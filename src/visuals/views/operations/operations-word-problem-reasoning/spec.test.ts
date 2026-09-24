@@ -1,4 +1,4 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 
@@ -9,6 +9,6 @@ describe('operations-word-problem-reasoning view spec', () => {
             Ability.PlausibilityEvaluation,
             Ability.ProcedureUnderstanding
         ]);
-        expect(spec.requiredLabels).toEqual([Area.IntegerRounding]);
+        expect(spec.requiredLabels).toBeUndefined();
     });
 });

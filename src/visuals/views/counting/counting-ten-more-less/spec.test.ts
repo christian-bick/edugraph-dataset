@@ -4,7 +4,7 @@ import {CountingTenMoreLessViewSchema, spec} from './spec.ts';
 
 describe('counting-ten-more-less view spec', () => {
     it('accepts only the generator-established ten-step family', () => {
-        expect(spec.requiredLabels).toEqual([Scope.StepsOf10]);
+        expect(spec.requiredLabels).toBeUndefined();
         expect(spec.generalLabels).toEqual([
             Area.PlaceValue,
             Scope.ArabicNumerals,

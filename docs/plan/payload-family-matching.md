@@ -3,8 +3,9 @@
 ## Agreed direction
 
 Use mathematical payload families and explicit view input types as the primary generator/view
-compatibility contract. Use positive applicability filters for restrictions within an accepted
-family, such as numeric range. Ontology capability coverage remains necessary: type compatibility
+compatibility contract. Resolve restrictions within an accepted family, such as numeric range,
+from declared types, mappings, labels, and explicit domain metadata. Do not inspect generated
+payloads to decide compatibility. Ontology capability coverage remains necessary: type compatibility
 alone does not establish a target's claims.
 
 The unit-relation, measurement-extrema, shape-edge, fraction-partition, and angle-family splits are
@@ -105,10 +106,10 @@ sample seeds and split assignments; cache verification must follow canonical gen
   are rendered in both modes by regression tests. All active CCSS and test targets remain covered;
   five CCSS tuples move generator registration without changing target labels or mathematical
   payload fields. Proper-fraction ids and seeded scale selection are retained.
-- [ ] **Positive micro-filters.** `measurement-line-plot` and its `usesUnitSteps` parameter provide
+- [ ] **Declarative domain contracts.** `measurement-line-plot` and its `usesUnitSteps` parameter provide
   a concrete starting case: an explicit whole-step requirement must agree with generated
-  subdivisions. Decide whether filters inspect target constraints or resolved generator guarantees,
-  and how broad targets, fallbacks, alternatives, and bounded domains are handled. A flat
+  subdivisions. Specify how metadata represents generator guarantees for broad targets, fallbacks,
+  alternatives, and bounded domains. Payload inspection is outside the agreed design. A flat
   `requiredLabels` conjunction is not proof of the complete generated domain.
 - [x] **Classification evidence.** The fraction-equivalence classification number-line
   question no longer prints the verdict "same point" in
@@ -116,7 +117,7 @@ sample seeds and split assignments; cache verification must follow canonical gen
   that caption only in the solution or in an equality-completion task (`IMPL-V5`).
   The number-line position remains the mathematical evidence for classification.
 
-## Positive micro-filter decision
+## Declarative domain decision
 
 The concrete probe uses `measurement-data` and `measurement-line-plot`, which share a coherent
 `MeasurementDataProblem` contract. The latter accepts whole-unit and fractional data, but its
@@ -138,7 +139,7 @@ request StepsOf1. This is a real contract gap outside those active combinations,
 their current artifacts. Keep it open explicitly rather than treating successful VQA as a proof
 of totality for arbitrary targets.
 
-The proposed semantics are a **positive guarantee filter within an accepted payload family**:
+The remaining proposal is a **declarative guarantee within an accepted payload family**:
 
 1. Type compatibility still establishes the mathematical family independently of labels.
 2. The filter describes an accepted domain, not additional capabilities or a generator dispatch.
@@ -182,7 +183,7 @@ independent of this remaining decision.
   are 32 added and 32 removed identities from the family/view registrations, with no attempt
   shifts, seed-scheme changes or unrelated image churn. Cache changes are committed separately
   from implementation and documentation.
-- **Remaining decision:** positive micro-filter policy, as described above. Canonical generation,
+- **Remaining decision:** declarative domain policy, as described above. Canonical generation,
   VQA and cache verification no longer block the completed payload-family/type-safety work.
 
 ## Adoption order and boundaries
@@ -194,7 +195,7 @@ independent of this remaining decision.
    when it supports every member. Share pure helpers and rendering components; do not manufacture
    unrelated optional fields merely to preserve one generator registration.
 3. Migrate arithmetic patterns, shape construction, and fraction equivalence one module at a time,
-   with a tested commit for each. Review the positive micro-filter API with concrete examples before changing required/rejected
+   with a tested commit for each. Review declarative domain metadata with concrete examples before changing required/rejected
    semantics globally. Preserve dimension neutrality and avoid duplicate generator parameterization
    in views. An allowlist of every generator label on every view is not the objective.
 4. Adopt consumers, then tighten matching and validation. Reject missing/unrecognized mappings and
@@ -223,3 +224,12 @@ Compare declaration-derived regression cases with the hand-authored `test` spec:
 
 This could strengthen regression testing; it does not replace live VQA of real standard artifacts
 or establish standards coverage. No synthetic probing framework is implemented by this plan.
+
+## Producer/view contract follow-up — 2026-09-24
+
+The broad declarations that relied on family-selecting labels have been adopted in
+[explicit-producer-view-contracts.md](explicit-producer-view-contracts.md). That inventory covers
+19 production consumers, 15 family-selecting requirements, and the tens/hundreds negative
+selector. It establishes precise producer declarations and view mappings without changing the
+matching algorithm. The remaining number-kind/range decision above must stay entirely
+declarative; successful generation is validation, not an eligibility mechanism.

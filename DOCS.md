@@ -49,6 +49,13 @@ creates the canonical mathematical payload, and the view projects it into an obs
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
+The producer/view contract migration is recorded in
+[explicit-producer-view-contracts.md](docs/plan/explicit-producer-view-contracts.md).
+Specialized consumers use precise entries in `ViewTypeMap`; shared renderers may still use
+explicit wider unions. For example, mass and liquid volume have separate producers, while
+the general strategy view accepts the named strategy union. Target requirements remain
+independent learner-task participation policies.
+
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
 `src/lib/ontology.ts` maps the concrete centimeter, meter, inch, foot, or abstract segment

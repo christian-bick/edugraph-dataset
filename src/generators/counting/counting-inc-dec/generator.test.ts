@@ -1,3 +1,5 @@
+import {CountingTenOffsetGenerator} from '../counting-ten-offset/generator.ts';
+import {CountingHundredOffsetGenerator} from '../counting-hundred-offset/generator.ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -22,8 +24,7 @@ describe('CountingIncDecGenerator', () => {
     it('increments by one without exceeding the range', () => {
         const stub = generator.generate({
             range: {min: 1, max: 10},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf1
+            direction: 'inc'
         });
 
         expect(stub).not.toBeNull();
@@ -36,8 +37,7 @@ describe('CountingIncDecGenerator', () => {
     it('decrements by one without reaching zero', () => {
         const stub = generator.generate({
             range: {min: 1, max: 10},
-            direction: Scope.SubtractiveCount,
-            stepMagnitude: Scope.StepsOf1
+            direction: 'dec'
         });
 
         expect(stub).not.toBeNull();
@@ -48,10 +48,9 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('increments by ten while preserving the ones place', () => {
-        const stub = generator.generate({
+        const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 10, max: 100},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf10
+            direction: 'inc'
         });
 
         expect(stub).not.toBeNull();
@@ -62,10 +61,9 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('decrements by ten while preserving the ones place', () => {
-        const stub = generator.generate({
+        const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 10, max: 100},
-            direction: Scope.SubtractiveCount,
-            stepMagnitude: Scope.StepsOf10
+            direction: 'dec'
         });
 
         expect(stub).not.toBeNull();
@@ -76,10 +74,9 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('decomposes the start and result into matching base-ten values', () => {
-        const stub = generator.generate({
+        const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 1, max: 100},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf10
+            direction: 'inc'
         });
 
         expect(stub!.data.numObjects).toBe(
@@ -91,10 +88,9 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('increments by one hundred while preserving the tens and ones places', () => {
-        const stub = generator.generate({
+        const stub = new CountingHundredOffsetGenerator().generate({
             range: {min: 101, max: 999},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf100
+            direction: 'inc'
         });
 
         expect(stub).not.toBeNull();
@@ -107,10 +103,9 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it('uses digit-place decompositions for three-digit values', () => {
-        const stub = generator.generate({
+        const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 101, max: 999},
-            direction: Scope.SubtractiveCount,
-            stepMagnitude: Scope.StepsOf10
+            direction: 'dec'
         });
 
         const start = stub!.data.startPlaceValue;
@@ -120,17 +115,17 @@ describe('CountingIncDecGenerator', () => {
     });
 
     it.each([
-        [Scope.AdditiveCount, Scope.StepsOf10],
-        [Scope.SubtractiveCount, Scope.StepsOf10],
-        [Scope.AdditiveCount, Scope.StepsOf100],
-        [Scope.SubtractiveCount, Scope.StepsOf100]
+        ['inc', Scope.StepsOf10],
+        ['dec', Scope.StepsOf10],
+        ['inc', Scope.StepsOf100],
+        ['dec', Scope.StepsOf100]
     ] as const)('keeps every displayed numeral zero-free for %s with %s', (direction, stepMagnitude) => {
         for (let seed = 0; seed < 25; seed++) {
             setSeed(seed);
-            const stub = generator.generate({
+            const selected = stepMagnitude === Scope.StepsOf10 ? new CountingTenOffsetGenerator() : new CountingHundredOffsetGenerator();
+            const stub = selected.generate({
                 range: {min: 101, max: 999},
-                direction,
-                stepMagnitude
+                direction
             });
 
             expect(stub).not.toBeNull();
@@ -142,37 +137,27 @@ describe('CountingIncDecGenerator', () => {
     it('returns null when the range cannot fit the requested change', () => {
         expect(generator.generate({
             range: {min: 1, max: 1},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf1
+            direction: 'inc'
         })).toBeNull();
-        expect(generator.generate({
+        expect(new CountingTenOffsetGenerator().generate({
             range: {min: 1, max: 9},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf10
+            direction: 'inc'
         })).toBeNull();
     });
 
     it('returns null when the only transition would introduce a zero digit', () => {
         expect(generator.generate({
             range: {min: 9, max: 10},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepsOf1
+            direction: 'inc'
         })).toBeNull();
     });
 
     it('returns null for an unsupported direction', () => {
         expect(generator.generate({
             range: {min: 1, max: 20},
-            direction: Scope.DerivedCount,
-            stepMagnitude: Scope.StepsOf1
+            direction: Scope.DerivedCount
         } as never)).toBeNull();
     });
 
-    it('returns null for an unsupported step magnitude', () => {
-        expect(generator.generate({
-            range: {min: 1, max: 20},
-            direction: Scope.AdditiveCount,
-            stepMagnitude: Scope.StepMagnitude
-        } as never)).toBeNull();
-    });
+
 });

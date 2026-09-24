@@ -1,3 +1,9 @@
+import {ArithmeticWordProblemsInterpretedRemainderGenerator} from '../arithmetic-word-problems-interpreted-remainder/generator.ts';
+import {spec as remainderGeneratorSpec} from '../arithmetic-word-problems-interpreted-remainder/spec.ts';
+import {ArithmeticWordProblemsRoundingGenerator} from '../arithmetic-word-problems-rounding/generator.ts';
+import {spec as roundingGeneratorSpec} from '../arithmetic-word-problems-rounding/spec.ts';
+import {ArithmeticWordProblemsLetterEquationGenerator} from '../arithmetic-word-problems-letter-equation/generator.ts';
+import {spec as equationGeneratorSpec} from '../arithmetic-word-problems-letter-equation/spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -18,6 +24,9 @@ const operationCases = [
 ] as const;
 
 describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
+    const equationGenerator = new ArithmeticWordProblemsLetterEquationGenerator();
+    const roundingGenerator = new ArithmeticWordProblemsRoundingGenerator();
+    const remainderGenerator = new ArithmeticWordProblemsInterpretedRemainderGenerator();
     const generator = new ArithmeticWordProblemsTwoStepGenerator();
 
     it('declares invariant multi-step and sign constraints', () => {
@@ -47,7 +56,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
     });
 
     it('resolves the interpreted-remainder labels into their dedicated task', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithLabels(remainderGenerator, [
             Area.Division,
             Area.ImperfectDivisibility,
             Area.Modulo,
@@ -56,17 +65,17 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe('interpreted-remainder');
-        expect(stub!.labels).toEqual(expect.arrayContaining([
+        expect([...remainderGeneratorSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([
             Area.Division,
             Area.ImperfectDivisibility,
             Area.Modulo
         ]));
-        expect(stub!.labels).not.toContain(Ability.ResultInterpretation);
+        expect([...remainderGeneratorSpec.generalLabels, ...stub!.labels]).not.toContain(Ability.ResultInterpretation);
     });
 
     it('resolves equation-labelled targets across all ten operation groups', () => {
         for (const entry of operationCases) {
-            const stub = generateWithLabels(generator, [
+            const stub = generateWithLabels(equationGenerator, [
                 ...entry.labels,
                 Area.Equation,
                 Scope.NumbersSmaller1000000,
@@ -76,14 +85,14 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             expect(stub!.data.kind).toBe('letter-equation');
             if (stub!.data.kind !== 'letter-equation') throw new Error('Expected equation payload.');
             expect(stub!.data.operations).toEqual(entry.operations);
-            expect(stub!.labels).toEqual(expect.arrayContaining([...entry.labels, Area.Equation]));
-            expect(stub!.labels).not.toContain(Ability.Formalization);
+            expect([...equationGeneratorSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([...entry.labels, Area.Equation]));
+            expect([...equationGeneratorSpec.generalLabels, ...stub!.labels]).not.toContain(Ability.Formalization);
         }
     });
 
     it('resolves integer rounding into canonical rounding relations', () => {
         for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
-            const stub = generateWithLabels(generator, [
+            const stub = generateWithLabels(roundingGenerator, [
                 operation,
                 Area.IntegerRounding,
                 Scope.NumbersSmaller1000000,
@@ -92,12 +101,12 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.kind).toBe('rounding');
-            expect(stub!.labels).toEqual(expect.arrayContaining([
+            expect([...roundingGeneratorSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([
                 operation,
                 Area.IntegerRounding
             ]));
-            expect(stub!.labels).not.toContain(Ability.PlausibilityEvaluation);
-            expect(stub!.labels).not.toContain(Ability.ProcedureUnderstanding);
+            expect([...roundingGeneratorSpec.generalLabels, ...stub!.labels]).not.toContain(Ability.PlausibilityEvaluation);
+            expect([...roundingGeneratorSpec.generalLabels, ...stub!.labels]).not.toContain(Ability.ProcedureUnderstanding);
         }
     });
 });

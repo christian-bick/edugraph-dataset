@@ -8,6 +8,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
     generalLabels: [
         Area.NumerationWithIntegers,
+        Scope.StepsOf1,
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutZero,
@@ -25,12 +26,12 @@ const countingDirections = [
 ] as const;
 
 const resolveDirection = selectExactLabelSetMap([
-    [[Scope.SubtractiveCount], Scope.SubtractiveCount],
-    [[Area.Decrement, Scope.Before], Scope.SubtractiveCount],
-    [[Scope.SubtractiveCount, Area.Decrement, Scope.Before], Scope.SubtractiveCount],
-    [[Scope.AdditiveCount], Scope.AdditiveCount],
-    [[Area.Increment, Scope.After], Scope.AdditiveCount],
-    [[Scope.AdditiveCount, Area.Increment, Scope.After], Scope.AdditiveCount]
+    [[Scope.SubtractiveCount], 'dec'],
+    [[Area.Decrement, Scope.Before], 'dec'],
+    [[Scope.SubtractiveCount, Area.Decrement, Scope.Before], 'dec'],
+    [[Scope.AdditiveCount], 'inc'],
+    [[Area.Increment, Scope.After], 'inc'],
+    [[Scope.AdditiveCount, Area.Increment, Scope.After], 'inc']
 ] as const);
 
 export const CountingIncDecGeneratorSchema = {
@@ -47,8 +48,7 @@ export const CountingIncDecGeneratorSchema = {
             [Scope.AdditiveCount],
             [Area.Increment, Scope.After]
         ]
-    ],
-    stepMagnitude: [Scope.StepsOf1, Scope.StepsOf10, Scope.StepsOf100]
+    ]
 } as const;
 
 export type CountingIncDecGeneratorConfig = ConfigFromSchema<typeof CountingIncDecGeneratorSchema>;

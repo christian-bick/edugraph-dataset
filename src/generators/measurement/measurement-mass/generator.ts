@@ -1,24 +1,21 @@
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import {MassVolumeMeasurementProblem} from '../../../types/problems.ts';
+import {MassMeasurementProblem} from '../../../types/problems.ts';
 import {
-    MeasurementMassVolumeGeneratorConfig,
-    MeasurementMassVolumeGeneratorSchema
+    MeasurementMassGeneratorConfig,
+    MeasurementMassGeneratorSchema
 } from './spec.ts';
 
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
-
-export class MeasurementMassVolumeGenerator implements ProblemGenerator<
-    MassVolumeMeasurementProblem,
-    MeasurementMassVolumeGeneratorConfig
+export class MeasurementMassGenerator implements ProblemGenerator<
+    MassMeasurementProblem,
+    MeasurementMassGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'measurement';
-    schema = MeasurementMassVolumeGeneratorSchema;
+    schema = MeasurementMassGeneratorSchema;
 
-    generate(config: MeasurementMassVolumeGeneratorConfig): ProblemStub<MassVolumeMeasurementProblem> {
-        validateConfigFields('measurement-mass-volume', config, ['measurement']);
+    generate(config: MeasurementMassGeneratorConfig): ProblemStub<MassMeasurementProblem> {
+        validateConfigFields('measurement-mass', config, ['measurement']);
         if (config.measurement === 'gram-weight') {
             const profiles = [
                 {object: 'apple' as const, value: 180},
@@ -47,20 +44,6 @@ export class MeasurementMassVolumeGenerator implements ProblemGenerator<
                 instrument: 'digital-scale'
             }};
         }
-        if (config.measurement !== 'liter-volume') {
-            throw new Error('[Generator: measurement-mass-volume] Validation Error: Unsupported scale.');
-        }
-        const capacity = randomInteger(4, 7);
-        const value = randomInteger(1, capacity - 1);
-        return {
-            data: {
-                measurementKind: 'liquid-volume',
-                object: 'measuring-jug',
-                unit: 'L',
-                value,
-                capacity,
-                tickStep: 1
-            }
-        };
+        throw new Error('[Generator: measurement-mass] Validation Error: Unsupported scale.');
     }
 }

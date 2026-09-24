@@ -1,3 +1,5 @@
+import {NumbersPrimeClassificationGenerator} from '../numbers-prime-classification/generator.ts';
+import {NumbersCompositeClassificationGenerator} from '../numbers-composite-classification/generator.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -42,6 +44,11 @@ const expectValidClassification = (problem: FactorClassificationProblem): void =
 
 describe('FactorMultipleRelationsGenerator', () => {
     const generator = new FactorMultipleRelationsGenerator();
+
+    const generateFamily = (task: 'factor-pairs' | 'one-digit-multiple-test' | 'prime-classification' | 'composite-classification') =>
+        task === 'prime-classification' ? new NumbersPrimeClassificationGenerator().generate({})
+            : task === 'composite-classification' ? new NumbersCompositeClassificationGenerator().generate({})
+                : generator.generate({task});
 
     it('strictly validates its configuration', () => {
         expect(() => generator.generate({} as never)).toThrow();
@@ -111,7 +118,7 @@ describe('FactorMultipleRelationsGenerator', () => {
     ] as const)('justifies %s from exhaustive factors', (task, classification) => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const problem = generator.generate({task}).data;
+            const problem = generateFamily(task).data;
             expect(problem.kind).toBe(task);
             if (problem.kind !== 'prime-classification' && problem.kind !== 'composite-classification') {
                 throw new Error('Unexpected task');
@@ -129,9 +136,9 @@ describe('FactorMultipleRelationsGenerator', () => {
             'composite-classification'
         ] as const) {
             setSeed(`factor-multiple-relations-${task}`);
-            const first = generator.generate({task});
+            const first = generateFamily(task);
             setSeed(`factor-multiple-relations-${task}`);
-            const second = generator.generate({task});
+            const second = generateFamily(task);
             expect(second).toEqual(first);
         }
     });

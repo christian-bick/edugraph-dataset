@@ -16,12 +16,6 @@ export type AddSubtractOperationLabel = typeof Area.Addition | typeof Area.Subtr
 
 export type TwoStepOperationLabels = readonly [ArithmeticOperationLabel, ArithmeticOperationLabel];
 
-export type ArithmeticWordProblemTask =
-    | 'two-step'
-    | 'interpreted-remainder'
-    | 'letter-equation'
-    | 'rounding';
-
 const resolveDeclaredOperationLabel = selectExactLabelMap(
     arithmeticOperations.map(operation => [operation, operation] as const)
 );
@@ -78,33 +72,9 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
     return 'unsupported';
 }
 
-/** Resolves the Grade 4 mathematical task while preserving the legacy two-step default. */
-export const arithmeticWordProblemTaskLabelSets = [
-    [],
-    [Area.IntegerRounding],
-    [Area.ImperfectDivisibility],
-    [Area.Modulo],
-    [Area.ImperfectDivisibility, Area.Modulo],
-    [Area.Equation]
-] as const;
-
-const resolveArithmeticWordProblemTaskLabels = selectExactLabelSetMap([
-    [arithmeticWordProblemTaskLabelSets[0], 'two-step'],
-    [arithmeticWordProblemTaskLabelSets[1], 'rounding'],
-    [arithmeticWordProblemTaskLabelSets[2], 'interpreted-remainder'],
-    [arithmeticWordProblemTaskLabelSets[3], 'interpreted-remainder'],
-    [arithmeticWordProblemTaskLabelSets[4], 'interpreted-remainder'],
-    [arithmeticWordProblemTaskLabelSets[5], 'letter-equation']
-] as const);
-
-export function resolveArithmeticWordProblemTask(labels: string[]): ArithmeticWordProblemTask {
-    return resolveArithmeticWordProblemTaskLabels(labels) ?? 'two-step';
-}
-
 exactResolver(resolveDeclaredOperation);
 exactResolver(resolvePropertyAwareOperation);
 compositionalResolver(resolveTwoStepOperations);
-exactResolver(resolveArithmeticWordProblemTask);
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {
     [Area.Addition]: 'addition',

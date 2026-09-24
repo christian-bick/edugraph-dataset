@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 
@@ -9,6 +9,6 @@ describe('operations-word-problem-equation-formalization view spec', () => {
             Ability.TextualReception,
             Ability.Formalization
         ]);
-        expect(spec.requiredLabels).toEqual([Area.Equation]);
+        expect(spec.requiredLabels).toEqual([Ability.Formalization]);
     });
 });

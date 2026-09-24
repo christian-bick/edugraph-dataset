@@ -1,3 +1,8 @@
+import {spec} from './spec.ts';
+import {spec as tenSpec} from '../counting-ten-offset/spec.ts';
+import {spec as hundredSpec} from '../counting-hundred-offset/spec.ts';
+import {CountingTenOffsetGenerator} from '../counting-ten-offset/generator.ts';
+import {CountingHundredOffsetGenerator} from '../counting-hundred-offset/generator.ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -23,10 +28,10 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
-        expect(stub!.labels).toContain(Scope.AdditiveCount);
-        expect(stub!.labels).not.toContain(Area.Increment);
-        expect(stub!.labels).not.toContain(Scope.After);
-        expect(stub!.labels).toContain(Scope.StepsOf1);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.AdditiveCount);
+        expect([...spec.generalLabels, ...stub!.labels]).not.toContain(Area.Increment);
+        expect([...spec.generalLabels, ...stub!.labels]).not.toContain(Scope.After);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.StepsOf1);
     });
 
     it('resolves a decrement-by-one problem', () => {
@@ -40,9 +45,9 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
-        expect(stub!.labels).toContain(Scope.SubtractiveCount);
-        expect(stub!.labels).not.toContain(Area.Decrement);
-        expect(stub!.labels).not.toContain(Scope.Before);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.SubtractiveCount);
+        expect([...spec.generalLabels, ...stub!.labels]).not.toContain(Area.Decrement);
+        expect([...spec.generalLabels, ...stub!.labels]).not.toContain(Scope.Before);
     });
 
     it('resolves a subsequent position as an increment', () => {
@@ -56,7 +61,7 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 1);
-        expect(stub!.labels).toContain(Scope.After);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.After);
     });
 
     it('preserves the complete successor-principle direction bundle', () => {
@@ -71,7 +76,7 @@ describe('CountingIncDecGenerator spec integration', () => {
 
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('inc');
-        expect(stub!.labels).toEqual(expect.arrayContaining([
+        expect([...spec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([
             Scope.AdditiveCount,
             Area.Increment,
             Scope.After
@@ -89,11 +94,11 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.incDecType).toBe('dec');
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects - 1);
-        expect(stub!.labels).toContain(Scope.Before);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.Before);
     });
 
     it('resolves direction and steps of ten independently through 100', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithLabels(new CountingTenOffsetGenerator(), [
             Area.NumerationWithIntegers,
             Area.Increment,
             Scope.NumbersLarger10,
@@ -106,14 +111,14 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.data.stepSize).toBe(10);
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 10);
         expect(stub!.data.startPlaceValue.ones).toBe(stub!.data.resultPlaceValue.ones);
-        expect(stub!.labels).toContain(Area.Increment);
-        expect(stub!.labels).toContain(Scope.After);
-        expect(stub!.labels).not.toContain(Scope.AdditiveCount);
-        expect(stub!.labels).toContain(Scope.StepsOf10);
+        expect([...tenSpec.generalLabels, ...stub!.labels]).toContain(Area.Increment);
+        expect([...tenSpec.generalLabels, ...stub!.labels]).toContain(Scope.After);
+        expect([...tenSpec.generalLabels, ...stub!.labels]).not.toContain(Scope.AdditiveCount);
+        expect([...tenSpec.generalLabels, ...stub!.labels]).toContain(Scope.StepsOf10);
     });
 
     it('resolves a one-hundred step through 1000', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithLabels(new CountingHundredOffsetGenerator(), [
             Area.NumerationWithIntegers,
             Area.Increment,
             Scope.NumbersLarger100,
@@ -126,6 +131,6 @@ describe('CountingIncDecGenerator spec integration', () => {
         expect(stub!.data.incDecAnswer).toBe(stub!.data.numObjects + 100);
         expect(stub!.data.resultPlaceValue.tens).toBe(stub!.data.startPlaceValue.tens);
         expect(stub!.data.resultPlaceValue.ones).toBe(stub!.data.startPlaceValue.ones);
-        expect(stub!.labels).toContain(Scope.StepsOf100);
+        expect([...hundredSpec.generalLabels, ...stub!.labels]).toContain(Scope.StepsOf100);
     });
 });

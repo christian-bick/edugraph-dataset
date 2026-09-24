@@ -93,7 +93,6 @@ describe('operations-word-problem-within-100 helpers', () => {
     });
 
     it.each([
-        {answer: 1, roundingPlace: 10, roundedAnswer: 0},
         {answer: 5, roundingPlace: 10, roundedAnswer: 10},
         {answer: 99, roundingPlace: 10, roundedAnswer: 100},
         {answer: 999_999, roundingPlace: 100_000, roundedAnswer: 1_000_000}
@@ -103,8 +102,23 @@ describe('operations-word-problem-within-100 helpers', () => {
             const claim = resolveRoundingClaim(edgeProblem, seed);
             expect(claim.proposedAnswer).toBeGreaterThan(0);
             expect(claim.proposedAnswer).toBeLessThan(10 * edge.roundingPlace);
+            expect(claim.roundedProposedAnswer).toBeGreaterThan(0);
             expect(claim.isReasonable).toBe(seed === 0);
         }
+    });
+
+    it('keeps unreasonable proposals away from zero at a leading-place boundary', () => {
+        const boundary = {...rounding, answer: 128, roundingPlace: 100 as const, roundedAnswer: 100};
+        for (let seed = 0; seed < 40; seed++) {
+            const claim = resolveRoundingClaim(boundary, seed);
+            expect(claim.roundedProposedAnswer).toBeGreaterThan(0);
+            expect(claim.isReasonable).toBe(seed % 2 === 0);
+        }
+    });
+
+    it('rejects a zero-rounded relation outside the positive rounding contract', () => {
+        expect(() => resolveRoundingClaim({...rounding, answer: 1, roundedAnswer: 0}, 0))
+            .toThrow('no bounded reasonableness proposal');
     });
 
     it('normalizes non-finite and signed seeds without using global randomness', () => {

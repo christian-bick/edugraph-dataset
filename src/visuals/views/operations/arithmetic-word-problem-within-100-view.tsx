@@ -6,7 +6,7 @@ import {
     ArithmeticWordProblemLetterEquation,
     ArithmeticWordProblemRounding,
     ArithmeticWordProblemTwoStep,
-    ArithmeticWordProblemWithin100
+    ArithmeticWordProblem
 } from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
@@ -26,7 +26,7 @@ export interface ArithmeticWordProblemWithin100Config {
 
 interface ArithmeticWordProblemWithin100ViewProps {
     config: ArithmeticWordProblemWithin100Config;
-    payload: RenderPayload<AbstractProblem<ArithmeticWordProblemWithin100>>;
+    payload: RenderPayload<AbstractProblem<ArithmeticWordProblem>>;
 }
 
 const VIEW_ID = 'operations-word-problem-within-100';
@@ -590,7 +590,7 @@ function ReasonablenessProblem({data, isSolutionView, seed}: {
 }
 
 function renderProblem(
-    data: ArithmeticWordProblemWithin100,
+    data: ArithmeticWordProblem,
     config: ArithmeticWordProblemWithin100Config,
     isSolutionView: boolean,
     seed: number

@@ -5,8 +5,6 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
 const resolveStrategy = selectExactLabelMap([
-    [Area.AdditionCountingOn, 'addition-counting-on'],
-    [Area.SubtractionCountingBack, 'subtraction-counting-back'],
     [Area.AdditionMakeTen, 'addition-make-ten'],
     [Area.AdditionNearDoubles, 'addition-near-doubles'],
     [Area.AdditionCompensation, 'addition-compensation'],
@@ -28,8 +26,6 @@ export const spec: GeneratorSpec = {
 
 export const IntegerAddSubtractStrategiesGeneratorSchema = {
     strategy: [[
-        Area.AdditionCountingOn,
-        Area.SubtractionCountingBack,
         Area.AdditionMakeTen,
         Area.AdditionNearDoubles,
         Area.AdditionCompensation,

@@ -1,3 +1,6 @@
+import {ArithmeticWordProblemsInterpretedRemainderGenerator} from '../arithmetic-word-problems-interpreted-remainder/generator.ts';
+import {ArithmeticWordProblemsRoundingGenerator} from '../arithmetic-word-problems-rounding/generator.ts';
+import {ArithmeticWordProblemsLetterEquationGenerator} from '../arithmetic-word-problems-letter-equation/generator.ts';
 import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
@@ -36,12 +39,14 @@ function expectValidSteps(problem: ArithmeticWordProblemTwoStep): void {
 }
 
 describe('ArithmeticWordProblemsTwoStepGenerator', () => {
+    const equationGenerator = new ArithmeticWordProblemsLetterEquationGenerator();
+    const roundingGenerator = new ArithmeticWordProblemsRoundingGenerator();
+    const remainderGenerator = new ArithmeticWordProblemsInterpretedRemainderGenerator();
     const generator = new ArithmeticWordProblemsTwoStepGenerator();
 
     it('strictly validates its configuration', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate({
-            task: 'two-step',
             operations: [Area.Addition, Area.Addition]
         } as never)).toThrow();
     });
@@ -51,7 +56,6 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
             for (let seed = 0; seed < 40; seed++) {
                 setSeed(seed);
                 const stub = generator.generate({
-                    task: 'two-step',
                     operations,
                     range: {min: 0, max: 100}
                 });
@@ -74,7 +78,6 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         for (const operations of operationSequences) {
             setSeed(9);
             const stub = generator.generate({
-                task: 'two-step',
                 operations,
                 range: {min: 0, max: 1_000_000}
             });
@@ -93,9 +96,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
     it('creates a canonical nonzero-remainder relation without choosing a context', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const stub = generator.generate({
-                task: 'interpreted-remainder',
-                operations: [Area.Division, Area.Division],
+            const stub = remainderGenerator.generate({
                 range: {min: 0, max: 1_000}
             });
             expect(stub).not.toBeNull();
@@ -120,8 +121,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         for (const operations of operationSequences) {
             for (let seed = 0; seed < 20; seed++) {
                 setSeed(seed);
-                const stub = generator.generate({
-                    task: 'letter-equation',
+                const stub = equationGenerator.generate({
                     operations,
                     range: {min: 0, max: 1_000_000}
                 });
@@ -139,8 +139,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
 
     it('supports a direct addition-then-division sequence through the abstract operation contract', () => {
         setSeed(12);
-        const stub = generator.generate({
-            task: 'letter-equation',
+        const stub = equationGenerator.generate({
             operations: [Area.Addition, Area.Division],
             range: {min: 0, max: 1_000_000}
         });
@@ -164,8 +163,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         ] as const) {
             for (let seed = 0; seed < 30; seed++) {
                 setSeed(seed);
-                const stub = generator.generate({
-                    task: 'rounding',
+                const stub = roundingGenerator.generate({
                     operations,
                     range: {min: 0, max: 1_000_000}
                 });
@@ -192,42 +190,33 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
     });
 
     it('is deterministic for every Grade 4 task', () => {
+        const generators = {'interpreted-remainder': remainderGenerator, 'letter-equation': equationGenerator, rounding: roundingGenerator};
         for (const task of ['interpreted-remainder', 'letter-equation', 'rounding'] as const) {
             const operations = task === 'interpreted-remainder'
                 ? [Area.Division, Area.Division] as const
                 : [Area.Multiplication, Area.Addition] as const;
             setSeed(`grade4-${task}`);
-            const first = generator.generate({task, operations, range: {min: 0, max: 1_000_000}});
+            const first = generators[task].generate({operations, range: {min: 0, max: 1_000_000}});
             setSeed(`grade4-${task}`);
-            const second = generator.generate({task, operations, range: {min: 0, max: 1_000_000}});
+            const second = generators[task].generate({operations, range: {min: 0, max: 1_000_000}});
             expect(second).toEqual(first);
         }
     });
 
     it('returns null for unsupported operations, incompatible tasks, and infeasible ranges', () => {
         expect(generator.generate({
-            task: 'two-step',
             operations: 'unsupported',
             range: {min: 0, max: 100}
         })).toBeNull();
-        expect(generator.generate({
-            task: 'interpreted-remainder',
-            operations: [Area.Addition, Area.Addition],
-            range: {min: 0, max: 100}
-        })).toBeNull();
-        expect(generator.generate({
-            task: 'interpreted-remainder',
-            operations: [Area.Division, Area.Division],
+        expect(remainderGenerator.generate({
             range: {min: 5, max: 5}
         })).toBeNull();
-        expect(generator.generate({
-            task: 'letter-equation',
+        expect(equationGenerator.generate({
             operations: [Area.Addition, Area.Addition],
             range: {min: 50, max: 51}
         })).toBeNull();
         for (const operations of operationSequences) {
             expect(generator.generate({
-                task: 'two-step',
                 operations,
                 range: {min: 5, max: 5}
             })).toBeNull();

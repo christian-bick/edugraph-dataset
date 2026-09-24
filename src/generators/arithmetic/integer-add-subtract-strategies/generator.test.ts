@@ -1,3 +1,5 @@
+import {IntegerAdditionCountingOnGenerator} from '../integer-addition-counting-on/generator.ts';
+import {IntegerSubtractionCountingBackGenerator} from '../integer-subtraction-counting-back/generator.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -181,6 +183,11 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
 describe('IntegerAddSubtractStrategiesGenerator', () => {
     const generator = new IntegerAddSubtractStrategiesGenerator();
 
+    const generateStrategy = (config: {strategy: IntegerAddSubtractStrategy; range: {min: number; max: number}}) =>
+        config.strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator().generate({range: config.range})
+            : config.strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator().generate({range: config.range})
+                : generator.generate({strategy: config.strategy, range: config.range});
+
     it('strictly validates every required configuration field', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate({strategy: 'addition-compensation'} as never)).toThrow();
@@ -199,7 +206,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     ] as const)('generates 100 exact and checkable %s problems', strategy => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const stub = generator.generate({strategy, range: targetRange});
+            const stub = generateStrategy({strategy, range: targetRange});
             expect(stub).not.toBeNull();
             expect(stub!.data.strategy).toBe(strategy);
             expectCommonInvariants(stub!.data);
@@ -217,7 +224,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
         'subtraction-make-ten',
         'subtraction-think-addition'
     ] as const)('returns null when the numeric interval cannot support %s', strategy => {
-        expect(generator.generate({strategy, range: {min: 9, max: 10}})).toBeNull();
+        expect(generateStrategy({strategy, range: {min: 9, max: 10}})).toBeNull();
     });
 
     it.each([
@@ -228,7 +235,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
         for (const range of [{min: 0, max: 10}, {min: 0, max: 20}]) {
             for (let seed = 0; seed < 100; seed++) {
                 setSeed(seed);
-                const stub = generator.generate({strategy, range});
+                const stub = generateStrategy({strategy, range});
                 expect(stub).not.toBeNull();
                 expect(stub!.data.leftOperand).toBeLessThan(range.max);
                 expect(stub!.data.rightOperand).toBeLessThan(range.max);
@@ -245,7 +252,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     ] as const)('generates %s inside NumbersSmaller20', strategy => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const stub = generator.generate({strategy, range: {min: 0, max: 20}});
+            const stub = generateStrategy({strategy, range: {min: 0, max: 20}});
             expect(stub).not.toBeNull();
             expect(stub!.data.leftOperand).toBeLessThan(20);
             expect(stub!.data.rightOperand).toBeLessThan(20);
@@ -269,7 +276,7 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
 
     it('rejects unsupported strategy configurations', () => {
         expect(() => generator.generate({
-            strategy: 'unsupported' as IntegerAddSubtractStrategy,
+            strategy: 'unsupported' as never,
             range: targetRange
         })).toThrow();
     });

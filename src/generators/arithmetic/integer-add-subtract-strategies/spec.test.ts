@@ -1,4 +1,9 @@
+import {spec as countingOnSpec} from '../integer-addition-counting-on/spec.ts';
+import {spec as countingBackSpec} from '../integer-subtraction-counting-back/spec.ts';
+import {IntegerAdditionCountingOnGenerator} from '../integer-addition-counting-on/generator.ts';
+import {IntegerSubtractionCountingBackGenerator} from '../integer-subtraction-counting-back/generator.ts';
 import {Area, Scope} from 'edugraph-ts';
+import {IntegerAddSubtractStrategyProblem} from '../../../types/problems.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -39,7 +44,10 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         [Area.SubtractionThinkAddition, 'subtraction-think-addition']
     ] as const)('resolves %s within 1000', (strategyLabel, strategy) => {
         setSeed(strategy);
-        const stub = generateWithLabels(generator, [
+        const selected = strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator()
+            : strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator() : generator;
+        const selectedSpec = strategy === 'addition-counting-on' ? countingOnSpec : strategy === 'subtraction-counting-back' ? countingBackSpec : spec;
+        const stub = generateWithLabels<IntegerAddSubtractStrategyProblem>(selected, [
             strategyLabel,
             ...invariantLabels,
             Scope.ArabicNumerals,
@@ -51,7 +59,7 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub!.data.leftOperand).toBeLessThan(1000);
         expect(stub!.data.rightOperand).toBeLessThan(1000);
         expect(stub!.data.answer).toBeLessThan(1000);
-        expect(stub!.labels).toEqual(expect.arrayContaining([
+        expect([...selectedSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([
             strategyLabel,
             Scope.NumbersSmaller1000
         ]));
@@ -69,7 +77,10 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         [Area.SubtractionThinkAddition, 'subtraction-think-addition', Scope.NumbersSmaller20]
     ] as const)('resolves Grade 1 %s as %s for %s', (strategyLabel, strategy, rangeLabel) => {
         setSeed(`${strategy}-${rangeLabel}`);
-        const stub = generateWithLabels(generator, [
+        const selected = strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator()
+            : strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator() : generator;
+        const selectedSpec = strategy === 'addition-counting-on' ? countingOnSpec : strategy === 'subtraction-counting-back' ? countingBackSpec : spec;
+        const stub = generateWithLabels<IntegerAddSubtractStrategyProblem>(selected, [
             strategyLabel,
             ...invariantLabels,
             Scope.ArabicNumerals,
@@ -82,6 +93,6 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub!.data.leftOperand).toBeLessThan(upperBound);
         expect(stub!.data.rightOperand).toBeLessThan(upperBound);
         expect(stub!.data.answer).toBeLessThan(upperBound);
-        expect(stub!.labels).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
+        expect([...selectedSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
     });
 });

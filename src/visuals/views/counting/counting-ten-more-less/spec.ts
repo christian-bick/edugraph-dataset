@@ -4,7 +4,6 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'counting-ten-more-less',
-    requiredLabels: [Scope.StepsOf10],
     generalLabels: [
         Area.PlaceValue,
         Scope.ArabicNumerals,

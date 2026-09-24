@@ -1,3 +1,4 @@
+import {PlaceValueHundredsBundlesGenerator} from '../place-value-hundreds-bundles/generator.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {PlaceValueBundlesGenerator} from './generator.ts';
@@ -8,15 +9,13 @@ describe('PlaceValueBundlesGenerator', () => {
     it('strictly validates required configuration', () => {
         expect(() => generator.generate({} as any)).toThrow();
         expect(() => generator.generate({
-            range: {min: 20, max: 10},
-            useHundreds: false
+            range: {min: 20, max: 10}
         })).toThrow();
     });
 
     it('generates a whole-ten value inside a small range', () => {
         const stub = generator.generate({
-            range: {min: 0, max: 20},
-            useHundreds: false
+            range: {min: 0, max: 20}
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe(stub!.data.tens * 10);
@@ -27,8 +26,7 @@ describe('PlaceValueBundlesGenerator', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 10},
-                useHundreds: false
+                range: {min: 0, max: 10}
             });
 
             expect(stub).not.toBeNull();
@@ -46,8 +44,7 @@ describe('PlaceValueBundlesGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 100},
-                useHundreds: false
+                range: {min: 0, max: 100}
             });
             expect(stub).not.toBeNull();
             expect(stub!.data.tens).toBeGreaterThanOrEqual(1);
@@ -62,15 +59,13 @@ describe('PlaceValueBundlesGenerator', () => {
 
     it('returns null when the resolved range contains no positive multiple of ten', () => {
         expect(generator.generate({
-            range: {min: 0, max: 9},
-            useHundreds: false
+            range: {min: 0, max: 9}
         })).toBeNull();
     });
 
     it('represents ten tens as one hundred for the narrow hundreds range', () => {
-        const data = generator.generate({
-            range: {min: 1, max: 120},
-            useHundreds: true
+        const data = new PlaceValueHundredsBundlesGenerator().generate({
+            range: {min: 1, max: 120}
         })!.data;
         expect(data).toEqual({hundreds: 1, tens: 10, ones: 0, target: 100});
     });
@@ -78,9 +73,8 @@ describe('PlaceValueBundlesGenerator', () => {
     it('generates one through nine complete hundreds', () => {
         for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
-            const data = generator.generate({
-                range: {min: 1, max: 1000},
-                useHundreds: true
+            const data = new PlaceValueHundredsBundlesGenerator().generate({
+                range: {min: 1, max: 1000}
             })!.data;
             expect(data.hundreds).toBeGreaterThanOrEqual(1);
             expect(data.hundreds).toBeLessThanOrEqual(9);

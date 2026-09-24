@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {OperationsCountingOnOperationDerivationViewSchema, spec} from './spec.ts';
 
@@ -8,7 +8,7 @@ describe('operations-counting-on-operation-derivation view spec', () => {
             Scope.ArabicNumerals,
             Ability.ConceptDerivation
         ]);
-        expect(spec.requiredLabels).toEqual([Area.AdditionCountingOn]);
+        expect(spec.requiredLabels).toBeUndefined();
         expect(spec.rejectedLabels).toBeUndefined();
         expect(OperationsCountingOnOperationDerivationViewSchema).toEqual({});
     });

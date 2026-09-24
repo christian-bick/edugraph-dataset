@@ -1,4 +1,4 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
 
@@ -8,6 +8,6 @@ describe('operations-word-problem-remainder-interpretation view spec', () => {
             Ability.TextualReception,
             Ability.ResultInterpretation
         ]);
-        expect(spec.requiredLabels).toEqual([Area.ImperfectDivisibility, Area.Modulo]);
+        expect(spec.requiredLabels).toBeUndefined();
     });
 });

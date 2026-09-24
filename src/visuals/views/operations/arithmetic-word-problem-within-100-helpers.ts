@@ -3,7 +3,7 @@ import {
     ArithmeticPairProblem,
     ArithmeticWordProblemRounding,
     ArithmeticWordProblemTwoStep,
-    ArithmeticWordProblemWithin100
+    ArithmeticWordProblem
 } from '../../../types/problems.ts';
 
 export type WordProblemPart = 'num1' | 'num2' | 'num3' | 'intermediate' | 'answer';
@@ -39,7 +39,8 @@ export function resolveRoundingClaim(
             return false;
         }
         const roundedCandidate = Math.round(candidate / data.roundingPlace) * data.roundingPlace;
-        return (roundedCandidate === data.roundedAnswer) === shouldBeReasonable;
+        return roundedCandidate > 0
+            && (roundedCandidate === data.roundedAnswer) === shouldBeReasonable;
     });
 
     if (proposedAnswer === undefined) {
@@ -56,7 +57,7 @@ export function resolveRoundingClaim(
 }
 
 export function isTwoStepProblem(
-    data: ArithmeticWordProblemWithin100
+    data: ArithmeticWordProblem
 ): data is ArithmeticWordProblemTwoStep {
     return 'kind' in data && data.kind === 'two-step';
 }

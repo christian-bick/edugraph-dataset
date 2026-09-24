@@ -1,28 +1,21 @@
 import {random} from '../../../lib/random.ts';
 import {validateConfigFields} from '../../../lib/errors.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import {MassVolumeEstimateProblem} from '../../../types/problems.ts';
+import {MassEstimateProblem} from '../../../types/problems.ts';
 import {
-    MeasurementMassVolumeEstimationGeneratorConfig,
-    MeasurementMassVolumeEstimationGeneratorSchema
+    MeasurementMassEstimationGeneratorConfig,
+    MeasurementMassEstimationGeneratorSchema
 } from './spec.ts';
 
-const liquidEstimates = [
-    {container: 'water-bottle', estimateLiters: 1},
-    {container: 'juice-carton', estimateLiters: 2},
-    {container: 'watering-can', estimateLiters: 5},
-    {container: 'bucket', estimateLiters: 10}
-] as const;
-
-export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerator<
-    MassVolumeEstimateProblem,
-    MeasurementMassVolumeEstimationGeneratorConfig
+export class MeasurementMassEstimationGenerator implements ProblemGenerator<
+    MassEstimateProblem,
+    MeasurementMassEstimationGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'measurement';
-    schema = MeasurementMassVolumeEstimationGeneratorSchema;
+    schema = MeasurementMassEstimationGeneratorSchema;
 
-    generate(config: MeasurementMassVolumeEstimationGeneratorConfig): ProblemStub<MassVolumeEstimateProblem> {
-        validateConfigFields('measurement-mass-volume-estimation', config, ['measurement']);
+    generate(config: MeasurementMassEstimationGeneratorConfig): ProblemStub<MassEstimateProblem> {
+        validateConfigFields('measurement-mass-estimation', config, ['measurement']);
         if (config.measurement === 'gram-weight') {
             const profiles = [
                 {object: 'crayon' as const, estimate: 10},
@@ -47,13 +40,6 @@ export class MeasurementMassVolumeEstimationGenerator implements ProblemGenerato
                 referenceObject: 'one-kilogram-bag', referenceValue: 1
             }};
         }
-        if (config.measurement !== 'liter-volume') throw new Error('Unsupported measurement configuration.');
-        const estimate = liquidEstimates[Math.floor(random() * liquidEstimates.length)];
-        return {data: {
-            measurementKind: 'liquid-volume',
-            ...estimate,
-            unit: 'L',
-            referenceLiters: 1
-        }};
+        throw new Error('[Generator: measurement-mass-estimation] Validation Error: Unsupported scale.');
     }
 }

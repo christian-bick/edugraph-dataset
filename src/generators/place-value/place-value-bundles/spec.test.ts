@@ -1,3 +1,5 @@
+import {PlaceValueHundredsBundlesGenerator} from '../place-value-hundreds-bundles/generator.ts';
+import {spec as hundredsSpec} from '../place-value-hundreds-bundles/spec.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -43,7 +45,7 @@ describe('PlaceValueBundlesGenerator spec integration', () => {
     });
 
     it('resolves multiples of one hundred into hundred bundles', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithLabels(new PlaceValueHundredsBundlesGenerator(), [
             Area.PlaceValue,
             Scope.MultiplesOf100,
             Scope.NumbersSmaller1000,
@@ -53,6 +55,6 @@ describe('PlaceValueBundlesGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.hundreds).toBeGreaterThanOrEqual(1);
         expect(stub!.data.target % 100).toBe(0);
-        expect(stub!.labels).toContain(Scope.MultiplesOf100);
+        expect([...hundredsSpec.generalLabels, ...stub!.labels]).toContain(Scope.MultiplesOf100);
     });
 });

@@ -98,9 +98,9 @@ export type IntegerAddSubtractStrategyStep = {
     result: number;
 };
 
-export type IntegerAddSubtractStrategyProblem = {
+type IntegerAddSubtractStrategyEvidence<TStrategy extends IntegerAddSubtractStrategy> = {
     task: 'integer-add-subtract-strategy';
-    strategy: IntegerAddSubtractStrategy;
+    strategy: TStrategy;
     operation: 'addition' | 'subtraction';
     leftOperand: number;
     rightOperand: number;
@@ -108,6 +108,28 @@ export type IntegerAddSubtractStrategyProblem = {
     adjustment: number;
     steps: readonly IntegerAddSubtractStrategyStep[];
 };
+
+export type AdditionCountingOnProblem = IntegerAddSubtractStrategyEvidence<'addition-counting-on'>;
+export type SubtractionCountingBackProblem = IntegerAddSubtractStrategyEvidence<'subtraction-counting-back'>;
+export type AdditionMakeTenProblem = IntegerAddSubtractStrategyEvidence<'addition-make-ten'>;
+export type AdditionNearDoublesProblem = IntegerAddSubtractStrategyEvidence<'addition-near-doubles'>;
+export type AdditionCompensationProblem = IntegerAddSubtractStrategyEvidence<'addition-compensation'>;
+export type SubtractionCompensationProblem = IntegerAddSubtractStrategyEvidence<'subtraction-compensation'>;
+export type SubtractionMakeTenProblem = IntegerAddSubtractStrategyEvidence<'subtraction-make-ten'>;
+export type SubtractionThinkAdditionProblem = IntegerAddSubtractStrategyEvidence<'subtraction-think-addition'>;
+
+export type IntegerFlexibleStrategyProblem =
+    | AdditionMakeTenProblem
+    | AdditionNearDoublesProblem
+    | AdditionCompensationProblem
+    | SubtractionCompensationProblem
+    | SubtractionMakeTenProblem
+    | SubtractionThinkAdditionProblem;
+
+export type IntegerAddSubtractStrategyProblem =
+    | AdditionCountingOnProblem
+    | SubtractionCountingBackProblem
+    | IntegerFlexibleStrategyProblem;
 
 export type MultiplicativeComparisonProblem = {
     referenceQuantity: number;
@@ -219,6 +241,8 @@ export type FactorClassificationProblem =
     | PrimeClassificationProblem
     | CompositeClassificationProblem;
 
+export type FactorPairsOrMultipleTestProblem = FactorPairsProblem | OneDigitMultipleTestProblem;
+
 export type FactorMultipleRelationsProblem =
     | FactorPairsProblem
     | OneDigitMultipleTestProblem
@@ -271,7 +295,8 @@ export type ArithmeticWordProblemGrade4 =
 export type ArithmeticWordProblemMultistep = ArithmeticWordProblemTwoStep | ArithmeticWordProblemGrade4;
 
 /** Shared payload accepted by the reusable one-step and multi-step word-problem view. */
-export type ArithmeticWordProblemWithin100 = ArithmeticPairProblem | ArithmeticWordProblemMultistep;
+export type ArithmeticWordProblemWithin100 = ArithmeticPairProblem | ArithmeticWordProblemTwoStep;
+export type ArithmeticWordProblem = ArithmeticPairProblem | ArithmeticWordProblemMultistep;
 
 export type ArithmeticDecomposeProblem = {
     targetNumber: number;
@@ -417,12 +442,21 @@ export type PlaceValueTeenProblem = {
     target: number;
 };
 
-export type PlaceValueBundlesProblem = {
+export type PlaceValueTensBundlesProblem = {
     tens: number;
     ones: 0;
     target: number;
-    hundreds?: number;
+    hundreds?: never;
 };
+
+export type PlaceValueHundredsBundlesProblem = {
+    hundreds: number;
+    tens: 0 | 10;
+    ones: 0;
+    target: number;
+};
+
+export type PlaceValueBundlesProblem = PlaceValueTensBundlesProblem | PlaceValueHundredsBundlesProblem;
 
 export type PlaceValueMakeTenProblem = {
     givenNumber: number;
@@ -527,15 +561,21 @@ export type CountingProblem = {
     parity?: 'even' | 'odd';
 };
 
-export type CountingIncDecProblem = {
+export type CountingOffsetProblem<TStep extends 1 | 10 | 100> = {
     numObjects: number;
     incDecType: 'inc' | 'dec';
     incDecAnswer: number;
     simpleAnswer: number;
-    stepSize: 1 | 10 | 100;
+    stepSize: TStep;
     startPlaceValue: {hundreds?: number; tens: number; ones: number};
     resultPlaceValue: {hundreds?: number; tens: number; ones: number};
 };
+
+export type CountingOneOffsetProblem = CountingOffsetProblem<1>;
+export type CountingTenOffsetProblem = CountingOffsetProblem<10>;
+export type CountingHundredOffsetProblem = CountingOffsetProblem<100>;
+export type CountingSmallOffsetProblem = CountingOneOffsetProblem | CountingTenOffsetProblem;
+export type CountingIncDecProblem = CountingSmallOffsetProblem | CountingHundredOffsetProblem;
 
 export type CountingSequenceProblem = {
     sequence: number[];
@@ -1817,15 +1857,15 @@ export interface ViewTypeMap {
     'operations-known-fact-derivation': KnownFactDerivationProblem;
     'operations-known-fact-inversion': KnownFactDerivationProblem;
     'operations-add-subtract-strategy-understanding': IntegerAddSubtractStrategyProblem;
-    'operations-counting-on-operation-derivation': IntegerAddSubtractStrategyProblem;
-    'operations-counting-back-operation-derivation': IntegerAddSubtractStrategyProblem;
+    'operations-counting-on-operation-derivation': AdditionCountingOnProblem;
+    'operations-counting-back-operation-derivation': SubtractionCountingBackProblem;
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
     'operations-division-area-model': MultiDigitDivisionProblem;
-    'numbers-factors-multiples': FactorMultipleRelationsProblem;
-    'numbers-prime-classification': FactorMultipleRelationsProblem;
-    'numbers-composite-classification': FactorMultipleRelationsProblem;
+    'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
+    'numbers-prime-classification': PrimeClassificationProblem;
+    'numbers-composite-classification': CompositeClassificationProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-boxes-inversion': ArithmeticProblem;
     'operations-representation': ArithmeticPairProblem;
@@ -1833,9 +1873,9 @@ export interface ViewTypeMap {
     'operations-word-problem-inversion': ArithmeticProblem;
     'operations-word-problem-within-100': ArithmeticWordProblemWithin100;
     'operations-word-problem-within-100-inversion': ArithmeticPairProblem;
-    'operations-word-problem-remainder-interpretation': ArithmeticWordProblemMultistep;
-    'operations-word-problem-equation-formalization': ArithmeticWordProblemMultistep;
-    'operations-word-problem-reasoning': ArithmeticWordProblemMultistep;
+    'operations-word-problem-remainder-interpretation': ArithmeticWordProblemInterpretedRemainder;
+    'operations-word-problem-equation-formalization': ArithmeticWordProblemLetterEquation;
+    'operations-word-problem-reasoning': ArithmeticWordProblemRounding;
     'operations-properties': ArithmeticTripleProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
@@ -1860,8 +1900,8 @@ export interface ViewTypeMap {
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
     'place-value-make-ten': PlaceValueMakeTenProblem;
-    'place-value-tens-bundles': PlaceValueBundlesProblem;
-    'place-value-hundreds-bundles': PlaceValueBundlesProblem;
+    'place-value-tens-bundles': PlaceValueTensBundlesProblem;
+    'place-value-hundreds-bundles': PlaceValueHundredsBundlesProblem;
     'place-value-expanded-form': PlaceValueExpandedProblem;
     'place-value-arithmetic-model': PlaceValueArithmeticProblem;
     'place-value-arithmetic-written-method': PlaceValueArithmeticProblem;
@@ -1873,9 +1913,9 @@ export interface ViewTypeMap {
     'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingProblem;
     'counting-objects-parity': CountingProblem;
-    'counting-inc-dec': CountingIncDecProblem;
-    'counting-ten-more-less': CountingIncDecProblem;
-    'counting-hundred-more-less': CountingIncDecProblem;
+    'counting-inc-dec': CountingSmallOffsetProblem;
+    'counting-ten-more-less': CountingTenOffsetProblem;
+    'counting-hundred-more-less': CountingHundredOffsetProblem;
     'counting-number-sequence': CountingSequenceProblem;
     'counting-conservation': CountingProblem;
     'sorting-classify-count': CountingClassifyCountProblem;
@@ -1914,10 +1954,10 @@ export interface ViewTypeMap {
     'time-digital-construction': TimeProblem;
     'time-elapsed': ElapsedTimeProblem;
     'time-interval-word-problem': TimeIntervalWordProblem;
-    'measure-liquid-volume': MassVolumeMeasurementProblem;
-    'measure-mass': MassVolumeMeasurementProblem;
-    'measure-liquid-volume-estimate': MassVolumeEstimateProblem;
-    'measure-mass-estimate': MassVolumeEstimateProblem;
+    'measure-liquid-volume': LiquidVolumeMeasurementProblem;
+    'measure-mass': MassMeasurementProblem;
+    'measure-liquid-volume-estimate': LiquidVolumeEstimateProblem;
+    'measure-mass-estimate': MassEstimateProblem;
     'measurement-word-problem': ArithmeticPairProblem;
     'currency-word-problem': CurrencyArithmeticProblem;
     'measurement-data-table': MeasurementDataProblem;
