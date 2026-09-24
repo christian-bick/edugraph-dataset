@@ -5,8 +5,14 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../helpers.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-pairs',
+    compatibility: [generatorLabelRule('equal-addends-domain', [
+        Area.Addition, Area.IteratedOperation, Scope.NumbersWithNegatives, Scope.NumbersWithZero
+    ], selected => !(selected(Area.Addition) && selected(Area.IteratedOperation))
+        || !selected(Scope.NumbersWithNegatives) && !selected(Scope.NumbersWithZero))],
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,

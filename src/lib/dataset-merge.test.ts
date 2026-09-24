@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import {planCompatibility, sampleGenerationPlan} from './compatibility.ts';
+import {normalizeSchemaChoices} from './schema-choices.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
 import {
     addRowTargetAssociations,
     claimFingerprint,
@@ -27,6 +30,59 @@ function row(overrides: Partial<MetadataRow> = {}): MetadataRow {
         ...overrides,
     };
 }
+
+function associationPlan(targetId: string, labels: string[] = []): GenerationPlan {
+    const result = planCompatibility({identity: {targetId, generatorId: 'counting-basic', viewId: 'counting-objects-simple'},
+        targetLabels: labels, generatorLabels: [], viewLabels: [],
+        fields: normalizeSchemaChoices({kind: ['a', 'b']}, labels, 'generator')});
+    if (!result.supported) throw new Error(result.reason);
+    return result.plan;
+}
+
+describe('planned target associations', () => {
+    function retained() {
+        const plan = associationPlan('source', ['a']);
+        return row({target_id: 'source', labels: ['a'], generation_plan: plan, generation_plan_hash: plan.hash,
+            generation_replay: {version: 1, sampleKey: 'source#counting-basic#counting-objects-simple#train#question#inst:0',
+                attempt: 1, seed: 1, selection: sampleGenerationPlan(plan, () => 0)}});
+    }
+
+    it('records the retained sample selection under every compatible target plan', () => {
+        const kept = retained();
+        const destination = associationPlan('destination');
+        addRowTargetAssociations(kept, [{spec: 'test', target_id: 'destination', generation_plan: destination}]);
+        expect(kept.target_associations).toHaveLength(1);
+        expect(kept.target_associations![0].generation_plan_hash).toBe(destination.hash);
+        expect(kept.target_associations![0].selection?.choices).toEqual(kept.generation_replay!.selection.choices);
+        expect(kept.target_associations![0].selection?.planHash).toBe(destination.hash);
+        expect(rowTargetAssociations(kept).find(entry => entry.target_id === 'source')?.selection)
+            .toEqual(kept.generation_replay!.selection);
+        expect(kept.labels).toEqual(['a']);
+    });
+
+    it('does not associate an equal task with a target that excludes its realized choice', () => {
+        const kept = retained();
+        const incompatible = associationPlan('incompatible', ['b']);
+        addRowTargetAssociations(kept, [{spec: 'test', target_id: 'incompatible', generation_plan: incompatible}]);
+        expect(kept.target_associations).toEqual([]);
+        expect(kept.labels).toEqual(['a']);
+    });
+
+    it('requires regeneration before mixing planned and legacy association provenance', () => {
+        expect(() => addRowTargetAssociations(retained(), [{spec: 'test', target_id: 'legacy'}])).toThrow('regenerate');
+        expect(() => addRowTargetAssociations(row(), [{spec: 'test', target_id: 'new',
+            generation_plan: associationPlan('new')}])).toThrow('regenerate');
+    });
+
+    it('rejects foreign identities and corrupt receipts before claiming target coverage', () => {
+        expect(() => addRowTargetAssociations(retained(), [{spec: 'test', target_id: 'wrong',
+            generation_plan: associationPlan('different')}])).toThrow('different target identity');
+        const kept = retained();
+        kept.generation_replay = {...kept.generation_replay!, selection: {...kept.generation_replay!.selection, planHash: 'corrupt'}};
+        expect(() => addRowTargetAssociations(kept, [{spec: 'test', target_id: 'new',
+            generation_plan: associationPlan('new')}])).toThrow('different generation plan');
+    });
+});
 
 describe('exerciseKey', () => {
     it('ignores the mode so both modes share one key', () => {

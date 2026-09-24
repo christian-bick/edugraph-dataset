@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
 const resolveUnitScale = exactResolver((labels: string[]): 'cm' | 'in' => {
     const exactScale = selectExactLabelMap([
@@ -11,9 +11,22 @@ const resolveUnitScale = exactResolver((labels: string[]): 'cm' | 'in' => {
     if (exactScale) return exactScale;
     return labels.includes(Scope.FractionNumbers) ? 'in' : 'cm';
 });
+withLabelChoices(resolveUnitScale, {
+    kind: 'alternatives',
+    defaults: [
+        {whenAll: [Scope.FractionNumbers], labels: [Scope.InchScale]},
+        {labels: [Scope.CentimeterScale]}
+    ],
+    contextLabels: [Scope.FractionNumbers]
+});
+
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',
+    compatibility: [generatorLabelRule('single-frame-fractions', [
+        Scope.SingleFrameOfReference, Scope.FractionNumbers
+    ], selected => !selected(Scope.SingleFrameOfReference) || selected(Scope.FractionNumbers))],
     generalLabels: [Area.Statistics]
 };
 

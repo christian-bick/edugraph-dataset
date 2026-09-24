@@ -1,16 +1,19 @@
+import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-word-problem-inversion',
-    rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersLarger20]),
-        ...deductAdmitting([Scope.NumbersWithNegatives]),
-        ...deductAdmitting([
-            Area.CommutativeLaw,
-            Area.AssociativeLaw,
-            Area.DistributiveLaw
+    compatibility: [
+        rejectTargetLabels('word-problem-inversion-domain', [
+            ...deductAdmitting([Scope.NumbersLarger20]),
+            ...deductAdmitting([Scope.NumbersWithNegatives]),
+            ...deductAdmitting([
+                Area.CommutativeLaw,
+                Area.AssociativeLaw,
+                Area.DistributiveLaw
+            ])
         ])
     ],
     generalLabels: [

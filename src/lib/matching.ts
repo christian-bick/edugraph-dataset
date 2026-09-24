@@ -13,6 +13,12 @@ import type {
 } from './dependency-planner.ts';
 import type {WorkCounters} from './work-counters.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
+import type {ConfigSchema, ResolverFn} from '../types/schema.ts';
+import type {GeneratorSpec} from '../types/generator-spec.ts';
+import type {ViewSpec} from '../types/view-spec.ts';
+import type {CompatibilityRule, GenerationPlan, GeneratorCompatibilityRule, ViewCompatibilityRule} from '../types/compatibility.ts';
+import {CompatibilityContractError, validateGenerationPlan} from './compatibility.ts';
+import {planModelCompatibility} from './model-compatibility.ts';
 
 const EDU_PREFIX = 'http://edugraph.io/edu/';
 const UNKNOWN_PROBLEM_TYPE = '(unknown)';
@@ -22,26 +28,40 @@ export interface GeneratorMatchInfo {
     /** Union of spec generalLabels and schema-extracted labels. */
     labels: string[];
     problemType?: string | null;
+    schema?: ConfigSchema;
+    generalLabels?: readonly string[];
+    spec?: GeneratorSpec;
+    compatibility?: readonly GeneratorCompatibilityRule[];
+    matchingSourceHash?: string;
 }
 
 export interface ViewMatchInfo {
     viewId: string;
     /** Union of spec generalLabels and view-schema-extracted labels. */
     supportedLabels: string[];
-    requiredLabels?: readonly string[];
-    rejectedLabels?: readonly string[];
     problemType?: string | null;
+    schema?: ConfigSchema;
+    generalLabels?: readonly string[];
+    spec?: ViewSpec;
+    compatibility?: readonly ViewCompatibilityRule[];
+    matchingSourceHash?: string;
 }
 
 export type MatchFailureReason =
     | 'incompatible-type'
     | 'unsupported-label'
     | 'missing-required-label'
-    | 'rejected-label';
+    | 'rejected-label'
+    | 'empty-label-domain'
+    | 'incompatible-label-variants';
 
 export type MatchVerdict =
     | {matched: true}
-    | {matched: false; reason: MatchFailureReason; label?: string};
+    | {matched: false; reason: MatchFailureReason; label?: string; ruleIds?: readonly string[]};
+
+export type PlannedMatchVerdict =
+    | {matched: true; plan: GenerationPlan}
+    | Exclude<MatchVerdict, {matched: true}>;
 
 function hasCompatibleProblemTypes(
     generatorInfo: GeneratorMatchInfo,
@@ -51,19 +71,13 @@ function hasCompatibleProblemTypes(
         && isProblemTypeCompatible(generatorInfo.problemType, viewInfo.problemType);
 }
 
-function matchesTargetCapabilities(
-    targetLabels: string[],
+function matchTargetCapabilities(
+    target: CompetencyTarget,
     generatorInfo: GeneratorMatchInfo,
-    viewInfo: ViewMatchInfo
-): Exclude<MatchVerdict, {matched: false; reason: 'incompatible-type'}> {
-    const missingRequired = viewInfo.requiredLabels?.find(requiredLabel =>
-        !targetLabels.some(targetLabel => capabilitySatisfies(targetLabel, requiredLabel))
-    );
-    if (missingRequired) {
-        return {matched: false, reason: 'missing-required-label', label: missingRequired};
-    }
-
-    for (const compLabel of targetLabels) {
+    viewInfo: ViewMatchInfo,
+    counters?: WorkCounters
+): PlannedMatchVerdict {
+    for (const compLabel of target.labels) {
         if (!compLabel.startsWith(EDU_PREFIX)) continue;
         const supportedByGen = generatorInfo.labels.some(genLabel =>
             capabilitySatisfies(genLabel, compLabel));
@@ -74,28 +88,61 @@ function matchesTargetCapabilities(
         }
     }
 
-    const rejected = viewInfo.rejectedLabels?.find(label =>
-        targetLabels.some(targetLabel => capabilitySatisfies(targetLabel, label)));
-    if (rejected) return {matched: false, reason: 'rejected-label', label: rejected};
-    return {matched: true};
+    const generatorRules = generatorInfo.spec?.compatibility ?? generatorInfo.compatibility;
+    const viewRules = viewInfo.spec?.compatibility ?? viewInfo.compatibility;
+    const generatorLabels = generatorInfo.generalLabels ?? generatorInfo.spec?.generalLabels
+        ?? (generatorInfo.schema === undefined ? generatorInfo.labels : []);
+    const viewLabels = viewInfo.generalLabels ?? viewInfo.spec?.generalLabels
+        ?? (viewInfo.schema === undefined ? viewInfo.supportedLabels : []);
+    const result = planModelCompatibility(target, {
+        generatorId: generatorInfo.generatorId,
+        schema: generatorInfo.schema,
+        generalLabels: generatorLabels,
+        spec: {generatorId: generatorInfo.generatorId, generalLabels: generatorLabels, compatibility: generatorRules}
+    }, {
+        viewId: viewInfo.viewId,
+        schema: viewInfo.schema ?? {},
+        generalLabels: viewLabels,
+        spec: {viewId: viewInfo.viewId, generalLabels: viewLabels, compatibility: viewRules}
+    }, matchPlanInputHash(target, generatorInfo, viewInfo));
+    for (const [name, value] of Object.entries(result.work)) counters?.add(`match.compatibility.${name}`, value);
+    if (result.supported) return {matched: true, plan: result.plan};
+    for (const rule of viewRules ?? []) {
+        if (!result.ruleIds?.includes(`view:${rule.id}`) || !rule.targetPolicy) continue;
+        const {kind, labels} = rule.targetPolicy;
+        const label = labels.find(candidate => target.labels.some(request => capabilitySatisfies(request, candidate)) === (kind === 'reject'));
+        if (label) return {matched: false, reason: kind === 'require' ? 'missing-required-label' : 'rejected-label', label};
+    }
+    if (result.reason === 'uncovered-target') return {matched: false, reason: 'unsupported-label', label: result.labels?.[0]};
+    if (result.reason === 'empty-domain') return {matched: false, reason: 'empty-label-domain'};
+    return {matched: false, reason: 'incompatible-label-variants', ruleIds: result.ruleIds};
 }
 
-/** The single matching predicate for target/generator/view triples. */
+/** The single authoritative matching operation for target/generator/view triples. */
+export function matchTarget(
+    target: CompetencyTarget,
+    generatorInfo: GeneratorMatchInfo,
+    viewInfo: ViewMatchInfo
+): PlannedMatchVerdict {
+    if (!hasCompatibleProblemTypes(generatorInfo, viewInfo)) return {matched: false, reason: 'incompatible-type'};
+    return matchTargetCapabilities(target, generatorInfo, viewInfo);
+}
+
+/** Verdict-only adapter for callers that have no target identity. */
 export function matchesTarget(
     targetLabels: string[],
     generatorInfo: GeneratorMatchInfo,
     viewInfo: ViewMatchInfo
 ): MatchVerdict {
-    if (!hasCompatibleProblemTypes(generatorInfo, viewInfo)) {
-        return {matched: false, reason: 'incompatible-type'};
-    }
-    return matchesTargetCapabilities(targetLabels, generatorInfo, viewInfo);
+    const result = matchTarget({id: `labels:${digestIdentity(radixSortUtf8([...new Set(targetLabels)]))}`, labels: targetLabels}, generatorInfo, viewInfo);
+    return result.matched ? {matched: true} : result;
 }
 
 export interface MatchTuple {
     target: CompetencyTarget;
     generatorId: string;
     viewId: string;
+    plan: GenerationPlan;
 }
 
 export interface MatchRejection {
@@ -160,17 +207,22 @@ export function buildDependencyMatchingIndex(
 ): DependencyMatchingIndex {
     const targetIndex = buildTargetCapabilityPostingIndex(targets);
     const matchedPairKeysByTarget = new Map<string, string[]>();
+    const plansByTarget = new Map<string, Map<string, GenerationPlan>>();
     for (const tuple of tuples) {
         const pairs = matchedPairKeysByTarget.get(tuple.target.id);
         const key = modulePairKey(tuple.generatorId, tuple.viewId);
         if (pairs) pairs.push(key);
         else matchedPairKeysByTarget.set(tuple.target.id, [key]);
+        let plans = plansByTarget.get(tuple.target.id);
+        if (!plans) plansByTarget.set(tuple.target.id, plans = new Map());
+        plans.set(key, tuple.plan);
     }
     return {
         target_ids_by_label: Object.fromEntries([...targetIndex.byRequiredTargetLabel]
             .map(([label, posting]) => [label, posting.map(target => target.id)])),
         targets_without_ontology_labels: targetIndex.withoutOntologyLabels.map(target => target.id),
-        matched_pair_keys_by_target: Object.fromEntries(matchedPairKeysByTarget)
+        matched_pair_keys_by_target: Object.fromEntries(matchedPairKeysByTarget),
+        generation_plans_by_target: Object.fromEntries([...plansByTarget].map(([target, plans]) => [target, Object.fromEntries(plans)]))
     };
 }
 
@@ -337,8 +389,9 @@ export function matchTargets(
             options.counters
         )) {
             options.counters?.add('match.capability_checks');
-            if (matchesTargetCapabilities(target.labels, generator, view).matched) {
-                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId});
+            const result = matchTargetCapabilities(target, generator, view, options.counters);
+            if (result.matched) {
+                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId, plan: result.plan});
             }
         }
     }
@@ -360,9 +413,9 @@ export function diagnoseTargetMatches(
         options.counters?.add('match.diagnostic_targets');
         for (const {generator, view} of orderedPairs) {
             options.counters?.add('match.diagnostic_pair_checks');
-            const verdict = matchesTargetCapabilities(target.labels, generator, view);
+            const verdict = matchTargetCapabilities(target, generator, view, options.counters);
             if (verdict.matched) {
-                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId});
+                tuples.push({target, generatorId: generator.generatorId, viewId: view.viewId, plan: verdict.plan});
             } else {
                 rejections.push({
                     targetId: target.id,
@@ -386,7 +439,7 @@ export function findTargetsWithoutMatch(
     const index = options.pairIndex
         ?? buildCompatibleModulePairIndex(generatorCatalog, viewCatalog, options.counters);
     return targets.filter(target => !candidatePairsForTarget(target.labels, index, options.counters)
-        .some(({generator, view}) => matchesTargetCapabilities(target.labels, generator, view).matched));
+        .some(({generator, view}) => matchTargetCapabilities(target, generator, view, options.counters).matched));
 }
 
 const matchingClosure = (labels: readonly string[]): Array<{label: string; ancestors: string[]}> =>
@@ -417,9 +470,92 @@ export function targetCapabilityInputHash(target: CompetencyTarget): string {
     return digestIdentity({labels: matchingClosure(target.labels)});
 }
 
+function schemaMetadata(schema: ConfigSchema | undefined, includeFunctionSource: boolean): unknown[] {
+    return radixSortUtf8(Object.keys(schema ?? {})).map(field => {
+        const value = schema![field];
+        if (typeof value === 'function') return {
+            field, kind: 'ontology-neutral',
+            ...(includeFunctionSource ? {source: Function.prototype.toString.call(value)} : {})
+        };
+        if (!Array.isArray(value[0])) return {field, kind: 'direct', labels: radixSortUtf8([...(value as readonly string[])])};
+        const [labels, resolver, fallback] = value as readonly [supported: readonly string[], resolver: ResolverFn<unknown>, fallback?: readonly (readonly string[])[]];
+        return {
+            field, kind: 'resolver', labels: radixSortUtf8([...labels]),
+            resolution: resolver.labelResolution ?? null,
+            choices: canonicalMetadata(resolver.labelChoices ?? null),
+            fallback: fallback === undefined ? null : fallback.map(bundle => radixSortUtf8([...bundle])),
+            ...(includeFunctionSource ? {source: Function.prototype.toString.call(resolver)} : {})
+        };
+    });
+}
+
+function canonicalMetadata(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(canonicalMetadata);
+    if (!value || typeof value !== 'object') return value;
+    return Object.fromEntries(radixSortUtf8(Object.keys(value)).map(key => [key, canonicalMetadata((value as Record<string, unknown>)[key])]));
+}
+
+function ruleMetadata(rules: readonly CompatibilityRule<any>[] | undefined, includeFunctionSource: boolean): unknown[] {
+    const byId = new Map((rules ?? []).map(rule => [rule.id, rule]));
+    return radixSortUtf8([...byId.keys()]).map(id => {
+        const rule = byId.get(id)!;
+        return {
+            id,
+            targetPolicy: rule.targetPolicy ?? null,
+            dependencies: rule.dependencies === undefined ? null : rule.dependencies.map(dependency => ({scope: dependency.scope, label: dependency.label}))
+                .sort((left, right) => `${left.scope}:${left.label}` < `${right.scope}:${right.label}` ? -1 : 1),
+            ...(includeFunctionSource ? {source: Function.prototype.toString.call(rule.predicate)} : {})
+        };
+    });
+}
+
+function schemaOntologyLabels(schema: ConfigSchema | undefined): string[] {
+    const labels: string[] = [];
+    for (const value of Object.values(schema ?? {})) {
+        if (typeof value === 'function') continue;
+        if (!Array.isArray(value[0])) {
+            labels.push(...value as readonly string[]);
+            continue;
+        }
+        const [supported, resolver, fallback] = value as readonly [supported: readonly string[], resolver: ResolverFn<unknown>, fallback?: readonly (readonly string[])[]];
+        labels.push(...supported, ...(fallback?.flat() ?? []));
+        const choice = resolver.labelChoices;
+        if (!choice) continue;
+        labels.push(...(choice.contextLabels ?? []));
+        if (choice.kind === 'target') labels.push(...(choice.predicate?.all ?? []));
+        else {
+            labels.push(...(choice.alternatives?.flat() ?? []), ...(choice.equivalenceGroups?.flat(2) ?? []));
+            for (const item of choice.defaults ?? []) labels.push(...item.labels, ...(item.whenAll ?? []), ...(item.whenNone ?? []));
+        }
+    }
+    return labels;
+}
+
+/** All semantic read roots, including label-choice defaults and declared rule queries. */
+export function generatorMatchingOntologyLabels(generator: GeneratorMatchInfo): string[] {
+    return radixSortUtf8([...new Set([
+        ...generator.labels, ...(generator.generalLabels ?? generator.spec?.generalLabels ?? []),
+        ...schemaOntologyLabels(generator.schema),
+        ...(generator.spec?.compatibility ?? generator.compatibility ?? []).flatMap(rule => rule.dependencies?.map(dependency => dependency.label) ?? [])
+    ])]);
+}
+
+export function viewMatchingOntologyLabels(view: ViewMatchInfo): string[] {
+    return radixSortUtf8([...new Set([
+        ...view.supportedLabels, ...(view.generalLabels ?? view.spec?.generalLabels ?? []),
+        ...schemaOntologyLabels(view.schema),
+        ...(view.spec?.compatibility ?? view.compatibility ?? []).flatMap(rule => rule.dependencies?.map(dependency => dependency.label) ?? [])
+    ])]);
+}
+
 export function generatorCapabilityInputHash(generator: GeneratorMatchInfo): string {
     return digestIdentity({
         labels: matchingClosure(generator.labels),
+        invariant_labels: radixSortUtf8([...(generator.generalLabels ?? generator.spec?.generalLabels ?? (generator.schema === undefined ? generator.labels : []))]),
+        semantic_reads: matchingClosure(generatorMatchingOntologyLabels(generator)),
+        schema: schemaMetadata(generator.schema, generator.matchingSourceHash === undefined),
+        rules: ruleMetadata(generator.spec?.compatibility ?? generator.compatibility, generator.matchingSourceHash === undefined),
+        matching_source: generator.matchingSourceHash ?? null,
         problem_type: generator.problemType ?? null
     });
 }
@@ -427,13 +563,16 @@ export function generatorCapabilityInputHash(generator: GeneratorMatchInfo): str
 export function viewCapabilityInputHash(view: ViewMatchInfo): string {
     return digestIdentity({
         supported: matchingClosure(view.supportedLabels),
-        required: matchingClosure(view.requiredLabels ?? []),
-        rejected: radixSortUtf8([...(view.rejectedLabels ?? [])]),
+        invariant_labels: radixSortUtf8([...(view.generalLabels ?? view.spec?.generalLabels ?? (view.schema === undefined ? view.supportedLabels : []))]),
+        semantic_reads: matchingClosure(viewMatchingOntologyLabels(view)),
+        schema: schemaMetadata(view.schema, view.matchingSourceHash === undefined),
+        rules: ruleMetadata(view.spec?.compatibility ?? view.compatibility, view.matchingSourceHash === undefined),
+        matching_source: view.matchingSourceHash ?? null,
         problem_type: view.problemType ?? null
     });
 }
 
-export const MATCHING_POLICY_EPOCH = 5;
+export const MATCHING_POLICY_EPOCH = 6;
 
 /**
  * Matching implementation code is deliberately outside automatic cache
@@ -442,6 +581,31 @@ export const MATCHING_POLICY_EPOCH = 5;
  */
 export function matchingPolicyInputHash(): string {
     return digestIdentity({matching_policy_epoch: MATCHING_POLICY_EPOCH});
+}
+
+export function matchPlanInputHash(target: CompetencyTarget, generator: GeneratorMatchInfo, view: ViewMatchInfo): string {
+    return digestIdentity({
+        policy: matchingPolicyInputHash(), target: targetCapabilityInputHash(target),
+        generator: generatorCapabilityInputHash(generator), view: viewCapabilityInputHash(view)
+    });
+}
+
+/** Rehydrate a current, authoritative plan; old positive tuples are never sufficient. */
+export function restorePersistedMatchTuple(
+    target: CompetencyTarget, generator: GeneratorMatchInfo, view: ViewMatchInfo, persistedPlan: unknown
+): MatchTuple {
+    if (persistedPlan === undefined || persistedPlan === null) {
+        throw new CompatibilityContractError('Persisted generation plan missing; rebuild matching');
+    }
+    const plan = validateGenerationPlan(persistedPlan);
+    if (plan.identity.targetId !== target.id || plan.identity.generatorId !== generator.generatorId
+        || plan.identity.viewId !== view.viewId) {
+        throw new CompatibilityContractError('Persisted generation plan identity mismatch; rebuild matching');
+    }
+    if (plan.inputHash !== matchPlanInputHash(target, generator, view)) {
+        throw new CompatibilityContractError('Persisted generation plan inputs changed; rebuild matching');
+    }
+    return {target, generatorId: generator.generatorId, viewId: view.viewId, plan};
 }
 
 export interface DeltaMatchResult extends MatchResult {
@@ -480,7 +644,8 @@ export function matchTargetsDelta(options: {
     );
     const previous = options.previousGraph;
     const currentPolicy = previous?.nodes[matchingPolicyNodeId()];
-    const baseline = !previous || !currentPolicy || currentPolicy.input_hash !== options.policyHash;
+    const baseline = !previous || !currentPolicy || currentPolicy.input_hash !== options.policyHash
+        || !previous.matching_index?.generation_plans_by_target;
     if (baseline) {
         const result = matchTargets(options.targets, options.generatorCatalog, options.viewCatalog, {
             pairIndex,
@@ -546,32 +711,10 @@ export function matchTargetsDelta(options: {
             for (const key of pairKeys) {
                 const pair = currentPairs.get(key);
                 if (!pair || changedPairs.has(key)) continue;
-                const tuple = {
-                    target,
-                    generatorId: pair.generator.generatorId,
-                    viewId: pair.view.viewId
-                };
+                const tuple = restorePersistedMatchTuple(target, pair.generator, pair.view,
+                    previous.matching_index.generation_plans_by_target[targetId]?.[key]);
                 tuples.set(tupleIdentity(tuple), tuple);
             }
-        }
-    } else {
-        const targetPrefix = `target-capability:${options.specName}:`;
-        for (const node of Object.values(previous.nodes)) {
-            if (node.kind !== 'match-tuple') continue;
-            const targetDependency = node.dependencies.find(id => id.startsWith(targetPrefix));
-            const pairDependency = node.dependencies.find(id => id.startsWith('module-pair:'));
-            if (!targetDependency || !pairDependency) continue;
-            const targetId = targetDependency.slice(targetPrefix.length);
-            const key = pairDependency.slice('module-pair:'.length);
-            const target = targetsById.get(targetId);
-            const pair = currentPairs.get(key);
-            if (!target || !pair || changedTargets.has(targetId) || changedPairs.has(key)) continue;
-            const tuple = {
-                target,
-                generatorId: pair.generator.generatorId,
-                viewId: pair.view.viewId
-            };
-            tuples.set(tupleIdentity(tuple), tuple);
         }
     }
     const reusedTuples = tuples.size;

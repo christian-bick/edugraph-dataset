@@ -1,6 +1,6 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {Area, Scope, deductCompatible} from 'edugraph-ts';
-import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel, selectExactMatch} from "../../../lib/resolvers.ts";
 
@@ -8,9 +8,18 @@ const exactTool = exactResolver((labels: string[]) => {
     if (labels.includes(Scope.CentimeterScale) || labels.includes(Scope.MeterScale)) return undefined;
     return selectExactMatch(labels, [Scope.PhysicalRuler, Scope.Tapemeter]);
 });
+withLabelChoices(exactTool, {
+    kind: 'alternatives',
+    contextLabels: [Scope.CentimeterScale, Scope.MeterScale]
+});
+
+import {targetLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-length',
+    compatibility: [targetLabelRule('tool-based-length-context', [
+        Scope.CentimeterScale, Scope.MeterScale
+    ], selected => !selected(Scope.CentimeterScale) && !selected(Scope.MeterScale))],
     generalLabels: [
         Area.MeasuringLength,
         Scope.NumbersWithoutNegatives

@@ -1,7 +1,9 @@
-import {radixSortUtf8} from './content-identity.ts';
+import {digestIdentity, radixSortUtf8} from './content-identity.ts';
+import {validateGenerationPlan} from './compatibility.ts';
+import type {GenerationPlan} from '../types/compatibility.ts';
 
-export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 4;
-export const DEPENDENCY_PLANNER_EPOCH = 5;
+export const DEPENDENCY_GRAPH_SCHEMA_VERSION = 5;
+export const DEPENDENCY_PLANNER_EPOCH = 6;
 
 export const DEPENDENCY_NODE_KINDS = [
     'source-file',
@@ -52,6 +54,12 @@ export interface DependencyMatchingIndex {
     target_ids_by_label: Record<string, string[]>;
     targets_without_ontology_labels: string[];
     matched_pair_keys_by_target: Record<string, string[]>;
+    generation_plans_by_target: Record<string, Record<string, GenerationPlan>>;
+}
+
+/** Match nodes identify both the admitted space and the exact metadata used to derive it. */
+export function generationPlanDependencyHash(plan: GenerationPlan): string {
+    return digestIdentity({generation_plan_hash: plan.hash, generation_plan_input_hash: plan.inputHash});
 }
 
 export interface DependencyCause {
@@ -101,6 +109,33 @@ function normalizedNode(node: DependencyNode): DependencyNode {
     return {...node, dependencies};
 }
 
+function normalizedGenerationPlans(index: DependencyMatchingIndex): DependencyMatchingIndex['generation_plans_by_target'] {
+    if (!index.generation_plans_by_target || typeof index.generation_plans_by_target !== 'object') {
+        throw new Error('Matching index lacks generation plans; rebuild the dependency graph.');
+    }
+    const plans: DependencyMatchingIndex['generation_plans_by_target'] = {};
+    for (const targetId of radixSortUtf8(Object.keys(index.matched_pair_keys_by_target))) {
+        const recorded = index.generation_plans_by_target[targetId];
+        const pairs = radixSortUtf8([...new Set(index.matched_pair_keys_by_target[targetId])]);
+        if (!recorded || !sameStrings(radixSortUtf8(Object.keys(recorded)), pairs)) {
+            throw new Error(`Matching plans differ from recorded pairs for ${targetId}; rebuild the dependency graph.`);
+        }
+        plans[targetId] = Object.fromEntries(pairs.map(pairKey => {
+            const plan = validateGenerationPlan(recorded[pairKey]);
+            if (plan.identity.targetId !== targetId
+                || `${plan.identity.generatorId}#${plan.identity.viewId}` !== pairKey
+                || !plan.inputHash) {
+                throw new Error(`Matching plan identity is invalid for ${targetId}#${pairKey}; rebuild the dependency graph.`);
+            }
+            return [pairKey, plan];
+        }));
+    }
+    if (!sameStrings(radixSortUtf8(Object.keys(index.generation_plans_by_target)), Object.keys(plans))) {
+        throw new Error('Matching index has unreferenced generation plans; rebuild the dependency graph.');
+    }
+    return plans;
+}
+
 /** Creates a canonical, complete graph after validating every direct edge. */
 export function createDependencyGraphSnapshot(
     nodes: readonly DependencyNode[],
@@ -136,7 +171,8 @@ export function createDependencyGraphSnapshot(
         ).map(targetId => [
             targetId,
             radixSortUtf8([...new Set(matchingIndex.matched_pair_keys_by_target[targetId])])
-        ]))
+        ])),
+        generation_plans_by_target: normalizedGenerationPlans(matchingIndex)
     } : undefined;
     return {
         schema_version: DEPENDENCY_GRAPH_SCHEMA_VERSION,

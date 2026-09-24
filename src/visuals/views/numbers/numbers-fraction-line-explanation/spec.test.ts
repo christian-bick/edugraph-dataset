@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -10,6 +11,6 @@ describe('numbers-fraction-line-explanation view spec', () => {
             Ability.Formalization,
             Ability.ProcedureUnderstanding
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

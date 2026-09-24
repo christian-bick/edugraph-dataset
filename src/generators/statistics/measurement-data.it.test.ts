@@ -22,8 +22,7 @@ describe('measurement observation and extrema contracts', () => {
             ]);
         const plain = generators.find(generator => generator.generatorId === 'measurement-data')!;
         const arithmetic = views.find(view => view.viewId === 'measurement-line-plot-arithmetic')!;
-        expect(arithmetic.requiredLabels ?? []).toEqual([]);
-        expect(arithmetic.rejectedLabels ?? []).toEqual([]);
+        expect(arithmetic.spec.compatibility ?? []).toEqual([]);
         expect(matchesTarget(arithmetic.generalLabels, plain, arithmetic))
             .toEqual({matched: false, reason: 'incompatible-type'});
     });

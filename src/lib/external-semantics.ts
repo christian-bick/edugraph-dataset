@@ -5,6 +5,7 @@ import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {resolveOntologyProvenance, type OntologyProvenance} from './coverage-identity.ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
 import {loadTargets} from './spec-catalog.ts';
+import {generatorMatchingOntologyLabels, viewMatchingOntologyLabels} from './matching.ts';
 
 export const EXTERNAL_SEMANTICS_SCHEMA_VERSION = 3;
 export const ONTOLOGY_DEPENDENCY_RELATIONS = ['partOf', 'specializes'] as const;
@@ -157,17 +158,13 @@ export async function resolveOntologySemanticUsage(
     specName: string
 ): Promise<{snapshot: OntologySemanticSnapshot; usage: OntologySemanticUsage}> {
     const [generators, views, targets] = await Promise.all([
-        loadGeneratorModelCatalog(resolve(projectRoot, 'src', 'generators')),
-        loadViewModelCatalog(resolve(projectRoot, 'src', 'visuals', 'views')),
+        loadGeneratorModelCatalog(resolve(projectRoot, 'src', 'generators'), undefined, undefined, {sourceRoot: projectRoot}),
+        loadViewModelCatalog(resolve(projectRoot, 'src', 'visuals', 'views'), undefined, undefined, {sourceRoot: projectRoot}),
         loadTargets(specName, resolve(projectRoot, 'src', 'spec'))
     ]);
     const labels = [
-        ...generators.flatMap(generator => generator.labels),
-        ...views.flatMap(view => [
-            ...view.supportedLabels,
-            ...(view.requiredLabels ?? []),
-            ...(view.rejectedLabels ?? [])
-        ]),
+        ...generators.flatMap(generatorMatchingOntologyLabels),
+        ...views.flatMap(viewMatchingOntologyLabels),
         ...targets.flatMap(target => target.labels)
     ];
     const snapshot = withOntologySemanticUsage(

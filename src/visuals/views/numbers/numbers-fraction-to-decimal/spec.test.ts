@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {NumbersFractionToDecimalViewSchema, spec} from './spec.ts';
@@ -14,8 +15,8 @@ describe('numbers-fraction-to-decimal view spec', () => {
             Scope.VisualNumbers,
             Ability.Formalization
         ]);
-        expect(spec.requiredLabels).toBeUndefined();
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(NumbersFractionToDecimalViewSchema).toEqual({});
     });
 });

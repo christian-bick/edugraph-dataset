@@ -4,8 +4,16 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveTwoStepOperations} from '../helpers.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-two-step',
+    compatibility: [generatorLabelRule('two-step-operation-count', [
+        Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division
+    ], selected => {
+        const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division].filter(selected);
+        return operations.length >= 1 && operations.length <= 2;
+    })],
     generalLabels: [
         Scope.MultiStep,
         Scope.MultiLevelComposition,

@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -5,6 +6,6 @@ import {spec} from './spec.ts';
 describe('geometry-angle-concepts view spec', () => {
     it('owns invariant arc-fraction interpretation', () => {
         expect(spec.generalLabels).toEqual([Ability.Interpretation, Area.FractionDenominatorInterpretation]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

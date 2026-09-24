@@ -79,6 +79,7 @@ export class SourceSymbolIndex {
     private bindingOrigin(binding: Binding, from: string, seen: Set<string>): string | undefined {
         const local = localSource(from, binding.module);
         if (!local) return `${binding.module}#${binding.imported}`;
+        if (binding.imported === '*') return `${local}#*`;
         const key = `${local}#${binding.imported}`;
         if (seen.has(key)) return undefined;
         seen.add(key);

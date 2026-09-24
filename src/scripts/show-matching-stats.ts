@@ -4,7 +4,7 @@ import {
     buildCompatibleModulePairIndex,
     diagnoseTargetMatches,
     computeSampleKey,
-    generateSampleWithRetry
+    generatePlannedSampleWithRetry
 } from '../lib/generation.ts';
 import { loadMatchingTargets } from '../lib/spec-validator.ts';
 import { shortenLabel } from '../lib/utils.ts';
@@ -83,9 +83,11 @@ async function main() {
                 });
 
                 try {
-                    const { stub, attempt } = generateSampleWithRetry({
+                    const tuple = tuples.find(tuple => tuple.generatorId === generatorId && tuple.viewId === viewId)!;
+                    const { stub, attempt } = generatePlannedSampleWithRetry({
                         generator,
-                        labels: [...target.labels],
+                        viewSchema: viewCatalog.find(view => view.viewId === viewId)!.schema,
+                        plan: tuple.plan,
                         sampleKey,
                         maxAttempts: 10
                     });
@@ -107,6 +109,11 @@ async function main() {
                 `  View [${rejection.viewId}] rejects ${shortenLabel(rejection.verdict.label!)} ` +
                 `(via ${rejection.generatorId})`
             );
+        }
+        for (const rejection of rejections.filter(rejection =>
+            rejection.verdict.reason === 'empty-label-domain' || rejection.verdict.reason === 'incompatible-label-variants')) {
+            console.log(`  Pair [${rejection.generatorId}/${rejection.viewId}] has no admitted label variant: `
+                + `${rejection.verdict.reason}${rejection.verdict.ruleIds?.length ? ` (${rejection.verdict.ruleIds.join(', ')})` : ''}`);
         }
 
         if (tuples.length === 0) {

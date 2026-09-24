@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
+import {Scope} from 'edugraph-ts';
 import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     DatasetManifest,
@@ -27,7 +28,8 @@ import {
 } from './dependency-planner.ts';
 import {buildVqaValidationContext} from './vqa-cache.ts';
 import {createWorkCounters} from './work-counters.ts';
-import {beginDatasetStoreTransaction} from './dataset-store.ts';
+import {beginDatasetStoreTransaction, readDatasetSnapshot} from './dataset-store.ts';
+import {buildDependencyMatchingIndex, matchTargets} from './matching.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -108,6 +110,11 @@ describe('datasetFreshnessIssues', () => {
         expect(datasetFreshnessIssues(null, 'ccss', build({}))).toEqual([
             'manifest.json is missing; regenerate this dataset.'
         ]);
+    });
+
+    it('requires an explicit rebuild for legacy graph formats', () => {
+        expect(datasetFreshnessIssues(manifest({dependency_graph: {...dependencyGraph, schema_version: 4}}), 'ccss', build({})))
+            .toContain('manifest dependency graph format is unsupported; rebuild generation plans.');
     });
 
     it('rejects ontology provenance that differs from the reconstructed graph inputs', () => {
@@ -230,6 +237,11 @@ describe('updateDatasetManifest', () => {
 
     it('merges a rebuilt pair subgraph without replacing unrelated entries', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-observed-merge-'));
+        const target = {id: 'target', labels: []};
+        const tuples = matchTargets([target], [
+            {generatorId: 'demo', labels: [], problemType: 'ArithmeticPairProblem'},
+            {generatorId: 'other', labels: [], problemType: 'ArithmeticPairProblem'}
+        ], [{viewId: 'view', supportedLabels: [], problemType: 'ArithmeticPairProblem'}]).tuples;
         const previousGraph = createDependencyGraphSnapshot([
             {id: 'pair:demo#view', kind: 'generation-pair', input_hash: 'old', dependencies: []},
             {id: 'image:demo-sample', kind: 'image', input_hash: 'old', dependencies: ['pair:demo#view']},
@@ -241,11 +253,7 @@ describe('updateDatasetManifest', () => {
                 input_hash: 'asset',
                 dependencies: ['image:demo-sample', 'image:other-sample']
             }
-        ], undefined, {
-            target_ids_by_label: {},
-            targets_without_ontology_labels: [],
-            matched_pair_keys_by_target: {target: ['demo#view', 'other#view']}
-        });
+        ], undefined, buildDependencyMatchingIndex([target], tuples));
         const partialGraph = createDependencyGraphSnapshot([
             {id: 'pair:demo#view', kind: 'generation-pair', input_hash: 'new', dependencies: []},
             {id: 'image:demo-sample', kind: 'image', input_hash: 'new', dependencies: ['pair:demo#view']},
@@ -604,6 +612,7 @@ describe('buildDatasetManifest', () => {
 
         const generator = {
             generatorId: 'demo',
+            generalLabels: ['http://edugraph.io/edu/Addition'],
             labels: ['http://edugraph.io/edu/Addition'],
             problemType: 'ArithmeticPairProblem',
             module: {
@@ -617,6 +626,7 @@ describe('buildDatasetManifest', () => {
         } as any;
         const view = {
             viewId: 'demo-view',
+            generalLabels: ['http://edugraph.io/edu/ProcedureExecution'],
             supportedLabels: ['http://edugraph.io/edu/ProcedureExecution'],
             problemType: 'ArithmeticPairProblem',
             module: {
@@ -637,6 +647,7 @@ describe('buildDatasetManifest', () => {
         };
 
         try {
+            const tuples = matchTargets([target], [generator], [view]).tuples;
             const result = buildDatasetManifest({
                 projectRoot,
                 datasetDir,
@@ -646,7 +657,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}]
+                tuples
             });
             const kinds = new Set(Object.values(result.dependency_graph.nodes).map(node => node.kind));
             expect(kinds).toEqual(new Set(DEPENDENCY_NODE_KINDS));
@@ -672,6 +683,12 @@ describe('buildDatasetManifest', () => {
             ]);
             expect(result.dependency_graph.nodes['pair:demo#demo-view'].dependencies)
                 .toContain(matchNodeId);
+            expect(result.dependency_graph.matching_index!.generation_plans_by_target.target['demo#demo-view'])
+                .toEqual(tuples[0].plan);
+            expect(result.dependency_graph.nodes['generator-capability:demo'].dependencies)
+                .toContain('source:src/generators/demo/spec.ts');
+            expect(result.dependency_graph.nodes['view-capability:demo-view'].dependencies)
+                .toContain('source:src/visuals/views/demo-view/spec.ts');
             expect(imageNode.dependencies).toEqual(expect.arrayContaining([
                 'pair:demo#demo-view',
                 matchNodeId
@@ -704,7 +721,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}],
+                tuples,
                 counters: rebuiltCounters
             });
             expect(dependencyGraphVqaCacheKey(rebuilt.dependency_graph, sampleKey))
@@ -722,10 +739,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [
-                    {target, generatorId: 'demo', viewId: 'demo-view'},
-                    {target: secondTarget, generatorId: 'demo', viewId: 'demo-view'}
-                ]
+                tuples: matchTargets([target, secondTarget], [generator], [view]).tuples
             });
             const reversedTargets = buildDatasetManifest({
                 projectRoot,
@@ -736,10 +750,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [
-                    {target: secondTarget, generatorId: 'demo', viewId: 'demo-view'},
-                    {target, generatorId: 'demo', viewId: 'demo-view'}
-                ]
+                tuples: matchTargets([secondTarget, target], [generator], [view]).tuples
             });
             expect(orderedTargets.entries['demo#demo-view'].input_hash)
                 .toBe(reversedTargets.entries['demo#demo-view'].input_hash);
@@ -754,7 +765,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}]
+                tuples
             });
             const checklistPlan = planDependencyDelta(
                 result.dependency_graph,
@@ -778,7 +789,7 @@ describe('buildDatasetManifest', () => {
                 views: [view],
                 generatedSplits: ['train'],
                 rendererEnvironment: 'canonical',
-                tuples: [{target, generatorId: 'demo', viewId: 'demo-view'}]
+                tuples
             });
             const policyPlan = planDependencyDelta(
                 changed.dependency_graph,
@@ -788,6 +799,56 @@ describe('buildDatasetManifest', () => {
             expect(policyPlan.affected_nodes).not.toContain(`image:${sampleKey}`);
             expect(dependencyGraphVqaCacheKey(changedPolicy.dependency_graph, sampleKey))
                 .not.toBe(dependencyGraphVqaCacheKey(changed.dependency_graph, sampleKey));
+
+            const variantGenerator = {...generator,
+                schema: {numberKind: [Scope.IntegerNumbers, Scope.FractionNumbers]},
+                labels: [...generator.labels, Scope.IntegerNumbers, Scope.FractionNumbers]};
+            const wholeView = {...view, spec: {compatibility: [{id: 'whole-only',
+                dependencies: [{scope: 'generator', label: Scope.IntegerNumbers}, {scope: 'target', label: Scope.SingleFrameOfReference}],
+                predicate: (labels: {has(scope: 'generator', label: string): boolean}) => labels.has('generator', Scope.IntegerNumbers)}]}};
+            const options = {projectRoot, datasetDir, specName: 'ccss', targets: [target], generators: [variantGenerator],
+                generatedSplits: ['train'] as const, rendererEnvironment: 'canonical'};
+            const broad = buildDatasetManifest({...options, generatedSplits: ['train'], views: [view]});
+            const narrow = buildDatasetManifest({...options, generatedSplits: ['train'], views: [wholeView]});
+            expect(Object.keys(broad.entries)).toEqual(Object.keys(narrow.entries));
+            expect(broad.entries['demo#demo-view'].input_hash).not.toBe(narrow.entries['demo#demo-view'].input_hash);
+            expect(broad.dependency_graph.nodes[matchNodeId].input_hash).not.toBe(narrow.dependency_graph.nodes[matchNodeId].input_hash);
+            expect(planDependencyDelta(broad.dependency_graph, narrow.dependency_graph).affected_nodes).toContain('pair:demo#demo-view');
+            expect(narrow.dependency_graph.nodes['view-capability:demo-view'].dependencies)
+                .toContain('ontology:SingleFrameOfReference');
+            const changedOntology = structuredClone(narrow.dependency_graph);
+            changedOntology.nodes['ontology:SingleFrameOfReference'].input_hash = 'changed-query-semantics';
+            expect(planDependencyDelta(narrow.dependency_graph, changedOntology).affected_nodes)
+                .toEqual(expect.arrayContaining(['view-capability:demo-view', matchNodeId, 'pair:demo#demo-view']));
+
+            const snapshot = readDatasetSnapshot(datasetDir);
+            const provenance = buildDatasetManifest({...options, generatedSplits: ['train'], views: [wholeView],
+                datasetSnapshot: {...snapshot, rows: split => snapshot.rows(split).map(row => ({...row,
+                    generation_plan_hash: narrow.dependency_graph.matching_index!.generation_plans_by_target.target['demo#demo-view'].hash,
+                    generation_replay: {sampleKey, seed: 123, attempt: 1},
+                    prepared_view: {config: {}, randomState: 123}}))}});
+            expect(provenance.entries['demo#demo-view'].content_hash).not.toBe(narrow.entries['demo#demo-view'].content_hash);
+            expect(provenance.dependency_graph.nodes[`image:${sampleKey}`].input_hash)
+                .not.toBe(narrow.dependency_graph.nodes[`image:${sampleKey}`].input_hash);
+
+            const helper = resolve(projectRoot, 'src/lib/spec-helper.ts');
+            writeFileSync(helper, 'export const allowed = true;');
+            writeFileSync(resolve(generatorDir, 'spec.ts'), "import {allowed} from '../../lib/spec-helper.ts'; export const spec = {allowed};");
+            writeFileSync(resolve(viewDir, 'view.tsx'), 'export const render = 1;');
+            const sourceBaseline = buildDatasetManifest({...options, generatedSplits: ['train'], views: [view]});
+            expect(sourceBaseline.dependency_graph.nodes['generator-capability:demo'].dependencies)
+                .toContain('source:src/lib/spec-helper.ts');
+            writeFileSync(helper, 'export const allowed = false;');
+            const helperChanged = buildDatasetManifest({...options, generatedSplits: ['train'], views: [view]});
+            const helperDelta = planDependencyDelta(sourceBaseline.dependency_graph, helperChanged.dependency_graph);
+            expect(helperDelta.affected_nodes).toContain('generator-capability:demo');
+            expect(helperDelta.affected_nodes).toContain(matchNodeId);
+            writeFileSync(resolve(viewDir, 'view.tsx'), 'export const render = 2;');
+            const rendererChanged = buildDatasetManifest({...options, generatedSplits: ['train'], views: [view]});
+            const rendererDelta = planDependencyDelta(helperChanged.dependency_graph, rendererChanged.dependency_graph);
+            expect(rendererDelta.affected_nodes).toContain('pair:demo#demo-view');
+            expect(rendererDelta.affected_nodes).not.toContain('view-capability:demo-view');
+            expect(rendererDelta.affected_nodes).not.toContain(matchNodeId);
         } finally {
             rmSync(projectRoot, {recursive: true, force: true});
         }

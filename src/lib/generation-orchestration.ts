@@ -1,12 +1,15 @@
-import {AbstractProblem, ResolvedProblemStub} from '../types/ml-engine.ts';
-import {assertResolvedTargetCoverage, ResolvedLabelContractError} from './label-contracts.ts';
+import {AbstractProblem} from '../types/ml-engine.ts';
+import {assertResolvedTargetCoverage} from './label-contracts.ts';
 import {
-    computeSampleKey, computeSampleFilename, computeSampleSeed, computeContentFingerprint,
-    computeTaskFingerprint, resolvePairCapabilities, generateSampleWithRetry, isValTuple,
+    computeSampleKey, computeSampleFilename, computeContentFingerprint,
+    computeTaskFingerprint, generatePlannedSampleWithRetry, isValTuple,
     DEFAULT_VAL_RATIO, buildProblem, type GeneratorCatalogEntry, type MatchTuple,
     type ViewCatalogEntry, type SampleIdentity, type SampleMode, type SampleSplit
 } from './generation.ts';
-import {radixSortUtf8} from './content-identity.ts';
+import {restorePersistedMatchTuple} from './matching.ts';
+import {selectionAdmittedByPlan, type PlannedGenerationDraw} from './planned-generation.ts';
+import type {GenerationPlan, GenerationSelectionReceipt} from '../types/compatibility.ts';
+import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
 
 const MAX_ATTEMPTS = 50;
 
@@ -28,6 +31,11 @@ export interface RenderSample {
     taskFingerprint: string;
     problem: AbstractProblem;
     associatedTargetIds: Set<string>;
+    associatedSelections: Map<string, GenerationSelectionReceipt>;
+    associatedPlans: Map<string, GenerationPlan>;
+    plan: GenerationPlan;
+    replay: GenerationReplay;
+    preparedView: PreparedViewConfiguration;
 }
 
 export type SampleFingerprintIndex = Map<string, Map<string, RenderSample[]>>;
@@ -82,6 +90,7 @@ export function generateModuleSamples(
         const instanceIdx = 0;
         const viewEntry = viewsById.get(tuple.viewId);
         if (!viewEntry) throw new Error(`View catalog entry not found: ${tuple.viewId}`);
+        restorePersistedMatchTuple(target, genEntry, viewEntry, tuple.plan);
 
         const makeIdentity = (mode: SampleMode): SampleIdentity => ({
             targetId: target.id,
@@ -92,26 +101,18 @@ export function generateModuleSamples(
             instanceIdx
         });
 
-        const fingerprintStub = (stub: ResolvedProblemStub, seed: number) => {
-            const pair = resolvePairCapabilities({
-                targetLabels,
-                generatorGeneralLabels: genEntry.generalLabels,
-                generatorResolvedLabels: stub.labels,
-                viewGeneralLabels: viewEntry.generalLabels,
-                viewSchema: viewEntry.schema,
-                seed
-            });
-            assertResolvedTargetCoverage(pair.labels, targetLabels, `${target.id}/${moduleName}/${tuple.viewId}`);
+        const fingerprintDraw = (draw: PlannedGenerationDraw) => {
+            assertResolvedTargetCoverage(draw.labels, targetLabels, `${target.id}/${moduleName}/${tuple.viewId}`);
             const problem = buildProblem({
-                stub,
+                stub: draw.stub!,
                 type: genEntry.generator.type,
-                labels: pair.labels
+                labels: draw.labels
             });
             const contentFingerprint = computeContentFingerprint(problem.data);
             return {
                 problem,
                 contentFingerprint,
-                taskFingerprint: computeTaskFingerprint(problem.data, pair.viewConfig)
+                taskFingerprint: computeTaskFingerprint(problem.data, draw.view.config)
             };
         };
 
@@ -119,17 +120,17 @@ export function generateModuleSamples(
         // with only the same mathematical payload cannot: it merely excludes
         // that payload from validation to protect the split boundary.
         const representingSamples: RenderSample[] = [];
-        const isDuplicate = (stub: ResolvedProblemStub, { seed }: { seed: number }) => {
-            const { problem, contentFingerprint, taskFingerprint } = fingerprintStub(stub, seed);
+        const associationReceipts = new Map<RenderSample, GenerationSelectionReceipt>();
+        const isDuplicate = (draw: PlannedGenerationDraw) => {
+            const {contentFingerprint, taskFingerprint} = fingerprintDraw(draw);
             const taskMatches = [
                 ...samplesForFingerprint(taskFingerprintsByView, tuple.viewId, taskFingerprint),
                 ...samplesForFingerprint(trainTaskFingerprintsByView, tuple.viewId, taskFingerprint)
             ];
             for (const sample of taskMatches) {
-                sample.problem.labels = radixSortUtf8([...new Set([
-                    ...sample.problem.labels,
-                    ...problem.labels
-                ])]);
+                const receipt = selectionAdmittedByPlan(tuple.plan, sample.plan, sample.replay.selection);
+                if (!receipt) continue;
+                associationReceipts.set(sample, receipt);
                 if (!representingSamples.includes(sample)) representingSamples.push(sample);
             }
             const trainContentMatches = samplesForFingerprint(
@@ -143,25 +144,21 @@ export function generateModuleSamples(
         const questionIdentity = makeIdentity('question');
         const questionKey = computeSampleKey(questionIdentity);
 
-        let question: { stub: ResolvedProblemStub | null; attempt: number; seed: number };
-        try {
-            question = generateSampleWithRetry({
+        const question = generatePlannedSampleWithRetry({
                 generator: genEntry.generator,
-                labels: targetLabels,
+                viewSchema: viewEntry.schema,
+                plan: tuple.plan,
                 sampleKey: questionKey,
                 maxAttempts: MAX_ATTEMPTS,
                 isDuplicate
             });
-        } catch (e) {
-            if (e instanceof ResolvedLabelContractError) throw e;
-            console.warn(`[${moduleName}] Skipping ${questionKey}: generator error: ${e instanceof Error ? e.message : e}`);
-            continue;
-        }
         if (!question.stub) {
             const representedBy = representingSamples[0];
             if (representedBy) {
                 assertResolvedTargetCoverage(representedBy.problem.labels, targetLabels, representedBy.sampleKey);
                 representedBy.associatedTargetIds.add(target.id);
+                representedBy.associatedSelections.set(target.id, associationReceipts.get(representedBy)!);
+                representedBy.associatedPlans.set(target.id, tuple.plan);
                 console.warn(`[${moduleName}] Linked ${questionKey} to existing sample ${representedBy.sampleKey} after ${MAX_ATTEMPTS} duplicate attempts`);
                 continue;
             }
@@ -169,7 +166,7 @@ export function generateModuleSamples(
             continue;
         }
 
-        const questionResult = fingerprintStub(question.stub, question.seed);
+        const questionResult = fingerprintDraw(question);
         const questionSample: RenderSample = {
             identity: questionIdentity,
             targetLabels,
@@ -180,7 +177,12 @@ export function generateModuleSamples(
             contentFingerprint: questionResult.contentFingerprint,
             taskFingerprint: questionResult.taskFingerprint,
             problem: questionResult.problem,
-            associatedTargetIds: new Set()
+            associatedTargetIds: new Set(),
+            associatedSelections: new Map(),
+            associatedPlans: new Map(),
+            plan: tuple.plan,
+            replay: question.replay,
+            preparedView: question.view
         };
         samples.push(questionSample);
         claimSample(taskFingerprintsByView, questionSample, questionSample.taskFingerprint);
@@ -188,36 +190,35 @@ export function generateModuleSamples(
 
         const solutionIdentity = makeIdentity('solution');
         const solutionKey = computeSampleKey(solutionIdentity);
-        let solution: { stub: ResolvedProblemStub | null; attempt: number; seed: number };
-        try {
-            solution = generateSampleWithRetry({
+        const solution = generatePlannedSampleWithRetry({
                 generator: genEntry.generator,
-                labels: targetLabels,
+                viewSchema: viewEntry.schema,
+                plan: tuple.plan,
                 sampleKey: solutionKey,
                 maxAttempts: MAX_ATTEMPTS,
                 isDuplicate
             });
-        } catch (e) {
-            if (e instanceof ResolvedLabelContractError) throw e;
-            solution = { stub: null, attempt: 1, seed: computeSampleSeed(solutionKey, 1) };
-        }
         // A view whose content space is too small to offer a second distinct
         // problem falls back to showing the question's content solved. That is
         // the same exercise in the same split — never a cross-split leak.
-        const solutionStub = solution.stub || question.stub;
-        const solutionSeed = solution.stub ? solution.seed : question.seed;
-        const solutionResult = fingerprintStub(solutionStub, solutionSeed);
+        const solutionDraw = solution.stub ? solution : question;
+        const solutionResult = fingerprintDraw(solutionDraw);
         const solutionSample: RenderSample = {
             identity: solutionIdentity,
             targetLabels,
             sampleKey: solutionKey,
             fileName: computeSampleFilename(solutionIdentity),
-            seed: solutionSeed,
-            attempt: solution.stub ? solution.attempt : question.attempt,
+            seed: solutionDraw.seed,
+            attempt: solutionDraw.attempt,
             contentFingerprint: solutionResult.contentFingerprint,
             taskFingerprint: solutionResult.taskFingerprint,
             problem: solutionResult.problem,
-            associatedTargetIds: new Set()
+            associatedTargetIds: new Set(),
+            associatedSelections: new Map(),
+            associatedPlans: new Map(),
+            plan: tuple.plan,
+            replay: solutionDraw.replay,
+            preparedView: solutionDraw.view
         };
         samples.push(solutionSample);
         claimSample(taskFingerprintsByView, solutionSample, solutionSample.taskFingerprint);

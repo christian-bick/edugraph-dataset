@@ -1,6 +1,6 @@
 import { labelSetKey } from './utils.ts';
 import { capabilitySatisfies } from './ontology.ts';
-import { rowTargetAssociations, type MetadataRow } from './dataset-merge.ts';
+import { rowTargetAssociations, type MetadataRow } from './dataset-metadata.ts';
 import type { CompetencyTarget } from '../types/ml-engine.ts';
 
 export const ASSET_INDEX_SCHEMA_VERSION = 1;

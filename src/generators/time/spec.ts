@@ -3,8 +3,14 @@ import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {hasLabel, selectExactMatch} from '../../lib/resolvers.ts';
 
+import {generatorLabelRule} from '../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'time',
+    compatibility: [generatorLabelRule('clock-period-and-interval', [
+        Scope.AnteMeridiem, Scope.PostMeridiem, Scope.StepsOf5, Scope.MinuteIntervals
+    ], selected => !(selected(Scope.AnteMeridiem) && selected(Scope.PostMeridiem))
+        && (!selected(Scope.StepsOf5) || selected(Scope.MinuteIntervals)))],
     generalLabels: [Area.MeasuringTime],
 };
 

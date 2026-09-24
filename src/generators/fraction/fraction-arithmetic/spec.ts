@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema, exactResolver} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
 const fractionArithmeticTaskLabels = [
     Area.IteratedOperation,
@@ -73,9 +73,44 @@ const resolveTask = exactResolver((labels: string[]): FractionArithmeticTaskConf
     }
     return null;
 });
+withLabelChoices(resolveTask, {
+    kind: 'alternatives',
+    alternatives: [
+        [Scope.TenthFractions],
+        [Scope.FractionNumbers],
+        [Scope.ProperFractions],
+        [Scope.ImproperFractions, Scope.MixedNumbers],
+        [Scope.MixedNumbers],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.UnitFractions],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ProperFractions],
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ImproperFractions]
+    ],
+    contextLabels: [Area.Addition, Area.Subtraction, Area.Multiplication]
+});
+
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-arithmetic',
+    compatibility: [generatorLabelRule('fraction-task-operation', [
+        Area.Addition, Area.Subtraction, Area.Multiplication, Area.IteratedOperation,
+        Scope.IntegerNumbers, Scope.FractionNumbers, Scope.ProperFractions, Scope.ImproperFractions,
+        Scope.MixedNumbers, Scope.UnitFractions, Scope.TenthFractions, Scope.CommonDenominator
+    ], selected => {
+        const addition = selected(Area.Addition);
+        const multiplication = selected(Area.Multiplication);
+        const iterated = selected(Area.IteratedOperation);
+        if (multiplication && !addition) {
+            return iterated && selected(Scope.IntegerNumbers) && (
+                selected(Scope.UnitFractions) || selected(Scope.ProperFractions) || selected(Scope.ImproperFractions));
+        }
+        if (!selected(Scope.CommonDenominator) || iterated) return false;
+        if (selected(Scope.TenthFractions)) return addition && multiplication;
+        if (multiplication) return false;
+        if (selected(Scope.ProperFractions) || selected(Scope.ImproperFractions)) return addition;
+        return (selected(Scope.FractionNumbers) || selected(Scope.MixedNumbers))
+            && (addition || selected(Area.Subtraction));
+    })],
     generalLabels: [
         Area.Equation,
         Scope.SingleFrameOfReference

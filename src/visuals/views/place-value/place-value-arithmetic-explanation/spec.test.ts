@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -8,6 +9,6 @@ describe('place-value-arithmetic-explanation spec', () => {
             Ability.TextualArticulation,
             Ability.ProcedureUnderstanding
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

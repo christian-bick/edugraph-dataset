@@ -3,9 +3,23 @@ import {
     exactResolver,
     OntologyNeutralResolverFn,
     predicateResolver,
-    ResolverFn
+    ResolverFn,
+    withLabelChoices
 } from '../types/schema.ts';
 import { capabilitySatisfies } from './ontology.ts';
+import {schemaResolutionKey} from './utils.ts';
+
+/** Mapping values are authored constants; discovering their equivalence never calls a resolver. */
+const mappingEquivalenceGroups = (mappings: readonly (readonly [readonly string[], unknown])[]) => {
+    const groups = new Map<string, (readonly string[])[]>();
+    for (const [labels, value] of mappings) {
+        const key = schemaResolutionKey(value);
+        const group = groups.get(key);
+        if (group) group.push(labels);
+        else groups.set(key, [labels]);
+    }
+    return [...groups.values()].filter(group => group.length > 1);
+};
 
 /**
  * Marks a function-only schema choice as independent of ontology labels.
@@ -15,35 +29,40 @@ export const ontologyNeutral = <T>(resolver: () => T): OntologyNeutralResolverFn
     Object.assign(resolver, {ontologyNeutral: true as const});
 
 export const hasLabel = (targetLabel: string): ResolverFn<boolean> => {
-    return predicateResolver((labels: string[]) => labels.includes(targetLabel));
+    return withLabelChoices(predicateResolver((labels: string[]) => labels.includes(targetLabel)),
+        {kind: 'target', contextLabels: [targetLabel], predicate: {all: [targetLabel]}});
 };
 
 /** Requires every exact label of a conjunctive task condition. */
 export const hasAllLabels = (targetLabels: readonly string[]): ResolverFn<boolean> =>
-    predicateResolver((labels: string[]) => targetLabels.every(label => labels.includes(label)));
+    withLabelChoices(predicateResolver((labels: string[]) => targetLabels.every(label => labels.includes(label))),
+        {kind: 'target', contextLabels: targetLabels, predicate: {all: targetLabels}});
 
 export const hasCapability = (targetLabel: string): ResolverFn<boolean> => {
-    return predicateResolver((labels: string[]) =>
-        labels.some(label => capabilitySatisfies(label, targetLabel)));
+    return withLabelChoices(predicateResolver((labels: string[]) =>
+        labels.some(label => capabilitySatisfies(label, targetLabel))),
+        {kind: 'target', relation: 'capability', contextLabels: [targetLabel],
+            predicate: {all: [targetLabel], relation: 'capability'}});
 };
 
 export const matchAllCapabilities = (targetLabels: readonly string[]): ResolverFn<string[]> => {
-    return aggregateResolver((labels: string[]) => targetLabels.filter(target =>
-        labels.some(label => capabilitySatisfies(label, target))));
+    return withLabelChoices(aggregateResolver((labels: string[]) => targetLabels.filter(target =>
+        labels.some(label => capabilitySatisfies(label, target)))),
+        {kind: 'target', relation: 'capability', contextLabels: targetLabels});
 };
 
-export const selectExactMatch = exactResolver((labels: string[], supportedLabels?: readonly string[]): string | undefined => {
+export const selectExactMatch = withLabelChoices(exactResolver((labels: string[], supportedLabels?: readonly string[]): string | undefined => {
     const matches = supportedLabels?.filter(label => labels.includes(label)) ?? [];
     if (matches.length > 1) {
         throw new Error(`Ambiguous exact label selection: ${matches.join(' + ')}`);
     }
     return matches[0];
-});
+}), {kind: 'alternatives'});
 
-export const matchAllExactLabels = aggregateResolver((labels: string[], supportedLabels?: readonly string[]): string[] => {
+export const matchAllExactLabels = withLabelChoices(aggregateResolver((labels: string[], supportedLabels?: readonly string[]): string[] => {
     if (!supportedLabels) return [];
     return supportedLabels.filter(s => labels.includes(s));
-});
+}), {kind: 'target'});
 
 export const selectExactLabelMap = <
     const TMappings extends readonly (readonly [string, unknown])[]
@@ -55,13 +74,14 @@ export const selectExactLabelMap = <
         throw new Error('Exact label mappings must not declare a label more than once.');
     }
 
-    return exactResolver((labels: string[]) => {
+    return withLabelChoices(exactResolver((labels: string[]) => {
         const matches = mappings.filter(([label]) => labels.includes(label));
         if (matches.length > 1) {
             throw new Error(`Ambiguous exact label mapping: ${matches.map(([label]) => label).join(' + ')}`);
         }
         return matches[0]?.[1];
-    });
+    }), {kind: 'alternatives', alternatives: mappedLabels.map(label => [label]),
+        equivalenceGroups: mappingEquivalenceGroups(mappings.map(([label, value]) => [[label], value]))});
 };
 
 export const selectExactLabelSetMap = <
@@ -81,7 +101,7 @@ export const selectExactLabelSetMap = <
     const mappingByKey = new Map(mappingKeys.map((key, index) => [key, mappings[index][1]]));
     const candidateSets = mappings.map(([labels]) => new Set(labels));
 
-    return exactResolver((labels: string[]) => {
+    return withLabelChoices(exactResolver((labels: string[]) => {
         const inputLabels = new Set(labels);
         const presentLabels = mappedLabels.filter(label => inputLabels.has(label));
         const presentKey = exactLabelSetKey(presentLabels);
@@ -92,5 +112,10 @@ export const selectExactLabelSetMap = <
         if (isIncomplete) return undefined;
 
         throw new Error(`Unsupported exact label combination: ${presentLabels.join(' + ')}`);
+    }), {
+        kind: 'alternatives',
+        alternatives: mappings.map(([labels]) => [...labels]),
+        equivalenceGroups: mappingEquivalenceGroups(mappings),
+        ...(mappings.some(([labels]) => labels.length === 0) ? {defaults: [{labels: []}]} : {})
     });
 };

@@ -1,10 +1,11 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
-import {ConfigFromSchema, ResolverFn} from '../../../types/schema.ts';
+import {ConfigFromSchema, ResolverFn, withLabelChoices} from '../../../types/schema.ts';
 
 const resolveDivisorDigits: ResolverFn<1 | undefined> = labels =>
     labels.includes(Scope.SingleDigitDivisor) ? 1 : undefined;
+withLabelChoices(resolveDivisorDigits, {kind: 'alternatives'});
 
 const resolveDividendDigits = selectExactLabelMap([
     [Scope.SingleDigitDividend, 1],

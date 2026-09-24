@@ -7,7 +7,7 @@ import {readDatasetManifest, datasetOntologyProvenanceHash} from './dataset-mani
 import {createDependencyGraphSnapshot} from './dependency-planner.ts';
 import {buildDependencyMatchingIndex, generatorCapabilityInputHash, generatorCapabilityNodeId,
     viewCapabilityInputHash, viewCapabilityNodeId, targetCapabilityInputHash, targetCapabilityNodeId,
-    matchingPolicyInputHash, matchingPolicyNodeId, modulePairNodeId} from './matching.ts';
+    matchingPolicyInputHash, matchingPolicyNodeId, modulePairNodeId, matchTargets} from './matching.ts';
 
 vi.mock('./spec-validator.ts', () => ({normalizeAndValidateSpec: vi.fn()}));
 vi.mock('./spec-catalog.ts', async importOriginal => ({...await importOriginal<object>(), loadSpecTodos: vi.fn()}));
@@ -47,7 +47,7 @@ describe('shared standards checks', () => {
             {id: generatorCapabilityNodeId('math'), kind: 'generator-capability', input_hash: generatorCapabilityInputHash(generator), dependencies: []},
             {id: viewCapabilityNodeId('question'), kind: 'view-capability', input_hash: viewCapabilityInputHash(view), dependencies: []},
             {id: modulePairNodeId('math', 'question'), kind: 'module-pair', input_hash: 'pair', dependencies: []}
-        ], undefined, buildDependencyMatchingIndex([target], [{target, generatorId: 'math', viewId: 'question'}]));
+        ], undefined, buildDependencyMatchingIndex([target], matchTargets([target], [generator], [view]).tuples));
         vi.mocked(readDatasetManifest).mockReturnValue({spec: 'ccss', dependency_graph: graph,
             ontology_provenance_hash: 'current'} as never);
         for (const changedCapability of [false, true]) {

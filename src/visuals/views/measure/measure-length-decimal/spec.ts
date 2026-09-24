@@ -1,3 +1,4 @@
+import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope, deductAdmitting} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
@@ -10,10 +11,12 @@ export const spec: ViewSpec = {
         Ability.VisualReception,
         Ability.ProcedureExecution
     ],
-    rejectedLabels: [
-        Scope.IntegerNumbers,
-        Area.Estimation,
-        ...deductAdmitting([Scope.NumbersLarger20])
+    compatibility: [
+        rejectTargetLabels('decimal-length-domain', [
+            Scope.IntegerNumbers,
+            Area.Estimation,
+            ...deductAdmitting([Scope.NumbersLarger20])
+        ])
     ]
 };
 

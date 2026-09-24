@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
@@ -12,6 +13,6 @@ describe('operations-boxes view spec', () => {
             Area.Equation,
             Scope.ExpressionOnOneSide
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

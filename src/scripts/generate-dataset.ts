@@ -21,6 +21,7 @@ import {
     generatorCapabilityNodeId,
     matchingPolicyInputHash,
     matchTargetsDelta,
+    restorePersistedMatchTuple,
     modulePairKey,
     subsetCompatibleModulePairIndex,
     viewCapabilityInputHash,
@@ -57,7 +58,7 @@ import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 import {currentRendererEnvironment} from '../lib/render-environment.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
-import {DEPENDENCY_PLANNER_EPOCH} from '../lib/dependency-planner.ts';
+import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
 import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -237,7 +238,8 @@ async function renderSamples(
                         viewId: identity.viewId,
                         targetLabels: sample.targetLabels,
                         mode: identity.mode,
-                        seed: sample.seed
+                        seed: sample.seed,
+                        preparedView: sample.preparedView
                     });
 
                     await page.evaluate((p) => window.renderView!(p), payload);
@@ -270,12 +272,19 @@ async function renderSamples(
                         mode: identity.mode,
                         instance: identity.instanceIdx,
                         attempt: sample.attempt,
+                        generation_plan_hash: sample.plan.hash,
+                        generation_plan: sample.plan,
+                        generation_replay: sample.replay,
+                        prepared_view: sample.preparedView,
                         seed: sample.seed,
                         content_fingerprint: sample.contentFingerprint,
                         task_fingerprint: sample.taskFingerprint,
                         labels: radixSortUtf8(sample.problem.labels.map(shortenLabel)),
                         target_associations: radixSortUtf8([...sample.associatedTargetIds])
-                            .map(targetId => ({spec: specName, target_id: targetId}))
+                            .map(targetId => ({spec: specName, target_id: targetId,
+                                generation_plan_hash: sample.associatedSelections.get(targetId)!.planHash,
+                                generation_plan: sample.associatedPlans.get(targetId)!,
+                                selection: sample.associatedSelections.get(targetId)!}))
                     });
 
                     completedTasks++;
@@ -456,6 +465,10 @@ async function main() {
         previousSupported: !previousManifest
             || (previousManifest.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
                 && previousManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && previousManifest.dependency_graph?.schema_version === DEPENDENCY_GRAPH_SCHEMA_VERSION
+                && previousManifest.dependency_graph.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+                && previousManifest.dependency_graph.complete === true
+                && previousManifest.dependency_graph.matching_index?.generation_plans_by_target !== undefined
                 && previousManifest.complete === true
                 && previousManifest.spec === specName),
         previousExternalIdentity: previousManifest?.ontology_provenance_hash,
@@ -487,6 +500,9 @@ async function main() {
         && !trainingOnly
         && trustedPreviousManifest?.schema_version === DATASET_MANIFEST_SCHEMA_VERSION
         && trustedPreviousManifest.planner_epoch === DEPENDENCY_PLANNER_EPOCH
+        && trustedPreviousManifest.dependency_graph?.schema_version === DEPENDENCY_GRAPH_SCHEMA_VERSION
+        && trustedPreviousManifest.dependency_graph.complete === true
+        && trustedPreviousManifest.dependency_graph.matching_index?.generation_plans_by_target !== undefined
         && trustedPreviousManifest.complete === true
         && trustedPreviousManifest.spec === specName) {
         const observation = inspectDevelopmentInputObservation({
@@ -594,6 +610,8 @@ async function main() {
                 ]?.input_hash === viewCapabilityInputHash(view));
         if (capabilitiesUnchanged) {
             const tuples: MatchTuple[] = [];
+            const selectedGeneratorsById = new Map(selectedGenerators.map(entry => [entry.generatorId, entry]));
+            const selectedViewsById = new Map(selectedViews.map(entry => [entry.viewId, entry]));
             for (const [targetId, pairKeys] of Object.entries(
                 trustedPreviousManifest.dependency_graph.matching_index.matched_pair_keys_by_target
             )) {
@@ -602,7 +620,10 @@ async function main() {
                 for (const key of pairKeys) {
                     if (!selectedPairs.has(key)) continue;
                     const [generatorId, viewId] = key.split('#');
-                    tuples.push({target, generatorId, viewId});
+                    const generator = selectedGeneratorsById.get(generatorId)!;
+                    const view = selectedViewsById.get(viewId)!;
+                    tuples.push(restorePersistedMatchTuple(target, generator, view,
+                        trustedPreviousManifest.dependency_graph.matching_index.generation_plans_by_target?.[targetId]?.[key]));
                 }
             }
             const compatible = buildCompatibleModulePairIndex(selectedGenerators, selectedViews, counters);

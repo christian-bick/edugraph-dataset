@@ -1,13 +1,17 @@
 import {describe, expect, it} from 'vitest';
+import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {dirname, resolve} from 'node:path';
 import {
     buildOntologySemanticSnapshot,
     OntologySemanticIndex,
+    resolveOntologySemanticUsage,
     withOntologySemanticUsage
 } from './external-semantics.ts';
 import type {OntologyProvenance} from './coverage-identity.ts';
 import {createDependencyGraphSnapshot, planDependencyDelta} from './dependency-planner.ts';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
-import {Area, bundledContext} from 'edugraph-ts/generated';
+import {Area, Scope, Ability, bundledContext} from 'edugraph-ts/generated';
 
 const schema = bundledContext.statements.filter(statement => statement.sourceKind === 'schema');
 const fact = (subject: string, predicate: string, object: string): OntologyStatement =>
@@ -25,6 +29,49 @@ const ontologyProvenance = (version: string): OntologyProvenance => ({
 });
 
 describe('external semantic deltas', () => {
+    it('tracks rule queries, choice defaults, and resolver context that are not positive capabilities', async () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-semantic-choice-'));
+        const dependency = 'https://example.test/ontology-v1.tgz';
+        const files = {
+            'package.json': JSON.stringify({dependencies: {'edugraph-ts': dependency}}),
+            'package-lock.json': JSON.stringify({packages: {'node_modules/edugraph-ts': {
+                version: '1.0.0', resolved: dependency, integrity: 'sha512-v1'}}}),
+            'src/generators/demo/spec.ts': `
+                const resolver = Object.assign(() => 'integer', {labelResolution: 'exact', labelChoices: {
+                    kind: 'alternatives', contextLabels: [${JSON.stringify(Scope.InchScale)}],
+                    defaults: [{whenAll: [${JSON.stringify(Scope.SingleFrameOfReference)}], labels: [${JSON.stringify(Scope.FractionNumbers)}]}]
+                }});
+                export const DemoGeneratorSchema = {kind: [[${JSON.stringify(Scope.IntegerNumbers)}, ${JSON.stringify(Scope.FractionNumbers)}], resolver]};
+                export const spec = {generalLabels: [${JSON.stringify(Area.Addition)}], compatibility: [{
+                    id: 'shape-query', dependencies: [{scope: 'generator', label: ${JSON.stringify(Area.Rectangle)}}], predicate: () => true
+                }]};
+            `,
+            'src/generators/demo/generator.ts': 'export class DemoGenerator implements ProblemGenerator<ArithmeticPairProblem> {}',
+            'src/visuals/views/demo-view/spec.ts': `
+                export const DemoViewViewSchema = {};
+                export const spec = {viewId: 'demo-view', generalLabels: [${JSON.stringify(Ability.ProcedureExecution)}], compatibility: [{
+                    id: 'target-query', dependencies: [{scope: 'target', label: ${JSON.stringify(Area.Square)}}], predicate: () => true
+                }]};
+            `,
+            'src/visuals/views/demo-view/view.tsx': 'throw new Error("renderer must not be loaded");',
+            'src/spec/demo.ts': `export const spec = [{id: 'target', labels: [${JSON.stringify(Scope.StepsOf1)}]}];`
+        };
+        try {
+            for (const [path, content] of Object.entries(files)) {
+                mkdirSync(dirname(resolve(projectRoot, path)), {recursive: true});
+                writeFileSync(resolve(projectRoot, path), content);
+            }
+            const {usage} = await resolveOntologySemanticUsage(projectRoot, 'demo');
+            expect(usage.roots).toEqual(expect.arrayContaining([
+                Scope.InchScale, Scope.SingleFrameOfReference, Area.Rectangle, Area.Square,
+                Scope.IntegerNumbers, Scope.FractionNumbers, Scope.StepsOf1
+            ]));
+            expect(usage.relations).toContain(`specializes|${Area.Square}|${Area.Rectangle}`);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
     it('invalidates parent users on child addition, removal and reparenting without touching unrelated users', () => {
         const [a, b, unrelated, child] = ['a', 'b', 'unrelated', 'child'].map(name => `https://fixture.example/${name}`);
         const snapshot = (parent?: string) => buildOntologySemanticSnapshot({

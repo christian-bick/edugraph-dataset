@@ -1,3 +1,4 @@
+import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
@@ -11,7 +12,9 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
     ],
-    requiredLabels: [Area.PatternGeneration]
+    compatibility: [
+        requireTargetLabels('pattern-generation-request', [Area.PatternGeneration])
+    ]
 };
 
 export const OperationsPatternGenerationPracticeViewSchema = {

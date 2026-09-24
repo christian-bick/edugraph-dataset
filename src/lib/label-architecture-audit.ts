@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels, validateCompatibilityRules} from './compatibility.ts';
 import {readFileSync} from 'node:fs';
 import {basename, extname, isAbsolute, relative, resolve} from 'node:path';
 import {Ability, Area, Scope} from 'edugraph-ts';
@@ -6,7 +7,8 @@ import type {ConfigSchema} from '../types/schema.ts';
 import type {DependencyGraphSnapshot} from './dependency-planner.ts';
 import {
     DEPENDENCY_GRAPH_SCHEMA_VERSION,
-    DEPENDENCY_PLANNER_EPOCH
+    DEPENDENCY_PLANNER_EPOCH,
+    generationPlanDependencyHash
 } from './dependency-planner.ts';
 import type {
     GeneratorModelDescriptor,
@@ -23,6 +25,7 @@ import {
     matchTupleNodeId,
     modulePairKey,
     modulePairNodeId,
+    restorePersistedMatchTuple,
     targetCapabilityInputHash,
     targetCapabilityNodeId,
     viewCapabilityInputHash,
@@ -237,8 +240,8 @@ export function reuseAuditTuplesFromGraph(options: {
         || graph.complete !== true) {
         return {tuples: null, reason: 'persisted graph schema or planner epoch is not current'};
     }
-    if (!graph.matching_index) {
-        return {tuples: null, reason: 'persisted graph has no matching index'};
+    if (!graph.matching_index?.generation_plans_by_target) {
+        return {tuples: null, reason: 'persisted graph has no plan-bearing matching index; rebuild required'};
     }
     if (graph.nodes[matchingPolicyNodeId()]?.input_hash !== matchingPolicyInputHash()) {
         return {tuples: null, reason: 'matching policy identity differs'};
@@ -299,6 +302,8 @@ export function reuseAuditTuplesFromGraph(options: {
         pair.view.viewId
     )));
     const tuples: MatchTuple[] = [];
+    const generatorsById = new Map(generators.map(generator => [generator.generatorId, generator]));
+    const viewsById = new Map(views.map(view => [view.viewId, view]));
     for (const targetId of radixSortUtf8(Object.keys(
         graph.matching_index.matched_pair_keys_by_target
     ))) {
@@ -311,10 +316,20 @@ export function reuseAuditTuplesFromGraph(options: {
             const separator = pairKey.indexOf('#');
             const generatorId = pairKey.slice(0, separator);
             const viewId = pairKey.slice(separator + 1);
-            if (!graph.nodes[matchTupleNodeId(specName, targetId, generatorId, viewId)]) {
+            const node = graph.nodes[matchTupleNodeId(specName, targetId, generatorId, viewId)];
+            if (!node) {
                 return {tuples: null, reason: `persisted matching index lacks tuple node: ${targetId}#${pairKey}`};
             }
-            tuples.push({target, generatorId, viewId});
+            try {
+                const tuple = restorePersistedMatchTuple(target, generatorsById.get(generatorId)!,
+                    viewsById.get(viewId)!, graph.matching_index.generation_plans_by_target[targetId]?.[pairKey]);
+                if (node.input_hash !== generationPlanDependencyHash(tuple.plan)) {
+                    return {tuples: null, reason: `persisted match node has a stale generation plan: ${targetId}#${pairKey}`};
+                }
+                tuples.push(tuple);
+            } catch (error) {
+                return {tuples: null, reason: `persisted generation plan is invalid: ${error instanceof Error ? error.message : String(error)}`};
+            }
         }
     }
     return {tuples, reason: 'all current capability hashes and pair topology match the persisted graph'};
@@ -630,6 +645,8 @@ export function buildLabelArchitectureAudit(options: {
     counters?: WorkCounters;
 }): LabelArchitectureAuditReport {
     const counters = options.counters ?? createWorkCounters();
+    for (const generator of options.generators) validateCompatibilityRules(generator.spec?.compatibility ?? generator.compatibility ?? [], 'generator');
+    for (const view of options.views) validateCompatibilityRules(view.spec?.compatibility ?? view.compatibility ?? [], 'view');
     const pairIndex = buildCompatibleModulePairIndex(options.generators, options.views, counters);
     const matching = resolveMatching({
         specName: options.specName,
@@ -690,21 +707,21 @@ export function buildLabelArchitectureAudit(options: {
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
-        if ((view.requiredLabels ?? []).length > 0) {
+        if (getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'require').length > 0) {
             findings.push(finding({
                 category: 'required-label-review',
                 disposition: 'review',
                 summary: `Review whether ${view.viewId} requires an explicit target precondition.`,
-                modules: [view.viewId], labels: [...(view.requiredLabels ?? [])], files: [],
+                modules: [view.viewId], labels: [...getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'require')], files: [],
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
-        if ((view.rejectedLabels ?? []).length > 0) {
+        if (getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'reject').length > 0) {
             findings.push(finding({
                 category: 'rejected-label-review',
                 disposition: 'review',
                 summary: `Review whether ${view.viewId} rejections are stable, complete exclusion boundaries.`,
-                modules: [view.viewId], labels: [...(view.rejectedLabels ?? [])], files: [],
+                modules: [view.viewId], labels: [...getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'reject')], files: [],
                 affected_tuples: tupleIndex.byView.get(view.viewId) ?? []
             }));
         }
@@ -760,13 +777,14 @@ export function buildLabelArchitectureAudit(options: {
         const affectedTuples = generatorId
             ? tupleIndex.byPair.get(modulePairKey(generatorId, issue.viewId))
             : tupleIndex.byView.get(issue.viewId);
+        const issueView = viewsById.get(issue.viewId)!;
         findings.push(finding({
-            category: issue.kind === 'ability-rejection' ? 'view-ability-rejectedLabels' : issue.kind,
+            category: issue.kind === 'ability-rejection' ? 'view-ability-target-rejection' : issue.kind,
             disposition: 'violation',
             summary: issue.message,
             modules: generatorId ? [generatorId, issue.viewId] : [issue.viewId],
             labels: issue.kind === 'no-compatible-generator'
-                ? [...(viewsById.get(issue.viewId)!.requiredLabels ?? [])]
+                ? getTargetPolicyLabels(issueView.spec.compatibility ?? issueView.compatibility, 'require')
                 : issue.kind === 'required-and-rejected-label' ? [issue.label, issue.rejectedLabel] : [issue.label],
             files: [ownershipFiles.get(`view:${issue.viewId}`)!],
             affected_tuples: affectedTuples ?? [],
@@ -848,9 +866,9 @@ export function buildLabelArchitectureAudit(options: {
             view_schema_parameters: orderedSchema.filter(parameter => parameter.role === 'view').length,
             ability_parameterized_views: abilityParameterizedViews,
             views_with_required_labels: radixSortUtf8(options.views
-                .filter(view => (view.requiredLabels ?? []).length > 0).map(view => view.viewId)),
+                .filter(view => getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'require').length > 0).map(view => view.viewId)),
             views_with_rejected_labels: radixSortUtf8(options.views
-                .filter(view => (view.rejectedLabels ?? []).length > 0).map(view => view.viewId)),
+                .filter(view => getTargetPolicyLabels(view.spec?.compatibility ?? view.compatibility, 'reject').length > 0).map(view => view.viewId)),
             views_with_positive_areas: radixSortUtf8(options.views
                 .filter(view => (viewCaps.get(view.viewId) ?? [])
                     .some(capability => capability.dimension === 'Area'))

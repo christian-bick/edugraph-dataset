@@ -1,7 +1,11 @@
 import {describe, expect, it} from 'vitest';
 import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {relative, resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {findGeneralLabelDeductionIssues, inspectSpecSource} from './spec-source-contracts.ts';
+
+const fixtureFile = fileURLToPath(new URL('./spec-source-contracts.fixture.ts', import.meta.url));
+const policiesFile = fileURLToPath(new URL('./target-policies.ts', import.meta.url));
 
 describe('findGeneralLabelDeductionIssues', () => {
     it('rejects deductCompatible inside generalLabels', () => {
@@ -74,21 +78,98 @@ describe('findGeneralLabelDeductionIssues', () => {
     it('keeps capability and boundary deduction operators in their respective fields', () => {
         const source = `
             import {deductCompatible, deductAdmitting} from 'edugraph-ts';
-            export const spec = {rejectedLabels: deductCompatible([]), requiredLabels: deductAdmitting([])};
+            import {rejectTargetLabels, requireTargetLabels} from './target-policies.ts';
+            export const spec = {compatibility: [
+                rejectTargetLabels('capabilities-are-not-boundaries', deductCompatible([])),
+                requireTargetLabels('positive-requirement', deductAdmitting([]))
+            ]};
             export const DemoViewSchema = {range: [deductAdmitting([]), choose]};
         `;
-        expect(inspectSpecSource(source).map(issue => [issue.rule, issue.field]))
-            .toEqual([['SPEC-V4', 'rejectedLabels'], ['SPEC-V4', 'requiredLabels'], ['SPEC-10', 'schema']]);
+        expect(inspectSpecSource(source, fixtureFile).map(issue => [issue.rule, issue.field]))
+            .toEqual([['SPEC-V4', 'compatibility'], ['SPEC-V4', 'compatibility'], ['SPEC-10', 'schema']]);
+    });
+
+    it('rejects removed policy fields with actionable migration guidance', () => {
+        const source = `export const spec = {requiredLabels: ['a'], rejectedLabels: ['b']};`;
+        expect(inspectSpecSource(source)).toMatchObject([
+            {rule: 'SPEC-V4', field: 'requiredLabels', message: expect.stringContaining('requireTargetLabels')},
+            {rule: 'SPEC-V4', field: 'rejectedLabels', message: expect.stringContaining('rejectTargetLabels')}
+        ]);
+    });
+
+    it('allows rejection expansion through trusted helper aliases and namespace imports', () => {
+        const source = `
+            import {deductAdmitting as expand} from 'edugraph-ts/generated';
+            import {rejectTargetLabels as reject} from './target-policies.ts';
+            import * as policy from './compatibility.ts';
+            const rejected = expand(['a']);
+            export const spec = {compatibility: [
+                reject('direct-alias', rejected),
+                policy.rejectTargetLabels('namespace-reexport', expand(['b']))
+            ]};
+        `;
+        expect(inspectSpecSource(source, fixtureFile)).toEqual([]);
+    });
+
+    it('follows imported compatibility constants and local re-export aliases', () => {
+        mkdirSync('temp', {recursive: true});
+        const root = mkdtempSync(resolve('temp', 'spec-policy-source-'));
+        try {
+            const policyImport = relative(root, policiesFile).replaceAll('\\', '/');
+            writeFileSync(resolve(root, 'bridge.ts'),
+                `export {rejectTargetLabels as reject} from '${policyImport}';\n`);
+            writeFileSync(resolve(root, 'shared.ts'), `
+                import {deductAdmitting} from 'edugraph-ts';
+                import {reject} from './bridge.ts';
+                export const labels = deductAdmitting(['a']);
+                export const policies = [reject('imported-boundary', labels)];
+            `);
+            const source = `
+                import {policies, labels} from './shared.ts';
+                export const spec = {compatibility: policies, generalLabels: labels};
+            `;
+            expect(inspectSpecSource(source, resolve(root, 'spec.ts')).map(issue => [issue.rule, issue.field]))
+                .toEqual([['SPEC-V4', 'generalLabels']]);
+        } finally {
+            rmSync(root, {recursive: true, force: true});
+        }
+    });
+
+    it('does not authorize a same-named helper, another argument, or another field', () => {
+        const source = `
+            import {deductAdmitting} from 'edugraph-ts';
+            import {rejectTargetLabels} from './target-policies.ts';
+            import {rejectTargetLabels as fakeReject} from 'untrusted-package';
+            const unrelated = {rejectTargetLabels: (id, labels) => labels};
+            const derived = deductAdmitting(['a']);
+            export const spec = {
+                compatibility: [
+                    rejectTargetLabels('allowed', derived),
+                    fakeReject('untrusted', derived),
+                    unrelated.rejectTargetLabels('same-name', derived),
+                    rejectTargetLabels(deductAdmitting(['b']), [])
+                ],
+                generalLabels: rejectTargetLabels('wrong-field', derived)
+            };
+            export const DemoViewSchema = {choice: [rejectTargetLabels('wrong-field', derived), choose]};
+        `;
+        expect(inspectSpecSource(source, fixtureFile).map(issue => [issue.rule, issue.field]))
+            .toEqual([
+                ['SPEC-V4', 'compatibility'], ['SPEC-V4', 'compatibility'],
+                ['SPEC-V4', 'generalLabels'], ['SPEC-10', 'schema']
+            ]);
     });
 
     it('rejects inline and prematurely called resolvers, but accepts factories and references', () => {
         const source = `
             import {hasLabel, selectExactMatch} from './resolvers.ts';
+            import {withLabelChoices} from '../types/schema.ts';
             export const DemoGeneratorSchema = {
                 inline: [['a'], (labels: string[]) => labels.includes('a')],
                 premature: [['a'], selectExactMatch([])],
                 factory: [['a'], hasLabel('a')],
-                referenced: [['a'], selectExactMatch]
+                referenced: [['a'], selectExactMatch],
+                choices: [['a'], withLabelChoices(selectExactMatch, {kind: 'target', relation: 'exact'})]
             };
         `;
         expect(inspectSpecSource(source).filter(issue => issue.rule === 'SPEC-6').map(issue => issue.field))

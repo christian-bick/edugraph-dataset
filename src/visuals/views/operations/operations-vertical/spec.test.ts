@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
@@ -9,6 +10,6 @@ describe('operations-vertical view spec', () => {
             Scope.ArabicNumerals,
             Ability.ProcedureExecution
         ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

@@ -1,14 +1,17 @@
+import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-place-value-comparison',
-    rejectedLabels: [
-        Scope.NumbersWithNegatives,
-        Scope.NumbersWithZero,
-        Scope.NumbersSmaller10,
-        ...deductAdmitting([Scope.NumbersLarger100])
+    compatibility: [
+        rejectTargetLabels('positive-two-digit-range', [
+            Scope.NumbersWithNegatives,
+            Scope.NumbersWithZero,
+            Scope.NumbersSmaller10,
+            ...deductAdmitting([Scope.NumbersLarger100])
+        ])
     ],
     generalLabels: [
         Area.PlaceValue,

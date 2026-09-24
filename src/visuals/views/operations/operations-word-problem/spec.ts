@@ -1,12 +1,15 @@
+import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-word-problem',
-    rejectedLabels: [
-        ...deductAdmitting([Scope.NumbersLarger20]),
-        ...deductAdmitting([Scope.NumbersWithNegatives])
+    compatibility: [
+        rejectTargetLabels('word-problem-domain', [
+            ...deductAdmitting([Scope.NumbersLarger20]),
+            ...deductAdmitting([Scope.NumbersWithNegatives])
+        ])
     ],
     generalLabels: [
         Ability.TextualReception,

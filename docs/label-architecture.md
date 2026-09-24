@@ -15,14 +15,18 @@ target label conjunction
 type-compatible generator + view pair
         |
         +-- positive capabilities cover every target claim
-        +-- requiredLabels admits the target
-        +-- rejectedLabels does not exclude the target
+        +-- requireTargetLabels admits the target
+        +-- rejectTargetLabels does not exclude the target
+        +-- generator/view predicates admit joint schema-label choices
         |
         v
-resolved generator config -> canonical mathematical payload
+versioned generation plan -> selected joint assignment + replay receipt
         |
         v
-resolved view config -> one observable task projection
+bound generator config -> canonical mathematical payload
+        |
+        v
+prepared view config + PRNG continuation -> one observable task projection
         |
         v
 question / solution artifacts -> VQA of the complete conjunction
@@ -33,8 +37,15 @@ when the compatible pair collectively supplies an equal or more-specific capabil
 target label; labels within a target are conjunctive. Applicability requirements and exclusion
 boundaries are evaluated in addition to that positive coverage. See
 [SPEC-1](spec-general.md#spec-1--matching-is-one-directional-capability-must-be-equal-or-more-specific),
-[SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries), and
-[SPEC-V7](spec-view.md#spec-v7--requiredlabels-declares-target-preconditions).
+[SPEC-V3](spec-view.md#spec-v3--rejecttargetlabels-declares-complete-exclusion-boundaries), and
+[SPEC-V7](spec-view.md#spec-v7--requiretargetlabels-declares-target-preconditions).
+
+One planner handles target policies and selected-label constraints. It preserves the original
+target separately from fallback selections, retains correlations, and never inspects payloads.
+Generator rules stay within generator-owned semantics; views query shared labels rather than
+generator parameter names. Value resolvers execute only after a valid assignment is selected.
+Random generation may vary within that assignment and may choose a different admitted variant
+on a retry. It cannot escape the plan or silently alter an explicit target choice.
 
 Before matching, distinguish the ontology's organizational nodes from descriptors eligible for
 labeling. The same eligibility requirement applies to target claims, module declarations, and
@@ -49,11 +60,12 @@ applies the ontology's content-evidence rule to this repository.
 | Target label | A claim the competency requires | n/a | n/a |
 | `generalLabels` | An invariant module capability | Yes | No; it is always true |
 | Schema label | A supported configurable capability | Yes, after resolution | Yes, within the module's role |
-| `requiredLabels` | An explicit target precondition for view participation | No | No |
-| `rejectedLabels` | A stable, complete invalid domain for a view | No | No |
+| `requireTargetLabels` | An explicit target precondition for view participation | No | No |
+| `rejectTargetLabels` | A stable, complete invalid domain for a view | No | No |
+| Selected-label compatibility predicate | A valid relation among candidate capabilities | No | Restricts admitted configurations before resolution |
 
 All label-bearing constructs are dimension-neutral mechanisms. Target labels, `generalLabels`,
-schema-supported labels, `requiredLabels`, and `rejectedLabels` use ordinary ontology labels and
+schema-supported labels, `requireTargetLabels`, and `rejectTargetLabels` use ordinary ontology labels and
 each construct's semantics apply without branching on whether a label is an Area, Scope, or
 Ability. The schema labels used for parameterization are no exception: the resolved configuration
 value, not a dimension-specific schema API, gives the label its operational meaning.
@@ -63,8 +75,8 @@ or parameterize Abilities, and views cannot reject them. A required capability m
 provided by the compatible generator/view pair, but either role may be the provider. A view
 capability that is also required remains invariant; the requirement does not make it conditional
 and must never drive rendering. See
-[SPEC-V7](spec-view.md#spec-v7--requiredlabels-declares-target-preconditions) and
-[SPEC-V8](spec-view.md#spec-v8--requiredlabels-does-not-parameterize-the-view).
+[SPEC-V7](spec-view.md#spec-v7--requiretargetlabels-declares-target-preconditions) and
+[SPEC-V8](spec-view.md#spec-v8--requiretargetlabels-does-not-parameterize-the-view).
 
 Positive ownership is non-polymorphic across a compatible pair: the roles do not split equal or
 ancestor/descendant capability claims. Invariant claims belong in `generalLabels`; capabilities
@@ -150,7 +162,7 @@ one Ability or accepting a label name as a substitute for its witness. See
 
 Generators do not annotate their output with ontology labels. Orchestration derives the sample's
 observable label set from the matched pair's invariant capabilities and resolved generator/view
-schema capabilities. Applicability-only `requiredLabels` and `rejectedLabels` never become sample
+schema capabilities. Applicability-only `requireTargetLabels` and `rejectTargetLabels` never become sample
 labels; target labels record what the standard requested, not the complete description of what the
 pair produced. See [IMPL-G3](implementation-generator.md#impl-g3--ontology-labels-are-resolved-outside-the-generator)
 for the generator boundary and [SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
@@ -184,7 +196,7 @@ When a match or artifact looks wrong, inspect it in this order:
    (`IMPL-G4`, `IMPL-G8`)?
 4. Does the view make its Ability true while preserving all payload evidence (`SPEC-V5`,
    `IMPL-V11`)?
-5. Are `requiredLabels` and `rejectedLabels` genuine applicability contracts rather than matching
+5. Are `requireTargetLabels` and `rejectTargetLabels` genuine applicability contracts rather than matching
    repairs (`SPEC-V3`, `SPEC-V7`, `SPEC-V8`)?
 6. Only after those contracts are sound, consider changing declarations, targets, ontology, or the
    checklist.
@@ -201,7 +213,7 @@ artifact.
 - [ ] Every label-bearing construct, including schema parameterization, is interpreted through its
   own semantics without a dimension-specific Area, Scope, or Ability channel.
 - [ ] Every target label is traced to the positive generator or view capability that satisfies it;
-  `requiredLabels` and `rejectedLabels` are treated only as applicability and boundary contracts.
+  `requireTargetLabels` and `rejectTargetLabels` are treated only as applicability and boundary contracts.
 - [ ] Area, Scope, and Ability ownership follows the determining behavior, with every Ability
   contributed by a view and every matched claim preserved in the final artifact.
 - [ ] Generator payload fields are canonical mathematics, calculated/structured evidence, or

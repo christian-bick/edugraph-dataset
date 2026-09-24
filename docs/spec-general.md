@@ -46,7 +46,7 @@ the module that owns the corresponding behavior:
 | Ability | the view whose final observable task makes the ability claim true |
 
 All label-bearing spec constructs are dimension-neutral mechanisms. Target labels,
-`generalLabels`, schema-supported labels, `requiredLabels`, and `rejectedLabels` use the same
+`generalLabels`, schema-supported labels, `requireTargetLabels`, and `rejectTargetLabels` use the same
 ontology-label type; each construct applies its semantics without a separate Area, Scope, or
 Ability channel. Schema parameterization is dimension-neutral in the same sense. The resolved
 configuration value and the role's ownership rules determine what a label controls; the schema API
@@ -56,9 +56,31 @@ Dimension-neutral machinery does not remove semantic ownership constraints. Gene
 cannot own Abilities, views cannot reject them, and Area/Scope ownership follows
 [SPEC-11](#spec-11--area-changes-task-nature-scope-changes-task-context).
 
-A view's `requiredLabels` applicability constraints and `rejectedLabels` boundaries are then
-applied on top. They can respectively require an explicit target claim or veto an otherwise matching tuple
-([SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)).
+After complete payload-type compatibility and positive coverage, one planner evaluates the
+specs' `compatibility` rules over declared schema-label alternatives. A match requires at least
+one valid joint assignment. Its mandatory generation plan retains correlated choices; generation
+samples only from that plan, preserving the sample count and split allocation per matched tuple.
+An explicit target choice cannot be rewritten to obtain compatibility.
+
+Rules have a stable `id`, a pure boolean `predicate`, and optional declared label `dependencies`.
+The query facade provides ontology-aware `has(scope, label)` and exact `exact(scope, label)`.
+`target` always means the original request; `generator` and `view` contain each role's invariants
+and the current candidate's selected capabilities. Views see semantic labels, never generator
+parameter names, config values, payloads, or generator identifiers. Generator rules can query only
+target and generator labels within their ownership constraints. Rules must not invoke resolvers,
+generators, randomness, I/O, or clocks. Exceptions and undeclared optimized queries are contract
+errors, not ordinary unsupported candidates.
+
+`requireTargetLabels(id, labels)` and `rejectTargetLabels(id, labels)` are helpers returning
+target-scope rules inside `compatibility`; they are not separate matching fields. They preserve
+original-target requirements and exclusions without supplying positive capabilities. A fallback
+label selected later cannot satisfy an explicit-target participation policy.
+Author browser-loaded specs with imports from `src/lib/target-policies.ts`; the server planner
+and content hashing modules must not enter renderer dependency trees.
+
+Declared dependencies let the planner factor independent fields and enumerate only connected
+choice groups. The current contract bounds each group at 4,096 assignments and fails explicitly
+above that bound; do not replace this with an unbounded whole-catalog Cartesian product.
 
 **Why:** declaring only an ancestor of what a target needs silently fails to match it — the
 target simply produces no samples, with no error.
@@ -86,7 +108,7 @@ pinned ontology. Structural leaves and families with only specialization childre
 organizational nodes and nodes with mixed child roles are not.
 
 This applies dimension-neutrally to target labels, generator/view `generalLabels`, schema-supported
-and fallback labels, and the labels used in `requiredLabels` and `rejectedLabels`. Every resolved
+and fallback labels, and the labels used in `requireTargetLabels` and `rejectTargetLabels`. Every resolved
 dataset annotation must satisfy it too. Structural families may organize code or discovery, but
 must not be exported as claims or used as matching guards.
 
@@ -148,6 +170,14 @@ Wrap a custom exact resolver with `exactResolver` only when it performs addition
 classification and enforces the same rejection contract.
 Ontology specialization is handled by schema fallback completion and must not be recreated as a
 list of parent/child aliases inside an exact mapping.
+
+Every labeled field also needs inspectable `labelChoices`: alternatives and any conditional
+defaults, conjunction semantics, equivalent-value bundles, or contextual label reads. Shared
+resolver factories attach this metadata. Custom resolvers use `withLabelChoices` with an explicit
+contract. Normalization must never execute value resolvers or consume randomness. Empty selections
+mean a declared no-label configuration, not an opportunity for later random capability selection.
+Field resolution receives only its admitted binding plus declared context; a value resolver must
+not recreate an unrestricted fallback after matching.
 
 Every multi-label resolver declares one dimension-neutral contract. `exact` selects one declared
 alternative or exact bundle; `predicate` answers one fixed capability question; `aggregate`
@@ -243,7 +273,7 @@ The two deduction operators are duals and are not interchangeable:
 - **Capabilities** are declared with `deductCompatible`, in generator/view schemas.
 - **Boundaries** are declared with `deductAdmitting`, in view rejection lists.
 
-See [SPEC-V3](spec-view.md#spec-v3--rejectedlabels-declares-complete-exclusion-boundaries)
+See [SPEC-V3](spec-view.md#spec-v3--rejecttargetlabels-declares-complete-exclusion-boundaries)
 and [SPEC-V4](spec-view.md#spec-v4--expand-rejection-boundaries-with-deductadmitting).
 
 ### SPEC-11 — Area changes task nature; Scope changes task context

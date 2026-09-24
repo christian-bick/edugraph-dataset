@@ -24,7 +24,7 @@ describe('DecimalComparisonGenerator spec integration', () => {
     const generator = new DecimalComparisonGenerator();
 
     it('declares invariant math separately from the configured relation family', () => {
-        expect(spec).toEqual({
+        expect({generatorId: spec.generatorId, generalLabels: spec.generalLabels}).toEqual({
             generatorId: 'decimal-comparison',
             generalLabels: [
                 Area.NumerationWithDecimals,

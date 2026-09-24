@@ -33,6 +33,7 @@ import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ProblemStub } from '../types/ml-engine.ts';
 import {createWorkCounters} from './work-counters.ts';
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 
 const IDENTITY: SampleIdentity = {
     targetId: 'test-writing-0',
@@ -134,8 +135,7 @@ describe('matchesTarget', () => {
     ): ViewMatchInfo => ({
         viewId: 'view-a',
         supportedLabels,
-        requiredLabels,
-        rejectedLabels,
+        compatibility: [requireTargetLabels('test-required', requiredLabels), rejectTargetLabels('test-rejected', rejectedLabels)],
         problemType
     });
 
@@ -583,7 +583,7 @@ describe('findTargetsWithoutMatch', () => {
         };
         const rejectingViews: ViewMatchInfo[] = [{
             ...views[0],
-            rejectedLabels: [Scope.NumbersSmaller100]
+            compatibility: [rejectTargetLabels('test-rejected', [Scope.NumbersSmaller100])]
         }];
 
         expect(findTargetsWithoutMatch(
@@ -736,11 +736,15 @@ describe('isValTuple', () => {
 describe('buildRenderPayload', () => {
     it('maps mode to isSolutionView and carries the seed', () => {
         const problem = { type: 'writing' as const, data: {}, labels: [] };
-        const q = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'question', seed: 7 });
+        const preparedView = {version: 1 as const, viewId: 'v', planHash: 'plan', variantHash: 'variant', config: {}, labels: [], randomState: 7};
+        const q = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'question', seed: 7, preparedView });
         expect(q.isSolutionView).toBe(false);
         expect(q.seed).toBe(7);
-        const s = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'solution', seed: 7 });
+        expect(q.preparedView).toBe(preparedView);
+        const s = buildRenderPayload({ problem, viewId: 'v', targetLabels: ['l'], mode: 'solution', seed: 7, preparedView });
         expect(s.isSolutionView).toBe(true);
+        expect(() => buildRenderPayload({problem, viewId: 'another', targetLabels: [], mode: 'question', seed: 7, preparedView}))
+            .toThrow('different view');
     });
 });
 

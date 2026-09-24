@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {exactResolver} from '../../types/schema.ts';
+import {exactResolver, withLabelChoices} from '../../types/schema.ts';
 
 export type ParityConstraint = 'even' | 'odd' | 'any';
 
@@ -18,3 +18,20 @@ export function resolveParityConstraint(labels: string[]): ParityConstraint {
 }
 
 exactResolver(resolveParityConstraint);
+withLabelChoices(resolveParityConstraint, {
+    kind: 'alternatives',
+    alternatives: [
+        [],
+        [Area.EvenDivisibility],
+        [Scope.EvenNumbers],
+        [Area.EvenDivisibility, Scope.EvenNumbers],
+        [Area.UnevenDivisibility],
+        [Scope.OddNumbers],
+        [Area.UnevenDivisibility, Scope.OddNumbers]
+    ],
+    defaults: [{labels: []}],
+    equivalenceGroups: [
+        [[Area.EvenDivisibility], [Scope.EvenNumbers], [Area.EvenDivisibility, Scope.EvenNumbers]],
+        [[Area.UnevenDivisibility], [Scope.OddNumbers], [Area.UnevenDivisibility, Scope.OddNumbers]]
+    ]
+});

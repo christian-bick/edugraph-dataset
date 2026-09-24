@@ -1,4 +1,5 @@
 import type { ViewTypeMap } from './problems.ts';
+import type {PreparedViewConfiguration} from './generation-plan.ts';
 
 /**
  * Represents the fundamental, abstract mathematical or conceptual problem.
@@ -19,12 +20,14 @@ export interface AbstractProblem<TData = any> {
 export interface RenderPayload<TProblem extends AbstractProblem = AbstractProblem> {
     problem: TProblem;
     viewId: string;
-    /** Target claims used only to resolve the view schema for this matched task. */
+    /** Original target claims retained as provenance; configuration is already prepared. */
     targetLabels: string[];
     /** Whether this render should be styled as the 'stimulus' (Question) or the 'solution' (Answer) */
     isSolutionView: boolean;
-    /** Deterministic render seed derived from the sample identity; views must draw all entropy from it */
+    /** Original draw seed; withConfig restores the prepared presentation continuation. */
     seed: number;
+    /** Required by withConfig; optional only for direct presentational component tests. */
+    preparedView?: PreparedViewConfiguration;
 }
 
 /**

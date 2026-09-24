@@ -1,8 +1,10 @@
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 import {describe, expect, it} from 'vitest';
 import {Area, Ability, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {createLabelContractIndex, validateModuleLabelContract,
     validateTargetLabelContract, assertResolvedTargetCoverage} from './label-contracts.ts';
+import {withLabelChoices} from '../types/schema.ts';
 
 const iri = (name: string) => `https://fixture.example/${name}`;
 const fact = (subject: string, predicate: string, object: string): OntologyStatement =>
@@ -31,11 +33,28 @@ describe('label contracts', () => {
 
     it('checks every declaration field and explicit fallback even in an unmatched module', () => {
         const errors = validateModuleLabelContract({generalLabels: ['bad-general'],
-            requiredLabels: ['bad-required'], rejectedLabels: ['bad-rejected'],
+            compatibility: [requireTargetLabels('required', ['bad-required']), rejectTargetLabels('rejected', ['bad-rejected'])],
             schema: {plain: ['bad-plain'], tuple: [['bad-supported'], () => true, [['bad-fallback']]]}}, 'module');
         expect(errors).toHaveLength(6);
         expect(errors.every(error => error.includes('SPEC-3 module.'))).toBe(true);
         expect(validateModuleLabelContract({}, 'empty')).toEqual([]);
+    });
+
+    it('validates compatibility choice reads and rejects removed metadata declarations', () => {
+        const errors = validateModuleLabelContract({schema: {
+            choice: [[Scope.IntegerNumbers], withLabelChoices(() => true, {
+                kind: 'alternatives', alternatives: [['bad-alternative']], equivalenceGroups: [[['bad-equivalence']]],
+                contextLabels: ['bad-context'], defaults: [{labels: ['bad-default'], whenAll: ['bad-when-all'], whenNone: ['bad-when-none']}]
+            })],
+            predicate: [[Scope.IntegerNumbers], withLabelChoices(() => true, {kind: 'target', predicate: {all: ['bad-predicate']}})]
+        }}, 'module');
+        expect(errors).toHaveLength(7);
+        expect(errors.every(error => error.includes('.choices: unknown descriptor'))).toBe(true);
+        expect(validateModuleLabelContract({requiredLabels: [], rejectedLabels: []} as any, 'removed'))
+            .toEqual([
+                'SPEC-V4 removed.requiredLabels: removed declaration; use compatibility target policies.',
+                'SPEC-V4 removed.rejectedLabels: removed declaration; use compatibility target policies.'
+            ]);
     });
 
     it('requires Area and Ability without requiring Scope or limiting conjunctions', () => {

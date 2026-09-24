@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {digestIdentity} from './content-identity.ts';
+import {planCompatibility} from './compatibility.ts';
 import {
     DEPENDENCY_NODE_KINDS,
     DEPENDENCY_PLANNER_EPOCH,
@@ -8,7 +9,8 @@ import {
     planDependencyDelta,
     type DependencyGraphSnapshot,
     type DependencyNode,
-    type DependencyNodeKind
+    type DependencyNodeKind,
+    type DependencyMatchingIndex
 } from './dependency-planner.ts';
 
 function node(
@@ -146,6 +148,39 @@ describe('dependency delta planning', () => {
 });
 
 describe('dependency graph contracts', () => {
+    const planFor = (targetId: string, generatorId = 'g') => {
+        const result = planCompatibility({identity: {targetId, generatorId, viewId: 'v'}, inputHash: 'inputs',
+            targetLabels: [], generatorLabels: [], viewLabels: [], fields: []});
+        if (!result.supported) throw new Error('Empty fixture plan must be supported');
+        return result.plan;
+    };
+
+    it('persists canonical plans together with their matched pair references', () => {
+        const index: DependencyMatchingIndex = {
+            target_ids_by_label: {}, targets_without_ontology_labels: ['b', 'a'],
+            matched_pair_keys_by_target: {b: ['g#v'], a: ['g#v']},
+            generation_plans_by_target: {b: {'g#v': planFor('b')}, a: {'g#v': planFor('a')}}
+        };
+        const graph = createDependencyGraphSnapshot([], undefined, index);
+        expect(Object.keys(graph.matching_index!.generation_plans_by_target)).toEqual(['a', 'b']);
+        expect(JSON.parse(JSON.stringify(graph)).matching_index.generation_plans_by_target)
+            .toEqual(graph.matching_index!.generation_plans_by_target);
+    });
+
+    it('rejects legacy, missing, corrupt, and misaddressed plans instead of creating bare matches', () => {
+        const index: DependencyMatchingIndex = {target_ids_by_label: {}, targets_without_ontology_labels: [],
+            matched_pair_keys_by_target: {a: ['g#v']}, generation_plans_by_target: {a: {'g#v': planFor('a')}}};
+        const {generation_plans_by_target: _plans, ...legacy} = index;
+        expect(() => createDependencyGraphSnapshot([], undefined, legacy as DependencyMatchingIndex)).toThrow('lacks generation plans');
+        expect(() => createDependencyGraphSnapshot([], undefined, {...index, generation_plans_by_target: {}})).toThrow('differ from recorded pairs');
+        expect(() => createDependencyGraphSnapshot([], undefined, {...index,
+            generation_plans_by_target: {a: {'g#v': {...planFor('a'), hash: 'tampered'}}}})).toThrow('content hash mismatch');
+        expect(() => createDependencyGraphSnapshot([], undefined, {...index,
+            generation_plans_by_target: {a: {'g#v': planFor('b')}}})).toThrow('identity is invalid');
+        expect(() => createDependencyGraphSnapshot([], undefined, {...index,
+            generation_plans_by_target: {...index.generation_plans_by_target, b: {'g#v': planFor('b')}}})).toThrow('unreferenced');
+    });
+
     it('rejects duplicate, missing, self, and unsupported node definitions', () => {
         expect(() => createDependencyGraphSnapshot([
             node('same', 'source-file'), node('same', 'view-module')

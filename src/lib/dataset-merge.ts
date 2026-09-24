@@ -14,44 +14,12 @@
  * generator; the merge spans whole standards and so scopes per (split, view).
  */
 
-export interface TargetAssociation {
-    spec: string;
-    target_id: string;
-}
-
-export interface MetadataRow {
-    file_name: string;
-    sample_key: string;
-    spec: string;
-    target_id: string;
-    generator: string;
-    view: string;
-    mode: string;
-    instance: number;
-    /** Mathematical payload identity, independent of presentation. */
-    content_fingerprint: string;
-    /** Rendered-task identity: mathematical payload plus resolved view config. */
-    task_fingerprint: string;
-    /** Additional target permutations represented by the same physical sample. */
-    target_associations?: TargetAssociation[];
-    /** Shortened ontology labels, as written by the pipeline. */
-    labels?: string[];
-    [key: string]: unknown;
-}
+import {CompatibilityContractError} from './compatibility.ts';
+import {selectionAdmittedByPlan} from './planned-generation.ts';
+import type {MetadataRow, TargetAssociation} from './dataset-metadata.ts';
+export {rowTargetAssociations, type MetadataRow, type TargetAssociation} from './dataset-metadata.ts';
 
 const associationKey = ({spec, target_id}: TargetAssociation): string => `${spec}\0${target_id}`;
-
-/** Returns the primary target and every deduplicated target associated with a physical row. */
-export function rowTargetAssociations(row: MetadataRow): TargetAssociation[] {
-    const associations = new Map<string, TargetAssociation>();
-    const primary = {spec: row.spec, target_id: row.target_id};
-    associations.set(associationKey(primary), primary);
-    for (const association of row.target_associations ?? []) {
-        associations.set(associationKey(association), association);
-    }
-    return [...associations.values()].sort((left, right) =>
-        left.spec.localeCompare(right.spec) || left.target_id.localeCompare(right.target_id));
-}
 
 /** Adds non-primary target associations without duplicating references. */
 export function addRowTargetAssociations(
@@ -64,7 +32,18 @@ export function addRowTargetAssociations(
     );
     for (const association of additions) {
         const key = associationKey(association);
-        if (key !== primaryKey) associations.set(key, {...association});
+        if (key === primaryKey) continue;
+        if (row.generation_plan || association.generation_plan) {
+            if (!row.generation_plan || !row.generation_replay || !association.generation_plan) {
+                throw new CompatibilityContractError('Cannot combine legacy target associations with planned samples; regenerate the source dataset.');
+            }
+            if (association.generation_plan.identity.targetId !== association.target_id) {
+                throw new CompatibilityContractError('Associated target plan has a different target identity.');
+            }
+            const selection = selectionAdmittedByPlan(association.generation_plan, row.generation_plan, row.generation_replay.selection);
+            if (!selection) continue;
+            associations.set(key, {...association, generation_plan_hash: association.generation_plan.hash, selection});
+        } else associations.set(key, {...association});
     }
     row.target_associations = [...associations.values()].sort((left, right) =>
         left.spec.localeCompare(right.spec) || left.target_id.localeCompare(right.target_id));

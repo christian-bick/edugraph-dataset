@@ -1,3 +1,4 @@
+import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
 import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS} from 'edugraph-ts/core';
@@ -150,21 +151,20 @@ describe('shared applicability inspection', () => {
         inspectApplicability({views, pairIndex: buildCompatibleModulePairIndex(generators, views)});
 
     it('checks unmatched views, retains both IRIs, and reports missing compatible generators', () => {
-        const issues = inspect([{viewId: 'v', supportedLabels: [], requiredLabels: [Area.Square],
-            rejectedLabels: [Area.Rectangle, Ability.Formalization]}]);
+        const issues = inspect([{viewId: 'v', supportedLabels: [], compatibility: [requireTargetLabels('required', [Area.Square]), rejectTargetLabels('rejected', [Area.Rectangle, Ability.Formalization])]}]);
         expect(issues.map(issue => issue.kind)).toEqual([
             'required-and-rejected-label', 'no-compatible-generator', 'ability-rejection'
         ]);
         expect(issues[0]).toMatchObject({label: Area.Square, rejectedLabel: Area.Rectangle,
             viewId: 'v', rule_ids: ['SPEC-V3', 'SPEC-V7']});
-        expect(issues[0].message).toContain(`requiredLabels '${Area.Square}'`);
-        expect(issues[0].message).toContain(`rejectedLabels '${Area.Rectangle}'`);
+        expect(issues[0].message).toContain(`required target policy '${Area.Square}'`);
+        expect(issues[0].message).toContain(`rejected target policy '${Area.Rectangle}'`);
         expect(issues[1].rule_ids).toEqual(['SPEC-V7']);
         expect(issues[2].rule_ids).toEqual(['SPEC-V3']);
     });
 
     it('uses the production pair index and reports precisely the unsupported compatible pair', () => {
-        const view = {viewId: 'v', supportedLabels: [], requiredLabels: [Area.Rectangle], problemType: 'ShapePolygonDefinitionProblem'};
+        const view = {viewId: 'v', supportedLabels: [], compatibility: [requireTargetLabels('required', [Area.Rectangle])], problemType: 'ShapePolygonDefinitionProblem'};
         const issues = inspect([view], [
             {generatorId: 'ok', labels: [Area.Square], problemType: 'ShapePolygonDefinitionProblem'},
             {generatorId: 'missing', labels: [], problemType: 'ShapePolygonDefinitionProblem'},
@@ -177,12 +177,10 @@ describe('shared applicability inspection', () => {
     });
 
     it('keeps diagnostics stable under reordered and repeated requirements and rejections', () => {
-        const view = {viewId: 'v', supportedLabels: [], requiredLabels: [Area.Square, Area.Rectangle],
-            rejectedLabels: [Area.Rectangle, Area.Square]};
+        const view = {viewId: 'v', supportedLabels: [], compatibility: [requireTargetLabels('required', [Area.Square, Area.Rectangle]), rejectTargetLabels('rejected', [Area.Rectangle, Area.Square])]};
         const generators = [{generatorId: 'g2', labels: []}, {generatorId: 'g1', labels: []}];
-        const other = {viewId: 'a', supportedLabels: [], rejectedLabels: [Ability.Formalization]};
-        expect(inspect([other, {...view, requiredLabels: [Area.Rectangle, Area.Square, Area.Square],
-            rejectedLabels: [Area.Square, Area.Rectangle, Area.Rectangle]}], generators.toReversed()))
+        const other = {viewId: 'a', supportedLabels: [], compatibility: [rejectTargetLabels('rejected', [Ability.Formalization])]};
+        expect(inspect([other, {...view, compatibility: [requireTargetLabels('required', [Area.Rectangle, Area.Square, Area.Square]), rejectTargetLabels('rejected', [Area.Square, Area.Rectangle, Area.Rectangle])]}], generators.toReversed()))
             .toEqual(inspect([view, other], generators));
         expect(inspect([{viewId: 'empty', supportedLabels: []}])).toEqual([]);
     });
@@ -190,7 +188,7 @@ describe('shared applicability inspection', () => {
     it('scales with view declarations and compatible pair edges using existing support closures', () => {
         const run = (size: number) => {
             const views = Array.from({length: size}, (_, i) => ({viewId: `v${i}`, problemType: 'CountingProblem', supportedLabels: [],
-                requiredLabels: [Area.Square], rejectedLabels: [Area.Rectangle]}));
+                compatibility: [requireTargetLabels('required', [Area.Square]), rejectTargetLabels('rejected', [Area.Rectangle])]}));
             const counters = createWorkCounters();
             const pairIndex = buildCompatibleModulePairIndex([{generatorId: 'g', labels: [Area.Square], problemType: 'CountingProblem'}], views);
             expect(inspectApplicability({views, pairIndex, counters})).toHaveLength(size);

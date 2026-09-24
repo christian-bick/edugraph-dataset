@@ -36,7 +36,7 @@ For a cross-role review, use the review order and terminology from
 `docs/label-architecture.md`. The view-specific report must include:
 
 - a task-identity assessment for every schema branch that changes learner-visible behavior;
-- a semantic disposition for `requiredLabels`, `rejectedLabels`, and every view-owned Area;
+- a semantic disposition for `requireTargetLabels`, `rejectTargetLabels`, and every view-owned Area;
 - an evidence trace showing that the complete matched conjunction survives the projection;
 - checklist and determinism findings from their dedicated Audit sections.
 

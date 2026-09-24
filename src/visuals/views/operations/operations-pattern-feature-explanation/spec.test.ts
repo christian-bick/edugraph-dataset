@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -12,10 +13,10 @@ describe('operations-pattern-feature-explanation view spec', () => {
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
         ]);
-        expect(spec.requiredLabels).toEqual([
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([
             Area.EmergentFeatureRecognition,
             Ability.ProcedureExecution
-        ]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        ].toSorted());
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

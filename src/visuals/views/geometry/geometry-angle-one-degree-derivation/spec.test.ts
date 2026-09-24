@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -5,6 +6,6 @@ import {spec} from './spec.ts';
 describe('geometry-angle-one-degree-derivation view spec', () => {
     it('owns invariant one-degree concept derivation', () => {
         expect(spec.generalLabels).toEqual([Ability.ConceptDerivation, Area.FractionDenominatorInterpretation]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

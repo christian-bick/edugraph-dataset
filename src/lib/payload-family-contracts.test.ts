@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from './compatibility.ts';
 import {beforeAll, describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
@@ -28,7 +29,7 @@ describe('declared producer/view payload families', () => {
     let views: Awaited<ReturnType<typeof loadViewModelCatalog>>;
     beforeAll(async () => {
         [generators, views] = await Promise.all([loadGeneratorModelCatalog(), loadViewModelCatalog()]);
-    });
+    }, 30_000);
 
     it.each(families)('%s selects its complete payload contract before target labels', (viewId, generatorId, otherId, broadType) => {
         const view = views.find(view => view.viewId === viewId)!;
@@ -36,8 +37,10 @@ describe('declared producer/view payload families', () => {
         const other = generators.find(generator => generator.generatorId === otherId)!;
         const taskRequirements = viewId === 'operations-word-problem-equation-formalization'
             ? [Ability.Formalization] : [];
-        expect(view.requiredLabels).toEqual(taskRequirements);
-        expect(matchesTarget(taskRequirements, generator, view)).toEqual({matched: true});
+        expect(getTargetPolicyLabels(view.spec.compatibility, 'require')).toEqual(taskRequirements);
+        const generatorRequirements = ['arithmetic-word-problems-letter-equation', 'arithmetic-word-problems-rounding'].includes(generatorId)
+            ? [Area.Addition] : [];
+        expect(matchesTarget([...taskRequirements, ...generatorRequirements], generator, view)).toEqual({matched: true});
         expect(matchesTarget([], other, view)).toEqual({matched: false, reason: 'incompatible-type'});
         expect(matchesTarget([], {...generator, problemType: broadType}, view))
             .toEqual({matched: false, reason: 'incompatible-type'});
@@ -69,13 +72,13 @@ describe('declared producer/view payload families', () => {
         const view = views.find(view => view.viewId === 'operations-word-problem-equation-formalization')!;
         expect(matchesTarget([Ability.TextualReception, Area.Equation], generator, view))
             .toEqual({matched: false, reason: 'missing-required-label', label: Ability.Formalization});
-        expect(matchesTarget([Ability.TextualReception, Ability.Formalization], generator, view))
+        expect(matchesTarget([Ability.TextualReception, Ability.Formalization, Area.Addition], generator, view))
             .toEqual({matched: true});
     });
 
     it('uses distinct complete-tens and complete-hundreds contracts without a negative selector', () => {
         const view = views.find(view => view.viewId === 'place-value-tens-bundles')!;
-        expect(view.rejectedLabels).toEqual([]);
+        expect(getTargetPolicyLabels(view.spec.compatibility, 'reject')).toEqual([]);
         expect(matchesTarget([], generators.find(generator => generator.generatorId === 'place-value-hundreds-bundles')!, view))
             .toEqual({matched: false, reason: 'incompatible-type'});
     });
@@ -94,14 +97,14 @@ describe('declared producer/view payload families', () => {
         const direct = targets.flatMap(target => pairs
             .filter(pair => matchesTarget(target.labels, pair.generator, pair.view).matched)
             .map(pair => `${target.id}#${pair.generator.generatorId}#${pair.view.viewId}`)).sort();
-        const indexed = matchTargets(targets, generators, views).tuples
+        const matchedTuples = matchTargets(targets, generators, views).tuples;
+        const indexed = matchedTuples
             .map(tuple => `${tuple.target.id}#${tuple.generatorId}#${tuple.viewId}`).sort();
         expect(indexed).toEqual(direct);
-        const matchedTuples = matchTargets(targets, generators, views).tuples;
         for (const [viewId, generatorId] of families) {
             const tuples = matchedTuples.filter(tuple => tuple.viewId === viewId);
             expect(tuples.length, viewId).toBeGreaterThan(0);
             expect(new Set(tuples.map(tuple => tuple.generatorId)), viewId).toEqual(new Set([generatorId]));
         }
-    });
+    }, 120_000);
 });

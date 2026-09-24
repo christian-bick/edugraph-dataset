@@ -1,7 +1,7 @@
 import {Area} from 'edugraph-ts';
 import {random} from '../../lib/random.ts';
 import {selectExactLabelMap, selectExactLabelSetMap} from '../../lib/resolvers.ts';
-import {compositionalResolver, exactResolver} from '../../types/schema.ts';
+import {compositionalResolver, exactResolver, withLabelChoices} from '../../types/schema.ts';
 
 export const arithmeticOperations = [
     Area.Addition,
@@ -75,6 +75,21 @@ export function resolveTwoStepOperations(labels: string[]): TwoStepOperationLabe
 exactResolver(resolveDeclaredOperation);
 exactResolver(resolvePropertyAwareOperation);
 compositionalResolver(resolveTwoStepOperations);
+
+withLabelChoices(resolveDeclaredOperation, {kind: 'alternatives'});
+withLabelChoices(resolvePropertyAwareOperation, {
+    kind: 'alternatives',
+    alternatives: [
+        [Area.Addition],
+        [Area.Addition, Area.Sum],
+        [Area.Subtraction],
+        [Area.Multiplication],
+        [Area.Addition, Area.Multiplication],
+        [Area.Division]
+    ],
+    contextLabels: [Area.DistributiveLaw]
+});
+withLabelChoices(resolveTwoStepOperations, {kind: 'target', relation: 'exact'});
 
 export const operationNames: Record<ArithmeticOperationLabel, 'addition' | 'subtraction' | 'multiplication' | 'division'> = {
     [Area.Addition]: 'addition',

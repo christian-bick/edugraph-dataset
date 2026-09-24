@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -9,6 +10,6 @@ describe('operations-word-problem-equation-formalization view spec', () => {
             Ability.TextualReception,
             Ability.Formalization
         ]);
-        expect(spec.requiredLabels).toEqual([Ability.Formalization]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Ability.Formalization]);
     });
 });

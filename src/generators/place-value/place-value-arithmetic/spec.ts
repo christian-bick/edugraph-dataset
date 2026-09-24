@@ -11,8 +11,28 @@ const resolveOperation = selectExactLabelMap([
     [Area.Subtraction, Area.Subtraction]
 ] as const);
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-arithmetic',
+    compatibility: [generatorLabelRule('place-value-operand-profile', [
+        Area.Addition, Area.AdditionPlaceValuePartitioning, Area.Subtraction, Area.SubtractionPlaceValuePartitioning,
+        Area.IntegerRegrouping, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand,
+        Scope.MultiplesOf10, Scope.NumbersWithZero
+    ], selected => {
+        const singleDigit = selected(Scope.SingleDigitSmallestOperand);
+        const twoDigit = selected(Scope.TwoDigitLargestOperand);
+        const multiples = selected(Scope.MultiplesOf10);
+        const regrouping = selected(Area.IntegerRegrouping);
+        const zero = selected(Scope.NumbersWithZero);
+        const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
+        if (singleDigit && multiples || singleDigit && !twoDigit || twoDigit && !singleDigit && !multiples) return false;
+        if (addition) {
+            return !zero && (!multiples || twoDigit && !regrouping);
+        }
+        if (twoDigit || singleDigit) return false;
+        return multiples ? !regrouping : !zero || !regrouping;
+    })],
     generalLabels: [
         Area.PlaceValue,
         Scope.TwoOperands,

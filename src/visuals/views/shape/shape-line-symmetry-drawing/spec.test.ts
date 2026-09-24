@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {ShapeLineSymmetryGenerator} from '../../../../generators/shape/shape-line-symmetry/generator.ts';
@@ -8,7 +9,7 @@ import {ShapeLineSymmetryDrawingViewSchema, spec} from './spec.ts';
 describe('shape-line-symmetry-drawing view spec', () => {
     it('owns invariant visual articulation', () => {
         expect(spec.generalLabels).toEqual([Ability.VisualArticulation]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 
     it('resolves a fingerprint-visible drawing figure without consuming labels', () => {

@@ -1,3 +1,4 @@
+import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {spec} from './spec.ts';
@@ -5,6 +6,6 @@ import {spec} from './spec.ts';
 describe('shape-patterns view spec', () => {
     it('owns invariant pattern generation', () => {
         expect(spec.generalLabels).toEqual([Ability.VisualArticulation]);
-        expect(spec.rejectedLabels).toBeUndefined();
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

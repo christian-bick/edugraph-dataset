@@ -7,7 +7,6 @@ import {
     loadGeneratorCatalog,
     computeSampleFilename,
     computeContentFingerprint,
-    resolvePairCapabilities,
     buildProblem,
     buildRenderPayload
 } from '../lib/generation.ts';
@@ -15,8 +14,10 @@ import { renderTasks } from '../lib/render.ts';
 import { computeImageSha256, VqaCacheManager } from '../lib/vqa-cache.ts';
 import { getCliOption } from '../lib/cli.ts';
 import { evaluateSampleVqa } from '../lib/vqa-evaluator.ts';
-import { datasetDirForSpec } from '../lib/dataset-paths.ts';
+import { datasetDirForSpec, datasetOutDir } from '../lib/dataset-paths.ts';
 import { CANONICAL_RENDERER_ID, currentRendererEnvironment } from '../lib/render-environment.ts';
+import {readDatasetSnapshot} from '../lib/dataset-store.ts';
+import {selectSampleReplay} from '../lib/sample-replay.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,18 +52,22 @@ async function main() {
     const cacheManager = new VqaCacheManager(CACHE_DIR, datasetFolderName, identity.generatorId);
     const cachedByIdentity = cacheManager.entries().find(e => e.sample_key === sampleKey);
 
-    let attempt = 1;
-    if (attemptArg !== undefined) {
-        attempt = parseInt(attemptArg, 10);
-    } else if (cachedByIdentity) {
-        attempt = cachedByIdentity.attempt;
-    }
+    const metadata = attemptArg === undefined
+        ? readDatasetSnapshot(datasetOutDir(PROJECT_ROOT, datasetFolderName)).rows(identity.split)
+            .find(row => row.sample_key === sampleKey)
+        : undefined;
+    const selected = selectSampleReplay({sampleKey, attempt: attemptArg === undefined ? undefined : Number(attemptArg),
+        metadata, cached: cachedByIdentity});
+    const {attempt} = selected;
 
     console.log(`--- Retesting sample ---`);
     console.log(`Sample key: ${sampleKey}`);
-    console.log(`Attempt:    ${attempt}${attemptArg === undefined && cachedByIdentity ? ' (auto-adopted from VQA cache)' : ''}`);
+    console.log(`Attempt:    ${attempt} (${selected.source === 'fresh' ? 'explicit fresh draw' : `recorded ${selected.source} recipe`})`);
 
-    const { target, targetLabels, seed, stub } = await generateSampleByKey({ sampleKey, attempt, specName });
+    const {target, targetLabels, seed, stub, plan, preparedView, replay, labels} = await generateSampleByKey({
+        sampleKey, attempt, specName, recordedPlan: selected.recordedPlan, replay: selected.replay
+    });
+    if (replay.sampleKey !== sampleKey) console.log(`Draw origin: ${replay.sampleKey}`);
 
     console.log(`Seed:       ${seed}`);
     console.log(`Target:     ${target.id}`);
@@ -82,19 +87,10 @@ async function main() {
     const generatorCatalog = await loadGeneratorCatalog();
     const viewCatalog = await loadViewCatalog();
     const generatorEntry = generatorCatalog.find(g => g.generatorId === identity.generatorId)!;
-    const viewEntry = viewCatalog.find(v => v.viewId === identity.viewId)!;
-    const pair = resolvePairCapabilities({
-        targetLabels,
-        generatorGeneralLabels: generatorEntry.generalLabels,
-        generatorResolvedLabels: stub.labels,
-        viewGeneralLabels: viewEntry.generalLabels,
-        viewSchema: viewEntry.schema,
-        seed
-    });
     const problem = buildProblem({
         stub,
         type: generatorEntry.generator.type,
-        labels: pair.labels
+        labels
     });
     const viewPathMap: Record<string, string> = {};
     for (const view of viewCatalog) {
@@ -112,7 +108,8 @@ async function main() {
                 viewId: identity.viewId,
                 targetLabels,
                 mode: identity.mode,
-                seed
+                seed,
+                preparedView
             })
         }
     ], outDir, viewPathMap);
@@ -166,6 +163,8 @@ async function main() {
             instanceIdx: identity.instanceIdx,
             attempt,
             seed,
+            generationPlan: plan,
+            generationReplay: replay,
             fileName,
             labels: problem.labels,
             apiKey,

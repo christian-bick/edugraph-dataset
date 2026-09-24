@@ -4,8 +4,13 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'counting-sequence',
+    compatibility: [generatorLabelRule('multiple-ten-step', [
+        Scope.MultiplesOf10, Scope.StepsOf10
+    ], selected => !selected(Scope.MultiplesOf10) || selected(Scope.StepsOf10))],
     generalLabels: [
         Area.NumerationWithIntegers,
         Scope.IntegerNumbers,

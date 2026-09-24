@@ -16,8 +16,16 @@ const resolveCoinDenomination = selectExactLabelSetMap([
     ...coinDenominations.map(denomination => [[denomination], denomination] as const)
 ]);
 
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+
 export const spec: GeneratorSpec = {
     generatorId: 'currency-arithmetic',
+    compatibility: [generatorLabelRule('currency-representation-denomination', [
+        Scope.Coins, Scope.Banknotes, ...coinDenominations
+    ], selected => {
+        const coins = selected(Scope.Coins);
+        return (coins || selected(Scope.Banknotes)) && coins === coinDenominations.some(selected);
+    })],
     generalLabels: [Scope.Dollar, Scope.TwoOperands, Scope.SingleStep]
 };
 
