@@ -26,22 +26,24 @@ Standing outside the matrix, because it describes standards rather than modules:
 - [target-spec-plan-template.md](target-spec-plan-template.md) — required Pass 1 structure for
   reviewable standard-to-target plans.
 
-## Open follow-ups
+## Plans and verification records
 
-- [Automated rule checks](plan/automated-rule-checks.md) — current enforcement, missing gates,
-  shared validation entry points, and incremental implementation order.
-- [Label-variant matching and constrained generation](plan/label-variant-matching.md) — agreed
-  design and implementation checkpoints for spec predicates, compatible label selections,
+- [Automated rule checks](plan/automated-rule-checks.md) — completed dataset consolidation,
+  shared validation entry points, and separately deferred semantic reviews.
+- [Label-variant matching and constrained generation](plan/label-variant-matching.md) — completed
+  design, implementation, and rollout of spec predicates, compatible label selections,
   and generation plans.
-- [Label-variant integration follow-ups](plan/label-variant-followups.md) — format rollout,
-  numeric feasibility, complete production VQA, and final coverage investigation.
+- [Label-variant integration follow-ups](plan/label-variant-followups.md) — completed format rollout,
+  numeric repairs, production VQA, and coverage investigation; content expansion is deferred.
 - [Payload-family matching and regression](plan/payload-family-matching.md) — payload-family
   migration checkpoints, the compatibility case study, and optional synthetic regression work.
 - [Performance safeguards and follow-ups](plan/improve_performance.md) — the performance contract
   and deferred retention/provenance improvements.
 
-These plans track unfinished work, not exceptions to the authoring rules. Completed migration
-inventories and validation logs remain available in Git history.
+Plans distinguish completed checkpoints from explicitly deferred work; they are not exceptions
+to the authoring rules. The documentation gate checks their links and rule citations recursively,
+along with Markdown reference material inside skills. Plans and skills do not define local rules
+or require normative Audit sections.
 
 ## Which files to load
 
@@ -77,6 +79,6 @@ depending on document section numbers:
 
 IDs are append-only. If a rule is retired, leave its ID unused rather than renumbering.
 
-Each file ends with an **Audit** section: the same rules restated as imperative,
+Each rule reference ends with an **Audit** section: the same rules restated as imperative,
 verifiable checks. Reviews work from the Audit section; authors work from the Rules
 section above it.

@@ -1,21 +1,20 @@
 # Automated rule checks — dataset
 
-Implementation plan for the remaining approved checks after label consolidation. Source, public
-entry points, and focused regressions were reviewed on 2026-09-23 against dataset `07c57d6`, after
-fetching current remote history. This plan links existing rules; it does not add ontology semantics.
+Status: dataset consolidation completed on 2026-09-24. This record links existing rules and
+verification; it does not add ontology semantics. The initial review against `07c57d6` and the
+earlier migration checkpoints below are historical baselines.
 
-D1–D5 and D8–D12 now have the deterministic gates and regressions specified below. D6 and
-D13–D15 retain their existing runtime checks. D7's payload-family adoption and fail-closed type
-matching are implemented; its positive micro-filter decision and D16's documentation discovery
-remain open. Semantic truth and uncertain
-control-flow cases remain review work rather than invented static proof.
+D1–D5, D7–D12, and D16 have the agreed deterministic gates and regressions. D6 and D13–D15 retain
+their runtime checks. D7's positive-filter question is resolved by label-variant plans carried
+through constrained generation, and D16 now discovers nested plans and skill references.
+Semantic truth and uncertain control-flow cases remain review work rather than invented static proof.
 
 The ontology owns descriptor structure and eligibility. Its
 [check inventory](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/plan/automated-rule-checks.md)
 covers the source graph and generated clients. This repository validates declarations, resolution,
 composition, and dataset artifacts against its complete, pinned ontology package.
 
-## Verified baseline
+## Initial verified baseline — 2026-09-23
 
 | Change | Evidence | Consequence for this plan |
 | --- | --- | --- |
@@ -35,8 +34,8 @@ Verification in this review:
   681 active targets; the isolated test spec has 559. Existing equivalence/overlap warnings remain.
 - Catalog inspection found 87 generators, 184 views, and 202 compatible pairs. No current module
   lacks a parsed payload mapping or required file, and no leaf checklist contains headings.
-- Six union-to-member pairs remain, all from `arithmetic-patterns`; their exact inventory is in the
-  [payload-family plan](payload-family-matching.md#verified-pair-inventory).
+- Six union-to-member pairs remained at this baseline, all from `arithmetic-patterns`; their
+  historical inventory is in the [payload-family plan](payload-family-matching.md#initial-pair-inventory).
 
 This review did not regenerate images, change cache entries, or establish release readiness.
 Functional tests verify the existing contracts; semantic truth still needs mathematical review
@@ -62,7 +61,7 @@ should cite the relevant existing rule and identify the file, field, label, pair
 | D4. Positive ownership | Reject generator Abilities, redundant invariant specialization ancestors, schema/general overlap, and overlapping positive ownership across a compatible pair. Keep label mechanics dimension-neutral. See SPEC-2, SPEC-7, SPEC-8, SPEC-11, SPEC-G3, SPEC-V5. | **Gate for declaration conflicts.** `spec-ownership.ts` supplies the same indexed checks, rule-linked diagnostics and declaration witnesses to the spec gate and architecture audit. Every module is checked, including unmatched ones; cross-role checks use all four invariant/schema combinations on the existing compatible-pair index. Full, affected and CI commands share the spec gate. Related schema alternatives and structural ancestry alone remain valid. Whether a capability is mathematically true or belongs in Area versus Scope remains semantic review. |
 | D5. Applicability consistency | Requirements are target preconditions, supported by each compatible pair, and do not contribute output labels. Rejections veto matches and never contain Abilities. Detect impossible required/rejected combinations. See SPEC-V3, SPEC-V7, SPEC-V8. | **Gate for algorithmic consistency.** `spec-contracts.ts` supplies shared diagnostics to the spec gate and architecture audit for pair support, missing compatible generators, rejected Abilities, and equality/specialization contradictions. Requiring Square while rejecting Rectangle fails, with both full IRIs; requiring Rectangle while rejecting Square remains valid. Support checks reuse the production compatible-pair index and its capability closures. Unmatched views are checked too. The existing matcher and resolved-label construction preserve participation-only requirements and target-context rejections. Proving a rejection boundary is complete remains review. |
 | D6. Matching semantics | Conjunctive coverage uses equality or `specializes` only, never `partOf`, reverse inheritance, or progression. Direct, indexed, and delta matching agree, including additions and removals. See SPEC-1. | **Runtime plus regressions.** `matching.ts`, `ontology.test.ts`, and `matching.test.ts` cover these behaviors. Retain focused positive/negative fixtures and extend command-parity tests; do not duplicate the production matcher in a second validation engine. |
-| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Type gate implemented.** Unknown/missing types fail closed; complete producer unions must fit accepted view families. Arithmetic, shape and fraction consumers are adopted, with direct/indexed/delta regressions and no active-target loss. Positive micro-filter policy remains open, with reproduced whole/fractional/fallback cases in the [payload-family plan](payload-family-matching.md#positive-micro-filter-decision). |
+| D7. Payload compatibility | A generator's possible output types must fit the view's declared input family; missing or unrecognized mappings must not silently admit a pair. See IMPL-8 and SPEC-V6. | **Implemented.** Unknown/missing types fail closed; complete producer unions must fit accepted view families. Precise producer contracts and direct/indexed/delta regressions retain active-target coverage. Within-family label compatibility uses spec predicates and mandatory generation plans; resolution, retries, rendering, replay, and associations preserve accepted choices. The measurement unit-step/fraction fallback case is resolved without payload inspection. See [label-variant matching](label-variant-matching.md) and its [completed follow-ups](label-variant-followups.md). |
 
 The D3 input is the normalized, deduplicated active `spec` export, not every declaration loaded
 from a standards file. TODO packages can have their own structural validation without being
@@ -88,7 +87,7 @@ enter the match-coverage set. An isolated `test` module still checks its active 
 | D13. Canonical rendering | **Runtime gate:** preflight, resource readiness, and sample failure collection prevent diagnostic cards from becoming artifacts. Failures roll back staged output and produce a nonzero exit after collecting sibling failures. Preserve regressions for both modes. This tests generated samples, not every possible configuration. See IMPL-V2, IMPL-V3, IMPL-V7. |
 | D14. Identity and provenance | **Runtime plus regressions:** sample seeds/attempts, data-only content fingerprints, data-plus-view-config task fingerprints, deterministic replay, and task-identical target associations remain distinct. Retain tests for config-only changes, duplicate tasks, and train/validation separation. See [sample identity](../../DOCS.md#sample-identity--determinism). |
 | D15. Dataset and release integrity | **Gates:** split audit, graph freshness, exact passing VQA-cache coverage, image digests, public metadata, and exact target-to-asset evidence. Retain their full release integration. Offline cache validation proves that the expected judgment exists; it does not independently prove its semantic correctness. See [final verification](../../DOCS.md#step-8-final-verification). |
-| D16. Documentation wiring | **Partial gate:** `check:docs` validates local links, anchors, rule IDs, and reference structure for top-level references, root consumers, and skills. Its collector does not scan nested plans. Extend document discovery with distinct rule-reference and plan roles, so plans are checked without requiring an Audit section. Remote Markdown failures remain advisory. See [documentation validation](../../DOCS.md#srcscriptsvalidate-docsts). |
+| D16. Documentation wiring | **Gate:** `check:docs` recursively discovers Markdown in docs and skills, including nested plans and skill references. All roles receive local link, anchor, and rule-citation checks; only rule references define rules and require Audit sections. Full, affected, and CI checks share the command. Public-command fixtures reject broken nested-plan links and invalid skill references. Remote Markdown failures remain advisory. See [documentation validation](../../DOCS.md#srcscriptsvalidate-docsts). |
 
 ## Execution and complexity
 
@@ -225,7 +224,7 @@ spec-audit phase is now the largest static phase; the independent split-integrit
 next. A scoped single-generator implementation check took 2.79 seconds including command
 startup. These are wall-clock observations, not asymptotic proofs or release benchmarks.
 
-### 4. Complete payload-family compatibility
+### 4. Complete payload-family compatibility — complete
 
 - [x] **D7 contract adoption:** follow the [payload-family plan](payload-family-matching.md).
   Start with `arithmetic-patterns`, whose six concrete union/member pairs use the exception;
@@ -236,19 +235,21 @@ startup. These are wall-clock observations, not asymptotic proofs or release ben
   `requiredLabels` union-member exception once its consumers have been adopted. Correct both
   `type-parser.ts` and the direct/indexed matching paths. A view accepting a union must support
   every member the generator can emit.
-- [ ] Define positive micro-filters using `measurement-line-plot` as the concrete case. Settle
-  what is guaranteed over all resolved outputs, including broad targets and fallbacks. Target
-  participation alone does not prove payload safety. Do not add pair-conditional capabilities or
-  configuration-dependent output routing to retain an overly broad generator.
+- [x] Resolve the positive-filter question using `measurement-line-plot`: spec predicates operate
+  on explicit semantic label alternatives, and matching retains admissible choices in a generation
+  plan. Omitted number kind can be constrained to integers for unit steps; explicit fractional
+  requests are rejected. Generation and replay retain those restrictions without payload inspection
+  or exposing generator parameter names to views. Precise producer families remain the type boundary.
 - [x] Adopt the type-compatibility behavior in SPEC-V3/V6/V7 and IMPL-V9, including their existing advice
   about guarding union members with requirements. Update skill references when their workflow
   changes. The current rules remain in force until their replacement is implemented.
 
-The three producer-family migrations and strict type matching are implemented. All 681 active
-CCSS targets remain covered; the complete comparison has 15 added and 14 removed tuples, consisting
-of registration moves and one newly supported hexagon drawing. The positive micro-filter policy
-remains a separate review decision, with concrete whole/fractional/fallback evidence in the
-[payload-family plan](payload-family-matching.md#positive-micro-filter-decision).
+The three initial producer-family migrations and strict type matching retained all 681 active
+CCSS targets; that checkpoint had 15 added and 14 removed tuples, consisting of registration moves
+and one newly supported hexagon drawing. The subsequent explicit producer-contract adoption and
+label-variant implementation are also complete. The [payload-family plan](payload-family-matching.md)
+retains the historical case, and [integration follow-ups](label-variant-followups.md) record the
+current 830 CCSS / 691 test tuples, numeric repairs, visual fixes, and restored target evidence.
 
 Verification completed on 2026-09-24: all 47 new Gemini evaluations pass, strict offline audit
 confirms exact passing coverage for all 1,944 CCSS images, and split integrity is clean. Churn is
@@ -261,22 +262,41 @@ incompatible union member cannot reach a narrower view. Rebuild the generation g
 machinery changes, regenerate the affected canonical content, inspect question/solution evidence,
 and complete the relevant VQA and cache checks. Review any identity/seed churn from generator splits.
 
-### 5. Complete documentation discovery and close the plan
+### 5. Complete documentation discovery and close the plan — complete
 
-- [ ] **D16:** discover nested Markdown plans and skill reference documents. Give references and
-  plans distinct roles in `docs-validator.ts`; validate plan links/anchors/rule citations without
-  requiring a normative Audit section. Keep remote document fetch failures advisory. Include a
-  fixture proving a broken nested-plan link fails through `check:docs`.
-- [ ] Update each affected rule's verification guidance and `DOCS.md` command coverage after its
-  check exists. Skills should reference the authoritative rules and applicable commands rather
-  than copy policy. Keep conceptual rules that require review explicitly identified as such.
-- [ ] Run the complete local/CI gate once all batches are implemented, including existing
-  D13–D15 safeguards. For source-check-only changes, do not regenerate or revalidate images merely
-  because a new lint gate exists. Preserve semantic equivalences pending their separate review.
+- [x] **D16:** `docs-discovery.ts` recursively collects plans and skill reference documents;
+  `docs-validator.ts` separates reference, plan, and consumer roles. Command fixtures verify broken
+  nested-plan links, invalid skill rule citations, and cross-file anchors. Existing remote-fetch
+  failure regressions remain advisory. The expanded real-repository scan found and corrected three
+  stale links in this roadmap.
+- [x] Update `DOCS.md`, the reference index, and migration records to distinguish current completion
+  from historical checkpoints and deferred work. Skills continue to cite the authoritative rules;
+  they do not acquire copied policy or new approval requirements.
+- [x] Retain D13–D15 safeguards in the final local/CI checks. This documentation-validation change does
+  not change generation inputs, dataset pixels, VQA verdicts, or semantic equivalences.
 
-D16 is independent and may be implemented earlier. Ontology publication and editor adoption do not
-block any batch. A v0.27.0 dependency update can be a separate maintenance commit, with its normal
-semantic-delta verification; it does not replace these dataset checks.
+No dataset consolidation implementation batch remains. The verification record below closes this
+plan; the separate ontology and equivalence reviews remain deferred. A future ontology dependency
+update still uses normal semantic-delta verification rather than replacing these dataset checks.
+
+## Final consolidation verification — 2026-09-24
+
+The completed matching/generation rollout is merged through PRs #1 and #2; all 681 CCSS and 559
+test targets have evidence. Final D16 verification passes:
+
+- All 3,062 tests in 526 files, all 105 generator coverage thresholds, the complete CCSS/test
+  repository check, and the production build.
+- The 87 focused documentation/scheduling tests, including the public command fixtures.
+  Changed libraries have 100% line/function coverage and 95.67% combined branch coverage;
+  discovery itself has 100% statement, branch, function, and line coverage.
+- The expanded documentation gate checks 29 files and all 63 local rule IDs with no errors.
+- Strict read-only VQA audit retains exact passing coverage for all 1,936 production images,
+  with no stale, missing, malformed, failing, or duplicate entries. No images or cache records
+  were regenerated for D16.
+
+Main CI invokes the same public documentation command through the complete repository check.
+Generator content expansion is explicitly deferred; the 55 CCSS and 23 test unfilled validation
+allocations remain documented limitations, not unfinished matcher or documentation-gate work.
 
 ## Separate ontology consolidation
 

@@ -4,6 +4,22 @@ import {generatorOutputContractChanged, planDevelopmentValidation} from './devel
 const specs = ['ccss', 'test'];
 
 describe('development validation plan', () => {
+    it.each(['docs/plan/nested/review.md', '.agents/skills/review/references/example.md'])(
+        'schedules documentation validation for %s', file => {
+            const plan = planDevelopmentValidation([file], specs);
+            expect(plan.checks).toEqual(['docs']);
+            expect(plan.reasons.docs).toEqual([file]);
+        }
+    );
+
+    it.each(['src/lib/docs-discovery.ts', 'src/lib/docs-validator.ts', 'src/scripts/validate-docs.ts'])(
+        'runs the documentation gate when its implementation changes: %s', file => {
+            const plan = planDevelopmentValidation([file], specs);
+            expect(plan.checks).toEqual(['types', 'related-tests', 'docs']);
+            expect(plan.specs).toEqual([]);
+        }
+    );
+
     it('compares declared output contracts and conservatively routes unknown declarations', () => {
         const previous = 'class Demo implements ProblemGenerator<FirstProblem> { value = 1; }';
         expect(generatorOutputContractChanged(previous,

@@ -1,45 +1,15 @@
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { parseDocsSections, validateDocs, validateExternalDocuments, type DocsValidationResult } from '../lib/docs-validator.ts';
+import {collectDocumentation} from '../lib/docs-discovery.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 
-/** Files outside `docs/` that may cite rule IDs or link into the reference library. */
-const CONSUMER_FILES = ['DOCS.md', 'AGENTS.md', 'README.md'];
-const SKILLS_DIR = '.agents/skills';
-
-function collectFiles(): Map<string, string> {
-    const files = new Map<string, string>();
-
-    const read = (relativePath: string) => {
-        const absolute = join(PROJECT_ROOT, relativePath);
-        if (existsSync(absolute)) files.set(relativePath, readFileSync(absolute, 'utf8'));
-    };
-
-    const docsDir = join(PROJECT_ROOT, 'docs');
-    if (existsSync(docsDir)) {
-        for (const entry of readdirSync(docsDir).filter(f => f.endsWith('.md')).sort()) {
-            read(`docs/${entry}`);
-        }
-    }
-
-    CONSUMER_FILES.forEach(read);
-
-    const skillsDir = join(PROJECT_ROOT, SKILLS_DIR);
-    if (existsSync(skillsDir)) {
-        for (const skill of readdirSync(skillsDir).sort()) {
-            read(`${SKILLS_DIR}/${skill}/SKILL.md`);
-        }
-    }
-
-    return files;
-}
-
 export async function runDocsValidation(): Promise<DocsValidationResult> {
-    const files = collectFiles();
+    const files = collectDocumentation(PROJECT_ROOT);
     const result = validateDocs({
         files,
         docsSections: parseDocsSections(files.get('DOCS.md') ?? ''),

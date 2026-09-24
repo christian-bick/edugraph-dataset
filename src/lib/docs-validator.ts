@@ -16,7 +16,7 @@ const RULE_HEADING = new RegExp(String.raw`^###\s+(${RULE_ID_PATTERN})\b`, 'gm')
 const HEADING = /^#{1,6} (.+)$/gm;
 const MARKDOWN_LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
 const DOCS_SECTION_REF = /DOCS\.md\s*§\s*([0-9]+[a-z]?)/g;
-const DOCS_PATH_REF = /docs\/([a-z0-9-]+\.md)/g;
+const DOCS_PATH_REF = /docs\/([a-z0-9_./-]+\.md)/gi;
 const PROTOCOL = /^[a-z][a-z0-9+.-]*:/i;
 const EXTERNAL_URL = /(?:\b[a-z][a-z0-9+.-]*:\/\/|(?<![\w:/])\/\/)[^\s<>()[\]`"']+/gi;
 
@@ -46,9 +46,17 @@ export interface DocsValidationInput {
     exists: (repoRelativePath: string) => boolean;
 }
 
-/** A reference file is any library file other than the index. */
+export type DocumentationRole = 'reference' | 'plan' | 'consumer';
+
+/** Only the reference library defines rules; plans and skills cite those rules. */
+export function documentationRole(path: string): DocumentationRole {
+    if (path.startsWith('docs/plan/')) return 'plan';
+    if (path.startsWith(REFERENCE_DIR) && path !== REFERENCE_INDEX) return 'reference';
+    return 'consumer';
+}
+
 export function isReferenceFile(path: string): boolean {
-    return path.startsWith(REFERENCE_DIR) && path !== REFERENCE_INDEX;
+    return documentationRole(path) === 'reference';
 }
 
 /** Reproduces GitHub's heading-to-anchor slug: strip punctuation, spaces to hyphens. */
