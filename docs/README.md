@@ -30,8 +30,10 @@ Standing outside the matrix, because it describes standards rather than modules:
 
 - [Automated rule checks](plan/automated-rule-checks.md) — current enforcement, missing gates,
   shared validation entry points, and incremental implementation order.
-- [Payload-family matching and regression](plan/payload-family-matching.md) — unresolved input
-  contracts, positive micro-filters, classification evidence, and optional synthetic regression work.
+- [Label-variant matching and constrained generation](plan/label-variant-matching.md) — agreed
+  implementation plan for spec predicates, compatible label selections, and generation plans.
+- [Payload-family matching and regression](plan/payload-family-matching.md) — payload-family
+  migration checkpoints, the compatibility case study, and optional synthetic regression work.
 - [Performance safeguards and follow-ups](plan/improve_performance.md) — the performance contract
   and deferred retention/provenance improvements.
 

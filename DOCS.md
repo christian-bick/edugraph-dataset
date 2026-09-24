@@ -56,6 +56,12 @@ explicit wider unions. For example, mass and liquid volume have separate produce
 the general strategy view accepts the named strategy union. Target requirements remain
 independent learner-task participation policies.
 
+The next stage is planned in
+[label-variant-matching.md](docs/plan/label-variant-matching.md): matching will retain compatible
+schema-label selections and pass their joint constraints into generation. The plan preserves the
+current sample count and allows seeded selection among valid variants; this handover is not yet
+implemented.
+
 ### Ontology Scale Resolution
 Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
 `src/lib/ontology.ts` maps the concrete centimeter, meter, inch, foot, or abstract segment

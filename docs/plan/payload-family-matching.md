@@ -106,18 +106,18 @@ sample seeds and split assignments; cache verification must follow canonical gen
   are rendered in both modes by regression tests. All active CCSS and test targets remain covered;
   five CCSS tuples move generator registration without changing target labels or mathematical
   payload fields. Proper-fraction ids and seeded scale selection are retained.
-- [ ] **Declarative domain contracts.** `measurement-line-plot` and its `usesUnitSteps` parameter provide
-  a concrete starting case: an explicit whole-step requirement must agree with generated
-  subdivisions. Specify how metadata represents generator guarantees for broad targets, fallbacks,
-  alternatives, and bounded domains. Payload inspection is outside the agreed design. A flat
-  `requiredLabels` conjunction is not proof of the complete generated domain.
+- [ ] **Label-variant matching and constrained generation.** The design decision is settled in
+  [label-variant-matching.md](label-variant-matching.md). Implement spec-owned predicates over
+  semantic label selections, preserve valid joint choices in the matching result, and restrict
+  generation to that space. `measurement-data` / `measurement-line-plot` is the first adoption.
+  Payload inspection remains outside the design.
 - [x] **Classification evidence.** The fraction-equivalence classification number-line
   question no longer prints the verdict "same point" in
   [fraction-line-view.tsx](../../src/visuals/views/numbers/fraction-line-view.tsx). It may disclose
   that caption only in the solution or in an equality-completion task (`IMPL-V5`).
   The number-line position remains the mathematical evidence for classification.
 
-## Declarative domain decision
+## Label-variant decision — planned
 
 The concrete probe uses `measurement-data` and `measurement-line-plot`, which share a coherent
 `MeasurementDataProblem` contract. The latter accepts whole-unit and fractional data, but its
@@ -139,25 +139,24 @@ request StepsOf1. This is a real contract gap outside those active combinations,
 their current artifacts. Keep it open explicitly rather than treating successful VQA as a proof
 of totality for arbitrary targets.
 
-The remaining proposal is a **declarative guarantee within an accepted payload family**:
+The chosen approach is **label-variant matching with constrained generation**, specified in
+[label-variant-matching.md](label-variant-matching.md). It supersedes the earlier recommendation
+to reject every target with an ambiguous fallback domain.
 
-1. Type compatibility still establishes the mathematical family independently of labels.
-2. The filter describes an accepted domain, not additional capabilities or a generator dispatch.
-3. Admit a target only when every generator configuration reachable after schema resolution,
-   including fallback alternatives, guarantees that domain. One passing seed is insufficient.
-4. In this example, activating unit-step presentation requires a guaranteed subdivision of one.
-   An explicit fractional request fails; an ambiguous fallback also fails under this policy.
-5. Compute such guarantees from declarative finite choices/bounds and their tested payload
-   contracts, not arbitrary code execution or the Cartesian product of every schema parameter.
-   Unknown guarantees fail closed, with a diagnostic explaining the unproved boundary.
+1. Keep complete payload-family compatibility and positive capability coverage as candidate tests.
+2. Evaluate generator and view predicates over original target labels and each candidate's selected
+   semantic labels. Views do not reference generator parameter names or generated data.
+3. Retain valid joint label selections as a serializable generation plan. An unspecified choice may
+   be narrowed; an explicit request must not be rewritten.
+4. Carry the plan through configuration resolution, seeded generation, rendering, retries, and replay.
+   Generation may randomize within accepted alternatives but must not reopen excluded choices.
+5. Preserve today's sample count per target/generator/view tuple rather than sampling every variant.
+6. Migrate required/rejected target policies into equivalent predicates through one shared evaluator.
 
-**Review before implementation:** should a filter only reject an ambiguous domain (recommended),
-or also restrict the generator's fallback choices to the accepted subset? The latter is constraint
-propagation into generator configuration and requires a shared resolution contract; it is not
-merely another name for `requiredLabels`. Neither policy is implemented here. In particular,
-`requiredLabels` and `rejectedLabels` retain their target-only semantics and no pair-conditional
-capability API has been added. The accepted-family migrations and fail-closed type matcher are
-independent of this remaining decision.
+For the example above, an omitted number kind can now be planned as integer-only when unit steps
+are requested. Explicit fractions remain incompatible with that mode. No runtime implementation
+of this new plan exists yet; current required/rejected semantics and the existing matching behavior
+remain in place until the staged migration is implemented.
 
 ## Verification checkpoint — completed 2026-09-24
 
@@ -183,8 +182,9 @@ independent of this remaining decision.
   are 32 added and 32 removed identities from the family/view registrations, with no attempt
   shifts, seed-scheme changes or unrelated image churn. Cache changes are committed separately
   from implementation and documentation.
-- **Remaining decision:** declarative domain policy, as described above. Canonical generation,
-  VQA and cache verification no longer block the completed payload-family/type-safety work.
+- **Follow-up:** domain policy was unresolved at this checkpoint. The later label-variant decision
+  above now has an implementation plan. Canonical generation, VQA and cache verification no longer
+  block the completed payload-family/type-safety work.
 
 ## Adoption order and boundaries
 
