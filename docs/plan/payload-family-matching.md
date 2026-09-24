@@ -158,7 +158,7 @@ merely another name for `requiredLabels`. Neither policy is implemented here. In
 capability API has been added. The accepted-family migrations and fail-closed type matcher are
 independent of this remaining decision.
 
-## Verification checkpoint — 2026-09-23
+## Verification checkpoint — completed 2026-09-24
 
 - Commits: `2b8ca71` arithmetic, `8553213` shapes, `d4acadd` fractions, `c30c171` strict matching.
 - `npm run test:coverage`: 486 files and 2,666 tests pass. Generator coverage thresholds pass
@@ -172,12 +172,18 @@ independent of this remaining decision.
 - Inspected question and solution examples for fraction classification, count-based shape
   construction, circle rotation and excluded quadrilaterals. Their intended evidence is visible;
   classification questions no longer disclose the explicit "same point" verdict.
-- Offline audit confirms current freshness, renderer identity and dataset structure. Split
-  integrity passes. There are 47 missing VQA cache records and 47 obsolete records.
-- **Pending:** upload the 47 current uncached PNGs and their full prompts to Gemini, resolve any
-  failures, rerun strict offline audit and churn review, then commit cache changes separately.
-  Approval review blocked this batch's upload pending explicit user authorization; no upload or
-  cache mutation was performed. The positive micro-filter decision above remains open separately.
+- With explicit user approval, all 47 uncached PNGs and their complete prompts were evaluated by
+  Gemini and passed. The other 1,897 evaluations were reused; 47 obsolete cache records were pruned.
+- Strict offline audit passes with exact coverage of all 1,944 samples (1,632 train and 312
+  validation): zero failing, missing, stale, duplicate or malformed records, and no freshness,
+  renderer-identity or dataset-structure issues. Split integrity passes.
+- Churn review: 1,911 retained identities keep identical images; the one changed retained image
+  is the intended removal of the fraction-classification question's "same point" caption. There
+  are 32 added and 32 removed identities from the family/view registrations, with no attempt
+  shifts, seed-scheme changes or unrelated image churn. Cache changes are committed separately
+  from implementation and documentation.
+- **Remaining decision:** positive micro-filter policy, as described above. Canonical generation,
+  VQA and cache verification no longer block the completed payload-family/type-safety work.
 
 ## Adoption order and boundaries
 

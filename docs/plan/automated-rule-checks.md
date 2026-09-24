@@ -250,6 +250,12 @@ of registration moves and one newly supported hexagon drawing. The positive micr
 remains a separate review decision, with concrete whole/fractional/fallback evidence in the
 [payload-family plan](payload-family-matching.md#positive-micro-filter-decision).
 
+Verification completed on 2026-09-24: all 47 new Gemini evaluations pass, strict offline audit
+confirms exact passing coverage for all 1,944 CCSS images, and split integrity is clean. Churn is
+confined to the intended classification-caption correction and family/view registration changes.
+The [verification checkpoint](payload-family-matching.md#verification-checkpoint--completed-2026-09-24)
+records the complete evidence; no new upload or cache work remains for these migrations.
+
 Acceptance: direct, indexed, and delta matching agree; no active target is silently lost; a new
 incompatible union member cannot reach a narrower view. Rebuild the generation graph after matching
 machinery changes, regenerate the affected canonical content, inspect question/solution evidence,
