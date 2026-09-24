@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {hasLabel, matchAllExactLabels} from '../../../lib/resolvers.ts';
+import {hasLabel, matchAllExactLabels, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
@@ -30,11 +30,6 @@ export const spec: GeneratorSpec = {
 };
 
 export const ShapeClassifyAttributesGeneratorSchema = {
-    shapeAttributes: [
-        [Scope.ShapeAttributes],
-        hasLabel(Scope.ShapeAttributes),
-        [[Scope.ShapeAttributes]]
-    ],
     subsumption: [
         [Area.ShapeSubsumption],
         hasLabel(Area.ShapeSubsumption)
@@ -64,8 +59,15 @@ export const ShapeClassifyAttributesGeneratorSchema = {
         matchAllExactLabels
     ],
     attributeCounts: [
-        [Scope.VertexCount, Scope.AngleCount, Scope.FaceCount, Scope.Equal],
-        matchAllExactLabels
+        [Scope.ShapeAttributes, Scope.VertexCount, Scope.AngleCount, Scope.FaceCount, Scope.Equal],
+        selectExactLabelSetMap([
+            [[], [] as string[]],
+            [[Scope.ShapeAttributes], [] as string[]],
+            [[Scope.VertexCount], [Scope.VertexCount] as string[]],
+            [[Scope.AngleCount], [Scope.AngleCount] as string[]],
+            [[Scope.FaceCount, Scope.Equal], [Scope.FaceCount, Scope.Equal] as string[]]
+        ]),
+        [[Scope.ShapeAttributes], [Scope.VertexCount], [Scope.AngleCount], [Scope.FaceCount, Scope.Equal]]
     ]
 } as const;
 

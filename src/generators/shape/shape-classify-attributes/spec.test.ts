@@ -1,9 +1,21 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
+import {labelSetHash} from '../../../lib/utils.ts';
+import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {ShapeClassifyAttributesGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {ShapeClassifyAttributesGeneratorSchema, spec} from './spec.ts';
+
+function generateWithPlannedLabels(generator: ShapeClassifyAttributesGenerator, labels: string[]) {
+    const domains = normalizeSchemaChoices(generator.schema, labels, 'generator');
+    if (domains.some(domain => domain.alternatives.length !== 1)) {
+        throw new Error('Spec regression requires one complete attribute selection per field.');
+    }
+    const bindings = Object.fromEntries(domains.map(domain => [domain.field, domain.alternatives[0].labels]));
+    const resolved = resolveSchemaChoices(generator.schema, labels, bindings);
+    const stub = generator.generate(resolved.config);
+    return stub ? {...stub, labels: resolved.resolvedLabels} : null;
+}
 
 describe('ShapeClassifyAttributesGenerator spec integration', () => {
     let generator: ShapeClassifyAttributesGenerator;
@@ -15,10 +27,11 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
 
     it('declares the shape-recognition and shape-attribute capabilities', () => {
         expect(spec.generalLabels).toEqual([Area.ShapeClassification]);
+        expect(ShapeClassifyAttributesGeneratorSchema.attributeCounts[0]).toContain(Scope.ShapeAttributes);
     });
 
     it('resolves the broad shape-attributes context', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithPlannedLabels(generator, [
             Area.ShapeClassification,
             Scope.ShapeAttributes
         ]);
@@ -28,7 +41,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     });
 
     it('generates the quadrilateral subsumption target', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithPlannedLabels(generator, [
             Area.ShapeSubsumption,
             Scope.ShapeAttributes,
             Ability.ConceptClassification,
@@ -42,7 +55,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     it('does not turn incidental runtime shape selection into a schema capability', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const stub = generateWithLabels(generator, [
+            const stub = generateWithPlannedLabels(generator, [
                 Area.ShapeClassification,
                 Scope.ShapeAttributes
             ])!;
@@ -51,8 +64,33 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         }
     });
 
+    it.each([
+        [[], [Scope.ShapeAttributes], []],
+        [[Scope.ShapeAttributes], [Scope.ShapeAttributes], []],
+        [[Scope.VertexCount], [Scope.VertexCount], [Scope.VertexCount]],
+        [[Scope.ShapeAttributes, Scope.VertexCount], [Scope.VertexCount], [Scope.VertexCount]],
+        [[Scope.AngleCount], [Scope.AngleCount], [Scope.AngleCount]],
+        [[Scope.ShapeAttributes, Scope.AngleCount], [Scope.AngleCount], [Scope.AngleCount]],
+        [[Scope.FaceCount, Scope.Equal], [Scope.Equal, Scope.FaceCount], [Scope.FaceCount, Scope.Equal]],
+        [[Scope.ShapeAttributes, Scope.FaceCount, Scope.Equal], [Scope.Equal, Scope.FaceCount], [Scope.FaceCount, Scope.Equal]]
+    ])('resolves the complete attribute mode for %j without changing count semantics', (requested, emitted, config) => {
+        const schema = {attributeCounts: ShapeClassifyAttributesGeneratorSchema.attributeCounts};
+        const [domain] = normalizeSchemaChoices(schema, requested, 'generator');
+        expect(domain.alternatives.map(alternative => alternative.labels)).toEqual([emitted]);
+        const planned = resolveSchemaChoices(schema, requested, {attributeCounts: emitted});
+        expect(planned.config.attributeCounts).toEqual(config);
+        expect(planned.resolvedLabels).toEqual(emitted);
+    });
+
+    it('rejects incompatible count modes from metadata alone', () => {
+        const schema = {attributeCounts: ShapeClassifyAttributesGeneratorSchema.attributeCounts};
+        const [domain] = normalizeSchemaChoices(schema,
+            [Scope.ShapeAttributes, Scope.VertexCount, Scope.AngleCount], 'generator');
+        expect(domain.alternatives).toEqual([]);
+    });
+
     it('resolves the vertex-count classification path', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithPlannedLabels(generator, [
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.VertexCount
@@ -65,7 +103,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     });
 
     it('resolves the angle-count classification path', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithPlannedLabels(generator, [
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.AngleCount,
@@ -80,7 +118,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
     });
 
     it('resolves the equal-face-count classification path', () => {
-        const stub = generateWithLabels(generator, [
+        const stub = generateWithPlannedLabels(generator, [
             Area.ShapeClassification,
             Scope.ShapeAttributes,
             Scope.FaceCount,
@@ -112,7 +150,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
             Ability.ConceptClassification
         ];
         expect(labelSetHash(labels)).toBe(expectedHash);
-        const stub = generateWithLabels(generator, labels);
+        const stub = generateWithPlannedLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(task);
         expect(stub!.labels).toContain(criterion);
@@ -128,7 +166,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
             Ability.VisualRecognition
         ];
         expect(labelSetHash(labels)).toBe('7352de55');
-        const stub = generateWithLabels(generator, labels);
+        const stub = generateWithPlannedLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('classify-right-triangle-category');
         expect(stub!.labels).toEqual(expect.arrayContaining([
@@ -148,7 +186,7 @@ describe('ShapeClassifyAttributesGenerator spec integration', () => {
         criterion,
         task
     ) => {
-        const stub = generateWithLabels(generator, [criterion, Ability.VisualRecognition]);
+        const stub = generateWithPlannedLabels(generator, [criterion, Ability.VisualRecognition]);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe(task);
     });
