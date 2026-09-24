@@ -37,7 +37,7 @@ describe('documentation discovery', () => {
     it('recursively collects Markdown from docs and skills, with stable repository-relative paths', () => {
         const root = fixture();
         const paths = [
-            'docs/spec-general.md', 'docs/plan/nested/migration.md',
+            'docs/spec-general.md', 'docs/plan/nested/migration.md', 'docs/history/migration.md',
             '.agents/skills/review/SKILL.md', '.agents/skills/review/references/nested/EXAMPLE.MD',
             'DOCS.md', 'AGENTS.md', 'README.md',
         ];
@@ -83,6 +83,7 @@ function commandFixture(): string {
     write(root, 'docs/README.md', '# References\n[Rules](spec-general.md)\n');
     write(root, 'docs/spec-general.md', '# Rules\n### SPEC-1 — Matching\n## Audit\nSPEC-1\n');
     write(root, 'docs/plan/nested/migration.md', '# Migration\nSee SPEC-1.\n');
+    write(root, 'docs/history/migration.md', '# Completed migration\nSee SPEC-1.\n');
     write(root, '.agents/skills/review/SKILL.md', '# Review\n[Guide](references/guide.md#steps)\n');
     write(root, '.agents/skills/review/references/guide.md', '# Guide\n## Steps\nSee SPEC-1.\n');
     return root;
@@ -93,7 +94,7 @@ describe('public check:docs command', () => {
         const result = runCheckDocs(commandFixture());
         expect(result.error).toBeUndefined();
         expect(result.status, result.stdout + result.stderr).toBe(0);
-        expect(result.stdout).toContain('Files Scanned:     5');
+        expect(result.stdout).toContain('Files Scanned:     6');
         expect(result.stdout).toContain('Documentation references valid');
     }, 35_000);
 
