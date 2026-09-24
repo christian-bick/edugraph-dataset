@@ -1,6 +1,6 @@
 # Label-variant matching and constrained generation
 
-Status: production handover implemented on `feat/label-variant-matching`; final verification and rollout are in progress. Agreed design recorded on 2026-09-24 against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
+Status: implemented and verified on `feat/label-variant-matching` on 2026-09-24. Agreed design recorded against `7be53701b7d7d2e1128d42f323fc4074c1a09bb9`.
 
 ## Implementation checkpoint
 
@@ -20,8 +20,36 @@ The implementation checkpoint passes type checking, all 2,955 tests in 521 files
 integration tests), every generator coverage threshold, CCSS/test contract checks, documentation
 validation, and the browser build. The new planner, resolution, replay, metadata, and rendering
 boundaries also have focused coverage reports. Pure target-policy and dataset-metadata modules
-keep server hashing and filesystem dependencies out of browser imports. Canonical dataset and
-visual validation results will be recorded below when rollout verification finishes.
+keep server hashing and filesystem dependencies out of browser imports.
+
+## Completed rollout verification
+
+Canonical Docker generation with the deliberate graph reset completed without rendering failures:
+
+| Dataset | Matched tuples | Train images | Validation images | Total images |
+|---|---:|---:|---:|---:|
+| CCSS | 830 | 1,632 | 304 | 1,936 |
+| Test | 691 | 1,368 | 318 | 1,686 |
+
+- Replayed every published row on Windows from the actual Docker-generated metadata: all 3,622 plan/input identities, content and task fingerprints, prepared view configurations, emitted labels, seeds, attempts, and selection receipts matched exactly. This includes 270 solutions retaining a question's actual origin and all 80 associated-target receipts. Every referenced image exists.
+- An unchanged canonical `--spec=test --affected` run reused all 691 persisted tuples, scanned zero targets, changed zero pairs, and rendered or published nothing. It reused 9,696 graph nodes. The container cannot use this Windows worktree's development observation shortcut, so this verifies authoritative graph reuse rather than the startup shortcut.
+- The published CCSS/test datasets passed `npm run check -- --spec=ccss,test`, including types, source/runtime contracts, labels, documentation, standards, and split integrity. Neither dataset has cross-split content leakage or duplicate configured tasks within a view.
+- Dependency regression tests cover isolated rule, imported-helper, schema-default, and ontology edits, including newly admitted indexed matches. Renderer-only edits preserve matching identities. Exhaustive reference fixtures verify factored planning and declared-query enforcement; connected choice groups have an explicit 4,096-assignment bound.
+- Manual inspection of the integer unit-step and fractional test line plots passed. Fresh Gemini validation of all 20 CCSS `measurement-data` images passed, across both splits and both consumers. The updated VQA cache records their plans and replay recipes.
+- `npm run report:churn -- --spec=ccss --ref=7be53701b7d7d2e1128d42f323fc4074c1a09bb9` reports zero changed image identities, attempts, or seeds. Only the 20 measurement cache records were refreshed; the other 1,924 cache rows were untouched. This establishes pixel stability for the validated measurement slice, not for every regenerated image.
+
+Verification logs and exhaustive probe reports are in ignored `temp/label-variants-*`,
+`temp/label-plan-*`, and `temp/persisted-plan-replay-*`; immutable generated artifacts are
+under ignored `out/`. The committed measurement VQA cache and this checkpoint retain the
+reviewable rollout evidence.
+
+Remaining diagnostics are outside label compatibility: two test arithmetic-estimation routes
+have impossible numeric ranges and reproduce the same all-null result with the legacy
+generator. Ordinary duplicate/retry limits leave 49 CCSS and 22 test validation allocations
+without a unique validation sample; the checker also reports incomplete validation view/label
+coverage and 12 CCSS duplicate-label target clusters. These warnings do not invalidate the
+emitted rows or their replay receipts. Numeric feasibility, sample-count policy, and broader
+coverage changes remain separate work.
 
 ## Objective and agreed decisions
 
