@@ -75,6 +75,20 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
                         {isSolutionView ? numObjects : ''}
                     </div>
                 </div>
+                <p className={`mt-4 text-base leading-relaxed text-center ${isSolutionView ? 'text-green-700' : 'text-slate-700'}`}>
+                    {isSolutionView ? (
+                        numObjects === 0 ? (
+                            <>There are no objects to count, so the total is {numObjects}.</>
+                        ) : (
+                            <>
+                                Count in order from one, matching each counting number to a different object.
+                                The last number gives the total because no object was skipped or counted twice.
+                            </>
+                        )
+                    ) : (
+                        <>Write the total in digits. Explain how you counted and why your count gives the total.</>
+                    )}
+                </p>
             </div>
         </div>
     );
