@@ -1,2 +1,2 @@
-- **Identity:** A visible target number and two distinct part-pair response areas define the task of decomposing it in two ways.
-- **Modes:** Question Mode leaves all parts empty; Solution Mode reveals two different pairs that each compose the target.
+- **Identity:** Two colored groupings of one whole support two different decompositions and an explanation of how and why counting and adding the parts recovers the whole.
+- **Modes:** Question Mode leaves the part counts blank and asks for the explanation. Solution Mode reveals both pairs and explains that each object is counted once when the two parts are added.

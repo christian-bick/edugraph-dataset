@@ -127,6 +127,18 @@ const OperationsDecomposeCore = ({ config: _config, payload }: CoreProps) => {
                         </div>
                     </div>
                 </div>
+                <p className={`mt-5 text-base leading-relaxed text-center font-sans ${isSolutionView ? 'text-green-700' : 'text-slate-700'}`}>
+                    {isSolutionView ? (
+                        <>
+                            Count each color group separately, then add the two counts.
+                            Each object belongs to one group, so both pictures count all {targetNumber} objects exactly once.
+                        </>
+                    ) : (
+                        <>
+                            Complete both sums. Explain how you counted the groups and why adding their counts gives {targetNumber} each time.
+                        </>
+                    )}
+                </p>
             </div>
         </div>
     );
