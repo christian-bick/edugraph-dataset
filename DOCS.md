@@ -338,6 +338,15 @@ The only public dataset-generation entry point.
 *   **Function**: Reads the selected logical snapshot once and outputs a markdown report detailing absolute frequencies of individual labels and unique label combinations. Standard reports live at `out/reports/dataset-<spec>/coverage-report.md`, outside the atomic pointer. `--spec=union` analyzes the materialized release union and writes `out/dataset/coverage-report.md` for publication.
 
 ### `src/scripts/validate-dataset.ts`
+
+Ontology label text uses `edugraph-ts`'s `involvementStatement` helper. Each prompt retains the
+exact label identifier and supplies a readable involvement statement with the definition and
+optional supporting comment. Comments are appended directly (`commentPrefix: ''`) because they
+can explain boundaries as well as give examples. The complete statement participates in both
+the VQA context hash and the graph's ontology-definition hash: label, definition, or comment
+changes invalidate judgments without changing image identity. After adopting this machinery,
+rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-graph` before VQA.
+
 *   **Execution**: live mode: `npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--rebuild-graph] [--force] [--concurrency=<positive_integer>] [--log-prompts] [--report-only] [--report=<path>]`; strict audit: `npm run audit:dataset -- --spec=<spec_module>`
 *   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=ccss` → `out/dataset-ccss/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
 *   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against exactly two visual contracts: the central view checklist and the selected leaf view's required checklist. The evaluator role is authored in `src/validation/vqa/system-instruction.md`; response-schema and pass/fail semantics live in `src/lib/vqa-policy.ts`. The user content contains only the mode, ontology labels, a generic `## View-specific checklist` heading with the heading-free leaf criteria, and the global checklist under its own H2. Validation runs per standard — `--spec=test` targets the small `out/dataset-test/` slice for fast iteration. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.

@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { definition, type CompetencyDescriptor } from 'edugraph-ts';
+import {bundledContext} from 'edugraph-ts/generated';
+import type {OntologyContext} from 'edugraph-ts/core';
 import type {WorkCounters} from './work-counters.ts';
 import {currentValidationPolicyInputHash} from './vqa-policy.ts';
 import type {GenerationPlan} from '../types/compatibility.ts';
@@ -14,6 +15,7 @@ export type VqaLabelVerdict = 'defendable' | 'uncertain' | 'not_defendable';
 export interface VqaLabelDefinition {
     iri: string;
     label: string;
+    /** Complete involvement statement, including any supporting ontology comment. */
     definition: string;
 }
 
@@ -96,16 +98,17 @@ export function computeChecklistHash(
     return computeChecklistContentHash(contents);
 }
 
-export function resolveVqaLabelDefinitions(labels: readonly string[]): VqaLabelDefinition[] {
+export function resolveVqaLabelDefinitions(
+    labels: readonly string[],
+    context: OntologyContext = bundledContext
+): VqaLabelDefinition[] {
     const byIri = new Map<string, VqaLabelDefinition>();
     for (const rawLabel of labels) {
         const iri = rawLabel.startsWith(EDUGRAPH_NAMESPACE)
             ? rawLabel
             : `${EDUGRAPH_NAMESPACE}${rawLabel}`;
-        const labelDefinition = definition(iri as CompetencyDescriptor);
-        if (!labelDefinition) {
-            throw new Error(`Cannot visually validate ontology label without a definition: "${rawLabel}"`);
-        }
+        // Comments may explain boundaries as well as give examples; append their prose directly.
+        const labelDefinition = context.involvementStatement(iri, {commentPrefix: ''});
         byIri.set(iri, {
             iri,
             label: iri.slice(EDUGRAPH_NAMESPACE.length),

@@ -12,6 +12,7 @@ import type {OntologyProvenance} from './coverage-identity.ts';
 import {createDependencyGraphSnapshot, planDependencyDelta} from './dependency-planner.ts';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {Area, Scope, Ability, bundledContext} from 'edugraph-ts/generated';
+import {computeLabelContextHash, resolveVqaLabelDefinitions} from './vqa-cache.ts';
 
 const schema = bundledContext.statements.filter(statement => statement.sourceKind === 'schema');
 const fact = (subject: string, predicate: string, object: string): OntologyStatement =>
@@ -29,6 +30,41 @@ const ontologyProvenance = (version: string): OntologyProvenance => ({
 });
 
 describe('external semantic deltas', () => {
+    it.each(['label', 'comment'])('invalidates VQA alone when an ontology %s changes', annotation => {
+        const iri = 'http://edugraph.io/edu/Example';
+        const context = (text: string) => createOntologyContext([
+            ...schema, descriptor(iri), definition(iri, 'A reusable concept.'),
+            {...fact(iri, `http://www.w3.org/2000/01/rdf-schema#${annotation}`, text), objectKind: 'Literal'}
+        ]);
+        const before = context('Original text');
+        const after = context('Revised text');
+        const snapshot = (source: typeof before) => buildOntologySemanticSnapshot({
+            provenance: ontologyProvenance('v0.29.0'), context: source
+        });
+        const prior = snapshot(before);
+        const current = snapshot(after);
+        expect(current.entities[iri].identity_hash).toBe(prior.entities[iri].identity_hash);
+        expect(current.relations).toEqual(prior.relations);
+        expect(current.entities[iri].definition_hash).not.toBe(prior.entities[iri].definition_hash);
+        expect(computeLabelContextHash(resolveVqaLabelDefinitions([iri], after)))
+            .not.toBe(computeLabelContextHash(resolveVqaLabelDefinitions([iri], before)));
+        expect(resolveVqaLabelDefinitions([iri], after)[0].definition).toContain('Revised text');
+        const graph = (state: typeof prior) => createDependencyGraphSnapshot([
+            {id: 'entity', kind: 'ontology-entity', input_hash: state.entities[iri].identity_hash, dependencies: []},
+            {id: 'text', kind: 'ontology-entity', input_hash: state.entities[iri].definition_hash, dependencies: []},
+            {id: 'image', kind: 'image', input_hash: 'pixels', dependencies: ['entity']},
+            {id: 'vqa', kind: 'vqa-record', input_hash: 'verdict', dependencies: ['image', 'text']}
+        ]);
+        expect(planDependencyDelta(graph(prior), graph(current)).affected_nodes).toEqual(['text', 'vqa']);
+    });
+
+    it('rejects missing VQA definitions while allowing incomplete inventory snapshots', () => {
+        const iri = 'http://edugraph.io/edu/Incomplete';
+        const context = createOntologyContext([...schema, descriptor(iri)]);
+        expect(() => buildOntologySemanticSnapshot({provenance: ontologyProvenance('v0.29.0'), context})).not.toThrow();
+        expect(() => resolveVqaLabelDefinitions([iri], context)).toThrow('Missing definition');
+    });
+
     it('tracks rule queries, choice defaults, and resolver context that are not positive capabilities', async () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-semantic-choice-'));
         const dependency = 'https://example.test/ontology-v1.tgz';

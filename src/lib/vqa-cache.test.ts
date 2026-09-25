@@ -89,7 +89,7 @@ describe('VQA Cache Module', () => {
         expect(context.labelDefinitions).toEqual([{
             iri: 'http://edugraph.io/edu/NumbersWithZero',
             label: 'NumbersWithZero',
-            definition: 'Involves zero as a number.'
+            definition: 'Involves Numbers With Zero: Numeric contexts containing zero as an involved numerical value. A zero-valued operand or result. A zero digit within the numeral 10 does not by itself establish a zero-valued quantity.'
         }]);
     });
 
@@ -101,12 +101,12 @@ describe('VQA Cache Module', () => {
         ]);
 
         expect(definitions.map(item => item.label)).toEqual(['NumbersWithoutZero', 'NumbersWithZero']);
-        expect(definitions[0].definition).toBe('Does not involve zero as a number.');
+        expect(definitions[0].definition).toContain('Involves Numbers Without Zero: Numeric contexts in which zero does not occur as an involved numerical value.');
     });
 
     it('should reject ontology labels without definitions', () => {
         expect(() => resolveVqaLabelDefinitions(['NotAnOntologyLabel']))
-            .toThrow('Cannot visually validate ontology label without a definition');
+            .toThrow('Unknown descriptor: http://edugraph.io/edu/NotAnOntologyLabel');
     });
 
     it('should invalidate the context when labels or definitions change', () => {

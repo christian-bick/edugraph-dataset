@@ -78,7 +78,7 @@ describe('vqa-evaluator', () => {
             labelDefinitions: [{
                 iri: 'http://edugraph.io/edu/NumbersWithZero',
                 label: 'NumbersWithZero',
-                definition: 'Involves zero as a number.'
+                definition: 'Involves Numbers With Zero: Numeric contexts containing zero as an involved numerical value.'
             }],
             globalChecklist: '## Global rules\n\n- Global criterion.',
             viewChecklist: '- **Identity:** View criterion.\n- **Modes:** Mode criterion.'
@@ -89,7 +89,7 @@ describe('vqa-evaluator', () => {
         expect(prompt.userPrompt).not.toContain('senior Visual QA engineer');
         expect(prompt.userPrompt).toMatch(/^Mode: Question Mode/);
         expect(prompt.userPrompt).toContain('## Ontology labels');
-        expect(prompt.userPrompt).toContain('NumbersWithZero: Involves zero as a number.');
+        expect(prompt.userPrompt).toContain('NumbersWithZero: Involves Numbers With Zero: Numeric contexts containing zero as an involved numerical value.');
         expect(prompt.userPrompt).toContain('## View-specific checklist\n\n- **Identity:** View criterion.');
         expect(prompt.userPrompt).toContain('## Global rules\n\n- Global criterion.');
         expect(prompt.userPrompt.indexOf('## View-specific checklist'))
@@ -214,7 +214,8 @@ describe('vqa-evaluator', () => {
         expect(prompt).toContain('## View-specific checklist');
         expect(prompt).toContain('A vertical arithmetic equation presents all operands and makes the result the single visible unknown.');
         expect(prompt).toContain('## Global Visual QA Checklist');
-        expect(prompt).toContain('NumbersWithZero: Involves zero as a number.');
+        expect(prompt).toContain('NumbersWithZero: Involves Numbers With Zero: Numeric contexts containing zero as an involved numerical value.');
+        expect(prompt).toContain('A zero digit within the numeral 10 does not by itself establish a zero-valued quantity.');
         expect(prompt).not.toContain('Generator:');
         expect(prompt).not.toContain('View:');
         expect(prompt).not.toContain('sections below are concatenated');

@@ -15,6 +15,7 @@ export type OntologyDimension = 'Area' | 'Scope' | 'Ability' | 'unknown';
 export interface OntologySemanticEntity {
     dimension: OntologyDimension;
     identity_hash: string;
+    /** Hashes the complete VQA involvement statement, including its display label and comment. */
     definition_hash: string;
 }
 
@@ -101,7 +102,8 @@ export function buildOntologySemanticSnapshot(options: {
             dimension,
             identity_hash: snapshotHash({iri, dimension,
                 constituentChildren: radixSortUtf8([...eligibility.constituentChildren])}),
-            definition_hash: snapshotHash({iri, definition: descriptor.definitions[0] ?? ''})
+            definition_hash: snapshotHash({iri, definition: descriptor.definitions.some(text => text.trim())
+                ? context.involvementStatement(iri, {commentPrefix: ''}) : ''})
         });
         for (const [type, property] of Object.entries(RELATION_IRIS)) {
             for (const target of context.related(iri, property)) {

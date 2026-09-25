@@ -144,6 +144,8 @@ Live Gemini validation is deliberately separate: generate canonically, then run
 invalidate affected records automatically. Response-schema, pass/fail implementation, evaluator
 model, and validation-pipeline changes are machinery: rebuild the graph when their behavior changed,
 and add `--force` when unchanged images must actually be re-evaluated by Gemini.
+Ontology context includes the library's involvement statements with their supporting comments.
+For a large rerun, use `--concurrency=4` to keep live requests bounded.
 
 **2d. Audit Label Architecture**
 Inspect label-dimension cardinality, exact generator/view capability provenance, schema ownership,
