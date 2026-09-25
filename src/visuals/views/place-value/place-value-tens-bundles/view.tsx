@@ -92,6 +92,25 @@ const PlaceValueTensBundlesCore = ({config: _config, payload}: CoreProps) => {
                     </div>
                     {isSingleTen && <span className="text-slate-500">ones</span>}
                 </div>
+                <p className={`mt-5 text-base leading-relaxed text-center font-sans ${isSolutionView ? 'text-emerald-700' : 'text-slate-700'}`}>
+                    {isSolutionView ? (
+                        isSingleTen ? (
+                            <>
+                                Count each of the {data.target} ones once, then group them as one ten.
+                                Every object is kept, so the total stays {data.target}.
+                            </>
+                        ) : (
+                            <>
+                                Count one full frame at a time by tens. Each frame adds 10 ones,
+                                so {data.tens} frames give {data.target} ones.
+                            </>
+                        )
+                    ) : (
+                        isSingleTen
+                            ? 'Explain how the ones are grouped and why the total stays the same.'
+                            : 'Explain how you counted the tens and why your method gives the total.'
+                    )}
+                </p>
             </div>
         </div>
     );

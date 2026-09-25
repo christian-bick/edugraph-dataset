@@ -1,2 +1,2 @@
-- **Identity:** Separate ones becoming one grouped ten, or complete tens representing a multiple of ten, make the place-value relationship identifiable.
-- **Modes:** Question Mode leaves the requested quantity empty; Solution Mode reveals the value supported by the unchanged grouping.
+- **Identity:** Separate ones becoming one grouped ten, or complete tens representing a multiple of ten, support finding the total and explaining how and why the counting method works.
+- **Modes:** Question Mode leaves the requested quantity and explanation unanswered. Solution Mode reveals the value and explains why grouping preserves all the ones or why each counted ten contributes ten ones.
