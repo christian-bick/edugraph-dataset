@@ -1,0 +1,1139 @@
+{
+  "spec": "ccss",
+  "library_version": "0.29.0",
+  "baseline_commit": "644254d",
+  "concurrency": 4,
+  "evaluated": 1936,
+  "passed": 1885,
+  "failed": 51,
+  "semantic_review_samples": 38,
+  "evaluator_disagreement_samples": 13,
+  "revalidation": [
+    {
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-boxes",
+      "evaluated": 44,
+      "failures_before": 1,
+      "failures_after": 1,
+      "resolved": 0,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-vertical-inversion",
+      "evaluated": 32,
+      "failures_before": 1,
+      "failures_after": 0,
+      "resolved": 1,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "counting-basic",
+      "view": "counting-objects-parity",
+      "evaluated": 4,
+      "failures_before": 1,
+      "failures_after": 0,
+      "resolved": 1,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "fraction-arithmetic",
+      "view": "fractions-understanding-model",
+      "evaluated": 10,
+      "failures_before": 1,
+      "failures_after": 0,
+      "resolved": 1,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "fraction-arithmetic",
+      "view": "fractions-word-problem",
+      "evaluated": 16,
+      "failures_before": 2,
+      "failures_after": 2,
+      "resolved": 1,
+      "newly_rejected": 1
+    },
+    {
+      "generator": "measurement-order",
+      "view": "measure-order",
+      "evaluated": 4,
+      "failures_before": 1,
+      "failures_after": 0,
+      "resolved": 1,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "evaluated": 22,
+      "failures_before": 7,
+      "failures_after": 4,
+      "resolved": 5,
+      "newly_rejected": 2
+    },
+    {
+      "generator": "shape-unit-square-grid",
+      "view": "shape-square-array-inversion",
+      "evaluated": 2,
+      "failures_before": 1,
+      "failures_after": 1,
+      "resolved": 0,
+      "newly_rejected": 0
+    },
+    {
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "evaluated": 14,
+      "failures_before": 6,
+      "failures_after": 4,
+      "resolved": 3,
+      "newly_rejected": 1
+    },
+    {
+      "generator": "measurement-data",
+      "view": "measurement-line-plot",
+      "evaluated": 10,
+      "failures_before": 1,
+      "failures_after": 0,
+      "resolved": 1,
+      "newly_rejected": 0
+    }
+  ],
+  "findings": [
+    {
+      "classification": "semantic_review_required",
+      "topic": "concrete-inference-versus-concept-derivation",
+      "sample_key": "1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0",
+      "generator": "measurement-mediated-comparison",
+      "view": "measure-mediated-comparison",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "ConceptDerivation",
+          "verdict": "not_defendable",
+          "evidence": "There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ConceptDerivation: There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length).",
+      "validated_at": "2026-09-26T08:57:59.788Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The task asks to represent a single point in time ('half past eleven') on a digital clock, which does not involve determining or comparing the durations of events or elapsed time intervals."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires displaying a specific point in time on a digital clock, rather than determining or comparing durations or intervals of time.",
+      "validated_at": "2026-09-25T22:39:25.835Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration",
+      "sample_key": "1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0",
+      "generator": "time",
+      "view": "time-analog",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "There is no measurement of duration, comparison of events, or interval calculation between start and finish times; it is simply reading a static time from a clock."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label MeasuringTime is not defendable because the exercise only involves reading a single clock to identify the current time (10:30). It does not involve determining or comparing the durations of events or calculating intervals between start and finish times.",
+      "validated_at": "2026-09-25T22:38:48.724Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration",
+      "sample_key": "1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0",
+      "generator": "time",
+      "view": "time-analog-construction",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The exercise only asks to represent a single static point in time ('12:00') on the clock, without involving any measurement of duration, elapsed time, or comparison of intervals."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves representing a single static point in time on an analog clock rather than measuring or comparing the durations of events or intervals.",
+      "validated_at": "2026-09-25T22:39:08.658Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration",
+      "sample_key": "1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0",
+      "generator": "time",
+      "view": "time-analog",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: MeasuringTime: This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals.",
+      "validated_at": "2026-09-26T08:59:49.928Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "symbol-scale-versus-sequence-steps",
+      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
+      "generator": "statistical-graphs",
+      "view": "data-picture-graph-arithmetic",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "StepsOf1",
+          "verdict": "not_defendable",
+          "evidence": "There are no lists or sequences of consecutive numbers changing by steps of 1."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1.",
+      "validated_at": "2026-09-25T22:38:26.936Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "sequence-position-and-component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "The number 1 is involved as a separate quantity ('1 one'), which is less than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is involved as a separate quantity ('1 one'), which is less than 10.",
+      "validated_at": "2026-09-25T22:16:12.713Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "sequence-position-and-component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "The number 1 is involved in the ones place and is explicitly shown ('1 one', '1 = 1'), which is smaller than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label NumbersLarger10 is not defendable because the number 1 is explicitly involved as a quantity in the ones place ('1 one', '1 = 1'), which is strictly smaller than 10.",
+      "validated_at": "2026-09-25T22:44:09.180Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "sequence-position-and-component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Before",
+          "verdict": "not_defendable",
+          "evidence": "The exercise is about finding 10 less (decrementing), not finding a preceding element in a sequence or chronological ordering."
+        },
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "Several numbers shown and used, such as 5, 6, and 1, have absolute values less than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Before: The exercise is about finding 10 less (decrementing), not finding a preceding element in a sequence or chronological ordering.; NumbersLarger10: Several numbers shown and used, such as 5, 6, and 1, have absolute values less than 10.",
+      "validated_at": "2026-09-25T22:16:16.131Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "sequence-position-and-component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "Several involved numbers, such as 1 and 2, have absolute values less than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: NumbersLarger10: Several involved numbers, such as 1 and 2, have absolute values less than 10.",
+      "validated_at": "2026-09-25T22:16:16.188Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "exact-equation-truth-versus-plausibility",
+      "sample_key": "1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0",
+      "generator": "arithmetic-equation-judgment",
+      "view": "operations-equation-judgment",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "PlausibilityEvaluation",
+          "verdict": "not_defendable",
+          "evidence": "Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: PlausibilityEvaluation: Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation.",
+      "validated_at": "2026-09-25T22:02:58.424Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The image shows a 2D stylized vector graphic representing a shape, not a manipulable physical object, solid model, or a shape constructed from sticks."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'PhysicalGeometry' is not defendable because the illustration is a standard 2D vector graphic rather than a physical, manipulable object, a physical solid model, or a construction made of sticks.",
+      "validated_at": "2026-09-25T22:33:07.528Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "No durations, time intervals, or elapsed times are being measured, calculated, or compared."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'MeasuringTime' is not defendable because this task is a simple time-telling/clock-building exercise that displays a static point in time, without any measurement or comparison of elapsed durations or time intervals.",
+      "validated_at": "2026-09-25T22:39:33.242Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The exercise is about reading and representing a specific point in time on a digital clock, not measuring or comparing durations of events or intervals."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves identifying a specific time point rather than measuring durations of events or calculating elapsed time intervals.",
+      "validated_at": "2026-09-26T09:00:01.402Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The exercise involves reading and representing a specific point in time, rather than measuring or comparing the durations of events or elapsed intervals."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires representing a static time (3:25 a.m.) on a digital clock based on a textual clue. There is no calculation of elapsed time, duration of events, or comparison of intervals.",
+      "validated_at": "2026-09-26T09:00:00.615Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration",
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0",
+      "generator": "time",
+      "view": "time-analog",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "No duration, elapsed time, or start/finish interval of an event is being determined or compared."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'MeasuringTime' is not defendable because the exercise only requires identifying a single point in time from a clock face, without measuring, comparing, or calculating durations/intervals.",
+      "validated_at": "2026-09-25T22:38:54.128Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The task only requires representing a specific point in time, not measuring or comparing durations of events or intervals."
+        },
+        {
+          "label": "StepsOf5",
+          "verdict": "not_defendable",
+          "evidence": "There are no consecutive values with a difference of 5 shown or calculated in the exercise."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The labels 'MeasuringTime' and 'StepsOf5' are not defendable because the task only requires displaying a static digital time corresponding to a text clue, without any duration calculations, consecutive step progressions, or interval measurements.",
+      "validated_at": "2026-09-25T22:39:40.893Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "arithmetic-offset-versus-sequence-position",
+      "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+      "generator": "counting-hundred-offset",
+      "view": "counting-hundred-more-less",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Before",
+          "verdict": "not_defendable",
+          "evidence": "The task asks for subtraction ('100 less') rather than identifying chronological sequences or preceding positions."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Before: The task asks for subtraction ('100 less') rather than identifying chronological sequences or preceding positions.",
+      "validated_at": "2026-09-25T22:15:27.966Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "sequence-position-and-component-numeric-bounds",
+      "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Before",
+          "verdict": "not_defendable",
+          "evidence": "The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Before: The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence.",
+      "validated_at": "2026-09-25T22:16:19.840Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-boxes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "EvenNumbers",
+          "verdict": "not_defendable",
+          "evidence": "The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: EvenNumbers: The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task.",
+      "validated_at": "2026-09-26T09:02:01.652Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration",
+      "sample_key": "3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0",
+      "generator": "time",
+      "view": "time-analog",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The task asks to identify the current time on a single clock, which does not involve measuring durations of events or intervals between times."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label MeasuringTime is not defendable because the task involves reading a static clock face to tell time, rather than measuring or comparing the durations of events or intervals of time.",
+      "validated_at": "2026-09-25T22:39:02.278Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: SingleStep: Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps.",
+      "validated_at": "2026-09-26T09:07:07.740Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "Solving this exercise requires multiple steps: converting both 6:48 and 7:30 into minutes relative to 6:00 (obtaining 48 and 90), and then performing subtraction. It cannot be solved by applying a single operation directly to the original time values."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'SingleStep' is not defendable because finding the elapsed duration between 6:48 and 7:30 requires multiple steps (converting both times to minutes from 6:00, then subtracting), rather than a single-step operation directly on the given numbers.",
+      "validated_at": "2026-09-26T09:07:11.636Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: SingleStep: Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes).",
+      "validated_at": "2026-09-26T09:07:01.857Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: SingleStep: The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation.",
+      "validated_at": "2026-09-26T09:07:13.925Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "clock-instant-versus-duration-and-sequence-steps",
+      "sample_key": "3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0",
+      "generator": "time",
+      "view": "time-digital-construction",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "MeasuringTime",
+          "verdict": "not_defendable",
+          "evidence": "The task only requires representing a static point in time, not measuring, calculating, or comparing the durations of events or intervals between them."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves reading and converting a single point in time, rather than measuring or comparing the durations or intervals of events.",
+      "validated_at": "2026-09-25T22:39:40.084Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0",
+      "generator": "shape-unit-square-grid",
+      "view": "shape-square-array-inversion",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Square",
+          "verdict": "not_defendable",
+          "evidence": "The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus.",
+      "validated_at": "2026-09-26T09:06:34.588Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0",
+      "generator": "fraction-arithmetic",
+      "view": "fractions-word-problem",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "IteratedOperation",
+          "verdict": "not_defendable",
+          "evidence": "There is no iterated operation shown; the problem is solved using a direct multiplication procedure."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'IteratedOperation' is not defendable because the exercise demonstrates simple fraction multiplication and regrouping rather than an iterated operation applied repeatedly on a single operand.",
+      "validated_at": "2026-09-26T09:04:59.982Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0",
+      "generator": "fraction-arithmetic",
+      "view": "fractions-word-problem",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "IteratedOperation",
+          "verdict": "not_defendable",
+          "evidence": "There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise.",
+      "validated_at": "2026-09-26T09:05:09.214Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership",
+      "sample_key": "K.CC.B.4b-conservation~2fd37d3f#counting-basic#counting-conservation#train#question#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-conservation",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There are no positional multi-digit numbers or base-10 place-value concepts represented in this exercise."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'Base10' is not defendable because the exercise does not involve positional number representations or place-value concepts; it is a simple counting and conservation task with a quantity of 3.",
+      "validated_at": "2026-09-25T22:14:10.554Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.4b-conservation~2fd37d3f#counting-basic#counting-conservation#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership",
+      "sample_key": "K.CC.B.4b-conservation~2fd37d3f#counting-basic#counting-conservation#train#solution#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-conservation",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There are no positional number representations, multi-digit numerals, or base-10 blocks used in this task."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There are no positional number representations, multi-digit numerals, or base-10 blocks used in this task.",
+      "validated_at": "2026-09-25T22:14:11.114Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.4b-conservation~2fd37d3f#counting-basic#counting-conservation#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership",
+      "sample_key": "K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#train#question#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-conservation",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There is no positional base-10 representation or numeral system showing place values in the image."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There is no positional base-10 representation or numeral system showing place values in the image.",
+      "validated_at": "2026-09-25T22:14:11.344Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership",
+      "sample_key": "K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#val#question#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-conservation",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "No place-value systems or base-10 representations are used in this exercise."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: No place-value systems or base-10 representations are used in this exercise.",
+      "validated_at": "2026-09-25T22:43:25.673Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership",
+      "sample_key": "K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#val#solution#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-conservation",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There is no positional number representation or place value representation in this exercise."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There is no positional number representation or place value representation in this exercise.",
+      "validated_at": "2026-09-25T22:43:26.927Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.4b-conservation~456ad416#counting-basic#counting-conservation#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-objects-simple",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "ArabicNumerals",
+          "verdict": "not_defendable",
+          "evidence": "No Arabic numerals are visible in this Question Mode image."
+        },
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "No base 10 representations or place-value digits are shown in this Question Mode image."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ArabicNumerals: No Arabic numerals are visible in this Question Mode image.; Base10: No base 10 representations or place-value digits are shown in this Question Mode image.",
+      "validated_at": "2026-09-26T08:57:20.110Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The image contains a 2D drawing representing a table in a room, which is not a physical manipulative, solid model, or physical object made of sticks as required by the definition."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label 'PhysicalGeometry' is not defendable because the exercise features a flat 2D illustration of a table rather than a physical manipulative, solid model, or stick-built geometric representation.",
+      "validated_at": "2026-09-25T22:33:12.251Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The items shown are 2D vector illustrations rather than manipulable physical objects, solid models, or stick representations."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'PhysicalGeometry' is not defendable because the exercise features a 2D drawing of a clock and furniture rather than manipulable physical objects, solid models, or representations made from sticks.",
+      "validated_at": "2026-09-25T22:33:15.322Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The geometric figure is depicted in a standard 2D vector drawing of a scene, which does not constitute a manipulable physical object, solid model, or stick construction."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is shown in a flat 2D cartoon illustration rather than as a manipulable physical object, solid model, or stick construction.",
+      "validated_at": "2026-09-25T22:33:15.038Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: PhysicalGeometry: The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks.",
+      "validated_at": "2026-09-25T22:33:13.393Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "environmental-illustration-versus-physical-manipulative",
+      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "generator": "shape-env-shapes",
+      "view": "shape-env-shapes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "PhysicalGeometry",
+          "verdict": "not_defendable",
+          "evidence": "The image features a flat 2D illustration of a room scene. There are no manipulable physical objects, solid models, or shapes constructed from sticks as required by the PhysicalGeometry definition."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is represented inside a standard 2D vector drawing of a room, rather than via manipulable physical objects or solid models.",
+      "validated_at": "2026-09-25T22:33:19.933Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties.",
+      "validated_at": "2026-09-26T09:05:53.353Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten.",
+      "validated_at": "2026-09-26T09:05:56.643Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "The only numbers present in the exercise are 4 and 0, which are single digits and do not showcase positional base-10 properties where place values differ by a factor of ten."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label 'Base10' is not defendable because the task only involves the single-digit numbers 4 and 0, which do not demonstrate place-value concepts (tens, hundreds, etc.) inherent in positional base-10 systems.",
+      "validated_at": "2026-09-26T09:06:04.272Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There are no multi-digit numbers, place value concepts, or representations of positional numbering in this image; only single-digit integers (8 and 1) are used."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There are no multi-digit numbers, place value concepts, or representations of positional numbering in this image; only single-digit integers (8 and 1) are used.",
+      "validated_at": "2026-09-26T09:06:16.012Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "spatial-assembly-versus-concept-composition",
+      "sample_key": "K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0",
+      "generator": "shape-compose-shapes",
+      "view": "shape-compose-shapes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "ConceptComposition",
+          "verdict": "not_defendable",
+          "evidence": "The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ConceptComposition: The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height.",
+      "validated_at": "2026-09-25T22:32:48.337Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership-and-shape-properties",
+      "sample_key": "K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#question#inst:0",
+      "generator": "counting-classify-count",
+      "view": "sorting-classify-count",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "ArabicNumerals",
+          "verdict": "not_defendable",
+          "evidence": "There are no Arabic numerals visible in this Question Mode image."
+        },
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "No numbers are visible to represent any base-10 positional notation."
+        },
+        {
+          "label": "IntegerNumbers",
+          "verdict": "not_defendable",
+          "evidence": "No integer numbers are visible in this Question Mode image."
+        },
+        {
+          "label": "NumbersSmaller10",
+          "verdict": "not_defendable",
+          "evidence": "No numbers are visible in this Question Mode image."
+        },
+        {
+          "label": "NumbersWithoutNegatives",
+          "verdict": "not_defendable",
+          "evidence": "No numbers are visible in this Question Mode image."
+        },
+        {
+          "label": "NumbersWithoutZero",
+          "verdict": "not_defendable",
+          "evidence": "No numbers are visible in this Question Mode image."
+        },
+        {
+          "label": "NumerationWithIntegers",
+          "verdict": "not_defendable",
+          "evidence": "There is no ordering or sequence of integers shown."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ArabicNumerals: There are no Arabic numerals visible in this Question Mode image.; Base10: No numbers are visible to represent any base-10 positional notation.; IntegerNumbers: No integer numbers are visible in this Question Mode image.; NumbersSmaller10: No numbers are visible in this Question Mode image.; NumbersWithoutNegatives: No numbers are visible in this Question Mode image.; NumbersWithoutZero: No numbers are visible in this Question Mode image.; NumerationWithIntegers: There is no ordering or sequence of integers shown.",
+      "validated_at": "2026-09-25T22:15:05.456Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "numeral-system-ownership-and-shape-properties",
+      "sample_key": "K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0",
+      "generator": "counting-classify-count",
+      "view": "sorting-classify-count",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "ShapeProperties",
+          "verdict": "not_defendable",
+          "evidence": "There is no mention or application of physical shape properties such as rolling, folding, or stacking stability."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ShapeProperties: There is no mention or application of physical shape properties such as rolling, folding, or stacking stability.",
+      "validated_at": "2026-09-25T22:15:09.341Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "complete-numeric-order-and-shape-properties",
+      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+      "generator": "counting-classify-sort",
+      "view": "sorting-classify-sort",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "The counts are single-digit integers (1, 3, 4) and do not involve place value."
+        },
+        {
+          "label": "ShapeProperties",
+          "verdict": "not_defendable",
+          "evidence": "There is no reasoning about physical properties of shapes such as rolling, folding, or stacking."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: The counts are single-digit integers (1, 3, 4) and do not involve place value.; ShapeProperties: There is no reasoning about physical properties of shapes such as rolling, folding, or stacking.",
+      "validated_at": "2026-09-25T22:15:13.842Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "complete-numeric-order-and-shape-properties",
+      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+      "generator": "counting-classify-sort",
+      "view": "sorting-classify-sort",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There are no multi-digit numbers or place-value representations in the exercise."
+        },
+        {
+          "label": "ShapeProperties",
+          "verdict": "not_defendable",
+          "evidence": "The exercise only uses shape names for classification, without considering properties that permit or constrain physical manipulation."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There are no multi-digit numbers or place-value representations in the exercise.; ShapeProperties: The exercise only uses shape names for classification, without considering properties that permit or constrain physical manipulation.",
+      "validated_at": "2026-09-25T22:15:12.609Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "complete-numeric-order-and-shape-properties",
+      "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+      "generator": "counting-classify-sort",
+      "view": "sorting-classify-sort",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "There are no written positional base-10 numerals in the image."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: There are no written positional base-10 numerals in the image.",
+      "validated_at": "2026-09-25T22:15:19.053Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "complete-numeric-order-and-shape-properties",
+      "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+      "generator": "counting-classify-sort",
+      "view": "sorting-classify-sort",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "The exercise only involves basic counting of shapes with single-digit results (3 and 4), and does not use multi-digit numbers or positional place value."
+        },
+        {
+          "label": "NumericOrder",
+          "verdict": "not_defendable",
+          "evidence": "The exercise does not involve ordering a list or sequence of numbers from least to greatest."
+        },
+        {
+          "label": "ShapeProperties",
+          "verdict": "not_defendable",
+          "evidence": "No mechanical or spatial properties of the shapes (such as rolling or stacking) are analyzed; they are simply counted as visual categories."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: The exercise only involves basic counting of shapes with single-digit results (3 and 4), and does not use multi-digit numbers or positional place value.; NumericOrder: The exercise does not involve ordering a list or sequence of numbers from least to greatest.; ShapeProperties: No mechanical or spatial properties of the shapes (such as rolling or stacking) are analyzed; they are simply counted as visual categories.",
+      "validated_at": "2026-09-25T22:15:20.709Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
+    }
+  ]
+}
