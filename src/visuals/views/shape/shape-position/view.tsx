@@ -31,6 +31,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
 
     const pos = getBallPosition(relation);
     const isBehind = relation === 'behind';
+    const needsForwardDirection = relation === 'ahead' || isBehind;
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] whitespace-nowrap py-3 px-1.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -45,7 +46,7 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
 
     const getLabelText = (opt: string) => {
         if (opt === 'nextTo') return 'Next to the box';
-        if (opt === 'ahead') return 'In front of the box';
+        if (opt === 'ahead') return 'Ahead of the box';
         return opt.charAt(0).toUpperCase() + opt.slice(1) + ' the box';
     };
 
@@ -73,6 +74,21 @@ const ShapePositionCore = ({ config: _config, payload }: CoreProps) => {
                 <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
                     <svg width="300" height="180" className="overflow-visible">
                         {isBehind ? [ballElement, boxElement] : [boxElement, ballElement]}
+                        {needsForwardDirection && (
+                            <g aria-label="Forward direction">
+                                <text x="245" y="42" textAnchor="middle" fill="#475569" fontSize="14" fontWeight="600">
+                                    Forward
+                                </text>
+                                <path
+                                    d="M245 56 V132 M237 124 L245 132 L253 124"
+                                    fill="none"
+                                    stroke="#64748b"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </g>
+                        )}
                     </svg>
                 </div>
 

@@ -1,2 +1,2 @@
-- **Identity:** A visually distinct ball and box plus spatial-relation choices make their requested relative position identifiable without redundant object labels.
+- **Identity:** A visually distinct ball and box plus spatial-relation choices make their requested relative position identifiable without redundant object labels. Ahead/behind relations include a visible forward-direction arrow.
 - **Modes:** Question Mode leaves every relation neutral; Solution Mode identifies the relation visibly demonstrated by the scene.
