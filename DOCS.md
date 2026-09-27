@@ -57,6 +57,11 @@ explicit wider unions. For example, mass and liquid volume have separate produce
 the general strategy view accepts the named strategy union. Target requirements remain
 independent learner-task participation policies.
 
+Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
+the requested count and the available collection size. The generator chooses that size within
+the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
+views retain `counting-basic` and `CountingProblem`, so supply sampling does not alter their data.
+
 Label compatibility is implemented through the design recorded in
 [label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability
 matching, the planner admits only valid joint schema-label selections. Every tuple carries a

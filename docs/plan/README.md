@@ -11,9 +11,10 @@ These items are not newly scheduled by the archive move.
   [equation classification correction](equation-correctness.md),
   [shape recognition correction](shape-recognition.md),
   [category ordering extension](category-ordering.md),
-  [arithmetic-offset label correction](arithmetic-offset-labels.md), and
-  [numeric-range and successor correction](numeric-range-bounds.md) are complete;
-  the current cache has 28 remaining failures among 1,934 CCSS images: 12 samples requiring
+  [arithmetic-offset label correction](arithmetic-offset-labels.md),
+  [numeric-range and successor correction](numeric-range-bounds.md), and
+  [bounded count-out supply correction](count-out-supply.md) are complete;
+  the current cache has 27 remaining failures among 1,932 CCSS images: 11 samples requiring
   semantic review and 16 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
@@ -21,8 +22,9 @@ These items are not newly scheduled by the archive move.
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist
   exemption is removed. Existing result-boundary coverage gaps remain deferred.
   The 2.NBT.B.8 starting cutoff of 900 is intentionally ignored, as recorded in its target block.
-  New reviews concern count-out pools exceeding their numeric bounds and direct property or
-  place-value tasks claiming an explanatory `ProcedureUnderstanding` Ability. A division-story
+  Count-out pools now come from a bounded generator interval, including equality; all ten new
+  images pass. Remaining reviews include direct property or place-value tasks claiming an
+  explanatory `ProcedureUnderstanding` Ability. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.
   The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.

@@ -2,13 +2,13 @@
   "spec": "ccss",
   "library_version": "0.29.0-pre.3.dee88508f2f8",
   "baseline_commit": "644254d",
-  "updated_on": "2026-09-27",
-  "cache_commit": "3e2920e",
+  "updated_on": "2026-09-28",
+  "cache_commit": "1ade36b",
   "concurrency": 4,
-  "evaluated": 1934,
-  "passed": 1906,
-  "failed": 28,
-  "semantic_review_samples": 12,
+  "evaluated": 1932,
+  "passed": 1905,
+  "failed": 27,
+  "semantic_review_samples": 11,
   "evaluator_disagreement_samples": 16,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -887,6 +887,137 @@
       },
       "note": "All concrete ranges use task inputs/results, including hidden answers and fixed arithmetic steps. Operand digit profiles preserve the existing offset domains. Two infeasible K.CC.A.2 arithmetic paths retire while sequence paths remain. Three successor retry changes are explained by freed duplicate payloads; former winning draws reproduce exactly. A newly exposed division-story wording defect was repaired and rechecked. Remaining semantic findings and evaluator disagreements are preserved without retrying for a pass. CCSS only; test targets, dataset and cache unchanged.",
       "details": "numeric-range-bounds.md"
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "count-out-supply",
+      "status": "completed",
+      "baseline_commit": "e086167",
+      "fix_commit": "cb6fab8",
+      "cache_commit": "1ade36b",
+      "library_version": "0.29.0-pre.3.dee88508f2f8",
+      "concurrency": 4,
+      "candidate_interval": "[max(requested_count, lower_bound), upper_bound]",
+      "equality_allowed_throughout_interval": true,
+      "baseline_bound_violations": 4,
+      "sample_count_before": 1934,
+      "sample_count_after": 1932,
+      "rendered": 1932,
+      "written_shards": 228,
+      "reused_shards": 58,
+      "evaluated": 10,
+      "reused": 1922,
+      "failures_before": 28,
+      "failures_after": 27,
+      "retired_failed_identities": 1,
+      "newly_rejected": 0,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "added_sample_identities": 10,
+      "removed_sample_identities": 12,
+      "provenance_only_cache_records": 1762,
+      "unchanged_retained_judgments": 1922,
+      "matching": {
+        "targets": 683,
+        "compatible_pairs": 212,
+        "tuples": 830,
+        "replaced_tuples": 3,
+        "changed_retained_plans": 0
+      },
+      "verification": {
+        "test_files": 537,
+        "tests": 3277,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "structural_or_stale_cache_issues": 0,
+        "uncached": 0,
+        "test_dataset_and_cache_unchanged": true
+      },
+      "passing_count_out_samples": [
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#train#question#inst:0",
+          "requested_count": 4,
+          "available_count": 5,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:01.634Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#train#solution#inst:0",
+          "requested_count": 3,
+          "available_count": 5,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:01.438Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~42b8a625#counting-selection#counting-objects-count-out#train#question#inst:0",
+          "requested_count": 18,
+          "available_count": 20,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:01.600Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~42b8a625#counting-selection#counting-objects-count-out#train#solution#inst:0",
+          "requested_count": 19,
+          "available_count": 20,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:01.970Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~641a7611#counting-selection#counting-objects-count-out#train#question#inst:0",
+          "requested_count": 5,
+          "available_count": 8,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:08.490Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~641a7611#counting-selection#counting-objects-count-out#train#solution#inst:0",
+          "requested_count": 17,
+          "available_count": 17,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:07.733Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#val#question#inst:0",
+          "requested_count": 2,
+          "available_count": 10,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:10.246Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#val#solution#inst:0",
+          "requested_count": 1,
+          "available_count": 8,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:07.730Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~42b8a625#counting-selection#counting-objects-count-out#val#question#inst:0",
+          "requested_count": 8,
+          "available_count": 12,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:15.182Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~42b8a625#counting-selection#counting-objects-count-out#val#solution#inst:0",
+          "requested_count": 19,
+          "available_count": 19,
+          "upper_bound": 20,
+          "validated_at": "2026-09-27T22:13:24.776Z",
+          "pass": true
+        }
+      ],
+      "note": "The mathematical generator owns the available collection count; the view only renders it. A distinct complete payload preserves the ordinary counting producer and all other current images. Producer identity changes replace twelve old count-out images with ten new ones because the linear variant is no longer allocated to validation. No target or ontology labels change, no judgments are retried merely to seek a pass, and no new major issue is found.",
+      "details": "count-out-supply.md"
     }
   ],
   "findings": [
@@ -1174,25 +1305,6 @@
       "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise.",
       "validated_at": "2026-09-26T09:05:09.214Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "count-out-supply-versus-numeric-bounds",
-      "sample_key": "K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0",
-      "generator": "counting-basic",
-      "view": "counting-objects-count-out",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "NumbersSmaller10",
-          "verdict": "not_defendable",
-          "evidence": "The total number of objects in the collection is 14, which is greater than 10."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'NumbersSmaller10' is not defendable because the total number of objects in the collection is 14, which is an input value of the task and exceeds 10.",
-      "validated_at": "2026-09-27T19:52:42.352Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -2766,6 +2878,68 @@
         "reasoning": "The story text contains a semantic/mathematical incoherence: '90 items are shared equally among 45 groups. How many are there now?' The question 'How many are there now?' belongs to change-based addition/subtraction problems and does not logically match the division equation $90 \\div 45 = ?$.",
         "validated_at": "2026-09-27T19:49:19.450Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0",
+      "resolution": "bounded-count-out-supply",
+      "resolution_type": "producer_replaced",
+      "fix_commit": "cb6fab8",
+      "cache_commit": "1ade36b",
+      "replacement_generator": "counting-selection",
+      "replacement_samples": [
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#train#question#inst:0",
+          "requested_count": 4,
+          "available_count": 5,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:01.634Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#train#solution#inst:0",
+          "requested_count": 3,
+          "available_count": 5,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:01.438Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#val#question#inst:0",
+          "requested_count": 2,
+          "available_count": 10,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:10.246Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.5-how-many~23fafedc#counting-selection#counting-objects-count-out#val#solution#inst:0",
+          "requested_count": 1,
+          "available_count": 8,
+          "upper_bound": 10,
+          "validated_at": "2026-09-27T22:13:07.730Z",
+          "pass": true
+        }
+      ],
+      "note": "The historical failed sample retires with its producer identity, not as a passing revalidation. The same three targets now use bounded selected/available cardinalities. All ten replacement images pass; equality is permitted throughout the inclusive candidate interval.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "count-out-supply-versus-numeric-bounds",
+        "sample_key": "K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0",
+        "generator": "counting-basic",
+        "view": "counting-objects-count-out",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "NumbersSmaller10",
+            "verdict": "not_defendable",
+            "evidence": "The total number of objects in the collection is 14, which is greater than 10."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'NumbersSmaller10' is not defendable because the total number of objects in the collection is 14, which is an input value of the task and exceeds 10.",
+        "validated_at": "2026-09-27T19:52:42.352Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0\" --no-validate"
       }
     }
   ]

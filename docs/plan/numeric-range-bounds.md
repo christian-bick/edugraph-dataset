@@ -275,6 +275,10 @@ disagreements**. Two new semantic topics require review:
   The finite supply is an input, and the view currently invents the spare-object count. A
   generator-owned bounded supply needs a boundary policy for tasks requesting the maximum count
   (`IMPL-V8`, `IMPL-V11`, `SPEC-V2`).
+  **Subsequently resolved on 2026-09-28:** the [count-out supply correction](count-out-supply.md)
+  chooses the available count from the inclusive requested/lower/upper-bound interval, allowing
+  equality anywhere. All ten replacement images pass; the figures in this section preserve the
+  earlier numeric-range checkpoint.
 - One property-completion task and one hundreds-conversion task claim `ProcedureUnderstanding`
   without requesting the how/why explanation required by its definition. Review target intent
   and view Ability together (`SPEC-V5`, `TSPEC-13`).

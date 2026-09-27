@@ -2,28 +2,28 @@
 
 ## Outcome
 
-Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, equation
+Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
-successor-evidence, and grouped-word-problem corrections on
+successor-evidence, grouped-word-problem, and count-out-supply corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,934 CCSS samples** have current judgments: **1,906 pass (98.6%) and 28 fail**, down from
-51 failures in the initial 2026-09-26 rerun. The target-label corrections changed target hashes
-and their validation allocation: the equation update removed two images, the shape update
-added four, the ordering extension added four, and the numeric-range correction removed eight,
-for a net decrease of two from the initial dataset.
-There are no uncached samples. The remaining failures comprise **12 samples requiring semantic
+All **1,932 CCSS samples** have current judgments: **1,905 pass (98.6%) and 27 fail**, down from
+51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
+sample identities and validation allocation: the equation update removed two images, the shape
+update added four, the ordering extension added four, the numeric-range correction removed eight,
+and the count-out producer replacement removed two, for a net decrease of four from the initial dataset.
+There are no uncached samples. The remaining failures comprise **11 samples requiring semantic
 review** and **16 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 28 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 28 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 40
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 41
 resolved finding records and initial totals are retained separately as history: 28 passed
-revalidation, and twelve were retired with their mislabeled targets and replaced by passing
-samples. This history includes the word-problem defect found and repaired within the latest run.
+revalidation, and thirteen were retired with corrected targets or producer contracts and replaced
+by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
 two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation` and three sorting
@@ -31,9 +31,10 @@ targets from `ShapeProperties` to `ShapeRecognition`. Full category ordering now
 view and ascending/descending targets; least/most selection is preserved as a separate subskill
 without claiming `NumericOrder`. Ten/hundred arithmetic offsets no longer claim sequence-position
 labels; their input/result bounds and independent operand digit profiles are now corrected.
-All 20 current offset/successor images pass. New semantic findings concern the finite supply
-in count-out tasks and explanatory Ability claims on direct property/conversion tasks. Resolved and
-remaining findings are described below.
+All 20 current offset/successor images and all ten bounded count-out images pass. The latter now
+receive their available collection size from the generator, including valid exact-size pools.
+Remaining semantic reviews include explanatory Ability claims on direct property/conversion tasks.
+Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
@@ -113,6 +114,14 @@ samples plus eight changed word-problem images. The original division-story defe
 the repair. The final singular/plural correction rechecks two of those images, both passing,
 and reuses the other 1,932 judgments. This follow-up completes 804 live judgments, including the
 repair rechecks. No repeated requests are made merely to replace a failing verdict with a pass.
+
+The [count-out supply follow-up](count-out-supply.md) gives selection tasks a precise mathematical
+payload with bounded requested and available counts. The shared type change triggers 1,932 renders,
+228 written shards, and 58 reused shards. Ten new count-out images replace twelve old identities;
+the linear variant is no longer allocated to validation. All 1,922 retained images, seeds, attempts,
+and semantic plans remain unchanged. VQA makes ten requests at concurrency four, all passing, and
+reuses all 1,922 retained judgments. Only `generation_plan.inputHash` changes on 1,762 retained cache
+records. Total failures fall from 28 to 27; no new rejection or API error occurs.
 
 ## Minor repairs
 
@@ -308,7 +317,7 @@ The [detailed correction](numeric-range-bounds.md) records exact domain preserva
 matching evidence. The 2.NBT.B.8 cutoff of 900 remains intentionally relaxed, as the user requested
 and the target comment records. Existing restrictions on zero results and results crossing digit
 boundaries remain a separate coverage expansion; this correction does not claim complete coverage
-of those starting-number standards. The new count-out supply issue below is also separate.
+of those starting-number standards. The separate count-out supply issue is corrected below.
 
 ### Successor principles and object-arrow evidence
 
@@ -319,23 +328,32 @@ successive numbers to the change in quantity and supplies the required `After`/`
 without deleting the successor capability (`IMPL-V11`, `TSPEC-13`). The mathematical payload is
 unchanged. K.CC.A.2 retains its valid explicit-sequence route as described above.
 
-## Major findings requiring follow-up
-
 ### Count-out supply versus numeric bounds
 
-The refreshed question
+**Resolved on 2026-09-28** in implementation `cb6fab8`, with VQA results in `1ade36b`.
+The earlier question
 `K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0`
 asks the learner to color 9 objects from a displayed pool of 14 diamonds while claiming
 `NumbersSmaller10`. Exact replay confirms a requested count of 9; the view adds five spare
 objects. This is an actual range conflict, not a counting error by the evaluator: the supplied
 finite collection is part of the task's input.
 
-The mathematical payload should supply a bounded available count instead of the view inventing
-one (`IMPL-V8`, `IMPL-V11`). A view-only cap cannot inspect generator-owned range parameters
-(`SPEC-V2`). A boundary policy also needs review: requesting the maximum allowed count leaves
-no room for a strictly larger pool under the same bound. Decide whether such tasks may use the
-entire pool, should exclude that requested count, or need a different target range. No silent
-target restriction or payload-contract change was made during this correction.
+Replay identified four such bound violations among twelve old samples, including three that VQA
+had accepted. The user approved drawing the available count uniformly from the inclusive interval
+`[max(requested count, lower bound), upper bound]`, allowing equality anywhere in the range.
+
+The new `counting-selection` producer supplies both quantities; the existing view renders that
+payload and its checklist accepts a sufficient collection (`IMPL-G7`, `IMPL-V8`, `IMPL-V11`,
+`CHK-V6`). A dedicated object contract keeps the other counting consumers unchanged. Exactly three
+K.CC.B.5 tuples change producer, preserving all target labels and competencies. The shared quantity
+sampler retains the ordinary producer's payloads and PRNG continuation.
+
+All ten replacement samples pass VQA, including solutions selecting all 17 of 17 and 19 of 19
+objects under an upper bound of 20. The old failed identity is recorded as retired through producer
+replacement, not as a passing revalidation. The [detailed report](count-out-supply.md) records
+the bounds, matching, unchanged-image proof, and tests. No new major problem was found.
+
+## Major findings requiring follow-up
 
 ### Applying a property or conversion versus explaining a procedure
 
@@ -543,28 +561,36 @@ view tests and final full CCSS repository checks and build. Matching retains all
 212 compatible pairs, with 830 tuples after two impossible arithmetic paths retire. The strict
 label audit reports zero violations and 97 review items.
 
-The latest validation confirms **1,906 pass / 28 fail / zero uncached**. All 20 current offset
+The numeric-range checkpoint confirmed **1,906 pass / 28 fail / zero uncached**. All 20 current offset
 and successor images pass, as do the eight repaired word-problem images. One temporary HTTP 503
 was recovered through cache-aware resumption; no API rate-limit errors were observed. Final VQA
-cache commit: `3e2920e`. The documentation check verifies local references and rule citations;
+cache commit for that checkpoint: `3e2920e`. The documentation check verifies local references and rule citations;
 four existing external references cannot be fetched in the restricted network environment.
 
-Current verification commands and outcomes (2026-09-27):
+The count-out correction passes **3,277 tests across 537 files**, all generator coverage thresholds,
+repository checks, and the build. Both counting producers have 100% statement and branch coverage.
+Matching preserves all 683 targets, 212 compatible pairs, and 830 tuples; the strict label audit
+remains at zero violations and 97 review items. All ten new judgments pass, with no rate-limit or
+service error. The final state is **1,905 pass / 27 fail / zero uncached**, in cache commit `1ade36b`.
+All 1,922 retained evaluation results and timestamps are unchanged.
+
+Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Numeric/successor repair: 20 renders, five shards written, 281 reused. Each word-helper repair schedules 132 renders, writes two shards and reuses 284; eight distinct story images change |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 804 completed live judgments across the range refresh, interrupted-request resumption, and repair rechecks; final 1,906 pass / 28 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 28 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Count-out correction: 1,932 renders, 228 shards written, 58 reused; all 1,922 retained image hashes unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Ten live judgments, all passing; 1,922 reused; final 1,905 pass / 27 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=cac26a3` | Latest follow-up: 1,906 identical retained images, 14 intended changes, 14 added/22 removed identities; three explained successor retry changes and no seed-scheme changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,859 identical retained images, 43 intended changes, 32 added/34 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=e086167` | Latest follow-up: 1,922 identical retained images, zero changed images/seeds/attempts, ten added/twelve removed count-out identities |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,847 identical retained images, 43 intended changes, 42 added/46 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,632 training and 302 validation images. All 830 matched tuples have
-training evidence. Of 206 tuples allocated to validation, 151 have validation evidence; the report
+The final split contains 1,632 training and 300 validation images. All 830 matched tuples have
+training evidence. Of 205 tuples allocated to validation, 150 have validation evidence; the report
 retains the same 55 coverage-gap warnings and does not infer their cause. There is no cross-split
-leakage or within-split configured-task redundancy. The numeric target replacements and removal
-of invalid arithmetic paths account for the latest allocation changes. Sampling policy is unchanged.
+leakage or within-split configured-task redundancy. The new count-out producer identity changes
+its linear variant's validation allocation, accounting for the latest two-image decrease.
+Sampling policy is unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.
