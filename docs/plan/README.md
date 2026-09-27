@@ -10,17 +10,21 @@ These items are not newly scheduled by the archive move.
   [MeasuringTime definition correction](measuring-time-definition.md),
   [equation classification correction](equation-correctness.md),
   [shape recognition correction](shape-recognition.md),
-  [category ordering extension](category-ordering.md), and
-  [arithmetic-offset label correction](arithmetic-offset-labels.md) are complete;
-  the current cache has 28 remaining failures, down from 51. Complete ordering now has its own
+  [category ordering extension](category-ordering.md),
+  [arithmetic-offset label correction](arithmetic-offset-labels.md), and
+  [numeric-range and successor correction](numeric-range-bounds.md) are complete;
+  the current cache has 28 remaining failures among 1,934 CCSS images: 12 samples requiring
+  semantic review and 16 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
-  Offset tasks retain arithmetic direction without sequence-position labels; seven rechecked
-  samples still fail on the separate component-count numeric boundary. The
-  [numeric-range investigation](numeric-range-bounds.md) separates whole-task bounds from
-  operand digit counts and records ten related conflicts in currently passing samples,
-  an existing checklist exemption, and remaining result-boundary gaps; fixes remain open.
+  Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
+  bounds now include their actual operands and hidden results, independently of operand digit
+  profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist
+  exemption is removed. Existing result-boundary coverage gaps remain deferred.
   The 2.NBT.B.8 starting cutoff of 900 is intentionally ignored, as recorded in its target block.
-  The related successor view's sequence evidence remains open. The equation follow-up also
+  New reviews concern count-out pools exceeding their numeric bounds and direct property or
+  place-value tasks claiming an explanatory `ProcedureUnderstanding` Ability. A division-story
+  wording defect and singular/plural agreement were repaired during revalidation.
+  The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.
 
 - **Ontology consolidation:** measurement definitions, numeric boundaries, and progression

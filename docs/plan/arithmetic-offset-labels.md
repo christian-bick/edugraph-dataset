@@ -78,6 +78,12 @@ also remains separate and unresolved.
 
 ## Verification
 
+**Subsequent resolution:** the [numeric-range correction](numeric-range-bounds.md) implements
+whole-task operand/result bounds, independent operand digit profiles, and ordered start/result
+evidence in the successor view. It also removes the two impossible K.CC.A.2 arithmetic matches
+while retaining their sequence routes. The evidence and totals below describe this earlier
+declaration-only checkpoint, not the final dataset after that follow-up.
+
 Baseline: 1,942 samples, 1,915 passing and 27 failing verdicts; zero uncached samples.
 The label audit reports zero violations and 97 review items. Matching, complete baseline cache
 records, and the read-only removal simulation are retained under `temp/arithmetic-offset-*`,

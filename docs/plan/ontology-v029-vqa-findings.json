@@ -1,15 +1,15 @@
 {
   "spec": "ccss",
-  "library_version": "0.29.0-pre.2.59ff94cc3573",
+  "library_version": "0.29.0-pre.3.dee88508f2f8",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "a7290e3",
+  "cache_commit": "3e2920e",
   "concurrency": 4,
-  "evaluated": 1942,
-  "passed": 1914,
+  "evaluated": 1934,
+  "passed": 1906,
   "failed": 28,
-  "semantic_review_samples": 16,
-  "evaluator_disagreement_samples": 12,
+  "semantic_review_samples": 12,
+  "evaluator_disagreement_samples": 16,
   "initial_rerun": {
     "completed_on": "2026-09-26",
     "report_commit": "1d5b58a",
@@ -604,7 +604,289 @@
         }
       ],
       "note": "Arithmetic-only direction declarations preserve every CCSS target and match. All three previous Before rejections are removed. One sample now passes; two previously passing solutions are newly rejected on the existing component-count numeric-boundary issue, and the hundred-less question changes from Before to NumbersLarger100. All seven affected failures now concern numeric bounds. No image, seed, attempt, or unrelated judgment changes; no evaluator weakening or repeated requests to seek a pass. The one-step successor view remains a separate observable-evidence review.",
-      "details": "arithmetic-offset-labels.md"
+      "details": "arithmetic-offset-labels.md",
+      "review_topic_resolutions": [
+        {
+          "topic": "component-numeric-bounds",
+          "follow_up": "numeric-range-bounds"
+        },
+        {
+          "topic": "successor-sequence-evidence",
+          "follow_up": "numeric-range-bounds"
+        }
+      ]
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "numeric-range-bounds",
+      "status": "completed",
+      "baseline_commit": "cac26a3",
+      "ontology_commit": "dee88508f2f8277730f4ef16650eae03f81a6104",
+      "dependency_commit": "0e7ccb8",
+      "fix_commit": "4b5cd9c",
+      "minor_repair_commit": "5f9d310",
+      "grammar_repair_commit": "72efab1",
+      "cache_commit": "3e2920e",
+      "library_version": "0.29.0-pre.3.dee88508f2f8",
+      "concurrency": 4,
+      "validation_phases": [
+        {
+          "phase": "range-definition-and-offset-refresh",
+          "scheduled": 794,
+          "evaluated": 792,
+          "reused": 1140,
+          "unavailable_service_errors": 1,
+          "uncached_after": 2,
+          "failed": 29
+        },
+        {
+          "phase": "grouped-word-problem-repair-and-service-resume",
+          "evaluated": 10,
+          "changed_images": 8,
+          "resumed_uncached": 2,
+          "reused": 1924,
+          "failed": 28
+        },
+        {
+          "phase": "grouped-word-problem-singular-agreement",
+          "evaluated": 2,
+          "reused": 1932,
+          "failed": 28
+        }
+      ],
+      "generation_phases": [
+        {
+          "phase": "numeric-offset-and-successor-repair",
+          "rendered": 20,
+          "written_shards": 5,
+          "reused_shards": 281
+        },
+        {
+          "phase": "grouped-word-problem-repair",
+          "rendered": 132,
+          "written_shards": 2,
+          "reused_shards": 284,
+          "changed_images": 8
+        },
+        {
+          "phase": "grouped-word-problem-singular-agreement",
+          "rendered": 132,
+          "written_shards": 2,
+          "reused_shards": 284,
+          "changed_images": 2
+        }
+      ],
+      "sample_count_before": 1942,
+      "sample_count_after": 1934,
+      "completed_live_judgments": 804,
+      "current_records_with_new_judgments": 794,
+      "failures_before": 28,
+      "failures_after": 28,
+      "retired_failed_identities": 7,
+      "retained_previous_failures_now_passing": 4,
+      "newly_rejected": 11,
+      "shared_image_changes": 14,
+      "added_sample_identities": 14,
+      "removed_sample_identities": 22,
+      "changed_retained_attempts": 3,
+      "changed_retained_seeds": 3,
+      "resolved_review_topics": [
+        "component-numeric-bounds",
+        "successor-sequence-evidence"
+      ],
+      "new_semantic_review_topics": [
+        "task-performance-versus-procedure-understanding",
+        "count-out-supply-versus-numeric-bounds"
+      ],
+      "target_replacements": [
+        {
+          "old_id": "1.NBT.C.5-ten-more-less~7cd81d94",
+          "new_id": "1.NBT.C.5-ten-more-less~8bc12168"
+        },
+        {
+          "old_id": "1.NBT.C.5-ten-more-less~ccf0dd68",
+          "new_id": "1.NBT.C.5-ten-more-less~4a08256c"
+        },
+        {
+          "old_id": "2.NBT.B.8-place-value-offsets~915e4322",
+          "new_id": "2.NBT.B.8-place-value-offsets~5471d75c"
+        },
+        {
+          "old_id": "2.NBT.B.8-place-value-offsets~caa6ebce",
+          "new_id": "2.NBT.B.8-place-value-offsets~135522d8"
+        },
+        {
+          "old_id": "2.NBT.B.8-place-value-offsets~e267d598",
+          "new_id": "2.NBT.B.8-place-value-offsets~b5cec0b4"
+        },
+        {
+          "old_id": "2.NBT.B.8-place-value-offsets~e9cca934",
+          "new_id": "2.NBT.B.8-place-value-offsets~87bfbd88"
+        }
+      ],
+      "passing_offset_successor_samples": [
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:53:43.145Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:53:45.000Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~5471d75c#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:53:46.041Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~5471d75c#counting-hundred-offset#counting-hundred-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:53:47.220Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~762240a1#counting-inc-dec#counting-inc-dec#train#question#inst:0",
+          "validated_at": "2026-09-27T19:53:49.286Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~762240a1#counting-inc-dec#counting-inc-dec#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:53:53.396Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~ade4a8e2#counting-inc-dec#counting-inc-dec#train#question#inst:0",
+          "validated_at": "2026-09-27T19:53:52.429Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~ade4a8e2#counting-inc-dec#counting-inc-dec#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:53:53.021Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:22.190Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:25.489Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:27.586Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:29.147Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~87bfbd88#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:31.539Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~87bfbd88#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:33.176Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~b5cec0b4#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:34.352Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~b5cec0b4#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:36.285Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#val#question#inst:0",
+          "validated_at": "2026-09-27T20:04:10.986Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#val#solution#inst:0",
+          "validated_at": "2026-09-27T20:04:16.095Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~ade4a8e2#counting-inc-dec#counting-inc-dec#val#question#inst:0",
+          "validated_at": "2026-09-27T20:04:19.298Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.CC.B.4c-one-larger~ade4a8e2#counting-inc-dec#counting-inc-dec#val#solution#inst:0",
+          "validated_at": "2026-09-27T20:04:22.132Z",
+          "pass": true
+        }
+      ],
+      "word_problem_repair": {
+        "previous_failure": {
+          "classification": "minor_content_defect",
+          "topic": "division-story-requested-quantity",
+          "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0",
+          "generator": "arithmetic-ops-pairs",
+          "view": "operations-word-problem-within-100",
+          "mode": "question",
+          "rejected_labels": [],
+          "failed_general_checks": [
+            "math_coherent"
+          ],
+          "reasoning": "The story text contains a semantic/mathematical incoherence: '90 items are shared equally among 45 groups. How many are there now?' The question 'How many are there now?' belongs to change-based addition/subtraction problems and does not logically match the division equation $90 \\div 45 = ?$.",
+          "validated_at": "2026-09-27T19:49:19.450Z",
+          "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0\" --no-validate"
+        },
+        "revalidated_samples": [
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~91284393#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0",
+            "validated_at": "2026-09-27T20:16:00.150Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~91284393#arithmetic-ops-pairs#operations-word-problem-within-100#train#solution#inst:0",
+            "validated_at": "2026-09-27T20:10:45.885Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0",
+            "validated_at": "2026-09-27T20:10:45.589Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#solution#inst:0",
+            "validated_at": "2026-09-27T20:10:45.947Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~91284393#arithmetic-ops-pairs#operations-word-problem-within-100-inversion#train#question#inst:0",
+            "validated_at": "2026-09-27T20:10:50.351Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~91284393#arithmetic-ops-pairs#operations-word-problem-within-100-inversion#train#solution#inst:0",
+            "validated_at": "2026-09-27T20:10:50.978Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100-inversion#train#question#inst:0",
+            "validated_at": "2026-09-27T20:10:51.335Z",
+            "pass": true
+          },
+          {
+            "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100-inversion#train#solution#inst:0",
+            "validated_at": "2026-09-27T20:15:59.867Z",
+            "pass": true
+          }
+        ]
+      },
+      "note": "All concrete ranges use task inputs/results, including hidden answers and fixed arithmetic steps. Operand digit profiles preserve the existing offset domains. Two infeasible K.CC.A.2 arithmetic paths retire while sequence paths remain. Three successor retry changes are explained by freed duplicate payloads; former winning draws reproduce exactly. A newly exposed division-story wording defect was repaired and rechecked. Remaining semantic findings and evaluator disagreements are preserved without retrying for a pass. CCSS only; test targets, dataset and cache unchanged.",
+      "details": "numeric-range-bounds.md"
     }
   ],
   "findings": [
@@ -647,118 +929,42 @@
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate"
     },
     {
-      "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "NumbersLarger10",
-          "verdict": "not_defendable",
-          "evidence": "The number 1 (which is less than 10) is actively involved in the calculations, labels ('1 one', '+ 1 ten'), and the equation '1 = 1'."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'NumbersLarger10' is not defendable because the number 1 is actively involved in the exercise ('1 one', '+ 1 ten', '1 = 1'), violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
-      "validated_at": "2026-09-27T17:41:27.473Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
+      "classification": "evaluator_disagreement",
+      "topic": "representational-zero-components",
+      "sample_key": "1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0",
+      "generator": "comparison",
+      "view": "numbers-place-value-comparison",
       "mode": "solution",
       "rejected_labels": [
         {
-          "label": "NumbersLarger10",
+          "label": "NumbersWithoutZero",
           "verdict": "not_defendable",
-          "evidence": "The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10."
+          "evidence": "The number zero is involved in the task, explicitly shown as 'none' in the ones column of both numbers."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10.",
-      "validated_at": "2026-09-27T17:41:25.178Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+      "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers.",
+      "validated_at": "2026-09-27T19:52:30.191Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
+      "topic": "task-performance-versus-procedure-understanding",
+      "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0",
+      "generator": "arithmetic-ops-triples",
+      "view": "operations-properties",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "NumbersLarger10",
+          "label": "ProcedureUnderstanding",
           "verdict": "not_defendable",
-          "evidence": "The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10."
+          "evidence": "There is no content in the image explaining how or why a procedure works; it is a straightforward application of the commutative identity by filling in a missing term."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10.",
-      "validated_at": "2026-09-27T17:41:47.131Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "NumbersLarger10",
-          "verdict": "not_defendable",
-          "evidence": "The number 1 is explicitly involved and displayed, which is less than 10."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly involved and displayed, which is less than 10.",
-      "validated_at": "2026-09-27T17:41:45.039Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "NumbersLarger10",
-          "verdict": "not_defendable",
-          "evidence": "The definition requires all involved numbers to be greater than or equal to 10. Here, numbers like 5, 6, and 1 are explicitly written and involved in the exercise."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers shown in the exercise (such as 1, 5, and 6) have absolute values strictly less than 10, violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
-      "validated_at": "2026-09-27T17:41:29.330Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "NumbersLarger10",
-          "verdict": "not_defendable",
-          "evidence": "Several involved numbers (like 2, 1) have absolute values strictly less than 10, violating the 'all involved numbers' requirement."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers (2 ones, 1 ten, 2 = 2) have values less than 10, which violates the definition requiring all involved numbers to have absolute values greater than or equal to 10.",
-      "validated_at": "2026-09-27T17:41:28.438Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+      "reasoning": "The ontology label 'ProcedureUnderstanding' is not defendable as there is no explanation of how or why a procedure works.",
+      "validated_at": "2026-09-27T19:50:04.675Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -781,41 +987,60 @@
     },
     {
       "classification": "semantic_review_required",
-      "topic": "component-numeric-bounds",
-      "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
-      "generator": "counting-hundred-offset",
-      "view": "counting-hundred-more-less",
+      "topic": "task-performance-versus-procedure-understanding",
+      "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+      "generator": "place-value-hundreds-bundles",
+      "view": "place-value-hundreds-bundles",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "NumbersLarger100",
+          "label": "ProcedureUnderstanding",
           "verdict": "not_defendable",
-          "evidence": "The image contains several involved numbers that are less than 100, such as 93, 3, 9, and 1."
+          "evidence": "There is no instruction or content asking the learner to explain why or how a procedure works."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "The label NumbersLarger100 is not defendable because several involved numbers shown in the image (such as 3, 9, 93, and 1) have absolute values less than 100.",
-      "validated_at": "2026-09-27T17:41:20.946Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0\" --no-validate"
+      "reasoning": "The label 'ProcedureUnderstanding' is not defendable because the task is a direct conversion exercise and does not prompt the learner for any procedural explanation or justification.",
+      "validated_at": "2026-09-27T19:58:06.123Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "formal-conventions-versus-informal-translation",
+      "sample_key": "2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-boxes-inversion",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Formalization",
+          "verdict": "not_defendable",
+          "evidence": "There is no task requiring the translation of informal ideas, visual representations, or word problems into a formal system; the equation template is already provided."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'Formalization' is not defendable because there is no active translation, conversion, or formalizing of informal text/diagrams into formal symbols; the equation is already fully formatted and presented.",
+      "validated_at": "2026-09-27T19:46:35.777Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
       "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
-      "generator": "arithmetic-ops-pairs",
-      "view": "operations-boxes",
+      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+      "generator": "counting-basic",
+      "view": "counting-objects-parity",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "EvenNumbers",
+          "label": "Base10",
           "verdict": "not_defendable",
-          "evidence": "The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task."
+          "evidence": "There is no representation of base-10 positional notation, place value columns, or multi-digit numbers."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: EvenNumbers: The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task.",
-      "validated_at": "2026-09-26T09:02:01.652Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
+      "reasoning": "Labels not defendable: Base10: There is no representation of base-10 positional notation, place value columns, or multi-digit numbers.",
+      "validated_at": "2026-09-27T19:53:00.747Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -824,7 +1049,6 @@
       "generator": "time-interval-arithmetic",
       "view": "time-interval-word-problem",
       "mode": "question",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
       "rejected_labels": [
         {
           "label": "SingleStep",
@@ -844,7 +1068,6 @@
       "generator": "time-interval-arithmetic",
       "view": "time-interval-word-problem",
       "mode": "solution",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
       "rejected_labels": [
         {
           "label": "SingleStep",
@@ -864,7 +1087,6 @@
       "generator": "time-interval-arithmetic",
       "view": "time-interval-word-problem",
       "mode": "solution",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
       "rejected_labels": [
         {
           "label": "SingleStep",
@@ -895,6 +1117,25 @@
       "reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus.",
       "validated_at": "2026-09-26T09:06:34.588Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "formal-conventions-versus-informal-translation",
+      "sample_key": "3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-boxes-inversion",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Formalization",
+          "verdict": "not_defendable",
+          "evidence": "There is no formalization or translation of information from an informal description into a formal framework."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Formalization: There is no formalization or translation of information from an informal description into a formal framework.",
+      "validated_at": "2026-09-27T19:46:49.477Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -935,28 +1176,23 @@
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
     },
     {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0",
+      "classification": "semantic_review_required",
+      "topic": "count-out-supply-versus-numeric-bounds",
+      "sample_key": "K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0",
       "generator": "counting-basic",
-      "view": "counting-objects-simple",
+      "view": "counting-objects-count-out",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "ArabicNumerals",
+          "label": "NumbersSmaller10",
           "verdict": "not_defendable",
-          "evidence": "No Arabic numerals are visible in this Question Mode image."
-        },
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "No base 10 representations or place-value digits are shown in this Question Mode image."
+          "evidence": "The total number of objects in the collection is 14, which is greater than 10."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ArabicNumerals: No Arabic numerals are visible in this Question Mode image.; Base10: No base 10 representations or place-value digits are shown in this Question Mode image.",
-      "validated_at": "2026-09-26T08:57:20.110Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0\" --no-validate"
+      "reasoning": "The label 'NumbersSmaller10' is not defendable because the total number of objects in the collection is 14, which is an input value of the task and exceeds 10.",
+      "validated_at": "2026-09-27T19:52:42.352Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -1056,7 +1292,7 @@
     {
       "classification": "evaluator_disagreement",
       "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "sample_key": "K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
       "generator": "shape-compare-attributes",
       "view": "shape-compare-attributes",
       "mode": "solution",
@@ -1064,18 +1300,18 @@
         {
           "label": "Base10",
           "verdict": "not_defendable",
-          "evidence": "The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties."
+          "evidence": "The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds)."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties.",
-      "validated_at": "2026-09-26T09:05:53.353Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      "reasoning": "Labels not defendable: Base10: The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds).",
+      "validated_at": "2026-09-27T19:58:28.432Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
       "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
       "generator": "shape-compare-attributes",
       "view": "shape-compare-attributes",
       "mode": "solution",
@@ -1083,13 +1319,32 @@
         {
           "label": "Base10",
           "verdict": "not_defendable",
-          "evidence": "Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten."
+          "evidence": "Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten.",
-      "validated_at": "2026-09-26T09:05:56.643Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      "reasoning": "Labels not defendable: Base10: Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated.",
+      "validated_at": "2026-09-27T19:58:40.629Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations.",
+      "validated_at": "2026-09-27T20:06:32.596Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -1102,12 +1357,12 @@
         {
           "label": "Base10",
           "verdict": "not_defendable",
-          "evidence": "The only numbers present in the exercise are 4 and 0, which are single digits and do not showcase positional base-10 properties where place values differ by a factor of ten."
+          "evidence": "The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "The ontology label 'Base10' is not defendable because the task only involves the single-digit numbers 4 and 0, which do not demonstrate place-value concepts (tens, hundreds, etc.) inherent in positional base-10 systems.",
-      "validated_at": "2026-09-26T09:06:04.272Z",
+      "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten.",
+      "validated_at": "2026-09-27T19:58:42.674Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
     },
     {
@@ -1121,13 +1376,32 @@
         {
           "label": "Base10",
           "verdict": "not_defendable",
-          "evidence": "There are no multi-digit numbers, place value concepts, or representations of positional numbering in this image; only single-digit integers (8 and 1) are used."
+          "evidence": "The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: There are no multi-digit numbers, place value concepts, or representations of positional numbering in this image; only single-digit integers (8 and 1) are used.",
-      "validated_at": "2026-09-26T09:06:16.012Z",
+      "reasoning": "Labels not defendable: Base10: The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts.",
+      "validated_at": "2026-09-27T20:06:37.369Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0",
+      "generator": "shape-compare-attributes",
+      "view": "shape-compare-attributes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "Base10",
+          "verdict": "not_defendable",
+          "evidence": "The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: Base10: The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts.",
+      "validated_at": "2026-09-27T19:58:47.730Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -2096,6 +2370,402 @@
         "reasoning": "Labels not defendable: Before: The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence.",
         "validated_at": "2026-09-25T22:16:19.840Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~8bc12168",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:27.586Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:29.147Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "The number 1 (which is less than 10) is actively involved in the calculations, labels ('1 one', '+ 1 ten'), and the equation '1 = 1'."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'NumbersLarger10' is not defendable because the number 1 is actively involved in the exercise ('1 one', '+ 1 ten', '1 = 1'), violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
+        "validated_at": "2026-09-27T17:41:27.473Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~8bc12168",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:27.586Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:29.147Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10.",
+        "validated_at": "2026-09-27T17:41:25.178Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~8bc12168",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:27.586Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:29.147Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10.",
+        "validated_at": "2026-09-27T17:41:47.131Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~8bc12168",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:27.586Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~8bc12168#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:29.147Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "The number 1 is explicitly involved and displayed, which is less than 10."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly involved and displayed, which is less than 10.",
+        "validated_at": "2026-09-27T17:41:45.039Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~4a08256c",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:25.489Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:22.190Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "The definition requires all involved numbers to be greater than or equal to 10. Here, numbers like 5, 6, and 1 are explicitly written and involved in the exercise."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers shown in the exercise (such as 1, 5, and 6) have absolute values strictly less than 10, violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
+        "validated_at": "2026-09-27T17:41:29.330Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.NBT.C.5-ten-more-less~4a08256c",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:54:25.489Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~4a08256c#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:54:22.190Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger10",
+            "verdict": "not_defendable",
+            "evidence": "Several involved numbers (like 2, 1) have absolute values strictly less than 10, violating the 'all involved numbers' requirement."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers (2 ones, 1 ten, 2 = 2) have values less than 10, which violates the definition requiring all involved numbers to have absolute values greater than or equal to 10.",
+        "validated_at": "2026-09-27T17:41:28.438Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+      "resolution": "numeric-range-bounds-and-operand-profile",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "2.NBT.B.8-place-value-offsets~135522d8",
+      "replacement_samples": [
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#val#solution#inst:0",
+          "validated_at": "2026-09-27T20:04:16.095Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "validated_at": "2026-09-27T19:53:43.145Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#val#question#inst:0",
+          "validated_at": "2026-09-27T20:04:10.986Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~135522d8#counting-hundred-offset#counting-hundred-more-less#train#solution#inst:0",
+          "validated_at": "2026-09-27T19:53:45.000Z",
+          "pass": true
+        }
+      ],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "component-numeric-bounds",
+        "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+        "generator": "counting-hundred-offset",
+        "view": "counting-hundred-more-less",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "NumbersLarger100",
+            "verdict": "not_defendable",
+            "evidence": "The image contains several involved numbers that are less than 100, such as 93, 3, 9, and 1."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label NumbersLarger100 is not defendable because several involved numbers shown in the image (such as 3, 9, 93, and 1) have absolute values less than 100.",
+        "validated_at": "2026-09-27T17:41:20.946Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "resolution": "numeric-range-preview-revalidation",
+      "validated_at": "2026-09-27T19:45:43.237Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+        "generator": "arithmetic-ops-pairs",
+        "view": "operations-boxes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "EvenNumbers",
+            "verdict": "not_defendable",
+            "evidence": "The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: EvenNumbers: The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task.",
+        "validated_at": "2026-09-26T09:02:01.652Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0",
+      "resolution": "numeric-range-preview-revalidation",
+      "validated_at": "2026-09-27T20:04:00.508Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0",
+        "generator": "counting-basic",
+        "view": "counting-objects-simple",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ArabicNumerals",
+            "verdict": "not_defendable",
+            "evidence": "No Arabic numerals are visible in this Question Mode image."
+          },
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "No base 10 representations or place-value digits are shown in this Question Mode image."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ArabicNumerals: No Arabic numerals are visible in this Question Mode image.; Base10: No base 10 representations or place-value digits are shown in this Question Mode image.",
+        "validated_at": "2026-09-26T08:57:20.110Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~42b8a625#counting-basic#counting-objects-simple#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "resolution": "numeric-range-preview-revalidation",
+      "validated_at": "2026-09-27T19:58:32.621Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers 1 and 2, which do not involve positional place value or base-10 properties.",
+        "validated_at": "2026-09-26T09:05:53.353Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~517be7c5#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "resolution": "numeric-range-preview-revalidation",
+      "validated_at": "2026-09-27T19:58:34.724Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: Only single-digit numbers 0 and 6 are present, which do not involve positional number representations where successive place values differ by ten.",
+        "validated_at": "2026-09-26T09:05:56.643Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~59a7a3dc#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0",
+      "resolution": "grouped-word-problem-requested-quantity",
+      "fix_commit": "5f9d310",
+      "validated_at": "2026-09-27T20:10:45.589Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "minor_content_defect",
+        "topic": "division-story-requested-quantity",
+        "sample_key": "3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0",
+        "generator": "arithmetic-ops-pairs",
+        "view": "operations-word-problem-within-100",
+        "mode": "question",
+        "rejected_labels": [],
+        "failed_general_checks": [
+          "math_coherent"
+        ],
+        "reasoning": "The story text contains a semantic/mathematical incoherence: '90 items are shared equally among 45 groups. How many are there now?' The question 'How many are there now?' belongs to change-based addition/subtraction problems and does not logically match the division equation $90 \\div 45 = ?$.",
+        "validated_at": "2026-09-27T19:49:19.450Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.A.3-multiplication-division-word-problems~d5f15126#arithmetic-ops-pairs#operations-word-problem-within-100#train#question#inst:0\" --no-validate"
       }
     }
   ]
