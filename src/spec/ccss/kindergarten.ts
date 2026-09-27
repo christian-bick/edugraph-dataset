@@ -327,7 +327,7 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
         Ability.ConceptClassification
     ])
     .applyLabelVariants([
-        [Scope.ShapeProperties],
+        [Area.ShapeRecognition],
     ]);
 
 // --- K.MD.B.3: Sort the categories by count ---
@@ -346,7 +346,7 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
         [Scope.Most]
     ])
     .applyLabelVariants([
-        [Scope.ShapeProperties],
+        [Area.ShapeRecognition],
     ]);
 
 // ==========================================

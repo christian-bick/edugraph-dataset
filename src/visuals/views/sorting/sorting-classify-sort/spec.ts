@@ -1,12 +1,12 @@
 import {ViewSpec} from '../../../../types/view-spec.ts';
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
 
 export const spec: ViewSpec = {
     viewId: 'sorting-classify-sort',
     generalLabels: [
         Ability.ProcedureExecution,
-        Scope.ShapeProperties
+        Area.ShapeRecognition
     ]
 };
 
