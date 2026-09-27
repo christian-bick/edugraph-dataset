@@ -18,7 +18,8 @@ These items are not newly scheduled by the archive move.
   samples still fail on the separate component-count numeric boundary. The
   [numeric-range investigation](numeric-range-bounds.md) separates whole-task bounds from
   operand digit counts and records ten related conflicts in currently passing samples,
-  an existing checklist exemption, and CCSS starting/result boundary gaps; fixes remain open.
+  an existing checklist exemption, and remaining result-boundary gaps; fixes remain open.
+  The 2.NBT.B.8 starting cutoff of 900 is intentionally ignored, as recorded in its target block.
   The related successor view's sequence evidence remains open. The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.
 

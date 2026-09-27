@@ -1,8 +1,9 @@
 # Numeric range bounds and operand profiles
 
 Investigation requested on 2026-09-27, following the [CCSS ontology VQA rerun](ontology-v029-vqa-rerun.md).
-Baseline: `3605b55`. This records a corrected interpretation and implementation options;
-no ontology, generator, target, view, dataset, or VQA cache change has been made.
+Baseline: `3605b55`. This records a corrected interpretation and implementation options.
+A subsequent target-block comment records the approved 900-cutoff approximation; no ontology,
+generator behavior, target labels, view, dataset, or VQA cache change has been made.
 The isolated `test` spec and its artifacts remain excluded.
 
 ## Clarified meaning
@@ -20,10 +21,18 @@ this distinction without exempting actual arithmetic operands.
 
 Installed ontology preview: `0.29.0-pre.2.59ff94cc3573`. Its current template says that
 "all involved numbers" have absolute values greater than or equal to, or less than or equal
-to, the threshold. The inclusive absolute-value bounds should remain. A possible clarification
-is to identify the numerical values used or determined in the primary mathematical task,
-including unshown answers, and exclude digits/place-value annotations used only to represent
-those values. This is proposed wording, not a published definition.
+to, the threshold. The inclusive absolute-value bounds should remain. The user prefers one
+concise definition rather than additional explanatory sentences on every range label. Proposed
+templates are:
+
+- **NumbersLargerN:** Numeric contexts in which all numerical values used or determined by
+  the main task have absolute values greater than or equal to N.
+- **NumbersSmallerN:** Numeric contexts in which all numerical values used or determined by
+  the main task have absolute values less than or equal to N.
+
+"Used or determined" includes operands and unshown results; "main task" distinguishes those
+values from annotations used only to represent them. These are proposed definitions, not a
+published ontology change.
 
 VQA receives each concrete label's own definition and comment through `involvementStatement`;
 it does not expand parent definitions. Updating only `NumericRange` would be insufficient.
@@ -107,7 +116,7 @@ This establishes matching feasibility only; production implementations and compl
 compatibility guards were not changed or validated by the experiment. Target hashes would
 change normally with their label sets (`TSPEC-5`).
 
-## CCSS boundaries needing an explicit disposition
+## CCSS boundary decisions and remaining gaps
 
 The canonical CCSS source in `public/coverage/ccss-tree.json` distinguishes starting-number
 requirements from whole-expression bounds:
@@ -116,26 +125,30 @@ requirements from whole-expression bounds:
   examples but are excluded by the current shared 10-to-100 whole-task range. Covering the
   full starting domain requires direction-appropriate result bounds and consideration of
   `10 - 10 = 0`, rather than treating a two-digit operand as a two-digit result guarantee.
-- **2.NBT.B.8:** starts from 100 through 900. A three-digit operand profile alone admits
-  starts above 900. The current cached solution `959 - 10 = 949` is outside that source
-  requirement. It is sample
+- **2.NBT.B.8 — accepted approximation:** the source specifies starts from 100 through 900.
+  The user explicitly approved ignoring the pedagogically arbitrary 900 cutoff, documented
+  in a comment above `placeValueOffsetsBuilder` in `src/spec/ccss/grade-02.ts`. Starts above
+  900, such as the current `959 - 10 = 949` sample, therefore do not require correction on
+  that basis. Its incorrectly asserted `NumbersLarger100` remains a separate open issue.
+  The sample is
   `2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#solution#inst:0`.
 - The same standard permits `111 - 100 = 11` and `100 - 100 = 0`; a blanket lower bound
   of 100 on hundred-less tasks excludes these cases. Conversely, the hundred-more family
   can keep a lower bound of 100 when starting at 100 or above.
 
-Preserving the existing restricted subskills and covering the full standard are different
-scopes. The next correction must state that choice and preserve explicit coverage gaps;
-the in-memory matching experiment does not claim full CCSS-domain coverage.
+The 900 starting cutoff is deliberately relaxed. The remaining result-boundary cases still
+need an explicit disposition: preserving the existing restricted subskills and extending
+their result coverage are different scopes. The in-memory matching experiment does not
+claim complete result-domain coverage.
 
 ## Proposed next correction and verification
 
-1. Clarify each concrete ontology range definition/comment around primary task values,
-   unshown answers, and representational digits, with no exception for adjustment operands.
+1. Use concise concrete ontology range definitions around values used or determined by
+   the main task, with no exception for adjustment operands.
 2. Separate operand digit profiles from numeric bounds in the existing offset generators;
    enforce all operands and results against the selected range. Declare label-expressible
    contradictions in compatibility rules and retain defensive numeric checks (`SPEC-G3`).
-3. Correct the affected targets, explicitly decide the CCSS boundary cases above, and repair
+3. Correct the affected targets, explicitly decide the remaining result-boundary cases, and repair
    the related one-step range/checklist issue without losing valid sequence capabilities.
 4. Run required unit coverage, matching and static gates, canonical affected generation,
    VQA at concurrency four, and churn/split checks. Preserve unrelated records and `test`.

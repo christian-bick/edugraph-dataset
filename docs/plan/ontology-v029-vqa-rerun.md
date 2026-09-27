@@ -293,11 +293,14 @@ passing-but-mislabeled samples are distinct; the cache totals remain unchanged.
 
 Separating numeric bounds from the existing operand digit-count labels is viable without a
 new payload or view family. An in-memory capability experiment preserves all 683 targets
-and 832 tuple relationships. It is not an implemented repair. The investigation also records
-CCSS boundary gaps, including a current `959 - 10 = 949` sample whose start exceeds the
-2.NBT.B.8 requirement of 100–900, and the need to allow smaller hidden results when covering
-the full subtraction domain. No generator, target, definition, checklist, or VQA record has
-been changed for this investigation; the follow-up remains open.
+and 832 tuple relationships. It is not an implemented repair. The user explicitly approved
+ignoring 2.NBT.B.8's pedagogically arbitrary 900 starting cutoff; a comment in that standard's
+target block records the decision. The current `959 - 10 = 949` sample therefore needs no
+correction for exceeding 900, while its `NumbersLarger100` claim remains incorrect. Smaller
+hidden results and the other result-boundary gaps remain open. The proposed ontology wording
+now uses one concise definition per range label, as requested. No generator behavior, target
+labels, ontology definitions, checklists, or VQA records have changed; only the target comment
+and investigation documentation have been updated.
 
 ### Spatial assembly versus concept composition
 

@@ -310,6 +310,8 @@ const modelToWrittenMethodBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 2.NBT.B.8: Ten or one hundred more or less ---
+// We intentionally ignore the standard's pedagogically arbitrary 900 cutoff for
+// the starting number; the target's numeric bounds govern the exercise instead.
 const placeValueOffsetsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
