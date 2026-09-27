@@ -336,18 +336,34 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Area.ObjectSorting,
         Area.NumericOrder,
+        Scope.ArabicNumerals,
+        Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller10,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.Least],
-        [Scope.Most]
+        [Scope.AscendingOrder],
+        [Scope.DescendingOrder]
     ])
     .applyLabelVariants([
         [Area.ShapeRecognition],
     ]);
+
+// Supporting subskill of K.MD.B.3: identify one endpoint before ordering every category.
+// The standard asks for complete ordering; least/most selection is our curricular decomposition.
+const selectByCountBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.NumerationWithIntegers,
+        Area.ObjectSorting,
+        Area.ShapeRecognition,
+        Scope.NumbersWithoutZero,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller10,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Scope.Least], [Scope.Most]]);
 
 // ==========================================
 // 5. Geometry (K.G)
@@ -545,6 +561,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('K.MD.A.2-compare-attributes', compareAttributesBuilder),
     ...toTargets('K.MD.B.3-classify-count', classifyCountBuilder),
     ...toTargets('K.MD.B.3-sort-by-count', sortByCountBuilder),
+    ...toTargets('K.MD.B.3-select-by-count', selectByCountBuilder),
     // K.G - Geometry
     ...toTargets('K.G.A.1-env-shapes', envShapesBuilder),
     ...toTargets('K.G.A.1-env-shapes-other', envShapesOtherBuilder),

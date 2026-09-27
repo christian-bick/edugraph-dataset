@@ -1,144 +1,25 @@
-import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
-import {generateScatteredPositions, getRelationAnswer} from './helpers.ts';
-import {buildShapeClassificationPresentation, ClassificationItem} from '../classification-presentation.ts';
-import { SortingClassifySortViewConfig, SortingClassifySortViewSchema } from './spec.ts';
-import { withConfig } from '../../withConfig.tsx';
-import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
+import {withConfig} from '../../withConfig.tsx';
+import {CategoryCountView} from '../category-count-view.tsx';
+import {SortingClassifySortViewConfig, SortingClassifySortViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
-const COLOR_MAP: Record<string, string> = {
-    red: '#ef4444',
-    blue: '#3b82f6',
-    green: '#14b8a6'
-};
-
-interface CoreProps {
+const VIEW_ID = 'sorting-classify-sort';
+const SortingClassifySortCore = ({payload}: {
     config: SortingClassifySortViewConfig;
     payload: ViewRenderPayload<'sorting-classify-sort'>;
-}
-
-function ItemSVG({ item, size = 40 }: { item: ClassificationItem; size?: number }) {
-    const fill = COLOR_MAP[item.color] || '#334155';
-    const stroke = '#1e293b';
-    const strokeWidth = 2;
-
-    if (item.shape === 'square') {
-        return (
-            <svg width={size} height={size} viewBox="0 0 40 40">
-                <rect x="4" y="4" width="32" height="32" rx="4" fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-            </svg>
-        );
-    } else if (item.shape === 'triangle') {
-        return (
-            <svg width={size} height={size} viewBox="0 0 40 40">
-                <polygon points="20,4 36,36 4,36" fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-            </svg>
-        );
-    } else {
-        return (
-            <svg width={size} height={size} viewBox="0 0 40 40">
-                <circle cx="20" cy="20" r="16" fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-            </svg>
-        );
-    }
-}
-
-const SortingClassifySortCore = ({ payload }: CoreProps) => {
-    const { problem, isSolutionView } = payload;
-    const data = problem.data;
-
-    validateProblemData('sorting-classify-sort', data, ['categories', 'numObjects', 'relation', 'answer']);
-
-    const relation = data.relation;
-    const categoryIds = Object.keys(data.categories).sort();
-    const categoryCounts = Object.values(data.categories);
-    if (categoryIds.length !== 3
-        || categoryCounts.some(count => !Number.isInteger(count) || count < 1)
-        || categoryCounts.reduce((sum, count) => sum + count, 0) !== data.numObjects
-        || (relation !== 'most' && relation !== 'least')
-        || getRelationAnswer(data.categories, relation, categoryIds) !== data.answer
-        || categoryIds.filter(id => data.categories[id] === data.categories[data.answer]).length !== 1) {
-        throw new ViewValidationError(
-            'sorting-classify-sort',
-            'Classification totals, relation, and calculated answer must form one unique result.'
-        );
-    }
-
-    const {items, categories, mappedCategories} = useMemo(() => {
-        const categoriesMap = data.categories;
-        const presentation = buildShapeClassificationPresentation(categoriesMap, payload.seed);
-        return {items: presentation.items, categories: categoriesMap, mappedCategories: presentation.mappedCategories};
-    }, [data.categories, payload.seed]);
-
-    const { positions, itemSize } = useMemo(() => {
-        return generateScatteredPositions(items.length, 450, 200, 32);
-    }, [items.length]);
-
-    const resolvedAnswer = useMemo(() => {
-        return mappedCategories[data.answer];
-    }, [data.answer, mappedCategories]);
-
-    const promptText = `Which shape has the ${relation} number of items?`;
-
-    return (
-        <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">
-            <div className="flex flex-col items-center w-[480px]">
-                <div className="text-[1.25rem] font-bold text-slate-700 mb-5 text-center leading-relaxed">
-                    {promptText}
-                </div>
-                
-                <div className="relative w-[450px] h-[200px] bg-slate-50 border-2 border-slate-200 rounded-xl overflow-hidden mb-[25px]">
-                    {positions.map((pos, i) => (
-                        <div 
-                            key={i}
-                            className="absolute flex justify-center items-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
-                            style={{ left: `${pos.x}px`, top: `${pos.y}px`, width: `${itemSize}px`, height: `${itemSize}px` }}
-                        >
-                            <ItemSVG item={items[i]} size={itemSize} />
-                        </div>
-                    ))}
-                </div>
-
-                <div className="w-full flex gap-3">
-                    {Object.keys(categories).sort().map(cat => {
-                        const trait = mappedCategories[cat];
-                        const labelText = trait.charAt(0).toUpperCase() + trait.slice(1);
-                        const isCorrect = trait === resolvedAnswer;
-                        
-                        const catItem: ClassificationItem = {shape: trait, color: 'blue'};
-
-                        return (
-                            <div 
-                                key={cat}
-                                className={`flex-1 py-3 px-2.5 border-2 rounded-lg flex flex-col items-center gap-2 font-semibold text-[0.95rem] transition-all duration-200 ${
-                                    (isCorrect && isSolutionView === true)
-                                        ? 'border-green-600 bg-green-50 text-green-700 shadow-[0_0_10px_rgba(22,163,74,0.2)] font-bold'
-                                        : 'border-slate-200 bg-white text-slate-600'
-                                }`}
-                            >
-                                <ItemSVG item={catItem} size={32} />
-                                <span>{labelText}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-};
+}) => <CategoryCountView payload={payload} viewId={VIEW_ID} task="extremum" />;
 
 export const SortingClassifySort = withConfig(SortingClassifySortViewSchema, SortingClassifySortCore);
 
 let root: ReturnType<typeof createRoot> | null = null;
-
-window.renderView = (payload: ViewRenderPayload<'sorting-classify-sort'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'sorting-classify-sort'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) root = createRoot(container);
+            root.render(<SortingClassifySort payload={payload} />);
         }
-        root.render(<SortingClassifySort payload={payload} />);
-    }
-};
+    };
+}

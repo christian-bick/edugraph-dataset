@@ -594,8 +594,11 @@ export type CountingClassifyCountProblem = {
 export type CountingClassifySortProblem = {
     categories: Record<string, number>;
     numObjects: number;
-    relation: 'most' | 'least';
-    answer: string;
+    relation: 'most' | 'least' | 'ascending' | 'descending';
+    /** Equal-count categories share a group; groups have strictly increasing counts. */
+    ascendingGroups: string[][];
+    minimumCategories: string[];
+    maximumCategories: string[];
 };
 
 export type MeasurementStandardProblem = {
@@ -1922,6 +1925,7 @@ export interface ViewTypeMap {
     'counting-conservation': CountingProblem;
     'sorting-classify-count': CountingClassifyCountProblem;
     'sorting-classify-sort': CountingClassifySortProblem;
+    'sorting-classify-order': CountingClassifySortProblem;
 
     'measure-length-integer': MeasurementStandardProblem;
     'measure-length-integer-drawing': MeasurementStandardProblem;

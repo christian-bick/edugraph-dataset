@@ -1,0 +1,2 @@
+- **Identity:** Count the objects in each shape category and arrange every category by its count in the stated direction, writing the counts in digits.
+- **Modes:** Question Mode leaves the category order and counts unanswered. Solution Mode shows every category with its count in order and groups categories with equal counts together.

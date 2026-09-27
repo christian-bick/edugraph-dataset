@@ -18,7 +18,8 @@ const numeralConsumers = [
     ['counting-basic', 'counting-objects-simple', Ability.ProcedureUnderstanding],
     ['counting-basic', 'counting-objects-parity', Ability.ConceptClassification],
     ['counting-basic', 'counting-objects-cardinality', Ability.ProcedureUnderstanding],
-    ['counting-classify-count', 'sorting-classify-count', Ability.ConceptClassification]
+    ['counting-classify-count', 'sorting-classify-count', Ability.ConceptClassification],
+    ['counting-classify-sort', 'sorting-classify-order', Ability.ProcedureExecution]
 ] as const;
 
 const objectOnlyConsumers = [
@@ -69,7 +70,10 @@ describe('counting numeral representation ownership', () => {
             const view = views.find(entry => entry.viewId === viewId)!;
             const result = matchTarget({
                 id: `numeral-response-${viewId}`,
-                labels: [...quantityLabels, ability, Scope.Base10]
+                labels: [
+                    ...quantityLabels, ability, Scope.Base10,
+                    ...(viewId === 'sorting-classify-order' ? [Area.NumericOrder] : [])
+                ]
             }, generator, view);
 
             expect(result.matched).toBe(true);

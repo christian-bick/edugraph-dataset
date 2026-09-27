@@ -1,2 +1,2 @@
-- **Identity:** The classification trait and most-or-least relation remain identifiable in both modes because they determine why one category is selected.
-- **Modes:** Question Mode leaves every category neutral; Solution Mode identifies the category satisfying the stated relation.
+- **Identity:** The shapes can be counted by category to select the category with the fewest or most items.
+- **Modes:** Question Mode leaves every category neutral; Solution Mode identifies the category satisfying the stated relation, including all tied categories if present.
