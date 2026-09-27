@@ -71,7 +71,7 @@ const SortingClassifyCountCore = ({ config: _config, payload }: CoreProps) => {
         return generateScatteredPositions(items.length, 450, 160, 40);
     }, [items.length]);
 
-    const promptText = 'Classify and count the objects by shape.';
+    const promptText = 'Classify the objects by shape. Write each count in digits.';
 
     return (
         <div className="flex justify-center items-center p-[30px] bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] w-fit font-sans">

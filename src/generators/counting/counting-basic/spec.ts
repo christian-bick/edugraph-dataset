@@ -9,7 +9,6 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.NumerationWithIntegers,
         Scope.IntegerNumbers,
-        Scope.Base10,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.AdditiveCount

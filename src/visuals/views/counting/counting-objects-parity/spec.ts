@@ -6,6 +6,7 @@ export const spec: ViewSpec = {
     viewId: 'counting-objects-parity',
     generalLabels: [
         Scope.PhysicalNumbers,
+        Scope.Base10,
         Ability.ConceptClassification
     ]
 };

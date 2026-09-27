@@ -1,2 +1,2 @@
 - **Identity:** Every countable object has one corresponding position for a sequential counting number.
-- **Modes:** Question Mode leaves the number positions and total empty; Solution Mode fills the positions in order and reveals the matching total.
+- **Modes:** Question Mode requests counting numbers in digits and leaves the number positions and total empty; Solution Mode fills the positions in order and reveals the matching total.

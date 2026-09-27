@@ -45,7 +45,7 @@ const CountingObjectsCardinalityCore = ({ config, payload }: CoreProps) => {
             <div className="flex flex-col items-center w-[480px]">
                 {!isSolutionView && (
                     <div className="text-2xl font-bold text-slate-700 mb-5 text-center font-sans">
-                        Count the objects. What is the total number?
+                        Count the objects. Write the total in digits.
                     </div>
                 )}
                 
