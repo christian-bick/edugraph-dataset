@@ -1,25 +1,23 @@
 # Ontology v0.29 CCSS VQA rerun
 
-Follow-up on 2026-09-27: the [numeral-system ownership correction](numeral-system-ownership.md)
-resolved seven failing samples, bringing the current CCSS total to **1,892 pass / 44 fail**.
-This report and its findings JSON retain the original 2026-09-26 rerun evidence below.
-
 ## Outcome
 
-Completed on 2026-09-26 on branch `codex/ontology-v029-vqa-rerun`.
-All **1,936 CCSS samples** have current judgments: **1,885 pass (97.4%) and 51 fail**.
-There are no uncached samples. The remaining failures comprise **38 samples requiring semantic
+Updated on 2026-09-27 after the numeral-system ownership correction on branch
+`codex/ontology-v029-vqa-rerun`. All **1,936 CCSS samples** have current judgments:
+**1,892 pass (97.7%) and 44 fail**, down from 51 failures in the initial 2026-09-26 rerun.
+There are no uncached samples. The remaining failures comprise **31 samples requiring semantic
 review** and **13 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 51 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 44 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain every failed sample,
-rejected-label evidence, disposition, replay command, and bounded-revalidation result. Major
-findings and proposed review directions are described below. No production targets or declared
-labels were changed to make the run pass.
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 44 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The seven
+resolved verdicts and initial totals are retained separately as history. Production targets remain
+unchanged; the user-authorized correction moved numeral-system ownership to the views that supply
+its evidence. Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
@@ -40,6 +38,11 @@ The initial canonical graph rebuild reused all 285 shards and rendered no images
 correctly required regeneration of the four repaired views. That affected run rendered 32 images
 in six shards and reused the other 279 shards. Completion reused 1,773 current judgments and
 requested 163 more: the remaining 131 original images plus the 32 repaired samples.
+
+The 2026-09-27 ownership correction regenerated 48 samples across seven affected pairs, replacing
+10 shards and reusing 275. Revalidation made 18 new judgments at concurrency four and reused
+1,918 current records. Seven failing samples became passing, with no newly rejected samples.
+The [detailed follow-up](numeral-system-ownership.md) records consumer adoption and verification.
 
 ## Minor repairs
 
@@ -62,6 +65,30 @@ The leaf checklists describe the repaired observable tasks. These repairs do not
 production target or a module's declared labels. Canonical images were inspected in both modes;
 31 of the 32 revalidated samples pass. The one residual counting rejection is documented below.
 
+## Resolved findings
+
+### Numeral-system labels on object-only tasks
+
+**Resolved on 2026-09-27** in `879fe74`, with VQA results committed in `34d77e2`.
+The `counting-basic`, `counting-classify-count`, and `counting-classify-sort` producers no longer
+claim `Base10`. That representation now belongs to their views that display decimal numerals or
+explicitly request a digit response (`SPEC-5`, `SPEC-G3`, `SPEC-11`). The user confirmed that such
+requests support numeral-system labels even while Question Mode keeps the answer box empty.
+
+All six `counting-conservation` and four `sorting-classify-sort` images now omit both `Base10`
+and `ArabicNumerals`. Their valid quantity, integer, and range claims remain. Written-response
+views retain their numeral claims, with explicit digit instructions added to one-to-one,
+classify/count, and the compatible cardinality view. No targets or matching pairs were removed.
+
+All six conservation images pass. The classify/count question and one most-selection question
+also changed from failing to passing, reducing the total failure count by seven. Four sorting
+images still fail on the separate shape-property issue below, and the cached simple-counting
+digit-answer disagreement remains. Passing sorting verdicts do not resolve their broader
+`ShapeProperties` or `NumericOrder` concerns.
+
+The [ownership correction report](numeral-system-ownership.md) contains the complete adoption
+matrix, per-view results, and verification evidence.
+
 ## Major findings requiring follow-up
 
 ### Exact equation truth versus plausibility
@@ -79,34 +106,6 @@ renaming the question to "plausible" would not correct its meaning (`SPEC-2`, `S
 1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0
 ```
 
-### Numeral-system labels on object-only tasks
-
-The producer-to-view ownership correction is completed in the
-[2026-09-27 follow-up](numeral-system-ownership.md), including scoped VQA results and the user's
-confirmation that explicitly requested digit answers support numeral-system labels.
-The following describes the original finding.
-
-The `counting-basic` producer supplies `Base10` invariantly even to `counting-conservation`,
-whose inspected question and solution images contain object collections and word choices,
-with no positional numeral representation. The conservation targets do not request `Base10`;
-the additional annotation comes from the producer.
-
-Review representation ownership across its five CCSS consumers: conservation, count-out,
-one-to-one, parity, and simple counting. Similar missing numeral evidence occurs in
-`sorting-classify-count` Question Mode and all inspected `sorting-classify-sort` images.
-Removing a producer claim requires a coordinated review of consumers and affected targets;
-adding a decorative numeral or a caption naming the label is not a sufficient repair
-(`SPEC-2`, `SPEC-5`, `IMPL-V11`, `CHK-V6`).
-
-Distinguish absence of numerals from single-digit notation. A visible ordinary decimal
-numeral can reasonably support `Base10`; VQA rationales demanding multiple digits or a
-place-value lesson impose a stronger requirement than the definition. Physical collections
-also supply integer quantities without printed numerals, so the count question's rejections
-of integer, range, and positive/nonzero labels are not automatically classification defects.
-
-Affected families include `K.CC.B.4b-conservation`, `K.MD.B.3-classify-count`, and
-`K.MD.B.3-sort-by-count`.
-
 ### Shape properties versus shape recognition
 
 Both sorting views claim `ShapeProperties`, while the supplied statement concerns physical
@@ -117,6 +116,8 @@ Review both view declarations and the corresponding kindergarten targets. `Area.
 is an eligible candidate describing visual identification and grouping by shared form, but this
 would be a coordinated classification and dimension change (`SPEC-2`, `SPEC-11`, `TSPEC-13`).
 The mismatch is present even in some samples where VQA accepted that label.
+After the numeral correction, four images retain this rejection: the classify/count solution,
+both least-selection modes, and the most-selection solution.
 
 ### Most/least selection versus a complete numeric order
 
@@ -220,7 +221,7 @@ relation chain and rendered comparison evidence are coherent.
 ## Evaluator disagreements
 
 The initial pass also produced findings whose reasoning conflicts with visible evidence or
-adds requirements absent from the supplied definition. These receive one bounded scoped
+adds requirements absent from the supplied definition. These received one bounded scoped
 revalidation, without prompt/checklist weakening or repeated retries until a pass:
 
 - Equal addends `7 + 7` structurally imply an even result, although Question Mode withholds it.
@@ -249,10 +250,11 @@ revalidation, without prompt/checklist weakening or repeated retries until a pas
 
 Persistent disagreements remain visible in the final cache and findings report.
 
-Ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
+On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
-the full-dataset failure count changed from 61 to 51. No further retries were made to chase a
-passing result. The remaining disagreements are one equal-addends question, one counting
+the full-dataset failure count changed from 61 to 51 before the ownership correction reduced it
+to 44. No further retries were made to chase a passing result. The 13 remaining disagreements
+are unchanged: one equal-addends question, one counting
 question, two fraction word-problem solutions, four shape-attribute comparisons, one square-cell
 array question, and four time-interval tasks.
 
@@ -272,8 +274,10 @@ array question, and four time-interval tasks.
 The repaired counting view still has one numeral-evidence rejection: its question explicitly asks
 for a total in digits, while its response box remains blank. This is a Question Mode boundary
 disagreement (`ArabicNumerals`/`Base10`), distinct from the repaired counting explanation. It was
-not repeatedly resubmitted. The answer must remain withheld, and decorative digits would not
-clarify the task's mathematical evidence.
+not repeatedly resubmitted. On 2026-09-27, the user explicitly confirmed that requesting a digit
+answer supports these labels. Its unchanged image and validation context retained the cached
+disagreement. The answer must remain withheld, and decorative digits would not clarify the task's
+mathematical evidence.
 
 ## Verification
 
@@ -285,21 +289,30 @@ violations; its existing semantic review items are separate from those static ch
 An initial Windows fixture-cleanup failure passed on retry. A concurrent coverage write caused
 the first Docker source-copy attempt to stop before generation; sequential execution resolved it.
 
-After the four view repairs, `npm run check` and `npm run build` both passed again. The final
-cache-aware validation reused all 1,936 records without further API calls and confirmed 51
-failures with zero uncached samples. No API rate-limit errors were observed.
-The final documentation check passed all local references and rule citations; four existing
+After the four initial view repairs, `npm run check` and `npm run build` both passed again.
+The 2026-09-26 cache-aware validation confirmed 51 failures with zero uncached samples.
+
+After the ownership correction, `npm run check -- --spec=ccss` and the complete coverage suite
+passed: **527 test files and 3,074 tests**, including eight new ownership/matching regression cases.
+All generator coverage thresholds passed. The strict label-architecture audit reports zero
+violations and 93 existing review items. All 681 targets and 830 matching tuples are preserved;
+17 generation plans record the ownership transfer.
+
+The latest validation confirmed **44 failures and zero uncached samples** after 18 new judgments
+and 1,918 reused records. No API rate-limit errors were observed. The documentation check passed
+all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
-Final verification commands and outcomes:
+Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | 32 rendered samples; 279 shards reused; six shards replaced |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,885 pass / 51 fail; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 51 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | 48 rendered samples; 275 shards reused; 10 shards replaced |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,892 pass / 44 fail; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 44 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | 1,910 identical images; 26 expected image changes confined to the four repaired views; zero added/removed identities, attempt shifts, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=1d5b58a` | Ownership correction: 1,932 identical images and four expected instruction changes; zero added/removed identities, attempt shifts, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,906 identical images and 30 expected changes across the six repaired views; zero added/removed identities, attempt shifts, or seed changes |
 
 The split contains 1,632 training and 304 validation images. Of 207 tuples allocated to validation,
 152 have validation evidence; the report retains the 55 coverage-gap warnings and does not infer
