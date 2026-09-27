@@ -297,8 +297,8 @@ and 832 tuple relationships. It is not an implemented repair. The user explicitl
 ignoring 2.NBT.B.8's pedagogically arbitrary 900 starting cutoff; a comment in that standard's
 target block records the decision. The current `959 - 10 = 949` sample therefore needs no
 correction for exceeding 900, while its `NumbersLarger100` claim remains incorrect. Smaller
-hidden results and the other result-boundary gaps remain open. The proposed ontology wording
-now uses one concise definition per range label, as requested. No generator behavior, target
+hidden results and the other result-boundary gaps remain open. The agreed ontology wording
+uses "serving as inputs or results of the task" in each concise range definition. No generator behavior, target
 labels, ontology definitions, checklists, or VQA records have changed; only the target comment
 and investigation documentation have been updated.
 

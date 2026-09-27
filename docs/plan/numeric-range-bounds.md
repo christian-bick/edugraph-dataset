@@ -21,18 +21,18 @@ this distinction without exempting actual arithmetic operands.
 
 Installed ontology preview: `0.29.0-pre.2.59ff94cc3573`. Its current template says that
 "all involved numbers" have absolute values greater than or equal to, or less than or equal
-to, the threshold. The inclusive absolute-value bounds should remain. The user prefers one
-concise definition rather than additional explanatory sentences on every range label. Proposed
+to, the threshold. The inclusive absolute-value bounds should remain. The user selected one
+concise definition rather than additional explanatory sentences on every range label. The agreed
 templates are:
 
-- **NumbersLargerN:** Numeric contexts in which all numerical values used or determined by
-  the main task have absolute values greater than or equal to N.
-- **NumbersSmallerN:** Numeric contexts in which all numerical values used or determined by
-  the main task have absolute values less than or equal to N.
+- **NumbersLargerN:** Numeric contexts in which all numerical values serving as inputs or
+  results of the task have absolute values greater than or equal to N.
+- **NumbersSmallerN:** Numeric contexts in which all numerical values serving as inputs or
+  results of the task have absolute values less than or equal to N.
 
-"Used or determined" includes operands and unshown results; "main task" distinguishes those
-values from annotations used only to represent them. These are proposed definitions, not a
-published ontology change.
+"Serving as inputs or results of the task" includes operands and unshown results while
+distinguishing those values from annotations used only to represent them. This wording decision
+has not yet been adopted through an updated ontology dependency.
 
 VQA receives each concrete label's own definition and comment through `involvementStatement`;
 it does not expand parent definitions. Updating only `NumericRange` would be insufficient.
@@ -143,8 +143,8 @@ claim complete result-domain coverage.
 
 ## Proposed next correction and verification
 
-1. Use concise concrete ontology range definitions around values used or determined by
-   the main task, with no exception for adjustment operands.
+1. Adopt the agreed concrete ontology range definitions around values serving as inputs or
+   results of the task, with no exception for adjustment operands.
 2. Separate operand digit profiles from numeric bounds in the existing offset generators;
    enforce all operands and results against the selected range. Declare label-expressible
    contradictions in compatibility rules and retain defensive numeric checks (`SPEC-G3`).
