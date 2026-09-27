@@ -62,6 +62,13 @@ the requested count and the available collection size. The generator chooses tha
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
 views retain `counting-basic` and `CountingProblem`, so supply sampling does not alter their data.
 
+Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
+union. The completion and explanation views share that mathematical payload and parent-level
+rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
+The general triples producer retains its existing property support for box and vertical formats.
+Hundreds-bundle completion and explanation likewise share `PlaceValueHundredsBundlesProblem`;
+their separate views distinguish reading the represented number from explaining the counting method.
+
 Label compatibility is implemented through the design recorded in
 [label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability
 matching, the planner admits only valid joint schema-label selections. Every tuple carries a

@@ -1,0 +1,2 @@
+- **Identity:** The task asks how complete tens or hundreds can be grouped or counted to find their value, and why the method works.
+- **Modes:** Question Mode leaves the value and explanation unanswered. Solution Mode gives the value and explains the method and why every represented unit is preserved or counted once, with the bundle models still visible.

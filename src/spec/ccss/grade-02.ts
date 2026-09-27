@@ -128,8 +128,11 @@ const tenTensMakeHundredBuilder = new DatasetPermutationBuilder()
         Scope.MultiplesOf100,
         Scope.NumbersSmaller120,
         Scope.NumbersWithoutZero,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureUnderstanding
+        Scope.PhysicalNumbers
+    ])
+    .applyLabelVariants([
+        [Ability.DirectUnderstanding],
+        [Ability.ProcedureUnderstanding]
     ]);
 
 // --- 2.NBT.A.1b: One to nine hundreds ---
@@ -141,8 +144,11 @@ const hundredsBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersSmaller1000,
         Scope.NumbersWithoutZero,
-        Scope.PhysicalNumbers,
-        Ability.ProcedureUnderstanding
+        Scope.PhysicalNumbers
+    ])
+    .applyLabelVariants([
+        [Ability.DirectUnderstanding],
+        [Ability.ProcedureUnderstanding]
     ]);
 
 // --- 2.NBT.A.2: Count and skip-count within 1000 ---

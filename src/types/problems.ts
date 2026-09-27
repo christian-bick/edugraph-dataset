@@ -23,6 +23,33 @@ export type ArithmeticTripleProblem = ArithmeticProblemBase & {
     blankPart?: undefined;
 };
 
+/**
+ * The same three addends or factors under a change of order or grouping.
+ * Commutative witnesses have distinct first and last values to make the swap visible.
+ */
+export type ArithmeticReorderingPropertyProblem = {
+    operation: 'addition' | 'multiplication';
+    propertyLaw: 'commutative' | 'associative';
+    num1: number;
+    num2: number;
+    num3: number;
+    answer: number;
+};
+
+/** A product of a sum, its two partial products, and their common total. */
+export type ArithmeticDistributivePropertyProblem = {
+    operation: 'multiplication';
+    propertyLaw: 'distributive';
+    num1: number;
+    num2: number;
+    num3: number;
+    combinedFactor: number;
+    partialProducts: [number, number];
+    answer: number;
+};
+
+export type ArithmeticPropertyProblem = ArithmeticReorderingPropertyProblem | ArithmeticDistributivePropertyProblem;
+
 export type ArithmeticFourProblem = ArithmeticProblemBase & {
     num1: number;
     num2: number;
@@ -1892,7 +1919,8 @@ export interface ViewTypeMap {
     'operations-word-problem-remainder-interpretation': ArithmeticWordProblemInterpretedRemainder;
     'operations-word-problem-equation-formalization': ArithmeticWordProblemLetterEquation;
     'operations-word-problem-reasoning': ArithmeticWordProblemRounding;
-    'operations-properties': ArithmeticTripleProblem;
+    'operations-properties': ArithmeticPropertyProblem;
+    'operations-properties-explanation': ArithmeticPropertyProblem;
     'operations-decompose': ArithmeticDecomposeProblem;
     'operations-equation-judgment': EquationJudgmentProblem;
     'operations-answer-reasonableness': ArithmeticEstimationProblem;
@@ -1918,6 +1946,7 @@ export interface ViewTypeMap {
     'place-value-make-ten': PlaceValueMakeTenProblem;
     'place-value-tens-bundles': PlaceValueTensBundlesProblem;
     'place-value-hundreds-bundles': PlaceValueHundredsBundlesProblem;
+    'place-value-hundreds-bundles-explanation': PlaceValueHundredsBundlesProblem;
     'place-value-expanded-form': PlaceValueExpandedProblem;
     'place-value-arithmetic-model': PlaceValueArithmeticProblem;
     'place-value-arithmetic-written-method': PlaceValueArithmeticProblem;

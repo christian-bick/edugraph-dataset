@@ -1,9 +1,7 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel} from '../../../lib/resolvers.ts';
+import {Area} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {arithmeticOperations, resolvePropertyAwareOperation} from '../helpers.ts';
+import {arithmeticTripleLabels, arithmeticTripleSchema} from '../arithmetic-triple-schema.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
@@ -22,40 +20,9 @@ export const spec: GeneratorSpec = {
         if (distributive && !multiplication) return false;
         return !selected(Area.Addition) || !multiplication || distributive;
     })],
-    generalLabels: [
-        Scope.ThreeOperands,
-        Scope.IntegerNumbers,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives
-    ]
+    generalLabels: arithmeticTripleLabels
 };
 
-export const ArithmeticOpsTriplesGeneratorSchema = {
-    operation: [[...arithmeticOperations, Area.Sum], resolvePropertyAwareOperation],
-    requireZero: [
-        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        hasLabel(Scope.NumbersWithZero)
-    ],
-    requireMultipleOf10: [
-        [Scope.MultiplesOf10],
-        hasLabel(Scope.MultiplesOf10)
-    ],
-    useCommutativeLaw: [
-        [Area.CommutativeLaw],
-        hasLabel(Area.CommutativeLaw)
-    ],
-    useAssociativeLaw: [
-        [Area.AssociativeLaw],
-        hasLabel(Area.AssociativeLaw)
-    ],
-    useDistributiveLaw: [
-        [Area.DistributiveLaw],
-        hasLabel(Area.DistributiveLaw)
-    ],
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const ArithmeticOpsTriplesGeneratorSchema = arithmeticTripleSchema;
 
 export type ArithmeticOpsTriplesGeneratorConfig = ConfigFromSchema<typeof ArithmeticOpsTriplesGeneratorSchema>;

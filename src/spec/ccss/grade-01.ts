@@ -35,18 +35,23 @@ const threeAddendsBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.OA.B.3: Apply properties of operations (commutative/associative) ---
+// Completion practices the required application; explaining how and why the change
+// preserves the total is a supporting refinement of this competency.
 const propertiesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Addition,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller20,
-        Ability.ProcedureUnderstanding
+        Scope.NumbersSmaller20
     ])
     .applyLabelVariants([
         [Area.CommutativeLaw],
         [Area.AssociativeLaw]
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.ProcedureUnderstanding]
     ]);
 
 const arithmeticStrategyConstraints = [

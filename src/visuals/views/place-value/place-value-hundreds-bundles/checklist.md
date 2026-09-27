@@ -1,3 +1,2 @@
-- **Identity:** Ten visibly distinct base-ten rods become one hundred flat, or 1-9 hundred flats represent the corresponding multiple of one hundred.
-- **Question mode:** The represented value remains blank while the complete grouping evidence stays visible.
-- **Solution mode:** The same grouping remains visible and its value is revealed in the answer position.
+- **Identity:** The task asks for the value in ones represented by ten full ten-rods or 1-9 hundred flats.
+- **Modes:** Question Mode leaves the represented value blank. Solution Mode fills it while preserving the complete bundle models.

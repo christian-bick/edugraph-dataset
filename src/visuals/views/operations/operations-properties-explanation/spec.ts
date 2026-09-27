@@ -4,14 +4,10 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 import {arithmeticPropertiesDisplayCapacity} from '../arithmetic-properties-compatibility.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'operations-properties',
+    viewId: 'operations-properties-explanation',
     compatibility: [arithmeticPropertiesDisplayCapacity],
-    generalLabels: [
-        Scope.ArabicNumerals,
-        Ability.ProcedureExecution
-    ]
+    generalLabels: [Scope.ArabicNumerals, Ability.ProcedureUnderstanding]
 };
 
-export const OperationsPropertiesViewSchema = {} as const;
-
-export type OperationsPropertiesViewConfig = ConfigFromSchema<typeof OperationsPropertiesViewSchema>;
+export const OperationsPropertiesExplanationViewSchema = {} as const;
+export type OperationsPropertiesExplanationViewConfig = ConfigFromSchema<typeof OperationsPropertiesExplanationViewSchema>;

@@ -1,0 +1,2 @@
+- **Identity:** Complete equivalent expressions show the named arithmetic property, and the task asks how the transformation is performed and why it preserves the result.
+- **Modes:** Question Mode withholds the explanation. Solution Mode explains the transformation steps and why the same quantities or partial products preserve the sum or product, while keeping the equations visible.

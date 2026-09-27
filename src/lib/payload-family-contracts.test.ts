@@ -22,7 +22,8 @@ const families = [
     ['operations-counting-back-operation-derivation', 'integer-subtraction-counting-back', 'integer-addition-counting-on', 'IntegerAddSubtractStrategyProblem'],
     ['counting-ten-more-less', 'counting-ten-offset', 'counting-hundred-offset', 'CountingIncDecProblem'],
     ['counting-hundred-more-less', 'counting-hundred-offset', 'counting-ten-offset', 'CountingIncDecProblem'],
-    ['place-value-hundreds-bundles', 'place-value-hundreds-bundles', 'place-value-bundles', 'PlaceValueBundlesProblem']
+    ['place-value-hundreds-bundles', 'place-value-hundreds-bundles', 'place-value-bundles', 'PlaceValueBundlesProblem'],
+    ['place-value-hundreds-bundles-explanation', 'place-value-hundreds-bundles', 'place-value-bundles', 'PlaceValueBundlesProblem']
 ] as const;
 
 describe('declared producer/view payload families', () => {
@@ -92,6 +93,52 @@ describe('declared producer/view payload families', () => {
         expect(matchesTarget([], generators.find(generator => generator.generatorId === 'place-value-hundreds-bundles')!, view))
             .toEqual({matched: false, reason: 'incompatible-type'});
     });
+
+    it('requires a complete property witness for both property task identities', () => {
+        const property = generators.find(generator => generator.generatorId === 'arithmetic-property-relations')!;
+        const ordinary = generators.find(generator => generator.generatorId === 'arithmetic-ops-triples')!;
+        for (const viewId of ['operations-properties', 'operations-properties-explanation']) {
+            const view = views.find(view => view.viewId === viewId)!;
+            expect(matchesTarget([Area.Addition, Area.CommutativeLaw, Scope.NumbersSmaller20], property, view))
+                .toEqual({matched: true});
+            expect(matchesTarget([Area.Addition, Area.CommutativeLaw, Scope.NumbersSmaller20], ordinary, view))
+                .toEqual({matched: false, reason: 'incompatible-type'});
+        }
+    });
+
+    it('separates completion and explanation throughout the real CCSS property and hundreds routes', async () => {
+        const targets = await loadMatchingTargets('ccss');
+        const tuples = matchTargets(targets, generators, views).tuples;
+        const families = [
+            ['1.OA.B.3-properties~', Ability.ProcedureExecution,
+                ['operations-properties', 'operations-boxes', 'operations-vertical'], 'operations-properties-explanation'],
+            ['3.OA.B.5-distributive-property~', Ability.ProcedureExecution,
+                ['operations-properties', 'operations-boxes', 'operations-vertical'], 'operations-properties-explanation'],
+            ['2.NBT.A.1a-ten-tens-make-hundred~', Ability.DirectUnderstanding,
+                ['place-value-hundreds-bundles'], 'place-value-hundreds-bundles-explanation'],
+            ['2.NBT.A.1b-hundreds~', Ability.DirectUnderstanding,
+                ['place-value-hundreds-bundles'], 'place-value-hundreds-bundles-explanation']
+        ] as const;
+        for (const [prefix, completionAbility, completionViews, explanationView] of families) {
+            const family = targets.filter(target => target.id.startsWith(prefix));
+            expect(family.some(target => target.labels.includes(completionAbility)), prefix).toBe(true);
+            expect(family.some(target => target.labels.includes(Ability.ProcedureUnderstanding)), prefix).toBe(true);
+            for (const target of family) {
+                const explanation = target.labels.includes(Ability.ProcedureUnderstanding);
+                expect(target.labels.includes(completionAbility), target.id).toBe(!explanation);
+                const routes = tuples.filter(tuple => tuple.target.id === target.id);
+                expect(new Set(routes.map(tuple => tuple.viewId)), target.id)
+                    .toEqual(new Set(explanation ? [explanationView] : completionViews));
+                for (const route of routes.filter(tuple => tuple.viewId.startsWith('operations-properties'))) {
+                    expect(route.generatorId).toBe('arithmetic-property-relations');
+                }
+            }
+        }
+        const ordinary = targets.find(target => target.id === '2.NBT.B.6-two-three-addends~71b01c5e')!;
+        expect(ordinary).toBeDefined();
+        expect(tuples.filter(tuple => tuple.target.id === ordinary.id)
+            .some(tuple => tuple.viewId.startsWith('operations-properties'))).toBe(false);
+    }, 120_000);
 
     it('does not advertise a ten-step change inside a range smaller than ten', () => {
         const generator = generators.find(generator => generator.generatorId === 'counting-ten-offset')!;

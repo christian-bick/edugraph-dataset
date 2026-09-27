@@ -157,6 +157,7 @@ const quotativeDivisionBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 3.OA.B.5: Use the distributive property for multiplication ---
+// Keep application and its explanatory supporting refinement as separate tasks.
 const multiplicationDistributiveBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Multiplication,
@@ -166,8 +167,11 @@ const multiplicationDistributiveBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller100,
-        Ability.ProcedureUnderstanding
+        Scope.NumbersSmaller100
+    ])
+    .applyLabelVariants([
+        [Ability.ProcedureExecution],
+        [Ability.ProcedureUnderstanding]
     ]);
 
 // --- 3.OA.D.8: Solve connected two-step word problems ---
