@@ -2,6 +2,7 @@ import {Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {CountingIncDecGeneratorSchema, spec as baseSpec} from '../counting-inc-dec/spec.ts';
+import {arithmeticOffsetDirection} from '../arithmetic-offset-schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-hundred-offset',
@@ -9,6 +10,7 @@ export const spec: GeneratorSpec = {
 };
 export const CountingHundredOffsetGeneratorSchema = {
     ...CountingIncDecGeneratorSchema,
+    direction: arithmeticOffsetDirection,
     range: [
         CountingIncDecGeneratorSchema.range[0].filter(label =>
             label !== Scope.NumbersSmaller5 && label !== Scope.NumbersSmaller10
