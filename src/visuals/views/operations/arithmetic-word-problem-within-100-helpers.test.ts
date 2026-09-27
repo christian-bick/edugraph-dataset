@@ -60,6 +60,32 @@ describe('operations-word-problem-within-100 helpers', () => {
         expect(getWordProblemStory({...twoStep, operations: ['division', 'division'] as const}, false, false)).toContain('shared equally');
     });
 
+    it.each([
+        {
+            data: {num1: 90, num2: 45, operation: 'division', answer: 2},
+            story: '90 items are shared equally among 45 groups. How many items are in each group?'
+        },
+        {
+            data: {num1: 3, num2: 7, operation: 'multiplication', answer: 21},
+            story: 'There are 3 equal groups with 7 items in each group. How many items are there altogether?'
+        }
+    ] as const)('asks for the quantity computed by $data.operation', ({data, story}) => {
+        expect(getWordProblemStory(data, false, false)).toBe(story);
+    });
+
+    it.each([
+        {
+            data: {num1: 90, num2: 45, operation: 'division', answer: 2},
+            story: '90 items are shared equally among an unknown number of groups. There are 2 items in each group.'
+        },
+        {
+            data: {num1: 3, num2: 7, operation: 'multiplication', answer: 21},
+            story: 'There are 3 equal groups with an unknown number of items in each group. There are 21 items altogether.'
+        }
+    ] as const)('preserves the known result and unknown input in inverted $data.operation', ({data, story}) => {
+        expect(getWordProblemStory(data, false, true)).toBe(story);
+    });
+
     it('uses singular nouns and verbs for one item, group, or team', () => {
         const singular = {
             ...twoStep,

@@ -133,9 +133,17 @@ export function getWordProblemStory(
         return `A shelf has ${first} books. ${second} books are removed. ${answer}`;
     }
     if (data.operation === 'multiplication') {
-        return `There are ${first} equal groups with ${second} items in each group. ${answer}`;
+        const items = unknown === 'num2' ? 'an unknown number of items' : `${second} items`;
+        const result = unknown === 'answer'
+            ? 'How many items are there altogether?'
+            : `There are ${data.answer} items altogether.`;
+        return `There are ${first} equal groups with ${items} in each group. ${result}`;
     }
-    return `${first} items are shared equally among ${second} groups. ${answer}`;
+    const groups = unknown === 'num2' ? 'an unknown number of groups' : `${second} groups`;
+    const result = unknown === 'answer'
+        ? 'How many items are in each group?'
+        : `There are ${data.answer} items in each group.`;
+    return `${first} items are shared equally among ${groups}. ${result}`;
 }
 
 export function operationSymbol(operation: ArithmeticOperation): string {
