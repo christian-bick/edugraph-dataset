@@ -3,10 +3,10 @@
   "library_version": "0.29.0-pre.3.dee88508f2f8",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "1ade36b",
+  "cache_commit": "f8f6fc8",
   "concurrency": 4,
-  "evaluated": 1932,
-  "passed": 1905,
+  "evaluated": 1962,
+  "passed": 1935,
   "failed": 27,
   "semantic_review_samples": 11,
   "evaluator_disagreement_samples": 16,
@@ -1018,6 +1018,790 @@
       ],
       "note": "The mathematical generator owns the available collection count; the view only renders it. A distinct complete payload preserves the ordinary counting producer and all other current images. Producer identity changes replace twelve old count-out images with ten new ones because the linear variant is no longer allocated to validation. No target or ontology labels change, no judgments are retried merely to seek a pass, and no new major issue is found.",
       "details": "count-out-supply.md"
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "procedure-task-separation",
+      "status": "completed",
+      "baseline_commit": "6268e29",
+      "fix_commit": "d45c2bd",
+      "cache_commit": "f8f6fc8",
+      "library_version": "0.29.0-pre.3.dee88508f2f8",
+      "concurrency": 4,
+      "sample_count_before": 1932,
+      "sample_count_after": 1962,
+      "rendered": 1962,
+      "written_shards": 226,
+      "reused_shards": 65,
+      "evaluated": 40,
+      "reused": 1922,
+      "failures_before": 27,
+      "failures_after": 27,
+      "retired_failed_identities": 2,
+      "newly_rejected": 2,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "added_sample_identities": 40,
+      "removed_sample_identities": 10,
+      "provenance_only_cache_records": 1726,
+      "unchanged_retained_judgments": 1922,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "added_targets": 5,
+        "removed_targets": 0,
+        "added_tuples": 16,
+        "removed_tuples": 5,
+        "changed_retained_plans": 0
+      },
+      "verification": {
+        "test_files": 543,
+        "tests": 3434,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "structural_or_stale_cache_issues": 0,
+        "uncached": 0,
+        "legacy_payload_and_prng_cases_preserved": 1536,
+        "test_dataset_and_cache_unchanged": true
+      },
+      "passing_replacement_samples": [
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 6,
+            "num2": 13,
+            "num3": 1,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:50.115Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 1,
+            "num2": 2,
+            "num3": 10,
+            "answer": 13,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:49.541Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-ops-triples#operations-boxes#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 13,
+            "num2": 1,
+            "num3": 5,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:19:49.545Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 2,
+            "num2": 1,
+            "num3": 16,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:19:49.360Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 8,
+            "num2": 3,
+            "num3": 5,
+            "answer": 64,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 8,
+            "partialProducts": [
+              24,
+              40
+            ]
+          },
+          "validated_at": "2026-09-27T23:19:56.811Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-vertical#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 16,
+            "num2": 1,
+            "num3": 2,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:56.595Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-vertical#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 3,
+            "num2": 6,
+            "num3": 11,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:55.977Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-ops-triples#operations-vertical#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 17,
+            "num2": 1,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:00.616Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-ops-triples#operations-vertical#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 4,
+            "num2": 14,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:01.828Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-vertical#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 1,
+            "num2": 73,
+            "num3": 8,
+            "answer": 81,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 81,
+            "partialProducts": [
+              73,
+              8
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:01.597Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-vertical#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 3,
+            "num2": 6,
+            "num3": 15,
+            "answer": 63,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 21,
+            "partialProducts": [
+              18,
+              45
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:04.601Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-property-relations#operations-properties#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 17,
+            "num2": 1,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:06.150Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-property-relations#operations-properties#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 7,
+            "num2": 8,
+            "num3": 3,
+            "answer": 18,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:07.123Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-property-relations#operations-properties#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 7,
+            "num2": 4,
+            "num3": 6,
+            "answer": 17,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:07.203Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~dca16be6#arithmetic-property-relations#operations-properties#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 13,
+            "num2": 4,
+            "num3": 1,
+            "answer": 18,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:09.367Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 6,
+            "num2": 2,
+            "num3": 11,
+            "answer": 78,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 13,
+            "partialProducts": [
+              12,
+              66
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:13.343Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 5,
+            "num2": 19,
+            "num3": 1,
+            "answer": 100,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 20,
+            "partialProducts": [
+              95,
+              5
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:14.171Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-property-relations#operations-properties-explanation#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 2,
+            "num2": 8,
+            "num3": 4,
+            "answer": 14,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:12.872Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-property-relations#operations-properties-explanation#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 12,
+            "num2": 5,
+            "num3": 3,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:14.951Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~57782372#arithmetic-property-relations#operations-properties-explanation#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 13,
+            "num2": 3,
+            "num3": 3,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:17.954Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~57782372#arithmetic-property-relations#operations-properties-explanation#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 12,
+            "num2": 2,
+            "num3": 5,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:18.997Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~aba62c6e#arithmetic-property-relations#operations-properties-explanation#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 6,
+            "num2": 11,
+            "num3": 2,
+            "answer": 78,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 13,
+            "partialProducts": [
+              66,
+              12
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:22.443Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~aba62c6e#arithmetic-property-relations#operations-properties-explanation#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 9,
+            "num2": 10,
+            "num3": 1,
+            "answer": 99,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 11,
+            "partialProducts": [
+              90,
+              9
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:24.739Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1a-ten-tens-make-hundred~6eb535f7#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 1,
+            "tens": 10,
+            "ones": 0,
+            "target": 100
+          },
+          "validated_at": "2026-09-27T23:20:23.087Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1a-ten-tens-make-hundred~6eb535f7#place-value-hundreds-bundles#place-value-hundreds-bundles#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 1,
+            "tens": 10,
+            "ones": 0,
+            "target": 100
+          },
+          "validated_at": "2026-09-27T23:20:25.526Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~d49fb0c0#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 2,
+            "tens": 0,
+            "ones": 0,
+            "target": 200
+          },
+          "validated_at": "2026-09-27T23:20:28.076Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~d49fb0c0#place-value-hundreds-bundles#place-value-hundreds-bundles#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 6,
+            "tens": 0,
+            "ones": 0,
+            "target": 600
+          },
+          "validated_at": "2026-09-27T23:20:28.611Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1a-ten-tens-make-hundred~8b2822b7#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 1,
+            "tens": 10,
+            "ones": 0,
+            "target": 100
+          },
+          "validated_at": "2026-09-27T23:20:31.477Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1a-ten-tens-make-hundred~8b2822b7#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 1,
+            "tens": 10,
+            "ones": 0,
+            "target": 100
+          },
+          "validated_at": "2026-09-27T23:20:33.154Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 6,
+            "tens": 0,
+            "ones": 0,
+            "target": 600
+          },
+          "validated_at": "2026-09-27T23:20:35.195Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 5,
+            "tens": 0,
+            "ones": 0,
+            "target": 500
+          },
+          "validated_at": "2026-09-27T23:20:35.527Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#val#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 15,
+            "num2": 3,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:37.325Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#val#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 18,
+            "num2": 1,
+            "num3": 1,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:40.349Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-vertical#val#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 9,
+            "num2": 2,
+            "num3": 1,
+            "answer": 27,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 3,
+            "partialProducts": [
+              18,
+              9
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:41.501Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-vertical#val#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 4,
+            "num2": 1,
+            "num3": 20,
+            "answer": 84,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 21,
+            "partialProducts": [
+              4,
+              80
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:41.673Z",
+          "pass": true
+        },
+        {
+          "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 7,
+            "num2": 8,
+            "num3": 3,
+            "answer": 77,
+            "operation": "multiplication",
+            "propertyLaw": "distributive",
+            "combinedFactor": 11,
+            "partialProducts": [
+              56,
+              21
+            ]
+          },
+          "validated_at": "2026-09-27T23:20:46.727Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~57782372#arithmetic-property-relations#operations-properties-explanation#val#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 10,
+            "num2": 2,
+            "num3": 5,
+            "answer": 17,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:46.858Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~57782372#arithmetic-property-relations#operations-properties-explanation#val#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 1,
+            "num2": 15,
+            "num3": 1,
+            "answer": 17,
+            "operation": "addition",
+            "propertyLaw": "associative"
+          },
+          "validated_at": "2026-09-27T23:20:47.446Z",
+          "pass": true
+        }
+      ],
+      "new_failed_samples": [
+        "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+        "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0"
+      ],
+      "new_semantic_review": "operand-cardinality-in-nested-expressions",
+      "split": {
+        "train": 1654,
+        "validation": 308,
+        "matched_tuples": 841,
+        "validation_allocated": 210,
+        "validation_represented": 154,
+        "validation_gaps": 56,
+        "added_gap": "2.NBT.A.1a-ten-tens-make-hundred~8b2822b7#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation"
+      },
+      "note": "Property completion uses ProcedureExecution; hundred-bundle reading uses DirectUnderstanding. Separate leaves retain ProcedureUnderstanding with explicit how/why tasks. All 40 new samples pass Ability and general visual/math checks; 38 pass overall. Two distributive samples raise a separate ThreeOperands semantic review. A precise property producer preserves complete law evidence, while legacy box and vertical completion routes remain available. No ontology change or forced retry. The fixed ten-tens relation adds one validation-coverage gap after deterministic deduplication, without cross-split leakage.",
+      "details": "procedure-task-separation.md"
     }
   ],
   "findings": [
@@ -1080,25 +1864,6 @@
     },
     {
       "classification": "semantic_review_required",
-      "topic": "task-performance-versus-procedure-understanding",
-      "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0",
-      "generator": "arithmetic-ops-triples",
-      "view": "operations-properties",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ProcedureUnderstanding",
-          "verdict": "not_defendable",
-          "evidence": "There is no content in the image explaining how or why a procedure works; it is a straightforward application of the commutative identity by filling in a missing term."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'ProcedureUnderstanding' is not defendable as there is no explanation of how or why a procedure works.",
-      "validated_at": "2026-09-27T19:50:04.675Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
       "topic": "environmental-illustration-versus-physical-manipulative",
       "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
       "generator": "shape-env-shapes",
@@ -1115,25 +1880,6 @@
       "reasoning": "The label 'PhysicalGeometry' is not defendable because the illustration is a standard 2D vector graphic rather than a physical, manipulable object, a physical solid model, or a construction made of sticks.",
       "validated_at": "2026-09-25T22:33:07.528Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "task-performance-versus-procedure-understanding",
-      "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
-      "generator": "place-value-hundreds-bundles",
-      "view": "place-value-hundreds-bundles",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ProcedureUnderstanding",
-          "verdict": "not_defendable",
-          "evidence": "There is no instruction or content asking the learner to explain why or how a procedure works."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'ProcedureUnderstanding' is not defendable because the task is a direct conversion exercise and does not prompt the learner for any procedural explanation or justification.",
-      "validated_at": "2026-09-27T19:58:06.123Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -1248,6 +1994,46 @@
       "reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus.",
       "validated_at": "2026-09-26T09:06:34.588Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "operand-cardinality-in-nested-expressions",
+      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+      "generator": "arithmetic-ops-triples",
+      "view": "operations-boxes",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "ThreeOperands",
+          "verdict": "not_defendable",
+          "evidence": "There is no mathematical operation instance containing exactly three explicit operands (e.g., a + b + c)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label ThreeOperands is not defendable because there is no operation instance containing exactly three explicit operands like a + b + c.",
+      "validated_at": "2026-09-27T23:19:58.032Z",
+      "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "operand-cardinality-in-nested-expressions",
+      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0",
+      "generator": "arithmetic-property-relations",
+      "view": "operations-properties",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "ThreeOperands",
+          "verdict": "not_defendable",
+          "evidence": "There is no operation instance in the expression containing exactly three explicit operands (like a + b + c)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: ThreeOperands: There is no operation instance in the expression containing exactly three explicit operands (like a + b + c).",
+      "validated_at": "2026-09-27T23:20:45.061Z",
+      "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -2940,6 +3726,308 @@
         "reasoning": "The label 'NumbersSmaller10' is not defendable because the total number of objects in the collection is 14, which is an input value of the task and exceeds 10.",
         "validated_at": "2026-09-27T19:52:42.352Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.CC.B.5-how-many~23fafedc#counting-basic#counting-objects-count-out#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0",
+      "resolution": "completion-and-explanation-task-separation",
+      "resolution_type": "task_separated",
+      "fix_commit": "d45c2bd",
+      "cache_commit": "f8f6fc8",
+      "replacement_samples": [
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 6,
+            "num2": 13,
+            "num3": 1,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:50.115Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 1,
+            "num2": 2,
+            "num3": 10,
+            "answer": 13,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:49.541Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-vertical#train#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 16,
+            "num2": 1,
+            "num3": 2,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:56.595Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-vertical#train#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-vertical",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 3,
+            "num2": 6,
+            "num3": 11,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:19:55.977Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-property-relations#operations-properties#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 17,
+            "num2": 1,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:06.150Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-property-relations#operations-properties#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 7,
+            "num2": 8,
+            "num3": 3,
+            "answer": 18,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:07.123Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-property-relations#operations-properties-explanation#train#question#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 2,
+            "num2": 8,
+            "num3": 4,
+            "answer": 14,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:12.872Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-property-relations#operations-properties-explanation#train#solution#inst:0",
+          "generator": "arithmetic-property-relations",
+          "view": "operations-properties-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "num1": 12,
+            "num2": 5,
+            "num3": 3,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:14.951Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#val#question#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 15,
+            "num2": 3,
+            "num3": 1,
+            "answer": 19,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:37.325Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.B.3-properties~9b3ced17#arithmetic-ops-triples#operations-boxes#val#solution#inst:0",
+          "generator": "arithmetic-ops-triples",
+          "view": "operations-boxes",
+          "abilities": [
+            "ProcedureExecution"
+          ],
+          "data": {
+            "num1": 18,
+            "num2": 1,
+            "num3": 1,
+            "answer": 20,
+            "operation": "addition",
+            "propertyLaw": "commutative"
+          },
+          "validated_at": "2026-09-27T23:20:40.349Z",
+          "pass": true
+        }
+      ],
+      "note": "The original mislabeled identity retires. Completion is preserved with an appropriate Ability, and distinct explanation tasks request how and why. All replacements pass; this is not a passing revalidation of the old sample.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "task-performance-versus-procedure-understanding",
+        "sample_key": "1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0",
+        "generator": "arithmetic-ops-triples",
+        "view": "operations-properties",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ProcedureUnderstanding",
+            "verdict": "not_defendable",
+            "evidence": "There is no content in the image explaining how or why a procedure works; it is a straightforward application of the commutative identity by filling in a missing term."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'ProcedureUnderstanding' is not defendable as there is no explanation of how or why a procedure works.",
+        "validated_at": "2026-09-27T19:50:04.675Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.B.3-properties~1cdccfff#arithmetic-ops-triples#operations-properties#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+      "resolution": "completion-and-explanation-task-separation",
+      "resolution_type": "task_separated",
+      "fix_commit": "d45c2bd",
+      "cache_commit": "f8f6fc8",
+      "replacement_samples": [
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~d49fb0c0#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 2,
+            "tens": 0,
+            "ones": 0,
+            "target": 200
+          },
+          "validated_at": "2026-09-27T23:20:28.076Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~d49fb0c0#place-value-hundreds-bundles#place-value-hundreds-bundles#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles",
+          "abilities": [
+            "DirectUnderstanding"
+          ],
+          "data": {
+            "hundreds": 6,
+            "tens": 0,
+            "ones": 0,
+            "target": 600
+          },
+          "validated_at": "2026-09-27T23:20:28.611Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#question#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 6,
+            "tens": 0,
+            "ones": 0,
+            "target": 600
+          },
+          "validated_at": "2026-09-27T23:20:35.195Z",
+          "pass": true
+        },
+        {
+          "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles-explanation#train#solution#inst:0",
+          "generator": "place-value-hundreds-bundles",
+          "view": "place-value-hundreds-bundles-explanation",
+          "abilities": [
+            "ProcedureUnderstanding"
+          ],
+          "data": {
+            "hundreds": 5,
+            "tens": 0,
+            "ones": 0,
+            "target": 500
+          },
+          "validated_at": "2026-09-27T23:20:35.527Z",
+          "pass": true
+        }
+      ],
+      "note": "The original mislabeled identity retires. Completion is preserved with an appropriate Ability, and distinct explanation tasks request how and why. All replacements pass; this is not a passing revalidation of the old sample.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "task-performance-versus-procedure-understanding",
+        "sample_key": "2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0",
+        "generator": "place-value-hundreds-bundles",
+        "view": "place-value-hundreds-bundles",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ProcedureUnderstanding",
+            "verdict": "not_defendable",
+            "evidence": "There is no instruction or content asking the learner to explain why or how a procedure works."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'ProcedureUnderstanding' is not defendable because the task is a direct conversion exercise and does not prompt the learner for any procedural explanation or justification.",
+        "validated_at": "2026-09-27T19:58:06.123Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0\" --no-validate"
       }
     }
   ]

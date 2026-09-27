@@ -12,9 +12,10 @@ These items are not newly scheduled by the archive move.
   [shape recognition correction](shape-recognition.md),
   [category ordering extension](category-ordering.md),
   [arithmetic-offset label correction](arithmetic-offset-labels.md),
-  [numeric-range and successor correction](numeric-range-bounds.md), and
-  [bounded count-out supply correction](count-out-supply.md) are complete;
-  the current cache has 27 remaining failures among 1,932 CCSS images: 11 samples requiring
+  [numeric-range and successor correction](numeric-range-bounds.md),
+  [bounded count-out supply correction](count-out-supply.md), and
+  [completion/explanation separation](procedure-task-separation.md) are complete;
+  the current cache has 27 remaining failures among 1,962 CCSS images: 11 samples requiring
   semantic review and 16 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
@@ -23,8 +24,11 @@ These items are not newly scheduled by the archive move.
   exemption is removed. Existing result-boundary coverage gaps remain deferred.
   The 2.NBT.B.8 starting cutoff of 900 is intentionally ignored, as recorded in its target block.
   Count-out pools now come from a bounded generator interval, including equality; all ten new
-  images pass. Remaining reviews include direct property or place-value tasks claiming an
-  explanatory `ProcedureUnderstanding` Ability. A division-story
+  images pass. Property application and bundle reading now have appropriate completion Abilities
+  and separate explanation tasks. Of their 40 new samples, 38 pass; two distributive expressions
+  raise a separate review of `ThreeOperands` in nested operations. All 40 pass Ability and general
+  visual/math checks. The fixed ten-tens explanation adds one validation-coverage gap, bringing
+  that total to 56 without leakage. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.
   The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.

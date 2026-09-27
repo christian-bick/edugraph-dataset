@@ -4,13 +4,14 @@
 
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
-successor-evidence, grouped-word-problem, and count-out-supply corrections on
+successor-evidence, grouped-word-problem, count-out-supply, and completion/explanation corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,932 CCSS samples** have current judgments: **1,905 pass (98.6%) and 27 fail**, down from
+All **1,962 CCSS samples** have current judgments: **1,935 pass (98.6%) and 27 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
-and the count-out producer replacement removed two, for a net decrease of four from the initial dataset.
+the count-out producer replacement removed two, and the completion/explanation split added 30,
+for a net increase of 26 from the initial dataset.
 There are no uncached samples. The remaining failures comprise **11 samples requiring semantic
 review** and **16 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
@@ -20,9 +21,9 @@ renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-modul
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
 [The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 41
+samples with current evidence, dispositions, replay commands, and revalidation results. The 43
 resolved finding records and initial totals are retained separately as history: 28 passed
-revalidation, and thirteen were retired with corrected targets or producer contracts and replaced
+revalidation, and fifteen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
@@ -33,7 +34,10 @@ without claiming `NumericOrder`. Ten/hundred arithmetic offsets no longer claim 
 labels; their input/result bounds and independent operand digit profiles are now corrected.
 All 20 current offset/successor images and all ten bounded count-out images pass. The latter now
 receive their available collection size from the generator, including valid exact-size pools.
-Remaining semantic reviews include explanatory Ability claims on direct property/conversion tasks.
+Property and hundreds-bundle completion now have appropriate Abilities and distinct explanation
+tasks. All 40 new samples pass their Ability and general visual/math checks; 38 pass overall.
+Two distributive samples raise a new semantic review about `ThreeOperands` in nested expressions.
+Those failures are preserved without retrying or changing the ontology definition automatically.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -122,6 +126,17 @@ the linear variant is no longer allocated to validation. All 1,922 retained imag
 and semantic plans remain unchanged. VQA makes ten requests at concurrency four, all passing, and
 reuses all 1,922 retained judgments. Only `generation_plan.inputHash` changes on 1,762 retained cache
 records. Total failures fall from 28 to 27; no new rejection or API error occurs.
+
+The [completion/explanation follow-up](procedure-task-separation.md) retains the five explanation
+target permutations and adds five completion permutations. A precise property producer supplies
+complete law relations; separate views distinguish applying a property or reading bundles from
+explaining the method. The legacy box and vertical property formats remain available for completion.
+Canonical generation renders 1,962 images, writes 226 shards, and reuses 65 shards. Forty new
+identities replace ten old ones. All 1,922 retained images, labels, seeds, attempts, replay receipts,
+and semantic plans remain unchanged. VQA makes 40 requests at concurrency four: 38 pass, and two
+fail only on `ThreeOperands`. It reuses all 1,922 retained judgments, refreshing only
+`generation_plan.inputHash` on 1,726 records. Both original Ability failures retire with passing
+replacement tasks; the separate operand-cardinality findings keep the total at 27. No API error occurs.
 
 ## Minor repairs
 
@@ -353,23 +368,48 @@ objects under an upper bound of 20. The old failed identity is recorded as retir
 replacement, not as a passing revalidation. The [detailed report](count-out-supply.md) records
 the bounds, matching, unchanged-image proof, and tests. No new major problem was found.
 
-## Major findings requiring follow-up
-
 ### Applying a property or conversion versus explaining a procedure
 
-Two refreshed questions claim `ProcedureUnderstanding`, defined as explaining how and why a
-procedure's steps, order, and conditions produce its intended outcome, without requesting that
-explanation:
+**Resolved on 2026-09-28:** implementation commit `d45c2bd` separates the requested learner
+actions, with VQA evidence in `f8f6fc8`. The previous questions claimed `ProcedureUnderstanding`
+while only requesting completion of a commutative equation or the number represented by hundreds.
+The user approved preserving those useful tasks and adding distinct explanations (`SPEC-V5`, `TSPEC-13`).
 
-- `1.OA.B.3-properties~1cdccfff`, `operations-properties`, shows the commutative property and
-  asks the learner to complete `4 + 4 + 7 = 7 + 4 + □`.
-- `2.NBT.A.1b-hundreds~229993b4`, `place-value-hundreds-bundles`, asks for the number represented
-  by 9 hundreds, with 900 as the hidden answer.
+| Task | Completion Ability | Separate explanation Ability |
+| --- | --- | --- |
+| Complete an equation using an arithmetic property | `ProcedureExecution` | `ProcedureUnderstanding` |
+| Read the number represented by complete hundreds or ten tens | `DirectUnderstanding` | `ProcedureUnderstanding` |
 
-These tasks may exercise valid property application or place-value knowledge, but the displayed
-actions do not establish the declared explanatory Ability. Review target intent and view evidence
-together (`SPEC-V5`, `TSPEC-13`); an ornamental explanatory caption would not repair a mismatched
-learner action. These findings are recorded for semantic review rather than relabeled automatically.
+The original five explanation target IDs and label sets remain; five completion variants are added.
+`operations-properties-explanation` asks for transformation steps and why the result is preserved.
+`place-value-hundreds-bundles-explanation` asks how grouping/counting works and why every unit is
+preserved or counted once. Their solutions provide actual explanations, while Question Mode
+withholds them. The ten-tens completion prompt now correctly asks for the represented number
+of ones. The dedicated property views share a precise mathematical payload; existing box and
+vertical completion routes retain their valid property support.
+
+Both old failed identities retire, and their corresponding completion and explanation replacements
+pass. Every new sample passes the relevant Ability and general visual/math checks. Two new
+distributive samples fail only on a separate operand-count interpretation, documented below.
+The [detailed report](procedure-task-separation.md) records source, matching, tests, and cache evidence.
+
+## Major findings requiring follow-up
+
+### Operand cardinality in nested distributive expressions
+
+**New semantic review from the 2026-09-28 follow-up:** two otherwise passing distributive tasks
+are rejected for `ThreeOperands`. The pinned definition is "A mathematical operation instance
+with exactly three explicit operands", illustrated by `4 + 7 + 5`.
+
+- The box-format solution shows `6 × (10 + 1) = 66`, with the expansion `6 × 10 + 6 × 1 = 60 + 6 = 66`.
+- The dedicated completion question shows `8 × (2 + 10)` and `(8 × 2) + (8 × 10)`, leaving the result blank.
+
+Each original expression has three explicit numeric inputs. Each individual multiplication or
+addition within it, however, has two operands. The evaluator applies the latter interpretation;
+the flat-addition example does not settle how nested mixed-operation expressions should be counted.
+Review the intended ontology boundary and both producers' `ThreeOperands` declarations together.
+Do not remove a target claim or add an unrelated three-addend expression merely to pass VQA
+(`SPEC-3`, `TSPEC-13`). Both raw failures remain in the cache and findings JSON; no forced retry was made.
 
 ### Spatial assembly versus concept composition
 
@@ -571,26 +611,34 @@ The count-out correction passes **3,277 tests across 537 files**, all generator 
 repository checks, and the build. Both counting producers have 100% statement and branch coverage.
 Matching preserves all 683 targets, 212 compatible pairs, and 830 tuples; the strict label audit
 remains at zero violations and 97 review items. All ten new judgments pass, with no rate-limit or
-service error. The final state is **1,905 pass / 27 fail / zero uncached**, in cache commit `1ade36b`.
+service error. That checkpoint is **1,905 pass / 27 fail / zero uncached**, in cache commit `1ade36b`.
 All 1,922 retained evaluation results and timestamps are unchanged.
+
+The completion/explanation split passes **3,434 tests across 543 files**, repository checks, the
+build, and all generator coverage thresholds. The new property producer has 94.11% statement
+and 95.23% branch coverage. All 1,536 captured legacy payloads and PRNG continuations are identical.
+Matching now has 688 targets, 214 compatible pairs, and 841 tuples: five added completion targets,
+16 added routes, and five removed routes, with no changed retained semantic plans. The strict
+label audit remains at zero violations and 97 review items. Current VQA is **1,935 pass / 27 fail /
+zero uncached**, in cache commit `f8f6fc8`; all retained judgments and timestamps are unchanged.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Count-out correction: 1,932 renders, 228 shards written, 58 reused; all 1,922 retained image hashes unchanged |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Ten live judgments, all passing; 1,922 reused; final 1,905 pass / 27 fail / zero uncached; exits 1 for the documented failures |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Completion/explanation split: 1,962 renders, 226 shards written, 65 reused; all 1,922 retained image hashes unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Forty live judgments: 38 pass, two operand-cardinality flags; 1,922 reused; final 1,935 pass / 27 fail / zero uncached; exits 1 for the documented failures |
 | `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=e086167` | Latest follow-up: 1,922 identical retained images, zero changed images/seeds/attempts, ten added/twelve removed count-out identities |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,847 identical retained images, 43 intended changes, 42 added/46 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=6268e29` | Latest follow-up: 1,922 identical retained images, zero changed images/seeds/attempts, 40 added/ten removed identities |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,837 identical retained images, 43 intended changes, 82 added/56 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,632 training and 300 validation images. All 830 matched tuples have
-training evidence. Of 205 tuples allocated to validation, 150 have validation evidence; the report
-retains the same 55 coverage-gap warnings and does not infer their cause. There is no cross-split
-leakage or within-split configured-task redundancy. The new count-out producer identity changes
-its linear variant's validation allocation, accounting for the latest two-image decrease.
-Sampling policy is unchanged.
+The final split contains 1,654 training and 308 validation images. All 841 matched tuples have
+training evidence. Of 210 tuples allocated to validation, 154 have validation evidence. The 55
+existing gaps remain, and the new ten-tens explanation route adds one: its fixed mathematical
+relation repeats the training payload. Generation records 50 duplicate attempts before linking
+that request to the existing training sample. It is not counted as independent validation evidence.
+There is no cross-split leakage or within-split configured-task redundancy. Sampling policy is unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.
