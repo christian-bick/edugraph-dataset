@@ -10,7 +10,7 @@ describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
         for (const operation of [Area.Addition, Area.Subtraction] as const) {
             const stub = generateWithLabels(generator, [
                 operation,
-                Ability.PlausibilityEvaluation,
+                Ability.CorrectnessEvaluation,
                 Scope.NumbersWithoutNegatives,
                 Scope.NumbersSmaller20
             ]);

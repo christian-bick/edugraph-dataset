@@ -7,7 +7,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.Equation,
         Scope.ArabicNumerals,
-        Ability.PlausibilityEvaluation
+        Ability.CorrectnessEvaluation
     ]
 };
 

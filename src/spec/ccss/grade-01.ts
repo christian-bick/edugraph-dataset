@@ -154,7 +154,7 @@ const equalSignBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller20,
-        Ability.PlausibilityEvaluation
+        Ability.CorrectnessEvaluation
     ])
     .applyLabelVariants([
         [Area.Addition],
