@@ -2,26 +2,28 @@
 
 ## Outcome
 
-Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, and equation
-correctness corrections on branch `codex/ontology-v029-vqa-rerun`.
-All **1,934 CCSS samples** have current judgments: **1,903 pass (98.4%) and 31 fail**, down from
-51 failures in the initial 2026-09-26 rerun. The equation target-label correction changed target
-hashes and their validation allocation, reducing the sample count by two.
-There are no uncached samples. The remaining failures comprise **19 samples requiring semantic
+Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, equation
+correctness, and shape recognition corrections on branch `codex/ontology-v029-vqa-rerun`.
+All **1,938 CCSS samples** have current judgments: **1,911 pass (98.6%) and 27 fail**, down from
+51 failures in the initial 2026-09-26 rerun. The target-label corrections changed target hashes
+and their validation allocation: the equation update removed two images and the shape update
+added four, for a net increase of two over the initial dataset.
+There are no uncached samples. The remaining failures comprise **15 samples requiring semantic
 review** and **12 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 31 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 31 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 23
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 27
 resolved findings and initial totals are retained separately as history: 22 passed revalidation,
-and one was retired with its mislabeled target and replaced by passing samples. The authorized
+and five were retired with their mislabeled targets and replaced by passing samples. The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
-two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation`. Resolved and
-remaining findings are described below.
+two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation` and three sorting
+targets from `ShapeProperties` to `ShapeRecognition`. Resolved and remaining findings are
+described below.
 
 ## Scope and implementation
 
@@ -62,6 +64,13 @@ replacement samples in one shard, reuses 283 shards, and retires six old sample 
 All four new judgments pass at concurrency four; 1,930 unchanged records are reused. Total
 failures fall from 32 to 31, with no new rejection.
 
+The [shape recognition follow-up](shape-recognition.md) replaces the `ShapeProperties` Scope in
+the two sorting views and three K.MD.B.3 target permutations with `Area.ShapeRecognition`.
+It renders ten replacement samples in four shards, reuses 282 shards, and retires six old
+identities. All ten new judgments pass at concurrency four; 1,928 unchanged records are reused.
+Total failures fall from 31 to 27, with no new rejection. The separate `NumericOrder` concern
+remains open despite the passing replacement judgments.
+
 ## Minor repairs
 
 - **`operations-decompose`:** Question Mode now requests how and why counting the two groups
@@ -99,10 +108,10 @@ views retain their numeral claims, with explicit digit instructions added to one
 classify/count, and the compatible cardinality view. No targets or matching pairs were removed.
 
 All six conservation images pass. The classify/count question and one most-selection question
-also changed from failing to passing, reducing the total failure count by seven. Four sorting
-images still fail on the separate shape-property issue below, and the cached simple-counting
-digit-answer disagreement remains. Passing sorting verdicts do not resolve their broader
-`ShapeProperties` or `NumericOrder` concerns.
+also changed from failing to passing, reducing the total failure count by seven. At that stage,
+four sorting images still failed on the separate shape-property issue. The shape recognition
+correction below subsequently resolves those failures. The cached simple-counting digit-answer
+disagreement and the independent `NumericOrder` concern remain open.
 
 The [ownership correction report](numeral-system-ownership.md) contains the complete adoption
 matrix, per-view results, and verification evidence.
@@ -144,20 +153,29 @@ question is preserved in history as resolved by target replacement, not falsely 
 passing revalidation. The [detailed report](equation-correctness.md) records target mapping,
 expected split changes, and a separate pre-existing task-fingerprint review item.
 
-## Major findings requiring follow-up
-
 ### Shape properties versus shape recognition
 
-Both sorting views claim `ShapeProperties`, while the supplied statement concerns physical
-features that permit or constrain manipulation, such as rolling, folding, and stacking.
-The inspected tasks group circles, squares, and triangles by appearance.
+**Resolved on 2026-09-27** in `603cac0`, with VQA results in `084af8c`. Both sorting views and
+their three K.MD.B.3 target permutations now claim `Area.ShapeRecognition`. The user agreed
+that visually identifying and grouping circles, squares, and triangles supports this Area;
+the old `Scope.ShapeProperties` describes physical features permitting or constraining
+manipulation, such as rolling, folding, and stacking.
 
-Review both view declarations and the corresponding kindergarten targets. `Area.ShapeRecognition`
-is an eligible candidate describing visual identification and grouping by shared form, but this
-would be a coordinated classification and dimension change (`SPEC-2`, `SPEC-11`, `TSPEC-13`).
-The mismatch is present even in some samples where VQA accepted that label.
-After the numeral correction, four images retain this rejection: the classify/count solution,
-both least-selection modes, and the most-selection solution.
+The generators supply abstract category counts; the views supply the geometric shapes and
+therefore own the independent shape-recognition Area (`SPEC-2`, `SPEC-11`, `TSPEC-13`). Existing
+counting, sorting, numeric, and Ability claims are retained. Rendering, mathematics, and
+checklists are unchanged.
+
+All ten replacement images pass, including all four classify/count and six most/least samples.
+The four old failures are retained in history as resolved by target replacement. Two earlier
+numeral-system resolutions also gain replacement-sample references while retaining their
+historical pass timestamps. All other 1,928 images and evaluation records are unchanged.
+
+The [detailed report](shape-recognition.md) records the three target mappings, expected addition
+of four validation images, ownership review, and verification. Passing VQA does not resolve the
+separate incomplete-ordering concern below.
+
+## Major findings requiring follow-up
 
 ### Most/least selection versus a complete numeric order
 
@@ -169,8 +187,10 @@ removing the label would lose the intended coverage.
 This needs a generator/view correction that supplies and requests the complete order, including
 tied counts. It is more substantial than a prompt clarification. Do not substitute
 `NumericComparison`, which is structurally ineligible as a label (`IMPL-G8`, `IMPL-V11`,
-`TSPEC-6`, `TSPEC-13`). Both `K.MD.B.3-sort-by-count~1bb99c29` and
-`K.MD.B.3-sort-by-count~47cf0f93` are affected.
+`TSPEC-6`, `TSPEC-13`). Both `K.MD.B.3-sort-by-count~5c7c2c25` and
+`K.MD.B.3-sort-by-count~bdc50867` are affected after the shape-recognition target correction.
+All six current samples pass VQA, but their prompts and solutions still select a single extremum
+without requesting or displaying the complete order. This remains an open content issue.
 
 ### Arithmetic offsets and sequence-position labels
 
@@ -282,7 +302,8 @@ Persistent disagreements remain visible in the final cache and findings report.
 On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
 the full-dataset failure count changed from 61 to 51 before the ownership correction reduced it
-to 44, the MeasuringTime update reduced it to 32, and the equation correction reduced it to 31.
+to 44, the MeasuringTime update reduced it to 32, the equation correction reduced it to 31,
+and the shape recognition correction reduced it to 27.
 No further retries were made to chase a passing result. The 12 current disagreements are one
 equal-addends question, one counting question, two fraction word-problem solutions, four
 shape-attribute comparisons, one square-cell array question, and three time-interval tasks.
@@ -344,8 +365,15 @@ and all 3,074 tests across 527 files. Matching preserves all 681 target competen
 tuples, replacing only the two expected target IDs. The strict label-architecture audit remains
 at zero violations and 93 review items.
 
-The latest validation confirmed **31 failures and zero uncached samples** after four new judgments
-and 1,930 reused records. No API rate-limit errors were observed. The documentation check passed
+The shape recognition correction passes the same complete checks, build, and coverage suite.
+Matching preserves all 681 target competencies and 830 tuples, replacing only three target IDs.
+The strict label-architecture audit reports zero violations and 95 review items: 93 existing
+entries and two new view-owned-Area entries. The latter are reviewed in the
+[shape recognition report](shape-recognition.md); they reflect the intended independent
+geometric capability supplied by the views.
+
+The latest validation confirmed **27 failures and zero uncached samples** after ten new judgments
+and 1,928 reused records. No API rate-limit errors were observed. The documentation check passed
 all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
@@ -353,17 +381,18 @@ Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Equation correction: four rendered samples in one new shard; 283 shards reused; only the equation pair regenerated |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,903 pass / 31 fail; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 31 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Shape recognition: ten rendered samples in four new shards; 282 shards reused; only the two sorting pairs regenerated |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,911 pass / 27 fail; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=5edbbc3` | Equation correction: 1,930 identical images, four added and six removed equation identities; no retained-identity image, attempt, or seed changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,900 identical images and 30 expected changes across the six repaired views, plus four added/six removed equation identities; no retained-identity attempt or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=77e749f` | Shape recognition: 1,928 identical images, ten added and six removed sorting identities; no retained-identity image, attempt, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,895 identical images and 29 expected changes from earlier repairs, plus 14 added/12 removed equation and sorting identities; no retained-identity attempt or seed changes |
 
-The split contains 1,632 training and 302 validation images. Of 206 tuples allocated to validation,
-151 have validation evidence; the report retains the same 55 coverage-gap warnings and does not
-infer their cause. The corrected equation hashes no longer allocate an equation tuple to validation,
-accounting for the two fewer images. Sampling policy and every other sample identity are unchanged.
+The split contains 1,632 training and 306 validation images. Of 208 tuples allocated to validation,
+153 have validation evidence; the report retains the same 55 coverage-gap warnings and does not
+infer their cause. The equation correction removed one validation allocation, while the shape
+recognition correction adds two. Sampling policy and sample identities outside the corrected
+equation and sorting targets are unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.

@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.2.59ff94cc3573",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "a61e7ae",
+  "cache_commit": "084af8c",
   "concurrency": 4,
-  "evaluated": 1934,
-  "passed": 1903,
-  "failed": 31,
-  "semantic_review_samples": 19,
+  "evaluated": 1938,
+  "passed": 1911,
+  "failed": 27,
+  "semantic_review_samples": 15,
   "evaluator_disagreement_samples": 12,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -189,6 +189,52 @@
         }
       ],
       "details": "equation-correctness.md"
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "shape-recognition",
+      "status": "completed",
+      "baseline_commit": "77e749f",
+      "fix_commit": "603cac0",
+      "cache_commit": "084af8c",
+      "library_version": "0.29.0-pre.2.59ff94cc3573",
+      "regenerated": 10,
+      "reused_shards": 282,
+      "written_shards": 4,
+      "evaluated": 10,
+      "reused": 1928,
+      "concurrency": 4,
+      "sample_count_before": 1934,
+      "sample_count_after": 1938,
+      "failures_before": 31,
+      "failures_after": 27,
+      "resolved": 4,
+      "newly_rejected": 0,
+      "shape_recognition_rejections": 0,
+      "shared_image_changes": 0,
+      "added_sample_identities": 10,
+      "removed_sample_identities": 6,
+      "target_replacements": [
+        {
+          "task": "classify-count",
+          "old_id": "K.MD.B.3-classify-count~6f08223f",
+          "new_id": "K.MD.B.3-classify-count~c6ccf9b3"
+        },
+        {
+          "task": "least",
+          "old_id": "K.MD.B.3-sort-by-count~1bb99c29",
+          "new_id": "K.MD.B.3-sort-by-count~5c7c2c25"
+        },
+        {
+          "task": "most",
+          "old_id": "K.MD.B.3-sort-by-count~47cf0f93",
+          "new_id": "K.MD.B.3-sort-by-count~bdc50867"
+        }
+      ],
+      "remaining_review_topics": [
+        "complete-numeric-order"
+      ],
+      "details": "shape-recognition.md"
     }
   ],
   "findings": [
@@ -659,87 +705,6 @@
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
     },
     {
-      "classification": "semantic_review_required",
-      "topic": "shape-properties-versus-shape-recognition",
-      "sample_key": "K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0",
-      "generator": "counting-classify-count",
-      "view": "sorting-classify-count",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "ShapeProperties",
-          "verdict": "not_defendable",
-          "evidence": "There is no examination of physical shape properties (like rolling, stacking, or folding constraints)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ShapeProperties: There is no examination of physical shape properties (like rolling, stacking, or folding constraints).",
-      "validated_at": "2026-09-27T12:38:27.071Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "complete-numeric-order-and-shape-properties",
-      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
-      "generator": "counting-classify-sort",
-      "view": "sorting-classify-sort",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ShapeProperties",
-          "verdict": "not_defendable",
-          "evidence": "The shapes are merely used as generic tokens for sorting and counting; no physical manipulation or geometric properties (like rolling, folding, or stacking) are involved."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'ShapeProperties' is not defendable because the task only uses shapes for counting and sorting, without involving any physical properties or manipulation constraints of the shapes.",
-      "validated_at": "2026-09-27T12:38:25.014Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "complete-numeric-order-and-shape-properties",
-      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
-      "generator": "counting-classify-sort",
-      "view": "sorting-classify-sort",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "ShapeProperties",
-          "verdict": "not_defendable",
-          "evidence": "No physical properties of the shapes (like rolling, folding, stacking, or geometric attributes like edges/vertices) are discussed or used to constrain manipulation."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ShapeProperties: No physical properties of the shapes (like rolling, folding, stacking, or geometric attributes like edges/vertices) are discussed or used to constrain manipulation.",
-      "validated_at": "2026-09-27T12:38:29.259Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "complete-numeric-order-and-shape-properties",
-      "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
-      "generator": "counting-classify-sort",
-      "view": "sorting-classify-sort",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "NumericOrder",
-          "verdict": "uncertain",
-          "evidence": "Determining the 'most' implies comparing magnitudes (4 > 3), but it does not explicitly arrange them in a sequence."
-        },
-        {
-          "label": "ShapeProperties",
-          "verdict": "not_defendable",
-          "evidence": "The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ShapeProperties: The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation.",
-      "validated_at": "2026-09-27T12:38:38.053Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
-    },
-    {
       "classification": "evaluator_disagreement",
       "topic": "observable-evidence-or-task-granularity",
       "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
@@ -979,7 +944,9 @@
         "reasoning": "Labels not defendable: ArabicNumerals: There are no Arabic numerals visible in this Question Mode image.; Base10: No numbers are visible to represent any base-10 positional notation.; IntegerNumbers: No integer numbers are visible in this Question Mode image.; NumbersSmaller10: No numbers are visible in this Question Mode image.; NumbersWithoutNegatives: No numbers are visible in this Question Mode image.; NumbersWithoutZero: No numbers are visible in this Question Mode image.; NumerationWithIntegers: There is no ordering or sequence of integers shown.",
         "validated_at": "2026-09-25T22:15:05.456Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#question#inst:0\" --no-validate"
-      }
+      },
+      "superseded_in_follow_up": "shape-recognition",
+      "replacement_sample_key": "K.MD.B.3-classify-count~c6ccf9b3#counting-classify-count#sorting-classify-count#train#question#inst:0"
     },
     {
       "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
@@ -1004,7 +971,9 @@
         "reasoning": "Labels not defendable: Base10: There are no written positional base-10 numerals in the image.",
         "validated_at": "2026-09-25T22:15:19.053Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
-      }
+      },
+      "superseded_in_follow_up": "shape-recognition",
+      "replacement_sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#train#question#inst:0"
     },
     {
       "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
@@ -1443,6 +1412,193 @@
         "reasoning": "Labels not defendable: PlausibilityEvaluation: Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation.",
         "validated_at": "2026-09-25T22:02:58.424Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0",
+      "resolution": "shape-recognition-classification",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "K.MD.B.3-classify-count~c6ccf9b3",
+      "replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-classify-count~c6ccf9b3#counting-classify-count#sorting-classify-count#train#question#inst:0",
+          "validated_at": "2026-09-27T15:04:13.405Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-classify-count~c6ccf9b3#counting-classify-count#sorting-classify-count#train#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:12.590Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-classify-count~c6ccf9b3#counting-classify-count#sorting-classify-count#val#question#inst:0",
+          "validated_at": "2026-09-27T15:04:19.995Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-classify-count~c6ccf9b3#counting-classify-count#sorting-classify-count#val#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:18.763Z",
+          "pass": true
+        }
+      ],
+      "remaining_review_topics": [],
+      "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "shape-properties-versus-shape-recognition",
+        "sample_key": "K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0",
+        "generator": "counting-classify-count",
+        "view": "sorting-classify-count",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "ShapeProperties",
+            "verdict": "not_defendable",
+            "evidence": "There is no examination of physical shape properties (like rolling, stacking, or folding constraints)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ShapeProperties: There is no examination of physical shape properties (like rolling, stacking, or folding constraints).",
+        "validated_at": "2026-09-27T12:38:27.071Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-classify-count~6f08223f#counting-classify-count#sorting-classify-count#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+      "resolution": "shape-recognition-classification",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "K.MD.B.3-sort-by-count~5c7c2c25",
+      "replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~5c7c2c25#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T15:04:11.957Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~5c7c2c25#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:13.397Z",
+          "pass": true
+        }
+      ],
+      "remaining_review_topics": [
+        "complete-numeric-order"
+      ],
+      "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "complete-numeric-order-and-shape-properties",
+        "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+        "generator": "counting-classify-sort",
+        "view": "sorting-classify-sort",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ShapeProperties",
+            "verdict": "not_defendable",
+            "evidence": "The shapes are merely used as generic tokens for sorting and counting; no physical manipulation or geometric properties (like rolling, folding, or stacking) are involved."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'ShapeProperties' is not defendable because the task only uses shapes for counting and sorting, without involving any physical properties or manipulation constraints of the shapes.",
+        "validated_at": "2026-09-27T12:38:25.014Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+      "resolution": "shape-recognition-classification",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "K.MD.B.3-sort-by-count~5c7c2c25",
+      "replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~5c7c2c25#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T15:04:11.957Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~5c7c2c25#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:13.397Z",
+          "pass": true
+        }
+      ],
+      "remaining_review_topics": [
+        "complete-numeric-order"
+      ],
+      "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "complete-numeric-order-and-shape-properties",
+        "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+        "generator": "counting-classify-sort",
+        "view": "sorting-classify-sort",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "ShapeProperties",
+            "verdict": "not_defendable",
+            "evidence": "No physical properties of the shapes (like rolling, folding, stacking, or geometric attributes like edges/vertices) are discussed or used to constrain manipulation."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ShapeProperties: No physical properties of the shapes (like rolling, folding, stacking, or geometric attributes like edges/vertices) are discussed or used to constrain manipulation.",
+        "validated_at": "2026-09-27T12:38:29.259Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+      "resolution": "shape-recognition-classification",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "K.MD.B.3-sort-by-count~bdc50867",
+      "replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T15:04:18.259Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:18.193Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#val#question#inst:0",
+          "validated_at": "2026-09-27T15:04:23.825Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#val#solution#inst:0",
+          "validated_at": "2026-09-27T15:04:24.116Z",
+          "pass": true
+        }
+      ],
+      "remaining_review_topics": [
+        "complete-numeric-order"
+      ],
+      "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "complete-numeric-order-and-shape-properties",
+        "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+        "generator": "counting-classify-sort",
+        "view": "sorting-classify-sort",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "NumericOrder",
+            "verdict": "uncertain",
+            "evidence": "Determining the 'most' implies comparing magnitudes (4 > 3), but it does not explicitly arrange them in a sequence."
+          },
+          {
+            "label": "ShapeProperties",
+            "verdict": "not_defendable",
+            "evidence": "The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ShapeProperties: The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation.",
+        "validated_at": "2026-09-27T12:38:38.053Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
       }
     }
   ]

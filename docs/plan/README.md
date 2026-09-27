@@ -7,9 +7,12 @@ These items are not newly scheduled by the archive move.
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
   record minor task-evidence repairs and remaining classification and numeric-boundary reviews.
   The [numeral-system ownership correction](numeral-system-ownership.md),
-  [MeasuringTime definition correction](measuring-time-definition.md), and
-  [equation classification correction](equation-correctness.md) are complete;
-  the current cache has 31 remaining failures, down from 51. The equation follow-up also
+  [MeasuringTime definition correction](measuring-time-definition.md),
+  [equation classification correction](equation-correctness.md), and
+  [shape recognition correction](shape-recognition.md) are complete;
+  the current cache has 27 remaining failures, down from 51. The review of most/least selection
+  versus complete ordering remains open despite passing VQA on the replacement sorting samples.
+  The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.
 
 - **Ontology consolidation:** measurement definitions, numeric boundaries, and progression
