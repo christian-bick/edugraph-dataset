@@ -1,14 +1,14 @@
 {
   "spec": "ccss",
-  "library_version": "0.29.0-pre.1.6282636d6637",
+  "library_version": "0.29.0-pre.2.59ff94cc3573",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "100dabb",
+  "cache_commit": "a61e7ae",
   "concurrency": 4,
-  "evaluated": 1936,
-  "passed": 1904,
-  "failed": 32,
-  "semantic_review_samples": 20,
+  "evaluated": 1934,
+  "passed": 1903,
+  "failed": 31,
+  "semantic_review_samples": 19,
   "evaluator_disagreement_samples": 12,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -150,6 +150,45 @@
       "measuring_time_rejections": 0,
       "image_changes": 0,
       "details": "measuring-time-definition.md"
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "equation-correctness",
+      "status": "completed",
+      "baseline_commit": "5edbbc3",
+      "dependency_commit": "5720938",
+      "fix_commit": "582930e",
+      "cache_commit": "a61e7ae",
+      "library_version": "0.29.0-pre.2.59ff94cc3573",
+      "regenerated": 4,
+      "reused_shards": 283,
+      "written_shards": 1,
+      "evaluated": 4,
+      "reused": 1930,
+      "concurrency": 4,
+      "sample_count_before": 1936,
+      "sample_count_after": 1934,
+      "failures_before": 32,
+      "failures_after": 31,
+      "resolved": 1,
+      "newly_rejected": 0,
+      "correctness_evaluation_rejections": 0,
+      "shared_image_changes": 0,
+      "added_sample_identities": 4,
+      "removed_sample_identities": 6,
+      "target_replacements": [
+        {
+          "operation": "Addition",
+          "old_id": "1.OA.D.7-equal-sign~6f678d9f",
+          "new_id": "1.OA.D.7-equal-sign~e3a36789"
+        },
+        {
+          "operation": "Subtraction",
+          "old_id": "1.OA.D.7-equal-sign~9cf60b5d",
+          "new_id": "1.OA.D.7-equal-sign~f3b9f3e3"
+        }
+      ],
+      "details": "equation-correctness.md"
     }
   ],
   "findings": [
@@ -271,25 +310,6 @@
       "reasoning": "Labels not defendable: NumbersLarger10: Several involved numbers, such as 1 and 2, have absolute values less than 10.",
       "validated_at": "2026-09-25T22:16:16.188Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "exact-equation-truth-versus-plausibility",
-      "sample_key": "1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0",
-      "generator": "arithmetic-equation-judgment",
-      "view": "operations-equation-judgment",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "PlausibilityEvaluation",
-          "verdict": "not_defendable",
-          "evidence": "Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: PlausibilityEvaluation: Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation.",
-      "validated_at": "2026-09-25T22:02:58.424Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -1385,6 +1405,44 @@
         "reasoning": "The label 'MeasuringTime' is not defendable because the task involves reading and converting a single point in time, rather than measuring or comparing the durations or intervals of events.",
         "validated_at": "2026-09-25T22:39:40.084Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0",
+      "resolution": "correctness-evaluation-classification",
+      "resolution_type": "target_replaced",
+      "replacement_target_id": "1.OA.D.7-equal-sign~e3a36789",
+      "replacement_samples": [
+        {
+          "sample_key": "1.OA.D.7-equal-sign~e3a36789#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0",
+          "validated_at": "2026-09-27T14:30:19.099Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.OA.D.7-equal-sign~e3a36789#arithmetic-equation-judgment#operations-equation-judgment#train#solution#inst:0",
+          "validated_at": "2026-09-27T14:30:19.232Z",
+          "pass": true
+        }
+      ],
+      "note": "The corrected label changes the target hash and sample identities. This historical failed sample was retired, not revalidated as passing; both samples of its replacement target pass.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "exact-equation-truth-versus-plausibility",
+        "sample_key": "1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0",
+        "generator": "arithmetic-equation-judgment",
+        "view": "operations-equation-judgment",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "PlausibilityEvaluation",
+            "verdict": "not_defendable",
+            "evidence": "Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: PlausibilityEvaluation: Evaluating the absolute mathematical truth of an arithmetic equation is a formal logical verification, not an informal plausibility or likelihood evaluation.",
+        "validated_at": "2026-09-25T22:02:58.424Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0\" --no-validate"
       }
     }
   ]

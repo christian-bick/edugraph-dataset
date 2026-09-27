@@ -2,28 +2,33 @@
 
 ## Outcome
 
-Updated on 2026-09-27 after the numeral-system ownership and MeasuringTime definition corrections on branch
-`codex/ontology-v029-vqa-rerun`. All **1,936 CCSS samples** have current judgments:
-**1,904 pass (98.3%) and 32 fail**, down from 51 failures in the initial 2026-09-26 rerun.
-There are no uncached samples. The remaining failures comprise **20 samples requiring semantic
+Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, and equation
+correctness corrections on branch `codex/ontology-v029-vqa-rerun`.
+All **1,934 CCSS samples** have current judgments: **1,903 pass (98.4%) and 31 fail**, down from
+51 failures in the initial 2026-09-26 rerun. The equation target-label correction changed target
+hashes and their validation allocation, reducing the sample count by two.
+There are no uncached samples. The remaining failures comprise **19 samples requiring semantic
 review** and **12 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 32 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 31 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 32 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 22
-resolved verdicts and initial totals are retained separately as history. Production targets remain
-unchanged; the user-authorized correction moved numeral-system ownership to the views that supply
-its evidence. Resolved and remaining findings are described below.
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 31 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 23
+resolved findings and initial totals are retained separately as history: 22 passed revalidation,
+and one was retired with its mislabeled target and replaced by passing samples. The authorized
+corrections moved numeral-system ownership to the views supplying its evidence and changed the
+two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation`. Resolved and
+remaining findings are described below.
 
 ## Scope and implementation
 
 This maintenance run upgrades `edugraph-ts` from v0.26.0 through v0.29.0 to the exact
-preview `0.29.0-pre.1.6282636d6637`. It adopts the descriptor-text harmonization from v0.28.0,
-the v0.29.0 involvement-statement helper, and the preview's broader `MeasuringTime` definition.
+preview `0.29.0-pre.2.59ff94cc3573`. It adopts the descriptor-text harmonization from v0.28.0,
+the v0.29.0 involvement-statement helper, the broader `MeasuringTime` definition, and the new
+`CorrectnessEvaluation` Ability.
 Only **CCSS** is regenerated and validated; the isolated `test` dataset and cache
 remain outside this work.
 
@@ -50,6 +55,12 @@ definition. Canonical graph reconstruction reuses all 285 shards without renderi
 58 time samples at concurrency four and reuses 1,878 records. The eleven clock failures and four
 previous arithmetic disagreements pass; three other arithmetic samples receive `SingleStep`
 rejections, reducing total failures from 44 to 32.
+
+The [equation correctness follow-up](equation-correctness.md) adopts the next preview and
+corrects both equal-sign target permutations and their view. Canonical generation renders four
+replacement samples in one shard, reuses 283 shards, and retires six old sample identities.
+All four new judgments pass at concurrency four; 1,930 unchanged records are reused. Total
+failures fall from 32 to 31, with no new rejection.
 
 ## Minor repairs
 
@@ -111,22 +122,29 @@ The [definition correction report](measuring-time-definition.md) records the dep
 verification, and three residual `SingleStep` disagreements. The separate sequence-step concern
 below remains open.
 
-## Major findings requiring follow-up
-
 ### Exact equation truth versus plausibility
 
-`operations-equation-judgment` asks whether an exact arithmetic equation is true or false.
-For example, the inspected image asks about `18 + 2 = 20`. Its `PlausibilityEvaluation`
-label concerns credibility or likelihood in context, which is a different performance.
+**Resolved on 2026-09-27** by adopting preview `0.29.0-pre.2.59ff94cc3573` in `5720938`,
+correcting the view and CCSS targets in `582930e`, and validating the replacements in `a61e7ae`.
+The standard requests exact truth judgments about addition/subtraction equations; the existing
+exercise was appropriate. Its `PlausibilityEvaluation` label described a different performance.
 
-Review the view declaration and `1.OA.D.7-equal-sign` production targets together. `ErrorDetection`
-is a possible replacement, subject to checking both correct and incorrect equations; simply
-renaming the question to "plausible" would not correct its meaning (`SPEC-2`, `SPEC-V5`,
-`TSPEC-6`, `TSPEC-13`). The failing sample is:
+The preview adds `CorrectnessEvaluation` under `Evaluation`:
 
-```text
-1.OA.D.7-equal-sign~6f678d9f#arithmetic-equation-judgment#operations-equation-judgment#train#question#inst:0
-```
+> Judging whether a statement, result, or solution is correct according to applicable facts, definitions, rules, or task requirements.
+
+This covers both true and false equations without requiring a shown procedure or an actual
+mistake. The view now owns that Ability, and both `1.OA.D.7-equal-sign` permutations request it
+(`SPEC-2`, `SPEC-V5`, `TSPEC-6`, `TSPEC-13`). Mathematics, rendering, and the checklist are unchanged.
+
+Addition target `~6f678d9f` becomes `~e3a36789`; subtraction `~9cf60b5d` becomes `~f3b9f3e3`.
+All four resulting images pass, including a false equation whose solution correctly selects
+False. All other 1,930 images and evaluation records are unchanged. The old failed addition
+question is preserved in history as resolved by target replacement, not falsely reported as a
+passing revalidation. The [detailed report](equation-correctness.md) records target mapping,
+expected split changes, and a separate pre-existing task-fingerprint review item.
+
+## Major findings requiring follow-up
 
 ### Shape properties versus shape recognition
 
@@ -264,10 +282,11 @@ Persistent disagreements remain visible in the final cache and findings report.
 On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
 the full-dataset failure count changed from 61 to 51 before the ownership correction reduced it
-to 44 and the MeasuringTime update reduced it to 32. No further retries were made to chase a
-passing result. The 12 current disagreements are one equal-addends question, one counting
-question, two fraction word-problem solutions, four shape-attribute comparisons, one square-cell
-array question, and three time-interval tasks. The table records the original 2026-09-26 recheck.
+to 44, the MeasuringTime update reduced it to 32, and the equation correction reduced it to 31.
+No further retries were made to chase a passing result. The 12 current disagreements are one
+equal-addends question, one counting question, two fraction word-problem solutions, four
+shape-attribute comparisons, one square-cell array question, and three time-interval tasks.
+The table records the original 2026-09-26 recheck.
 
 | Generator / view | Rechecked | Failures before | Failures after |
 | --- | ---: | ---: | ---: |
@@ -316,12 +335,17 @@ All generator coverage thresholds passed. The strict label-architecture audit re
 violations and 93 existing review items. All 681 targets and 830 matching tuples are preserved;
 17 generation plans record the ownership transfer.
 
-After the preview dependency update, repository checks, the build, and the same complete coverage
+After the MeasuringTime preview update, repository checks, the build, and the same complete coverage
 suite passed again. One initial documentation-fixture cleanup failed with a Windows `EPERM`;
 one complete retry passed without source changes.
 
-The latest validation confirmed **32 failures and zero uncached samples** after 58 new judgments
-and 1,878 reused records. No API rate-limit errors were observed. The documentation check passed
+The CorrectnessEvaluation preview and target correction also pass repository checks, the build,
+and all 3,074 tests across 527 files. Matching preserves all 681 target competencies and 830
+tuples, replacing only the two expected target IDs. The strict label-architecture audit remains
+at zero violations and 93 review items.
+
+The latest validation confirmed **31 failures and zero uncached samples** after four new judgments
+and 1,930 reused records. No API rate-limit errors were observed. The documentation check passed
 all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
@@ -329,17 +353,17 @@ Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | MeasuringTime update: zero rendered samples; all 285 shards reused; 59 non-render graph nodes affected |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,904 pass / 32 fail; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 32 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Equation correction: four rendered samples in one new shard; 283 shards reused; only the equation pair regenerated |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,903 pass / 31 fail; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 31 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=c0f2798` | MeasuringTime update: all 1,936 images identical; zero added/removed identities, attempt shifts, or seed changes |
-| `npm run report:churn -- --spec=ccss --ref=1d5b58a` | Ownership correction: 1,932 identical images and four expected instruction changes; zero added/removed identities, attempt shifts, or seed changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,906 identical images and 30 expected changes across the six repaired views; zero added/removed identities, attempt shifts, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=5edbbc3` | Equation correction: 1,930 identical images, four added and six removed equation identities; no retained-identity image, attempt, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,900 identical images and 30 expected changes across the six repaired views, plus four added/six removed equation identities; no retained-identity attempt or seed changes |
 
-The split contains 1,632 training and 304 validation images. Of 207 tuples allocated to validation,
-152 have validation evidence; the report retains the 55 coverage-gap warnings and does not infer
-their cause. This run did not change sampling or split membership.
+The split contains 1,632 training and 302 validation images. Of 206 tuples allocated to validation,
+151 have validation evidence; the report retains the same 55 coverage-gap warnings and does not
+infer their cause. The corrected equation hashes no longer allocate an equation tuple to validation,
+accounting for the two fewer images. Sampling policy and every other sample identity are unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.
