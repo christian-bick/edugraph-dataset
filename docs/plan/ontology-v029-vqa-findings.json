@@ -3,10 +3,10 @@
   "library_version": "0.29.0-pre.2.59ff94cc3573",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "084af8c",
+  "cache_commit": "a41af55",
   "concurrency": 4,
-  "evaluated": 1938,
-  "passed": 1911,
+  "evaluated": 1942,
+  "passed": 1915,
   "failed": 27,
   "semantic_review_samples": 15,
   "evaluator_disagreement_samples": 12,
@@ -231,10 +231,111 @@
           "new_id": "K.MD.B.3-sort-by-count~bdc50867"
         }
       ],
-      "remaining_review_topics": [
+      "remaining_review_topics": [],
+      "details": "shape-recognition.md",
+      "review_topic_resolutions": [
+        {
+          "topic": "complete-numeric-order",
+          "follow_up": "category-ordering"
+        }
+      ]
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "category-ordering",
+      "status": "completed",
+      "baseline_commit": "d59c376",
+      "fix_commit": "b5e11c6",
+      "cache_commit": "a41af55",
+      "library_version": "0.29.0-pre.2.59ff94cc3573",
+      "regenerated": 1942,
+      "reused_shards": 66,
+      "written_shards": 221,
+      "evaluated": 10,
+      "reused": 1932,
+      "concurrency": 4,
+      "sample_count_before": 1938,
+      "sample_count_after": 1942,
+      "failures_before": 27,
+      "failures_after": 27,
+      "resolved": 0,
+      "newly_rejected": 0,
+      "resolved_review_topics": [
         "complete-numeric-order"
       ],
-      "details": "shape-recognition.md"
+      "numeric_order_rejections": 0,
+      "shared_image_changes": 0,
+      "added_sample_identities": 10,
+      "removed_sample_identities": 6,
+      "refreshed_plan_input_hashes": 1730,
+      "changed_semantic_plan_hashes": 0,
+      "changed_retained_judgments": 0,
+      "target_replacements": [
+        {
+          "old_id": "K.MD.B.3-sort-by-count~5c7c2c25",
+          "preserved_selection_id": "K.MD.B.3-select-by-count~2ca2ef8c",
+          "complete_order_id": "K.MD.B.3-sort-by-count~610728d1"
+        },
+        {
+          "old_id": "K.MD.B.3-sort-by-count~bdc50867",
+          "preserved_selection_id": "K.MD.B.3-select-by-count~501842ea",
+          "complete_order_id": "K.MD.B.3-sort-by-count~98f9e643"
+        }
+      ],
+      "passing_samples": [
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~610728d1#counting-classify-sort#sorting-classify-order#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:44.028Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:49.796Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:53.591Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.710Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#question#inst:0",
+          "validated_at": "2026-09-27T16:13:52.147Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~98f9e643#counting-classify-sort#sorting-classify-order#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:42.943Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~610728d1#counting-classify-sort#sorting-classify-order#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:42.213Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.064Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:47.663Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-sort-by-count~98f9e643#counting-classify-sort#sorting-classify-order#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:44.159Z",
+          "pass": true
+        }
+      ],
+      "note": "Least/most selection is preserved as an explicitly authored K.MD.B.3 supporting subskill. Complete ascending/descending category orders have a separate view. The old six images already passed VQA, so this closes a semantic coverage finding without reducing the retained failure count. Shared-type regeneration changes only input-hash provenance for retained records; images, semantic plans, evaluations, and timestamps are unchanged.",
+      "details": "category-ordering.md"
     }
   ],
   "findings": [
@@ -973,7 +1074,21 @@
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
       },
       "superseded_in_follow_up": "shape-recognition",
-      "replacement_sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#train#question#inst:0"
+      "replacement_sample_key": "K.MD.B.3-sort-by-count~bdc50867#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+      "current_replacement_follow_up": "category-ordering",
+      "current_replacement_target_id": "K.MD.B.3-select-by-count~501842ea",
+      "current_replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:49.796Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.710Z",
+          "pass": true
+        }
+      ]
     },
     {
       "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
@@ -1480,9 +1595,7 @@
           "pass": true
         }
       ],
-      "remaining_review_topics": [
-        "complete-numeric-order"
-      ],
+      "remaining_review_topics": [],
       "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
       "previous_finding": {
         "classification": "semantic_review_required",
@@ -1502,7 +1615,37 @@
         "reasoning": "The ontology label 'ShapeProperties' is not defendable because the task only uses shapes for counting and sorting, without involving any physical properties or manipulation constraints of the shapes.",
         "validated_at": "2026-09-27T12:38:25.014Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
-      }
+      },
+      "current_replacement_follow_up": "category-ordering",
+      "current_replacement_target_id": "K.MD.B.3-select-by-count~2ca2ef8c",
+      "current_replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:53.591Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#question#inst:0",
+          "validated_at": "2026-09-27T16:13:52.147Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.064Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:47.663Z",
+          "pass": true
+        }
+      ],
+      "review_topic_resolutions": [
+        {
+          "topic": "complete-numeric-order",
+          "follow_up": "category-ordering"
+        }
+      ]
     },
     {
       "sample_key": "K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
@@ -1521,9 +1664,7 @@
           "pass": true
         }
       ],
-      "remaining_review_topics": [
-        "complete-numeric-order"
-      ],
+      "remaining_review_topics": [],
       "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
       "previous_finding": {
         "classification": "semantic_review_required",
@@ -1543,7 +1684,37 @@
         "reasoning": "Labels not defendable: ShapeProperties: No physical properties of the shapes (like rolling, folding, stacking, or geometric attributes like edges/vertices) are discussed or used to constrain manipulation.",
         "validated_at": "2026-09-27T12:38:29.259Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~1bb99c29#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
-      }
+      },
+      "current_replacement_follow_up": "category-ordering",
+      "current_replacement_target_id": "K.MD.B.3-select-by-count~2ca2ef8c",
+      "current_replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:53.591Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#val#question#inst:0",
+          "validated_at": "2026-09-27T16:13:52.147Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.064Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~2ca2ef8c#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:47.663Z",
+          "pass": true
+        }
+      ],
+      "review_topic_resolutions": [
+        {
+          "topic": "complete-numeric-order",
+          "follow_up": "category-ordering"
+        }
+      ]
     },
     {
       "sample_key": "K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
@@ -1572,9 +1743,7 @@
           "pass": true
         }
       ],
-      "remaining_review_topics": [
-        "complete-numeric-order"
-      ],
+      "remaining_review_topics": [],
       "note": "The ShapeProperties claim is corrected to ShapeRecognition. This historical failed sample was retired through a target-label change, not revalidated as passing; all replacement target samples pass. The separate NumericOrder review remains open for most/least tasks.",
       "previous_finding": {
         "classification": "semantic_review_required",
@@ -1599,7 +1768,27 @@
         "reasoning": "Labels not defendable: ShapeProperties: The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation.",
         "validated_at": "2026-09-27T12:38:38.053Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
-      }
+      },
+      "current_replacement_follow_up": "category-ordering",
+      "current_replacement_target_id": "K.MD.B.3-select-by-count~501842ea",
+      "current_replacement_samples": [
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#question#inst:0",
+          "validated_at": "2026-09-27T16:13:49.796Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.MD.B.3-select-by-count~501842ea#counting-classify-sort#sorting-classify-sort#train#solution#inst:0",
+          "validated_at": "2026-09-27T16:13:48.710Z",
+          "pass": true
+        }
+      ],
+      "review_topic_resolutions": [
+        {
+          "topic": "complete-numeric-order",
+          "follow_up": "category-ordering"
+        }
+      ]
     }
   ]
 }

@@ -3,11 +3,11 @@
 ## Outcome
 
 Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, equation
-correctness, and shape recognition corrections on branch `codex/ontology-v029-vqa-rerun`.
-All **1,938 CCSS samples** have current judgments: **1,911 pass (98.6%) and 27 fail**, down from
+correctness, shape recognition, and category ordering corrections on branch `codex/ontology-v029-vqa-rerun`.
+All **1,942 CCSS samples** have current judgments: **1,915 pass (98.6%) and 27 fail**, down from
 51 failures in the initial 2026-09-26 rerun. The target-label corrections changed target hashes
-and their validation allocation: the equation update removed two images and the shape update
-added four, for a net increase of two over the initial dataset.
+and their validation allocation: the equation update removed two images, the shape update
+added four, and the ordering extension added four, for a net increase of six over the initial dataset.
 There are no uncached samples. The remaining failures comprise **15 samples requiring semantic
 review** and **12 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
@@ -22,8 +22,9 @@ resolved findings and initial totals are retained separately as history: 22 pass
 and five were retired with their mislabeled targets and replaced by passing samples. The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
 two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation` and three sorting
-targets from `ShapeProperties` to `ShapeRecognition`. Resolved and remaining findings are
-described below.
+targets from `ShapeProperties` to `ShapeRecognition`. Full category ordering now has its own
+view and ascending/descending targets; least/most selection is preserved as a separate subskill
+without claiming `NumericOrder`. Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
@@ -68,8 +69,16 @@ The [shape recognition follow-up](shape-recognition.md) replaces the `ShapePrope
 the two sorting views and three K.MD.B.3 target permutations with `Area.ShapeRecognition`.
 It renders ten replacement samples in four shards, reuses 282 shards, and retires six old
 identities. All ten new judgments pass at concurrency four; 1,928 unchanged records are reused.
-Total failures fall from 31 to 27, with no new rejection. The separate `NumericOrder` concern
-remains open despite the passing replacement judgments.
+Total failures fall from 31 to 27, with no new rejection. At that point, the separate `NumericOrder`
+concern remained open despite the passing replacement judgments.
+
+The [category ordering follow-up](category-ordering.md) extends the shared mathematical payload
+and separates full ordering from least/most selection. The shared type change triggers broad
+canonical regeneration: 1,942 images, 221 written shards, and 66 reused shards. Ten new sorting
+identities replace six old ones, and all ten new VQA judgments pass at concurrency four. All
+1,932 retained image hashes, seeds, attempts, judgment timestamps, and evaluations are unchanged.
+The pipeline refreshes only `generation_plan.inputHash` on 1,730 retained cache records; their
+semantic plan hashes and VQA contexts remain unchanged. No extra live judgments are needed for them.
 
 ## Minor repairs
 
@@ -111,7 +120,7 @@ All six conservation images pass. The classify/count question and one most-selec
 also changed from failing to passing, reducing the total failure count by seven. At that stage,
 four sorting images still failed on the separate shape-property issue. The shape recognition
 correction below subsequently resolves those failures. The cached simple-counting digit-answer
-disagreement and the independent `NumericOrder` concern remain open.
+disagreement remains open; the independent `NumericOrder` concern is resolved below.
 
 The [ownership correction report](numeral-system-ownership.md) contains the complete adoption
 matrix, per-view results, and verification evidence.
@@ -172,25 +181,39 @@ numeral-system resolutions also gain replacement-sample references while retaini
 historical pass timestamps. All other 1,928 images and evaluation records are unchanged.
 
 The [detailed report](shape-recognition.md) records the three target mappings, expected addition
-of four validation images, ownership review, and verification. Passing VQA does not resolve the
-separate incomplete-ordering concern below.
-
-## Major findings requiring follow-up
+of four validation images, ownership review, and verification. The following change resolves
+the separate incomplete-ordering concern.
 
 ### Most/least selection versus a complete numeric order
 
-`sorting-classify-sort` asks which category has the most or least objects and highlights that
-single category in Solution Mode. `NumericOrder` instead describes arranging values into a
-magnitude-based sequence. The underlying CCSS competency calls for sorting categories by count;
-removing the label would lose the intended coverage.
+**Resolved on 2026-09-27** in `b5e11c6`, with VQA results in `a41af55`. The user approved
+preserving the existing capability while extending the mathematics and separating the views.
 
-This needs a generator/view correction that supplies and requests the complete order, including
-tied counts. It is more substantial than a prompt clarification. Do not substitute
-`NumericComparison`, which is structurally ineligible as a label (`IMPL-G8`, `IMPL-V11`,
-`TSPEC-6`, `TSPEC-13`). Both `K.MD.B.3-sort-by-count~5c7c2c25` and
-`K.MD.B.3-sort-by-count~bdc50867` are affected after the shape-recognition target correction.
-All six current samples pass VQA, but their prompts and solutions still select a single extremum
-without requesting or displaying the complete order. This remains an open content issue.
+`counting-classify-sort` now supplies the complete ascending order as equal-count groups and
+both endpoint sets. Its relation schema supports `Least`, `Most`, `AscendingOrder`, and
+`DescendingOrder`. The new `sorting-classify-order` leaf requests every category and its count,
+and its solution displays the full sequence, including ties. For example, the descending
+solution shows Circle 2 = Square 2 > Triangle 1. This leaf owns `NumericOrder`, requires that
+Area explicitly in the target, and owns numeral labels through its digit-count response.
+
+The existing `sorting-classify-sort` leaf retains object-only least/most selection with a
+unique correct category. Both leaves share rendering and accept the complete common payload;
+positive relation compatibility selects their production paths (`IMPL-G8`, `SPEC-V6`,
+`SPEC-V7`, `SPEC-11`, `IMPL-V11`). No evaluator or central checklist is weakened.
+
+The old two `K.MD.B.3-sort-by-count` permutations become ascending and descending targets
+`~610728d1` and `~98f9e643`. Separate `K.MD.B.3-select-by-count` targets `~2ca2ef8c` and
+`~501842ea` preserve least and most. The latter are explicitly documented as our supporting
+subskill decomposition of K.MD.B.3, not a separate CCSS requirement. A small inherited
+generator range defect is also repaired so every category respects a higher requested minimum;
+current CCSS sampling with a minimum of one is unchanged.
+
+All ten new images were inspected and pass VQA with every label defendable. The total failure
+count stays at 27 because the six retired images had already passed: this closes a confirmed
+semantic coverage defect that passing VQA had not detected. The [detailed report](category-ordering.md)
+records matching, canonical regeneration, provenance-only cache changes, and verification.
+
+## Major findings requiring follow-up
 
 ### Arithmetic offsets and sequence-position labels
 
@@ -372,8 +395,14 @@ entries and two new view-owned-Area entries. The latter are reviewed in the
 [shape recognition report](shape-recognition.md); they reflect the intended independent
 geometric capability supplied by the views.
 
+The category-ordering extension passes repository checks, the build, and **3,143 tests across
+530 files**, including 86 focused cases. The changed generator has 100% statement and branch
+coverage. Matching now has 683 targets, 212 compatible pairs, and 832 tuples. The label audit
+reports zero violations and 97 review items; its two additional entries concern the new view's
+independent Areas and explicit `NumericOrder` precondition, reviewed in the detailed report.
+
 The latest validation confirmed **27 failures and zero uncached samples** after ten new judgments
-and 1,928 reused records. No API rate-limit errors were observed. The documentation check passed
+and 1,932 reused records. No API rate-limit errors were observed. The documentation check passed
 all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
@@ -381,18 +410,20 @@ Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Shape recognition: ten rendered samples in four new shards; 282 shards reused; only the two sorting pairs regenerated |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,911 pass / 27 fail; exits 1 for the documented failures |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Category ordering: shared-type change triggers 1,942 canonical renders; 221 shards written and 66 reused; only ten new sorting identities have new images |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,915 pass / 27 fail; all ten new judgments pass; exits 1 for the documented failures |
 | `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=77e749f` | Shape recognition: 1,928 identical images, ten added and six removed sorting identities; no retained-identity image, attempt, or seed changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,895 identical images and 29 expected changes from earlier repairs, plus 14 added/12 removed equation and sorting identities; no retained-identity attempt or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=d59c376` | Category ordering: 1,932 identical images, ten added and six removed sorting identities; no retained-identity image, attempt, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,895 identical images and 29 expected changes from earlier repairs, plus 18 added/12 removed equation and sorting identities; no retained-identity attempt or seed changes |
 
-The split contains 1,632 training and 306 validation images. Of 208 tuples allocated to validation,
+The split contains 1,636 training and 306 validation images. Of 208 tuples allocated to validation,
 153 have validation evidence; the report retains the same 55 coverage-gap warnings and does not
 infer their cause. The equation correction removed one validation allocation, while the shape
-recognition correction adds two. Sampling policy and sample identities outside the corrected
-equation and sorting targets are unchanged.
+recognition correction adds two. Category ordering adds four training images and replaces the
+previous most-selection validation allocation with a least-selection allocation, without changing
+the validation total. Sampling policy and sample identities outside the corrected equation and
+sorting targets are unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.

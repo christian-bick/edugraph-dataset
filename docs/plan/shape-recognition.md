@@ -67,6 +67,10 @@ complete ordering of categories, including ties. The six current most/least samp
 but that does not resolve the previously established semantic mismatch. No label or evaluator
 rule was weakened to suppress it.
 
+Subsequent follow-up on 2026-09-27: the [category-ordering extension](category-ordering.md)
+resolves this remaining issue, preserving extremum selection and adding a complete-order view.
+The preceding outcomes describe the shape-recognition checkpoint before that extension.
+
 ## Verification
 
 Source correction: `603cac0`; VQA cache: `084af8c`, on `codex/ontology-v029-vqa-rerun`.
