@@ -3,6 +3,18 @@ import {ViewValidationError} from '../../../helpers/validation.ts';
 
 const MAX_LOOSE_OBJECTS = 20;
 
+export type CountingSequencePosition = {
+    role: 'start' | 'result';
+    value: number;
+};
+
+/** Place the supplied quantities in counting order without calculating a new value. */
+export function countingSequencePositions(data: CountingIncDecProblem): [CountingSequencePosition, CountingSequencePosition] {
+    const start: CountingSequencePosition = {role: 'start', value: data.numObjects};
+    const result: CountingSequencePosition = {role: 'result', value: data.incDecAnswer};
+    return data.incDecType === 'inc' ? [start, result] : [result, start];
+}
+
 function isValidPlaceValue(value: number, placeValue: {tens: number; ones: number}): boolean {
     return Number.isInteger(placeValue.tens)
         && placeValue.tens >= 0

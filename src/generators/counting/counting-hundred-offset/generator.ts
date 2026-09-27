@@ -8,7 +8,7 @@ export class CountingHundredOffsetGenerator implements ProblemGenerator<Counting
     schema = CountingHundredOffsetGeneratorSchema;
 
     generate(config: CountingHundredOffsetGeneratorConfig): ProblemStub<CountingHundredOffsetProblem> | null {
-        validateConfigFields('counting-hundred-offset', config, ['range', 'direction']);
-        return generateCountingOffset(config, 100);
+        validateConfigFields('counting-hundred-offset', config, ['range', 'direction', 'operandProfile']);
+        return generateCountingOffset(config, 100, config.operandProfile!);
     }
 }

@@ -340,6 +340,7 @@ const tenMoreLessBuilder = new DatasetPermutationBuilder()
         Area.PlaceValue,
         Scope.Base10,
         Scope.StepsOf10,
+        Scope.TwoDigitLargestOperand,
         Scope.NumbersLarger10,
         Scope.NumbersSmaller100,
         Ability.ProcedureUnderstanding

@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
 import {CountingHundredOffsetGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
@@ -17,6 +17,32 @@ describe('counting-hundred-offset spec', () => {
         const labels = [...spec.generalLabels, ...extractSchemaLabels(new CountingHundredOffsetGenerator().schema)];
         expect(labels).toEqual(expect.arrayContaining([Area.Increment, Area.Decrement]));
         for (const label of countingLabels) expect(labels).not.toContain(label);
+    });
+
+    it('supports only the optional three-digit largest-operand profile', () => {
+        const generator = new CountingHundredOffsetGenerator();
+        const supported = extractSchemaLabels(generator.schema);
+        expect(supported).toContain(Scope.ThreeDigitLargestOperand);
+        expect(supported).not.toContain(Scope.TwoDigitLargestOperand);
+        expect(spec.generalLabels).not.toContain(Scope.ThreeDigitLargestOperand);
+        for (const direction of [Area.Increment, Area.Decrement]) {
+            const labels = [Scope.NumbersLarger100, Scope.NumbersSmaller1000, direction, Scope.ThreeDigitLargestOperand];
+            expect(extractConfig(generator.schema, labels).config.operandProfile).toBe('three-digit');
+            const stub = generateWithLabels(generator, labels)!;
+            expect(stub.labels).toContain(Scope.ThreeDigitLargestOperand);
+            expect(String(Math.max(stub.data.numObjects, stub.data.stepSize))).toHaveLength(3);
+            expect(stub.data.numObjects).toBeGreaterThanOrEqual(stub.data.stepSize);
+        }
+    });
+
+    it('preserves small starting operands without inventing a profile claim', () => {
+        const generator = new CountingHundredOffsetGenerator();
+        const labels = [Scope.NumbersSmaller120, Area.Increment];
+        expect(extractConfig(generator.schema, labels).config.operandProfile).toBe('unrestricted');
+        const stub = generateWithLabels(generator, labels)!;
+        expect(stub.data.numObjects).toBeLessThan(stub.data.stepSize);
+        expect(stub.labels).not.toContain(Scope.TwoDigitLargestOperand);
+        expect(stub.labels).not.toContain(Scope.ThreeDigitLargestOperand);
     });
 
     it.each([[Area.Increment, 'inc'], [Area.Decrement, 'dec']] as const)(

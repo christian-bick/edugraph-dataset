@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import type {CountingIncDecProblem} from '../../../../types/problems.ts';
-import {validateCountingIncDecProblem} from './helpers.ts';
+import {countingSequencePositions, validateCountingIncDecProblem} from './helpers.ts';
 
 const problem = (overrides: Partial<CountingIncDecProblem> = {}): CountingIncDecProblem => ({
     numObjects: 9,
@@ -14,6 +14,24 @@ const problem = (overrides: Partial<CountingIncDecProblem> = {}): CountingIncDec
 });
 
 describe('counting-inc-dec view helpers', () => {
+    it('places the supplied successor after the starting number', () => {
+        expect(countingSequencePositions(problem())).toEqual([
+            {role: 'start', value: 9}, {role: 'result', value: 10}
+        ]);
+    });
+
+    it('places the supplied predecessor before the starting number', () => {
+        const data = problem({
+            numObjects: 10, simpleAnswer: 10, incDecType: 'dec', incDecAnswer: 9,
+            startPlaceValue: {tens: 1, ones: 0}, resultPlaceValue: {tens: 0, ones: 9}
+        });
+        expect(countingSequencePositions(data)).toEqual([
+            {role: 'result', value: 9}, {role: 'start', value: 10}
+        ]);
+        expect(data.numObjects).toBe(10);
+        expect(data.incDecAnswer).toBe(9);
+    });
+
     it.each([
         problem(),
         problem({

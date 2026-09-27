@@ -316,7 +316,7 @@ const placeValueOffsetsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithIntegers,
         Scope.Base10,
-        Scope.NumbersLarger100,
+        Scope.ThreeDigitLargestOperand,
         Scope.NumbersSmaller1000,
         Ability.ProcedureUnderstanding
     ])
@@ -325,8 +325,8 @@ const placeValueOffsetsBuilder = new DatasetPermutationBuilder()
         [Area.Decrement]
     ])
     .applyLabelVariants([
-        [Scope.StepsOf10],
-        [Scope.StepsOf100]
+        [Scope.StepsOf10, Scope.NumbersLarger10],
+        [Scope.StepsOf100, Scope.NumbersLarger100]
     ]);
 
 // --- 2.NBT.B.9: Explain addition and subtraction strategies ---

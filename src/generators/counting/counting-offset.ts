@@ -5,36 +5,48 @@ import {CountingIncDecGeneratorConfig} from './counting-inc-dec/spec.ts';
 
 const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
 
+export type CountingOffsetOperandProfile = 'unrestricted' | 'two-digit' | 'three-digit';
+
+/** Enumerates the complete domain before the single seeded mathematical draw. */
+export function countingOffsetStarts(
+    config: CountingIncDecGeneratorConfig,
+    stepSize: 1 | 10 | 100,
+    operandProfile: CountingOffsetOperandProfile = 'unrestricted'
+): number[] {
+    const {direction, range} = config;
+    if ((direction !== 'inc' && direction !== 'dec') || !range
+        || !Number.isSafeInteger(range.min) || !Number.isSafeInteger(range.max)
+        || stepSize < range.min || stepSize > range.max) return [];
+    if (operandProfile !== 'unrestricted' && operandProfile !== 'two-digit' && operandProfile !== 'three-digit') return [];
+
+    const minimum = Math.max(1, range.min);
+    let minCount = direction === 'dec' ? minimum + stepSize : minimum;
+    let maxCount = direction === 'inc' ? range.max - stepSize : range.max;
+    if (operandProfile !== 'unrestricted') {
+        const profileMinimum = operandProfile === 'two-digit' ? 10 : 100;
+        const profileMaximum = operandProfile === 'two-digit' ? 99 : 999;
+        // The configured starting value is a largest operand; the result has its own range bound.
+        minCount = Math.max(minCount, profileMinimum, stepSize);
+        maxCount = Math.min(maxCount, profileMaximum);
+    }
+    if (minCount > maxCount) return [];
+
+    return Array.from({length: maxCount - minCount + 1}, (_, index) => minCount + index)
+        .filter(value => hasNoZeroDigit(value) && hasNoZeroDigit(
+            direction === 'inc' ? value + stepSize : value - stepSize
+        ));
+}
+
 export function generateCountingOffset<TStep extends 1 | 10 | 100>(
     config: CountingIncDecGeneratorConfig,
-    stepSize: TStep
+    stepSize: TStep,
+    operandProfile: CountingOffsetOperandProfile = 'unrestricted'
 ): ProblemStub<CountingOffsetProblem<TStep>> | null {
     const incDecType = config.direction;
     if (incDecType !== 'inc' && incDecType !== 'dec') return null;
 
     const resolvedRange = config.range!;
-    let maxCount = resolvedRange.max;
-    let minCount = resolvedRange.min;
-    if (minCount < 1) {
-        minCount = 1;
-    }
-
-    if (incDecType === 'inc') {
-        maxCount -= stepSize;
-    } else {
-        minCount += stepSize;
-    }
-
-    if (minCount > maxCount) {
-        return null;
-    }
-
-    const validStarts = Array.from(
-        {length: maxCount - minCount + 1},
-        (_, index) => minCount + index
-    ).filter(value => hasNoZeroDigit(value) && hasNoZeroDigit(
-        incDecType === 'inc' ? value + stepSize : value - stepSize
-    ));
+    const validStarts = countingOffsetStarts(config, stepSize, operandProfile);
     if (validStarts.length === 0) return null;
 
     const numObjects = validStarts[Math.floor(random() * validStarts.length)];

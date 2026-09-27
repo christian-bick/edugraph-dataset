@@ -2,15 +2,18 @@ import {Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {CountingIncDecGeneratorSchema, spec as baseSpec} from '../counting-inc-dec/spec.ts';
-import {arithmeticOffsetDirection} from '../arithmetic-offset-schema.ts';
+import {arithmeticOffsetDirection, hundredOffsetOperandProfile} from '../arithmetic-offset-schema.ts';
+import {hundredOffsetRangeRules} from '../counting-offset-compatibility.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-hundred-offset',
+    compatibility: hundredOffsetRangeRules,
     generalLabels: [...baseSpec.generalLabels.filter(label => label !== Scope.StepsOf1), Scope.StepsOf100]
 };
 export const CountingHundredOffsetGeneratorSchema = {
     ...CountingIncDecGeneratorSchema,
     direction: arithmeticOffsetDirection,
+    operandProfile: hundredOffsetOperandProfile,
     range: [
         CountingIncDecGeneratorSchema.range[0].filter(label =>
             label !== Scope.NumbersSmaller5 && label !== Scope.NumbersSmaller10

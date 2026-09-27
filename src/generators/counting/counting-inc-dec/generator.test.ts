@@ -50,7 +50,8 @@ describe('CountingIncDecGenerator', () => {
     it('increments by ten while preserving the ones place', () => {
         const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 10, max: 100},
-            direction: 'inc'
+            direction: 'inc',
+            operandProfile: 'two-digit'
         });
 
         expect(stub).not.toBeNull();
@@ -63,7 +64,8 @@ describe('CountingIncDecGenerator', () => {
     it('decrements by ten while preserving the ones place', () => {
         const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 10, max: 100},
-            direction: 'dec'
+            direction: 'dec',
+            operandProfile: 'two-digit'
         });
 
         expect(stub).not.toBeNull();
@@ -76,7 +78,8 @@ describe('CountingIncDecGenerator', () => {
     it('decomposes the start and result into matching base-ten values', () => {
         const stub = new CountingTenOffsetGenerator().generate({
             range: {min: 1, max: 100},
-            direction: 'inc'
+            direction: 'inc',
+            operandProfile: 'unrestricted'
         });
 
         expect(stub!.data.numObjects).toBe(
@@ -89,8 +92,9 @@ describe('CountingIncDecGenerator', () => {
 
     it('increments by one hundred while preserving the tens and ones places', () => {
         const stub = new CountingHundredOffsetGenerator().generate({
-            range: {min: 101, max: 999},
-            direction: 'inc'
+            range: {min: 100, max: 999},
+            direction: 'inc',
+            operandProfile: 'three-digit'
         });
 
         expect(stub).not.toBeNull();
@@ -104,8 +108,9 @@ describe('CountingIncDecGenerator', () => {
 
     it('uses digit-place decompositions for three-digit values', () => {
         const stub = new CountingTenOffsetGenerator().generate({
-            range: {min: 101, max: 999},
-            direction: 'dec'
+            range: {min: 10, max: 999},
+            direction: 'dec',
+            operandProfile: 'three-digit'
         });
 
         const start = stub!.data.startPlaceValue;
@@ -124,8 +129,9 @@ describe('CountingIncDecGenerator', () => {
             setSeed(seed);
             const selected = stepMagnitude === Scope.StepsOf10 ? new CountingTenOffsetGenerator() : new CountingHundredOffsetGenerator();
             const stub = selected.generate({
-                range: {min: 101, max: 999},
-                direction
+                range: {min: stepMagnitude === Scope.StepsOf10 ? 10 : 100, max: 999},
+                direction,
+                operandProfile: 'three-digit'
             });
 
             expect(stub).not.toBeNull();
@@ -141,15 +147,15 @@ describe('CountingIncDecGenerator', () => {
         })).toBeNull();
         expect(new CountingTenOffsetGenerator().generate({
             range: {min: 1, max: 9},
-            direction: 'inc'
+            direction: 'inc',
+            operandProfile: 'unrestricted'
         })).toBeNull();
     });
 
-    it('returns null when the only transition would introduce a zero digit', () => {
-        expect(generator.generate({
-            range: {min: 9, max: 10},
-            direction: 'inc'
-        })).toBeNull();
+    it('bounds the explicit unit adjustment even when the result is hidden', () => {
+        for (const direction of ['inc', 'dec'] as const) {
+            expect(generator.generate({range: {min: 5, max: 20}, direction})).toBeNull();
+        }
     });
 
     it('returns null for an unsupported direction', () => {

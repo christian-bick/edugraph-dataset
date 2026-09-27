@@ -3,9 +3,11 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {countingOffsetStepRangeRule} from '../counting-offset-compatibility.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
+    compatibility: [countingOffsetStepRangeRule(1)],
     generalLabels: [
         Area.NumerationWithIntegers,
         Scope.StepsOf1,
