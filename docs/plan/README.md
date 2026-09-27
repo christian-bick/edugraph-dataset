@@ -6,6 +6,8 @@ These items are not newly scheduled by the archive move.
 
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
   record minor task-evidence repairs and remaining classification and numeric-boundary reviews.
+  The [numeral-system ownership correction](numeral-system-ownership.md) is complete;
+  the current cache has 44 remaining failures, down from 51.
 
 - **Ontology consolidation:** measurement definitions, numeric boundaries, and progression
   semantics remain in the [ontology roadmap](https://github.com/christian-bick/edugraph-ontology/blob/main/docs/plan/ontology-consolidation.md).

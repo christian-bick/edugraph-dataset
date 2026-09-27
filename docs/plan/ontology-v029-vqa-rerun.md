@@ -1,5 +1,9 @@
 # Ontology v0.29 CCSS VQA rerun
 
+Follow-up on 2026-09-27: the [numeral-system ownership correction](numeral-system-ownership.md)
+resolved seven failing samples, bringing the current CCSS total to **1,892 pass / 44 fail**.
+This report and its findings JSON retain the original 2026-09-26 rerun evidence below.
+
 ## Outcome
 
 Completed on 2026-09-26 on branch `codex/ontology-v029-vqa-rerun`.
@@ -76,6 +80,11 @@ renaming the question to "plausible" would not correct its meaning (`SPEC-2`, `S
 ```
 
 ### Numeral-system labels on object-only tasks
+
+The producer-to-view ownership correction is completed in the
+[2026-09-27 follow-up](numeral-system-ownership.md), including scoped VQA results and the user's
+confirmation that explicitly requested digit answers support numeral-system labels.
+The following describes the original finding.
 
 The `counting-basic` producer supplies `Base10` invariantly even to `counting-conservation`,
 whose inspected question and solution images contain object collections and word choices,
