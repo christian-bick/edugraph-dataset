@@ -2,28 +2,29 @@
 
 ## Outcome
 
-Updated on 2026-09-27 after the numeral-system ownership correction on branch
+Updated on 2026-09-27 after the numeral-system ownership and MeasuringTime definition corrections on branch
 `codex/ontology-v029-vqa-rerun`. All **1,936 CCSS samples** have current judgments:
-**1,892 pass (97.7%) and 44 fail**, down from 51 failures in the initial 2026-09-26 rerun.
-There are no uncached samples. The remaining failures comprise **31 samples requiring semantic
-review** and **13 evaluator disagreements**. These are sample counts, not distinct defects;
+**1,904 pass (98.3%) and 32 fail**, down from 51 failures in the initial 2026-09-26 rerun.
+There are no uncached samples. The remaining failures comprise **20 samples requiring semantic
+review** and **12 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 44 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 32 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 44 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The seven
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 32 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 22
 resolved verdicts and initial totals are retained separately as history. Production targets remain
 unchanged; the user-authorized correction moved numeral-system ownership to the views that supply
 its evidence. Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
-This maintenance run upgrades the exact `edugraph-ts` dependency from v0.26.0 to v0.29.0,
-adopting the descriptor-text harmonization from v0.28.0 and the new involvement-statement
-helper. Only **CCSS** is regenerated and validated; the isolated `test` dataset and cache
+This maintenance run upgrades `edugraph-ts` from v0.26.0 through v0.29.0 to the exact
+preview `0.29.0-pre.1.6282636d6637`. It adopts the descriptor-text harmonization from v0.28.0,
+the v0.29.0 involvement-statement helper, and the preview's broader `MeasuringTime` definition.
+Only **CCSS** is regenerated and validated; the isolated `test` dataset and cache
 remain outside this work.
 
 VQA retains exact label identifiers but supplies the library's complete involvement statements.
@@ -43,6 +44,12 @@ The 2026-09-27 ownership correction regenerated 48 samples across seven affected
 10 shards and reusing 275. Revalidation made 18 new judgments at concurrency four and reused
 1,918 current records. Seven failing samples became passing, with no newly rejected samples.
 The [detailed follow-up](numeral-system-ownership.md) records consumer adoption and verification.
+
+The subsequent [MeasuringTime follow-up](measuring-time-definition.md) changes only that ontology
+definition. Canonical graph reconstruction reuses all 285 shards without rendering. VQA rechecks
+58 time samples at concurrency four and reuses 1,878 records. The eleven clock failures and four
+previous arithmetic disagreements pass; three other arithmetic samples receive `SingleStep`
+rejections, reducing total failures from 44 to 32.
 
 ## Minor repairs
 
@@ -88,6 +95,21 @@ digit-answer disagreement remains. Passing sorting verdicts do not resolve their
 
 The [ownership correction report](numeral-system-ownership.md) contains the complete adoption
 matrix, per-view results, and verification evidence.
+
+### Clock instants versus measuring durations
+
+**Resolved on 2026-09-27** by adopting ontology preview `0.29.0-pre.1.6282636d6637` in
+`5f7c5f0`, with VQA results in `100dabb`. The user confirmed that `MeasuringTime` should cover
+clock/calendar points as well as durations. Its revised definition now reads:
+
+> Determining, representing, or comparing times of day, calendar dates, or elapsed durations using temporal reference systems and units.
+
+The installed preview changes only this definition. Existing clock-reading/construction labels
+and targets therefore remain appropriate. All 40 clock samples now pass, and all 58 rechecked
+time samples accept `MeasuringTime`. No images, labels, seeds, or generation plans changed.
+The [definition correction report](measuring-time-definition.md) records the dependency,
+verification, and three residual `SingleStep` disagreements. The separate sequence-step concern
+below remains open.
 
 ## Major findings requiring follow-up
 
@@ -178,19 +200,6 @@ Ten physical samples cover seven targets through retained associations: `K.G.A.1
 `K.G.A.1-env-shapes-other`, and two `2.G.A.1-identify-supported-shapes` variants. A caption
 calling an illustration a physical model would not supply the missing witness (`CHK-V6`).
 
-### Clock instants versus measuring durations
-
-The `time` generator invariantly supplies `MeasuringTime`, whose involvement statement concerns
-durations of events and intervals between them. All 40 canonical samples across 17 targets and
-four time views read or construct a single clock time instead. This includes currently passing
-samples: the issue is broader than the eleven VQA rejections.
-
-Review the generator declaration and clock-reading/construction targets together. Adding an
-elapsed-time calculation would change the competency, while deleting the descriptor without
-review would leave the target encoding incomplete (`SPEC-G3`, `TSPEC-6`, `TSPEC-13`).
-`TimeMeasurement` already covers clocks and times of day, but is a Scope, not an Area replacement;
-the current Area catalog has no other clock/time entry. This likely needs ontology coordination.
-
 ### Sequence steps versus scale and precision
 
 `statistical-graphs` maps `StepsOf1` to a picture-graph symbol scale. The inspected total question
@@ -204,6 +213,8 @@ different target and producer encodings. Six digital-construction samples across
 claim `StepsOf5`. The observed pictograph failure is
 `1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0`.
 This is a semantic boundary decision; decorative sequences would not repair the original task.
+All clock samples pass after the MeasuringTime definition update, but the `StepsOf5` definition
+and task evidence are unchanged, so that semantic review remains open.
 
 ### Concrete inference versus deriving a concept
 
@@ -253,10 +264,10 @@ Persistent disagreements remain visible in the final cache and findings report.
 On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
 the full-dataset failure count changed from 61 to 51 before the ownership correction reduced it
-to 44. No further retries were made to chase a passing result. The 13 remaining disagreements
-are unchanged: one equal-addends question, one counting
+to 44 and the MeasuringTime update reduced it to 32. No further retries were made to chase a
+passing result. The 12 current disagreements are one equal-addends question, one counting
 question, two fraction word-problem solutions, four shape-attribute comparisons, one square-cell
-array question, and four time-interval tasks.
+array question, and three time-interval tasks. The table records the original 2026-09-26 recheck.
 
 | Generator / view | Rechecked | Failures before | Failures after |
 | --- | ---: | ---: | ---: |
@@ -270,6 +281,13 @@ array question, and four time-interval tasks.
 | `shape-unit-square-grid` / `shape-square-array-inversion` | 2 | 1 | 1 |
 | `time-interval-arithmetic` / `time-interval-word-problem` | 14 | 6 | 4 |
 | `measurement-data` / `measurement-line-plot` | 10 | 1 | 0 |
+
+The MeasuringTime update necessarily rechecked all 14 time-interval samples. All four earlier
+failures passed, while three previously passing samples were rejected for the same hour-rollover
+interpretation of `SingleStep`. Their canonical images show one requested time addition with
+correct arithmetic. The [current findings JSON](ontology-v029-vqa-findings.json) records these
+three new verdicts and preserves the four resolved ones separately. This is evaluator variation
+on the existing task-granularity disagreement; the images and `SingleStep` definition did not change.
 
 The repaired counting view still has one numeral-evidence rejection: its question explicitly asks
 for a total in digits, while its response box remains blank. This is a Question Mode boundary
@@ -298,8 +316,12 @@ All generator coverage thresholds passed. The strict label-architecture audit re
 violations and 93 existing review items. All 681 targets and 830 matching tuples are preserved;
 17 generation plans record the ownership transfer.
 
-The latest validation confirmed **44 failures and zero uncached samples** after 18 new judgments
-and 1,918 reused records. No API rate-limit errors were observed. The documentation check passed
+After the preview dependency update, repository checks, the build, and the same complete coverage
+suite passed again. One initial documentation-fixture cleanup failed with a Windows `EPERM`;
+one complete retry passed without source changes.
+
+The latest validation confirmed **32 failures and zero uncached samples** after 58 new judgments
+and 1,878 reused records. No API rate-limit errors were observed. The documentation check passed
 all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
@@ -307,10 +329,11 @@ Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | 48 rendered samples; 275 shards reused; 10 shards replaced |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,892 pass / 44 fail; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 44 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | MeasuringTime update: zero rendered samples; all 285 shards reused; 59 non-render graph nodes affected |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,904 pass / 32 fail; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 32 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
+| `npm run report:churn -- --spec=ccss --ref=c0f2798` | MeasuringTime update: all 1,936 images identical; zero added/removed identities, attempt shifts, or seed changes |
 | `npm run report:churn -- --spec=ccss --ref=1d5b58a` | Ownership correction: 1,932 identical images and four expected instruction changes; zero added/removed identities, attempt shifts, or seed changes |
 | `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,906 identical images and 30 expected changes across the six repaired views; zero added/removed identities, attempt shifts, or seed changes |
 

@@ -1,15 +1,15 @@
 {
   "spec": "ccss",
-  "library_version": "0.29.0",
+  "library_version": "0.29.0-pre.1.6282636d6637",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "34d77e2",
+  "cache_commit": "100dabb",
   "concurrency": 4,
   "evaluated": 1936,
-  "passed": 1892,
-  "failed": 44,
-  "semantic_review_samples": 31,
-  "evaluator_disagreement_samples": 13,
+  "passed": 1904,
+  "failed": 32,
+  "semantic_review_samples": 20,
+  "evaluator_disagreement_samples": 12,
   "initial_rerun": {
     "completed_on": "2026-09-26",
     "report_commit": "1d5b58a",
@@ -129,6 +129,27 @@
       "resolved": 7,
       "newly_rejected": 0,
       "details": "numeral-system-ownership.md"
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "measuring-time-definition",
+      "status": "completed",
+      "baseline_commit": "c0f2798",
+      "dependency_commit": "5f7c5f0",
+      "cache_commit": "100dabb",
+      "library_version": "0.29.0-pre.1.6282636d6637",
+      "regenerated": 0,
+      "reused_shards": 285,
+      "evaluated": 58,
+      "reused": 1878,
+      "concurrency": 4,
+      "failures_before": 44,
+      "failures_after": 32,
+      "resolved": 15,
+      "newly_rejected": 3,
+      "measuring_time_rejections": 0,
+      "image_changes": 0,
+      "details": "measuring-time-definition.md"
     }
   ],
   "findings": [
@@ -150,82 +171,6 @@
       "reasoning": "Labels not defendable: ConceptDerivation: There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length).",
       "validated_at": "2026-09-26T08:57:59.788Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The task asks to represent a single point in time ('half past eleven') on a digital clock, which does not involve determining or comparing the durations of events or elapsed time intervals."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires displaying a specific point in time on a digital clock, rather than determining or comparing durations or intervals of time.",
-      "validated_at": "2026-09-25T22:39:25.835Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration",
-      "sample_key": "1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0",
-      "generator": "time",
-      "view": "time-analog",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "There is no measurement of duration, comparison of events, or interval calculation between start and finish times; it is simply reading a static time from a clock."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label MeasuringTime is not defendable because the exercise only involves reading a single clock to identify the current time (10:30). It does not involve determining or comparing the durations of events or calculating intervals between start and finish times.",
-      "validated_at": "2026-09-25T22:38:48.724Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration",
-      "sample_key": "1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0",
-      "generator": "time",
-      "view": "time-analog-construction",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The exercise only asks to represent a single static point in time ('12:00') on the clock, without involving any measurement of duration, elapsed time, or comparison of intervals."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves representing a single static point in time on an analog clock rather than measuring or comparing the durations of events or intervals.",
-      "validated_at": "2026-09-25T22:39:08.658Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration",
-      "sample_key": "1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0",
-      "generator": "time",
-      "view": "time-analog",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: MeasuringTime: This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals.",
-      "validated_at": "2026-09-26T08:59:49.928Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -367,106 +312,6 @@
     },
     {
       "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "No durations, time intervals, or elapsed times are being measured, calculated, or compared."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'MeasuringTime' is not defendable because this task is a simple time-telling/clock-building exercise that displays a static point in time, without any measurement or comparison of elapsed durations or time intervals.",
-      "validated_at": "2026-09-25T22:39:33.242Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The exercise is about reading and representing a specific point in time on a digital clock, not measuring or comparing durations of events or intervals."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves identifying a specific time point rather than measuring durations of events or calculating elapsed time intervals.",
-      "validated_at": "2026-09-26T09:00:01.402Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The exercise involves reading and representing a specific point in time, rather than measuring or comparing the durations of events or elapsed intervals."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires representing a static time (3:25 a.m.) on a digital clock based on a textual clue. There is no calculation of elapsed time, duration of events, or comparison of intervals.",
-      "validated_at": "2026-09-26T09:00:00.615Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration",
-      "sample_key": "2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0",
-      "generator": "time",
-      "view": "time-analog",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "No duration, elapsed time, or start/finish interval of an event is being determined or compared."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'MeasuringTime' is not defendable because the exercise only requires identifying a single point in time from a clock face, without measuring, comparing, or calculating durations/intervals.",
-      "validated_at": "2026-09-25T22:38:54.128Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The task only requires representing a specific point in time, not measuring or comparing durations of events or intervals."
-        },
-        {
-          "label": "StepsOf5",
-          "verdict": "not_defendable",
-          "evidence": "There are no consecutive values with a difference of 5 shown or calculated in the exercise."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The labels 'MeasuringTime' and 'StepsOf5' are not defendable because the task only requires displaying a static digital time corresponding to a text clue, without any duration calculations, consecutive step progressions, or interval measurements.",
-      "validated_at": "2026-09-25T22:39:40.893Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
       "topic": "arithmetic-offset-versus-sequence-position",
       "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
       "generator": "counting-hundred-offset",
@@ -521,120 +366,6 @@
       "reasoning": "Labels not defendable: EvenNumbers: The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task.",
       "validated_at": "2026-09-26T09:02:01.652Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration",
-      "sample_key": "3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0",
-      "generator": "time",
-      "view": "time-analog",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The task asks to identify the current time on a single clock, which does not involve measuring durations of events or intervals between times."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label MeasuringTime is not defendable because the task involves reading a static clock face to tell time, rather than measuring or comparing the durations of events or intervals of time.",
-      "validated_at": "2026-09-25T22:39:02.278Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: SingleStep: Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps.",
-      "validated_at": "2026-09-26T09:07:07.740Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "Solving this exercise requires multiple steps: converting both 6:48 and 7:30 into minutes relative to 6:00 (obtaining 48 and 90), and then performing subtraction. It cannot be solved by applying a single operation directly to the original time values."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'SingleStep' is not defendable because finding the elapsed duration between 6:48 and 7:30 requires multiple steps (converting both times to minutes from 6:00, then subtracting), rather than a single-step operation directly on the given numbers.",
-      "validated_at": "2026-09-26T09:07:11.636Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: SingleStep: Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes).",
-      "validated_at": "2026-09-26T09:07:01.857Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: SingleStep: The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation.",
-      "validated_at": "2026-09-26T09:07:13.925Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "clock-instant-versus-duration-and-sequence-steps",
-      "sample_key": "3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0",
-      "generator": "time",
-      "view": "time-digital-construction",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "MeasuringTime",
-          "verdict": "not_defendable",
-          "evidence": "The task only requires representing a static point in time, not measuring, calculating, or comparing the durations of events or intervals between them."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'MeasuringTime' is not defendable because the task involves reading and converting a single point in time, rather than measuring or comparing the durations or intervals of events.",
-      "validated_at": "2026-09-25T22:39:40.084Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -987,6 +718,66 @@
       "reasoning": "Labels not defendable: ShapeProperties: The exercise only requires basic shape recognition and counting, not analyzing physical properties that permit or constrain physical manipulation.",
       "validated_at": "2026-09-27T12:38:38.053Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "question",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process).",
+      "validated_at": "2026-09-27T13:42:34.997Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26.",
+      "validated_at": "2026-09-27T13:42:36.789Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps.",
+      "validated_at": "2026-09-27T13:42:36.711Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
     }
   ],
   "resolved_findings": [
@@ -1193,6 +984,407 @@
         "reasoning": "Labels not defendable: Base10: There are no written positional base-10 numerals in the image.",
         "validated_at": "2026-09-25T22:15:19.053Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.MD.B.3-sort-by-count~47cf0f93#counting-classify-sort#sorting-classify-sort#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:13.654Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The task asks to represent a single point in time ('half past eleven') on a digital clock, which does not involve determining or comparing the durations of events or elapsed time intervals."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires displaying a specific point in time on a digital clock, rather than determining or comparing durations or intervals of time.",
+        "validated_at": "2026-09-25T22:39:25.835Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-digital-construction~5cfbc7a0#time#time-digital-construction#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:41:44.426Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration",
+        "sample_key": "1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0",
+        "generator": "time",
+        "view": "time-analog",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "There is no measurement of duration, comparison of events, or interval calculation between start and finish times; it is simply reading a static time from a clock."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label MeasuringTime is not defendable because the exercise only involves reading a single clock to identify the current time (10:30). It does not involve determining or comparing the durations of events or calculating intervals between start and finish times.",
+        "validated_at": "2026-09-25T22:38:48.724Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-half-hour-time~5a9f673e#time#time-analog#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:41:57.711Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration",
+        "sample_key": "1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0",
+        "generator": "time",
+        "view": "time-analog-construction",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The exercise only asks to represent a single static point in time ('12:00') on the clock, without involving any measurement of duration, elapsed time, or comparison of intervals."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'MeasuringTime' is not defendable because the task involves representing a single static point in time on an analog clock rather than measuring or comparing the durations of events or intervals.",
+        "validated_at": "2026-09-25T22:39:08.658Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~80e8f688#time#time-analog-construction#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:44.393Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration",
+        "sample_key": "1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0",
+        "generator": "time",
+        "view": "time-analog",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: MeasuringTime: This is a simple time-reading task; there is no measurement or comparison of elapsed durations or intervals.",
+        "validated_at": "2026-09-26T08:59:49.928Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.B.3-time~e2b3b365#time#time-analog#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:18.549Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "No durations, time intervals, or elapsed times are being measured, calculated, or compared."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'MeasuringTime' is not defendable because this task is a simple time-telling/clock-building exercise that displays a static point in time, without any measurement or comparison of elapsed durations or time intervals.",
+        "validated_at": "2026-09-25T22:39:33.242Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:48.583Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The exercise is about reading and representing a specific point in time on a digital clock, not measuring or comparing durations of events or intervals."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'MeasuringTime' is not defendable because the task involves identifying a specific time point rather than measuring durations of events or calculating elapsed time intervals.",
+        "validated_at": "2026-09-26T09:00:01.402Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:50.689Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The exercise involves reading and representing a specific point in time, rather than measuring or comparing the durations of events or elapsed intervals."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'MeasuringTime' is not defendable because the task only requires representing a static time (3:25 a.m.) on a digital clock based on a textual clue. There is no calculation of elapsed time, duration of events, or comparison of intervals.",
+        "validated_at": "2026-09-26T09:00:00.615Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~0f4e2295#time#time-digital-construction#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:41:49.340Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration",
+        "sample_key": "2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0",
+        "generator": "time",
+        "view": "time-analog",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "No duration, elapsed time, or start/finish interval of an event is being determined or compared."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'MeasuringTime' is not defendable because the exercise only requires identifying a single point in time from a clock face, without measuring, comparing, or calculating durations/intervals.",
+        "validated_at": "2026-09-25T22:38:54.128Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~353abed7#time#time-analog#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:22.344Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The task only requires representing a specific point in time, not measuring or comparing durations of events or intervals."
+          },
+          {
+            "label": "StepsOf5",
+            "verdict": "not_defendable",
+            "evidence": "There are no consecutive values with a difference of 5 shown or calculated in the exercise."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The labels 'MeasuringTime' and 'StepsOf5' are not defendable because the task only requires displaying a static digital time corresponding to a text clue, without any duration calculations, consecutive step progressions, or interval measurements.",
+        "validated_at": "2026-09-25T22:39:40.893Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.7-nearest-five-minute-time~ec774107#time#time-digital-construction#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:41:55.045Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration",
+        "sample_key": "3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0",
+        "generator": "time",
+        "view": "time-analog",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The task asks to identify the current time on a single clock, which does not involve measuring durations of events or intervals between times."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label MeasuringTime is not defendable because the task involves reading a static clock face to tell time, rather than measuring or comparing the durations of events or intervals of time.",
+        "validated_at": "2026-09-25T22:39:02.278Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-read-analog-nearest-minute~003875db#time#time-analog#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0",
+      "resolution": "evaluator-revalidation-after-measuring-time-definition-change",
+      "validated_at": "2026-09-27T13:42:54.825Z",
+      "pass": true,
+      "remaining_uncertainties": [
+        {
+          "label": "SingleStep",
+          "verdict": "uncertain",
+          "evidence": "Calculating elapsed time across an hour boundary (from 2:42 to 3:26) typically involves multiple intermediate steps (e.g., finding minutes to the next hour, then adding remaining minutes)."
+        }
+      ],
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: SingleStep: Calculating the duration from 2:42 to 3:26 involves crossing the hour boundary (2:42 to 3:00, then 3:00 to 3:26), which requires multiple operations/steps.",
+        "validated_at": "2026-09-26T09:07:07.740Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+      "resolution": "evaluator-revalidation-after-measuring-time-definition-change",
+      "validated_at": "2026-09-27T13:42:56.933Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "Solving this exercise requires multiple steps: converting both 6:48 and 7:30 into minutes relative to 6:00 (obtaining 48 and 90), and then performing subtraction. It cannot be solved by applying a single operation directly to the original time values."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'SingleStep' is not defendable because finding the elapsed duration between 6:48 and 7:30 requires multiple steps (converting both times to minutes from 6:00, then subtracting), rather than a single-step operation directly on the given numbers.",
+        "validated_at": "2026-09-26T09:07:11.636Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~6adb9108#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "resolution": "evaluator-revalidation-after-measuring-time-definition-change",
+      "validated_at": "2026-09-27T13:42:43.365Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: SingleStep: Finding the interval from 5:41 to 6:13 requires multiple steps: calculating minutes to the next hour (19 minutes) and adding the minutes past the hour (13 minutes).",
+        "validated_at": "2026-09-26T09:07:01.857Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+      "resolution": "evaluator-revalidation-after-measuring-time-definition-change",
+      "validated_at": "2026-09-27T13:42:59.168Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: SingleStep: The solution is multi-step, requiring conversion of time into minutes elapsed since 9:00 (converting 10:25 to 85) before executing the final subtraction operation.",
+        "validated_at": "2026-09-26T09:07:13.925Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~96726914#time-interval-arithmetic#time-interval-word-problem#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0",
+      "resolution": "measuring-time-definition-correction",
+      "validated_at": "2026-09-27T13:42:23.083Z",
+      "pass": true,
+      "remaining_uncertainties": [],
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "clock-instant-versus-duration-and-sequence-steps",
+        "sample_key": "3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0",
+        "generator": "time",
+        "view": "time-digital-construction",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "MeasuringTime",
+            "verdict": "not_defendable",
+            "evidence": "The task only requires representing a static point in time, not measuring, calculating, or comparing the durations of events or intervals between them."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'MeasuringTime' is not defendable because the task involves reading and converting a single point in time, rather than measuring or comparing the durations or intervals of events.",
+        "validated_at": "2026-09-25T22:39:40.084Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-write-digital-nearest-minute~8cdbc29c#time#time-digital-construction#train#question#inst:0\" --no-validate"
       }
     }
   ]
