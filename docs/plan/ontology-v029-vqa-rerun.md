@@ -3,28 +3,31 @@
 ## Outcome
 
 Updated on 2026-09-27 after the numeral-system ownership, MeasuringTime definition, equation
-correctness, shape recognition, and category ordering corrections on branch `codex/ontology-v029-vqa-rerun`.
-All **1,942 CCSS samples** have current judgments: **1,915 pass (98.6%) and 27 fail**, down from
+correctness, shape recognition, category ordering, and arithmetic-offset label corrections on
+branch `codex/ontology-v029-vqa-rerun`.
+All **1,942 CCSS samples** have current judgments: **1,914 pass (98.6%) and 28 fail**, down from
 51 failures in the initial 2026-09-26 rerun. The target-label corrections changed target hashes
 and their validation allocation: the equation update removed two images, the shape update
 added four, and the ordering extension added four, for a net increase of six over the initial dataset.
-There are no uncached samples. The remaining failures comprise **15 samples requiring semantic
+There are no uncached samples. The remaining failures comprise **16 samples requiring semantic
 review** and **12 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 28 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 27
-resolved findings and initial totals are retained separately as history: 22 passed revalidation,
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 28 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 28
+resolved findings and initial totals are retained separately as history: 23 passed revalidation,
 and five were retired with their mislabeled targets and replaced by passing samples. The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
 two equal-sign targets from `PlausibilityEvaluation` to `CorrectnessEvaluation` and three sorting
 targets from `ShapeProperties` to `ShapeRecognition`. Full category ordering now has its own
 view and ascending/descending targets; least/most selection is preserved as a separate subskill
-without claiming `NumericOrder`. Resolved and remaining findings are described below.
+without claiming `NumericOrder`. Ten/hundred arithmetic offsets no longer claim sequence-position
+labels; their remaining rejections concern the separate numeric-boundary review. Resolved and
+remaining findings are described below.
 
 ## Scope and implementation
 
@@ -79,6 +82,15 @@ identities replace six old ones, and all ten new VQA judgments pass at concurren
 1,932 retained image hashes, seeds, attempts, judgment timestamps, and evaluations are unchanged.
 The pipeline refreshes only `generation_plan.inputHash` on 1,730 retained cache records; their
 semantic plan hashes and VQA contexts remain unchanged. No extra live judgments are needed for them.
+
+The [arithmetic-offset follow-up](arithmetic-offset-labels.md) separates the two offset generators'
+direction declarations from their inherited counting/sequence bundles. Canonical regeneration
+renders 16 images in four shards and reuses 283 shards. All 1,942 images, seeds, attempts, and
+sample identities remain unchanged; the other 1,926 cache records are byte-for-byte identical.
+VQA makes 16 requests at concurrency four: nine pass and seven fail only on numeric bounds.
+One previous failure passes, while two previously passing solutions receive range-label rejections,
+so the current total moves from 27 to 28 failures. No sequence-position rejection remains on
+the corrected offsets, and no unrelated judgment changes.
 
 ## Minor repairs
 
@@ -213,25 +225,60 @@ count stays at 27 because the six retired images had already passed: this closes
 semantic coverage defect that passing VQA had not detected. The [detailed report](category-ordering.md)
 records matching, canonical regeneration, provenance-only cache changes, and verification.
 
+## Resolved: Arithmetic offsets and sequence-position labels
+
+**Resolved on 2026-09-27** in `8598ac3`, with VQA results in `a7290e3`.
+
+The ten/hundred-more-less views correctly demonstrate arithmetic offsets, such as finding 100
+less than 393. Their targets already request `Increment` or `Decrement`; the unsupported
+`Before`/`After` labels came from an inherited generator direction bundle. The user approved
+the scoped declaration correction after reviewing current consumers and removal alternatives.
+
+`counting-ten-offset` and `counting-hundred-offset` now share an arithmetic-only direction schema.
+They no longer support or emit `Before`, `After`, `AdditiveCount`, or `SubtractiveCount`.
+Their mathematics, payloads, views, and six CCSS targets remain unchanged (`SPEC-G3`, `IMPL-G4`).
+All 683 targets and 832 matching tuples are preserved, with exactly six changed plans.
+
+The shared one-step schema is retained: removing its position labels would lose four matches
+and leave both K.CC.B.4c successor variants unsupported. The independent sequence generator
+also retains its valid `After` capability. Its explicit sequence task establishes that relation;
+the object-arrow successor projection has a separate evidence concern below.
+
+All three previous `Before` rejections are eliminated. One of those samples now passes, while
+the other two fail only on numeric bounds. Across the 16 necessary rechecks, nine pass and
+seven fail on the already documented component-count boundary, including two newly rejected
+solutions. The [detailed report](arithmetic-offset-labels.md) records exact transitions and
+the unchanged image/cache evidence; the numeric-bound issue is not considered resolved.
+
 ## Major findings requiring follow-up
 
-### Arithmetic offsets and sequence-position labels
+### Successor principles and object-arrow evidence
 
-The ten/hundred-more-less views show a place-value transformation such as "Find 100 less"
-with start/result panels. The rejected `Before` statement describes identifying an earlier
-chronological point or a preceding sequence position. Review whether these arithmetic-offset
-targets and producer declarations provide sufficient sequence-position evidence, or need a
-different semantic encoding. The corresponding `After` direction deserves the same review.
+K.CC.B.4c requires relating successive number names to quantities one larger. Both authored
+variants legitimately require `After`, but the current `counting-inc-dec` view shows objects
+and an upward arrow marked 1 rather than an explicit number sequence. Its evidence is weaker
+than the ordered terms in `counting-number-sequence`. Review a successor-specific projection
+that preserves the relationship between successive numbers and quantities (`IMPL-V11`, `TSPEC-13`).
 
-Affected families are `1.NBT.C.5-ten-more-less` and `2.NBT.B.8-place-value-offsets`.
+This also concerns the two K.CC.A.2 count-from-number variants matched by the object-arrow view.
+Their explicit sequence-view paths are preserved. These passing samples do not add to the cached
+failure count; passing VQA and maintaining coverage are not proofs of adequate sequence evidence.
+The arithmetic-offset correction deliberately preserves this capability pending that separate review.
 
 ### Numeric bounds and component counts
 
-Some ten-more-less tasks claim `NumbersLarger10` while explicitly displaying separate place
-counts such as "1 one" or small tens counts. VQA treats those as involved quantities below the
-requested bound. Review the intended boundary between the whole operand range and numerical
-quantities used in its representation before altering generators or production targets.
-This is a semantic decision rather than a layout defect.
+Six ten-more-less samples currently fail `NumbersLarger10` while explicitly displaying separate
+place counts such as "1 one" or small tens counts. One hundred-less question fails
+`NumbersLarger100` because it shows component counts 3 and 9, the unchanged lower-place value
+93, and a step of 1 hundred. VQA treats those as involved quantities below the requested bound.
+
+The required arithmetic-offset revalidation added range rejections to two unchanged solutions
+(81 → 91 and 31 → 41), and changed the 393 → 293 question's rejection from `Before` to
+`NumbersLarger100`. All seven remaining offset failures concern this same boundary. Review the
+intended relationship between the whole operand range and numerical quantities used in its
+representation before altering generators or production targets. This is a semantic decision
+rather than a layout defect; no bounds labels or visible component counts were altered in the
+sequence-position correction.
 
 ### Spatial assembly versus concept composition
 
@@ -326,7 +373,8 @@ On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgme
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
 the full-dataset failure count changed from 61 to 51 before the ownership correction reduced it
 to 44, the MeasuringTime update reduced it to 32, the equation correction reduced it to 31,
-and the shape recognition correction reduced it to 27.
+and the shape recognition correction reduced it to 27. Category ordering preserved that count;
+the necessary offset rechecks later moved it to 28 through the separate numeric-bound review.
 No further retries were made to chase a passing result. The 12 current disagreements are one
 equal-addends question, one counting question, two fraction word-problem solutions, four
 shape-attribute comparisons, one square-cell array question, and three time-interval tasks.
@@ -401,8 +449,12 @@ coverage. Matching now has 683 targets, 212 compatible pairs, and 832 tuples. Th
 reports zero violations and 97 review items; its two additional entries concern the new view's
 independent Areas and explicit `NumericOrder` precondition, reviewed in the detailed report.
 
-The latest validation confirmed **27 failures and zero uncached samples** after ten new judgments
-and 1,932 reused records. No API rate-limit errors were observed. The documentation check passed
+The arithmetic-offset correction passes **3,150 tests across 530 files**, including 57 focused
+cases, the build, and CCSS repository checks. It preserves all targets and matches, changes only
+six offset plans, and leaves the strict label audit at zero violations and 97 review items.
+
+The latest validation confirmed **28 failures and zero uncached samples** after 16 new judgments
+and 1,926 reused records. No API rate-limit errors were observed. The documentation check passed
 all local references and rule citations; four existing
 external references could not be fetched in the restricted network environment.
 
@@ -410,11 +462,11 @@ Current verification commands and outcomes (2026-09-27):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Category ordering: shared-type change triggers 1,942 canonical renders; 221 shards written and 66 reused; only ten new sorting identities have new images |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,915 pass / 27 fail; all ten new judgments pass; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Arithmetic offsets: 16 canonical renders, four shards written and 283 reused; every image hash unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Complete coverage; 1,914 pass / 28 fail; nine of 16 new judgments pass, seven fail only on numeric bounds; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 28 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=d59c376` | Category ordering: 1,932 identical images, ten added and six removed sorting identities; no retained-identity image, attempt, or seed changes |
+| `npm run report:churn -- --spec=ccss --ref=e112e3e` | Arithmetic offsets: all 1,942 images identical, no added/removed identities, no attempt or seed changes |
 | `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,895 identical images and 29 expected changes from earlier repairs, plus 18 added/12 removed equation and sorting identities; no retained-identity attempt or seed changes |
 
 The split contains 1,636 training and 306 validation images. Of 208 tuples allocated to validation,

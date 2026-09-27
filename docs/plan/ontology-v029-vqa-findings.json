@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.2.59ff94cc3573",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-27",
-  "cache_commit": "a41af55",
+  "cache_commit": "a7290e3",
   "concurrency": 4,
   "evaluated": 1942,
-  "passed": 1915,
-  "failed": 27,
-  "semantic_review_samples": 15,
+  "passed": 1914,
+  "failed": 28,
+  "semantic_review_samples": 16,
   "evaluator_disagreement_samples": 12,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -336,6 +336,275 @@
       ],
       "note": "Least/most selection is preserved as an explicitly authored K.MD.B.3 supporting subskill. Complete ascending/descending category orders have a separate view. The old six images already passed VQA, so this closes a semantic coverage finding without reducing the retained failure count. Shared-type regeneration changes only input-hash provenance for retained records; images, semantic plans, evaluations, and timestamps are unchanged.",
       "details": "category-ordering.md"
+    },
+    {
+      "completed_on": "2026-09-27",
+      "topic": "arithmetic-offset-labels",
+      "status": "completed",
+      "baseline_commit": "e112e3e",
+      "fix_commit": "8598ac3",
+      "cache_commit": "a7290e3",
+      "library_version": "0.29.0-pre.2.59ff94cc3573",
+      "regenerated": 16,
+      "reused_shards": 283,
+      "written_shards": 4,
+      "evaluated": 16,
+      "passed": 9,
+      "failed": 7,
+      "reused": 1926,
+      "concurrency": 4,
+      "sample_count_before": 1942,
+      "sample_count_after": 1942,
+      "failures_before": 27,
+      "failures_after": 28,
+      "affected_failures_before": 6,
+      "affected_failures_after": 7,
+      "resolved": 1,
+      "newly_rejected": 2,
+      "resolved_review_topics": [
+        "arithmetic-offset-versus-sequence-position"
+      ],
+      "remaining_review_topics": [
+        "component-numeric-bounds",
+        "successor-sequence-evidence"
+      ],
+      "shared_image_changes": 0,
+      "added_sample_identities": 0,
+      "removed_sample_identities": 0,
+      "changed_semantic_plans": 6,
+      "changed_cache_plan_records": 16,
+      "unchanged_cache_records": 1926,
+      "sequence_position_rejections_after": 0,
+      "resolved_label_findings": [
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "previous_rejections": [
+            {
+              "label": "Before",
+              "verdict": "not_defendable",
+              "evidence": "The task asks for subtraction ('100 less') rather than identifying chronological sequences or preceding positions."
+            }
+          ],
+          "previous_validated_at": "2026-09-25T22:15:27.966Z",
+          "pass": false,
+          "remaining_rejections": [
+            {
+              "label": "NumbersLarger100",
+              "verdict": "not_defendable",
+              "evidence": "The image contains several involved numbers that are less than 100, such as 93, 3, 9, and 1."
+            }
+          ],
+          "validated_at": "2026-09-27T17:41:20.946Z"
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_rejections": [
+            {
+              "label": "Before",
+              "verdict": "not_defendable",
+              "evidence": "The exercise is about finding 10 less (decrementing), not finding a preceding element in a sequence or chronological ordering."
+            }
+          ],
+          "previous_validated_at": "2026-09-25T22:16:16.131Z",
+          "pass": false,
+          "remaining_rejections": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The definition requires all involved numbers to be greater than or equal to 10. Here, numbers like 5, 6, and 1 are explicitly written and involved in the exercise."
+            }
+          ],
+          "validated_at": "2026-09-27T17:41:29.330Z"
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_rejections": [
+            {
+              "label": "Before",
+              "verdict": "not_defendable",
+              "evidence": "The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence."
+            }
+          ],
+          "previous_validated_at": "2026-09-25T22:16:19.840Z",
+          "pass": true,
+          "remaining_rejections": [],
+          "validated_at": "2026-09-27T17:41:31.720Z"
+        }
+      ],
+      "revalidated_samples": [
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:16:12.713Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:27.473Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The number 1 (which is less than 10) is actively involved in the calculations, labels ('1 one', '+ 1 ten'), and the equation '1 = 1'."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:16:11.481Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:25.178Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:44:09.180Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:47.131Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:44:09.991Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:45.039Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The number 1 is explicitly involved and displayed, which is less than 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:16:16.131Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:29.330Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "The definition requires all involved numbers to be greater than or equal to 10. Here, numbers like 5, 6, and 1 are explicitly written and involved in the exercise."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:16:16.188Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:28.438Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger10",
+              "verdict": "not_defendable",
+              "evidence": "Several involved numbers (like 2, 1) have absolute values strictly less than 10, violating the 'all involved numbers' requirement."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~915e4322#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:15:19.864Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:19.041Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~915e4322#counting-hundred-offset#counting-hundred-more-less#train#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:15:21.033Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:20.152Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~915e4322#counting-hundred-offset#counting-hundred-more-less#val#question#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:43:48.188Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:37.149Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~915e4322#counting-hundred-offset#counting-hundred-more-less#val#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:43:53.348Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:40.531Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:15:27.966Z",
+          "pass": false,
+          "validated_at": "2026-09-27T17:41:20.946Z",
+          "rejected_labels": [
+            {
+              "label": "NumbersLarger100",
+              "verdict": "not_defendable",
+              "evidence": "The image contains several involved numbers that are less than 100, such as 93, 3, 9, and 1."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:15:30.705Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:17.034Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_pass": false,
+          "previous_validated_at": "2026-09-25T22:16:19.840Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:31.720Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:16:19.658Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:34.893Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~e9cca934#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:16:23.826Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:34.496Z",
+          "rejected_labels": []
+        },
+        {
+          "sample_key": "2.NBT.B.8-place-value-offsets~e9cca934#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+          "previous_pass": true,
+          "previous_validated_at": "2026-09-25T22:16:24.380Z",
+          "pass": true,
+          "validated_at": "2026-09-27T17:41:36.610Z",
+          "rejected_labels": []
+        }
+      ],
+      "note": "Arithmetic-only direction declarations preserve every CCSS target and match. All three previous Before rejections are removed. One sample now passes; two previously passing solutions are newly rejected on the existing component-count numeric-boundary issue, and the hundred-less question changes from Before to NumbersLarger100. All seven affected failures now concern numeric bounds. No image, seed, attempt, or unrelated judgment changes; no evaluator weakening or repeated requests to seek a pass. The one-step successor view remains a separate observable-evidence review.",
+      "details": "arithmetic-offset-labels.md"
     }
   ],
   "findings": [
@@ -379,7 +648,7 @@
     },
     {
       "classification": "semantic_review_required",
-      "topic": "sequence-position-and-component-numeric-bounds",
+      "topic": "component-numeric-bounds",
       "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
       "generator": "counting-ten-offset",
       "view": "counting-ten-more-less",
@@ -388,17 +657,36 @@
         {
           "label": "NumbersLarger10",
           "verdict": "not_defendable",
-          "evidence": "The number 1 is involved as a separate quantity ('1 one'), which is less than 10."
+          "evidence": "The number 1 (which is less than 10) is actively involved in the calculations, labels ('1 one', '+ 1 ten'), and the equation '1 = 1'."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is involved as a separate quantity ('1 one'), which is less than 10.",
-      "validated_at": "2026-09-25T22:16:12.713Z",
+      "reasoning": "The label 'NumbersLarger10' is not defendable because the number 1 is actively involved in the exercise ('1 one', '+ 1 ten', '1 = 1'), violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
+      "validated_at": "2026-09-27T17:41:27.473Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
-      "topic": "sequence-position-and-component-numeric-bounds",
+      "topic": "component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly shown in multiple places (e.g. '1 one', '+ 1 ten', '1 = 1'), which has an absolute value less than 10.",
+      "validated_at": "2026-09-27T17:41:25.178Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "component-numeric-bounds",
       "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0",
       "generator": "counting-ten-offset",
       "view": "counting-ten-more-less",
@@ -407,41 +695,55 @@
         {
           "label": "NumbersLarger10",
           "verdict": "not_defendable",
-          "evidence": "The number 1 is involved in the ones place and is explicitly shown ('1 one', '1 = 1'), which is smaller than 10."
+          "evidence": "The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "The label NumbersLarger10 is not defendable because the number 1 is explicitly involved as a quantity in the ones place ('1 one', '1 = 1'), which is strictly smaller than 10.",
-      "validated_at": "2026-09-25T22:44:09.180Z",
+      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is involved as an independent numerical value (e.g., '1 = 1'), which has an absolute value less than 10.",
+      "validated_at": "2026-09-27T17:41:47.131Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
-      "topic": "sequence-position-and-component-numeric-bounds",
+      "topic": "component-numeric-bounds",
+      "sample_key": "1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0",
+      "generator": "counting-ten-offset",
+      "view": "counting-ten-more-less",
+      "mode": "solution",
+      "rejected_labels": [
+        {
+          "label": "NumbersLarger10",
+          "verdict": "not_defendable",
+          "evidence": "The number 1 is explicitly involved and displayed, which is less than 10."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: NumbersLarger10: The number 1 is explicitly involved and displayed, which is less than 10.",
+      "validated_at": "2026-09-27T17:41:45.039Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~7cd81d94#counting-ten-offset#counting-ten-more-less#val#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "component-numeric-bounds",
       "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
       "generator": "counting-ten-offset",
       "view": "counting-ten-more-less",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "Before",
-          "verdict": "not_defendable",
-          "evidence": "The exercise is about finding 10 less (decrementing), not finding a preceding element in a sequence or chronological ordering."
-        },
-        {
           "label": "NumbersLarger10",
           "verdict": "not_defendable",
-          "evidence": "Several numbers shown and used, such as 5, 6, and 1, have absolute values less than 10."
+          "evidence": "The definition requires all involved numbers to be greater than or equal to 10. Here, numbers like 5, 6, and 1 are explicitly written and involved in the exercise."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Before: The exercise is about finding 10 less (decrementing), not finding a preceding element in a sequence or chronological ordering.; NumbersLarger10: Several numbers shown and used, such as 5, 6, and 1, have absolute values less than 10.",
-      "validated_at": "2026-09-25T22:16:16.131Z",
+      "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers shown in the exercise (such as 1, 5, and 6) have absolute values strictly less than 10, violating the condition that all involved numbers must have absolute values greater than or equal to 10.",
+      "validated_at": "2026-09-27T17:41:29.330Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
-      "topic": "sequence-position-and-component-numeric-bounds",
+      "topic": "component-numeric-bounds",
       "sample_key": "1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0",
       "generator": "counting-ten-offset",
       "view": "counting-ten-more-less",
@@ -450,12 +752,12 @@
         {
           "label": "NumbersLarger10",
           "verdict": "not_defendable",
-          "evidence": "Several involved numbers, such as 1 and 2, have absolute values less than 10."
+          "evidence": "Several involved numbers (like 2, 1) have absolute values strictly less than 10, violating the 'all involved numbers' requirement."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: NumbersLarger10: Several involved numbers, such as 1 and 2, have absolute values less than 10.",
-      "validated_at": "2026-09-25T22:16:16.188Z",
+      "reasoning": "The label 'NumbersLarger10' is not defendable because several involved numbers (2 ones, 1 ten, 2 = 2) have values less than 10, which violates the definition requiring all involved numbers to have absolute values greater than or equal to 10.",
+      "validated_at": "2026-09-27T17:41:28.438Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.5-ten-more-less~ccf0dd68#counting-ten-offset#counting-ten-more-less#train#solution#inst:0\" --no-validate"
     },
     {
@@ -479,41 +781,22 @@
     },
     {
       "classification": "semantic_review_required",
-      "topic": "arithmetic-offset-versus-sequence-position",
+      "topic": "component-numeric-bounds",
       "sample_key": "2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0",
       "generator": "counting-hundred-offset",
       "view": "counting-hundred-more-less",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "Before",
+          "label": "NumbersLarger100",
           "verdict": "not_defendable",
-          "evidence": "The task asks for subtraction ('100 less') rather than identifying chronological sequences or preceding positions."
+          "evidence": "The image contains several involved numbers that are less than 100, such as 93, 3, 9, and 1."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Before: The task asks for subtraction ('100 less') rather than identifying chronological sequences or preceding positions.",
-      "validated_at": "2026-09-25T22:15:27.966Z",
+      "reasoning": "The label NumbersLarger100 is not defendable because several involved numbers shown in the image (such as 3, 9, 93, and 1) have absolute values less than 100.",
+      "validated_at": "2026-09-27T17:41:20.946Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~caa6ebce#counting-hundred-offset#counting-hundred-more-less#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "sequence-position-and-component-numeric-bounds",
-      "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
-      "generator": "counting-ten-offset",
-      "view": "counting-ten-more-less",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "Before",
-          "verdict": "not_defendable",
-          "evidence": "The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Before: The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence.",
-      "validated_at": "2026-09-25T22:16:19.840Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -533,6 +816,66 @@
       "reasoning": "Labels not defendable: EvenNumbers: The visible numbers are both 7, which are odd, and even divisibility is not relevant to the task.",
       "validated_at": "2026-09-26T09:02:01.652Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "question",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process).",
+      "validated_at": "2026-09-27T13:42:34.997Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26.",
+      "validated_at": "2026-09-27T13:42:36.789Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "generator": "time-interval-arithmetic",
+      "view": "time-interval-word-problem",
+      "mode": "solution",
+      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
+      "rejected_labels": [
+        {
+          "label": "SingleStep",
+          "verdict": "not_defendable",
+          "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps.",
+      "validated_at": "2026-09-27T13:42:36.711Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -804,66 +1147,6 @@
       "reasoning": "Labels not defendable: ConceptComposition: The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height.",
       "validated_at": "2026-09-25T22:32:48.337Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "question",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process).",
-      "validated_at": "2026-09-27T13:42:34.997Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26.",
-      "validated_at": "2026-09-27T13:42:36.789Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "review_note": "Canonical image review confirms one requested time addition and correct arithmetic. The evaluator counts hour rollover as a separate semantic operation; this is the previously documented SingleStep disagreement.",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps.",
-      "validated_at": "2026-09-27T13:42:36.711Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
     }
   ],
   "resolved_findings": [
@@ -1789,6 +2072,31 @@
           "follow_up": "category-ordering"
         }
       ]
+    },
+    {
+      "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+      "resolution": "arithmetic-offset-direction-correction",
+      "validated_at": "2026-09-27T17:41:31.720Z",
+      "pass": true,
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "sequence-position-and-component-numeric-bounds",
+        "sample_key": "2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0",
+        "generator": "counting-ten-offset",
+        "view": "counting-ten-more-less",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Before",
+            "verdict": "not_defendable",
+            "evidence": "The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Before: The task is a quantitative decrement ('Find 10 less') rather than sequencing or identifying a preceding element in a ordered sequence.",
+        "validated_at": "2026-09-25T22:16:19.840Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.8-place-value-offsets~e267d598#counting-ten-offset#counting-ten-more-less#train#question#inst:0\" --no-validate"
+      }
     }
   ]
 }

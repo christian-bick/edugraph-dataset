@@ -9,11 +9,14 @@ These items are not newly scheduled by the archive move.
   The [numeral-system ownership correction](numeral-system-ownership.md),
   [MeasuringTime definition correction](measuring-time-definition.md),
   [equation classification correction](equation-correctness.md),
-  [shape recognition correction](shape-recognition.md), and
-  [category ordering extension](category-ordering.md) are complete;
-  the current cache has 27 remaining failures, down from 51. Complete ordering now has its own
+  [shape recognition correction](shape-recognition.md),
+  [category ordering extension](category-ordering.md), and
+  [arithmetic-offset label correction](arithmetic-offset-labels.md) are complete;
+  the current cache has 28 remaining failures, down from 51. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
-  The equation follow-up also
+  Offset tasks retain arithmetic direction without sequence-position labels; seven rechecked
+  samples still fail on the separate component-count numeric boundary. The related successor
+  view's sequence evidence remains open. The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.
 
 - **Ontology consolidation:** measurement definitions, numeric boundaries, and progression
