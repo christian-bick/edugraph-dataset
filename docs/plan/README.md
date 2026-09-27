@@ -15,8 +15,11 @@ These items are not newly scheduled by the archive move.
   the current cache has 28 remaining failures, down from 51. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels; seven rechecked
-  samples still fail on the separate component-count numeric boundary. The related successor
-  view's sequence evidence remains open. The equation follow-up also
+  samples still fail on the separate component-count numeric boundary. The
+  [numeric-range investigation](numeric-range-bounds.md) separates whole-task bounds from
+  operand digit counts and records ten related conflicts in currently passing samples,
+  an existing checklist exemption, and CCSS starting/result boundary gaps; fixes remain open.
+  The related successor view's sequence evidence remains open. The equation follow-up also
   records a separate review of the existing seeded claim's task-fingerprint representation.
 
 - **Ontology consolidation:** measurement definitions, numeric boundaries, and progression

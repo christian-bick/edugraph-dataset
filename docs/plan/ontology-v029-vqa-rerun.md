@@ -274,11 +274,30 @@ place counts such as "1 one" or small tens counts. One hundred-less question fai
 
 The required arithmetic-offset revalidation added range rejections to two unchanged solutions
 (81 → 91 and 31 → 41), and changed the 393 → 293 question's rejection from `Before` to
-`NumbersLarger100`. All seven remaining offset failures concern this same boundary. Review the
-intended relationship between the whole operand range and numerical quantities used in its
-representation before altering generators or production targets. This is a semantic decision
-rather than a layout defect; no bounds labels or visible component counts were altered in the
-sequence-position correction.
+`NumbersLarger100`. All seven remaining offset failures concern this representation boundary.
+
+**Clarified on 2026-09-27:** range bounds include the primary task's operands and result,
+including a hidden result. Digits/place-value annotations used solely to represent those
+numbers are separate; actual adjustment operands are not exempt. Thus `342 - 10 = 332`
+supports `NumbersLarger10`, not `NumbersLarger100`. This supersedes the earlier proposed
+exception for smaller adjustments. Concrete label definitions must carry the clarification;
+VQA does not automatically include parent definitions.
+
+The [numeric-range investigation](numeric-range-bounds.md) replays all 98 positive-lower-bound
+samples and verifies their content fingerprints. It finds ten additional semantic conflicts
+in currently passing samples: four grade-two ten-offset images exclude the operand 10 from
+their lower bound of 100, and six one-step object-arrow images exclude 1 from a lower bound
+of 5. The latter checklist explicitly instructs VQA to ignore the step, contrary to the
+clarified interpretation (`CHK-V6`). The seven cached component-count failures and these ten
+passing-but-mislabeled samples are distinct; the cache totals remain unchanged.
+
+Separating numeric bounds from the existing operand digit-count labels is viable without a
+new payload or view family. An in-memory capability experiment preserves all 683 targets
+and 832 tuple relationships. It is not an implemented repair. The investigation also records
+CCSS boundary gaps, including a current `959 - 10 = 949` sample whose start exceeds the
+2.NBT.B.8 requirement of 100–900, and the need to allow smaller hidden results when covering
+the full subtraction domain. No generator, target, definition, checklist, or VQA record has
+been changed for this investigation; the follow-up remains open.
 
 ### Spatial assembly versus concept composition
 
