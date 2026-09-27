@@ -86,6 +86,46 @@ describe('operations-word-problem-within-100 helpers', () => {
         expect(getWordProblemStory(data, false, true)).toBe(story);
     });
 
+    it.each([
+        {
+            data: {num1: 82, num2: 82, operation: 'division', answer: 1},
+            inverted: true,
+            story: '82 items are shared equally among an unknown number of groups. There is 1 item in each group.'
+        },
+        {
+            data: {num1: 1, num2: 1, operation: 'division', answer: 1},
+            inverted: false,
+            story: '1 item is shared equally among 1 group. How many items are in each group?'
+        },
+        {
+            data: {num1: 2, num2: 1, operation: 'division', answer: 2},
+            inverted: false,
+            story: '2 items are shared equally among 1 group. How many items are in each group?'
+        },
+        {
+            data: {num1: 1, num2: 1, operation: 'multiplication', answer: 1},
+            inverted: false,
+            story: 'There is 1 equal group with 1 item in each group. How many items are there altogether?'
+        },
+        {
+            data: {num1: 2, num2: 1, operation: 'multiplication', answer: 2},
+            inverted: false,
+            story: 'There are 2 equal groups with 1 item in each group. How many items are there altogether?'
+        },
+        {
+            data: {num1: 1, num2: 2, operation: 'multiplication', answer: 2},
+            inverted: false,
+            story: 'There is 1 equal group with 2 items in each group. How many items are there altogether?'
+        },
+        {
+            data: {num1: 1, num2: 1, operation: 'multiplication', answer: 1},
+            inverted: true,
+            story: 'There is 1 equal group with an unknown number of items in each group. There is 1 item altogether.'
+        }
+    ] as const)('agrees with singular and plural quantities in $data.operation (inverted: $inverted)', ({data, inverted, story}) => {
+        expect(getWordProblemStory(data, false, inverted)).toBe(story);
+    });
+
     it('uses singular nouns and verbs for one item, group, or team', () => {
         const singular = {
             ...twoStep,

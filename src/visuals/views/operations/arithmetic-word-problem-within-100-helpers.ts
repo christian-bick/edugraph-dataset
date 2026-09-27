@@ -133,17 +133,21 @@ export function getWordProblemStory(
         return `A shelf has ${first} books. ${second} books are removed. ${answer}`;
     }
     if (data.operation === 'multiplication') {
-        const items = unknown === 'num2' ? 'an unknown number of items' : `${second} items`;
+        const items = unknown === 'num2'
+            ? 'an unknown number of items'
+            : `${second} ${noun(data.num2, 'item')}`;
         const result = unknown === 'answer'
             ? 'How many items are there altogether?'
-            : `There are ${data.answer} items altogether.`;
-        return `There are ${first} equal groups with ${items} in each group. ${result}`;
+            : `There ${data.answer === 1 ? 'is' : 'are'} ${data.answer} ${noun(data.answer, 'item')} altogether.`;
+        return `There ${data.num1 === 1 ? 'is' : 'are'} ${first} equal ${noun(data.num1, 'group')} with ${items} in each group. ${result}`;
     }
-    const groups = unknown === 'num2' ? 'an unknown number of groups' : `${second} groups`;
+    const groups = unknown === 'num2'
+        ? 'an unknown number of groups'
+        : `${second} ${noun(data.num2, 'group')}`;
     const result = unknown === 'answer'
         ? 'How many items are in each group?'
-        : `There are ${data.answer} items in each group.`;
-    return `${first} items are shared equally among ${groups}. ${result}`;
+        : `There ${data.answer === 1 ? 'is' : 'are'} ${data.answer} ${noun(data.answer, 'item')} in each group.`;
+    return `${first} ${noun(data.num1, 'item')} ${data.num1 === 1 ? 'is' : 'are'} shared equally among ${groups}. ${result}`;
 }
 
 export function operationSymbol(operation: ArithmeticOperation): string {
