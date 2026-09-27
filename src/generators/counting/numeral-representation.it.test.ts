@@ -13,7 +13,7 @@ const quantityLabels = [
 ];
 
 const numeralConsumers = [
-    ['counting-basic', 'counting-objects-count-out', Ability.ProcedureExecution],
+    ['counting-selection', 'counting-objects-count-out', Ability.ProcedureExecution],
     ['counting-basic', 'counting-objects-one-to-one', Ability.ProcedureExecution],
     ['counting-basic', 'counting-objects-simple', Ability.ProcedureUnderstanding],
     ['counting-basic', 'counting-objects-parity', Ability.ConceptClassification],

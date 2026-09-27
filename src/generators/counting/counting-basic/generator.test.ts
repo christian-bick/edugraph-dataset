@@ -1,6 +1,6 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {CountingBasicGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
 
 describe('CountingBasicGenerator', () => {
     let generator: CountingBasicGenerator;
@@ -56,6 +56,24 @@ describe('CountingBasicGenerator', () => {
 
     it('returns null when the requested parity has no value in range', () => {
         expect(generator.generate({range: {min: 1, max: 1}, parity: 'even'})).toBeNull();
+    });
+
+    it.each([
+        ['any', {numObjects: 7, simpleAnswer: 7}],
+        ['even', {numObjects: 8, simpleAnswer: 8, parity: 'even'}],
+        ['odd', {numObjects: 7, simpleAnswer: 7, parity: 'odd'}]
+    ] as const)('preserves the established seed-42 payload and continuation for %s', (parity, data) => {
+        const stub = generator.generate({range: {min: 0, max: 10}, parity});
+        expect(stub).toEqual({data});
+        expect(getRandomState()).toBe(1831565855);
+        expect(stub!.data).not.toHaveProperty('availableCount');
+    });
+
+    it('preserves entropy when the established quantity domain is empty', () => {
+        expect(generator.generate({range: {min: 1, max: 1}, parity: 'even'})).toBeNull();
+        expect(getRandomState()).toBe(42);
+        expect(generator.generate({range: {min: 20, max: 10}, parity: 'any'})).toBeNull();
+        expect(getRandomState()).toBe(42);
     });
 
 

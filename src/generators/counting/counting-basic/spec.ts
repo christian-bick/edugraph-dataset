@@ -1,43 +1,13 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {resolveParityConstraint} from '../helpers.ts';
+import {countingQuantityLabels, countingQuantitySchema} from '../counting-quantity-schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-basic',
-    generalLabels: [
-        Area.NumerationWithIntegers,
-        Scope.IntegerNumbers,
-        Scope.NumbersWithoutZero,
-        Scope.NumbersWithoutNegatives,
-        Scope.AdditiveCount
-    ]
+    generalLabels: countingQuantityLabels
 };
 
 
-export const CountingBasicGeneratorSchema = {
-    parity: [
-        [
-            Area.EvenDivisibility,
-            Area.UnevenDivisibility,
-            Scope.EvenNumbers,
-            Scope.OddNumbers
-        ],
-        resolveParityConstraint,
-        [
-            [Area.EvenDivisibility],
-            [Scope.EvenNumbers],
-            [Area.EvenDivisibility, Scope.EvenNumbers],
-            [Area.UnevenDivisibility],
-            [Scope.OddNumbers],
-            [Area.UnevenDivisibility, Scope.OddNumbers]
-        ]
-    ],
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
-        resolveRangeFromLabels
-    ]
-} as const;
+export const CountingBasicGeneratorSchema = countingQuantitySchema;
 
 export type CountingBasicGeneratorConfig = ConfigFromSchema<typeof CountingBasicGeneratorSchema>;

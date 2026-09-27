@@ -1,2 +1,2 @@
-- **Identity:** The requested quantity and a larger available collection make the task of selecting exactly that many objects identifiable.
+- **Identity:** The requested quantity and an available collection containing at least that many objects make the task of selecting exactly that many objects identifiable.
 - **Modes:** Question Mode leaves every object unselected; Solution Mode visibly selects exactly the requested number and identifies that count.

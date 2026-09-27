@@ -563,6 +563,17 @@ export type CountingProblem = {
     parity?: 'even' | 'odd';
 };
 
+/** Cardinalities of a nonempty subset and its containing collection. */
+export type CountingSelectionProblem = {
+    /** Subset cardinality, within the configured numeric bounds. */
+    numObjects: number;
+    /** Containing collection cardinality: numObjects <= availableCount <= upper bound. */
+    availableCount: number;
+    simpleAnswer: number;
+    /** When constrained, the parity of the subset cardinality. */
+    parity?: 'even' | 'odd';
+};
+
 export type CountingOffsetProblem<TStep extends 1 | 10 | 100> = {
     numObjects: number;
     incDecType: 'inc' | 'dec';
@@ -1916,7 +1927,7 @@ export interface ViewTypeMap {
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
     'counting-objects-cardinality': CountingProblem;
-    'counting-objects-count-out': CountingProblem;
+    'counting-objects-count-out': CountingSelectionProblem;
     'counting-objects-parity': CountingProblem;
     'counting-inc-dec': CountingSmallOffsetProblem;
     'counting-ten-more-less': CountingTenOffsetProblem;

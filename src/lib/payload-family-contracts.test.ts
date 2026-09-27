@@ -7,6 +7,7 @@ import {loadMatchingTargets} from './spec-validator.ts';
 
 // These regressions deliberately load declarations only, never generator implementations.
 const families = [
+    ['counting-objects-count-out', 'counting-selection', 'counting-basic', 'CountingProblem'],
     ['measure-mass', 'measurement-mass', 'measurement-liquid-volume', 'MassVolumeMeasurementProblem'],
     ['measure-liquid-volume', 'measurement-liquid-volume', 'measurement-mass', 'MassVolumeMeasurementProblem'],
     ['measure-mass-estimate', 'measurement-mass-estimation', 'measurement-liquid-volume-estimation', 'MassVolumeEstimateProblem'],
@@ -63,6 +64,15 @@ describe('declared producer/view payload families', () => {
         const view = views.find(view => view.viewId === 'operations-word-problem-within-100')!;
         for (const id of ['arithmetic-word-problems-letter-equation', 'arithmetic-word-problems-rounding', 'arithmetic-word-problems-interpreted-remainder']) {
             expect(matchesTarget([], generators.find(generator => generator.generatorId === id)!, view))
+                .toEqual({matched: false, reason: 'incompatible-type'});
+        }
+    });
+
+    it('keeps collection-selection mathematics out of ordinary counting views', () => {
+        const generator = generators.find(generator => generator.generatorId === 'counting-selection')!;
+        for (const id of ['counting-objects-simple', 'counting-objects-one-to-one',
+            'counting-objects-cardinality', 'counting-objects-parity', 'counting-conservation']) {
+            expect(matchesTarget([], generator, views.find(view => view.viewId === id)!))
                 .toEqual({matched: false, reason: 'incompatible-type'});
         }
     });
