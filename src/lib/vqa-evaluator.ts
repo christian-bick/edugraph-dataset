@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -21,12 +21,15 @@ import type {GenerationPlan} from '../types/compatibility.ts';
 import type {GenerationReplay} from '../types/generation-plan.ts';
 import {readSampleReplayRecord} from './sample-replay.ts';
 import {parseSampleKey} from './generation.ts';
+import {
+    isPendingVqaReview, shouldEvaluateVqa, vqaReviewIssue, vqaReviewRequestHash,
+    VQA_HTTP_OPTIONS, VQA_MODEL, VQA_THINKING_LEVELS, type VqaReviewStage
+} from './vqa-review.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = resolve(__dirname, '..', '..');
 const VIEWS_ROOT = resolve(PROJECT_ROOT, 'src', 'visuals', 'views');
-const VQA_MODEL = 'gemini-3.5-flash';
 
 export function resolveViewChecklistPaths(viewsRoot: string, viewId: string): string[] {
     const rootChecklist = resolve(viewsRoot, 'checklist.md');
@@ -76,6 +79,10 @@ export interface EvaluateSampleVqaInput {
     labels: readonly string[];
     apiKey?: string;
     cacheManager?: VqaCacheManager;
+    /** Discard any prior decision and start a fresh LOW / HIGH sequence. */
+    force?: boolean;
+    /** Re-evaluate completed rejections, retaining passing records and resumable LOW work. */
+    retryFailed?: boolean;
     logPrompt?: boolean;
     /** Prepared single-pass inputs; omitted by one-off callers. */
     imageBuffer?: Buffer;
@@ -164,17 +171,13 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
     const {
         imagePath,
         sampleKey,
-        targetId,
-        generatorId,
         viewId,
         modeName,
-        instanceIdx,
-        attempt,
-        seed,
-        fileName,
         labels,
         apiKey,
         cacheManager,
+        force = false,
+        retryFailed = false,
         logPrompt = false,
         imageBuffer: preparedImageBuffer,
         imageSha256: preparedImageSha256,
@@ -200,14 +203,11 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
         ?? buildVqaValidationContext(imageSha256, checklistPaths, labels);
     const valCacheKey = validationContext.validationCacheKey;
 
-    // If cache manager is provided and already has this exact cache key, return cached entry
-    if (cacheManager) {
-        const cached = cacheManager.get(valCacheKey);
-        if (cached) {
-            const entry = {...cached, ...provenance};
-            cacheManager.set(entry);
-            return { entry, isLiveEvaluated: false };
-        }
+    const cached = cacheManager?.get(valCacheKey);
+    if (cached && !shouldEvaluateVqa(cached, {force, retryFailed})) {
+        const entry = {...cached, ...provenance};
+        cacheManager!.set(entry);
+        return {entry, isLiveEvaluated: false};
     }
 
     const client = initVqaClient(apiKey);
@@ -230,51 +230,56 @@ export async function evaluateSampleVqa(input: EvaluateSampleVqaInput): Promise<
             `=== END VQA PROMPT ===\n`);
     }
 
-    const imagePart = { inlineData: { data: imageBuffer.toString('base64'), mimeType: 'image/png' } };
-    const response = await client.models.generateContent({
-        model: VQA_MODEL,
-        contents: [promptParts.userPrompt, imagePart],
-        config: {
-            systemInstruction: promptParts.systemInstruction,
-            responseMimeType: 'application/json',
-            responseJsonSchema: VQA_RESPONSE_SCHEMA
-        }
-    });
-    const responseText = response.text;
-    if (!responseText) {
-        throw new Error('Invalid VQA response: Gemini returned no text');
+    const requestHash = vqaReviewRequestHash(imageSha256, promptParts);
+    const stages: VqaReviewStage[] = !force && cached && !vqaReviewIssue(cached)
+        && isPendingVqaReview(cached) && cached.review!.request_hash === requestHash
+        ? [...cached.review!.stages] : [];
+    let entry: VqaCacheEntry | undefined;
+    for (let index = stages.length; index < VQA_THINKING_LEVELS.length; index++) {
+        const level = VQA_THINKING_LEVELS[index];
+        const started = performance.now();
+        // Each stage is a new independent request. Never include the LOW verdict in HIGH's input.
+        const response = await client.models.generateContent({
+            model: VQA_MODEL,
+            contents: [promptParts.userPrompt, {inlineData: {data: imageBuffer.toString('base64'), mimeType: 'image/png'}}],
+            config: {
+                systemInstruction: promptParts.systemInstruction,
+                responseMimeType: 'application/json',
+                responseJsonSchema: VQA_RESPONSE_SCHEMA,
+                thinkingConfig: {thinkingLevel: ThinkingLevel[level]},
+                httpOptions: VQA_HTTP_OPTIONS
+            }
+        });
+        if (!response.text) throw new Error('Invalid VQA response: Gemini returned no text');
+        const evaluation = applyVqaValidationPolicy(JSON.parse(response.text), validationContext.labelDefinitions);
+        const usage = response.usageMetadata;
+        const stage: VqaReviewStage = {
+            model: VQA_MODEL, thinking_level: level,
+            model_version: response.modelVersion, response_id: response.responseId,
+            validated_at: new Date().toISOString(), elapsed_ms: Math.round(performance.now() - started),
+            usage: usage ? {
+                input_tokens: usage.promptTokenCount, answer_tokens: usage.candidatesTokenCount,
+                thinking_tokens: usage.thoughtsTokenCount, total_tokens: usage.totalTokenCount,
+                cached_tokens: usage.cachedContentTokenCount
+            } : undefined,
+            evaluation
+        };
+        stages.push(stage);
+        entry = {
+            ...provenance,
+            validation_cache_key: valCacheKey,
+            image_sha256: imageSha256,
+            checklist_hash: validationContext.checklistHash,
+            label_context_hash: validationContext.labelContextHash,
+            validation_context_hash: validationContext.validationContextHash,
+            validation_policy_hash: validationContext.validationPolicyHash,
+            validated_at: stage.validated_at,
+            evaluation,
+            review: {version: 1, request_hash: requestHash, stages: [...stages]}
+        };
+        // Checkpoint a rejected LOW before spending on HIGH; errors leave it resumable.
+        cacheManager?.set(entry);
+        if (evaluation.pass) break;
     }
-    const parsed = applyVqaValidationPolicy(
-        JSON.parse(responseText),
-        validationContext.labelDefinitions
-    );
-
-    const entry: VqaCacheEntry = {
-        validation_cache_key: valCacheKey,
-        sample_key: sampleKey,
-        target_id: targetId,
-        generator: generatorId,
-        view: viewId,
-        mode: modeName,
-        instance: instanceIdx,
-        attempt,
-        seed,
-        generation_plan: provenance.generation_plan,
-        generation_plan_hash: provenance.generation_plan_hash,
-        generation_replay: provenance.generation_replay,
-        file_name: fileName,
-        image_sha256: imageSha256,
-        checklist_hash: validationContext.checklistHash,
-        label_context_hash: validationContext.labelContextHash,
-        validation_context_hash: validationContext.validationContextHash,
-        validation_policy_hash: validationContext.validationPolicyHash,
-        validated_at: new Date().toISOString(),
-        evaluation: parsed
-    };
-
-    if (cacheManager) {
-        cacheManager.set(entry);
-    }
-
-    return { entry, isLiveEvaluated: true };
+    return {entry: entry!, isLiveEvaluated: true};
 }

@@ -7,6 +7,7 @@ import { findLeafModules } from './module-resolver.ts';
 import {planCompatibility, sampleGenerationPlan} from './compatibility.ts';
 import {computeSampleSeed} from './generation.ts';
 import {readSampleReplayRecord} from './sample-replay.ts';
+import {isPendingVqaReview, vqaReviewIssue} from './vqa-review.ts';
 
 function preparedInput(input: Omit<EvaluateSampleVqaInput, 'generationPlan' | 'generationReplay'>): EvaluateSampleVqaInput {
     const parts = input.sampleKey.split('#');
@@ -26,6 +27,7 @@ const evaluateSampleVqa = (input: Omit<EvaluateSampleVqaInput, 'generationPlan' 
 const mockGenerateContent = vi.fn();
 vi.mock('@google/genai', () => {
     return {
+        ThinkingLevel: {LOW: 'LOW', HIGH: 'HIGH'},
         GoogleGenAI: class {
             models = {
                 generateContent: mockGenerateContent
@@ -43,7 +45,7 @@ describe('vqa-evaluator', () => {
     const testViewId = 'operations-vertical';
 
     beforeEach(() => {
-        vi.clearAllMocks();
+        vi.resetAllMocks();
         if (existsSync(tmpDir)) {
             rmSync(tmpDir, { recursive: true, force: true });
         }
@@ -226,7 +228,8 @@ describe('vqa-evaluator', () => {
         expect(centralChecklist).toContain('`not_defendable`');
         expect(centralChecklist).toContain('`defendable` and `uncertain` pass; `not_defendable` fails.');
         expect(prompt).not.toContain('For every ontology label, judge whether');
-        expect(request.model).toBe('gemini-3.5-flash');
+        expect(request.model).toBe('gemini-3.8-flash');
+        expect(request.config.thinkingConfig).toEqual({thinkingLevel: 'LOW'});
         expect(request.config.responseMimeType).toBe('application/json');
         expect(request.config.responseJsonSchema.properties.label_checks.type).toBe('array');
         expect(request.contents[1].inlineData.mimeType).toBe('image/png');
@@ -353,7 +356,7 @@ describe('vqa-evaluator', () => {
     });
 
     it('forces a failure when a label is not defendable', async () => {
-        mockGenerateContent.mockResolvedValueOnce({
+        mockGenerateContent.mockResolvedValue({
             text: JSON.stringify({
                 pass: true,
                 general_checks: {
@@ -394,7 +397,7 @@ describe('vqa-evaluator', () => {
     });
 
     it('forces a failure when a central visual check fails', async () => {
-        mockGenerateContent.mockResolvedValueOnce({
+        mockGenerateContent.mockResolvedValue({
             text: JSON.stringify({
                 pass: true,
                 general_checks: {
@@ -466,6 +469,121 @@ describe('vqa-evaluator', () => {
             labels: ['NumbersWithZero'],
             apiKey: 'test-api-key'
         })).rejects.toThrow('expected label checks for [NumbersWithZero]');
+    });
+
+    const reviewInput = (cacheManager?: VqaCacheManager) => preparedInput({
+        imagePath: tmpImgPath, sampleKey: 'review#gen#view#train#question#inst:0',
+        targetId: 'review', generatorId: 'gen', viewId: testViewId, modeName: 'question',
+        instanceIdx: 0, attempt: 1, seed: 123, fileName: 'test-sample.png',
+        labels: ['NumbersWithZero'], apiKey: 'test-api-key', cacheManager
+    });
+    const response = (verdict = 'defendable') => ({
+        modelVersion: 'gemini-3.8-flash', responseId: 'response-id',
+        usageMetadata: {promptTokenCount: 100, candidatesTokenCount: 20, thoughtsTokenCount: 30, totalTokenCount: 150},
+        text: JSON.stringify({pass: true, reasoning: '',
+            general_checks: {no_overlaps: true, no_placeholders: true, sane_padding: true,
+                task_identifiable: true, mode_valid: true, text_minimal: true, math_coherent: true},
+            label_checks: [{label: 'NumbersWithZero', verdict, evidence: `Evidence: ${verdict}`}]
+        })
+    });
+
+    it.each(['defendable', 'uncertain', 'not_defendable'])('uses one independent HIGH review ending in %s', async verdict => {
+        mockGenerateContent.mockResolvedValueOnce(response('not_defendable')).mockResolvedValueOnce(response(verdict));
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        const result = await evaluateWithRecipe(reviewInput(manager));
+        expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+        const [low, high] = mockGenerateContent.mock.calls.map(call => call[0]);
+        expect(high.contents).toEqual(low.contents);
+        expect(high.config).toEqual({...low.config, thinkingConfig: {thinkingLevel: 'HIGH'}});
+        expect(high.config.maxOutputTokens).toBeUndefined();
+        expect(high.contents[0]).not.toContain('Evidence: not_defendable');
+        const entry = result!.entry;
+        expect(entry.evaluation.pass).toBe(verdict !== 'not_defendable');
+        expect(entry.review?.stages.map(stage => stage.thinking_level)).toEqual(['LOW', 'HIGH']);
+        expect(entry.review?.stages[0].evaluation.pass).toBe(false);
+        expect(entry.review?.stages[1]).toMatchObject({model_version: 'gemini-3.8-flash', response_id: 'response-id',
+            usage: {input_tokens: 100, answer_tokens: 20, thinking_tokens: 30, total_tokens: 150}});
+        expect(entry.review?.stages[1].usage?.cached_tokens).toBeUndefined();
+        expect(vqaReviewIssue(entry)).toBeUndefined();
+        manager.save();
+        const reloaded = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        expect(reloaded.entries()[0]).toEqual(entry);
+        expect((await evaluateWithRecipe(reviewInput(reloaded)))?.isLiveEvaluated).toBe(false);
+        expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+    });
+
+    it.each(['defendable', 'uncertain'])('stops at a passing LOW %s verdict', async verdict => {
+        mockGenerateContent.mockResolvedValueOnce(response(verdict));
+        const result = await evaluateWithRecipe(reviewInput());
+        expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+        expect(result?.entry.review?.stages).toHaveLength(1);
+        expect(result?.entry.evaluation.label_checks[0].verdict).toBe(verdict);
+    });
+
+    it.each(['transport', 'format'])('checkpoints LOW and resumes only HIGH after a %s error', async kind => {
+        mockGenerateContent.mockResolvedValueOnce(response('not_defendable'));
+        if (kind === 'transport') mockGenerateContent.mockRejectedValueOnce(new Error('Rate limited'));
+        else mockGenerateContent.mockResolvedValueOnce({text: '{bad-json'});
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        await expect(evaluateWithRecipe(reviewInput(manager))).rejects.toThrow();
+        const checkpoint = manager.entries()[0];
+        expect(isPendingVqaReview(checkpoint)).toBe(true);
+        expect(checkpoint.evaluation.pass).toBe(false);
+        const reloaded = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        expect(reloaded.entries()[0]).toEqual(checkpoint);
+        mockGenerateContent.mockResolvedValueOnce(response());
+        const result = await evaluateWithRecipe(reviewInput(reloaded));
+        expect(mockGenerateContent).toHaveBeenCalledTimes(3);
+        expect(mockGenerateContent.mock.calls[2][0].config.thinkingConfig.thinkingLevel).toBe('HIGH');
+        expect(result?.entry.review?.stages[0]).toEqual(checkpoint.review?.stages[0]);
+        expect(result?.entry.evaluation.pass).toBe(true);
+    });
+
+    it('starts fresh when a pending review no longer matches the exact request settings', async () => {
+        mockGenerateContent.mockResolvedValueOnce(response('not_defendable')).mockRejectedValueOnce(new Error('Interrupted'));
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        await expect(evaluateWithRecipe(reviewInput(manager))).rejects.toThrow('Interrupted');
+        manager.entries()[0].review!.request_hash = 'a'.repeat(64);
+        mockGenerateContent.mockResolvedValueOnce(response());
+        const result = await evaluateWithRecipe(reviewInput(manager));
+        expect(mockGenerateContent.mock.calls[2][0].config.thinkingConfig.thinkingLevel).toBe('LOW');
+        expect(result?.entry.review?.stages).toHaveLength(1);
+    });
+
+    it('explicit force starts a new sequence; legacy cache reuse does not invent stage provenance', async () => {
+        mockGenerateContent.mockResolvedValue(response());
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        const first = (await evaluateWithRecipe(reviewInput(manager)))!.entry;
+        const {review: _review, ...legacy} = first;
+        manager.set(legacy);
+        expect((await evaluateWithRecipe(reviewInput(manager)))?.entry.review).toBeUndefined();
+        expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+        const forced = await evaluateWithRecipe({...reviewInput(manager), force: true});
+        expect(forced?.entry.validation_cache_key).toBe(first.validation_cache_key);
+        expect(forced?.entry.review?.stages).toHaveLength(1);
+        expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not turn malformed LOW responses into semantic HIGH retries', async () => {
+        mockGenerateContent.mockResolvedValueOnce({text: JSON.stringify({pass: 'true', reasoning: ''})});
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        await expect(evaluateWithRecipe(reviewInput(manager))).rejects.toThrow('Invalid VQA response');
+        expect(mockGenerateContent).toHaveBeenCalledTimes(1);
+        expect(manager.size).toBe(0);
+    });
+
+    it('retries a completed failed record at LOW only on explicit request, then reuses its pass', async () => {
+        mockGenerateContent.mockResolvedValue(response('not_defendable'));
+        const manager = new VqaCacheManager(tmpCacheDir, 'dataset-test', 'gen');
+        await evaluateWithRecipe(reviewInput(manager));
+        expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+        mockGenerateContent.mockResolvedValueOnce(response());
+        const result = await evaluateWithRecipe({...reviewInput(manager), retryFailed: true});
+        expect(result?.entry.evaluation.pass).toBe(true);
+        expect(result?.entry.review?.stages).toHaveLength(1);
+        expect(mockGenerateContent.mock.calls[2][0].config.thinkingConfig.thinkingLevel).toBe('LOW');
+        expect((await evaluateWithRecipe({...reviewInput(manager), retryFailed: true}))?.isLiveEvaluated).toBe(false);
+        expect(mockGenerateContent).toHaveBeenCalledTimes(3);
     });
 
     it('rejects invalid recorded provenance before making a validation request', async () => {

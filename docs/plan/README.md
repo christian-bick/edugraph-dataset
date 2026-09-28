@@ -37,6 +37,9 @@ These items are not newly scheduled by the archive move.
   fifteen are fully defendable, while `EvenNumbers` and one `SingleStep` verdict remain uncertain.
   It leads this comparison, but controlled accuracy checks and the additional review candidates
   remain open. The official cache is unchanged.
+  The selected [Flash 3.8 LOW/HIGH workflow](vqa-two-stage-evaluation.md) is now implemented:
+  fresh LOW evaluations receive one independent HIGH review only on failure, with both
+  judgments retained and interrupted reviews resumable. Production rollout is pending.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist

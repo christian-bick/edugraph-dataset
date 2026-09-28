@@ -64,4 +64,10 @@ describe('VQA validation policy', () => {
         expect(result.pass).toBe(false);
         expect(result.reasoning).toContain('no_placeholders');
     });
+
+    it.each([null, {}, {pass: 'true', reasoning: ''}, {pass: true, reasoning: '', general_checks: {no_overlaps: true}}])(
+        'rejects malformed responses before deciding semantic failure', raw => {
+            expect(() => applyVqaValidationPolicy(raw as any, [])).toThrow('Invalid VQA response');
+        }
+    );
 });

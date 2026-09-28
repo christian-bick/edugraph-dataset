@@ -93,4 +93,20 @@ describe('auditVqaCache', () => {
         expect(result.counts.failing).toBe(1);
         expect(result.passed).toBe(0);
     });
+
+    it('fails closed when a passing cache verdict hides an inconsistent stage history', () => {
+        const entry = cacheEntry();
+        entry.review = {version: 1, request_hash: 'a'.repeat(64), stages: [{
+            model: 'gemini-3.8-flash', thinking_level: 'LOW', elapsed_ms: 100,
+            validated_at: entry.validated_at,
+            evaluation: {pass: false, reasoning: 'Rejected', label_checks: [],
+                general_checks: {no_overlaps: false, no_placeholders: true, sane_padding: true,
+                    task_identifiable: true, mode_valid: true, text_minimal: true, math_coherent: true}}
+        }]};
+        const root = fixture({writing: [JSON.stringify(entry)]});
+        const result = auditVqaCache(root, expected);
+        expect(result.passed).toBe(0);
+        expect(result.counts.malformed).toBe(1);
+        expect(result.issues[0].message).toContain('Effective VQA verdict disagrees');
+    });
 });

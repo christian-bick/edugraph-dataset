@@ -7,6 +7,7 @@ import type {WorkCounters} from './work-counters.ts';
 import {currentValidationPolicyInputHash} from './vqa-policy.ts';
 import type {GenerationPlan} from '../types/compatibility.ts';
 import type {GenerationReplay} from '../types/generation-plan.ts';
+import type {VqaReview} from './vqa-review.ts';
 
 const EDUGRAPH_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -57,6 +58,8 @@ export interface VqaCacheEntry {
     validation_context_hash: string;
     validation_policy_hash: string;
     validated_at: string;
+    /** Absent on historical records; LOW plus at most one independent HIGH judgment. */
+    review?: VqaReview;
     evaluation: {
         pass: boolean;
         reasoning: string;

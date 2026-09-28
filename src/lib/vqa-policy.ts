@@ -115,6 +115,10 @@ export function applyVqaValidationPolicy(
     raw: Record<string, any>,
     labelDefinitions: readonly VqaLabelDefinition[]
 ): VqaCacheEntry['evaluation'] {
+    if (!raw || typeof raw.pass !== 'boolean' || typeof raw.reasoning !== 'string'
+        || VQA_GENERAL_CHECK_NAMES.some(name => typeof raw.general_checks?.[name] !== 'boolean')) {
+        throw new Error('Invalid VQA response: pass, reasoning and all general checks are required');
+    }
     const parsed = {...raw} as VqaCacheEntry['evaluation'];
     parsed.label_checks = validateLabelChecks(parsed.label_checks, labelDefinitions);
     const failedGeneralChecks = VQA_GENERAL_CHECK_NAMES

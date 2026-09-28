@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import type { VqaCacheEntry } from './vqa-cache.ts';
 import type {WorkCounters} from './work-counters.ts';
+import {vqaReviewIssue} from './vqa-review.ts';
 
 export type VqaCacheAuditIssueKind =
     | 'duplicate'
@@ -86,6 +87,11 @@ function readModuleSnapshot(path: string, counters?: WorkCounters): CacheModuleS
             continue;
         }
         counters?.add('vqa.audit_cache_entries_parsed');
+        const reviewIssue = vqaReviewIssue(value);
+        if (reviewIssue) {
+            issues.push({kind: 'malformed', message: `${moduleName}.jsonl:${index + 1} ${reviewIssue}`});
+            continue;
+        }
         if (value.generator !== moduleName) {
             issues.push({
                 kind: 'malformed',

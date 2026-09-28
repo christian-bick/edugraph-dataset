@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { validationFailed, validationReportPath } from './validation-report.ts';
+import { validationFailed, validationReportPath, vqaReviewReport } from './validation-report.ts';
+import type {VqaCacheEntry} from './vqa-cache.ts';
 
 describe('validationReportPath', () => {
     it('preserves a timestamped full validation report outside the generated dataset', () => {
@@ -36,5 +37,29 @@ describe('validationFailed', () => {
 
     it('allows an explicit report-only run to exit successfully', () => {
         expect(validationFailed({ failed: 1, uncached: 2 }, true)).toBe(false);
+    });
+});
+
+describe('vqaReviewReport', () => {
+    const sample = (levels: boolean[], uncertain = false): VqaCacheEntry => {
+        const stages = levels.map((pass, i) => ({thinking_level: i === 0 ? 'LOW' : 'HIGH',
+            evaluation: {pass, reasoning: '', label_checks: [{label: 'Base10',
+                verdict: uncertain ? 'uncertain' : 'defendable', evidence: 'An example | with\nnewlines'}]}}));
+        return {sample_key: 'sample', evaluation: stages.at(-1)!.evaluation, review: {stages}} as VqaCacheEntry;
+    };
+    it('distinguishes LOW, HIGH, pending and historical results and exposes uncertain evidence', () => {
+        const {review: _review, ...legacy} = sample([true]);
+        const report = vqaReviewReport([sample([true]), sample([false, true], true),
+            sample([false, false]), sample([false]), legacy]);
+        for (const category of ['LOW passed', 'HIGH passed after LOW failure', 'HIGH failed after LOW failure',
+            'HIGH pending', 'Historical records without stage provenance', 'Final evaluations with uncertain labels']) {
+            expect(report).toContain(`| ${category} | 1 |`);
+        }
+        expect(report).toContain('| sample | HIGH | Base10 | An example \\| with newlines |');
+    });
+    it('handles no uncertainty and historical uncertain results', () => {
+        expect(vqaReviewReport([])).toContain('None.');
+        const {review: _review, ...legacy} = sample([true], true);
+        expect(vqaReviewReport([legacy])).toContain('| sample | Historical | Base10 |');
     });
 });

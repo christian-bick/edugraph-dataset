@@ -148,7 +148,13 @@ invalidate affected records automatically. Response-schema, pass/fail implementa
 model, and validation-pipeline changes are machinery: rebuild the graph when their behavior changed,
 and add `--force` when unchanged images must actually be re-evaluated by Gemini.
 Ontology context includes the library's involvement statements with their supporting comments.
-For a large rerun, use `--concurrency=4` to keep live requests bounded.
+Fresh evaluations use Gemini Flash 3.8 with LOW thinking. A failed evaluation receives
+one independent HIGH review using the same input; both judgments are kept in the cache.
+HIGH is the maximum supported thinking level. Uncertain labels retain their existing
+passing policy and appear in the report. Live validation defaults to three concurrent
+samples. Use `--retry-failed` to re-evaluate failed records while retaining passing
+coverage, or `--force` for a complete rerun of the selected scope. An interrupted HIGH
+review resumes automatically when validation is run again without `--force`.
 
 **2d. Audit Label Architecture**
 Inspect label-dimension cardinality, exact generator/view capability provenance, schema ownership,

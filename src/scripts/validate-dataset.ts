@@ -8,6 +8,7 @@ import {
     createVqaValidationContextResolver,
     pruneObsoleteVqaCacheFiles,
     type VqaValidationContext,
+    type VqaCacheEntry,
     VqaCacheManager
 } from "../lib/vqa-cache.ts";
 import { getCliOption } from "../lib/cli.ts";
@@ -20,7 +21,8 @@ import {
     SPLIT_DIRS
 } from "../lib/generation.ts";
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../lib/model-catalog.ts';
-import { validationFailed, validationReportPath } from '../lib/validation-report.ts';
+import { validationFailed, validationReportPath, vqaReviewReport } from '../lib/validation-report.ts';
+import {shouldEvaluateVqa} from '../lib/vqa-review.ts';
 import {
     buildDatasetManifest,
     DATASET_MANIFEST_SCHEMA_VERSION,
@@ -162,8 +164,10 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
 async function evaluateSingleSample(
     sample: PreparedVqaSample,
     logPrompt: boolean,
-    counters: ReturnType<typeof createWorkCounters>
-): Promise<any> {
+    counters: ReturnType<typeof createWorkCounters>,
+    cacheManager: VqaCacheManager,
+    options: {force: boolean; retryFailed: boolean}
+): Promise<VqaCacheEntry | null> {
     const {entry} = sample;
     if (!sample.imageBuffer) {
         sample.imageBuffer = readFileSync(sample.imagePath);
@@ -190,6 +194,8 @@ async function evaluateSingleSample(
         fileName: entry.file_name,
         labels: entry.labels,
         apiKey,
+        cacheManager,
+        ...options,
         logPrompt,
         imageBuffer: sample.imageBuffer,
         imageSha256: sample.imageSha256,
@@ -199,7 +205,7 @@ async function evaluateSingleSample(
     });
 
     if (!result) return null;
-    return { ...result.entry, moduleName: entry.generator };
+    return result.entry;
 }
 
 async function main() {
@@ -209,17 +215,18 @@ async function main() {
     let targetGenerator: string | undefined = process.env.npm_config_generator;
     let targetView: string | undefined = process.env.npm_config_view;
     let force = process.env.npm_config_force === 'true' || process.env.npm_config_force === '';
+    let retryFailed = process.env.npm_config_retry_failed === 'true' || process.env.npm_config_retry_failed === '';
     let rebuildGraph = process.env.npm_config_rebuild_graph === 'true'
         || process.env.npm_config_rebuild_graph === '';
     let auditMode = process.env.npm_config_audit === 'true' || process.env.npm_config_audit === '';
     let reportOnly = process.env.npm_config_report_only === 'true' || process.env.npm_config_report_only === '';
     let logPrompts = process.env.npm_config_log_prompts === 'true' || process.env.npm_config_log_prompts === '';
-    let evaluationConcurrency = 10;
+    let evaluationConcurrency = 3;
     
     const specName = getCliOption(args, 'spec');
     if (!specName) {
         console.error('❌ Error: The --spec parameter is required.');
-        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--rebuild-graph] [--force] [--concurrency=N] [--log-prompts] [--report-only] [--report=<path>]');
+        console.error('Usage: npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--rebuild-graph] [--force|--retry-failed] [--concurrency=N] [--log-prompts] [--report-only] [--report=<path>]');
         process.exit(1);
     }
     if (isUnionSpec(specName)) {
@@ -238,6 +245,8 @@ async function main() {
             targetView = arg.split('view=')[1];
         } else if (arg === '--force') {
             force = true;
+        } else if (arg === '--retry-failed') {
+            retryFailed = true;
         } else if (arg === '--rebuild-graph') {
             rebuildGraph = true;
         } else if (arg === '--audit' || arg === '--ci') {
@@ -651,7 +660,7 @@ async function main() {
         const existingCache = cacheManagerFor(entry.generator)
             .get(validationCacheKey);
 
-        if (existingCache && !force) {
+        if (existingCache && !shouldEvaluateVqa(existingCache, {force, retryFailed})) {
             cacheManagerFor(entry.generator).set(refreshCachedVqaProvenance(
                 existingCache, currentProvenance.get(entry.sample_key)!
             ));
@@ -667,6 +676,7 @@ async function main() {
         console.log(`ℹ️ Reused ${cachedCount} cached evaluation records (${cachedPassed} passed, ${cachedFailed} failed).`);
     }
 
+    const requestErrors: Array<{sampleKey: string; message: string}> = [];
     if (toEvaluate.length > 0) {
         if (!apiKey) {
             console.log(`⚠️ LLM QA skipped: GEMINI_API_KEY or model not loaded.`);
@@ -681,35 +691,17 @@ async function main() {
             renderProgressBar(0, toEvaluate.length, evalPassed, evalFailed);
 
             await runPool(toEvaluate, evaluationConcurrency, async (sample) => {
-                const record = await evaluateSingleSample(sample, logPrompts, counters);
-                processed++;
-                if (record) {
-                    const mgr = cacheManagerFor(record.moduleName);
-                    mgr.set({
-                        validation_cache_key: record.validation_cache_key,
-                        sample_key: record.sample_key,
-                        target_id: record.target_id,
-                        generator: record.generator,
-                        view: record.view,
-                        mode: record.mode,
-                        instance: record.instance,
-                        attempt: record.attempt,
-                        seed: record.seed,
-                        generation_plan: record.generation_plan,
-                        generation_plan_hash: record.generation_plan_hash,
-                        generation_replay: record.generation_replay,
-                        file_name: record.file_name,
-                        image_sha256: record.image_sha256,
-                        checklist_hash: record.checklist_hash,
-                        label_context_hash: record.label_context_hash,
-                        validation_context_hash: record.validation_context_hash,
-                        validation_policy_hash: record.validation_policy_hash,
-                        validated_at: record.validated_at,
-                        evaluation: record.evaluation
-                    });
-                    if (record.evaluation.pass) evalPassed++;
-                    else evalFailed++;
+                const manager = cacheManagerFor(sample.entry.generator);
+                try {
+                    const record = await evaluateSingleSample(sample, logPrompts, counters, manager, {force, retryFailed});
+                    if (record?.evaluation.pass) evalPassed++;
+                    else if (record) evalFailed++;
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    requestErrors.push({sampleKey: sample.entry.sample_key, message});
+                    console.error(`\nVQA request error for ${sample.entry.sample_key}: ${message}`);
                 }
+                processed++;
                 renderProgressBar(processed, toEvaluate.length, evalPassed, evalFailed);
             });
             console.log('\n');
@@ -731,18 +723,19 @@ async function main() {
         datasetFolderName,
         preparedSamples,
         resolvedReportPath,
-        cacheManagerFor
+        cacheManagerFor,
+        requestErrors
     );
     const reportPath = report.path;
     console.log(`📄 Validation report & TODO list generated: ${reportPath}`);
 
-    if (validationFailed(report.counts, reportOnly)) {
+    if (validationFailed(report.counts, reportOnly) || (requestErrors.length > 0 && !reportOnly)) {
         throw new Error(
-            `VQA validation failed: ${report.counts.failed} failing and ${report.counts.uncached} uncached sample(s). ` +
+            `VQA validation failed: ${report.counts.failed} failing, ${report.counts.uncached} uncached sample(s), ${requestErrors.length} request error(s). ` +
             `See ${report.path}.`
         );
     }
-    if (reportOnly && (report.counts.failed > 0 || report.counts.uncached > 0)) {
+    if (reportOnly && (report.counts.failed > 0 || report.counts.uncached > 0 || requestErrors.length > 0)) {
         console.log('--report-only requested; validation findings do not affect the exit code.');
     }
 
@@ -754,7 +747,8 @@ function generateValidationReport(
     datasetFolderName: string,
     preparedSamples: readonly PreparedVqaSample[],
     reportPath: string,
-    cacheManagerFor: (moduleName: string) => VqaCacheManager
+    cacheManagerFor: (moduleName: string) => VqaCacheManager,
+    requestErrors: readonly {sampleKey: string; message: string}[]
 ): { path: string; counts: { passed: number; failed: number; uncached: number } } {
     const outDir = dirname(reportPath);
     if (!existsSync(outDir)) {
@@ -764,6 +758,7 @@ function generateValidationReport(
     let passedCount = 0;
     let failedCount = 0;
     let uncachedCount = 0;
+    const cachedSamples: VqaCacheEntry[] = [];
     const failedItems: Array<{
         entry: any;
         evaluation: any;
@@ -789,6 +784,7 @@ function generateValidationReport(
         }
 
         const cache = cacheManagerFor(moduleName).get(validationCacheKey);
+        if (cache) cachedSamples.push({...cache, sample_key: entry.sample_key});
 
         if (!cache) {
             uncachedCount++;
@@ -835,6 +831,12 @@ ${[...perSplit.entries()]
         .join('\n')}
 
 ---
+
+${vqaReviewReport(cachedSamples)}
+
+## Request errors
+
+${requestErrors.length === 0 ? 'None.' : requestErrors.map(error => `- \`${error.sampleKey}\`: ${error.message}`).join('\n')}
 
 ## Failure TODO List
 
