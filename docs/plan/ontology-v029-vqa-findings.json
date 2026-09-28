@@ -3,13 +3,13 @@
   "library_version": "0.29.0-pre.5.a88ac7a500c5",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "440c59e",
-  "concurrency": 4,
+  "cache_commit": "f456d4d",
+  "concurrency": 3,
   "evaluated": 1968,
-  "passed": 1951,
-  "failed": 17,
+  "passed": 1968,
+  "failed": 0,
   "semantic_review_samples": 0,
-  "evaluator_disagreement_samples": 17,
+  "evaluator_disagreement_samples": 0,
   "initial_rerun": {
     "completed_on": "2026-09-26",
     "report_commit": "1d5b58a",
@@ -4707,347 +4707,54 @@
       "details": "vqa-flash38-high-pilot.md",
       "results": "vqa-flash38-high-pilot.json",
       "note": "Identical 17 images, prompts, definitions, checklists, schema, policy and request settings to both prior HIGH-thinking pilots, apart from model selection. All 17 pass the existing policy: fifteen are fully defendable and two retain uncertain EvenNumbers or SingleStep checks. All 119 general checks pass. The run has no control cases and does not establish overall accuracy. No judgments are promoted, and prior Pro review candidates remain open."
-    }
-  ],
-  "findings": [
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "representational-zero-components",
-      "sample_key": "1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0",
-      "generator": "comparison",
-      "view": "numbers-place-value-comparison",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "NumbersWithoutZero",
-          "verdict": "not_defendable",
-          "evidence": "The number zero is involved in the task, explicitly shown as 'none' in the ones column of both numbers."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers.",
-      "validated_at": "2026-09-27T19:52:30.191Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0\" --no-validate"
     },
     {
-      "classification": "evaluator_disagreement",
-      "topic": "currency-system-versus-denomination",
-      "disposition": "The image shows 75 cents plus 50 cents using five 25-cent coins. Dollar denotes the currency system, which includes minor denominations; its definition does not require a dollar-denominated value, dollar bill, or dollar symbol. The evaluator adds that denomination requirement. Preserve the verdict without changing the valid cents task or retrying.",
-      "sample_key": "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
-      "generator": "currency-arithmetic",
-      "view": "currency-word-problem",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "Dollar",
-          "verdict": "not_defendable",
-          "evidence": "The entire exercise is formulated in cents (¢), without using the dollar ($) symbol or dollar bills."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'Dollar' is not defendable because the exercise only contains cents (¢) and no dollar-denominated values or symbols ($).",
-      "validated_at": "2026-09-28T07:44:07.732Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "disposition": "The unchanged question shows 7 + 7 and explicitly identifies the repeated equal addend. Its necessarily even hidden result is 14. This is a recurrence of the earlier reviewed EvenNumbers disagreement, which passed during the numeric-range refresh; preserve the new verdict without exposing the answer or retrying.",
-      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
-      "generator": "arithmetic-ops-pairs",
-      "view": "operations-boxes",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "EvenNumbers",
-          "verdict": "not_defendable",
-          "evidence": "There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: EvenNumbers: There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task.",
-      "validated_at": "2026-09-28T07:38:22.244Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
-      "generator": "counting-basic",
-      "view": "counting-objects-parity",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "There is no representation of base-10 positional notation, place value columns, or multi-digit numbers."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: There is no representation of base-10 positional notation, place value columns, or multi-digit numbers.",
-      "validated_at": "2026-09-27T19:53:00.747Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process).",
-      "validated_at": "2026-09-27T13:42:34.997Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26.",
-      "validated_at": "2026-09-27T13:42:36.789Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
-      "generator": "time-interval-arithmetic",
-      "view": "time-interval-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "SingleStep",
-          "verdict": "not_defendable",
-          "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps.",
-      "validated_at": "2026-09-27T13:42:36.711Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0",
-      "generator": "shape-unit-square-grid",
-      "view": "shape-square-array-inversion",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "Square",
-          "verdict": "not_defendable",
-          "evidence": "The shape being studied and solved for is a non-square rectangle (5 by 2 units)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'Square' is not defendable because the exercise is about a non-square rectangle (5x2), not a square.",
-      "validated_at": "2026-09-28T07:51:11.019Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate",
-      "revalidation": {
-        "previous_validated_at": "2026-09-26T09:06:34.588Z",
-        "previous_rejected_labels": [
-          {
-            "label": "Square",
-            "verdict": "not_defendable",
-            "evidence": "The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
-          }
+      "completed_on": "2026-09-28",
+      "topic": "flash38-low-high-production-evaluator",
+      "status": "completed",
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "profile": {
+        "model": "gemini-3.8-flash",
+        "thinking_levels": [
+          "LOW",
+          "HIGH"
         ],
-        "previous_reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
-      }
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "disposition": "The unchanged solution visibly tiles a two-by-four rectangle with eight equal square units and uses their area to infer the missing side. Square includes related measurements; it does not require the outer boundary to be square. This repeats the reviewed unit-cell disagreement on the question image. Preserve the new verdict without changing the valid area model or retrying.",
-      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
-      "generator": "shape-unit-square-grid",
-      "view": "shape-square-array-inversion",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Square",
-          "verdict": "not_defendable",
-          "evidence": "The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities."
+        "http_options": {
+          "timeout": 240000,
+          "retryOptions": {
+            "attempts": 3
+          }
         }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Square: The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities.",
-      "validated_at": "2026-09-28T07:51:09.751Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0",
-      "generator": "fraction-arithmetic",
-      "view": "fractions-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "IteratedOperation",
-          "verdict": "not_defendable",
-          "evidence": "There is no iterated operation shown; the problem is solved using a direct multiplication procedure."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'IteratedOperation' is not defendable because the exercise demonstrates simple fraction multiplication and regrouping rather than an iterated operation applied repeatedly on a single operand.",
-      "validated_at": "2026-09-26T09:04:59.982Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0",
-      "generator": "fraction-arithmetic",
-      "view": "fractions-word-problem",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "IteratedOperation",
-          "verdict": "not_defendable",
-          "evidence": "There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise.",
-      "validated_at": "2026-09-26T09:05:09.214Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds).",
-      "validated_at": "2026-09-27T19:58:28.432Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated.",
-      "validated_at": "2026-09-27T19:58:40.629Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations.",
-      "validated_at": "2026-09-27T20:06:32.596Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten.",
-      "validated_at": "2026-09-27T19:58:42.674Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts.",
-      "validated_at": "2026-09-27T20:06:37.369Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "evaluator_disagreement",
-      "topic": "observable-evidence-or-task-granularity",
-      "sample_key": "K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0",
-      "generator": "shape-compare-attributes",
-      "view": "shape-compare-attributes",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "Base10",
-          "verdict": "not_defendable",
-          "evidence": "The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Base10: The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts.",
-      "validated_at": "2026-09-27T19:58:47.730Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0\" --no-validate"
+      },
+      "concurrency": 3,
+      "revalidated": 17,
+      "low_passed": 17,
+      "high_evaluated": 0,
+      "passed_with_uncertainty": 0,
+      "label_checks": {
+        "defendable": 145,
+        "uncertain": 0,
+        "not_defendable": 0
+      },
+      "general_checks_passed": 119,
+      "request_errors": 0,
+      "official_evaluated": 1968,
+      "official_passed": 1968,
+      "official_failed": 0,
+      "official_uncertain_samples": 8,
+      "passing_records_preserved": 1951,
+      "ccss_images_and_metadata_unchanged": true,
+      "test_dataset_and_cache_unchanged": true,
+      "prior_trial_records_unchanged": true,
+      "strict_audit": "passed with zero issues",
+      "additional_pro_review_candidates_closed": false,
+      "details": "vqa-two-stage-evaluation.md",
+      "results": "vqa-two-stage-evaluation.json",
+      "note": "Adopts the user-selected LOW then independent HIGH policy. Every selected case passes LOW with fully defendable labels, so no HIGH request occurs. Historical uncertain passes and the four unconfirmed Pro review candidates are retained."
     }
   ],
+  "findings": [],
   "resolved_findings": [
     {
       "sample_key": "K.CC.B.4b-conservation~2fd37d3f#counting-basic#counting-conservation#train#question#inst:0",
@@ -7381,6 +7088,591 @@
         "validated_at": "2026-09-26T08:57:59.788Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
       }
+    },
+    {
+      "sample_key": "1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:35.129Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "representational-zero-components",
+        "sample_key": "1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0",
+        "generator": "comparison",
+        "view": "numbers-place-value-comparison",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "NumbersWithoutZero",
+            "verdict": "not_defendable",
+            "evidence": "The number zero is involved in the task, explicitly shown as 'none' in the ones column of both numbers."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers.",
+        "validated_at": "2026-09-27T19:52:30.191Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:37.492Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "currency-system-versus-denomination",
+        "disposition": "The image shows 75 cents plus 50 cents using five 25-cent coins. Dollar denotes the currency system, which includes minor denominations; its definition does not require a dollar-denominated value, dollar bill, or dollar symbol. The evaluator adds that denomination requirement. Preserve the verdict without changing the valid cents task or retrying.",
+        "sample_key": "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
+        "generator": "currency-arithmetic",
+        "view": "currency-word-problem",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Dollar",
+            "verdict": "not_defendable",
+            "evidence": "The entire exercise is formulated in cents (¢), without using the dollar ($) symbol or dollar bills."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'Dollar' is not defendable because the exercise only contains cents (¢) and no dollar-denominated values or symbols ($).",
+        "validated_at": "2026-09-28T07:44:07.732Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:37.222Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "disposition": "The unchanged question shows 7 + 7 and explicitly identifies the repeated equal addend. Its necessarily even hidden result is 14. This is a recurrence of the earlier reviewed EvenNumbers disagreement, which passed during the numeric-range refresh; preserve the new verdict without exposing the answer or retrying.",
+        "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+        "generator": "arithmetic-ops-pairs",
+        "view": "operations-boxes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "EvenNumbers",
+            "verdict": "not_defendable",
+            "evidence": "There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: EvenNumbers: There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task.",
+        "validated_at": "2026-09-28T07:38:22.244Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:36.001Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+        "generator": "counting-basic",
+        "view": "counting-objects-parity",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "There is no representation of base-10 positional notation, place value columns, or multi-digit numbers."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: There is no representation of base-10 positional notation, place value columns, or multi-digit numbers.",
+        "validated_at": "2026-09-27T19:53:00.747Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:48.894Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process).",
+        "validated_at": "2026-09-27T13:42:34.997Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:47.930Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26.",
+        "validated_at": "2026-09-27T13:42:36.789Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:51.294Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+        "generator": "time-interval-arithmetic",
+        "view": "time-interval-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps.",
+        "validated_at": "2026-09-27T13:42:36.711Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:57.119Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0",
+        "generator": "shape-unit-square-grid",
+        "view": "shape-square-array-inversion",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Square",
+            "verdict": "not_defendable",
+            "evidence": "The shape being studied and solved for is a non-square rectangle (5 by 2 units)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'Square' is not defendable because the exercise is about a non-square rectangle (5x2), not a square.",
+        "validated_at": "2026-09-28T07:51:11.019Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate",
+        "revalidation": {
+          "previous_validated_at": "2026-09-26T09:06:34.588Z",
+          "previous_rejected_labels": [
+            {
+              "label": "Square",
+              "verdict": "not_defendable",
+              "evidence": "The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+            }
+          ],
+          "previous_reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+        }
+      }
+    },
+    {
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:45.228Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "disposition": "The unchanged solution visibly tiles a two-by-four rectangle with eight equal square units and uses their area to infer the missing side. Square includes related measurements; it does not require the outer boundary to be square. This repeats the reviewed unit-cell disagreement on the question image. Preserve the new verdict without changing the valid area model or retrying.",
+        "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
+        "generator": "shape-unit-square-grid",
+        "view": "shape-square-array-inversion",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Square",
+            "verdict": "not_defendable",
+            "evidence": "The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Square: The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities.",
+        "validated_at": "2026-09-28T07:51:09.751Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:40.582Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0",
+        "generator": "fraction-arithmetic",
+        "view": "fractions-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "IteratedOperation",
+            "verdict": "not_defendable",
+            "evidence": "There is no iterated operation shown; the problem is solved using a direct multiplication procedure."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'IteratedOperation' is not defendable because the exercise demonstrates simple fraction multiplication and regrouping rather than an iterated operation applied repeatedly on a single operand.",
+        "validated_at": "2026-09-26T09:04:59.982Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:51.904Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0",
+        "generator": "fraction-arithmetic",
+        "view": "fractions-word-problem",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "IteratedOperation",
+            "verdict": "not_defendable",
+            "evidence": "There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise.",
+        "validated_at": "2026-09-26T09:05:09.214Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:39.583Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds).",
+        "validated_at": "2026-09-27T19:58:28.432Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:41.229Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated.",
+        "validated_at": "2026-09-27T19:58:40.629Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:54.271Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations.",
+        "validated_at": "2026-09-27T20:06:32.596Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:42.552Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten.",
+        "validated_at": "2026-09-27T19:58:42.674Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:54.394Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts.",
+        "validated_at": "2026-09-27T20:06:37.369Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0",
+      "resolution": "flash38-low-high-production-evaluator",
+      "validated_at": "2026-09-28T19:17:45.225Z",
+      "pass": true,
+      "model": "gemini-3.8-flash",
+      "thinking_level": "LOW",
+      "high_review_needed": false,
+      "implementation_commit": "675ffc6",
+      "cache_commit": "f456d4d",
+      "result_reference": "vqa-two-stage-evaluation.json",
+      "note": "Fresh LOW evaluation: all labels defendable and all general checks pass. Original rejected evidence is retained below; unchanged image, labels, checklists and prompt.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "observable-evidence-or-task-granularity",
+        "sample_key": "K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0",
+        "generator": "shape-compare-attributes",
+        "view": "shape-compare-attributes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Base10: The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts.",
+        "validated_at": "2026-09-27T19:58:47.730Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0\" --no-validate"
+      }
+    }
+  ],
+  "uncertain_samples": 8,
+  "additional_review_candidates": [
+    {
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "label": "Formalization",
+      "status": "unconfirmed-review-candidate",
+      "note": "Pro treats illustrative argument/report examples as requirements. Separately review whether filling an already formal equation demonstrates the intended formal-expression capability."
+    },
+    {
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "general_check": "text_minimal",
+      "status": "unconfirmed-review-candidate",
+      "note": "Pro considers the repeated-addition caption redundant. The leaf checklist already recognizes repeated operands as the witness; review the caption against the global text-economy criterion."
+    },
+    {
+      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+      "label": "AdditiveCount",
+      "status": "unconfirmed-review-candidate",
+      "note": "The total of three is supplied and the requested answer is a parity classification. Review whether countable objects suffice for successive-accumulation evidence."
+    },
+    {
+      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+      "label": "NumerationWithIntegers",
+      "status": "unconfirmed-review-candidate",
+      "note": "Review the boundary between an integer quantity and the sequence/order/magnitude competency. Pro rejects the label; Flash accepts the collection magnitude."
     }
   ]
 }

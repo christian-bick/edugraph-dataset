@@ -6,9 +6,9 @@ Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definiti
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
 whole-tens subtraction, spatial-construction, whole-share Ability, environmental-image,
-multiples-of-five, picture-graph scale, and logical-inference corrections on
+multiples-of-five, picture-graph scale, logical-inference corrections, and Flash 3.8 LOW/HIGH adoption on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,968 CCSS samples** have current judgments: **1,951 pass (99.1%) and 17 fail**, down from
+All **1,968 CCSS samples pass (100%)**, with **zero failures**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
@@ -16,20 +16,23 @@ the count-out producer replacement removed two, the completion/explanation split
 and the whole-tens target correction added four. The multiples-of-five and subsequent graph-scale
 target migrations each add two validation images through the existing allocation policy. The
 logical-inference target correction retires two validation images under that same policy, for a net
-increase of 32 from the initial dataset. There are no uncached samples. The remaining failures are
-**17 evaluator disagreements**; **no semantic-review failures remain**. These are sample counts,
-not distinct defects.
+increase of 32 from the initial dataset. There are no uncached samples or active semantic-review
+failures. The final 17 evaluator disagreements now pass fresh Flash 3.8/LOW evaluations, with
+all 145 labels defendable and all 119 general checks passing. No HIGH review was needed in this
+rollout. The 1,951 earlier passing records remain unchanged, including eight uncertain passes.
+These are sample counts, not distinct defects or proof of overall evaluator accuracy.
 
-The strict audit fails on those 17 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit **passes all 1,968 samples**. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
-issues. Every final failure concerns label evidence; none fails a general visual/math check.
+issues. There are no rejected final label checks or failed general visual/math checks.
 
 An isolated [Flash high-thinking pilot](vqa-flash-high-pilot.md) on those same 17 failures
 produced **10 passes / seven failures** with unchanged images, prompts, definitions, and pass
 policy. All ten passes have only defendable label checks; no uncertain verdicts or new
 rejections occurred. The remaining rejections are four `Base10`, two `SingleStep`, and one
 `Square`. These experimental judgments are recorded separately and have not replaced the
-committed cache, so the official counts and strict-audit result above remain unchanged.
+committed cache at that experiment checkpoint. They remain separate historical evidence;
+the subsequent production rollout uses fresh LOW judgments.
 This single run on selected failures does not establish an overall accuracy improvement.
 
 The subsequent [Pro/high comparison](vqa-pro-high-pilot.md) on the exact same inputs also
@@ -38,18 +41,22 @@ Flash. Nine Pro passes are fully defendable; one relies on an uncertain `Base10`
 Pro additionally objects to `Formalization`, `AdditiveCount`, `NumerationWithIntegers`, and
 the equal-addend banner's text economy. These are documented as unconfirmed review candidates
 in the experiment, separate from the original cached failure classifications. Both pilot records
-are retained without changing official judgments or counts.
+are retained unchanged. These four unconfirmed review candidates remain open despite the new
+passing judgments; the model comparison alone does not settle them.
 
 The [Flash 3.8/HIGH trial](vqa-flash38-high-pilot.md), using the same 17 inputs and maximum
 supported dynamic thinking, returns **17 passes / zero failures**. Fifteen passes have every
 label defendable; two retain uncertain `EvenNumbers` or `SingleStep` evidence. All 119 general
 checks pass. This is the strongest agreement in the three trials, but has no invalid controls
-and does not settle Pro's additional review candidates. The trial is recorded separately;
-the official cache and its 17 failures remain unchanged.
+and does not settle Pro's additional review candidates. The trial remains recorded separately.
+The user subsequently selected [Flash 3.8 LOW with one HIGH review on failure](vqa-two-stage-evaluation.md)
+for production. Cache commit `f456d4d` contains the fresh LOW judgments; trial responses were not
+copied into the cache. Request concurrency now defaults to three, with resumable stage evidence.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 17 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 58
-resolved finding records and initial totals are retained separately as history: 38 passed
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain no active failed samples,
+retain the four additional review candidates, and preserve all original evidence, dispositions,
+replay commands, and revalidation results. The 75 resolved finding records and initial totals are
+retained separately as history: 55 passed
 revalidation, and twenty were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
@@ -672,8 +679,8 @@ resolved history as a retired target, not a passing retry. All 1,966 retained im
 identities and cache records are unchanged. No new failure, VQA retry, rate-limit error or major
 issue occurred. The [detailed follow-up](logical-inference.md) records verification and allocation.
 
-All semantic-review failure categories in this report are now resolved. The remaining recorded
-failures are the evaluator disagreements below.
+All semantic-review failure categories in this report are now resolved. The historical evaluator
+disagreements below also pass under the selected production evaluation strategy.
 
 ## Evaluator disagreements
 
@@ -716,7 +723,8 @@ revalidation, without prompt/checklist weakening or repeated retries until a pas
   columns say "none". Those are representational components of nonzero task values, consistent
   with the user's clarification and the ontology's exclusion of zero digits as separate quantities.
 
-Persistent disagreements remain visible in the final cache and findings report.
+The original disagreements remain visible in findings history and the three isolated trial records.
+The production LOW rollout resolves their failing cache status without changing the content.
 
 On 2026-09-26, ten reviewed scopes received one forced pass, totaling 158 judgments at concurrency four.
 Fourteen previous failures resolved and four previously passing samples were newly rejected;
@@ -728,7 +736,7 @@ No further retries were made to chase a passing result. The required numeric-ran
 passes the previous equal-addends and digit-answer counting questions and two shape comparisons.
 It also introduces new interpretations of unchanged tasks. The later operand refresh resolves
 the two missing-operand formal-equation disagreements, restores the earlier equal-addends flag,
-and adds the square-array solution and cents-denomination flags. The 17 current disagreements
+and adds the square-array solution and cents-denomination flags. The 17 disagreements before the Flash 3.8 rollout
 comprise two fraction word-problem solutions, six shape-attribute comparisons, two square-cell
 array images, three time-interval tasks, one representational zero-component judgment, one parity
 question's decimal notation, one equal-addends question, and one currency-system judgment.
@@ -750,8 +758,8 @@ The table records the original 2026-09-26 recheck.
 The MeasuringTime update necessarily rechecked all 14 time-interval samples. All four earlier
 failures passed, while three previously passing samples were rejected for the same hour-rollover
 interpretation of `SingleStep`. Their canonical images show one requested time addition with
-correct arithmetic. The [current findings JSON](ontology-v029-vqa-findings.json) records these
-three new verdicts and preserves the four resolved ones separately. This is evaluator variation
+correct arithmetic. The [findings history](ontology-v029-vqa-findings.json) records these
+three rejections and their later LOW passes, alongside the four earlier resolutions. This is evaluator variation
 on the existing task-granularity disagreement; the images and `SingleStep` definition did not change.
 
 The repaired counting view previously had one numeral-evidence rejection: its question explicitly asks
@@ -897,16 +905,31 @@ target identity and route without changing other plans. Both canonical samples r
 Cache `440c59e` contains **1,951 pass / 17 fail / zero uncached**. Both new judgments pass all
 eight label checks, and all 1,966 retained cache records are byte-identical.
 
-Current verification commands and outcomes (2026-09-28):
+The Flash 3.8 LOW/HIGH implementation (`675ffc6`) passes the full coverage gate with **3,576
+tests in 550 files**, and the final focused suite passes **80 tests**. The new review module
+has 100% statement/branch/function/line coverage. All touched library modules together have
+97.25% statement and 90.29% branch coverage. CCSS repository checks, TypeScript, and documentation
+checks pass; the latter retain four existing external-reference fetch warnings. The production
+rollout completes 17 LOW evaluations without exposed request errors, using 46,505 reported total
+tokens. All pass clearly, so the HIGH branch is covered by unit tests but was not exercised live
+in this rollout. The prior HIGH pilot remains separate live evidence for that model setting.
+
+All 1,968 images and metadata rows, both dataset pointers, all 1,951 earlier passing judgments,
+the entire `test` cache, and the three earlier experiment records are unchanged. No new content
+defect or major operational problem arose. The eight historical uncertain passes and the four
+unconfirmed Pro review candidates remain explicit in the reports.
+
+Current verification commands and outcomes (2026-09-28), including the preceding content correction:
 
 | Command | Outcome |
 | --- | --- |
 | `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Logical-inference correction: two renders, one shard written, 289 reused; two added/four removed identities, no retained-image changes |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Two live judgments, both passing with eight defendable label checks; 1,966 reused; final 1,951 pass / 17 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 17 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run validate:dataset -- --spec=ccss --rebuild-graph --retry-failed --concurrency=3` | 17 fresh LOW passes, 145 defendable labels, no HIGH calls; 1,951 reused; final 1,968 pass / zero fail / zero uncached |
+| `npm run audit:dataset -- --spec=ccss` | Passes all 1,968 samples; zero structural, freshness, integrity or cache issues |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
 | `npm run report:churn -- --spec=ccss --ref=51a9efd` | Latest follow-up: 1,966 identical retained images, two added/four removed identities, no retained seed/attempt changes |
 | `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,689 identical retained images, 53 intended changes, 226 added/194 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=28952b7` | Evaluator rollout: all 1,968 identities and images unchanged, no seed/attempt changes |
 
 The final split contains 1,654 training and 314 validation images. All 841 matched tuples have
 training evidence. Of 212 tuples allocated to validation, 157 have validation evidence. The 55

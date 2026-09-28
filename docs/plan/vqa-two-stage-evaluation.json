@@ -1,0 +1,3537 @@
+{
+  "recorded_at": "2026-09-28T19:18:24.261Z",
+  "baseline_commit": "28952b76b5b975053cd3a7064ed51f5103979110",
+  "implementation_commit": "675ffc625935333de381d4ad23612ca92f6db6c3",
+  "command": "npm run validate:dataset -- --spec=ccss --rebuild-graph --retry-failed --concurrency=3",
+  "profile": {
+    "model": "gemini-3.8-flash",
+    "thinking_levels": [
+      "LOW",
+      "HIGH"
+    ],
+    "http_options": {
+      "timeout": 240000,
+      "retryOptions": {
+        "attempts": 3
+      }
+    }
+  },
+  "input_reference": {
+    "file": "docs/plan/vqa-flash38-high-pilot.json",
+    "sha256": "957c1781685603cbf06cea93835865122314fa80c1bee56ff4f78395fe9c17a4",
+    "note": "The same 17 images, prompts, ontology statements and checklists; fresh production LOW and, only on failure, independent HIGH evaluations. Earlier pilot responses were not promoted."
+  },
+  "protected_state": {
+    "ccss_metadata_and_image_hash": "9676434470f694df7e258e27d116edde5fbc0537b602e146c71afd1ceec8a654",
+    "files": {
+      "out/dataset-ccss/current.json": "d32d76945954bf481b70c3fb14fd1b6cf7ac509c9a006b44385c3300387d75c9",
+      "out/dataset-test/current.json": "9e520762b2ba5c57d3c0642238d5dcef95c6736100bb614afbe79d61617b1d83",
+      "cache/vqa-validation/dataset-test/angle-arithmetic.jsonl": "bd973f9db2f74f5ac5c5c335c790291ad1054ebd741641e276cc37abe63c7c7f",
+      "cache/vqa-validation/dataset-test/angle-concepts.jsonl": "3d7b09e270338d47f219fe67c533444911b30979907dbd5742b3e370a8ec2f6d",
+      "cache/vqa-validation/dataset-test/angle-measurement.jsonl": "f6970b1f63c43145989820b3a9e0a273192d7090ef1befbe0fa25658302d3b1b",
+      "cache/vqa-validation/dataset-test/area-decomposition.jsonl": "1c65b1146ea745aa5480f20458021f03d0c32fe07a2255d2c4b641f608a3560c",
+      "cache/vqa-validation/dataset-test/area-perimeter-relations.jsonl": "d032f4e1884ea4477b7c1734b36a63b544ddf956a76eef0ddb65edda944e5eb2",
+      "cache/vqa-validation/dataset-test/arithmetic-decompose.jsonl": "5336fede9e821fce32e35f3e352448d26099cacc429b1fe336179391195d2a95",
+      "cache/vqa-validation/dataset-test/arithmetic-equation-judgment.jsonl": "ada2ee79f670bba193a56d0eaa10a44112333f7086abb303f1496a97c1ed2056",
+      "cache/vqa-validation/dataset-test/arithmetic-estimation.jsonl": "0aa8528aed80e1c31be6f14cc16458b8a7eb98a5385540abd889f16086916f59",
+      "cache/vqa-validation/dataset-test/arithmetic-ops-four.jsonl": "a5d4bb867ff2d1ec6965b751684a204a50ea612f6411f17f2a40a2e8c29a1f86",
+      "cache/vqa-validation/dataset-test/arithmetic-ops-pairs.jsonl": "8898793e18d39d870768fac317327601d47abbda77c42c12455a110d99335322",
+      "cache/vqa-validation/dataset-test/arithmetic-ops-triples.jsonl": "823dc95e73f1875048fbd106ea2b4dbd95fcb0f70962442f1bd024e4b4602880",
+      "cache/vqa-validation/dataset-test/arithmetic-patterns.jsonl": "a2ee71d8ed83b02963e80c74e24103f4353bfb026eac57c5807eb0fbe7b68030",
+      "cache/vqa-validation/dataset-test/arithmetic-word-problems-two-step.jsonl": "02f9da61a056c3d856966f554c02e70595620a9c9ea11d173db9051e1e64679f",
+      "cache/vqa-validation/dataset-test/comparison.jsonl": "30aaf720a6f326add5254be1d4f4c26b982e3e90616c6236f0e149eec11597e9",
+      "cache/vqa-validation/dataset-test/counting-basic.jsonl": "04a9bd94284a3ff4e3ffde9bf7a019c0e9c4437a9fdfdc2f7df0697610570ef8",
+      "cache/vqa-validation/dataset-test/counting-classify-count.jsonl": "3d3ba2b2f6d3fabf2ca616bd6e71d2d2465eb2b137499ea0c03dec513c25f239",
+      "cache/vqa-validation/dataset-test/counting-classify-sort.jsonl": "f0981a859edaae97c15c5f35eb5b81d6240a4ed7cb898f5b6cd0933739332bd7",
+      "cache/vqa-validation/dataset-test/counting-inc-dec.jsonl": "4e02cada3d94f6b7ff72196f41f539363779e12310ae8cb1268154c4d2ea13e1",
+      "cache/vqa-validation/dataset-test/counting-sequence.jsonl": "eb2e10a33863a5d7690936b7eed11fd10e5d666bbd37e9650777e10ca3eea33c",
+      "cache/vqa-validation/dataset-test/decimal-comparison.jsonl": "d5b9006f34555547202037ccb5e49603385ea3b050710bf2ae717a97e43cabf4",
+      "cache/vqa-validation/dataset-test/decimal-notation.jsonl": "d19233b17073ecead683afbc74f2727431ef39f6245465d303ffaf1f96b0c19b",
+      "cache/vqa-validation/dataset-test/equal-groups-collection.jsonl": "569e38cf108c103657e044d08b14886256c3d2fe252946ff079ad560a49d1d88",
+      "cache/vqa-validation/dataset-test/factor-multiple-relations.jsonl": "6f29900a3e371a08742ad3e2a24890e46091de23e71e11764720b3b85cf0687b",
+      "cache/vqa-validation/dataset-test/fraction-arithmetic.jsonl": "d2fde27cc46affb41c27d223f0f000cffba9d8c97e52a9b7897e33f717bd331b",
+      "cache/vqa-validation/dataset-test/fraction-comparison.jsonl": "50dc5c3d1cc788f62f8b88e39acf3301da01c3d896bdf85c70375a7b5d758f53",
+      "cache/vqa-validation/dataset-test/fraction-equivalence.jsonl": "e7150823da4e99ae71023ef6c7cedeb17b6293e39cc86b7a2b11e444853bfeba",
+      "cache/vqa-validation/dataset-test/geometry-perimeter.jsonl": "c65d119b1a773fee79b8b0e0163ed4cac2c11c03927d93b4b8eca729090d2c51",
+      "cache/vqa-validation/dataset-test/geometry-primitives.jsonl": "2417ace6ef08fbdcb1c3c230ebef83b9b83b43c85ef06356f1c9c51ba508752d",
+      "cache/vqa-validation/dataset-test/integer-add-subtract-strategies.jsonl": "a55384d42abd57026ae1ac45af460ee5fe13e6ac65204186a3084bba67a8b8cf",
+      "cache/vqa-validation/dataset-test/integer-rounding.jsonl": "00c4a48d0105e4f9e6dab96b96b663aabdd80b8baabc0499f975c346ef0064cc",
+      "cache/vqa-validation/dataset-test/measurement-attribute.jsonl": "fd1e07473471a1b2ab757ab2d4d7b58d7dc0b9c4aa18d2a4bb6bd2ec4afa1e73",
+      "cache/vqa-validation/dataset-test/measurement-compare.jsonl": "9b421b7432f01d85a5642cde1beaf1b96aefd0d8a5cdeefc2c07acace22256e2",
+      "cache/vqa-validation/dataset-test/measurement-conversion.jsonl": "f93c98c24f7aaab2b271ee3acc45b997ccac605a00040489c3dfccaa9f143b85",
+      "cache/vqa-validation/dataset-test/measurement-data.jsonl": "980623ae267c58d1ad2f43e3dad36451d48e50c0a9099b6b39bec869d8d24e42",
+      "cache/vqa-validation/dataset-test/measurement-length-estimation.jsonl": "1107d3b4f541d0b47623859613e5d0bdf1f208b214b0e1b2ece54eea0aba584d",
+      "cache/vqa-validation/dataset-test/measurement-length.jsonl": "c0791ca419a4aaaecd90f1d42c4668845a9c370152fb7071b8e3982e9808ee65",
+      "cache/vqa-validation/dataset-test/measurement-mass-estimation.jsonl": "ddf5e3443d50d2ac420860fa9ab8d78d2d4df8547a8d577e116c5d963f9303f7",
+      "cache/vqa-validation/dataset-test/measurement-mass-volume-estimation.jsonl": "31dc1f2f33d445054785eeccea4bec497d0e07147d21936f231422965866b267",
+      "cache/vqa-validation/dataset-test/measurement-mass-volume.jsonl": "ff36fe9d9f77b4431a0e3b9389b4a72a3de1300716724581d66b0325c610b28f",
+      "cache/vqa-validation/dataset-test/measurement-mediated-comparison.jsonl": "5abe9deab47589467e8dbe12f4f8cff7cbc3e7e3d800e508659cc71607359589",
+      "cache/vqa-validation/dataset-test/measurement-number-line.jsonl": "23e7f61dbe8772bd80d2ca51eeac63dbee745b7a8cb9894471d7ea43b37d0eb6",
+      "cache/vqa-validation/dataset-test/measurement-order.jsonl": "8f33aa5639b5777d4806673771c5ec144da1e6112b9b2d136c2b7014be42aa0d",
+      "cache/vqa-validation/dataset-test/measurement-tool-selection.jsonl": "42fe4e15caf4266443ae29e2ea60559381b385995bcb11fc6834ad637a2d280a",
+      "cache/vqa-validation/dataset-test/measurement-word-problems.jsonl": "2ea4d5816b8273a305c534bb1d341a0e5e3e4fecb3e479783b3f08878e5b12c2",
+      "cache/vqa-validation/dataset-test/multi-digit-division.jsonl": "5cef358a0fc8a312fd154da050fae0d3ad6ecfbb7491fae943a53d90a7c9931c",
+      "cache/vqa-validation/dataset-test/multi-digit-multiplication.jsonl": "338c08ca0d7c95b52cc2281e3884e95bb06af81edc79634cafbdaac0ec881163",
+      "cache/vqa-validation/dataset-test/multiplicative-comparison.jsonl": "707cb78a21d70ede44334adf93d390de59a7387c03660c1034ca980c3dcfbdf8",
+      "cache/vqa-validation/dataset-test/number-array.jsonl": "b5322765b9254f4def4141af48b9d2da446ea2f814bdf019baaa16c0cd378bb1",
+      "cache/vqa-validation/dataset-test/ordering.jsonl": "5ff274f7f905b59010b18f719423abb485b12166949004f30873699b9c12a8cf",
+      "cache/vqa-validation/dataset-test/place-value-arithmetic.jsonl": "10c456281ee68287ffee1169737e6979663978dc8cadb8eaf0499fb447e00990",
+      "cache/vqa-validation/dataset-test/place-value-bundles.jsonl": "fa4a7d1444f55431d3baa52cf27c8292a6563a7c1d9c2a175e1cb5185b2772a6",
+      "cache/vqa-validation/dataset-test/place-value-expanded.jsonl": "97f705d208b87376c3de7cb96bc77c1dd6302bbe6d73bb95a0e7da597c85c4a0",
+      "cache/vqa-validation/dataset-test/place-value-make-ten.jsonl": "c47934d9575d12f53a4b98d23d5cf34e48ee03c319c30561c589fc2026cb7aea",
+      "cache/vqa-validation/dataset-test/place-value-scaling.jsonl": "3d49caa1ff57a8e7edd4c1f8ef3873d5613c060cc6e7cc31f435a1dde5478b02",
+      "cache/vqa-validation/dataset-test/place-value-teen.jsonl": "6ca2692d4338a9769f819d900a6c607599241ca0ad6dc66b491d2ca61989fd58",
+      "cache/vqa-validation/dataset-test/shape-build-shape.jsonl": "9f25910a1f9b422cdb7cbec5dba3c1b0537060888e5e292c6faff4d819d32b6c",
+      "cache/vqa-validation/dataset-test/shape-classify-attributes.jsonl": "0169a54e782965a89eaedb98c8f3cf0d7a1bb92693056de417a355a3bdadf1d1",
+      "cache/vqa-validation/dataset-test/shape-classify-dim.jsonl": "1f32eaf585e0e8fa4014d6dae218ca7a35bc4de838defb7581cdaa336c8ed0c0",
+      "cache/vqa-validation/dataset-test/shape-compare-attributes.jsonl": "ae8d3c063e956a57a4797f2f2fc5b9fdbddefef77abfd9efa3ab9fd72725d9b8",
+      "cache/vqa-validation/dataset-test/shape-compose-shapes.jsonl": "6d5642389e444efba26a816397c2e9b60f431bcfaff041e7af70096e74fffebf",
+      "cache/vqa-validation/dataset-test/shape-env-shapes.jsonl": "307e27e26b0ac54b0d25c5b618ec17a6d63ae9dcf3be397e30d1b39223673dc6",
+      "cache/vqa-validation/dataset-test/shape-identity.jsonl": "4235e2cdbd2f3f46a54bf69799d5a9f45a2eec8f7c4b1f8463a6d1ca32fc934a",
+      "cache/vqa-validation/dataset-test/shape-line-symmetry.jsonl": "504a611b014191136ff1e44fdbd70a260106373d640587c6a20cd887f4eb8724",
+      "cache/vqa-validation/dataset-test/shape-partition-equivalence.jsonl": "bda8195b66ec3d5602d5be5a30a228082c74d6e7b94ae66e185f3fb03d1031fb",
+      "cache/vqa-validation/dataset-test/shape-partition.jsonl": "672eca3176a11ca8d63dec6da315ffe022c25343139c63ed8287cb58723c4840",
+      "cache/vqa-validation/dataset-test/shape-patterns.jsonl": "e73a695b9e0e9ff548ffd31af020d9c5f8b1de4e62d912bc1f6953bf066e785f",
+      "cache/vqa-validation/dataset-test/shape-position.jsonl": "fbf3e6e3dafb729c698336c2a070296ddc6fd60cabbd96e66d92eed979d89682",
+      "cache/vqa-validation/dataset-test/shape-same-attribute.jsonl": "0f67348cc121bd6bf6aa775a2094b73207c59b74b6b2bdd1503c79833d3f0d2c",
+      "cache/vqa-validation/dataset-test/shape-square-array.jsonl": "b1872f6a813bc194a45241c7258b58b314c2cc9dd734d02c8913b5637ab023b5",
+      "cache/vqa-validation/dataset-test/standard-algorithm-add-subtract.jsonl": "c4e95924d1f3760ac61cc7b27bb8314b99d4be50a6812d04a5857725b2e86d9e",
+      "cache/vqa-validation/dataset-test/statistical-graphs.jsonl": "fd733e703a4a5e726507924f9e919d89c9d91752c4b019ff283514334edca633",
+      "cache/vqa-validation/dataset-test/time-elapsed.jsonl": "9406d51a6f84a7030cb817ac56f99a00b40e2c1dc85b1b18d2ad4c03d6d03725",
+      "cache/vqa-validation/dataset-test/time-interval-arithmetic.jsonl": "f65008e59a4650dfd3af41dd745db26467269ec495ef19bf6d2da1fb8c2bae7e",
+      "cache/vqa-validation/dataset-test/time.jsonl": "39376a3e60f7fdd22338b0af43262c438c57743e2612a0b0942edfda42ebf64d",
+      "cache/vqa-validation/dataset-test/writing.jsonl": "ca8ddb563d2d995cbeeecab12336d0ac244520e7cfa3a2ccd90e146946c7c870",
+      "docs/plan/vqa-flash38-high-pilot.json": "957c1781685603cbf06cea93835865122314fa80c1bee56ff4f78395fe9c17a4",
+      "docs/plan/vqa-flash-high-pilot.json": "c90fb39554ac0eef633f581a31464e28ee21185ac05f12aa14d8f864e349e7ee",
+      "docs/plan/vqa-pro-high-pilot.json": "a07e7c4b900a2b6f6b46a8d03493a2e61a07a472ca5e43659d8192a76f97eb53"
+    }
+  },
+  "summary": {
+    "evaluated": 17,
+    "low_passed": 17,
+    "high_evaluated": 0,
+    "high_passed": 0,
+    "final_passed": 17,
+    "final_failed": 0,
+    "passed_with_uncertainty": 0,
+    "final_label_checks": {
+      "defendable": 145,
+      "uncertain": 0,
+      "not_defendable": 0
+    },
+    "all_stage_label_checks": {
+      "defendable": 145,
+      "uncertain": 0,
+      "not_defendable": 0
+    },
+    "usage": {
+      "input_tokens": {
+        "reported_stages": 17,
+        "sum": 35376
+      },
+      "answer_tokens": {
+        "reported_stages": 17,
+        "sum": 8891
+      },
+      "thinking_tokens": {
+        "reported_stages": 7,
+        "sum": 2238
+      },
+      "total_tokens": {
+        "reported_stages": 17,
+        "sum": 46505
+      },
+      "cached_tokens": {
+        "reported_stages": 0,
+        "sum": 0
+      }
+    },
+    "served_model_versions": [
+      "gemini-3.8-flash"
+    ],
+    "dataset": {
+      "evaluated": 1968,
+      "passed": 1968,
+      "failed": 0,
+      "with_uncertainty": 8
+    },
+    "preserved_passing_records": 1951,
+    "images_metadata_test_and_prior_pilots_unchanged": true
+  },
+  "cases": [
+    {
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "image_sha256": "e5b92ba5e1c7f83b93971810aa9b9a135ea5853cede46f14329aaebd9293f929",
+      "validation_cache_key": "cd47bf4bf272c6b29d4bf6f93e783f3fce7fe22dd2e2ce488069c1fba8da107f",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "The equation 7 + 7 uses the plus sign (+) to represent the addition of two quantities."
+          },
+          {
+            "label": "ArabicNumerals",
+            "verdict": "defendable",
+            "evidence": "The digits '7' are represented using standard Arabic numeral symbols."
+          },
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "The number 7 is represented in base-10, and its sum 14 is a base-10 positional numeral."
+          },
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "The expression contains an equals sign (=) with expressions on both sides."
+          },
+          {
+            "label": "EvenNumbers",
+            "verdict": "not_defendable",
+            "evidence": "There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task."
+          },
+          {
+            "label": "ExpressionOnOneSide",
+            "verdict": "defendable",
+            "evidence": "The left side contains the composite expression 7 + 7, while the right side contains a single empty box."
+          },
+          {
+            "label": "Formalization",
+            "verdict": "defendable",
+            "evidence": "The question is formulated using standard mathematical symbols in a horizontal equation layout."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The operand 7 is an integer."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "defendable",
+            "evidence": "The text states 'the same addend is used twice' and the equation repeats the operand 7 in both addend positions."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All involved values (7, 7, and the expected sum 14) are strictly less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "There are no negative values present in the task."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The task requires performing a standard addition computation."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "The problem is solved by performing a single addition operation."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The expression 7 + 7 has exactly two operands."
+          }
+        ],
+        "reasoning": "Labels not defendable: EvenNumbers: There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "574088e970e7428bb58b98bb20da8cea6dbec4de7d9ffda74bbe310a31d52431",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "S726ap-pJ7D_vdIPyYbt4QM",
+            "validated_at": "2026-09-28T19:17:37.222Z",
+            "elapsed_ms": 5932,
+            "usage": {
+              "input_tokens": 2361,
+              "answer_tokens": 764,
+              "thinking_tokens": 383,
+              "total_tokens": 3508
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Addition",
+                  "verdict": "defendable",
+                  "evidence": "The '+' sign is used between the two addends 7 and 7."
+                },
+                {
+                  "label": "ArabicNumerals",
+                  "verdict": "defendable",
+                  "evidence": "The digit '7' is an Arabic numeral."
+                },
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard base-10 numerical representations are used."
+                },
+                {
+                  "label": "Equation",
+                  "verdict": "defendable",
+                  "evidence": "An equation with an equals sign relates 7 + 7 to an unknown result."
+                },
+                {
+                  "label": "EvenNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Doubling an integer (7 + 7) inherently involves parity and results in an even number (14)."
+                },
+                {
+                  "label": "ExpressionOnOneSide",
+                  "verdict": "defendable",
+                  "evidence": "The expression '7 + 7' is on the left side, and a single placeholder box is on the right side."
+                },
+                {
+                  "label": "Formalization",
+                  "verdict": "defendable",
+                  "evidence": "The operation is represented using formal arithmetic symbols and structured boxed formatting."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The operand 7 is an integer."
+                },
+                {
+                  "label": "IteratedOperation",
+                  "verdict": "defendable",
+                  "evidence": "The same addend 7 occupies both operand positions in repeated addition."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "All numbers involved (7 and the sum 14) are less than or equal to 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "None of the involved numbers are negative."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "The task asks the learner to carry out an addition operation."
+                },
+                {
+                  "label": "SingleStep",
+                  "verdict": "defendable",
+                  "evidence": "Evaluating 7 + 7 requires a single arithmetic operation."
+                },
+                {
+                  "label": "TwoOperands",
+                  "verdict": "defendable",
+                  "evidence": "The expression explicitly contains exactly two operands (7 and 7)."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "The '+' sign is used between the two addends 7 and 7."
+          },
+          {
+            "label": "ArabicNumerals",
+            "verdict": "defendable",
+            "evidence": "The digit '7' is an Arabic numeral."
+          },
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard base-10 numerical representations are used."
+          },
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "An equation with an equals sign relates 7 + 7 to an unknown result."
+          },
+          {
+            "label": "EvenNumbers",
+            "verdict": "defendable",
+            "evidence": "Doubling an integer (7 + 7) inherently involves parity and results in an even number (14)."
+          },
+          {
+            "label": "ExpressionOnOneSide",
+            "verdict": "defendable",
+            "evidence": "The expression '7 + 7' is on the left side, and a single placeholder box is on the right side."
+          },
+          {
+            "label": "Formalization",
+            "verdict": "defendable",
+            "evidence": "The operation is represented using formal arithmetic symbols and structured boxed formatting."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The operand 7 is an integer."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "defendable",
+            "evidence": "The same addend 7 occupies both operand positions in repeated addition."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numbers involved (7 and the sum 14) are less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "None of the involved numbers are negative."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The task asks the learner to carry out an addition operation."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "Evaluating 7 + 7 requires a single arithmetic operation."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The expression explicitly contains exactly two operands (7 and 7)."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0",
+      "image_sha256": "ad6e86f0aa4cef7de1aea522cd80ce79458ff819ba5852d815eff16b1a7d9182",
+      "validation_cache_key": "d6f165d0099ce5726285718ce79cfac274bb3ce4c456edfdaa7e68f625c2c792",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "ArabicNumerals",
+            "verdict": "defendable",
+            "evidence": "The numerals 10 and 100 are written in Arabic numerals."
+          },
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "The numbers are broken down into tens and ones columns."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "All numbers shown (10, 100, 1, 10) are integers."
+          },
+          {
+            "label": "Less",
+            "verdict": "defendable",
+            "evidence": "The less-than relation (<) is shown and used to compare 10 and 100."
+          },
+          {
+            "label": "NumbersLarger10",
+            "verdict": "defendable",
+            "evidence": "The numbers compared are 10 and 100, both of which are greater than or equal to 10."
+          },
+          {
+            "label": "NumbersSmaller100",
+            "verdict": "defendable",
+            "evidence": "The numbers compared are 10 and 100, both of which are less than or equal to 100."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers involved are positive or zero; there are no negative numbers."
+          },
+          {
+            "label": "NumbersWithoutZero",
+            "verdict": "not_defendable",
+            "evidence": "The number zero is involved in the task, explicitly shown as 'none' in the ones column of both numbers."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The relation 10 < 100 is evaluated."
+          },
+          {
+            "label": "PlaceValue",
+            "verdict": "defendable",
+            "evidence": "The values are decomposed into their tens and ones places to perform the comparison."
+          },
+          {
+            "label": "ProcedureUnderstanding",
+            "verdict": "defendable",
+            "evidence": "The image explains how and why the comparison is made by checking the tens place first."
+          }
+        ],
+        "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "93b03a34501cd738b3b1c1fd8e55277598a413e4c13a111c501b50eddd38c214",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "S726aq6hMMqExs0PhbXZwA8",
+            "validated_at": "2026-09-28T19:17:35.129Z",
+            "elapsed_ms": 3840,
+            "usage": {
+              "input_tokens": 2248,
+              "answer_tokens": 653,
+              "total_tokens": 2901
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "ArabicNumerals",
+                  "verdict": "defendable",
+                  "evidence": "Visible Arabic digits 10 and 100."
+                },
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Decomposition of numbers into tens and ones base-10 columns."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Involves integers 10 and 100."
+                },
+                {
+                  "label": "Less",
+                  "verdict": "defendable",
+                  "evidence": "The comparison relation uses the '<' (less than) symbol."
+                },
+                {
+                  "label": "NumbersLarger10",
+                  "verdict": "defendable",
+                  "evidence": "Values involved are 10 and 100, both >= 10."
+                },
+                {
+                  "label": "NumbersSmaller100",
+                  "verdict": "defendable",
+                  "evidence": "Values involved are 10 and 100, both <= 100."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers shown are non-negative."
+                },
+                {
+                  "label": "NumbersWithoutZero",
+                  "verdict": "defendable",
+                  "evidence": "Numbers compared are 10 and 100 (non-zero quantities; 'none' is written for ones rather than a separate 0-value operand)."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "Displays the inequality 10 < 100."
+                },
+                {
+                  "label": "PlaceValue",
+                  "verdict": "defendable",
+                  "evidence": "Explicitly compares digits by place value (tens vs ones)."
+                },
+                {
+                  "label": "ProcedureUnderstanding",
+                  "verdict": "defendable",
+                  "evidence": "Text explains the procedure: 'Compare the tens first. If they match, compare the ones.' and 'The tens columns differ, so the tens decide.'"
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "ArabicNumerals",
+            "verdict": "defendable",
+            "evidence": "Visible Arabic digits 10 and 100."
+          },
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Decomposition of numbers into tens and ones base-10 columns."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Involves integers 10 and 100."
+          },
+          {
+            "label": "Less",
+            "verdict": "defendable",
+            "evidence": "The comparison relation uses the '<' (less than) symbol."
+          },
+          {
+            "label": "NumbersLarger10",
+            "verdict": "defendable",
+            "evidence": "Values involved are 10 and 100, both >= 10."
+          },
+          {
+            "label": "NumbersSmaller100",
+            "verdict": "defendable",
+            "evidence": "Values involved are 10 and 100, both <= 100."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers shown are non-negative."
+          },
+          {
+            "label": "NumbersWithoutZero",
+            "verdict": "defendable",
+            "evidence": "Numbers compared are 10 and 100 (non-zero quantities; 'none' is written for ones rather than a separate 0-value operand)."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "Displays the inequality 10 < 100."
+          },
+          {
+            "label": "PlaceValue",
+            "verdict": "defendable",
+            "evidence": "Explicitly compares digits by place value (tens vs ones)."
+          },
+          {
+            "label": "ProcedureUnderstanding",
+            "verdict": "defendable",
+            "evidence": "Text explains the procedure: 'Compare the tens first. If they match, compare the ones.' and 'The tens columns differ, so the tens decide.'"
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+      "image_sha256": "a37e9b931701bb865272e24d52136058380fe60cac470af9a88e09e110d2924a",
+      "validation_cache_key": "2144c6bff97b8c5e3070abef85c105c9f88a989024817abd2b4a17160044bb5e",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AdditiveCount",
+            "verdict": "defendable",
+            "evidence": "The task displays a collection of 3 items distributed one-by-one into two groups and a leftover container to determine its total count and properties."
+          },
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "There is no representation of base-10 positional notation, place value columns, or multi-digit numbers."
+          },
+          {
+            "label": "ConceptClassification",
+            "verdict": "defendable",
+            "evidence": "The student is asked to classify the number 3 as 'odd' or 'even' based on visual grouping criteria."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The number 3 and the grouped objects represent positive integer quantities."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "The number of objects is 3, which is well within the threshold of 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers involved (3, 2, 1) are positive integers."
+          },
+          {
+            "label": "NumbersWithoutZero",
+            "verdict": "defendable",
+            "evidence": "Zero is not present in the task."
+          },
+          {
+            "label": "NumerationWithIntegers",
+            "verdict": "defendable",
+            "evidence": "The concept of parity (oddness/evenness) relates to the structure and properties of integer numeration."
+          },
+          {
+            "label": "OddNumbers",
+            "verdict": "defendable",
+            "evidence": "The task demonstrates that 3 is an odd number because grouping leaves 1 leftover object."
+          },
+          {
+            "label": "PhysicalNumbers",
+            "verdict": "defendable",
+            "evidence": "The numbers are represented concretely using orange circular counters."
+          },
+          {
+            "label": "UnevenDivisibility",
+            "verdict": "defendable",
+            "evidence": "The image shows 3 split into two equal groups of 1, leaving a remainder of 1 in the 'left over' section."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: There is no representation of base-10 positional notation, place value columns, or multi-digit numbers."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "73d9335ff8df55cc60579b4034a759ddd82c6e2e2052b153cbdfadeedb8fe830",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "TL26aqTsFOWxsOIPwoWX6Q4",
+            "validated_at": "2026-09-28T19:17:36.001Z",
+            "elapsed_ms": 4711,
+            "usage": {
+              "input_tokens": 2263,
+              "answer_tokens": 628,
+              "thinking_tokens": 204,
+              "total_tokens": 3095
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "AdditiveCount",
+                  "verdict": "defendable",
+                  "evidence": "Counting physical objects (3 total counters across two groups and a leftover)."
+                },
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard decimal numeral 3 is used."
+                },
+                {
+                  "label": "ConceptClassification",
+                  "verdict": "defendable",
+                  "evidence": "Task asks to classify the collection as odd or even."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The values involved (1, 2, 3) are integers."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present (1, 2, 3) are less than or equal to 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "Only positive quantities and numbers are involved."
+                },
+                {
+                  "label": "NumbersWithoutZero",
+                  "verdict": "defendable",
+                  "evidence": "The value zero does not appear or serve as a quantity."
+                },
+                {
+                  "label": "NumerationWithIntegers",
+                  "verdict": "defendable",
+                  "evidence": "Engages numerical understanding and cardinality of integers 1, 2, and 3."
+                },
+                {
+                  "label": "OddNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Focuses on identifying whether 3 is an odd number via divisibility by 2."
+                },
+                {
+                  "label": "PhysicalNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Counters/circles are used to physically represent numbers."
+                },
+                {
+                  "label": "UnevenDivisibility",
+                  "verdict": "defendable",
+                  "evidence": "3 objects partitioned into 2 equal groups of 1 with 1 left over demonstrates uneven divisibility by 2."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AdditiveCount",
+            "verdict": "defendable",
+            "evidence": "Counting physical objects (3 total counters across two groups and a leftover)."
+          },
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard decimal numeral 3 is used."
+          },
+          {
+            "label": "ConceptClassification",
+            "verdict": "defendable",
+            "evidence": "Task asks to classify the collection as odd or even."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The values involved (1, 2, 3) are integers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numbers present (1, 2, 3) are less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "Only positive quantities and numbers are involved."
+          },
+          {
+            "label": "NumbersWithoutZero",
+            "verdict": "defendable",
+            "evidence": "The value zero does not appear or serve as a quantity."
+          },
+          {
+            "label": "NumerationWithIntegers",
+            "verdict": "defendable",
+            "evidence": "Engages numerical understanding and cardinality of integers 1, 2, and 3."
+          },
+          {
+            "label": "OddNumbers",
+            "verdict": "defendable",
+            "evidence": "Focuses on identifying whether 3 is an odd number via divisibility by 2."
+          },
+          {
+            "label": "PhysicalNumbers",
+            "verdict": "defendable",
+            "evidence": "Counters/circles are used to physically represent numbers."
+          },
+          {
+            "label": "UnevenDivisibility",
+            "verdict": "defendable",
+            "evidence": "3 objects partitioned into 2 equal groups of 1 with 1 left over demonstrates uneven divisibility by 2."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
+      "image_sha256": "73fc8c802129c3c6890f6a32df6d06fb15d0f40bb9847936b1d05f7a05ae63b5",
+      "validation_cache_key": "7e09ed2c85ebbcf6c40d5377389f6632318a62627dc84fa4620223cc35b5445c",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "The operation shown is 75¢ + 50¢."
+          },
+          {
+            "label": "Coins",
+            "verdict": "defendable",
+            "evidence": "Depicts several 25¢ coins."
+          },
+          {
+            "label": "Dollar",
+            "verdict": "not_defendable",
+            "evidence": "The entire exercise is formulated in cents (¢), without using the dollar ($) symbol or dollar bills."
+          },
+          {
+            "label": "QuarterDenomination",
+            "verdict": "defendable",
+            "evidence": "Features 25¢ coins, which represent quarter denominations."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "The solution requires only one addition step: 75¢ + 50¢."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "Includes a short story: 'Maya has 75¢. She receives 50¢ more. How much money does she have now?'"
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "There are exactly two operands in the addition: 75¢ and 50¢."
+          }
+        ],
+        "reasoning": "The label 'Dollar' is not defendable because the exercise only contains cents (¢) and no dollar-denominated values or symbols ($)."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "54a66ff18138a69ae2a34564f6dfe4ae5135cdd53d41d5c72cbdb777684e1962",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "T726aue4F_Lsxs0PlNqOaA",
+            "validated_at": "2026-09-28T19:17:37.492Z",
+            "elapsed_ms": 2360,
+            "usage": {
+              "input_tokens": 1926,
+              "answer_tokens": 429,
+              "total_tokens": 2355
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Addition",
+                  "verdict": "defendable",
+                  "evidence": "Shows addition operator '+' and combines amounts 75¢ + 50¢."
+                },
+                {
+                  "label": "Coins",
+                  "verdict": "defendable",
+                  "evidence": "Visual coins depicting 25¢ are displayed."
+                },
+                {
+                  "label": "Dollar",
+                  "verdict": "defendable",
+                  "evidence": "Uses the cent denomination of the US dollar system (cents/quarters)."
+                },
+                {
+                  "label": "QuarterDenomination",
+                  "verdict": "defendable",
+                  "evidence": "Coins are specifically 25¢ quarter denominations."
+                },
+                {
+                  "label": "SingleStep",
+                  "verdict": "defendable",
+                  "evidence": "Requires a single addition operation: 75¢ + 50¢."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "A word problem story is provided at the top for the learner to read and interpret."
+                },
+                {
+                  "label": "TwoOperands",
+                  "verdict": "defendable",
+                  "evidence": "The equation contains exactly two operands: 75¢ and 50¢."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "Shows addition operator '+' and combines amounts 75¢ + 50¢."
+          },
+          {
+            "label": "Coins",
+            "verdict": "defendable",
+            "evidence": "Visual coins depicting 25¢ are displayed."
+          },
+          {
+            "label": "Dollar",
+            "verdict": "defendable",
+            "evidence": "Uses the cent denomination of the US dollar system (cents/quarters)."
+          },
+          {
+            "label": "QuarterDenomination",
+            "verdict": "defendable",
+            "evidence": "Coins are specifically 25¢ quarter denominations."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "Requires a single addition operation: 75¢ + 50¢."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "A word problem story is provided at the top for the learner to read and interpret."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The equation contains exactly two operands: 75¢ and 50¢."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0",
+      "image_sha256": "6b647e33d9c40cbb3e482f13e9919cb7428b92f6665a518b538f6beda6ae7087",
+      "validation_cache_key": "15c2f6bfcd25268d1d6953ebe0d992ff6917e702f8f7826f728c42bc6b2c18ff",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "Visible equations such as 2 * (2/8) = (2 * 2) * (1/8) = 4 * (1/8) = 4/8 are used to represent the operations."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers like 1, 2, and 4 are used throughout the problem."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "not_defendable",
+            "evidence": "There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "Multiplication of a whole number by a fraction is explicitly performed, e.g., 2 * (2/8)."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The step-by-step execution of associative multiplication to solve the fraction multiplication is shown in the yellow and green boxes."
+          },
+          {
+            "label": "ProperFractions",
+            "verdict": "defendable",
+            "evidence": "Proper fractions such as 1/8, 2/8, and 4/8 are prominently featured."
+          },
+          {
+            "label": "SingleFrameOfReference",
+            "verdict": "defendable",
+            "evidence": "All representations refer to a single, consistent frame of reference, labeled 'SAME WHOLE' (representing 1 meter of ribbon)."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "The problem begins with a text-based story scenario about craft kits and ribbon usage that must be read and understood."
+          },
+          {
+            "label": "VisualNumbers",
+            "verdict": "defendable",
+            "evidence": "The fractions 2/8 and 4/8 are represented visually using shaded regions of divided bars representing the whole."
+          }
+        ],
+        "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "9e56872b480ecdc808e76e67c5697a66a1b17f8e5434e93c9284c1b4a43686b8",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Xb26ap2tBtG1vdIPp_-UkAQ",
+            "validated_at": "2026-09-28T19:17:51.904Z",
+            "elapsed_ms": 3009,
+            "usage": {
+              "input_tokens": 2127,
+              "answer_tokens": 585,
+              "total_tokens": 2712
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Equation",
+                  "verdict": "defendable",
+                  "evidence": "Multiple equations are displayed, such as 2 × (2/8) = (2 × 2) × (1/8) = 4 × (1/8) = 4/8."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Integers such as 1, 2, 4, and 0 appear throughout."
+                },
+                {
+                  "label": "IteratedOperation",
+                  "verdict": "defendable",
+                  "evidence": "Represents iterated copies (repeated addition/scaling) via 2 equal copies of 2/8."
+                },
+                {
+                  "label": "Multiplication",
+                  "verdict": "defendable",
+                  "evidence": "Explicit multiplication operations involving whole numbers and fractions (2 × (2/8))."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "Steps 1 and 2 detail decomposing the fraction and executing the associative property calculation."
+                },
+                {
+                  "label": "ProperFractions",
+                  "verdict": "defendable",
+                  "evidence": "Fractions 2/8, 1/8, and 4/8 are proper fractions."
+                },
+                {
+                  "label": "SingleFrameOfReference",
+                  "verdict": "defendable",
+                  "evidence": "Shared frame of reference 'SHARED WHOLE: ONE METER' divided into 8 equal parts across all copies."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "Word problem presented requiring reading comprehension about craft kits using ribbon."
+                },
+                {
+                  "label": "VisualNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Visual bar strip models partitioned into 8 equal segments with shaded portions representing fractions."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "Multiple equations are displayed, such as 2 × (2/8) = (2 × 2) × (1/8) = 4 × (1/8) = 4/8."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers such as 1, 2, 4, and 0 appear throughout."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "defendable",
+            "evidence": "Represents iterated copies (repeated addition/scaling) via 2 equal copies of 2/8."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "Explicit multiplication operations involving whole numbers and fractions (2 × (2/8))."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Steps 1 and 2 detail decomposing the fraction and executing the associative property calculation."
+          },
+          {
+            "label": "ProperFractions",
+            "verdict": "defendable",
+            "evidence": "Fractions 2/8, 1/8, and 4/8 are proper fractions."
+          },
+          {
+            "label": "SingleFrameOfReference",
+            "verdict": "defendable",
+            "evidence": "Shared frame of reference 'SHARED WHOLE: ONE METER' divided into 8 equal parts across all copies."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "Word problem presented requiring reading comprehension about craft kits using ribbon."
+          },
+          {
+            "label": "VisualNumbers",
+            "verdict": "defendable",
+            "evidence": "Visual bar strip models partitioned into 8 equal segments with shaded portions representing fractions."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "4.NF.B.4c-fraction-multiplication-word-problems~19c617d3#fraction-arithmetic#fractions-word-problem#train#solution#inst:0",
+      "image_sha256": "fbb429598653627685f15acc4bcc442675b354fd3d4c96121d9e7a86f15cbd86",
+      "validation_cache_key": "a345cfc19955019f4d39a5b76b0167dbc687de5fb2be14d016c15a62ff3bd801",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "There are several equations showing the equivalence of different forms of multiplication with fractions, such as 3 * (3/4) = (3 * 3) * (1/4)."
+          },
+          {
+            "label": "ImproperFractions",
+            "verdict": "defendable",
+            "evidence": "The fraction 9/4 is an improper fraction used throughout the exercise."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The integers 3, 1, 2, and 9 are present."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "not_defendable",
+            "evidence": "There is no iterated operation shown; the problem is solved using a direct multiplication procedure."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "The expression 3 * (3/4) represents the multiplication of a fraction by a whole number."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The step-by-step conversion of 3 * (3/4) into (3 * 3) * (1/4) = 9/4 is displayed."
+          },
+          {
+            "label": "SingleFrameOfReference",
+            "verdict": "defendable",
+            "evidence": "All quantities and fractions refer to a single consistent frame of reference: one meter of ribbon partitioned into fourths."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "The exercise starts with a word problem requiring reading comprehension to extract the mathematical calculation."
+          },
+          {
+            "label": "VisualNumbers",
+            "verdict": "defendable",
+            "evidence": "The fractional quantities are visually represented as segments (A, B, C) within segmented bar diagrams representing wholes."
+          }
+        ],
+        "reasoning": "The label 'IteratedOperation' is not defendable because the exercise demonstrates simple fraction multiplication and regrouping rather than an iterated operation applied repeatedly on a single operand."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "e4e60e41ea7f323870d25f523f553c02f2fc4302fc33d22ff81da7950e95339c",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "UL26atnBD4TRnsEPlcip8AM",
+            "validated_at": "2026-09-28T19:17:40.582Z",
+            "elapsed_ms": 4579,
+            "usage": {
+              "input_tokens": 2120,
+              "answer_tokens": 590,
+              "thinking_tokens": 385,
+              "total_tokens": 3095
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Equation",
+                  "verdict": "defendable",
+                  "evidence": "Visible equations explicitly relate expressions such as 3 × (3/4) = (3 × 3) × (1/4) = 9 × (1/4) = 9/4."
+                },
+                {
+                  "label": "ImproperFractions",
+                  "verdict": "defendable",
+                  "evidence": "The improper fraction 9/4 is calculated and displayed as the final result."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Integers such as 1, 2, 3, and 9 appear throughout the problem and equations."
+                },
+                {
+                  "label": "IteratedOperation",
+                  "verdict": "defendable",
+                  "evidence": "The task represents 3 copies of 3/4 combined together through equal unit parts."
+                },
+                {
+                  "label": "Multiplication",
+                  "verdict": "defendable",
+                  "evidence": "Multiplication is explicitly executed both conceptually (equal groups) and algebraically (3 × (3/4))."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "Steps 1 and 2 detail the procedure for decomposing and regrouping factors to find the product."
+                },
+                {
+                  "label": "SingleFrameOfReference",
+                  "verdict": "defendable",
+                  "evidence": "All representations maintain a consistent unit frame of reference ('Shared whole: one meter', divided into 4 equal fourths)."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "A written word problem at the top introduces the context and question."
+                },
+                {
+                  "label": "VisualNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Fractions and counts are visually represented via partitioned bar/tape diagrams."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Equation",
+            "verdict": "defendable",
+            "evidence": "Visible equations explicitly relate expressions such as 3 × (3/4) = (3 × 3) × (1/4) = 9 × (1/4) = 9/4."
+          },
+          {
+            "label": "ImproperFractions",
+            "verdict": "defendable",
+            "evidence": "The improper fraction 9/4 is calculated and displayed as the final result."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers such as 1, 2, 3, and 9 appear throughout the problem and equations."
+          },
+          {
+            "label": "IteratedOperation",
+            "verdict": "defendable",
+            "evidence": "The task represents 3 copies of 3/4 combined together through equal unit parts."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "Multiplication is explicitly executed both conceptually (equal groups) and algebraically (3 × (3/4))."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Steps 1 and 2 detail the procedure for decomposing and regrouping factors to find the product."
+          },
+          {
+            "label": "SingleFrameOfReference",
+            "verdict": "defendable",
+            "evidence": "All representations maintain a consistent unit frame of reference ('Shared whole: one meter', divided into 4 equal fourths)."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "A written word problem at the top introduces the context and question."
+          },
+          {
+            "label": "VisualNumbers",
+            "verdict": "defendable",
+            "evidence": "Fractions and counts are visually represented via partitioned bar/tape diagrams."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "image_sha256": "aea9be3e4baabb9790c696249b194d59cfb08cc695a8de61fb2aa97aedd3e223",
+      "validation_cache_key": "0c283392a99a2018cb1841a55bb702d56b20a85ce00bbcc54fae4bdd90c14237",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated."
+          },
+          {
+            "label": "Hexagon",
+            "verdict": "defendable",
+            "evidence": "A blue hexagon with six sides is displayed on the left card."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The numbers 4 and 6 are integers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numbers shown (4 and 6) have absolute values well below 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "None of the numbers involved are negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The comparison is written as '6 > 4' in the solution description."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task counts and compares the number of sides (shape attributes) of the hexagon and the square."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Requires identifying visual shape representations (hexagon and square) to verify their respective side counts."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: Only single-digit numbers (4 and 6) are present; there is no multi-digit positional representation shown or evaluated."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "8ccdfb29186dbe3dd0c4bca930e137b00b85d22d9d5ce5846ed70bfef2be38b4",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Ub26apTBLp-xvdIPt4vecA",
+            "validated_at": "2026-09-28T19:17:41.229Z",
+            "elapsed_ms": 3736,
+            "usage": {
+              "input_tokens": 2053,
+              "answer_tokens": 470,
+              "thinking_tokens": 293,
+              "total_tokens": 2816
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard decimal numerals 6 and 4 are used."
+                },
+                {
+                  "label": "Hexagon",
+                  "verdict": "defendable",
+                  "evidence": "A 6-sided polygon (hexagon) is displayed."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The values 6 and 4 are whole integer numbers."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "All numerical values (4 and 6) are less than or equal to 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present are non-negative."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "The inequality '6 > 4' is explicitly evaluated and stated."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "The task focuses on counting and comparing the number of sides of geometric shapes."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "Interpreting visual geometric shapes to identify and count their sides."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard decimal numerals 6 and 4 are used."
+          },
+          {
+            "label": "Hexagon",
+            "verdict": "defendable",
+            "evidence": "A 6-sided polygon (hexagon) is displayed."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The values 6 and 4 are whole integer numbers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numerical values (4 and 6) are less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers present are non-negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The inequality '6 > 4' is explicitly evaluated and stated."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task focuses on counting and comparing the number of sides of geometric shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Interpreting visual geometric shapes to identify and count their sides."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~1c54c7a4#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "image_sha256": "fad915117dbe66794095dd22083137de015ee9b811d5ba4566756bfde343da4b",
+      "validation_cache_key": "2978b0a99721996ef3955903c7e78285c42977fa3db574522846ce785d3c8bc9",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds)."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The numbers used in counting the sides of the shapes are 3 and 0, which are integers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numeric values shown (3 and 0) are less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "No negative numbers are present in the image."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The inequality relation '3 > 0' is explicitly stated in the solution block."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The exercise asks to count and compare the number of sides (attributes) of the shapes."
+          },
+          {
+            "label": "Triangle",
+            "verdict": "defendable",
+            "evidence": "A triangle is visually depicted and identified, and its attribute of having 3 sides is evaluated."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The user must visually recognize the shapes (triangle and circle) and identify their sides to solve the task."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: The math task only uses the single-digit numbers 3 and 0, which do not demonstrate or require understanding of multi-digit positional place value (e.g., units, tens, hundreds)."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "4de6ada8efe660331b54afe5190931718e5de9398a6f3a960dc83636e6100013",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Ub26aqGNIub1xN8Pn63L-Qg",
+            "validated_at": "2026-09-28T19:17:39.583Z",
+            "elapsed_ms": 2360,
+            "usage": {
+              "input_tokens": 2057,
+              "answer_tokens": 469,
+              "total_tokens": 2526
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard decimal digits 3 and 0 are used."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The quantities 3 and 0 are integer values."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present (0 and 3) are less than or equal to 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present (0, 3) are nonnegative."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "The inequality 3 > 0 is explicitly shown and compared."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "Counting the sides of shapes (3 sides for triangle, 0 sides for circle)."
+                },
+                {
+                  "label": "Triangle",
+                  "verdict": "defendable",
+                  "evidence": "A triangle is prominently featured and analyzed."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "Interpreting geometric visual representations of a triangle and a circle."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard decimal digits 3 and 0 are used."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The quantities 3 and 0 are integer values."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numbers present (0 and 3) are less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers present (0, 3) are nonnegative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The inequality 3 > 0 is explicitly shown and compared."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "Counting the sides of shapes (3 sides for triangle, 0 sides for circle)."
+          },
+          {
+            "label": "Triangle",
+            "verdict": "defendable",
+            "evidence": "A triangle is prominently featured and analyzed."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Interpreting geometric visual representations of a triangle and a circle."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~e6757d97#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "image_sha256": "bb75db6fcede3442aee375ce78ad6598b979771a7e4a27292842dd49d8e5985a",
+      "validation_cache_key": "90650408243277ae8e9c78ca8cb459da087c83efe9b697ba091101f219e108c3",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts."
+          },
+          {
+            "label": "Cube",
+            "verdict": "defendable",
+            "evidence": "A 3D cube illustration is shown, identified by name, and its 8 vertices are counted."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The numbers 8 and 1 used in the task are integers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numerical values (8 and 1) are strictly less than 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "There are no negative numbers in the exercise."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The solution explicitly compares the quantities using the inequality relation '8 > 1'."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The exercise is based on counting and comparing the number of vertices, which is a structural geometric attribute of the 3D shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The student must interpret the 3D visual representations of the cube and cone to understand the question."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: The task only contains single-digit integers (8 and 1) without any demonstration or requirement of positional representation or place value concepts."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "8fe57e569d8a24cf8d18983fc003559daa93f9052c2880db518027a6ea115db1",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "YL26aqvGBvXHnsEPiYrG6QQ",
+            "validated_at": "2026-09-28T19:17:54.394Z",
+            "elapsed_ms": 2489,
+            "usage": {
+              "input_tokens": 2061,
+              "answer_tokens": 464,
+              "total_tokens": 2525
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard base-10 numerals '8' and '1' are used."
+                },
+                {
+                  "label": "Cube",
+                  "verdict": "defendable",
+                  "evidence": "A cube is illustrated and named."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Integers 8 and 1 are used."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "Numbers 8 and 1 are both <= 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present (8, 1) are non-negative."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "Inequality statement '8 > 1' is explicitly shown."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "Vertices of 3D geometric shapes are counted and compared."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "Visual 3D representations of a cube and a cone are displayed."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard base-10 numerals '8' and '1' are used."
+          },
+          {
+            "label": "Cube",
+            "verdict": "defendable",
+            "evidence": "A cube is illustrated and named."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers 8 and 1 are used."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "Numbers 8 and 1 are both <= 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers present (8, 1) are non-negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "Inequality statement '8 > 1' is explicitly shown."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "Vertices of 3D geometric shapes are counted and compared."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Visual 3D representations of a cube and a cone are displayed."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~95238441#shape-compare-attributes#shape-compare-attributes#train#solution#inst:0",
+      "image_sha256": "ec61daf71c0e4d0641a9e4921f06c7165b82080748e918984b2c67ad2da135e1",
+      "validation_cache_key": "a80617e526fa0b01ffbf0242faa1550c7e7b3c663786d74eaf28d4b872316b98",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The values 4 and 0 are integers with no fractional parts."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "The numbers involved (4 and 0) are well below the absolute value threshold of 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numerical values in the exercise (4 and 0) are non-negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The comparison explicitly states and writes the inequality '4 > 0'."
+          },
+          {
+            "label": "Rectangle",
+            "verdict": "defendable",
+            "evidence": "A rectangle shape is featured on the left card and referred to in the text."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task focuses on the number of sides of geometric shapes (4 sides for the rectangle, 0 sides for the circle)."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The learner must interpret visual shapes (rectangle and circle) and their properties to solve the problem."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: The task only uses single-digit numbers (4 and 0), which do not exhibit multi-digit positional place value representation where successive places differ by a factor of ten."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "0eff331aa4e1dfff0d9d9f7c61ee41ead69bd4f32a33f469c67c98ecc925e83a",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "U726ariENIGkvdIPnMejgAM",
+            "validated_at": "2026-09-28T19:17:42.552Z",
+            "elapsed_ms": 2968,
+            "usage": {
+              "input_tokens": 2061,
+              "answer_tokens": 465,
+              "total_tokens": 2526
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard base 10 numerals 4 and 0 are used."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Whole integer counts 4 and 0 are compared."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "The values involved are 0 and 4, both <= 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers present are non-negative (0 and 4)."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "The inequality 4 > 0 is explicitly shown and evaluated."
+                },
+                {
+                  "label": "Rectangle",
+                  "verdict": "defendable",
+                  "evidence": "A rotated rectangle is visually depicted and identified."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "Sides of shapes (geometric attributes) are counted and compared."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "Requires interpreting visual 2D shapes to evaluate side counts."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard base 10 numerals 4 and 0 are used."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Whole integer counts 4 and 0 are compared."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "The values involved are 0 and 4, both <= 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers present are non-negative (0 and 4)."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The inequality 4 > 0 is explicitly shown and evaluated."
+          },
+          {
+            "label": "Rectangle",
+            "verdict": "defendable",
+            "evidence": "A rotated rectangle is visually depicted and identified."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "Sides of shapes (geometric attributes) are counted and compared."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Requires interpreting visual 2D shapes to evaluate side counts."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0",
+      "image_sha256": "0a53c59cce0e24026697951d196876cbacd6136fbeee65abbcf0c50760ada6c7",
+      "validation_cache_key": "e36cd7a491c1f7417401987299a151a12068fe0104835144ff60ea7a6776dfc7",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts."
+          },
+          {
+            "label": "Cylinder",
+            "verdict": "defendable",
+            "evidence": "A cylinder shape is clearly displayed on the left-hand card, labeled 'Cylinder'."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The numbers shown, 2 and 0, are integer values."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numerical values shown (0 and 2) have absolute values strictly less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "None of the numbers in the exercise (0 and 2) are negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The question 'Which shape has more flat faces?' requires comparing the quantities 2 and 0 to establish which one is strictly greater."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task explicitly counts and compares a structural attribute (the number of flat faces) of 3D shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The student must look at the diagrammed shapes (cylinder and sphere) to recognize them and associate their attributes with the given counts."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "beed93187f801ca4393f3dfe71e7509f6c7bf11ebe2083eefe4d85a9de28689e",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "VL26apz2NMLY7M8PtY7oiQU",
+            "validated_at": "2026-09-28T19:17:45.225Z",
+            "elapsed_ms": 4642,
+            "usage": {
+              "input_tokens": 2066,
+              "answer_tokens": 516,
+              "thinking_tokens": 283,
+              "total_tokens": 2865
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Numbers 2 and 0 are presented in standard base-10 positional notation."
+                },
+                {
+                  "label": "Cylinder",
+                  "verdict": "defendable",
+                  "evidence": "A 3D cylinder is depicted and explicitly labeled with its flat face count."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The flat face counts are given as integers 2 and 0."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "All numerical values (2 and 0) are strictly less than or equal to 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numerical values present in the exercise (2 and 0) are non-negative."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "The question asks which shape has 'more' flat faces, requiring a numeric inequality comparison between 2 and 0."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "The task focuses on quantifying and comparing the number of flat faces of 3D geometric shapes."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "The learner must interpret visual 3D shape illustrations (cylinder and sphere) to relate to the geometric question."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Numbers 2 and 0 are presented in standard base-10 positional notation."
+          },
+          {
+            "label": "Cylinder",
+            "verdict": "defendable",
+            "evidence": "A 3D cylinder is depicted and explicitly labeled with its flat face count."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The flat face counts are given as integers 2 and 0."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "All numerical values (2 and 0) are strictly less than or equal to 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numerical values present in the exercise (2 and 0) are non-negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The question asks which shape has 'more' flat faces, requiring a numeric inequality comparison between 2 and 0."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task focuses on quantifying and comparing the number of flat faces of 3D geometric shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The learner must interpret visual 3D shape illustrations (cylinder and sphere) to relate to the geometric question."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "K.G.B.4-compare-shape-attributes~827d01f8#shape-compare-attributes#shape-compare-attributes#val#solution#inst:0",
+      "image_sha256": "1ad3cf6a760b16934a95fa52fd4a52d4dfe248eaeaacaf8453bab6d0962a3d77",
+      "validation_cache_key": "fd83086089876417129541cd113123d488e5726df6e4c1f7b1e817df0d4e8b3f",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "not_defendable",
+            "evidence": "Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations."
+          },
+          {
+            "label": "Hexagon",
+            "verdict": "defendable",
+            "evidence": "A pink hexagon is displayed in the left option box."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The values 6 and 0 are integer numbers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "The values 6 and 0 are both smaller than 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "No negative numbers are present."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The expression 6 > 0 is explicitly shown in the solution explanation."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task asks to compare the count of vertices for two shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "The task requires interpreting visual shapes (hexagon and circle) and their counts."
+          }
+        ],
+        "reasoning": "Labels not defendable: Base10: Only single-digit numbers (6 and 0) are used, which do not demonstrate positional base-10 representations."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "2d5186b71bdcc2e7b3801d4b9efed35031f4034f36ed6be4802715d30366575d",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "X726atjJI82XvdIP8vnCoAc",
+            "validated_at": "2026-09-28T19:17:54.271Z",
+            "elapsed_ms": 2976,
+            "usage": {
+              "input_tokens": 2053,
+              "answer_tokens": 475,
+              "total_tokens": 2528
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Base10",
+                  "verdict": "defendable",
+                  "evidence": "Standard decimal base-10 numerals '6' and '0' are used."
+                },
+                {
+                  "label": "Hexagon",
+                  "verdict": "defendable",
+                  "evidence": "A 6-sided polygon (hexagon) is displayed and named."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Vertex counts 6 and 0 are integers."
+                },
+                {
+                  "label": "NumbersSmaller20",
+                  "verdict": "defendable",
+                  "evidence": "Numbers involved are 6 and 0, which are ≤ 20."
+                },
+                {
+                  "label": "NumbersWithoutNegatives",
+                  "verdict": "defendable",
+                  "evidence": "All numbers shown (6 and 0) are non-negative."
+                },
+                {
+                  "label": "NumericInequality",
+                  "verdict": "defendable",
+                  "evidence": "The inequality 6 > 0 is explicitly written and evaluated."
+                },
+                {
+                  "label": "ShapeAttributes",
+                  "verdict": "defendable",
+                  "evidence": "The task focuses on counting vertices of shapes."
+                },
+                {
+                  "label": "VisualReception",
+                  "verdict": "defendable",
+                  "evidence": "Interpreting visual geometric shapes (hexagon and circle) to determine vertex counts."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Base10",
+            "verdict": "defendable",
+            "evidence": "Standard decimal base-10 numerals '6' and '0' are used."
+          },
+          {
+            "label": "Hexagon",
+            "verdict": "defendable",
+            "evidence": "A 6-sided polygon (hexagon) is displayed and named."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Vertex counts 6 and 0 are integers."
+          },
+          {
+            "label": "NumbersSmaller20",
+            "verdict": "defendable",
+            "evidence": "Numbers involved are 6 and 0, which are ≤ 20."
+          },
+          {
+            "label": "NumbersWithoutNegatives",
+            "verdict": "defendable",
+            "evidence": "All numbers shown (6 and 0) are non-negative."
+          },
+          {
+            "label": "NumericInequality",
+            "verdict": "defendable",
+            "evidence": "The inequality 6 > 0 is explicitly written and evaluated."
+          },
+          {
+            "label": "ShapeAttributes",
+            "verdict": "defendable",
+            "evidence": "The task focuses on counting vertices of shapes."
+          },
+          {
+            "label": "VisualReception",
+            "verdict": "defendable",
+            "evidence": "Interpreting visual geometric shapes (hexagon and circle) to determine vertex counts."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
+      "image_sha256": "501e3e5737a942cf271f40160e4641bc1e186a1adcd2c8e7b621fcb2255ff029",
+      "validation_cache_key": "0037e6b98a0cf860bf37c3836cc6e851203eb81bd6c911bf39a6f9b273fda938",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AreaCalculation",
+            "verdict": "defendable",
+            "evidence": "The task asks to find the width given the area and length of a rectangle using the area formula."
+          },
+          {
+            "label": "BoxArrangement",
+            "verdict": "defendable",
+            "evidence": "The grid of unit squares is arranged in a 2x4 rectangular box organization."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "The formula 'Area = length x width' and equation '8 = 2 x 4' involve multiplication."
+          },
+          {
+            "label": "ProcedureInversion",
+            "verdict": "defendable",
+            "evidence": "The solution uses division (8 / 2 = 4) to invert the multiplication procedure and find the unknown width."
+          },
+          {
+            "label": "Square",
+            "verdict": "not_defendable",
+            "evidence": "The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The equations '8 / 2 = 4' and '2 * 4' contain exactly two operands."
+          }
+        ],
+        "reasoning": "Labels not defendable: Square: The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "d99b628ca0026ea10b67509a852288f05ce61346b22c27256c44b15cf007039f",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Vr26auLTMZbFvdIPuryZkQY",
+            "validated_at": "2026-09-28T19:17:45.228Z",
+            "elapsed_ms": 2676,
+            "usage": {
+              "input_tokens": 1956,
+              "answer_tokens": 406,
+              "total_tokens": 2362
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "AreaCalculation",
+                  "verdict": "defendable",
+                  "evidence": "Visible grid showing area calculation with formula Area = length × width and 8 = 2 × 4."
+                },
+                {
+                  "label": "BoxArrangement",
+                  "verdict": "defendable",
+                  "evidence": "2 by 4 rectangular grid of unit boxes."
+                },
+                {
+                  "label": "Multiplication",
+                  "verdict": "defendable",
+                  "evidence": "Multiplication formula and equation Area = length × width and 8 = 2 × 4 are shown."
+                },
+                {
+                  "label": "ProcedureInversion",
+                  "verdict": "defendable",
+                  "evidence": "Inverting the area multiplication to find the missing side via division: 8 ÷ 2 = 4."
+                },
+                {
+                  "label": "Square",
+                  "verdict": "defendable",
+                  "evidence": "The grid consists of unit squares forming the rectangular region."
+                },
+                {
+                  "label": "TwoOperands",
+                  "verdict": "defendable",
+                  "evidence": "Expressions like 8 ÷ 2 = 4 and 2 × 4 have exactly two operands."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AreaCalculation",
+            "verdict": "defendable",
+            "evidence": "Visible grid showing area calculation with formula Area = length × width and 8 = 2 × 4."
+          },
+          {
+            "label": "BoxArrangement",
+            "verdict": "defendable",
+            "evidence": "2 by 4 rectangular grid of unit boxes."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "Multiplication formula and equation Area = length × width and 8 = 2 × 4 are shown."
+          },
+          {
+            "label": "ProcedureInversion",
+            "verdict": "defendable",
+            "evidence": "Inverting the area multiplication to find the missing side via division: 8 ÷ 2 = 4."
+          },
+          {
+            "label": "Square",
+            "verdict": "defendable",
+            "evidence": "The grid consists of unit squares forming the rectangular region."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "Expressions like 8 ÷ 2 = 4 and 2 × 4 have exactly two operands."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0",
+      "image_sha256": "85b9f6c7e12008e77f67a5bcdbd3de2aa6c2f5397d3ea12c63bf56876b6363cc",
+      "validation_cache_key": "f5fcd2882f9dc21f228b1a4992667136be7fe6b5966995341e717e4bf7fe6935",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AreaCalculation",
+            "verdict": "defendable",
+            "evidence": "The task requires finding the length of a rectangle given its area of 10 square units and width of 5 units."
+          },
+          {
+            "label": "BoxArrangement",
+            "verdict": "defendable",
+            "evidence": "The rectangle is represented visually as a 5x2 grid of unit squares."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "The formulas 'Area = length x width' and '10 = ? x 5' explicitly involve multiplication."
+          },
+          {
+            "label": "ProcedureInversion",
+            "verdict": "defendable",
+            "evidence": "The problem presents an 'Inverse step: 10 ÷ 5 = ?' to determine the missing dimension."
+          },
+          {
+            "label": "Square",
+            "verdict": "not_defendable",
+            "evidence": "The shape being studied and solved for is a non-square rectangle (5 by 2 units)."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The division '10 ÷ 5' contains exactly two explicit operands."
+          }
+        ],
+        "reasoning": "The ontology label 'Square' is not defendable because the exercise is about a non-square rectangle (5x2), not a square."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "1d3788158b058525ba89f3537adc3e82f5c81b54e80adca012acdf7a01fd65b4",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Vb26aq3zHNz6xs0P0ZrHkAQ",
+            "validated_at": "2026-09-28T19:17:57.119Z",
+            "elapsed_ms": 15889,
+            "usage": {
+              "input_tokens": 1978,
+              "answer_tokens": 420,
+              "thinking_tokens": 355,
+              "total_tokens": 2753
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "AreaCalculation",
+                  "verdict": "defendable",
+                  "evidence": "The prompt explicitly addresses calculating rectangle area using the formula Area = length × width with 10 square units."
+                },
+                {
+                  "label": "BoxArrangement",
+                  "verdict": "defendable",
+                  "evidence": "A 2D rectangular grid arrangement of 5 × 2 unit square boxes is visibly depicted."
+                },
+                {
+                  "label": "Multiplication",
+                  "verdict": "defendable",
+                  "evidence": "The formula 'Area = length × width' and relation '10 = ? × 5' visibly involve multiplication."
+                },
+                {
+                  "label": "ProcedureInversion",
+                  "verdict": "defendable",
+                  "evidence": "The task explicitly states 'Inverse step: 10 ÷ 5 = ?' to invert multiplication and recover the unknown dimension."
+                },
+                {
+                  "label": "Square",
+                  "verdict": "defendable",
+                  "evidence": "The rectangle is tiled by individual unit squares."
+                },
+                {
+                  "label": "TwoOperands",
+                  "verdict": "defendable",
+                  "evidence": "The expressions '? × 5' and '10 ÷ 5' each contain exactly two operands."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "AreaCalculation",
+            "verdict": "defendable",
+            "evidence": "The prompt explicitly addresses calculating rectangle area using the formula Area = length × width with 10 square units."
+          },
+          {
+            "label": "BoxArrangement",
+            "verdict": "defendable",
+            "evidence": "A 2D rectangular grid arrangement of 5 × 2 unit square boxes is visibly depicted."
+          },
+          {
+            "label": "Multiplication",
+            "verdict": "defendable",
+            "evidence": "The formula 'Area = length × width' and relation '10 = ? × 5' visibly involve multiplication."
+          },
+          {
+            "label": "ProcedureInversion",
+            "verdict": "defendable",
+            "evidence": "The task explicitly states 'Inverse step: 10 ÷ 5 = ?' to invert multiplication and recover the unknown dimension."
+          },
+          {
+            "label": "Square",
+            "verdict": "defendable",
+            "evidence": "The rectangle is tiled by individual unit squares."
+          },
+          {
+            "label": "TwoOperands",
+            "verdict": "defendable",
+            "evidence": "The expressions '? × 5' and '10 ÷ 5' each contain exactly two operands."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "image_sha256": "41b3089465ef1f7e713f194955c2fad85d0d0ec2272c837e84b75fe7758c3113",
+      "validation_cache_key": "02ae1f8df694192ef7965dd566d481dd13c47fdd91f4e458800579797b1b26cb",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "An addition equation '45 + 41 = 86' is explicitly written in the solution block."
+          },
+          {
+            "label": "DigitalClock",
+            "verdict": "defendable",
+            "evidence": "Two digital clock displays showing '5:45' and '6:26' are clearly rendered."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "All numerical values such as 45, 41, and 86 are integer numbers."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "The entire exercise focuses on determining the end time of a science club given its start time and duration."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "The duration of the activity is specified as 41 minutes."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The solution explicitly outlines the procedure of counting minutes after 5:00."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "Solving this exercise is not a single-step operation, as it requires adding the minutes (45 + 41 = 86) and then performing a modulo-60 conversion to determine the hour change and final time (6:26)."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "The problem is introduced with a written text story that the student must read and comprehend."
+          }
+        ],
+        "reasoning": "The exercise is labeled as SingleStep, but it cannot be solved in a single procedural step; it requires both addition (45 + 41 = 86) and an extra hour-rollover conversion step to determine that 86 minutes past 5:00 corresponds to 6:26."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "f68b8e36bd0ad8387403b6addaa09f307d0f082006b8a2128512df68027b24cd",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Wb26asGoHbWY28oPxYmUwAk",
+            "validated_at": "2026-09-28T19:17:47.930Z",
+            "elapsed_ms": 2700,
+            "usage": {
+              "input_tokens": 2019,
+              "answer_tokens": 538,
+              "total_tokens": 2557
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Addition",
+                  "verdict": "defendable",
+                  "evidence": "Visible addition equation: 45 + 41 = 86."
+                },
+                {
+                  "label": "DigitalClock",
+                  "verdict": "defendable",
+                  "evidence": "Displays reading 5:45 and 6:26 styled as digital clocks."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Integers used throughout: 45, 41, 86, 5, 6, 26."
+                },
+                {
+                  "label": "MeasuringTime",
+                  "verdict": "defendable",
+                  "evidence": "Calculating end time from start time 5:45 and 41 minutes duration."
+                },
+                {
+                  "label": "MinuteIntervals",
+                  "verdict": "defendable",
+                  "evidence": "Duration is specified as 41 minutes."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "Following the procedure of counting minutes after 5:00 via 45 + 41 = 86 to yield 6:26."
+                },
+                {
+                  "label": "SingleStep",
+                  "verdict": "defendable",
+                  "evidence": "Single core addition step 45 + 41 = 86 to find minutes past 5:00."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "Story problem presented in written text: 'A science club starts at 5:45 and lasts 41 minutes. What time does it end?'"
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "Visible addition equation: 45 + 41 = 86."
+          },
+          {
+            "label": "DigitalClock",
+            "verdict": "defendable",
+            "evidence": "Displays reading 5:45 and 6:26 styled as digital clocks."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers used throughout: 45, 41, 86, 5, 6, 26."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "Calculating end time from start time 5:45 and 41 minutes duration."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "Duration is specified as 41 minutes."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Following the procedure of counting minutes after 5:00 via 45 + 41 = 86 to yield 6:26."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "Single core addition step 45 + 41 = 86 to find minutes past 5:00."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "Story problem presented in written text: 'A science club starts at 5:45 and lasts 41 minutes. What time does it end?'"
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#question#inst:0",
+      "image_sha256": "d8420c666db22d715adbea7da8807486090594cdf6438024e16c4a9bb8ca5956",
+      "validation_cache_key": "8e4a609c87d3fbf80a3ebb60513179f03a24820cd107c145abdcbd8c55cd40a0",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "Solving the task requires adding 36 minutes to the start time's minute value."
+          },
+          {
+            "label": "DigitalClock",
+            "verdict": "defendable",
+            "evidence": "The start and end times are represented using digital clock displays."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The times and duration are represented as integers (5, 46, 36)."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "The task is to find the end time of an event given the start time and duration."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "The duration is expressed in minutes (36 minutes)."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Solving this requires executing the procedure of adding elapsed time to a clock face."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "The calculation (5:46 + 36 minutes) crosses the hour boundary, requiring both an addition step and a base-60 carryover/conversion step. Thus, it cannot be solved in a single step."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "The student must read and comprehend the short word problem to obtain the start time and duration."
+          }
+        ],
+        "reasoning": "The label 'SingleStep' is not defendable because the task requires crossing the hour boundary (from 5:46 with a duration of 36 minutes to reach 6:22), which involves addition followed by a base-60 carryover transformation (multi-step process)."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "7d75a9208928ba7ab5ce7c9f5b46c195b3c9fbb92ef12df6ae54688a2bfed73c",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "Wb26auz9Gpb4nsEPxK2l8AQ",
+            "validated_at": "2026-09-28T19:17:48.894Z",
+            "elapsed_ms": 3668,
+            "usage": {
+              "input_tokens": 2002,
+              "answer_tokens": 498,
+              "thinking_tokens": 335,
+              "total_tokens": 2835
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Addition",
+                  "verdict": "defendable",
+                  "evidence": "Finding the end time requires adding the 36-minute duration to the start time of 5:46."
+                },
+                {
+                  "label": "DigitalClock",
+                  "verdict": "defendable",
+                  "evidence": "Start and end times are presented on digital clock displays."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "The values 5, 46, and 36 are integers."
+                },
+                {
+                  "label": "MeasuringTime",
+                  "verdict": "defendable",
+                  "evidence": "The exercise involves calculating an end time based on clock times and an elapsed duration."
+                },
+                {
+                  "label": "MinuteIntervals",
+                  "verdict": "defendable",
+                  "evidence": "The duration is explicitly given as 36 minutes, an interval of minutes."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "Carrying out the procedure of adding minutes and converting over an hour threshold (5:46 + 36 min)."
+                },
+                {
+                  "label": "SingleStep",
+                  "verdict": "defendable",
+                  "evidence": "The problem requires a single operational step of adding the duration to the start time."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "The problem scenario is introduced via a written word problem sentence."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "Finding the end time requires adding the 36-minute duration to the start time of 5:46."
+          },
+          {
+            "label": "DigitalClock",
+            "verdict": "defendable",
+            "evidence": "Start and end times are presented on digital clock displays."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "The values 5, 46, and 36 are integers."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "The exercise involves calculating an end time based on clock times and an elapsed duration."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "The duration is explicitly given as 36 minutes, an interval of minutes."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Carrying out the procedure of adding minutes and converting over an hour threshold (5:46 + 36 min)."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "The problem requires a single operational step of adding the duration to the start time."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "The problem scenario is introduced via a written word problem sentence."
+          }
+        ],
+        "reasoning": ""
+      }
+    },
+    {
+      "sample_key": "3.MD.A.1-time-interval-word-problems~3b716d20#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+      "image_sha256": "07b93603df164ad88fedec7b50df4b38153ad508a48b2f4f57e1dc1cf40e2d36",
+      "validation_cache_key": "e55bae22a96cc4620977488d3b4eb814660ded3783a7245812cc5ff5d0757332",
+      "original_evaluation": {
+        "pass": false,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "An addition equation '42 + 32 = 74' is explicitly shown in the solution box."
+          },
+          {
+            "label": "AnalogClock",
+            "verdict": "defendable",
+            "evidence": "Two analog clocks represent the start time (8:42) and the end time (9:14)."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "All numbers representing hours, minutes, and totals are integers (8, 42, 32, 9, 14, 74)."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "The task asks to find the end time of a science club given its start time and duration."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "The duration is given in minutes (32 minutes) and the clocks resolve to minute-level accuracy."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "The solution explicitly outlines the procedure: counting minutes after 8:00 by adding 42 + 32 to get 74, then converting to the final hour/minute time."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "not_defendable",
+            "evidence": "The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "Solving the exercise requires reading and understanding the word problem provided in the 'Time Interval Story' box."
+          }
+        ],
+        "reasoning": "Labels not defendable: SingleStep: The problem requires addition (42 + 32 = 74) and then a subsequent conversion/wrap-around to the next hour (74 minutes past 8:00 is 9:14), which constitutes multiple steps."
+      },
+      "review": {
+        "version": 1,
+        "request_hash": "b27f1b04a11d56b200a44bdb302215266cfcf046e3dd7dbc1d3537ec5847d538",
+        "stages": [
+          {
+            "model": "gemini-3.8-flash",
+            "thinking_level": "LOW",
+            "model_version": "gemini-3.8-flash",
+            "response_id": "XL26av6dC9i7vdIPuLTr8QU",
+            "validated_at": "2026-09-28T19:17:51.294Z",
+            "elapsed_ms": 3363,
+            "usage": {
+              "input_tokens": 2025,
+              "answer_tokens": 521,
+              "total_tokens": 2546
+            },
+            "evaluation": {
+              "pass": true,
+              "general_checks": {
+                "no_overlaps": true,
+                "no_placeholders": true,
+                "sane_padding": true,
+                "task_identifiable": true,
+                "mode_valid": true,
+                "text_minimal": true,
+                "math_coherent": true
+              },
+              "label_checks": [
+                {
+                  "label": "Addition",
+                  "verdict": "defendable",
+                  "evidence": "The equation shows addition: 42 + 32 = 74."
+                },
+                {
+                  "label": "AnalogClock",
+                  "verdict": "defendable",
+                  "evidence": "Start and End analog clocks are shown with hour and minute hands."
+                },
+                {
+                  "label": "IntegerNumbers",
+                  "verdict": "defendable",
+                  "evidence": "Integers like 42, 32, 74, 8, 9, 14 are used."
+                },
+                {
+                  "label": "MeasuringTime",
+                  "verdict": "defendable",
+                  "evidence": "Calculating elapsed time / end time (8:42 + 32 minutes = 9:14)."
+                },
+                {
+                  "label": "MinuteIntervals",
+                  "verdict": "defendable",
+                  "evidence": "A duration of 32 minutes is shown and calculated."
+                },
+                {
+                  "label": "ProcedureExecution",
+                  "verdict": "defendable",
+                  "evidence": "Steps execute counting minutes after 8:00 via 42 + 32 = 74 to determine the time."
+                },
+                {
+                  "label": "SingleStep",
+                  "verdict": "defendable",
+                  "evidence": "A single addition step 42 + 32 = 74 is used to find the minutes past the base hour."
+                },
+                {
+                  "label": "TextualReception",
+                  "verdict": "defendable",
+                  "evidence": "A word problem at the top describes the science club start time and duration."
+                }
+              ],
+              "reasoning": ""
+            }
+          }
+        ]
+      },
+      "evaluation": {
+        "pass": true,
+        "general_checks": {
+          "no_overlaps": true,
+          "no_placeholders": true,
+          "sane_padding": true,
+          "task_identifiable": true,
+          "mode_valid": true,
+          "text_minimal": true,
+          "math_coherent": true
+        },
+        "label_checks": [
+          {
+            "label": "Addition",
+            "verdict": "defendable",
+            "evidence": "The equation shows addition: 42 + 32 = 74."
+          },
+          {
+            "label": "AnalogClock",
+            "verdict": "defendable",
+            "evidence": "Start and End analog clocks are shown with hour and minute hands."
+          },
+          {
+            "label": "IntegerNumbers",
+            "verdict": "defendable",
+            "evidence": "Integers like 42, 32, 74, 8, 9, 14 are used."
+          },
+          {
+            "label": "MeasuringTime",
+            "verdict": "defendable",
+            "evidence": "Calculating elapsed time / end time (8:42 + 32 minutes = 9:14)."
+          },
+          {
+            "label": "MinuteIntervals",
+            "verdict": "defendable",
+            "evidence": "A duration of 32 minutes is shown and calculated."
+          },
+          {
+            "label": "ProcedureExecution",
+            "verdict": "defendable",
+            "evidence": "Steps execute counting minutes after 8:00 via 42 + 32 = 74 to determine the time."
+          },
+          {
+            "label": "SingleStep",
+            "verdict": "defendable",
+            "evidence": "A single addition step 42 + 32 = 74 is used to find the minutes past the base hour."
+          },
+          {
+            "label": "TextualReception",
+            "verdict": "defendable",
+            "evidence": "A word problem at the top describes the science club start time and duration."
+          }
+        ],
+        "reasoning": ""
+      }
+    }
+  ],
+  "cache_commit": "f456d4d",
+  "verification": {
+    "strict_audit": "passed",
+    "passing_coverage": "1968/1968",
+    "all_audit_issues": 0,
+    "full_coverage_tests_passed": 3576,
+    "full_coverage_files_passed": 550,
+    "final_focused_tests_passed": 80,
+    "ccss_repository_checks": "passed",
+    "docs_check": "passed with four existing external-fetch warnings",
+    "request_errors": 0,
+    "transport_retries": "Not instrumented by the SDK; no exposed request errors.",
+    "high_branch_live_exercised": false,
+    "high_branch_unit_tested": true
+  },
+  "review_disposition": {
+    "additional_pro_review_candidates_closed": false,
+    "note": "The user selected this production strategy. Fresh LOW judgments replace the 17 failed official records; prior pilot judgments were not copied. No prompt, checklist, image, ontology label, or valid-response pass policy changed. This selected set has no negative controls and does not establish overall accuracy. Eight historical passing evaluations retain uncertain labels."
+  }
+}

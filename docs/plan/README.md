@@ -5,7 +5,7 @@ Completed consolidation and migration documents are preserved unchanged in
 These items are not newly scheduled by the archive move.
 
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
-  record completed semantic repairs and remaining evaluator disagreements.
+  record completed semantic repairs and preserved evaluator-disagreement history.
   The [numeral-system ownership correction](numeral-system-ownership.md),
   [MeasuringTime definition correction](measuring-time-definition.md),
   [equation classification correction](equation-correctness.md),
@@ -23,12 +23,12 @@ These items are not newly scheduled by the archive move.
   [multiples-of-five migration](multiples-of-five-migration.md),
   [picture-graph quantity/axis separation](picture-graph-scales.md), and
   [logical-inference correction](logical-inference.md) are complete;
-  the current cache has 17 remaining failures among 1,968 CCSS images, all evaluator
-  disagreements. No semantic-review failures remain. Complete ordering now has its own
+  the current cache passes all 1,968 CCSS images with zero failures after the selected
+  Flash 3.8 LOW/HIGH rollout. No semantic-review failures remain. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   The isolated [Flash high-thinking pilot](vqa-flash-high-pilot.md) rechecks all 17 failures
   with the same prompts: ten pass with fully defendable labels and seven still fail.
-  Trial judgments are preserved separately; the official cache and its 17 failures are unchanged.
+  Trial judgments are preserved separately; no trial response was copied into the official cache.
   The [Pro/high comparison](vqa-pro-high-pilot.md) on the same 17 inputs also returns ten passes
   and seven failures, with four verdicts changing in each direction. Only nine Pro passes are
   fully defendable; one is uncertain. Three additional label objections and one text-economy
@@ -36,10 +36,13 @@ These items are not newly scheduled by the archive move.
   The [Flash 3.8/HIGH trial](vqa-flash38-high-pilot.md) passes all 17 under the existing policy:
   fifteen are fully defendable, while `EvenNumbers` and one `SingleStep` verdict remain uncertain.
   It leads this comparison, but controlled accuracy checks and the additional review candidates
-  remain open. The official cache is unchanged.
-  The selected [Flash 3.8 LOW/HIGH workflow](vqa-two-stage-evaluation.md) is now implemented:
+  remain open.
+  The selected [Flash 3.8 LOW/HIGH workflow](vqa-two-stage-evaluation.md) is implemented:
   fresh LOW evaluations receive one independent HIGH review only on failure, with both
-  judgments retained and interrupted reviews resumable. Production rollout is pending.
+  judgments retained and interrupted reviews resumable. All 17 formerly failed images pass
+  fresh LOW evaluations with 145 defendable labels, so no HIGH review is needed. The strict
+  audit now passes all 1,968 images. The 1,951 earlier passing records are unchanged, including
+  eight uncertain passes; Pro's four unconfirmed review candidates remain open.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist
