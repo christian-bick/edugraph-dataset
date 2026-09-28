@@ -3,7 +3,7 @@ import {ViewValidationError} from '../../helpers/validation.ts';
 
 type Point3 = [number, number, number];
 type Point2 = [number, number];
-type Face = {points: Point3[]; outline: boolean};
+type Face = {points: Point3[]; outline: boolean; edges?: Point3[][]};
 export type DrawingFrame = {width: number; height: number};
 const COLORS = ['#93c5fd', '#fcd34d', '#86efac', '#c4b5fd', '#fda4af', '#67e8f9', '#fdba74', '#cbd5e1'];
 
@@ -11,6 +11,15 @@ const planar = (region: ShapeAssemblyRegion) => region.kind === 'polygon' || reg
 const project = (p: Point3, flat: boolean): Point2 => flat
     ? [p[0], -p[1]] : [p[0] - 0.65 * p[1], 0.35 * (p[0] + p[1]) - p[2]];
 const depth = (face: Face): number => face.points.reduce((sum, p) => sum + 0.65 * p[0] + p[1] + 0.5775 * p[2], 0) / face.points.length;
+
+// Outward face normals face the camera along the null direction of the projection.
+function visible(face: Face): boolean {
+    const [a, b, c] = face.points;
+    const u = b.map((value, axis) => value - a[axis]);
+    const v = c.map((value, axis) => value - a[axis]);
+    const normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    return 0.65 * normal[0] + normal[1] + 0.5775 * normal[2] > 1e-10;
+}
 
 function arc(radius: number, start: number, end: number, height: number): Point3[] {
     const steps = Math.max(8, Math.ceil((end - start) / (2 * Math.PI) * 64));
@@ -28,7 +37,7 @@ function faces(region: ShapeAssemblyRegion): Face[] {
         const [x, y, z] = region.min;
         const [X, Y, Z] = region.max;
         return [
-            [[x, y, z], [X, y, z], [X, Y, z], [x, Y, z]],
+            [[x, Y, z], [X, Y, z], [X, y, z], [x, y, z]],
             [[x, y, Z], [X, y, Z], [X, Y, Z], [x, Y, Z]],
             [[x, y, z], [X, y, z], [X, y, Z], [x, y, Z]],
             [[X, y, z], [X, Y, z], [X, Y, Z], [X, y, Z]],
@@ -41,18 +50,30 @@ function faces(region: ShapeAssemblyRegion): Face[] {
         ? lower.map((): Point3 => [0, 0, region.top])
         : arc(region.radius, region.start, region.end, region.top);
     const partial = region.end - region.start < 2 * Math.PI - 1e-8;
-    const result: Face[] = [{points: partial ? [[0, 0, region.bottom], ...lower] : lower, outline: true}];
+    const result: Face[] = [{points: (partial ? [[0, 0, region.bottom] as Point3, ...lower] : [...lower]).reverse(), outline: true}];
     if (region.solid === 'cylinder') {
         result.push({points: partial ? [[0, 0, region.top], ...upper] : upper, outline: true});
     }
-    lower.slice(1).forEach((point, index) => result.push({
+    const sides: Face[] = lower.slice(1).map((point, index) => ({
         points: region.solid === 'cone' ? [lower[index], point, upper[index]]
-            : [lower[index], point, upper[index + 1], upper[index]], outline: false
+            : [lower[index], point, upper[index + 1], upper[index]], outline: false,
+        edges: region.solid === 'cone' ? [[lower[index], point]]
+            : [[lower[index], point], [upper[index], upper[index + 1]]]
     }));
+    sides.forEach((face, index) => {
+        if (partial && index === 0 || !visible(sides[(index + sides.length - 1) % sides.length])) {
+            face.edges!.push([lower[index], upper[index]]);
+        }
+        if (partial && index === sides.length - 1 || !visible(sides[(index + 1) % sides.length])) {
+            face.edges!.push([lower[index + 1], upper[index + 1]]);
+        }
+    });
+    result.push(...sides);
     if (partial) for (const index of [0, lower.length - 1]) {
-        result.push({points: region.solid === 'cone'
+        const points: Point3[] = region.solid === 'cone'
             ? [[0, 0, region.bottom], lower[index], upper[index]]
-            : [[0, 0, region.bottom], lower[index], upper[index], [0, 0, region.top]], outline: true});
+            : [[0, 0, region.bottom], lower[index], upper[index], [0, 0, region.top]];
+        result.push({points: index === 0 ? points : points.reverse(), outline: true});
     }
     return result;
 }
@@ -76,16 +97,21 @@ export function ShapeAssemblyDrawing({assembly, showParts = false, neutral = fal
     const box = bounds(assembly.region);
     const scale = Math.min(184 / (frame?.width ?? box.width), 144 / (frame?.height ?? box.height));
     const selected = showParts && assembly.parts.length ? assembly.parts : [assembly];
-    const projected = selected.flatMap((part, index) => faces(part.region).map(face => ({
+    const flat = planar(assembly.region);
+    const projected = selected.flatMap((part, index) => faces(part.region).filter(face => flat || visible(face)).map(face => ({
         face, fill: neutral ? '#e2e8f0' : COLORS[index % COLORS.length]
     }))).sort((a, b) => depth(a.face) - depth(b.face));
+    const points = (vertices: Point3[]) => vertices.map(point => {
+        const [x, y] = project(point, flat);
+        return `${105 + (x - box.x) * scale},${85 + (y - box.y) * scale}`;
+    }).join(' ');
     return <svg viewBox="0 0 210 170" className="w-full h-full" role="img" aria-label={label}>
-        {projected.map(({face, fill}, index) => <polygon key={index}
-            points={face.points.map(point => {
-                const [x, y] = project(point, planar(assembly.region));
-                return `${105 + (x - box.x) * scale},${85 + (y - box.y) * scale}`;
-            }).join(' ')} fill={fill} stroke={face.outline ? '#334155' : fill}
-            strokeWidth={face.outline ? 1.8 : 0.5} strokeLinejoin="round" />)}
+        {projected.map(({face, fill}, index) => <g key={index}>
+            <polygon points={points(face.points)} fill={fill} stroke={face.outline ? '#334155' : fill}
+                strokeWidth={face.outline ? 1.8 : 0.5} strokeLinejoin="round" />
+            {face.edges?.map((edge, i) => <polyline key={i} points={points(edge)} fill="none"
+                stroke="#334155" strokeWidth="1.8" strokeLinejoin="round" />)}
+        </g>)}
     </svg>;
 }
 
