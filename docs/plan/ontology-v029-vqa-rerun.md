@@ -5,25 +5,25 @@
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
-whole-tens subtraction, spatial-construction, and whole-share Ability corrections on
+whole-tens subtraction, spatial-construction, whole-share Ability, and environmental-image corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,966 CCSS samples** have current judgments: **1,940 pass (98.7%) and 26 fail**, down from
+All **1,966 CCSS samples** have current judgments: **1,946 pass (99.0%) and 20 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, the completion/explanation split added 30,
 and the whole-tens target correction added four, for a net increase of 30 from the initial dataset.
-There are no uncached samples. The remaining failures comprise **9 samples requiring semantic
+There are no uncached samples. The remaining failures comprise **3 samples requiring semantic
 review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 26 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 20 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 26 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 49
-resolved finding records and initial totals are retained separately as history: 32 passed
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 20 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 55
+resolved finding records and initial totals are retained separately as history: 38 passed
 revalidation, and seventeen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
@@ -48,6 +48,9 @@ All 42 replacement construction images pass. The picture-graph scale review intr
 required 732-sample refresh remains open for its question and solution. The related review of
 four whole-from-shares fraction targets is also resolved: their view and targets now use
 `ConceptualThinking`, and all eight unchanged exercises pass under the corrected label.
+The five environmental objects now use fixed, realistic AI-generated images and precise surface
+prompts. All ten updated exercises pass with their existing labels, resolving six failures;
+one window question retains an uncertain `PhysicalGeometry` check under the existing pass policy.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -528,28 +531,36 @@ Ability `SpatialGeneration` would change the intended fraction competency (`TSPE
 All four corrected targets retain their existing generator/view route and other labels. Their
 eight replacement images are pixel-identical, and all pass VQA with 48 defendable label checks.
 The other 1,958 images and cached judgments are unchanged. Since the former samples already
-passed, the active failed count and resolved-failure history stay at 26 and 49 respectively.
+passed, that checkpoint's active failed count and resolved-failure history stayed at 26 and 49 respectively.
 The [detailed report](whole-share-ability.md) records target identities, eligibility, tests,
 retained artifacts, and the one changed validation allocation.
 
-## Major findings requiring follow-up
-
 ### Environmental illustrations versus physical manipulatives
 
-`shape-env-shapes` invariantly supplies `PhysicalGeometry`, defined through geometric figures
-represented by manipulable physical objects. The inspected artifacts instead show ordinary
-environmental illustrations: a room's clock/window/table, a pennant, and a flat hexagon named
-as a honeycomb cell. They do not clearly depict geometry manipulatives or models.
+**Resolved on 2026-09-28** in `f4a09e9`, with VQA results in `cdc345d`. The user approved
+replacing the simplified room, pennant and flat honeycomb illustrations with realistic images
+of the same physical objects. Five fixed PNG assets now depict a clock, window, wooden table,
+fabric pennant and wax honeycomb. Prompts identify the clock face, window frame, tabletop,
+pennant or cell opening. Both modes use the same image; only the solution choice is highlighted.
 
-A two-dimensional image can represent a physical model, so the evaluator's blanket rejection
-of drawings is too strong. Nevertheless, the contrast with `VisualGeometry` warrants a
-coordinated semantic review. Consider whether environmental context needs a separate descriptor;
-mechanically replacing or removing the current context could admit generic diagrams in place of
-the environmental competency (`SPEC-2`, `TSPEC-6`, `TSPEC-13`).
+The earlier suggestion that environmental objects require a separate descriptor was too
+restrictive. `PhysicalGeometry`'s examples do not limit it to specialized teaching manipulatives.
+The repair improves evidence of physical materials, depth and shape while preserving all labels
+and targets (`TSPEC-6`, `TSPEC-13`). No ontology change or checklist exception was made (`CHK-V6`).
+The ten samples still cover seven targets through associations: five kindergarten environmental
+variants and two `2.G.A.1-identify-supported-shapes` variants.
 
-Ten physical samples cover seven targets through retained associations: `K.G.A.1-env-shapes`,
-`K.G.A.1-env-shapes-other`, and two `2.G.A.1-identify-supported-shapes` variants. A caption
-calling an illustration a physical model would not supply the missing witness (`CHK-V6`).
+All ten updated images pass after one VQA run at concurrency four, resolving all six prior
+failures. Of 40 label checks, 39 are defendable and one is uncertain: the window question's
+`PhysicalGeometry` check notes that the frame is fixed rather than handheld. It passes under
+the unchanged policy; this caveat is preserved without retrying the same evidence. No label is
+rejected, and every general check passes. The other 1,956 images and cache records are unchanged.
+
+The [detailed follow-up](environmental-object-images.md) records the generated assets,
+[complete prompts](environmental-object-image-prompts.json), visual review, test-harness repair,
+matching, retained artifacts and revalidation evidence.
+
+## Major findings requiring follow-up
 
 ### Sequence steps versus scale and precision
 
@@ -768,20 +779,29 @@ uncached**, in cache commit `6348f13`. All 1,924 retained judgments and timestam
 The whole-share Ability correction passes **3,491 tests across 546 files**, all coverage
 thresholds and CCSS repository checks. Matching still has 688 targets, 214 compatible pairs,
 and 841 tuples; only the four corrected targets and their routes change identity. The label
-audit reports zero violations and 97 review items. Current VQA is **1,940 pass / 26 fail / zero
+audit reports zero violations and 97 review items. That checkpoint's VQA is **1,940 pass / 26 fail / zero
 uncached**, in cache commit `227f7d4`. All 1,958 retained cache records are byte-identical, and
 the eight replacements preserve their former pixels and content/task fingerprints.
+
+The environmental-image correction passes **3,498 tests across 547 files** and all coverage
+thresholds, CCSS checks and production build. Matching and strict label-audit counts are unchanged.
+The recurring Windows documentation-fixture cleanup error is repaired with bounded retries in
+`e2fef77`; the final coverage gate passes when run independently. Ten images change with no
+identity, label, mathematical fingerprint, plan, replay, seed or attempt changes. VQA reuses
+1,956 byte-identical cache records and records ten passes in `cdc345d`: 39 defendable label
+checks and the one window uncertainty described above. Current VQA is **1,946 pass / 20 fail /
+zero uncached**; the six resolved failures remain in history with their prior evidence.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Whole-share Ability: eight renders, one shard written, 290 reused; all retained and corresponding replacement image hashes unchanged |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Eight live judgments, all passing; 1,958 reused; final 1,940 pass / 26 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 26 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Environmental images: ten renders, one shard written, 290 reused; exactly ten intended image-hash changes |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Ten live judgments, all passing; 1,956 reused; final 1,946 pass / 20 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 20 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=db117e0` | Latest follow-up: all 1,958 retained images identical, zero changed retained seeds/attempts, eight added/eight removed identities |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,775 identical retained images, 43 intended changes, 148 added/118 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=39da8f8` | Latest follow-up: 1,956 identical images, ten intended changes, zero seed/attempt or identity changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,765 identical retained images, 53 intended changes, 148 added/118 removed identities; the same three explained successor retry changes |
 
 The final split contains 1,654 training and 312 validation images. All 841 matched tuples have
 training evidence. Of 211 tuples allocated to validation, 156 have validation evidence. The 55

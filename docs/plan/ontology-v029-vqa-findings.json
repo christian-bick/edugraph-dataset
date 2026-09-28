@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.4.a08f9a911317",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "227f7d4",
+  "cache_commit": "cdc345d",
   "concurrency": 4,
   "evaluated": 1966,
-  "passed": 1940,
-  "failed": 26,
-  "semantic_review_samples": 9,
+  "passed": 1946,
+  "failed": 20,
+  "semantic_review_samples": 3,
   "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -2517,6 +2517,176 @@
       ],
       "details": "whole-share-ability.md",
       "note": "The task recognizes the existing relationship between equal shares and one whole. ConceptualThinking replaces the unsupported ConceptComposition claim without changing the exercise, geometric evidence, or requested response. The old passing verdicts are preserved as historical evaluator overacceptance, not as evidence for retaining the label. Active failures and resolved-failure history are unchanged."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "environmental-object-images",
+      "status": "completed",
+      "baseline_commit": "39da8f8",
+      "fix_commit": "f4a09e9",
+      "test_harness_fix_commit": "e2fef77",
+      "cache_commit": "cdc345d",
+      "library_version": "0.29.0-pre.4.a08f9a911317",
+      "concurrency": 4,
+      "sample_count_before": 1966,
+      "sample_count_after": 1966,
+      "evaluated": 10,
+      "reused": 1956,
+      "failures_before": 26,
+      "failures_after": 20,
+      "resolved": 6,
+      "retired_failed_identities": 0,
+      "newly_rejected": 0,
+      "added_sample_identities": 0,
+      "removed_sample_identities": 0,
+      "shared_image_changes": 10,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "unchanged_cache_records": 1956,
+      "provenance_only_cache_records": 0,
+      "unchanged_retained_judgments": 1956,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "changed_targets": 0,
+        "changed_routes": 0,
+        "changed_retained_plans": 0
+      },
+      "generation": {
+        "rendered": 10,
+        "written_shards": 1,
+        "reused_shards": 290
+      },
+      "verification": {
+        "test_files": 547,
+        "tests": 3498,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "fresh_label_checks": {
+          "defendable": 39,
+          "uncertain": 1,
+          "not_defendable": 0
+        },
+        "test_dataset_and_cache_unchanged": true,
+        "split": {
+          "train_images": 1654,
+          "validation_images": 312,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 211,
+          "validation_represented_tuples": 156,
+          "validation_gaps": 55,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        }
+      },
+      "passing_revalidated_samples": [
+        {
+          "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+          "validated_at": "2026-09-28T15:03:25.385Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The honeycomb is a physical object whose natural structure represents a geometric hexagon."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+          "validated_at": "2026-09-28T15:03:28.167Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The shape is represented by a photograph of a physical clock hanging on a wall."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+          "validated_at": "2026-09-28T15:03:34.328Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The task uses a photograph of a real-world window frame to represent a geometric shape (square)."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+          "validated_at": "2026-09-28T15:03:30.136Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The clock is a real-world, physical object representing a geometric shape (circle)."
+          }
+        },
+        {
+          "sample_key": "2.G.A.1-identify-supported-shapes~4d193ec7#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+          "validated_at": "2026-09-28T15:03:23.952Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The triangular pennant is a physical object representing a geometric figure (triangle)."
+          }
+        },
+        {
+          "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+          "validated_at": "2026-09-28T15:03:23.730Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The exercise uses a real-world physical object (a honeycomb structure) to represent and identify a geometric shape."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+          "validated_at": "2026-09-28T15:03:28.993Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The exercise asks to identify the geometric shape of a real physical object (a tabletop) shown in a photograph."
+          }
+        },
+        {
+          "sample_key": "2.G.A.1-identify-supported-shapes~4d193ec7#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+          "validated_at": "2026-09-28T15:03:24.313Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The exercise uses a real physical object (a fabric pennant on a wooden pole) to represent a geometric shape (a triangle)."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+          "validated_at": "2026-09-28T15:03:34.709Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "uncertain",
+            "evidence": "The window frame is a real-world physical object representing a square, though it is a fixed architectural feature rather than a handheld manipulative."
+          }
+        },
+        {
+          "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+          "validated_at": "2026-09-28T15:03:27.925Z",
+          "pass": true,
+          "physical_geometry_check": {
+            "label": "PhysicalGeometry",
+            "verdict": "defendable",
+            "evidence": "The question asks for the shape of a physical object (a wooden tabletop)."
+          }
+        }
+      ],
+      "asset_prompts": "environmental-object-image-prompts.json",
+      "details": "environmental-object-images.md",
+      "note": "Fixed photorealistic assets replace the illustrations; prompts identify the relevant surface. All targets and labels remain unchanged. PhysicalGeometry is defendable in nine judgments and uncertain in the window question because it depicts a fixed frame. All ten samples pass under the existing policy. No VQA retry, ontology change, new descriptor, or checklist exception was used."
     }
   ],
   "findings": [
@@ -2607,25 +2777,6 @@
       "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers.",
       "validated_at": "2026-09-27T19:52:30.191Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The image shows a 2D stylized vector graphic representing a shape, not a manipulable physical object, solid model, or a shape constructed from sticks."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'PhysicalGeometry' is not defendable because the illustration is a standard 2D vector graphic rather than a physical, manipulable object, a physical solid model, or a construction made of sticks.",
-      "validated_at": "2026-09-25T22:33:07.528Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -2830,101 +2981,6 @@
       "reasoning": "Labels not defendable: IteratedOperation: There is no iterated operation (repeated application of the same operation on a single operand value) depicted in this exercise.",
       "validated_at": "2026-09-26T09:05:09.214Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"4.NF.B.4c-fraction-multiplication-word-problems~5df9ed23#fraction-arithmetic#fractions-word-problem#val#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The image contains a 2D drawing representing a table in a room, which is not a physical manipulative, solid model, or physical object made of sticks as required by the definition."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'PhysicalGeometry' is not defendable because the exercise features a flat 2D illustration of a table rather than a physical manipulative, solid model, or stick-built geometric representation.",
-      "validated_at": "2026-09-25T22:33:12.251Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The items shown are 2D vector illustrations rather than manipulable physical objects, solid models, or stick representations."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'PhysicalGeometry' is not defendable because the exercise features a 2D drawing of a clock and furniture rather than manipulable physical objects, solid models, or representations made from sticks.",
-      "validated_at": "2026-09-25T22:33:15.322Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The geometric figure is depicted in a standard 2D vector drawing of a scene, which does not constitute a manipulable physical object, solid model, or stick construction."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is shown in a flat 2D cartoon illustration rather than as a manipulable physical object, solid model, or stick construction.",
-      "validated_at": "2026-09-25T22:33:15.038Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: PhysicalGeometry: The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks.",
-      "validated_at": "2026-09-25T22:33:13.393Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "environmental-illustration-versus-physical-manipulative",
-      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
-      "generator": "shape-env-shapes",
-      "view": "shape-env-shapes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "PhysicalGeometry",
-          "verdict": "not_defendable",
-          "evidence": "The image features a flat 2D illustration of a room scene. There are no manipulable physical objects, solid models, or shapes constructed from sticks as required by the PhysicalGeometry definition."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is represented inside a standard 2D vector drawing of a room, rather than via manipulable physical objects or solid models.",
-      "validated_at": "2026-09-25T22:33:19.933Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -4982,6 +5038,240 @@
         "reasoning": "Labels not defendable: ConceptComposition: The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height.",
         "validated_at": "2026-09-25T22:32:48.337Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:25.385Z",
+      "pass": true,
+      "labels": [
+        "Hexagon",
+        "PhysicalGeometry",
+        "ShapeNaming",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "defendable",
+        "evidence": "The honeycomb is a physical object whose natural structure represents a geometric hexagon."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The image shows a 2D stylized vector graphic representing a shape, not a manipulable physical object, solid model, or a shape constructed from sticks."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'PhysicalGeometry' is not defendable because the illustration is a standard 2D vector graphic rather than a physical, manipulable object, a physical solid model, or a construction made of sticks.",
+        "validated_at": "2026-09-25T22:33:07.528Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:28.993Z",
+      "pass": true,
+      "labels": [
+        "PhysicalGeometry",
+        "Rectangle",
+        "ShapeNaming",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "defendable",
+        "evidence": "The exercise asks to identify the geometric shape of a real physical object (a tabletop) shown in a photograph."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The image contains a 2D drawing representing a table in a room, which is not a physical manipulative, solid model, or physical object made of sticks as required by the definition."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'PhysicalGeometry' is not defendable because the exercise features a flat 2D illustration of a table rather than a physical manipulative, solid model, or stick-built geometric representation.",
+        "validated_at": "2026-09-25T22:33:12.251Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~4924380f#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:28.167Z",
+      "pass": true,
+      "labels": [
+        "Circle",
+        "PhysicalGeometry",
+        "ShapeNaming",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "defendable",
+        "evidence": "The shape is represented by a photograph of a physical clock hanging on a wall."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The items shown are 2D vector illustrations rather than manipulable physical objects, solid models, or stick representations."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'PhysicalGeometry' is not defendable because the exercise features a 2D drawing of a clock and furniture rather than manipulable physical objects, solid models, or representations made from sticks.",
+        "validated_at": "2026-09-25T22:33:15.322Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:30.136Z",
+      "pass": true,
+      "labels": [
+        "Circle",
+        "PhysicalGeometry",
+        "ShapeNaming",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "defendable",
+        "evidence": "The clock is a real-world, physical object representing a geometric shape (circle)."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The geometric figure is depicted in a standard 2D vector drawing of a scene, which does not constitute a manipulable physical object, solid model, or stick construction."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is shown in a flat 2D cartoon illustration rather than as a manipulable physical object, solid model, or stick construction.",
+        "validated_at": "2026-09-25T22:33:15.038Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~edfe5618#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:34.709Z",
+      "pass": true,
+      "labels": [
+        "PhysicalGeometry",
+        "ShapeNaming",
+        "Square",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "uncertain",
+        "evidence": "The window frame is a real-world physical object representing a square, though it is a fixed architectural feature rather than a handheld manipulative."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: PhysicalGeometry: The image contains flat 2D illustrations of real-world objects rather than manipulable physical models or shapes constructed from sticks.",
+        "validated_at": "2026-09-25T22:33:13.393Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+      "resolution": "realistic-environmental-object-images",
+      "fix_commit": "f4a09e9",
+      "cache_commit": "cdc345d",
+      "validated_at": "2026-09-28T15:03:34.328Z",
+      "pass": true,
+      "labels": [
+        "PhysicalGeometry",
+        "ShapeNaming",
+        "Square",
+        "VisualRecognition"
+      ],
+      "physical_geometry_check": {
+        "label": "PhysicalGeometry",
+        "verdict": "defendable",
+        "evidence": "The task uses a photograph of a real-world window frame to represent a geometric shape (square)."
+      },
+      "note": "The same sample identity now depicts a realistic physical object or named surface. Labels remain unchanged. The window question has an uncertain PhysicalGeometry check and passes under the existing VQA policy; that caveat is preserved without another retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "environmental-illustration-versus-physical-manipulative",
+        "sample_key": "K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
+        "generator": "shape-env-shapes",
+        "view": "shape-env-shapes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "PhysicalGeometry",
+            "verdict": "not_defendable",
+            "evidence": "The image features a flat 2D illustration of a room scene. There are no manipulable physical objects, solid models, or shapes constructed from sticks as required by the PhysicalGeometry definition."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is represented inside a standard 2D vector drawing of a room, rather than via manipulable physical objects or solid models.",
+        "validated_at": "2026-09-25T22:33:19.933Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
       }
     }
   ]
