@@ -1,9 +1,13 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {spec as modelView} from '../../../visuals/views/place-value/place-value-arithmetic-model/spec.ts';
+import {spec as writtenView} from '../../../visuals/views/place-value/place-value-arithmetic-written-method/spec.ts';
+import {spec as explanationView} from '../../../visuals/views/place-value/place-value-arithmetic-explanation/spec.ts';
 import {PlaceValueArithmeticGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
 
 const invariantLabels = [
     Scope.TwoOperands,
@@ -11,6 +15,10 @@ const invariantLabels = [
     Scope.Base10,
     Scope.NumbersWithoutNegatives
 ];
+
+const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
+    schema: PlaceValueArithmeticGeneratorSchema, spec};
+const views = [modelView, writtenView, explanationView];
 
 const generate = (labels: string[]) => generateWithLabels(
     new PlaceValueArithmeticGenerator(),
@@ -66,7 +74,8 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
     ] as const)('resolves multiples-of-10 subtraction for %s', (zeroLabel, requireZero) => {
         setSeed(zeroLabel);
         const stub = generate([
-            Area.SubtractionPlaceValuePartitioning,
+            Area.Subtraction,
+            Area.PlaceValue,
             Scope.MultiplesOf10,
             Scope.NumbersWithoutNegatives,
             zeroLabel
@@ -75,11 +84,36 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub!.data.operandProfile).toBe('multiples-of-ten');
         expect(stub!.data.answer === 0).toBe(requireZero);
         expect(stub!.labels).toEqual(expect.arrayContaining([
-            Area.SubtractionPlaceValuePartitioning,
+            Area.Subtraction,
             Scope.MultiplesOf10,
             zeroLabel
         ]));
-        expect(stub!.labels).not.toContain(Area.Subtraction);
+        expect(spec.generalLabels).toContain(Area.PlaceValue);
+        expect(stub!.labels).not.toContain(Area.SubtractionPlaceValuePartitioning);
+    });
+
+    it.each(views.flatMap(view => [Scope.NumbersWithoutZero, Scope.NumbersWithZero]
+        .map(zeroLabel => ({view, zeroLabel}))))(
+        'admits whole-tens subtraction without partitioning in $view.viewId / $zeroLabel',
+        ({view, zeroLabel}) => {
+            const labels = [Area.PlaceValue, Scope.MultiplesOf10, Scope.TwoOperands,
+                Scope.NumbersSmaller100, Scope.NumbersWithoutNegatives, zeroLabel, ...view.generalLabels];
+            const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
+            const accepted = planModelCompatibility({id: 'whole-tens', labels: [...labels, Area.Subtraction]},
+                model, consumer);
+            expect(accepted.supported).toBe(true);
+
+            const rejected = planModelCompatibility({id: 'unsupported-partitioning',
+                labels: [...labels, Area.SubtractionPlaceValuePartitioning]}, model, consumer);
+            expect(rejected).toMatchObject({supported: false, reason: 'incompatible-rules'});
+        }
+    );
+
+    it.each(views)('preserves the partitioning route for $viewId when regrouping supplies its evidence', view => {
+        const labels = [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping,
+            Scope.TwoOperands, Scope.NumbersSmaller1000, ...view.generalLabels];
+        expect(planModelCompatibility({id: 'partitioned-subtraction', labels}, model,
+            {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view}).supported).toBe(true);
     });
 
     it.each([

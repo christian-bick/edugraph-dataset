@@ -358,7 +358,10 @@ const tenMoreLessBuilder = new DatasetPermutationBuilder()
 const createPlaceValueSubtractionBuilder = (presentationLabels: string[]): DatasetPermutationBuilder =>
     new DatasetPermutationBuilder()
         .addLabels([
-            Area.SubtractionPlaceValuePartitioning,
+            // 1.NBT.C.6 asks for a place-value strategy with whole tens, without
+            // requiring decomposition into parts and coordination of partial differences.
+            Area.Subtraction,
+            Area.PlaceValue,
             Scope.TwoOperands,
             Scope.MultiplesOf10,
             Scope.NumbersSmaller100,

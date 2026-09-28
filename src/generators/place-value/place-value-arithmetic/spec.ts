@@ -31,6 +31,9 @@ export const spec: GeneratorSpec = {
             return !zero && (!multiples || twoDigit && !regrouping);
         }
         if (twoDigit || singleDigit) return false;
+        // The whole-tens profile operates in one unit; its views do not expose
+        // the decomposition and partial differences of a partitioning strategy.
+        if (multiples && selected(Area.SubtractionPlaceValuePartitioning)) return false;
         return multiples ? !regrouping : !zero || !regrouping;
     })],
     generalLabels: [
