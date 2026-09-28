@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.5.a88ac7a500c5",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "afbfd07",
+  "cache_commit": "b851404",
   "concurrency": 4,
-  "evaluated": 1968,
-  "passed": 1948,
-  "failed": 20,
-  "semantic_review_samples": 3,
+  "evaluated": 1970,
+  "passed": 1952,
+  "failed": 18,
+  "semantic_review_samples": 1,
   "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -3103,6 +3103,1289 @@
       ],
       "details": "multiples-of-five-migration.md",
       "note": "Clock minutes and five-scale graph quantities now use MultiplesOf5. Clock sampling excludes minute multiples of ten. Bar views retain StepsOf5 for their numbered axes; genuine skip-counting targets remain unchanged. All 30 fresh judgments pass with 218 defendable checks. The existing 20 failures and their judgments are unchanged; unit-, two- and ten-scale picture-graph semantics remain deferred. No new major issue, VQA retry or rate-limit error occurred."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "picture-graph-scales",
+      "status": "completed",
+      "baseline_commit": "163fb9e",
+      "fix_commit": "a425a0d",
+      "cache_commit": "b851404",
+      "library_version": "0.29.0-pre.5.a88ac7a500c5",
+      "concurrency": 4,
+      "sample_count_before": 1968,
+      "sample_count_after": 1970,
+      "evaluated": 54,
+      "reused": 1916,
+      "failures_before": 20,
+      "failures_after": 18,
+      "resolved": 2,
+      "retired_failed_identities": 2,
+      "newly_rejected": 0,
+      "added_sample_identities": 54,
+      "removed_sample_identities": 52,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "retained_label_changes": 0,
+      "retained_task_fingerprint_changes": 14,
+      "refreshed_retained_plan_receipts": 14,
+      "unchanged_cache_records": 1896,
+      "provenance_only_cache_records": 6,
+      "refreshed_plan_cache_records": 14,
+      "unchanged_retained_judgments": 1916,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "changed_targets": 15,
+        "changed_routes": 21,
+        "changed_retained_plans": 7
+      },
+      "generation": {
+        "rendered": 74,
+        "written_shards": 13,
+        "reused_shards": 278
+      },
+      "verification": {
+        "test_files": 549,
+        "tests": 3539,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "label_signals": 0,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "replayed_samples": 74,
+        "fresh_label_checks": {
+          "defendable": 348,
+          "uncertain": 0,
+          "not_defendable": 0,
+          "even_numbers": 14,
+          "multiples_of_five": 12,
+          "multiples_of_ten": 16,
+          "steps_of_one": 0,
+          "steps_of_two": 10,
+          "steps_of_five": 12,
+          "steps_of_ten": 12
+        },
+        "test_dataset_and_cache_unchanged": true,
+        "split": {
+          "train_images": 1654,
+          "validation_images": 316,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 213,
+          "validation_represented_tuples": 158,
+          "validation_gaps": 55,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        }
+      },
+      "passing_revalidated_samples": [
+        {
+          "sample_key": "1.MD.C.4-find-total~73273aab#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:36.644Z",
+          "pass": true,
+          "labels": [
+            "Addition",
+            "IntegerNumbers",
+            "PictureGraph",
+            "ProcedureExecution",
+            "Statistics",
+            "ThreeOperands"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "1.MD.C.4-find-total~73273aab#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:32.943Z",
+          "pass": true,
+          "labels": [
+            "Addition",
+            "IntegerNumbers",
+            "PictureGraph",
+            "ProcedureExecution",
+            "Statistics",
+            "ThreeOperands"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph-classification#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:27:06.060Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7a976012#statistical-graphs#data-picture-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:42.702Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "Each card and each symbol represents 10 items, highlighting the concept of counting in multiples of 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~eea6c7a4#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:06.000Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf5",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The values shown in the bars (15, 20, 40) are multiples of 5, as is the scale of the graph."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale increments in steps of 5: 0, 5, 10, 15, 20, 25, 30, 35, 40."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~54a4823a#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:01.579Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The calculation 50 - 20 = 30 directly involves multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis advances in steps of 10, and it is explicitly labeled 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~96fd2ae2#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:04.792Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All numerical quantities on the y-axis and in the calculation (14, 10, 4) are even integers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale progresses by steps of 2 (0, 2, 4, ..., 16), and it is explicitly labeled 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:22.862Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The item values (30, 20, 70) and scale marks are multiples of 10, which corresponds to 'Each observation card represents 10 items'."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale increments by steps of 10 from 0 to 80, as explicitly stated by 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7f5a836d#statistical-graphs#data-picture-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:31.942Z",
+          "pass": true,
+          "labels": [
+            "EvenNumbers",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "The quantities 8, 10, and 12, as well as the scale 'Each symbol = 2 items', all explicitly utilize even numbers to guarantee integer symbol counts (4, 5, and 6 symbols)."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:26.074Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:27.375Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The category counts (10, 35, 30) are multiples of 5, corresponding to each card representing 5 items."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis grid lines increase in increments of 5, explicitly labeled 'SCALE STEPS BY 5'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:54.533Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The values shown (10, 20, 30, 40, 50, 60, 70, 80) are all multiples of 10, and divisibility by 10 is relevant to reading the scale."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The axis scale increases in constant steps of 10 (0, 10, 20, ... 80)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~96fd2ae2#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:04.781Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All values on the y-axis (0, 2, 4, ..., 16) and the bar quantities (12, 14, 8) are even numbers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis increases in steps of 2, explicitly labeled as 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~7e843f98#statistical-graphs#data-bar-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:25:54.881Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "Statistics",
+            "StepsOf2",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All quantities (6, 10, 4) and axis numbers are even integers divisible by two."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis is explicitly labeled with steps of 2 (0, 2, 4, 6, 8, 10, 12, 14, 16)."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.MD.C.4-read-category-count~154a83fa#statistical-graphs#data-picture-graph-interpretation#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:48.005Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "Interpretation",
+            "PictureGraph",
+            "Statistics"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:25:54.670Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The scale on the Y-axis progresses in multiples of 10: 10, 20, 30, 40, 50, 60, 70, 80."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The Y-axis increments by steps of 10, and the bottom label explicitly states 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:21.871Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale contains values that are multiples of 5, and each observation card represents 5 items."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis advances in consecutive steps of 5 (0, 5, 10, 15, 20, 25, 30, 35, 40)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~7e843f98#statistical-graphs#data-bar-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:25:54.737Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "Statistics",
+            "StepsOf2",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "The axis values (0, 2, 4, 6, 8, 10, 12, 14, 16) and the data values (8, 4, 16) are all even integers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The vertical axis specifically says 'SCALE STEPS BY 2' and increases from 0 to 16 in increments of 2."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7a976012#statistical-graphs#data-picture-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:30.943Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The values (60, 50, 30) and the scale (10) are multiples of 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:25:55.195Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The quantities to be plotted (40, 50, 60) are multiples of 10, and the y-axis is scaled in multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The scale steps by 10 as explicitly stated at the bottom: 'SCALE STEPS BY 10', with consecutive values 0, 10, 20, 30, etc."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~6b94f6e3#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:17.380Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "MultiStep",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All values on the scale and bar counts are even (4, 10, 16), and the steps are in increments of 2."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis advances in steps of 2 (0, 2, 4, ..., 16) as also written in the caption."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~eea6c7a4#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:07.579Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf5",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The values plotted (10, 20, 25) and the scale intervals are all multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical scale increments by steps of 5, as indicated by the scale numbers (0, 5, 10, 15...) and explicitly stated in the label 'SCALE STEPS BY 5'."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:27.061Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "1.MD.C.4-organize-represent-data~1db67e7c#statistical-graphs#data-picture-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:37.358Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "ObjectSorting",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph-classification#val#question#inst:0",
+          "validated_at": "2026-09-28T17:27:02.857Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "Each card represents 5 items, and the scale values on the y-axis are multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical axis scale explicitly steps by 5: 0, 5, 10, 15, 20, 25, 30, 35, 40."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7f5a836d#statistical-graphs#data-picture-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:43.893Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "Each card and symbol represents 2 items, involving skip counting or scaling by 2 (even numbers)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1ff2c2ef#statistical-graphs#data-bar-graph-arithmetic#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:27:00.700Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "All values on the graph and in the calculations (10, 20, 30, 40, 70) are multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale of the bar graph increases in increments of 10, and it is explicitly labeled 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:53.126Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The counts 35, 10, and 20, as well as the axis labels, are all multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical axis is graduated with steps of 5, clearly labeled as 'SCALE STEPS BY 5'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1ff2c2ef#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:10.698Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The values 20, 30, 70, and the scale values are multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis increments by steps of 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7a976012#statistical-graphs#data-picture-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:27.536Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The values 30, 40, and 50 are multiples of 10, which perfectly align with the scale key of 10 items per symbol."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~196ea975#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:10.467Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf5",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf5",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "All numbers used (10, 15, 30, 40) and the scale numbers are multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical scale of the bar graph increases in increments of 5 (0, 5, 10, 15, etc.)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1ff2c2ef#statistical-graphs#data-bar-graph-arithmetic#val#question#inst:0",
+          "validated_at": "2026-09-28T17:26:59.410Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The values involved (80, 20, 50) and those on the vertical axis are all multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale goes from 0 to 80 in increments of 10, explicitly captioned as 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.MD.C.4-read-category-count~154a83fa#statistical-graphs#data-picture-graph-interpretation#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:47.922Z",
+          "pass": true,
+          "labels": [
+            "IntegerNumbers",
+            "Interpretation",
+            "PictureGraph",
+            "Statistics"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~96fd2ae2#statistical-graphs#data-bar-graph-arithmetic#val#question#inst:0",
+          "validated_at": "2026-09-28T17:26:55.568Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All scale numbers (0, 2, 4, 6, 8, 10, 12, 14, 16) and bar values (12, 16, 14) are even numbers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale uses increments of 2 (0, 2, 4, 6, 8, 10, 12, 14, 16), explicitly captioned 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7f5a836d#statistical-graphs#data-picture-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:47.762Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "Each observation card and graph symbol represents 2 items, making all item counts even numbers."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~54a4823a#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:25:59.784Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "All category counts and scale ticks are multiples of 10 (60, 50, 30, 10, 20, etc.)."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The graph scale goes up in steps of 10 (0, 10, 20, 30, ...), explicitly labeled 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~7e843f98#statistical-graphs#data-bar-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:19.499Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "Statistics",
+            "StepsOf2",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "The item counts (8, 10, 14) and the y-axis labels (0, 2, 4, 6, 8, 10, 12, 14, 16) are all even integers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The scale on the y-axis increments by steps of 2, and the subtitle explicitly states 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~6b94f6e3#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:16.603Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "MultiStep",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All data points (8, 4, 16) and the y-axis labels (0, 2, 4, 6, 8, 10, 12, 14, 16) are even numbers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale progresses in increments of 2 (0, 2, 4, 6, 8, ...), and this is explicitly noted underneath."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:25:59.979Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The values plotted (40, 15, 20) are multiples of 5, which matches the scale steps."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis is clearly labeled 'SCALE STEPS BY 5' with ticks at 0, 5, 10, 15, 20, 25, 30, 35, 40."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:42.869Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph-classification#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:27:04.459Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "Each category count is a multiple of 5 (30, 15, 40), as each observation card represents 5 items."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis grid lines and labels increase in steps of 5 (0, 5, 10, 15, 20, 25, 30, 35, 40)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1ff2c2ef#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:13.006Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf10",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf10",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "All values on the scale and within the calculations (10, 20, 30, 50, 80) are multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale is explicitly labeled with steps of 10 (0, 10, 20, ..., 80)."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7a976012#statistical-graphs#data-picture-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:44.882Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "Each observation card represents 10 items, showing that values are counted in multiples of 10."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~7e843f98#statistical-graphs#data-bar-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:17.146Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "Statistics",
+            "StepsOf2",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale contains even numbers (0, 2, 4, 6, 8, 10, 12, 14, 16)."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis increments in steps of 2, and it is explicitly labeled as 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~96fd2ae2#statistical-graphs#data-bar-graph-arithmetic#val#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:58.068Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "EvenNumbers",
+            "IntegerNumbers",
+            "ProcedureExecution",
+            "SingleStep",
+            "Statistics",
+            "StepsOf2",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "All numerical data points and ticks in the graph (0, 2, 4, 6, 8, 10, 12, 14, 16) are even numbers."
+            },
+            {
+              "label": "StepsOf2",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale goes up by increments of 2 (0, 2, 4, 6, etc.), and is explicitly captioned 'SCALE STEPS BY 2'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:22.376Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "ConceptClassification",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "Each card represents 10 items, and all values on the axis are multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale explicitly states 'SCALE STEPS BY 10' and lists numbers increasing by 10 at each grid line."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~b382638e#statistical-graphs#data-bar-graph#val#question#inst:0",
+          "validated_at": "2026-09-28T17:26:49.589Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf10",
+            "Statistics",
+            "StepsOf10",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf10",
+              "verdict": "defendable",
+              "evidence": "The quantities to be plotted (20, 80, 50) and the scale are multiples of 10."
+            },
+            {
+              "label": "StepsOf10",
+              "verdict": "defendable",
+              "evidence": "The axis increments by 10 (0, 10, 20, 30, etc.), and it explicitly mentions 'SCALE STEPS BY 10'."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~196ea975#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:10.970Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiStep",
+            "MultiplesOf5",
+            "ProcedureExecution",
+            "Statistics",
+            "StepsOf5",
+            "Subtraction"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The scale steps (5, 10, 15, 20, 25, 30, 35, 40) and data values (10, 20, 40) are multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The y-axis scale explicitly increments in steps of 5, as indicated by both the numbers and the label 'SCALE STEPS BY 5'."
+            }
+          ]
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T17:26:38.308Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T17:25:59.788Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "Values 10, 15, 20 and axis labels are multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical axis scale uses steps of 5: 0, 5, 10, 15, ..., 40."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~7f5a836d#statistical-graphs#data-picture-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:33.414Z",
+          "pass": true,
+          "labels": [
+            "EvenNumbers",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "defendable",
+              "evidence": "The values shown (8, 6, 14) and the scaling factor (2) are even numbers, and dividing by 2 is key to determining the number of icons."
+            }
+          ]
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~f862d84a#statistical-graphs#data-bar-graph#val#question#inst:0",
+          "validated_at": "2026-09-28T17:26:53.192Z",
+          "pass": true,
+          "labels": [
+            "BarGraph",
+            "IntegerNumbers",
+            "MultiplesOf5",
+            "Statistics",
+            "StepsOf5",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": [
+            {
+              "label": "MultiplesOf5",
+              "verdict": "defendable",
+              "evidence": "The data values 10, 25, 40 and the axis divisions are multiples of 5."
+            },
+            {
+              "label": "StepsOf5",
+              "verdict": "defendable",
+              "evidence": "The vertical axis is explicitly labeled as 'SCALE STEPS BY 5' and increases in steps of 5."
+            }
+          ]
+        },
+        {
+          "sample_key": "1.MD.C.4-organize-represent-data~1db67e7c#statistical-graphs#data-picture-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T17:26:37.807Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "ObjectSorting",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        },
+        {
+          "sample_key": "2.MD.D.10-picture-graph~528d51ed#statistical-graphs#data-picture-graph-classification#val#question#inst:0",
+          "validated_at": "2026-09-28T17:27:04.393Z",
+          "pass": true,
+          "labels": [
+            "ConceptClassification",
+            "IntegerNumbers",
+            "PictureGraph",
+            "Statistics",
+            "VisualArticulation"
+          ],
+          "quantity_and_axis_checks": []
+        }
+      ],
+      "details": "picture-graph-scales.md",
+      "note": "Picture-graph quantities use EvenNumbers, MultiplesOf5 or MultiplesOf10; an empty quantity-label selection explicitly resolves scale one. Single-unit tasks remain without step or divisibility claims. Bar views own all four genuine axis steps and scaled bar targets request both quantity and axis constraints. All 54 fresh judgments pass with 348 defendable checks, replacing both rejected unit-picture identities. The remaining eighteen judgments are unchanged. No new major issue, VQA retry or rate-limit error occurred."
     }
   ],
   "findings": [
@@ -3124,56 +4407,6 @@
       "reasoning": "Labels not defendable: ConceptDerivation: There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length).",
       "validated_at": "2026-09-26T08:57:59.788Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "symbol-scale-versus-sequence-steps",
-      "disposition": "The unchanged question shows category counts of 3, 2, and 5, a one-item-per-symbol legend, and a total expression. It does not display a sequence advancing by one. This extends the existing StepsOf1 symbol-scale review from the solution to the question; review scale/granularity separately from sequence steps without adding an unrelated decorative sequence.",
-      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
-      "generator": "statistical-graphs",
-      "view": "data-picture-graph-arithmetic",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "StepsOf1",
-          "verdict": "not_defendable",
-          "evidence": "There are no consecutive values or sequences advancing in steps of 1 displayed in the image; the values used are 2, 3, and 5."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label 'StepsOf1' is not defendable because there are no consecutive number sequences or progressions of step size 1 in the image.",
-      "validated_at": "2026-09-28T07:51:36.150Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "symbol-scale-versus-sequence-steps",
-      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
-      "generator": "statistical-graphs",
-      "view": "data-picture-graph-arithmetic",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "StepsOf1",
-          "verdict": "not_defendable",
-          "evidence": "There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: StepsOf1: There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1.",
-      "validated_at": "2026-09-28T07:51:36.632Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate",
-      "revalidation": {
-        "previous_validated_at": "2026-09-25T22:38:26.936Z",
-        "previous_rejected_labels": [
-          {
-            "label": "StepsOf1",
-            "verdict": "not_defendable",
-            "evidence": "There are no lists or sequences of consecutive numbers changing by steps of 1."
-          }
-        ],
-        "previous_reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1."
-      }
     },
     {
       "classification": "evaluator_disagreement",
@@ -5688,6 +6921,102 @@
         "reasoning": "The label 'PhysicalGeometry' is not defendable because the geometric shape is represented inside a standard 2D vector drawing of a room, rather than via manipulable physical objects or solid models.",
         "validated_at": "2026-09-25T22:33:19.933Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.A.1-env-shapes~fdf278f5#shape-env-shapes#shape-env-shapes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
+      "resolution": "picture-graph-quantity-and-axis-separation",
+      "resolution_type": "target_corrected",
+      "fix_commit": "a425a0d",
+      "cache_commit": "b851404",
+      "replacement_samples": [
+        {
+          "sample_key": "1.MD.C.4-find-total~73273aab#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
+          "labels": [
+            "Addition",
+            "IntegerNumbers",
+            "PictureGraph",
+            "ProcedureExecution",
+            "Statistics",
+            "ThreeOperands"
+          ],
+          "validated_at": "2026-09-28T17:26:32.943Z",
+          "pass": true
+        }
+      ],
+      "note": "The old target identity retires after removing its unsupported StepsOf1 claim. The replacement preserves the total-finding task and one-item-per-symbol key and passes with the corrected labels. The rejected judgment is preserved as history, not recorded as a passing retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "symbol-scale-versus-sequence-steps",
+        "disposition": "The unchanged question shows category counts of 3, 2, and 5, a one-item-per-symbol legend, and a total expression. It does not display a sequence advancing by one. This extends the existing StepsOf1 symbol-scale review from the solution to the question; review scale/granularity separately from sequence steps without adding an unrelated decorative sequence.",
+        "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
+        "generator": "statistical-graphs",
+        "view": "data-picture-graph-arithmetic",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "StepsOf1",
+            "verdict": "not_defendable",
+            "evidence": "There are no consecutive values or sequences advancing in steps of 1 displayed in the image; the values used are 2, 3, and 5."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label 'StepsOf1' is not defendable because there are no consecutive number sequences or progressions of step size 1 in the image.",
+        "validated_at": "2026-09-28T07:51:36.150Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
+      "resolution": "picture-graph-quantity-and-axis-separation",
+      "resolution_type": "target_corrected",
+      "fix_commit": "a425a0d",
+      "cache_commit": "b851404",
+      "replacement_samples": [
+        {
+          "sample_key": "1.MD.C.4-find-total~73273aab#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
+          "labels": [
+            "Addition",
+            "IntegerNumbers",
+            "PictureGraph",
+            "ProcedureExecution",
+            "Statistics",
+            "ThreeOperands"
+          ],
+          "validated_at": "2026-09-28T17:26:36.644Z",
+          "pass": true
+        }
+      ],
+      "note": "The old target identity retires after removing its unsupported StepsOf1 claim. The replacement preserves the total-finding task and one-item-per-symbol key and passes with the corrected labels. The rejected judgment is preserved as history, not recorded as a passing retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "symbol-scale-versus-sequence-steps",
+        "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
+        "generator": "statistical-graphs",
+        "view": "data-picture-graph-arithmetic",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "StepsOf1",
+            "verdict": "not_defendable",
+            "evidence": "There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: StepsOf1: There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1.",
+        "validated_at": "2026-09-28T07:51:36.632Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate",
+        "revalidation": {
+          "previous_validated_at": "2026-09-25T22:38:26.936Z",
+          "previous_rejected_labels": [
+            {
+              "label": "StepsOf1",
+              "verdict": "not_defendable",
+              "evidence": "There are no lists or sequences of consecutive numbers changing by steps of 1."
+            }
+          ],
+          "previous_reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1."
+        }
       }
     }
   ]

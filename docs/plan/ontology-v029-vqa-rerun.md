@@ -5,27 +5,28 @@
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
-whole-tens subtraction, spatial-construction, whole-share Ability, environmental-image, and multiples-of-five corrections on
+whole-tens subtraction, spatial-construction, whole-share Ability, environmental-image,
+multiples-of-five, and picture-graph scale corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,968 CCSS samples** have current judgments: **1,948 pass (99.0%) and 20 fail**, down from
+All **1,970 CCSS samples** have current judgments: **1,952 pass (99.1%) and 18 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, the completion/explanation split added 30,
-and the whole-tens target correction added four. The multiples-of-five target migration adds two
-validation images through the existing allocation policy, for a net increase of 32 from the initial dataset.
-There are no uncached samples. The remaining failures comprise **3 samples requiring semantic
-review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
+and the whole-tens target correction added four. The multiples-of-five and subsequent graph-scale
+target migrations each add two validation images through the existing allocation policy, for a net
+increase of 34 from the initial dataset. There are no uncached samples. The remaining failures comprise
+**1 sample requiring semantic review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 20 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 18 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 20 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 55
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 18 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 57
 resolved finding records and initial totals are retained separately as history: 38 passed
-revalidation, and seventeen were retired with corrected targets or producer contracts and replaced
+revalidation, and nineteen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
@@ -45,8 +46,8 @@ The subsequent whole-tens correction resolves the single-place subtraction revie
 and explanation requirements. Identifiable partitioning routes remain supported, with unchanged
 images and judgments. All 16 replacement whole-tens samples pass. Spatial construction now has
 its own view and `SpatialGeneration` Ability, preserving the selection task with `SpatialImagination`.
-All 42 replacement construction images pass. The picture-graph scale review introduced by the
-required 732-sample refresh remains open for its question and solution. The related review of
+All 42 replacement construction images pass. The picture-graph scale review, extended to the
+question by the required 732-sample refresh, is now resolved for both modes. The related review of
 four whole-from-shares fraction targets is also resolved: their view and targets now use
 `ConceptualThinking`, and all eight unchanged exercises pass under the corrected label.
 The five environmental objects now use fixed, realistic AI-generated images and precise surface
@@ -54,8 +55,10 @@ prompts. All ten updated exercises pass with their existing labels, resolving si
 one window question retains an uncertain `PhysicalGeometry` check under the existing pass policy.
 Clock minutes and five-scale graph quantities now use `MultiplesOf5`; bar-graph views retain the
 genuine `StepsOf5` evidence on their numbered axes. All 30 migrated samples pass with 218
-defendable label checks. This resolves the five-minute precision review without changing the
-remaining unit-scale picture-graph findings or introducing a new failure.
+defendable label checks. This resolves the five-minute precision review. The subsequent graph-scale
+correction replaces the remaining picture sequence claims with quantity constraints, preserving
+single-unit tasks without a divisibility label. Bar views own their numbered axis steps. All 54 fresh
+judgments pass with 348 defendable label checks, resolving both unit-picture failures without a new rejection.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -591,24 +594,36 @@ fingerprints; 1,938 judgments are reused. No VQA retry or checklist change was n
 
 The [detailed migration record](multiples-of-five-migration.md) contains ownership decisions,
 the complete consumer matrix, sample allocation changes and verification results. The
-remaining unit-, two- and ten-scale picture-graph semantics are deferred to the next discussion.
-
-## Major findings requiring follow-up
+remaining unit-, two- and ten-scale picture-graph semantics were subsequently resolved below.
 
 ### Sequence steps versus scale and precision
 
-`statistical-graphs` maps `StepsOf1` to a picture-graph symbol scale. The inspected total question
-uses "Each symbol = 1 item" and the solution `3 + 7 + 4 = 14`; neither displays a sequence of
-consecutive values. The harmonized statement defines consecutive values whose absolute
-difference is one. The clock and five-scale graph portion is resolved above using `MultiplesOf5`;
-the remaining symbol-scale cases still need separate target and producer encodings. The original
-pictograph failure is
-`1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0`.
-This is a semantic boundary decision; decorative sequences would not repair the original task.
-The required operand refresh also rejects its question, which shows category counts of 3, 2,
-and 5 with a one-item-per-symbol legend. Both current verdicts concern the same scale-versus-sequence issue.
-The two- and ten-scale picture-graph variants also still encode symbol scale with sequence-step
-labels. These were deliberately preserved during the five-based migration for the next discussion.
+**Resolved on 2026-09-28** in `a425a0d`, with VQA results in `b851404`. The original
+`1.MD.C.4-find-total~358e3f7e` question and solution claimed `StepsOf1` because each symbol
+represented one item. Neither displayed the consecutive-value evidence required by that label.
+The user approved quantity constraints for scaled graphs and no multiples-of-one claim.
+
+The generator now uses `EvenNumbers`, `MultiplesOf5` and `MultiplesOf10` for scales 2, 5 and 10.
+An empty quantity-label selection explicitly resolves scale one. Grade 1/2 single-unit tasks remain; Grade 3
+scaled-picture variants still use only 2, 5 and 10. Picture targets claim no `StepsOfX`. Bar views
+own steps 1, 2, 5 and 10 because their numbered axes supply actual consecutive values; scaled
+bar targets request both their quantity constraint and axis step. Joint compatibility keeps these
+consistent (`SPEC-G3`, `SPEC-6`, `SPEC-8`, `SPEC-11`, `TSPEC-13`, `IMPL-V11`).
+
+The two retired failures are replaced by passing `1.MD.C.4-find-total~73273aab` samples with the
+same learner action: the question shows `4 + 5 + 6` with an empty answer, and the solution shows
+`5 + 8 + 3 = 16`. Both use one item per symbol without a sequence claim. Scaled picture totals
+need not be consecutive: one two-scale solution shows 8, 6 and 14, and one ten-scale solution
+shows 60, 50 and 30. Their keys make the common scale visible.
+
+All 74 graph samples replay exactly; 54 replacement/new identities receive fresh passing
+judgments with 348 defendable labels and every general check passing. The other 1,916 judgments
+are reused unchanged. Every retained image, numeric payload, label, seed and attempt is unchanged.
+Both original rejected records remain in resolved history as retired targets, not passing retries.
+No VQA retry, checklist change, rate-limit error or new major issue occurred. See the
+[detailed migration record](picture-graph-scales.md) for consumer adoption and verification.
+
+## Major findings requiring follow-up
 
 ### Concrete inference versus deriving a concept
 
@@ -830,26 +845,34 @@ are replaced, and 30 retained plans change. The strict label audit remains at ze
 97 review items and zero signals. All 112 affected samples replay exactly. Cache `afbfd07`
 contains **1,948 pass / 20 fail / zero uncached**. All 20 failure judgments are unchanged.
 
+The picture-graph scale migration passes **3,539 tests across 549 files**, all coverage thresholds,
+CCSS repository checks and the production build. Statistical-generator coverage is 98.36%
+statements / 98.03% branches. Matching retains 688 targets, 214 compatible pairs and 841 tuples;
+15 target identities and 21 routes are replaced, and seven retained plans change. The strict label
+audit remains at zero violations, 97 review items and zero signals. All 74 graph samples replay
+exactly. Cache `b851404` contains **1,952 pass / 18 fail / zero uncached**. The two retired scale
+failures have passing replacements, and the other 18 verdicts are unchanged.
+
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Multiples-of-five migration: 112 renders, 19 shards written, 272 reused; 22 added/20 removed identities, no retained-image changes |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 30 live judgments, all passing with 218 defendable label checks; 1,938 reused; final 1,948 pass / 20 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 20 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Graph-scale migration: 74 renders, 13 shards written, 278 reused; 54 added/52 removed identities, no retained-image changes |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 54 live judgments, all passing with 348 defendable label checks; 1,916 reused; final 1,952 pass / 18 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 18 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=cf7127d` | Latest follow-up: 1,946 identical retained images, 22 added/20 removed identities, no retained seed/attempt changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,745 identical retained images, 53 intended changes, 170 added/138 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=163fb9e` | Latest follow-up: 1,916 identical retained images, 54 added/52 removed identities, no retained seed/attempt changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,693 identical retained images, 53 intended changes, 224 added/190 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,654 training and 314 validation images. All 841 matched tuples have
-training evidence. Of 212 tuples allocated to validation, 157 have validation evidence. The 55
+The final split contains 1,654 training and 316 validation images. All 841 matched tuples have
+training evidence. Of 213 tuples allocated to validation, 158 have validation evidence. The 55
 remaining gaps include the ten-tens explanation route added earlier: its fixed mathematical
 relation repeats the training payload. Generation records 50 duplicate attempts before linking
 that request to the existing training sample. It is not counted as independent validation evidence.
 The previous total of 56 gaps falls by one because the corrected whole-share target hashes no
 longer allocate the rectangle/halves variant to validation; that earlier correction added no validation
-evidence. The subsequent five-based migration adds one allocated and represented tuple overall,
-producing two additional validation images while leaving the number of gaps unchanged.
+evidence. Each subsequent graph-label migration adds one allocated and represented tuple overall,
+producing two additional validation images per migration while leaving the number of gaps unchanged.
 There is no cross-split leakage or within-split configured-task redundancy. Validation allocation policy is unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
