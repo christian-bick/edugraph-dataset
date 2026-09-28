@@ -14,9 +14,10 @@ These items are not newly scheduled by the archive move.
   [arithmetic-offset label correction](arithmetic-offset-labels.md),
   [numeric-range and successor correction](numeric-range-bounds.md),
   [bounded count-out supply correction](count-out-supply.md),
-  [completion/explanation separation](procedure-task-separation.md), and
-  [operand-cardinality clarification](operand-cardinality.md) are complete;
-  the current cache has 28 remaining failures among 1,962 CCSS images: 11 samples requiring
+  [completion/explanation separation](procedure-task-separation.md),
+  [operand-cardinality clarification](operand-cardinality.md), and
+  [whole-tens subtraction correction](whole-tens-subtraction.md) are complete;
+  the current cache has 27 remaining failures among 1,966 CCSS images: 10 samples requiring
   semantic review and 17 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
@@ -29,8 +30,10 @@ These items are not newly scheduled by the archive move.
   and separate explanation tasks. All 40 replacement samples now pass after clarifying that
   operand cardinality counts occurrences across all nested operations. The 732 required rechecks
   retain all images and leave no rejected operand label; one pictorial-division verdict is uncertain
-  but passes under the existing policy. A new review concerns single-place subtraction versus
-  place-value partitioning; the picture-graph scale review now includes its question as well.
+  but passes under the existing policy. Whole-tens targets now use `Subtraction` with `PlaceValue`,
+  retaining their model, written-method, and explanation requirements; identifiable partitioning
+  remains supported elsewhere. All 16 corrected samples pass without changing any retained image
+  or judgment. The picture-graph scale review includes its question as well.
   The fixed ten-tens explanation adds one validation-coverage gap, bringing
   that total to 56 without leakage. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.

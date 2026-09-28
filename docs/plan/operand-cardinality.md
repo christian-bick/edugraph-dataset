@@ -112,6 +112,12 @@ the other remaining reviews. There are now 11 active semantic-review samples and
 disagreements. Historical records preserve the four newly passing findings, bringing that history
 to 47 records: 32 passed revalidations and 15 retired identities.
 
+The subsequent [whole-tens subtraction correction](whole-tens-subtraction.md) resolves the first
+row with the user's approval: six `1.NBT.C.6` targets now use `Subtraction` with `PlaceValue`, while
+identifiable partitioning remains supported. Its 16 replacement samples pass, and the old failed
+identity is retained as history. The counts above describe this operand-cardinality checkpoint;
+the rolling report records the current totals.
+
 ## Churn and commits
 
 The churn report against `791d038` confirms all 1,962 images are stable, with no added/removed

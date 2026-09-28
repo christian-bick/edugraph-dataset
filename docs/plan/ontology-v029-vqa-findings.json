@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.4.a08f9a911317",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "c645060",
+  "cache_commit": "3ea12ff",
   "concurrency": 4,
-  "evaluated": 1962,
-  "passed": 1934,
-  "failed": 28,
-  "semantic_review_samples": 11,
+  "evaluated": 1966,
+  "passed": 1939,
+  "failed": 27,
+  "semantic_review_samples": 10,
   "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -1871,6 +1871,158 @@
       },
       "details": "operand-cardinality.md",
       "note": "Operand cardinality counts individual occurrences across a whole expression, including nested operations. All three concrete definitions and their parent now state this explicitly. Repeated values count separately; the result is not an extra operand of the original expression. Target labels and images are unchanged; all affected judgments were refreshed once without prompt or checklist changes."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "whole-tens-subtraction",
+      "status": "completed",
+      "baseline_commit": "e39b9f4",
+      "fix_commit": "f5300a3",
+      "cache_commit": "3ea12ff",
+      "library_version": "0.29.0-pre.4.a08f9a911317",
+      "concurrency": 4,
+      "generation": {
+        "rendered_images": 56,
+        "written_shards": 6,
+        "reused_shards": 285
+      },
+      "sample_count_before": 1962,
+      "sample_count_after": 1966,
+      "evaluated": 16,
+      "reused": 1950,
+      "failures_before": 28,
+      "failures_after": 27,
+      "retired_failed_identities": 1,
+      "newly_rejected": 0,
+      "added_sample_identities": 16,
+      "removed_sample_identities": 12,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "unchanged_cache_records": 1910,
+      "provenance_only_cache_records": 40,
+      "unchanged_retained_judgments": 1950,
+      "retained_partitioning_samples": [
+        "2.NBT.B.9-explain-strategies~dbec91bb#place-value-arithmetic#place-value-arithmetic-explanation#train#question#inst:0",
+        "2.NBT.B.9-explain-strategies~dbec91bb#place-value-arithmetic#place-value-arithmetic-explanation#train#solution#inst:0",
+        "2.NBT.B.7-concrete-regrouping~0130749a#place-value-arithmetic#place-value-arithmetic-model#train#question#inst:0",
+        "2.NBT.B.7-concrete-regrouping~0130749a#place-value-arithmetic#place-value-arithmetic-model#train#solution#inst:0",
+        "2.NBT.B.7-model-to-written-method~7682ea5d#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+        "2.NBT.B.7-model-to-written-method~7682ea5d#place-value-arithmetic#place-value-arithmetic-written-method#train#solution#inst:0"
+      ],
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "replaced_targets": 6,
+        "replaced_routes": 6,
+        "changed_retained_plans": 0
+      },
+      "verification": {
+        "test_files": 543,
+        "tests": 3443,
+        "focused_tests": 52,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "test_dataset_and_cache_unchanged": true
+      },
+      "split": {
+        "train_images": 1654,
+        "validation_images": 312,
+        "matched_tuples": 841,
+        "training_tuples": 841,
+        "allocated_validation_tuples": 212,
+        "represented_validation_tuples": 156,
+        "validation_gaps": 56,
+        "cross_split_leakage": 0,
+        "within_split_task_redundancy": 0
+      },
+      "passing_replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~bd94f77d#place-value-arithmetic#place-value-arithmetic-model#val#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:43.189Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~3026996c#place-value-arithmetic#place-value-arithmetic-explanation#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:18.429Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~9e3b5600#place-value-arithmetic#place-value-arithmetic-explanation#val#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:38.408Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~52634bc9#place-value-arithmetic#place-value-arithmetic-model#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:23.544Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~9e3b5600#place-value-arithmetic#place-value-arithmetic-explanation#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:14.923Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~bd94f77d#place-value-arithmetic#place-value-arithmetic-model#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:23.939Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~bd94f77d#place-value-arithmetic#place-value-arithmetic-model#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:26.031Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~9e3b5600#place-value-arithmetic#place-value-arithmetic-explanation#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:15.714Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~9a5c1508#place-value-arithmetic#place-value-arithmetic-written-method#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:36.143Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~9a5c1508#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:31.556Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~bd94f77d#place-value-arithmetic#place-value-arithmetic-model#val#question#inst:0",
+          "validated_at": "2026-09-28T12:46:37.511Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~973978da#place-value-arithmetic#place-value-arithmetic-written-method#train#solution#inst:0",
+          "validated_at": "2026-09-28T12:46:31.162Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~3026996c#place-value-arithmetic#place-value-arithmetic-explanation#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:16.572Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-explain-place-value-subtraction~9e3b5600#place-value-arithmetic#place-value-arithmetic-explanation#val#question#inst:0",
+          "validated_at": "2026-09-28T12:46:35.889Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-concrete-place-value-subtraction~52634bc9#place-value-arithmetic#place-value-arithmetic-model#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:22.538Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~973978da#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+          "validated_at": "2026-09-28T12:46:30.202Z",
+          "pass": true
+        }
+      ],
+      "details": "whole-tens-subtraction.md",
+      "note": "Six 1.NBT.C.6 variants use Subtraction and PlaceValue, preserving the concrete-model, written-method, and explanation tasks and both result-zero variants. The generator rejects partitioning with its direct whole-tens profile. Existing general partitioning routes, mathematics, renderers, ontology definitions, and retained images remain unchanged."
     }
   ],
   "findings": [
@@ -1961,26 +2113,6 @@
       "reasoning": "The ontology label 'NumbersWithoutZero' is not defendable because the numerical value zero is involved in the task, represented by 'none' in the ones place of both numbers.",
       "validated_at": "2026-09-27T19:52:30.191Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "single-place-subtraction-versus-place-value-partitioning",
-      "disposition": "The unchanged question models 90 - 60 with nine and six tens, then asks for their difference using a tens-unit vertical method. SubtractionPlaceValuePartitioning explicitly requires decomposing operands into place-value parts and coordinating partial differences. This task has only one occupied place. The shared 1.NBT.C.6 target builder constrains inputs to multiples of ten, so adding nonzero ones would change the intended competency. Review whether single-place unit subtraction belongs in this Area or needs a different target/producer declaration; retain the raw verdict pending that semantic decision.",
-      "sample_key": "1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
-      "generator": "place-value-arithmetic",
-      "view": "place-value-arithmetic-written-method",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "SubtractionPlaceValuePartitioning",
-          "verdict": "not_defendable",
-          "evidence": "The subtraction task 90 - 60 only operates on the tens place value (9 tens - 6 tens) with no ones, so there is no partitioning of operands into multiple place-value parts (like tens and ones) to coordinate partial differences."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The ontology label SubtractionPlaceValuePartitioning is not defendable because the task 90 - 60 only involves subtracting single-digit quantities of tens, without any decomposition of multi-digit numbers into multiple place-value parts (e.g., tens and ones) and without coordination of multiple partial differences.",
-      "validated_at": "2026-09-28T07:50:40.007Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "semantic_review_required",
@@ -4259,6 +4391,70 @@
         "validated_at": "2026-09-27T23:20:45.061Z",
         "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+      "resolution": "whole-tens-subtraction-target-correction",
+      "resolution_type": "target_corrected",
+      "fix_commit": "f5300a3",
+      "cache_commit": "3ea12ff",
+      "replacement_samples": [
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~973978da#place-value-arithmetic#place-value-arithmetic-written-method#train#solution#inst:0",
+          "labels": [
+            "http://edugraph.io/edu/Formalization",
+            "http://edugraph.io/edu/MultiplesOf10",
+            "http://edugraph.io/edu/NumbersSmaller100",
+            "http://edugraph.io/edu/NumbersWithoutNegatives",
+            "http://edugraph.io/edu/NumbersWithoutZero",
+            "http://edugraph.io/edu/PhysicalNumbers",
+            "http://edugraph.io/edu/PlaceValue",
+            "http://edugraph.io/edu/ProcedureUnderstanding",
+            "http://edugraph.io/edu/Subtraction",
+            "http://edugraph.io/edu/TwoOperands"
+          ],
+          "validated_at": "2026-09-28T12:46:31.162Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.NBT.C.6-model-to-written-method~973978da#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+          "labels": [
+            "http://edugraph.io/edu/Formalization",
+            "http://edugraph.io/edu/MultiplesOf10",
+            "http://edugraph.io/edu/NumbersSmaller100",
+            "http://edugraph.io/edu/NumbersWithoutNegatives",
+            "http://edugraph.io/edu/NumbersWithoutZero",
+            "http://edugraph.io/edu/PhysicalNumbers",
+            "http://edugraph.io/edu/PlaceValue",
+            "http://edugraph.io/edu/ProcedureUnderstanding",
+            "http://edugraph.io/edu/Subtraction",
+            "http://edugraph.io/edu/TwoOperands"
+          ],
+          "validated_at": "2026-09-28T12:46:30.202Z",
+          "pass": true
+        }
+      ],
+      "note": "The old identity retires after correcting the target to Subtraction plus PlaceValue. Its replacement samples pass; the old rejected judgment is preserved as history, not recorded as a passing retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "single-place-subtraction-versus-place-value-partitioning",
+        "disposition": "The unchanged question models 90 - 60 with nine and six tens, then asks for their difference using a tens-unit vertical method. SubtractionPlaceValuePartitioning explicitly requires decomposing operands into place-value parts and coordinating partial differences. This task has only one occupied place. The shared 1.NBT.C.6 target builder constrains inputs to multiples of ten, so adding nonzero ones would change the intended competency. Review whether single-place unit subtraction belongs in this Area or needs a different target/producer declaration; retain the raw verdict pending that semantic decision.",
+        "sample_key": "1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+        "generator": "place-value-arithmetic",
+        "view": "place-value-arithmetic-written-method",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "SubtractionPlaceValuePartitioning",
+            "verdict": "not_defendable",
+            "evidence": "The subtraction task 90 - 60 only operates on the tens place value (9 tens - 6 tens) with no ones, so there is no partitioning of operands into multiple place-value parts (like tens and ones) to coordinate partial differences."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The ontology label SubtractionPlaceValuePartitioning is not defendable because the task 90 - 60 only involves subtracting single-digit quantities of tens, without any decomposition of multi-digit numbers into multiple place-value parts (e.g., tens and ones) and without coordination of multiple partial differences.",
+        "validated_at": "2026-09-28T07:50:40.007Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0\" --no-validate"
       }
     }
   ]

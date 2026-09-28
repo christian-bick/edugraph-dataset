@@ -4,26 +4,27 @@
 
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
-successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, and operand-cardinality corrections on
+successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
+and whole-tens subtraction corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,962 CCSS samples** have current judgments: **1,934 pass (98.6%) and 28 fail**, down from
+All **1,966 CCSS samples** have current judgments: **1,939 pass (98.6%) and 27 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
-the count-out producer replacement removed two, and the completion/explanation split added 30,
-for a net increase of 26 from the initial dataset.
-There are no uncached samples. The remaining failures comprise **11 samples requiring semantic
+the count-out producer replacement removed two, the completion/explanation split added 30,
+and the whole-tens target correction added four, for a net increase of 30 from the initial dataset.
+There are no uncached samples. The remaining failures comprise **10 samples requiring semantic
 review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 28 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 28 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 47
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 48
 resolved finding records and initial totals are retained separately as history: 32 passed
-revalidation, and fifteen were retired with corrected targets or producer contracts and replaced
+revalidation, and sixteen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
@@ -38,8 +39,11 @@ Property and hundreds-bundle completion now have appropriate Abilities and disti
 tasks. All 40 replacement samples now pass overall after the agreed operand-cardinality clarification.
 Operands are counted across the complete expression, including nested operations and repeated
 occurrences. Both distributive failures are resolved without changing their images or labels.
-The required 732-sample refresh introduces a separate review of single-place subtraction versus
-place-value partitioning and extends the existing picture-graph scale review to its question.
+The subsequent whole-tens correction resolves the single-place subtraction review: six
+`1.NBT.C.6` targets now use `Subtraction` with `PlaceValue`, preserving their model, written-method,
+and explanation requirements. Identifiable partitioning routes remain supported, with unchanged
+images and judgments. All 16 replacement whole-tens samples pass. The picture-graph scale review
+introduced by the required 732-sample refresh remains open for its question and solution.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -151,6 +155,17 @@ All 1,230 unaffected judgments remain byte-identical. Both distributive failures
 This moves the total from 27 to 28 failures. No API or rate-limit error occurs, and no verdict is
 retried merely to obtain a pass. Operand checks comprise 731 defendable and one uncertain verdict,
 with none rejected; the uncertain pictorial-division sample still passes under the existing policy.
+
+The [whole-tens subtraction follow-up](whole-tens-subtraction.md) corrects six `1.NBT.C.6` target
+variants and prevents the generator's direct whole-tens profile from claiming partitioning.
+Canonical generation renders 56 images, writes six shards, and reuses 285. Sixteen new identities
+replace twelve old ones; four additional images result from the corrected targets' validation
+allocation. All 1,950 retained images, labels, seeds, attempts, replay receipts, and semantic plans
+remain unchanged, including all six existing general subtraction-partitioning images. VQA makes
+16 requests at concurrency four, all passing, and reuses 1,950 judgments. Only
+`generation_plan.inputHash` changes on 40 retained cache records; the other 1,910 are byte-identical.
+The old partitioning failure retires with its corrected target, reducing total failures from 28
+to 27. No new rejection, API error, or rate-limit error occurs.
 
 ## Minor repairs
 
@@ -426,25 +441,29 @@ samples once at concurrency four, with no rejected operand label. Cache commit: 
 The [detailed report](operand-cardinality.md) records the single passing-but-uncertain pictorial
 division verdict and all unrelated new findings. No prompt or checklist exemption was introduced.
 
-## Major findings requiring follow-up
-
 ### Single-place subtraction versus place-value partitioning
 
-**New semantic review from the operand-cardinality refresh:** the unchanged written-method
-question asks the learner to model `90 − 60`, showing nine tens, six tens, and a tens-unit
-vertical subtraction. `SubtractionPlaceValuePartitioning` requires decomposing operands into
-place-value parts and coordinating partial differences. The image uses only one occupied place,
-so the evaluator's objection identifies a real boundary to settle.
+**Resolved on 2026-09-28:** the user approved retaining `SubtractionPlaceValuePartitioning`
+where that strategy is identifiable and using `Subtraction` plus `PlaceValue` otherwise.
+[1.NBT.C.6](https://www.thecorestandards.org/Math/Content/1/NBT/) requires whole-tens subtraction
+and place-value or related strategies, but does not require decomposition and coordinated partial
+differences. The former `90 − 60` written-method question correctly modeled nine tens minus six
+tens; its target overclaimed a particular strategy (`TSPEC-6`, `TSPEC-13`).
 
-The shared `1.NBT.C.6` target builder selects this Area and `MultiplesOf10` for the concrete,
-written-method, and explanation variants. Adding nonzero ones to force multiple partial
-differences would change the standard's intended task. Review whether single-place unit
-subtraction belongs in this Area or should have a different target/producer declaration
-(`SPEC-3`, `TSPEC-13`). The arithmetic and visualization are correct; no wording-only repair
-or automatic relabeling was made.
+Implementation commit `f5300a3` replaces the Area on all six target variants while retaining
+models, `Formalization`, `TextualArticulation`, and both positive/zero-result variants. A generator
+compatibility guard excludes `SubtractionPlaceValuePartitioning` with the direct whole-tens
+profile (`SPEC-G3`). Existing general partitioning targets and all three consumer routes remain
+supported. For example, the retained `259 − 236` explanation coordinates `9 − 6` and `250 − 230`
+and combines their differences; its image and passing judgment are unchanged.
 
-The reported sample is
-`1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0`.
+All 16 corrected samples pass, with all 180 label judgments defendable and all general checks
+passing. The old failed identity retires, with its original verdict preserved in resolved history;
+this is not recorded as a passing retry of the old task. Cache commit: `3ea12ff`.
+The [detailed report](whole-tens-subtraction.md) records target/view coverage, visual inspection,
+tests, unchanged retained samples, and split evidence.
+
+## Major findings requiring follow-up
 
 ### Spatial assembly versus concept composition
 
@@ -669,23 +688,31 @@ The operand-cardinality preview passes the same **3,434 tests across 543 files**
 thresholds, repository checks, and the build. Ontology validation also passes its complete Docker
 gate and hosted Linux/Windows checks. Matching remains at 688 targets, 214 compatible pairs,
 and 841 tuples, with no changed retained semantic plans; the strict label audit remains at zero
-violations and 97 review items. Current VQA is **1,934 pass / 28 fail / zero uncached**, in cache
+violations and 97 review items. That checkpoint is **1,934 pass / 28 fail / zero uncached**, in cache
 commit `c645060`. Exactly 732 judgments are refreshed and all 1,230 unaffected records are unchanged.
+
+The whole-tens correction passes **3,443 tests across 543 files**, all coverage thresholds,
+repository checks, and the build. One initial coverage run encountered an existing Windows
+temporary-fixture cleanup `EPERM`; a single rerun passes without a source change. All 52 focused
+generator/view tests pass. Matching remains at 688 targets, 214 compatible pairs, and 841 tuples:
+six targets and their six routes are replaced, with no changed retained semantic plans. The strict
+label audit remains at zero violations and 97 review items. Current VQA is **1,939 pass / 27 fail /
+zero uncached**, in cache commit `3ea12ff`. All 1,950 retained judgments and timestamps are unchanged.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Operand-cardinality preview: zero renders, zero shards written, 291 reused; all 1,962 image hashes unchanged |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 732 live judgments: 725 pass, seven unrelated flags; 1,230 reused; final 1,934 pass / 28 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 28 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Whole-tens correction: 56 renders, six shards written, 285 reused; all 1,950 retained image hashes unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 16 live judgments, all passing; 1,950 reused; final 1,939 pass / 27 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=791d038` | Latest follow-up: all 1,962 images identical, zero changed seeds/attempts, no added or removed identities |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,837 identical retained images, 43 intended changes, 82 added/56 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=e39b9f4` | Latest follow-up: all 1,950 retained images identical, zero changed seeds/attempts, 16 added/12 removed identities |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,825 identical retained images, 43 intended changes, 98 added/68 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,654 training and 308 validation images. All 841 matched tuples have
-training evidence. Of 210 tuples allocated to validation, 154 have validation evidence. The 55
-existing gaps remain, and the new ten-tens explanation route adds one: its fixed mathematical
+The final split contains 1,654 training and 312 validation images. All 841 matched tuples have
+training evidence. Of 212 tuples allocated to validation, 156 have validation evidence. The 56
+existing gaps remain, including the ten-tens explanation route added earlier: its fixed mathematical
 relation repeats the training payload. Generation records 50 duplicate attempts before linking
 that request to the existing training sample. It is not counted as independent validation evidence.
 There is no cross-split leakage or within-split configured-task redundancy. Sampling policy is unchanged.
