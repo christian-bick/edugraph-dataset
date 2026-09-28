@@ -84,8 +84,7 @@ When that contract changes — a renamed field, a new required field, a changed 
 change is not complete until the consuming views are adopted:
 
 1. Find the consuming views and inspect rejection reasons:
-   `npm run show:matching -- --spec=<real-standard>` for the actual consumers. Use
-   `--spec=test` for the isolated smoke path and add `--raw` only when diagnosing
+   `npm run show:matching -- --spec=<real-standard>` for the actual consumers. Add `--raw` only when diagnosing
    pre-deduplication source definitions.
 2. Adopt each matched view to render the updated payload fields.
 
@@ -141,7 +140,7 @@ view may seed presentation choices through `payload.seed`.
 - [ ] **IMPL-G3** — `ProblemStub` contains only `data`; every competency-changing choice is resolved through the schema before generation, while ontology-neutral instance randomness remains in generator code and is captured by `problem.data`.
 - [ ] **IMPL-G4** — the generated math provably satisfies every label the config encodes.
 - [ ] **IMPL-G5** — `generator.test.ts` covers the mathematical boundaries; `spec.test.ts` covers schema-label resolution; an empty-config throw is asserted.
-- [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields; the test spec also retains a smoke path.
+- [ ] **IMPL-G6** — if the payload contract changed, every consuming view found against the real standard via `npm run show:matching` renders the new fields.
 - [ ] **IMPL-G7** — capability extensions preserve the payload contract; structurally different problem shapes use a separate generator and share a typed-union view where rendering remains simple.
 - [ ] **IMPL-G8** — the payload preserves the structured witnesses for its mathematical labels and semantic context, but contains no Ability-specific prompt, blank, hint, requested reasoning, or answer prose.
 - [ ] `npm run test` and `npm run check:types` pass.

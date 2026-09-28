@@ -26,10 +26,7 @@ import {
     type GeneratorModelDescriptor,
     type ViewModelDescriptor
 } from './model-catalog.ts';
-import {
-    matchTargets,
-    type MatchTuple
-} from './matching.ts';
+import {matchTargets} from './matching.ts';
 export * from './matching.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,56 +134,6 @@ export interface GeneratorCatalogEntry extends GeneratorModelDescriptor {
 }
 
 export type ViewCatalogEntry = ViewModelDescriptor;
-
-/**
- * Returns generator IDs that have no semantically compatible target/view path
- * capable of producing a sample. Used to keep the isolated test spec useful as
- * a smoke and regression surface for every generator module.
- */
-export function findGeneratorsWithoutTestPath(
-    targets: CompetencyTarget[],
-    generatorCatalog: GeneratorCatalogEntry[],
-    viewCatalog: ViewCatalogEntry[],
-    maxAttempts = 10,
-    matchedTuples?: MatchTuple[]
-): string[] {
-    const tuples = matchedTuples ?? matchTargets(targets, generatorCatalog, viewCatalog).tuples;
-    const tuplesByGenerator = new Map<string, MatchTuple[]>();
-    for (const tuple of tuples) {
-        const group = tuplesByGenerator.get(tuple.generatorId);
-        if (group) group.push(tuple);
-        else tuplesByGenerator.set(tuple.generatorId, [tuple]);
-    }
-
-    const uncovered = generatorCatalog
-        .filter(entry => {
-            const candidates = tuplesByGenerator.get(entry.generatorId) ?? [];
-            return !candidates.some(tuple => {
-                const sampleKey = computeSampleKey({
-                    targetId: tuple.target.id,
-                    generatorId: tuple.generatorId,
-                    viewId: tuple.viewId,
-                    split: 'train',
-                    mode: 'question',
-                    instanceIdx: 0
-                });
-                try {
-                    const view = viewCatalog.find(view => view.viewId === tuple.viewId)!;
-                    return generatePlannedSampleWithRetry({
-                        generator: entry.generator,
-                        viewSchema: view.schema,
-                        plan: tuple.plan,
-                        sampleKey,
-                        maxAttempts
-                    }).stub !== null;
-                } catch {
-                    return false;
-                }
-            });
-        })
-        .map(entry => entry.generatorId);
-    return radixSortUtf8(uncovered);
-}
 
 function camelCase(str: string): string {
     return str.replace(/-([a-z0-9])/g, g => g[1].toUpperCase());

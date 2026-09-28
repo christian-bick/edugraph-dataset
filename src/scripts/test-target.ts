@@ -41,7 +41,7 @@ async function main() {
 
     if (!targetId || !specName) {
         console.error('Usage: npm run test:target -- --target=<target.id> --spec=<spec_module> [--raw] [--render] [--validate]');
-        console.error('Example: npm run test:target -- --target=test-writing~fe4336da --spec=test');
+        console.error('Example: npm run test:target -- --target=1.NBT.B.3-place-value-comparison --spec=ccss');
         process.exit(1);
     }
 

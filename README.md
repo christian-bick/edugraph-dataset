@@ -54,19 +54,12 @@ Generate the ML dataset (images + JSONL metadata). Each education standard gener
 ```bash
 # Generate using curriculum standards -> out/dataset-ccss/
 npm run generate:dataset -- --spec=ccss
-
-# Generate using test specifications -> out/dataset-test/
-npm run generate:dataset -- --spec=test
 ```
 
 The same `--generator`, `--view`, `--training-only`, and `--concurrency` filters apply to
 full and scoped generation. Container dependencies are isolated from host `node_modules`
 and reused while the lockfile and canonical renderer image remain unchanged, keeping
 targeted canonical iteration warm and repeatable.
-
-The isolated `test` spec is a prototyping, debugging, smoke, and retained-regression
-surface. It intentionally keeps at least one generatable target/view path per generator,
-but it is not an exhaustive curriculum or a substitute for validating real standard targets.
 
 **1b. Merge the Union Dataset**
 The released dataset at `out/dataset/` is the **union** of every education standard, deduplicated across them. Standards overlap heavily, so each one added contributes a shrinking delta — which the merge reports per standard.
@@ -123,9 +116,6 @@ Analyze the generated dataset to ensure proper pedagogical label coverage and di
 ```bash
 # Generate report for curriculum standards
 npm run report:coverage -- --spec=ccss
-
-# Generate report for test specifications
-npm run report:coverage -- --spec=test
 ```
 The `--spec` parameter is required. Pass `--spec=union` to analyze the merged release dataset in `out/dataset/`.
 

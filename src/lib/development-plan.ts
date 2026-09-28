@@ -56,7 +56,6 @@ export function planDevelopmentValidation(
     const checks = new Set<DevelopmentCheck>();
     const specs = new Set<string>();
     const availableSpecSet = new Set(availableSpecs);
-    const productionSpecSet = new Set([...productionSpecs, ...availableSpecs.filter(spec => spec === 'test')]);
     const reasons = new Map<string, Set<string>>();
     const missingFileSet = new Set(missingFiles.map(normalizedFile));
     const changedOutputTypes = new Set(changedGeneratorOutputTypes.map(normalizedFile));
@@ -143,7 +142,7 @@ export function planDevelopmentValidation(
 
     const checkList = DEVELOPMENT_CHECKS.filter(check => checks.has(check));
     const specList = radixSortUtf8([...new Set(
-        allSpecs ? [...productionSpecSet, ...specs] : [...specs]
+        allSpecs ? [...productionSpecs, ...specs] : [...specs]
     )]);
     return {
         changed_files: files,

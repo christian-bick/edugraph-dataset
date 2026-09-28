@@ -4,7 +4,7 @@ Rules for the visual QA contract formed by the central view checklist and one ch
 each view.
 
 **Applies to:** `src/visuals/views/checklist.md` and every view `checklist.md`.
-**Verify with:** `npm run validate:dataset -- --view=Y --spec=test`
+**Verify with:** `npm run validate:dataset -- --view=Y --spec=ccss`
 
 ---
 

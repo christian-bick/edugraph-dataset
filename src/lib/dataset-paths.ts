@@ -10,9 +10,7 @@ import { resolve } from 'path';
  * spec, so one standard can be regenerated without disturbing the others.
  *
  * Every script selects its dataset the same way: `--spec=<module>`, plus the
- * reserved `--spec=union` for the merged set. Before this existed, four scripts
- * derived the folder from a spec name while two derived it from a raw folder
- * name, and the two rules only agreed for the `test` spec.
+ * reserved `--spec=union` for the merged set.
  */
 
 export const UNION_DATASET_DIR = 'dataset';

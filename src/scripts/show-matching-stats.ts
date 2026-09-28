@@ -17,7 +17,7 @@ async function main() {
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
         console.error('Usage: npx vite-node src/scripts/show-matching-stats.ts --spec=<spec_module> [--raw]');
-        console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=test');
+        console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=ccss');
         console.error('Example: npx vite-node src/scripts/show-matching-stats.ts --spec=ccss --raw');
         process.exit(1);
     }

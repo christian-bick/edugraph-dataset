@@ -13,7 +13,7 @@ Hand off to `/implement-spec` instead of proceeding when a failure turns out to 
 - a **new** generator or view module, or an extension of the supported ontological space (`IMPL-7` in `docs/implementation-general.md`);
 - resolution of an entry in `implementationTodos`, or promotion of targets into `spec`.
 
-**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectTargetLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target; update the aligned `test` target when one exists. A rejection remains legitimate only when it describes a truthful, stable, and complete invalid domain for the view; an exact exclusion requires the view to accept every other compatible case.
+**Never make a failure disappear by suppressing the match.** Do not weaken a declaration, add a convenient `rejectTargetLabels` entry, or edit a target merely so the sample stops being generated (`TSPEC-6`, `SPEC-V3`). An evidence-backed classification correction is legitimate when the ontology definition and rendered task show that the current claim is false and the replacement is the most specific directly observable claim (`SPEC-2`, `SPEC-V5`, `TSPEC-13`). Explain that evidence and obtain user confirmation before changing any view `spec.ts` or production target. A rejection remains legitimate only when it describes a truthful, stable, and complete invalid domain for the view; an exact exclusion requires the view to accept every other compatible case.
 
 ## Scope: One Standard at a Time
 
@@ -128,12 +128,12 @@ npm run check -- --spec=<specModule>
 npm run merge:dataset
 ```
 
-Skip `merge:dataset` for an isolated spec such as `test`, which never enters the union.
+Skip `merge:dataset` when the module metadata declares `isolated = true`.
 
 #### Step 7: Report
 
 Summarize for the user: how many failures were found per source, how they were triaged, what changed per module, any evidence-backed label corrections and their confirmation, which failures were resolved by fixing a checklist rather than code, and anything handed off to `/implement-spec`.
 
 IMPORTANT:
-- Do NOT update code outside views, generators, and the "test" spec without user confirmation.
+- Do NOT update code outside views and generators without user confirmation.
 - Do NOT modify `spec.ts` without user confirmation.

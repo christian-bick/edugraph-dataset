@@ -1,8 +1,7 @@
 import {normalizeAndValidateSpec} from './spec-validator.ts';
 import {loadSpecTodos} from './spec-catalog.ts';
 import {labelContractIndex, validateTargetLabelContract} from './label-contracts.ts';
-import {findGeneratorsWithoutTestPath,
-    type GeneratorCatalogEntry, type ViewCatalogEntry} from './generation.ts';
+import type {GeneratorCatalogEntry, ViewCatalogEntry} from './generation.ts';
 import {matchTargetsDelta, matchingPolicyInputHash} from './matching.ts';
 import {readDatasetManifest, datasetOntologyProvenanceHash} from './dataset-manifest.ts';
 import {datasetDirForSpec, datasetOutDir} from './dataset-paths.ts';
@@ -39,11 +38,6 @@ export async function validateStandardContracts(specName: string,
     const matched = new Set(matching.tuples.map(tuple => tuple.target.id));
     for (const target of result.targets.filter(target => !matched.has(target.id))) {
         result.errors.push(`TSPEC-9 ${specName}:${target.id}: active target has no compatible generator/view path.`);
-    }
-    if (specName === 'test') {
-        for (const generator of findGeneratorsWithoutTestPath(result.targets, generators, views, 10, matching.tuples)) {
-            result.errors.push(`TSPEC-12 test: generator '${generator}' has no generatable target/view path.`);
-        }
     }
     return result;
 }

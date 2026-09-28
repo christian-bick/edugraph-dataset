@@ -77,9 +77,8 @@ Refer to `DOCS.md § 6` (Efficient Development & Debugging Iteration) for target
   npm run test:sample -- --sample="<sampleKey>" --spec=<specModule> --no-validate
   ```
 
-Use the isolated `test` spec only for deliberately authored prototypes, smoke paths,
-and retained regressions. Add `--raw` to `test:target` only when inspecting source
-definitions before production overlap deduplication.
+Add `--raw` to `test:target` only when inspecting source definitions before production
+overlap deduplication.
 
 #### Step 5: Canonical Scoped Iteration Loop
 Keep iteration scoped during active development; every dataset render is canonical and starts
@@ -87,27 +86,19 @@ its own isolated renderer in Docker:
 - Run Vitest unit tests: `npm run test`
 - Run **scoped dataset generation**:
   ```bash
-  npm run generate:dataset -- --spec=test --generator=<generator> --view=<view> [--training-only]
+  npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view> [--training-only]
   ```
 - At a VQA checkpoint, run **scoped VQA validation** against that canonical output:
   ```bash
-  npm run validate:dataset -- --spec=test --generator=<generator> --view=<view> 
-  ```
-  The command fails on any failing or uncached sample and prints the path of a new timestamped
-  report under `temp/validation-reports/dataset-test/`.
-- Run **cache churn report**:
-  ```bash
-  npm run report:churn -- --spec=test
-  ```
-  *(Verify zero unexpected image churn in unrelated modules).*
-- Treat this `test` run as a fast smoke loop. Before promotion, inspect and generate the
-  actual target with `--spec=<specModule>`; the test spec is not evidence that the real
-  standard matches correctly or that its production labels are visually defendable
-  (`TSPEC-13`):
-  ```bash
-  npm run generate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
   npm run validate:dataset -- --spec=<specModule> --generator=<generator> --view=<view>
   ```
+  The command fails on any failing or uncached sample and prints the path of a new timestamped
+  report under `temp/validation-reports/dataset-<specModule>/`.
+- Run **cache churn report**:
+  ```bash
+  npm run report:churn -- --spec=<specModule>
+  ```
+  *(Verify zero unexpected image churn in unrelated modules).*
 - Once clean and verified, **promote completed targets from `implementationTodos` to `spec`** in `src/spec/<spec>/`, per the export contract in `docs/target-spec.md` (`TSPEC-1`, `TSPEC-7`).
 
 #### Step 6: Commit the Completed Todo and Continue
@@ -139,4 +130,4 @@ npm run check -- --spec=<specModule>
 npm run merge:dataset
 ```
 
-`merge:dataset` rebuilds the union dataset at `out/dataset/` from every non-isolated standard. Skip it for an isolated spec such as `test` (`TSPEC-10` in `docs/target-spec.md`).
+`merge:dataset` rebuilds the union dataset at `out/dataset/` from every non-isolated standard. Skip it when the module metadata declares `isolated = true` (`TSPEC-10` in `docs/target-spec.md`).

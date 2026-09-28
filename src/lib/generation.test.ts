@@ -12,7 +12,6 @@ import {
     diagnoseTargetMatches,
     matchTargets,
     matchesTarget,
-    findGeneratorsWithoutTestPath,
     findTargetsWithoutMatch,
     generateSample,
     generateSampleWithRetry,
@@ -26,8 +25,7 @@ import {
     buildRenderPayload,
     SampleIdentity,
     GeneratorMatchInfo,
-    ViewMatchInfo,
-    GeneratorCatalogEntry
+    ViewMatchInfo
 } from './generation.ts';
 import {loadSpecTodos, loadTargets} from './spec-catalog.ts';
 import { random } from './random.ts';
@@ -487,63 +485,6 @@ describe('generateSampleWithRetry', () => {
         const result = generateSampleWithRetry({ generator, labels: [], sampleKey, maxAttempts: 5 });
         expect(result.stub).toBeNull();
         expect(result.attempt).toBe(5);
-    });
-});
-
-describe('findGeneratorsWithoutTestPath', () => {
-    const module = {
-        id: 'fixture',
-        relativePath: 'fixture',
-        absolutePath: '/fixture',
-        category: null
-    };
-    const viewCatalog = [{
-        viewId: 'fixture-view',
-        generalLabels: [],
-        supportedLabels: [],
-        problemType: 'WritingProblem',
-        module,
-        schema: {},
-        spec: { viewId: 'fixture-view', generalLabels: [] }
-    }];
-
-    it('requires both a semantic target/view match and a generatable sample', () => {
-        const generatorCatalog = [
-            {
-                generatorId: 'covered',
-                generalLabels: [],
-                labels: [],
-                problemType: 'WritingProblem',
-                module,
-                spec: {},
-                generator: makeStubGenerator(() => ({ data: { value: 1 } }))
-            },
-            {
-                generatorId: 'null-only',
-                generalLabels: [],
-                labels: [],
-                problemType: 'WritingProblem',
-                module,
-                spec: {},
-                generator: makeStubGenerator(() => null)
-            },
-            {
-                generatorId: 'type-mismatch',
-                generalLabels: [],
-                labels: [],
-                problemType: 'CountingProblem',
-                module,
-                spec: {},
-                generator: makeStubGenerator(() => ({ data: { value: 2 } }))
-            }
-        ] as GeneratorCatalogEntry[];
-
-        expect(findGeneratorsWithoutTestPath(
-            [{ id: 'fixture-target', labels: [] }],
-            generatorCatalog,
-            viewCatalog,
-            2
-        )).toEqual(['null-only', 'type-mismatch']);
     });
 });
 

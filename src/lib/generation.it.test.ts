@@ -68,11 +68,11 @@ describe('catalogs and end-to-end matching', () => {
         ]));
     }, 90000);
 
-    it('loads catalogs, matches the test spec and replays a sample by key', async () => {
+    it('loads catalogs, matches CCSS and replays a sample by key', async () => {
         const [generatorCatalog, viewCatalog, targets] = await Promise.all([
             loadGeneratorCatalog(),
             loadViewCatalog(),
-            loadTargets('test')
+            loadTargets('ccss')
         ]);
 
         expect(generatorCatalog.length).toBeGreaterThan(0);
@@ -122,7 +122,7 @@ describe('catalogs and end-to-end matching', () => {
             instanceIdx: 0
         };
         const sampleKey = computeSampleKey(identity);
-        const replayed = await generateSampleByKey({ sampleKey, attempt: 1, specName: 'test' });
+        const replayed = await generateSampleByKey({ sampleKey, attempt: 1, specName: 'ccss' });
 
         const generator = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!.generator;
         const direct = generatePlannedDraw({
@@ -144,7 +144,7 @@ describe('catalogs and end-to-end matching', () => {
         const [generatorCatalog, viewCatalog, targets] = await Promise.all([
             loadGeneratorCatalog(),
             loadViewCatalog(),
-            loadTargets('test')
+            loadTargets('ccss')
         ]);
 
         const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);

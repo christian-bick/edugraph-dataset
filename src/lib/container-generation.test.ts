@@ -39,7 +39,7 @@ describe('container generation command', () => {
             projectRoot: '/repo',
             npmCacheDir: '/cache/npm',
             packageLock: 'lock',
-            generationArgs: ['--spec=test', '--generator=writing'],
+            generationArgs: ['--spec=ccss', '--generator=writing'],
             hostUid: 1001,
             hostGid: 1002
         });
@@ -53,7 +53,7 @@ describe('container generation command', () => {
         expect(args).toContain('GIT_DIR=/host-workspace/.git');
         expect(args).toContain('GIT_WORK_TREE=/workspace');
         expect(args).toContain('EDUGRAPH_HOST_UID=1001');
-        expect(args.slice(-2)).toEqual(['--spec=test', '--generator=writing']);
+        expect(args.slice(-2)).toEqual(['--spec=ccss', '--generator=writing']);
     });
 
     it('rejects ambiguous Docker mount sources', () => {

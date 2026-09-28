@@ -368,7 +368,7 @@ async function runModulePipeline(
     // the primary artifact and may not depend on whether val was generated at
     // all, while val is derived and necessarily depends on train — disjointness
     // cannot be had otherwise. Verify with:
-    //   generate --spec=test, then generate --spec=test --training-only
+    //   generate --spec=ccss, then generate --spec=ccss --training-only
     //   → the train split must be byte-identical.
     const trainTaskFingerprints: SampleFingerprintIndex = new Map();
     const trainContentFingerprints: SampleFingerprintIndex = new Map();
@@ -443,7 +443,6 @@ async function main() {
     if (!specName) {
         console.error('Error: The --spec parameter is required.');
         console.error('Usage: npm run generate:dataset -- --spec=<spec_module> [--generator=<generator_name>] [--view=<view_id>] [--affected] [--rebuild-graph] [--reset-graph] [--training-only]');
-        console.error('Example: npm run generate:dataset -- --spec=test');
         console.error('Example: npm run generate:dataset -- --spec=ccss');
         process.exit(1);
     }

@@ -42,7 +42,7 @@ async function main() {
 
     if (!sampleKey || !specName) {
         console.error('Usage: npm run test:sample -- --sample="<sample_key>" [--attempt=<n>] --spec=<spec_module> [--no-render] [--no-validate]');
-        console.error('Example: npm run test:sample -- --sample="test-writing~fe4336da#writing#numbers-write-standard#train#question#inst:0" --spec=test');
+        console.error('Example: npm run test:sample -- --sample="1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0" --spec=ccss');
         process.exit(1);
     }
 

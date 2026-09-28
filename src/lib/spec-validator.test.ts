@@ -485,22 +485,4 @@ describe('spec-validator', () => {
                 .rejects.toThrow(/Spec module not found/);
         });
     });
-
-    describe('normalizeAndValidateSpec (live test spec)', () => {
-        it('validates and deduplicates the committed test spec module', async () => {
-            const result = await normalizeAndValidateSpec('test');
-            expect(result.errors).toHaveLength(0);
-            expect(result.stats.totalTargets).toBeGreaterThan(0);
-            expect(result.stats.uniqueTargets).toBe(result.targets.length);
-            expect(result.stats.totalTargets - result.stats.uniqueTargets)
-                .toBe(result.stats.deduplicatedCount);
-
-            const ids = result.targets.map(t => t.id);
-            expect(new Set(ids).size).toBe(ids.length);
-            for (const target of result.targets) {
-                const normalized = Array.from(new Set(target.labels)).sort();
-                expect(target.labels).toEqual(normalized);
-            }
-        }, 15_000);
-    });
 });

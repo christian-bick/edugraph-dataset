@@ -217,13 +217,13 @@ Neither target-only label filters nor a passing sample prove that property for a
 
 ## Optional synthetic regression experiment
 
-Compare declaration-derived regression cases with the hand-authored `test` spec:
+Compare declaration-derived regression cases with the existing unit-test fixtures:
 
 - [ ] Derive valid schema choices and explicit fallback sets, paired only with compatible views
   whose applicability admits them. Avoid a blind label power set or unrestricted Cartesian product.
 - [ ] Check resolution, deterministic generation, rendering in both modes, task identities, and
   fingerprints. Keep work proportional to declared choices, compatible-pair edges, and emitted cases.
-- [ ] Compare detected failures and coverage with existing test targets. Preserve unique authored
+- [ ] Compare detected failures and coverage with existing regression cases. Preserve unique authored
   edge cases, bug reproductions, and human-readable fixtures. Replace generic reachability targets
   only if the experiment establishes an equivalent or stronger check.
 

@@ -4,7 +4,7 @@ Rules for authoring competency target specs — the pedagogical input to the who
 Unlike generator/view `spec.ts` files, these describe **standards**, not modules, and are
 deliberately broad: they state what a competency demands, not how any module satisfies it.
 
-**Applies to:** `src/spec/<module>/*.ts` (`ccss`, `test`)
+**Applies to:** `src/spec/<module>/*.ts` (for example, `ccss`)
 **Read with:** [spec-general.md](spec-general.md) — targets sit on the broad side of every matching rule there.
 **Verify with:** `npm run check:standards-spec -- --spec=<module>`, `npm run check -- --spec=<module>`
 
@@ -67,8 +67,7 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
 - `toOntologyTodo('<standard-id>', '<title>', ontology, '<description>')` — creates a
   leaf-indexed ontology TODO referencing that shared package.
 
-Build permutations programmatically rather than writing static arrays by hand — this
-applies to the `test` module too.
+Build permutations programmatically rather than writing static arrays by hand.
 
 For example:
 
@@ -283,8 +282,7 @@ export const unionOrder = 200;   // merge precedence; lower merges first
 Files prefixed with `_` describe the module rather than contributing targets, so the
 target-bearing loaders skip them — a `_module.ts` must **not** export `spec`.
 
-- **`isolated`** — only `src/spec/test/` sets this. An isolated spec exists to exercise
-  generators and views, and its samples never reach released data.
+- **`isolated`** — excludes the module's samples from released data.
 - **`unionOrder`** — defaults to 100, ties broken by module name. When adding a standard,
   declare a **higher** value than the established ones, so they keep their samples and the
   newcomer contributes only its delta.
@@ -292,19 +290,6 @@ target-bearing loaders skip them — a `_module.ts` must **not** export `spec`.
 **Why:** standards overlap heavily. Precedence decides which standard keeps a shared
 exercise, so leaving it implicit would let adding one standard silently reshuffle another's
 contribution.
-
-### TSPEC-12 — `test` is an isolated prototyping and regression spec
-
-The `test` module is a fast workspace for prototyping, debugging, smoke generation and
-retained cached regressions. It is not a second curriculum and need not reproduce every
-capability permutation from the real standards.
-
-Keep existing useful targets when they continue to provide regression value. Every
-generator module must nevertheless match at least one `test` target together with at least
-one compatible view and produce a sample through that tuple, so each generator has a cheap
-end-to-end path. Durable mathematical and label-resolution coverage remains in the
-module's `generator.test.ts` and
-`spec.test.ts`; final matching is verified against the real standard spec.
 
 ### TSPEC-9 — Validation
 
@@ -314,9 +299,6 @@ normalization, intra-target permutation uniqueness, definition distinctness, and
 matching coverage. Every normalized active target must have at least one semantically
 compatible generator/view path; a zero-match target is invalid even though forward
 generation would otherwise omit it silently.
-
-For `--spec=test`, it also verifies that every generator has at least one matched
-generator-view path whose bounded probe can produce a sample.
 
 Follow with `npm run check -- --spec=<module>` for the repository-wide checks.
 
@@ -336,7 +318,6 @@ library. Whether an eligible descriptor is justified by the target's competency 
 - [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, every ontology TODO references a valid authored ontology package, and matching is confirmed via `npm run show:matching` for addressable competencies.
 - [ ] **TSPEC-8** — no two definitions share an identical permutation set unless their complete source leaf competencies mutually imply one another and the identity is declared in `equivalentTargets` with a reason; partial overlap, containment, current-support coincidence, and missing distinctions are not equivalence.
 - [ ] **TSPEC-9** — `npm run check:standards-spec -- --spec=<module>` confirms structural validity and at least one compatible generator/view path for every active target; `npm run check -- --spec=<module>` passes.
-- [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; only `test` is `isolated`; no `_module.ts` exports `spec`.
-- [ ] **TSPEC-12** — `test` remains a focused prototyping/regression spec and provides at least one generatable target-view path per generator.
+- [ ] **TSPEC-10** — a new standard declares a `unionOrder` above the established ones; union membership follows module metadata; no `_module.ts` exports `spec`.
 - [ ] **TSPEC-13** — every active label is structurally eligible under SPEC-3 and reasonably identifiable and defendable from visual or textual evidence in the expected matched artifact; no target relies on hidden context.
 - [ ] **TSPEC-14** — every active target contains at least one Area and Ability; Scope is used only when a meaningful same-task discriminator exists; multiple labels in any dimension are treated as a conjunction without a primary label.

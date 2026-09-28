@@ -23,7 +23,7 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
      IDs instead of reproducing their general wording.
 
 4. **Consuming View Alignment**:
-   - If the returned problem payload contract needed modification, follow `IMPL-G6` in `docs/implementation-generator.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual consuming views and inspect rejection reasons, then adopt each matched view to render the updated payload fields. Use `--spec=test` only for the isolated smoke path and `--raw` only for source-definition diagnosis.
+   - If the returned problem payload contract needed modification, follow `IMPL-G6` in `docs/implementation-generator.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual consuming views and inspect rejection reasons, then adopt each matched view to render the updated payload fields. Use `--raw` only for source-definition diagnosis.
    - Before editing consumers, record a compact adoption matrix with every production consumer,
      its matched target families, fields affected, required projection change, and verification
      test. A payload migration is incomplete until every matrix row is adopted or explicitly shown
@@ -33,12 +33,11 @@ Update the generator module under `src/generators/[<category>/]{moduleName}` (id
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):
      - **Real Target Debugging**: `npm run test:target -- --target=<target.id> --spec=<real-standard> --render`
      - **Real Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=<real-standard> --no-validate`
-     - **Canonical Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<moduleName> --view=<viewName> [--training-only]`
-     - **Real-standard VQA Regeneration**: `npm run generate:dataset -- --spec=<real-standard> --generator=<moduleName> --view=<viewName> [--training-only]`
+     - **Canonical Scoped Regeneration**: `npm run generate:dataset -- --spec=<real-standard> --generator=<moduleName> --view=<viewName> [--training-only]`
      - **VQA Validation**: `npm run validate:dataset -- --spec=<real-standard> --generator=<moduleName>`
      - **Cache Churn Check**: `npm run report:churn -- --spec=<real-standard>`
      - **Vitest Unit Tests**: `npm run test`
 
 IMPORTANT:
-- Do NOT update code outside views, generators, and the "test" spec without user confirmation.
+- Do NOT update code outside views and generators without user confirmation.
 - Do NOT modify `spec.ts` without user confirmation.

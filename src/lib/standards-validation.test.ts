@@ -19,8 +19,8 @@ describe('shared standards checks', () => {
             stats: {totalTargets: 0, uniqueTargets: 0, deduplicatedCount: 0}, equivalences: []});
         vi.mocked(loadSpecTodos).mockResolvedValue({implementationTodos: [], ontologyTodos: [], beyondScope: []});
     });
-    it('rejects unmatched active targets in production and isolated specs', async () => {
-        for (const name of ['ccss', 'test']) {
+    it('rejects unmatched active targets in every standard', async () => {
+        for (const name of ['ccss', 'fixture']) {
             const result = await normalizeAndValidateSpec(name);
             result.targets = [{id: 'active', labels: [Area.Addition, Ability.ProcedureExecution]}];
             expect((await validateStandardContracts(name, [], [])).errors.join()).toContain('TSPEC-9');
@@ -63,16 +63,12 @@ describe('shared standards checks', () => {
             expect(full.errors).toHaveLength(1);
         }
     });
-    it('rejects a generator with no generatable isolated test path', async () => {
-        expect((await validateStandardContracts('test', [{generatorId: 'uncovered', labels: []}] as never, [])).errors)
-            .toEqual(["TSPEC-12 test: generator 'uncovered' has no generatable target/view path."]);
-    });
     it('uses only a current, complete graph with identical pinned ontology provenance', () => {
         const graph = createDependencyGraphSnapshot([]);
         vi.mocked(readDatasetManifest).mockReturnValue({spec: 'ccss', dependency_graph: graph,
             ontology_provenance_hash: 'current'} as never);
         expect(readStandardsMatchingGraph('.', 'ccss')).toBe(graph);
-        expect(readStandardsMatchingGraph('.', 'test')).toBeNull();
+        expect(readStandardsMatchingGraph('.', 'fixture')).toBeNull();
         vi.mocked(datasetOntologyProvenanceHash).mockReturnValueOnce('changed');
         expect(readStandardsMatchingGraph('.', 'ccss')).toBeNull();
         vi.mocked(readDatasetManifest).mockReturnValue(null);

@@ -102,8 +102,7 @@ A view renders `problem.data`; it never invents or derives the mathematics it is
 When a view needs data the payload does not carry:
 
 1. Find the producing generators and inspect rejection reasons:
-   `npm run show:matching -- --spec=<real-standard>` for the actual producers. Use
-   `--spec=test` for the isolated smoke path and add `--raw` only when diagnosing
+   `npm run show:matching -- --spec=<real-standard>` for the actual producers. Add `--raw` only when diagnosing
    pre-deduplication source definitions.
 2. Adopt each matched generator to supply the required field
    ([IMPL-G6](implementation-generator.md#impl-g6--a-payload-contract-change-is-a-two-module-change)).
@@ -182,4 +181,4 @@ truthful, stable, and complete exclusion boundary.
 - [ ] **IMPL-V9** — sibling leaf identities use thin wrappers around parent-level shared rendering code; no view hides parallel task implementations behind large config-controlled branches, and shared code receives a fixed task mode rather than parsing labels or importing a leaf spec.
 - [ ] **IMPL-V10** — the outermost rendered element has a natural width; only an intentionally full-canvas view requests viewport width, so `#view` screenshots contain no accidental transparent remainder.
 - [ ] **IMPL-V11** — every leaf projection preserves observable evidence for all generator-owned labels in the matched target; it neither flattens structured witnesses nor substitutes labels or names for the claimed objects and relations.
-- [ ] `npm run report:churn -- --spec=test` shows churn only in the views actually touched.
+- [ ] `npm run report:churn -- --spec=ccss` shows churn only in the views actually touched.

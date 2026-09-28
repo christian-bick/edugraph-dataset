@@ -1,13 +1,18 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
-import {spec as equationTargets} from '../../../spec/test/arithmetic-equation-judgment.ts';
 import {resolveEstimationClaim} from '../../../visuals/views/operations/operations-answer-reasonableness/helpers.ts';
 import {OperationsAnswerReasonablenessViewSchema, spec as viewSpec} from '../../../visuals/views/operations/operations-answer-reasonableness/spec.ts';
 import {ArithmeticEstimationGenerator} from './generator.ts';
 import {ArithmeticEstimationGeneratorSchema, spec} from './spec.ts';
+
+const equationTargets = [Area.Addition, Area.Subtraction].map(operation => ({
+    id: `small-number-${operation.split('/').at(-1)}`,
+    labels: [operation, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller20, Ability.PlausibilityEvaluation]
+}));
 
 describe('ArithmeticEstimationGenerator spec integration', () => {
     const generator = new ArithmeticEstimationGenerator();
@@ -29,7 +34,7 @@ describe('ArithmeticEstimationGenerator spec integration', () => {
         }
     });
 
-    it.each(equationTargets)('generates the existing small-number target $id through its authoritative plan', target => {
+    it.each(equationTargets)('generates small-number fixture $id through its authoritative plan', target => {
         const planned = planModelCompatibility(target,
             {...spec, spec, schema: ArithmeticEstimationGeneratorSchema},
             {...viewSpec, spec: viewSpec, schema: OperationsAnswerReasonablenessViewSchema});

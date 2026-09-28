@@ -1,14 +1,23 @@
 import {renderToStaticMarkup} from 'react-dom/server';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {ArithmeticEstimationGenerator} from '../../../../generators/arithmetic/arithmetic-estimation/generator.ts';
 import {ArithmeticEstimationGeneratorSchema, spec as generatorSpec} from '../../../../generators/arithmetic/arithmetic-estimation/spec.ts';
 import {planModelCompatibility} from '../../../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../../../lib/planned-generation.ts';
-import {spec as targets} from '../../../../spec/test/arithmetic-equation-judgment.ts';
-import {spec as estimationTargets} from '../../../../spec/test/arithmetic-estimation.ts';
 import type {ArithmeticEstimationProblem} from '../../../../types/problems.ts';
 import {resolveEstimationClaim} from './helpers.ts';
 import {OperationsAnswerReasonablenessViewSchema, spec as viewSpec} from './spec.ts';
+
+const targets = [Area.Addition, Area.Subtraction].map(operation => ({
+    id: `small-number-${operation.split('/').at(-1)}`,
+    labels: [operation, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller20, Ability.PlausibilityEvaluation]
+}));
+const estimationTargets = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division].map(operation => ({
+    id: `rounded-${operation.split('/').at(-1)}`,
+    labels: [operation, Area.IntegerRounding, Scope.NumbersSmaller1000, Ability.PlausibilityEvaluation]
+}));
 
 let OperationsAnswerReasonableness: typeof import('./view.tsx')['OperationsAnswerReasonableness'];
 beforeAll(async () => {
@@ -36,7 +45,7 @@ function prepare(target = targets[0], seed = 0) {
 }
 
 describe('answer reasonableness domain rendering', () => {
-    it.each([...targets, ...estimationTargets])('renders both modes and verdicts for the original target $id', target => {
+    it.each([...targets, ...estimationTargets])('renders both modes and verdicts for fixture $id', target => {
         for (const seed of [0, 1]) {
             const payload = prepare(target, seed);
             const claim = resolveEstimationClaim(payload.problem.data, seed);

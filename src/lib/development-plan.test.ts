@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {generatorOutputContractChanged, planDevelopmentValidation} from './development-plan.ts';
 
-const specs = ['ccss', 'test'];
+const specs = ['ccss', 'fixture'];
 
 describe('development validation plan', () => {
     it.each(['docs/plan/nested/review.md', '.agents/skills/review/references/example.md'])(
@@ -40,14 +40,19 @@ describe('development validation plan', () => {
             'generator-view-specs',
             'labels'
         ]);
-        expect(plan.specs).toEqual(['ccss', 'test']);
+        expect(plan.specs).toEqual(['ccss']);
         expect(plan.reasons.docs).toBeUndefined();
     });
 
-    it('keeps a standard-spec edit scoped to that module', () => {
-        const plan = planDevelopmentValidation(['src/spec/ccss/grade-4.ts'], specs);
+    it.each(specs)('keeps a %s standard-spec edit scoped to that module', spec => {
+        const plan = planDevelopmentValidation([`src/spec/${spec}/grade-4.ts`], specs, ['ccss']);
         expect(plan.checks).toEqual(['types', 'related-tests']);
-        expect(plan.specs).toEqual(['ccss']);
+        expect(plan.specs).toEqual([spec]);
+    });
+
+    it('includes an explicitly changed isolated module alongside production checks', () => {
+        const plan = planDevelopmentValidation(['package-lock.json', 'src/spec/fixture/targets.ts'], specs, ['ccss']);
+        expect(plan.specs).toEqual(['ccss', 'fixture']);
     });
 
     it('does not expand a matching-library test edit into production matching', () => {
@@ -66,14 +71,14 @@ describe('development validation plan', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [], [file]);
         expect(plan.checks).toEqual(['types', 'related-tests', 'implementation-contracts', 'generator-view-specs', 'labels', 'generator-coverage']);
-        expect(plan.specs).toEqual(['ccss', 'test']);
+        expect(plan.specs).toEqual(['ccss']);
     });
 
     it('treats a removed implementation as a capability-wide structural change', () => {
         const file = 'src/generators/counting/counting-basic/generator.ts';
         const plan = planDevelopmentValidation([file], specs, ['ccss'], [file]);
         expect(plan.checks).toEqual(['types', 'related-tests', 'implementation-contracts', 'generator-view-specs', 'labels']);
-        expect(plan.specs).toEqual(['ccss', 'test']);
+        expect(plan.specs).toEqual(['ccss']);
     });
 
     it('classifies work with a constant number of steps per changed file', () => {
@@ -90,14 +95,14 @@ describe('development validation plan', () => {
             ['ccss']
         );
         expect(plan.checks).toEqual(['types', 'generator-view-specs', 'labels']);
-        expect(plan.specs).toEqual(['ccss', 'test']);
+        expect(plan.specs).toEqual(['ccss']);
     });
 
     it.each(['src/lib/spec-ownership.ts', 'src/lib/model-catalog.ts'])(
         'keeps %s in affected module and standards gates', file => {
             const plan = planDevelopmentValidation([file], specs, ['ccss']);
             expect(plan.checks).toEqual(['types', 'related-tests', 'generator-view-specs', 'labels']);
-            expect(plan.specs).toEqual(['ccss', 'test']);
+            expect(plan.specs).toEqual(['ccss']);
         });
 
     it.each(['src/scripts/validate-generator-view-specs.ts', 'src/scripts/generator-view-spec-validation.ts'])(

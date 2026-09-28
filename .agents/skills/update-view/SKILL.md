@@ -24,18 +24,17 @@ Update the visual view module under `src/visuals/views/[<category>/]{viewName}` 
      `IMPL-V9`, and `IMPL-V11`; record only view-specific decisions and cite those rule IDs.
 
 3. **Producing Generator Alignment**:
-   - If the view needs payload data it does not have, follow `IMPL-V8` in `docs/implementation-view.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual producing generators and inspect rejection reasons, then adopt each matched generator to supply the required fields. Use `--spec=test` only for the isolated smoke path and `--raw` only for source-definition diagnosis. Never derive the missing mathematics inside the view.
+   - If the view needs payload data it does not have, follow `IMPL-V8` in `docs/implementation-view.md`: run `npm run show:matching -- --spec=<real-standard>` to find actual producing generators and inspect rejection reasons, then adopt each matched generator to supply the required fields. Use `--raw` only for source-definition diagnosis. Never derive the missing mathematics inside the view.
 
 4. **Validation Workflow**:
    - Follow the targeted debugging & fast-iteration workflows documented in `DOCS.md § 6` (Efficient Development & Debugging Iteration):
      - **Real Target Debugging**: `npm run test:target -- --target=<target.id> --spec=<real-standard> --render`
      - **Real Sample Debugging**: `npm run test:sample -- --sample="<sample_key>" --spec=<real-standard> --no-validate`
-     - **Canonical Scoped Regeneration**: `npm run generate:dataset -- --spec=test --generator=<generator> --view=<viewName> [--training-only]`
-     - **Real-standard VQA Regeneration**: `npm run generate:dataset -- --spec=<real-standard> --generator=<generator> --view=<viewName> [--training-only]`
+     - **Canonical Scoped Regeneration**: `npm run generate:dataset -- --spec=<real-standard> --generator=<generator> --view=<viewName> [--training-only]`
      - **VQA Validation**: `npm run validate:dataset --  --spec=<real-standard> --view=<viewName>`
      - **Cache Churn Check**: `npm run report:churn -- --spec=<real-standard>`
      - **Vitest Unit Tests**: `npm run test`
 
 IMPORTANT:
-- Do NOT update code outside views, generators, and the "test" spec without user confirmation.
+- Do NOT update code outside views and generators without user confirmation.
 - Do NOT modify `spec.ts` without user confirmation.

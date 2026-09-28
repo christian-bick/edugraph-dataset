@@ -148,8 +148,8 @@ describe('declared producer/view payload families', () => {
         expect(matchesTarget([Scope.NumbersSmaller20], generator, view)).toEqual({matched: true});
     });
 
-    it.each(['ccss', 'test'])('agrees between indexed and direct matching for all %s targets', async spec => {
-        const targets = await loadMatchingTargets(spec);
+    it('agrees between indexed and direct matching for all CCSS targets', async () => {
+        const targets = await loadMatchingTargets('ccss');
         const pairs = buildCompatibleModulePairIndex(generators, views).orderedPairs;
         const direct = targets.flatMap(target => pairs
             .filter(pair => matchesTarget(target.labels, pair.generator, pair.view).matched)
@@ -158,13 +158,10 @@ describe('declared producer/view payload families', () => {
         const indexed = matchedTuples
             .map(tuple => `${tuple.target.id}#${tuple.generatorId}#${tuple.viewId}`).sort();
         expect(indexed).toEqual(direct);
-        // Production coverage belongs to CCSS; the excluded test spec retains older range claims.
-        if (spec === 'ccss') {
-            for (const [viewId, generatorId] of families) {
-                const tuples = matchedTuples.filter(tuple => tuple.viewId === viewId);
-                expect(tuples.length, viewId).toBeGreaterThan(0);
-                expect(new Set(tuples.map(tuple => tuple.generatorId)), viewId).toEqual(new Set([generatorId]));
-            }
+        for (const [viewId, generatorId] of families) {
+            const tuples = matchedTuples.filter(tuple => tuple.viewId === viewId);
+            expect(tuples.length, viewId).toBeGreaterThan(0);
+            expect(new Set(tuples.map(tuple => tuple.generatorId)), viewId).toEqual(new Set([generatorId]));
         }
     }, 120_000);
 });
