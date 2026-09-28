@@ -1,3 +1,3 @@
 import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {Ability, Area} from 'edugraph-ts'; import {describe, expect, it} from 'vitest'; import {spec} from './spec.ts';
-describe('shape-partition-whole-composition view spec', () => {it('owns invariant whole composition', () => {expect(spec.generalLabels).toEqual([Area.ShapeSynthesis, Ability.ConceptComposition]); expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);});});
+describe('shape-partition-whole-composition view spec', () => {it('owns understanding of the part-whole relationship', () => {expect(spec.generalLabels).toEqual([Area.ShapeSynthesis, Ability.ConceptualThinking]); expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);});});

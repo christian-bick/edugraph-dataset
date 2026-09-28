@@ -1,2 +1,2 @@
-- **Identity:** Separate equal-share pieces require identifying the whole they compose.
-- **Modes:** Question Mode withholds the composition count; Solution Mode reveals it while preserving the same equal-share evidence.
+- **Identity:** Identify the whole represented by all the shown equal shares.
+- **Modes:** Question Mode shows separate shares and withholds the answer; Solution Mode shows them together and identifies one whole.

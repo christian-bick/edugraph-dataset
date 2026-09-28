@@ -16,7 +16,7 @@ describe('ShapePartitionGenerator schema', () => {
     it('keeps the same mathematical relation across task projections', () => {
         const labels = [Area.Circle, Scope.SixthFractions];
         const partition = generateWithLabels(generator, [...labels, Area.ShapeDecomposition, Ability.VisualArticulation])!;
-        const composition = generateWithLabels(generator, [...labels, Area.ShapeSynthesis, Ability.ConceptComposition])!;
+        const composition = generateWithLabels(generator, [...labels, Area.ShapeSynthesis, Ability.ConceptualThinking])!;
         expect(composition).toEqual(partition);
     });
     it('rejects competing shape or denominator alternatives', () => {

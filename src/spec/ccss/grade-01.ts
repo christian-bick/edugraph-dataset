@@ -630,12 +630,13 @@ const nameUnitSharesBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Scope.HalfFractions], [Scope.QuarterFractions]]);
 
 // --- 1.G.A.3: Describe a whole as all of its equal shares ---
+// Relate equal shares to their whole without claiming creation of a new concept.
 const composeWholeFromSharesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeSynthesis,
         Scope.EqualShares,
         Scope.UnitFractions,
-        Ability.ConceptComposition
+        Ability.ConceptualThinking
     ])
     .applyLabelVariants([[Area.Circle], [Area.Rectangle]])
     .applyLabelVariants([[Scope.HalfFractions], [Scope.QuarterFractions]]);

@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'shape-partition-whole-composition',
-    generalLabels: [Area.ShapeSynthesis, Ability.ConceptComposition]
+    generalLabels: [Area.ShapeSynthesis, Ability.ConceptualThinking]
 };
 
 export const ShapePartitionWholeCompositionViewSchema = {} as const;
