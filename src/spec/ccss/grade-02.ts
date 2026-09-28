@@ -520,7 +520,6 @@ const pictureGraphBuilder = new DatasetPermutationBuilder()
         Area.Statistics,
         Scope.IntegerNumbers,
         Scope.PictureGraph,
-        Scope.StepsOf1,
         Ability.VisualArticulation
     ]);
 

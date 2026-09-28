@@ -17,7 +17,7 @@ interface BarGraphViewProps {
     mode: StatisticalGraphViewMode;
     payload: RenderPayload<AbstractProblem<StatisticalGraphProblem>>;
     viewId: string;
-    requireFiveStepAxis: boolean | undefined;
+    axisStep: StatisticalGraphProblem['scale'] | undefined;
 }
 
 const AnswerBox = ({answer}: {answer?: number}) => (
@@ -26,12 +26,12 @@ const AnswerBox = ({answer}: {answer?: number}) => (
     </span>
 );
 
-export const BarGraphView = ({mode, payload, viewId, requireFiveStepAxis}: BarGraphViewProps) => {
+export const BarGraphView = ({mode, payload, viewId, axisStep}: BarGraphViewProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
     validateStatisticalGraph(data, viewId);
-    if (requireFiveStepAxis && data.scale !== 5) {
-        throw new ViewValidationError(viewId, 'A five-step axis requires graph quantities scaled by five.');
+    if (axisStep !== data.scale) {
+        throw new ViewValidationError(viewId, 'The axis step must match the graph quantity scale.');
     }
 
     const displayTask = resolveStatisticalGraphTask(data, mode);
@@ -44,7 +44,7 @@ export const BarGraphView = ({mode, payload, viewId, requireFiveStepAxis}: BarGr
 
     const revealBars = revealsBars(isSolutionView, displayTask);
     const revealCounts = revealsBarCounts(isSolutionView, displayTask);
-    const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * data.scale);
+    const axisValues = Array.from({length: 9}, (_, value) => (8 - value) * axisStep);
     const categories = graphCategories(data, seed);
     const selectedCategory = categories[selectCategoryIndex(seed)];
     const observations = graphObservations(data, seed);

@@ -7,7 +7,7 @@ import '../../../../tailwind.css';
 
 const VIEW_ID = 'data-bar-graph-interpretation';
 interface CoreProps {config: DataBarGraphInterpretationViewConfig; payload: ViewRenderPayload<'data-bar-graph-interpretation'>}
-const Core = ({config, payload}: CoreProps) => <BarGraphView mode="interpretation" payload={payload} requireFiveStepAxis={config.requireFiveStepAxis} viewId={VIEW_ID} />;
+const Core = ({config, payload}: CoreProps) => <BarGraphView mode="interpretation" payload={payload} axisStep={config.axisStep} viewId={VIEW_ID} />;
 export const DataBarGraphInterpretation = withConfig(DataBarGraphInterpretationViewSchema, Core);
 let root: ReturnType<typeof createRoot> | null = null;
 window.renderView = (payload: ViewRenderPayload<'data-bar-graph-interpretation'>) => {

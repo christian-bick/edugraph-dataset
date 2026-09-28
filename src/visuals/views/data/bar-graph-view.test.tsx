@@ -13,16 +13,18 @@ const payload = (scale: StatisticalGraphProblem['scale'], isSolutionView: boolea
 });
 
 describe('bar-graph axis evidence', () => {
-    it.each([false, true])('shows successive five-step labels in solution mode %s', isSolutionView => {
-        const html = renderToStaticMarkup(<BarGraphView mode="construction" payload={payload(5, isSolutionView)}
-            requireFiveStepAxis={true} viewId="data-bar-graph" />);
-        for (const value of [0, 5, 10, 15, 20, 25, 30, 35, 40]) {
-            expect(html).toContain(`>${value}</div>`);
+    it.each(([1, 2, 5, 10] as const).flatMap(scale => [false, true].map(isSolutionView => ({scale, isSolutionView}))))(
+        'shows successive $scale-step labels in solution mode $isSolutionView', ({scale, isSolutionView}) => {
+            const html = renderToStaticMarkup(<BarGraphView mode="construction" payload={payload(scale, isSolutionView)}
+                axisStep={scale} viewId="data-bar-graph" />);
+            for (let index = 0; index <= 8; index++) {
+                expect(html).toContain(`>${index * scale}</div>`);
+            }
         }
-    });
+    );
 
-    it('rejects a requested five-step axis with an incompatible scale', () => {
+    it.each([undefined, 1, 5, 10] as const)('rejects axis step %s with quantity scale two', axisStep => {
         expect(() => renderToStaticMarkup(<BarGraphView mode="construction" payload={payload(2, false)}
-            requireFiveStepAxis={true} viewId="data-bar-graph" />)).toThrow('five-step axis');
+            axisStep={axisStep} viewId="data-bar-graph" />)).toThrow('axis step must match');
     });
 });

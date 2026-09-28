@@ -421,11 +421,15 @@ const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
 
 const scaledPictureGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.PictureGraph, Ability.VisualArticulation])
-    .applyLabelVariants([[Scope.StepsOf2], [Scope.MultiplesOf5], [Scope.StepsOf10]]);
+    .applyLabelVariants([[Scope.EvenNumbers], [Scope.MultiplesOf5], [Scope.MultiplesOf10]]);
 
 const scaledBarGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.BarGraph, Ability.VisualArticulation])
-    .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
+    .applyLabelVariants([
+        [Scope.EvenNumbers, Scope.StepsOf2],
+        [Scope.MultiplesOf5, Scope.StepsOf5],
+        [Scope.MultiplesOf10, Scope.StepsOf10]
+    ]);
 
 const oneStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -436,7 +440,11 @@ const oneStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Scope.SingleStep,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
+    .applyLabelVariants([
+        [Scope.EvenNumbers, Scope.StepsOf2],
+        [Scope.MultiplesOf5, Scope.StepsOf5],
+        [Scope.MultiplesOf10, Scope.StepsOf10]
+    ]);
 
 const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -447,7 +455,11 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
         Scope.MultiStep,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
+    .applyLabelVariants([
+        [Scope.EvenNumbers, Scope.StepsOf2],
+        [Scope.MultiplesOf5, Scope.StepsOf5],
+        [Scope.MultiplesOf10, Scope.StepsOf10]
+    ]);
 
 const generateFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
     .addLabels([

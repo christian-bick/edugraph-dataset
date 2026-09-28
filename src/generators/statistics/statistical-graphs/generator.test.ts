@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {StatisticalGraphsGenerator} from './generator.ts';
@@ -8,7 +7,7 @@ describe('StatisticalGraphsGenerator', () => {
     beforeEach(() => setSeed(42));
 
     const baseConfig = {
-        scale: Scope.StepsOf1,
+        scale: 1,
         useAddition: false,
         useSubtraction: false,
         useObjectSorting: false,
@@ -32,15 +31,11 @@ describe('StatisticalGraphsGenerator', () => {
         expect(problem.data.answer).toBeUndefined();
     });
 
-    it.each([
-        [Scope.StepsOf2, 2],
-        [Scope.MultiplesOf5, 5],
-        [Scope.StepsOf10, 10]
-    ] as const)('generates totals aligned to %s', (scale, scaleValue) => {
+    it.each([2, 5, 10] as const)('generates totals aligned to %s', scale => {
         const data = generator.generate({...baseConfig, scale}).data;
-        expect(data.scale).toBe(scaleValue);
-        expect(data.categories.every(({count}) => count % scaleValue === 0)).toBe(true);
-        expect(data.categories.every(({count}) => count >= 2 * scaleValue && count <= 8 * scaleValue)).toBe(true);
+        expect(data.scale).toBe(scale);
+        expect(data.categories.every(({count}) => count % scale === 0)).toBe(true);
+        expect(data.categories.every(({count}) => count >= 2 * scale && count <= 8 * scale)).toBe(true);
     });
 
     it.each([
@@ -63,7 +58,7 @@ describe('StatisticalGraphsGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 ...baseConfig,
-                scale: Scope.MultiplesOf5,
+                scale: 5,
                 useSubtraction: true,
                 isMultiStep: true
             }).data;
@@ -77,7 +72,7 @@ describe('StatisticalGraphsGenerator', () => {
     it('generates a connected multi-step subtraction question', () => {
         const data = generator.generate({
             ...baseConfig,
-            scale: Scope.MultiplesOf5,
+            scale: 5,
             useSubtraction: true,
             isMultiStep: true
         }).data;
@@ -142,6 +137,10 @@ describe('StatisticalGraphsGenerator', () => {
         expect(() => generator.generate({...baseConfig, useAddition: true, isMultiStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useObjectSorting: true, useSubtraction: true, isSingleStep: true})).toThrow();
         expect(() => generator.generate({...baseConfig, useAddition: true, requireThreeOperands: true, isSingleStep: true})).toThrow();
-        expect(() => generator.generate({...baseConfig, useAddition: true, requireThreeOperands: true, scale: Scope.StepsOf2})).toThrow();
+        expect(() => generator.generate({...baseConfig, useAddition: true, requireThreeOperands: true, scale: 2})).toThrow();
+    });
+
+    it.each([0, 3, -1])('rejects unsupported graph scale %s', scale => {
+        expect(() => generator.generate({...baseConfig, scale} as any)).toThrow('Graph scale must be');
     });
 });

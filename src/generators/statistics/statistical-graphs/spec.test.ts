@@ -1,9 +1,19 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {setSeed} from '../../../lib/random.ts';
 import {StatisticalGraphsGenerator} from './generator.ts';
 
 describe('statistical-graphs spec', () => {
+    it('always defaults to scale one without claiming steps or divisibility', () => {
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const result = generateWithLabels(new StatisticalGraphsGenerator(), [Area.Statistics])!;
+            expect(result.data.scale).toBe(1);
+            expect(result.labels).toEqual([]);
+        }
+    });
+
     it('labels five-scale quantities as multiples without claiming a sequence', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics, Scope.MultiplesOf5
@@ -18,7 +28,6 @@ describe('statistical-graphs spec', () => {
             Area.Statistics,
             Scope.IntegerNumbers,
             Scope.PictureGraph,
-            Scope.StepsOf1,
             Ability.VisualArticulation
         ])!.data;
         expect(data.scale).toBe(1);
@@ -27,9 +36,9 @@ describe('statistical-graphs spec', () => {
     });
 
     it.each([
-        [Scope.StepsOf2, 2],
+        [Scope.EvenNumbers, 2],
         [Scope.MultiplesOf5, 5],
-        [Scope.StepsOf10, 10]
+        [Scope.MultiplesOf10, 10]
     ] as const)('resolves %s as a non-unit graph scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
@@ -50,7 +59,6 @@ describe('statistical-graphs spec', () => {
             Area.Statistics,
             Scope.IntegerNumbers,
             Scope.BarGraph,
-            Scope.StepsOf1,
             Scope.SingleStep,
             Ability.ProcedureExecution,
             operationLabel
@@ -60,9 +68,9 @@ describe('statistical-graphs spec', () => {
     });
 
     it.each([
-        [Scope.StepsOf2, 2],
+        [Scope.EvenNumbers, 2],
         [Scope.MultiplesOf5, 5],
-        [Scope.StepsOf10, 10]
+        [Scope.MultiplesOf10, 10]
     ] as const)('resolves a one-step subtraction comparison on the %s scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
@@ -109,7 +117,6 @@ describe('statistical-graphs spec', () => {
             Area.ObjectSorting,
             Scope.IntegerNumbers,
             Scope.PictureGraph,
-            Scope.StepsOf1,
             Ability.ConceptClassification,
             Ability.VisualArticulation
         ])!;
@@ -126,7 +133,6 @@ describe('statistical-graphs spec', () => {
             Area.Statistics,
             Scope.IntegerNumbers,
             Scope.BarGraph,
-            Scope.StepsOf1,
             Ability.Interpretation
         ])!;
         expect(result.data.operation).toBeUndefined();
@@ -141,7 +147,6 @@ describe('statistical-graphs spec', () => {
             Scope.IntegerNumbers,
             Scope.PictureGraph,
             Scope.ThreeOperands,
-            Scope.StepsOf1,
             Ability.ProcedureExecution
         ])!;
         expect(result.data.operandCategoryIds).toEqual(['apple', 'book', 'kite']);

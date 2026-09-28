@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {StatisticalGraphsGenerator} from '../../../generators/statistics/statistical-graphs/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -16,7 +15,7 @@ import {categoryLabel} from './helpers.ts';
 
 const generator = new StatisticalGraphsGenerator();
 const baseConfig = {
-    scale: Scope.StepsOf1,
+    scale: 1,
     useAddition: false,
     useSubtraction: false,
     useObjectSorting: false,
@@ -42,7 +41,7 @@ describe('statistical graph presentation', () => {
 
     it('derives deterministic scaled observation presentation from counts', () => {
         setSeed('scaled-observations');
-        const data = generator.generate({...baseConfig, scale: Scope.MultiplesOf5}).data;
+        const data = generator.generate({...baseConfig, scale: 5}).data;
         const first = graphObservations(data, 31);
         const second = graphObservations(data, 31);
 
@@ -84,7 +83,7 @@ describe('statistical graph presentation', () => {
         setSeed('graph-multi');
         const multi = generator.generate({
             ...baseConfig,
-            scale: Scope.MultiplesOf5,
+            scale: 5,
             useSubtraction: true,
             isMultiStep: true
         }).data;

@@ -1,4 +1,3 @@
-import {Scope} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -10,12 +9,6 @@ import {
 import {StatisticalGraphsGeneratorConfig, StatisticalGraphsGeneratorSchema} from './spec.ts';
 
 const categoryIds: StatisticalCategoryId[] = ['apple', 'book', 'kite'];
-const scaleValues = {
-    [Scope.StepsOf1]: 1,
-    [Scope.StepsOf2]: 2,
-    [Scope.MultiplesOf5]: 5,
-    [Scope.StepsOf10]: 10
-} as const;
 
 function uniqueCounts(): number[] {
     const pool = [2, 3, 4, 5, 6, 7, 8];
@@ -56,6 +49,10 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
             'isSingleStep',
             'isMultiStep'
         ]);
+        const scale = config.scale!;
+        if (![1, 2, 5, 10].includes(scale)) {
+            throw new GeneratorValidationError('statistical-graphs', 'Graph scale must be 1, 2, 5, or 10.');
+        }
         if (config.useAddition && config.useSubtraction) {
             throw new GeneratorValidationError('statistical-graphs', 'A graph question cannot require both addition and subtraction.');
         }
@@ -89,14 +86,13 @@ export class StatisticalGraphsGenerator implements ProblemGenerator<StatisticalG
                 'Finding the total requires three-category addition without legacy step flags.'
             );
         }
-        if (selectedGrade1Tasks > 0 && config.scale !== Scope.StepsOf1) {
+        if (selectedGrade1Tasks > 0 && config.scale !== 1) {
             throw new GeneratorValidationError(
                 'statistical-graphs',
                 'Grade 1 categorical-data tasks require a scale of one.'
             );
         }
 
-        const scale = scaleValues[config.scale!];
         const counts = (config.isMultiStep ? connectedSubtractionCounts() : uniqueCounts())
             .map(count => count * scale);
         const categories = categoryIds.map((id, index) => ({id, count: counts[index]})) as [

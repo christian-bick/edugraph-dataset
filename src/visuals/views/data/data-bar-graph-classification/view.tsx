@@ -7,7 +7,7 @@ import '../../../../tailwind.css';
 
 const VIEW_ID = 'data-bar-graph-classification';
 interface CoreProps {config: DataBarGraphClassificationViewConfig; payload: ViewRenderPayload<'data-bar-graph-classification'>}
-const Core = ({config, payload}: CoreProps) => <BarGraphView mode="classification" payload={payload} requireFiveStepAxis={config.requireFiveStepAxis} viewId={VIEW_ID} />;
+const Core = ({config, payload}: CoreProps) => <BarGraphView mode="classification" payload={payload} axisStep={config.axisStep} viewId={VIEW_ID} />;
 export const DataBarGraphClassification = withConfig(DataBarGraphClassificationViewSchema, Core);
 let root: ReturnType<typeof createRoot> | null = null;
 window.renderView = (payload: ViewRenderPayload<'data-bar-graph-classification'>) => {

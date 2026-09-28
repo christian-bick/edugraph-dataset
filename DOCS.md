@@ -76,10 +76,13 @@ The general triples producer retains its existing property support for box and v
 Hundreds-bundle completion and explanation likewise share `PlaceValueHundredsBundlesProblem`;
 their separate views distinguish reading the represented number from explaining the counting method.
 
-Five-scale statistical quantities and five-minute clock values use `MultiplesOf5`. The bar-graph
-views separately supply a requested `StepsOf5` axis capability, constrained to the producer's
-five-scale quantities. Clock sampling uses minute values 05, 15, 25, 35, 45 and 55 to distinguish
-those examples from ten-minute values; the canonical time and graph payloads are unchanged.
+Statistical quantity scales 2, 5 and 10 use `EvenNumbers`, `MultiplesOf5` and `MultiplesOf10`.
+Without a divisibility constraint the generator resolves scale 1 explicitly. Bar-graph views
+own the corresponding `StepsOf1/2/5/10` axis capabilities and validate that the selected axis
+agrees with the supplied scale. Scaled bar targets request both quantity and axis constraints;
+unit picture targets need no additional numeric label. Five-minute clock values use
+`MultiplesOf5`, sampling 05, 15, 25, 35, 45 and 55 minutes to distinguish these examples from
+ten-minute values. The canonical time and graph payloads are unchanged.
 
 Label compatibility is implemented through the design recorded in
 [label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability

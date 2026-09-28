@@ -7,7 +7,7 @@ import '../../../../tailwind.css';
 
 const VIEW_ID = 'data-bar-graph-arithmetic';
 interface CoreProps {config: DataBarGraphArithmeticViewConfig; payload: ViewRenderPayload<'data-bar-graph-arithmetic'>}
-const Core = ({config, payload}: CoreProps) => <BarGraphView mode="arithmetic" payload={payload} requireFiveStepAxis={config.requireFiveStepAxis} viewId={VIEW_ID} />;
+const Core = ({config, payload}: CoreProps) => <BarGraphView mode="arithmetic" payload={payload} axisStep={config.axisStep} viewId={VIEW_ID} />;
 export const DataBarGraphArithmetic = withConfig(DataBarGraphArithmeticViewSchema, Core);
 let root: ReturnType<typeof createRoot> | null = null;
 window.renderView = (payload: ViewRenderPayload<'data-bar-graph-arithmetic'>) => {

@@ -13,7 +13,7 @@ interface CoreProps {
 }
 
 const DataBarGraphCore = ({config, payload}: CoreProps) => (
-    <BarGraphView mode="construction" payload={payload} requireFiveStepAxis={config.requireFiveStepAxis} viewId={VIEW_ID} />
+    <BarGraphView mode="construction" payload={payload} axisStep={config.axisStep} viewId={VIEW_ID} />
 );
 
 export const DataBarGraph = withConfig(DataBarGraphViewSchema, DataBarGraphCore);
