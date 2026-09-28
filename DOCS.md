@@ -76,6 +76,11 @@ The general triples producer retains its existing property support for box and v
 Hundreds-bundle completion and explanation likewise share `PlaceValueHundredsBundlesProblem`;
 their separate views distinguish reading the represented number from explaining the counting method.
 
+Five-scale statistical quantities and five-minute clock values use `MultiplesOf5`. The bar-graph
+views separately supply a requested `StepsOf5` axis capability, constrained to the producer's
+five-scale quantities. Clock sampling uses minute values 05, 15, 25, 35, 45 and 55 to distinguish
+those examples from ten-minute values; the canonical time and graph payloads are unchanged.
+
 Label compatibility is implemented through the design recorded in
 [label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability
 matching, the planner admits only valid joint schema-label selections. Every tuple carries a

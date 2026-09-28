@@ -24,10 +24,10 @@ describe('TimeGenerator', () => {
     describe('generate', () => {
         it('should generate valid problem stubs', () => {
             const configs = [
-                { intervalLabel: Scope.HourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
-                { intervalLabel: Scope.HalfHourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
-                { intervalLabel: Scope.MinuteIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false },
-                { intervalLabel: Scope.SecondIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false }
+                { intervalLabel: Scope.HourIntervals, requireZero: false, requireMultipleOf5: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.HalfHourIntervals, requireZero: false, requireMultipleOf5: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.MinuteIntervals, requireZero: false, requireMultipleOf5: false, isAnteMeridiem: false, isPostMeridiem: false },
+                { intervalLabel: Scope.SecondIntervals, requireZero: false, requireMultipleOf5: false, isAnteMeridiem: false, isPostMeridiem: false }
             ];
             configs.forEach(config => {
                 const stub = generator.generate(config);
@@ -43,7 +43,7 @@ describe('TimeGenerator', () => {
         });
 
         it('should be deterministic with the same seed', () => {
-            const config = { intervalLabel: Scope.HourIntervals, requireZero: false, requireFiveMinuteStep: false, isAnteMeridiem: false, isPostMeridiem: false };
+            const config = { intervalLabel: Scope.HourIntervals, requireZero: false, requireMultipleOf5: false, isAnteMeridiem: false, isPostMeridiem: false };
             setSeed(123);
             const stub1 = generator.generate(config);
             setSeed(123);
@@ -57,7 +57,7 @@ describe('TimeGenerator', () => {
             const config = { 
                 intervalLabel: Scope.HourIntervals,
                 requireZero: false,
-                requireFiveMinuteStep: false,
+                requireMultipleOf5: false,
                 isAnteMeridiem: false,
                 isPostMeridiem: false
             };
@@ -76,7 +76,7 @@ describe('TimeGenerator', () => {
             const config = { 
                 intervalLabel: Scope.HalfHourIntervals,
                 requireZero: false,
-                requireFiveMinuteStep: false,
+                requireMultipleOf5: false,
                 isAnteMeridiem: false,
                 isPostMeridiem: false
             };
@@ -94,7 +94,7 @@ describe('TimeGenerator', () => {
             const config = { 
                 intervalLabel: Scope.HourIntervals,
                 requireZero: false,
-                requireFiveMinuteStep: false,
+                requireMultipleOf5: false,
                 isAnteMeridiem: false,
                 isPostMeridiem: false
             };
@@ -120,7 +120,7 @@ describe('TimeGenerator', () => {
                 const stub = generator.generate({
                     intervalLabel,
                     requireZero: true,
-                    requireFiveMinuteStep: false,
+                    requireMultipleOf5: false,
                     isAnteMeridiem: false,
                     isPostMeridiem: false
                 });
@@ -130,22 +130,37 @@ describe('TimeGenerator', () => {
             }
         });
 
-        it('should generate only five-minute values when requested', () => {
+        it('samples all six non-ten multiples of five as minute values', () => {
+            const minutes = new Set<number>();
             for (let seed = 0; seed < 50; seed++) {
                 setSeed(seed);
                 const stub = generator.generate({
                     intervalLabel: Scope.MinuteIntervals,
                     requireZero: false,
-                    requireFiveMinuteStep: true,
+                    requireMultipleOf5: true,
                     isAnteMeridiem: false,
                     isPostMeridiem: false
                 });
                 const {minute, second} = timeParts(stub!.data.secondsSinceMidnight);
                 expect(minute % 5).toBe(0);
-                expect(minute).toBeGreaterThan(0);
+                expect(minute % 10).toBe(5);
                 expect(second).toBe(0);
+                minutes.add(minute);
             }
+            expect([...minutes].sort((a, b) => a - b)).toEqual([5, 15, 25, 35, 45, 55]);
         });
+
+        it.each([Scope.SecondIntervals, Scope.HalfHourIntervals, Scope.HourIntervals])(
+            'rejects a five-multiple minute constraint with interval %s', intervalLabel => {
+                expect(generator.generate({
+                    intervalLabel,
+                    requireZero: false,
+                    requireMultipleOf5: true,
+                    isAnteMeridiem: false,
+                    isPostMeridiem: false
+                })).toBeNull();
+            }
+        );
 
         it.each([
             [true, false, 'ante-meridiem', 0, 11],
@@ -156,7 +171,7 @@ describe('TimeGenerator', () => {
                 const stub = generator.generate({
                     intervalLabel: Scope.MinuteIntervals,
                     requireZero: false,
-                    requireFiveMinuteStep: true,
+                    requireMultipleOf5: true,
                     isAnteMeridiem,
                     isPostMeridiem
                 });
@@ -181,7 +196,7 @@ describe('TimeGenerator', () => {
             expect(() => generator.generate({
                 intervalLabel: Scope.DayIntervals,
                 requireZero: false,
-                requireFiveMinuteStep: false,
+                requireMultipleOf5: false,
                 isAnteMeridiem: false,
                 isPostMeridiem: false
             } as any)).toThrow('Unsupported interval label');
@@ -191,7 +206,7 @@ describe('TimeGenerator', () => {
             expect(() => generator.generate({
                 intervalLabel: Scope.MinuteIntervals,
                 requireZero: false,
-                requireFiveMinuteStep: true,
+                requireMultipleOf5: true,
                 isAnteMeridiem: true,
                 isPostMeridiem: true
             })).toThrow('both ante meridiem and post meridiem');

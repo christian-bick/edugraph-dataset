@@ -13,7 +13,7 @@ const categoryIds: StatisticalCategoryId[] = ['apple', 'book', 'kite'];
 const scaleValues = {
     [Scope.StepsOf1]: 1,
     [Scope.StepsOf2]: 2,
-    [Scope.StepsOf5]: 5,
+    [Scope.MultiplesOf5]: 5,
     [Scope.StepsOf10]: 10
 } as const;
 

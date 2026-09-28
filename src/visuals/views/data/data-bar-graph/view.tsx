@@ -12,8 +12,8 @@ interface CoreProps {
     payload: ViewRenderPayload<'data-bar-graph'>;
 }
 
-const DataBarGraphCore = ({payload}: CoreProps) => (
-    <BarGraphView mode="construction" payload={payload} viewId={VIEW_ID} />
+const DataBarGraphCore = ({config, payload}: CoreProps) => (
+    <BarGraphView mode="construction" payload={payload} requireFiveStepAxis={config.requireFiveStepAxis} viewId={VIEW_ID} />
 );
 
 export const DataBarGraph = withConfig(DataBarGraphViewSchema, DataBarGraphCore);

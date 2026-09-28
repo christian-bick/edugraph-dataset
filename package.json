@@ -67,7 +67,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "edugraph-ts": "https://github.com/christian-bick/edugraph-ontology/releases/download/preview-0.29.0-pre.4.a08f9a911317/edugraph-ts.tgz",
+    "edugraph-ts": "https://github.com/christian-bick/edugraph-ontology/releases/download/preview-0.29.0-pre.5.a88ac7a500c5/edugraph-ts.tgz",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zustand": "^5.0.14"

@@ -17,6 +17,7 @@ interface BarGraphViewProps {
     mode: StatisticalGraphViewMode;
     payload: RenderPayload<AbstractProblem<StatisticalGraphProblem>>;
     viewId: string;
+    requireFiveStepAxis: boolean | undefined;
 }
 
 const AnswerBox = ({answer}: {answer?: number}) => (
@@ -25,10 +26,13 @@ const AnswerBox = ({answer}: {answer?: number}) => (
     </span>
 );
 
-export const BarGraphView = ({mode, payload, viewId}: BarGraphViewProps) => {
+export const BarGraphView = ({mode, payload, viewId, requireFiveStepAxis}: BarGraphViewProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
     validateStatisticalGraph(data, viewId);
+    if (requireFiveStepAxis && data.scale !== 5) {
+        throw new ViewValidationError(viewId, 'A five-step axis requires graph quantities scaled by five.');
+    }
 
     const displayTask = resolveStatisticalGraphTask(data, mode);
     if (displayTask === null) {

@@ -421,7 +421,7 @@ const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
 
 const scaledPictureGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.PictureGraph, Ability.VisualArticulation])
-    .applyLabelVariants([[Scope.StepsOf2], [Scope.StepsOf5], [Scope.StepsOf10]]);
+    .applyLabelVariants([[Scope.StepsOf2], [Scope.MultiplesOf5], [Scope.StepsOf10]]);
 
 const scaledBarGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.BarGraph, Ability.VisualArticulation])

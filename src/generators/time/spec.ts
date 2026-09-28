@@ -8,9 +8,9 @@ import {generatorLabelRule} from '../compatibility-rules.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'time',
     compatibility: [generatorLabelRule('clock-period-and-interval', [
-        Scope.AnteMeridiem, Scope.PostMeridiem, Scope.StepsOf5, Scope.MinuteIntervals
+        Scope.AnteMeridiem, Scope.PostMeridiem, Scope.MultiplesOf5, Scope.MinuteIntervals
     ], selected => !(selected(Scope.AnteMeridiem) && selected(Scope.PostMeridiem))
-        && (!selected(Scope.StepsOf5) || selected(Scope.MinuteIntervals)))],
+        && (!selected(Scope.MultiplesOf5) || selected(Scope.MinuteIntervals)))],
     generalLabels: [Area.MeasuringTime],
 };
 
@@ -24,9 +24,9 @@ export const TimeGeneratorSchema = {
         [Scope.NumbersWithZero],
         hasLabel(Scope.NumbersWithZero)
     ],
-    requireFiveMinuteStep: [
-        [Scope.StepsOf5],
-        hasLabel(Scope.StepsOf5)
+    requireMultipleOf5: [
+        [Scope.MultiplesOf5],
+        hasLabel(Scope.MultiplesOf5)
     ],
     isAnteMeridiem: [
         [Scope.AnteMeridiem],

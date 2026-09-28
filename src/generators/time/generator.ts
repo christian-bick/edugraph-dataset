@@ -28,7 +28,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
         validateConfigFields('time', config, [
             'intervalLabel',
             'requireZero',
-            'requireFiveMinuteStep',
+            'requireMultipleOf5',
             'isAnteMeridiem',
             'isPostMeridiem'
         ]);
@@ -36,7 +36,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
         if (config.isAnteMeridiem && config.isPostMeridiem) {
             throw new GeneratorValidationError('time', 'A time cannot be both ante meridiem and post meridiem.');
         }
-        if (config.requireFiveMinuteStep && config.intervalLabel !== Scope.MinuteIntervals) {
+        if (config.requireMultipleOf5 && config.intervalLabel !== Scope.MinuteIntervals) {
             return null;
         }
 
@@ -45,12 +45,13 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
         const periodStart = config.isPostMeridiem ? halfDayInSeconds : 0;
         const periodEnd = config.isAnteMeridiem ? halfDayInSeconds : dayInSeconds;
         let totalSeconds: number;
-        if (config.requireFiveMinuteStep) {
+        if (config.requireMultipleOf5) {
             const firstHour = Math.floor(periodStart / 3600);
             const hourCount = Math.floor((periodEnd - periodStart) / 3600);
-            const selection = Math.floor(random() * hourCount * 11);
-            const hour = firstHour + Math.floor(selection / 11);
-            const minute = (selection % 11 + 1) * 5;
+            // Use non-ten multiples of five so these samples distinguish five-minute precision.
+            const selection = Math.floor(random() * hourCount * 6);
+            const hour = firstHour + Math.floor(selection / 6);
+            const minute = 5 + (selection % 6) * 10;
             totalSeconds = hour * 3600 + minute * 60;
         } else {
             const minInterval = Math.ceil(periodStart / interval);

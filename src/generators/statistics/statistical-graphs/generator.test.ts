@@ -34,7 +34,7 @@ describe('StatisticalGraphsGenerator', () => {
 
     it.each([
         [Scope.StepsOf2, 2],
-        [Scope.StepsOf5, 5],
+        [Scope.MultiplesOf5, 5],
         [Scope.StepsOf10, 10]
     ] as const)('generates totals aligned to %s', (scale, scaleValue) => {
         const data = generator.generate({...baseConfig, scale}).data;
@@ -57,10 +57,27 @@ describe('StatisticalGraphsGenerator', () => {
         if (operation === 'subtraction') expect(first).toBeGreaterThan(second);
     });
 
+    it('allows nonconsecutive category multiples of five and preserves arithmetic divisibility', () => {
+        let hasNonconsecutiveTotals = false;
+        for (let seed = 0; seed < 50; seed++) {
+            setSeed(seed);
+            const data = generator.generate({
+                ...baseConfig,
+                scale: Scope.MultiplesOf5,
+                useSubtraction: true,
+                isMultiStep: true
+            }).data;
+            const totals = data.categories.map(({count}) => count).sort((a, b) => a - b);
+            hasNonconsecutiveTotals ||= totals.some((count, index) => index > 0 && count - totals[index - 1] !== 5);
+            expect([...totals, data.intermediate!, data.answer!].every(value => value % 5 === 0)).toBe(true);
+        }
+        expect(hasNonconsecutiveTotals).toBe(true);
+    });
+
     it('generates a connected multi-step subtraction question', () => {
         const data = generator.generate({
             ...baseConfig,
-            scale: Scope.StepsOf5,
+            scale: Scope.MultiplesOf5,
             useSubtraction: true,
             isMultiStep: true
         }).data;

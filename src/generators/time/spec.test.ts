@@ -103,14 +103,15 @@ describe('TimeGenerator Spec Integration', () => {
             const stub = generateWithLabels(generator, [
                 Area.MeasuringTime,
                 Scope.MinuteIntervals,
-                Scope.StepsOf5,
+                Scope.MultiplesOf5,
                 periodLabel
             ]);
             const {hour, minute, second} = timeParts(stub!.data.secondsSinceMidnight);
 
             expect(stub).not.toBeNull();
-            expect(stub!.labels).toEqual(expect.arrayContaining([Scope.StepsOf5, periodLabel]));
-            expect(minute % 5).toBe(0);
+            expect(stub!.labels).toEqual(expect.arrayContaining([Scope.MultiplesOf5, periodLabel]));
+            expect(stub!.labels).not.toContain(Scope.StepsOf5);
+            expect(minute % 10).toBe(5);
             expect(second).toBe(0);
             expect(hour).toBeGreaterThanOrEqual(minHour);
             expect(hour).toBeLessThanOrEqual(maxHour);

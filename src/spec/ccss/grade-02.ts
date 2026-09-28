@@ -456,7 +456,7 @@ const nearestFiveMinuteTimeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringTime,
         Scope.MinuteIntervals,
-        Scope.StepsOf5
+        Scope.MultiplesOf5
     ])
     .applyLabelVariants([
         [Scope.AnalogClock, Ability.ProcedureExecution],

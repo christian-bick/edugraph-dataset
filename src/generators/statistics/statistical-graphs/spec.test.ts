@@ -4,6 +4,15 @@ import {generateWithLabels} from '../../../lib/utils.ts';
 import {StatisticalGraphsGenerator} from './generator.ts';
 
 describe('statistical-graphs spec', () => {
+    it('labels five-scale quantities as multiples without claiming a sequence', () => {
+        const result = generateWithLabels(new StatisticalGraphsGenerator(), [
+            Area.Statistics, Scope.MultiplesOf5
+        ])!;
+        expect(result.labels).toContain(Scope.MultiplesOf5);
+        expect(result.labels).not.toContain(Scope.StepsOf5);
+        expect(result.data.scale).toBe(5);
+    });
+
     it('generates presentation-only graph data without an arithmetic question', () => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
             Area.Statistics,
@@ -19,7 +28,7 @@ describe('statistical-graphs spec', () => {
 
     it.each([
         [Scope.StepsOf2, 2],
-        [Scope.StepsOf5, 5],
+        [Scope.MultiplesOf5, 5],
         [Scope.StepsOf10, 10]
     ] as const)('resolves %s as a non-unit graph scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
@@ -52,7 +61,7 @@ describe('statistical-graphs spec', () => {
 
     it.each([
         [Scope.StepsOf2, 2],
-        [Scope.StepsOf5, 5],
+        [Scope.MultiplesOf5, 5],
         [Scope.StepsOf10, 10]
     ] as const)('resolves a one-step subtraction comparison on the %s scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
@@ -80,7 +89,7 @@ describe('statistical-graphs spec', () => {
             Area.Subtraction,
             Scope.IntegerNumbers,
             Scope.BarGraph,
-            Scope.StepsOf5,
+            Scope.MultiplesOf5,
             Scope.MultiStep,
             Ability.ProcedureExecution
         ])!;

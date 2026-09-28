@@ -42,7 +42,7 @@ describe('statistical graph presentation', () => {
 
     it('derives deterministic scaled observation presentation from counts', () => {
         setSeed('scaled-observations');
-        const data = generator.generate({...baseConfig, scale: Scope.StepsOf5}).data;
+        const data = generator.generate({...baseConfig, scale: Scope.MultiplesOf5}).data;
         const first = graphObservations(data, 31);
         const second = graphObservations(data, 31);
 
@@ -84,7 +84,7 @@ describe('statistical graph presentation', () => {
         setSeed('graph-multi');
         const multi = generator.generate({
             ...baseConfig,
-            scale: Scope.StepsOf5,
+            scale: Scope.MultiplesOf5,
             useSubtraction: true,
             isMultiStep: true
         }).data;

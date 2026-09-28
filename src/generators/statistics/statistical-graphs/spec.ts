@@ -29,7 +29,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const StatisticalGraphsGeneratorSchema = {
-    scale: [Scope.StepsOf1, Scope.StepsOf2, Scope.StepsOf5, Scope.StepsOf10],
+    scale: [Scope.StepsOf1, Scope.StepsOf2, Scope.MultiplesOf5, Scope.StepsOf10],
     useAddition: [[Area.Addition], hasLabel(Area.Addition)],
     useSubtraction: [[Area.Subtraction], hasLabel(Area.Subtraction)],
     useObjectSorting: [[Area.ObjectSorting], hasLabel(Area.ObjectSorting)],
