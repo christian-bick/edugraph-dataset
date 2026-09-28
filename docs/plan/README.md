@@ -18,9 +18,10 @@ These items are not newly scheduled by the archive move.
   [operand-cardinality clarification](operand-cardinality.md),
   [whole-tens subtraction correction](whole-tens-subtraction.md),
   [spatial-construction correction](spatial-composition.md),
-  [whole-share Ability correction](whole-share-ability.md), and
-  [realistic environmental-object images](environmental-object-images.md) are complete;
-  the current cache has 20 remaining failures among 1,966 CCSS images: 3 samples requiring
+  [whole-share Ability correction](whole-share-ability.md),
+  [realistic environmental-object images](environmental-object-images.md), and
+  [multiples-of-five migration](multiples-of-five-migration.md) are complete;
+  the current cache has 20 remaining failures among 1,968 CCSS images: 3 samples requiring
   semantic review and 17 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
@@ -42,9 +43,13 @@ These items are not newly scheduled by the archive move.
   all eight images retain their pixels and pass with the corrected label. All ten environmental
   images pass with their existing labels after replacing the artwork with fixed realistic assets;
   one window question retains an uncertain `PhysicalGeometry` check under the existing pass policy.
-  The picture-graph scale
-  review includes its question as well. There are 55 validation-coverage gaps without leakage;
-  the drop from 56 reflects a changed target allocation, not newly acquired validation evidence.
+  Clock minutes and five-scale graph quantities now use `MultiplesOf5`, while numbered bar axes
+  retain view-owned `StepsOf5`. All 30 migrated samples pass with 218 defendable label checks.
+  Clock sampling excludes ten-minute values. The remaining unit-, two- and ten-scale picture-graph
+  review is deferred; the two active unit-scale failures include both question and solution.
+  There are 55 validation-coverage gaps without leakage; the earlier drop from 56 reflects a
+  changed target allocation. The five-based migration adds two validation images and one
+  allocated/represented tuple, leaving that gap count unchanged.
   The fixed ten-tens explanation remains one of those gaps. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.
   The equation follow-up also

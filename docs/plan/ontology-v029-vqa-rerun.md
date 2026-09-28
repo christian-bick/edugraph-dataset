@@ -5,14 +5,15 @@
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
-whole-tens subtraction, spatial-construction, whole-share Ability, and environmental-image corrections on
+whole-tens subtraction, spatial-construction, whole-share Ability, environmental-image, and multiples-of-five corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,966 CCSS samples** have current judgments: **1,946 pass (99.0%) and 20 fail**, down from
+All **1,968 CCSS samples** have current judgments: **1,948 pass (99.0%) and 20 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, the completion/explanation split added 30,
-and the whole-tens target correction added four, for a net increase of 30 from the initial dataset.
+and the whole-tens target correction added four. The multiples-of-five target migration adds two
+validation images through the existing allocation policy, for a net increase of 32 from the initial dataset.
 There are no uncached samples. The remaining failures comprise **3 samples requiring semantic
 review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
@@ -51,15 +52,19 @@ four whole-from-shares fraction targets is also resolved: their view and targets
 The five environmental objects now use fixed, realistic AI-generated images and precise surface
 prompts. All ten updated exercises pass with their existing labels, resolving six failures;
 one window question retains an uncertain `PhysicalGeometry` check under the existing pass policy.
+Clock minutes and five-scale graph quantities now use `MultiplesOf5`; bar-graph views retain the
+genuine `StepsOf5` evidence on their numbered axes. All 30 migrated samples pass with 218
+defendable label checks. This resolves the five-minute precision review without changing the
+remaining unit-scale picture-graph findings or introducing a new failure.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
 This maintenance run upgrades `edugraph-ts` from v0.26.0 through v0.29.0 to the exact
-preview `0.29.0-pre.4.a08f9a911317`. It adopts the descriptor-text harmonization from v0.28.0,
-the v0.29.0 involvement-statement helper, the broader `MeasuringTime` definition, and the new
-`CorrectnessEvaluation` Ability, the clarified input/result numeric-range definitions, and
-expression-wide operand cardinality.
+preview `0.29.0-pre.5.a88ac7a500c5`. It adopts the descriptor-text harmonization from v0.28.0,
+the v0.29.0 involvement-statement helper, the broader `MeasuringTime` definition,
+`CorrectnessEvaluation`, the clarified input/result numeric-range definitions,
+expression-wide operand cardinality, and `MultiplesOf5`.
 Only **CCSS** is regenerated and validated; the isolated `test` dataset and cache
 remain outside this work.
 
@@ -560,6 +565,34 @@ The [detailed follow-up](environmental-object-images.md) records the generated a
 [complete prompts](environmental-object-image-prompts.json), visual review, test-harness repair,
 matching, retained artifacts and revalidation evidence.
 
+### Clock minutes and five-scale graph quantities
+
+**Resolved on 2026-09-28** in `ea3ac85`, with VQA results in `afbfd07`. Preview
+`0.29.0-pre.5.a88ac7a500c5` introduces `MultiplesOf5`: integer values divisible by five
+without a remainder. The clock generator and six `2.MD.C.7` targets now use it for the
+minute component, without claiming a sequence. Sampling excludes ten-minute values and
+uses 05, 15, 25, 35, 45 and 55 as requested. Multiples of ten remain valid members of the
+ontology category; the exclusion is a sampling policy.
+
+The statistical generator and five-scale picture-graph target likewise use `MultiplesOf5`.
+Category totals and arithmetic inputs/results remain divisible by five, with no requirement
+that category totals be consecutive. For example, the new picture-graph solution shows
+40 books, 15 apples and 10 kites with a key of five items per symbol. Bar targets retain
+`StepsOf5`, now owned by the views: their axes show 0, 5, 10, …, 40. Joint compatibility
+binds that claim to the generator's five-scale quantities (`SPEC-G3`, `SPEC-8`, `SPEC-11`,
+`TSPEC-13`, `IMPL-V11`). Genuine skip-counting targets are unchanged.
+
+Canonical generation renders 112 images across the existing consumers. All 112 replay with
+matching mathematical fingerprints and labels. The 22 replacement/new images and eight
+retained bar images with updated labels receive 30 fresh passing judgments; all 218 label
+checks are defendable, including 30 `MultiplesOf5` and eight `StepsOf5` checks. Every general
+check passes. All 1,946 retained images preserve their bytes, seeds, attempts and mathematical
+fingerprints; 1,938 judgments are reused. No VQA retry or checklist change was needed.
+
+The [detailed migration record](multiples-of-five-migration.md) contains ownership decisions,
+the complete consumer matrix, sample allocation changes and verification results. The
+remaining unit-, two- and ten-scale picture-graph semantics are deferred to the next discussion.
+
 ## Major findings requiring follow-up
 
 ### Sequence steps versus scale and precision
@@ -567,18 +600,15 @@ matching, retained artifacts and revalidation evidence.
 `statistical-graphs` maps `StepsOf1` to a picture-graph symbol scale. The inspected total question
 uses "Each symbol = 1 item" and the solution `3 + 7 + 4 = 14`; neither displays a sequence of
 consecutive values. The harmonized statement defines consecutive values whose absolute
-difference is one. `time-digital-construction` similarly uses `StepsOf5` to select minute
-precision, while the inspected image contains only a single time with minute value 20.
-
-Review whether these descriptors are intended to cover scale/granularity, or whether those need
-different target and producer encodings. Six digital-construction samples across two targets
-claim `StepsOf5`. The original pictograph failure is
+difference is one. The clock and five-scale graph portion is resolved above using `MultiplesOf5`;
+the remaining symbol-scale cases still need separate target and producer encodings. The original
+pictograph failure is
 `1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0`.
 This is a semantic boundary decision; decorative sequences would not repair the original task.
 The required operand refresh also rejects its question, which shows category counts of 3, 2,
 and 5 with a one-item-per-symbol legend. Both current verdicts concern the same scale-versus-sequence issue.
-All clock samples pass after the MeasuringTime definition update, but the `StepsOf5` definition
-and task evidence are unchanged, so that semantic review remains open.
+The two- and ten-scale picture-graph variants also still encode symbol scale with sequence-step
+labels. These were deliberately preserved during the five-based migration for the next discussion.
 
 ### Concrete inference versus deriving a concept
 
@@ -789,28 +819,38 @@ The recurring Windows documentation-fixture cleanup error is repaired with bound
 `e2fef77`; the final coverage gate passes when run independently. Ten images change with no
 identity, label, mathematical fingerprint, plan, replay, seed or attempt changes. VQA reuses
 1,956 byte-identical cache records and records ten passes in `cdc345d`: 39 defendable label
-checks and the one window uncertainty described above. Current VQA is **1,946 pass / 20 fail /
+checks and the one window uncertainty described above. That checkpoint's VQA is **1,946 pass / 20 fail /
 zero uncached**; the six resolved failures remain in history with their prior evidence.
+
+The multiples-of-five migration passes **3,511 tests across 549 files**, all coverage thresholds,
+CCSS repository checks and the production build. Generator coverage is 97.36% statements /
+96.96% branches for `time` and 98.33% / 97.95% for `statistical-graphs`. Matching retains
+688 targets, 214 compatible pairs and 841 tuples; seven target identities and eight routes
+are replaced, and 30 retained plans change. The strict label audit remains at zero violations,
+97 review items and zero signals. All 112 affected samples replay exactly. Cache `afbfd07`
+contains **1,948 pass / 20 fail / zero uncached**. All 20 failure judgments are unchanged.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Environmental images: ten renders, one shard written, 290 reused; exactly ten intended image-hash changes |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Ten live judgments, all passing; 1,956 reused; final 1,946 pass / 20 fail / zero uncached; exits 1 for the documented failures |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Multiples-of-five migration: 112 renders, 19 shards written, 272 reused; 22 added/20 removed identities, no retained-image changes |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 30 live judgments, all passing with 218 defendable label checks; 1,938 reused; final 1,948 pass / 20 fail / zero uncached; exits 1 for the documented failures |
 | `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 20 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=39da8f8` | Latest follow-up: 1,956 identical images, ten intended changes, zero seed/attempt or identity changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,765 identical retained images, 53 intended changes, 148 added/118 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=cf7127d` | Latest follow-up: 1,946 identical retained images, 22 added/20 removed identities, no retained seed/attempt changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,745 identical retained images, 53 intended changes, 170 added/138 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,654 training and 312 validation images. All 841 matched tuples have
-training evidence. Of 211 tuples allocated to validation, 156 have validation evidence. The 55
+The final split contains 1,654 training and 314 validation images. All 841 matched tuples have
+training evidence. Of 212 tuples allocated to validation, 157 have validation evidence. The 55
 remaining gaps include the ten-tens explanation route added earlier: its fixed mathematical
 relation repeats the training payload. Generation records 50 duplicate attempts before linking
 that request to the existing training sample. It is not counted as independent validation evidence.
 The previous total of 56 gaps falls by one because the corrected whole-share target hashes no
-longer allocate the rectangle/halves variant to validation; no new validation evidence was added.
-There is no cross-split leakage or within-split configured-task redundancy. Sampling policy is unchanged.
+longer allocate the rectangle/halves variant to validation; that earlier correction added no validation
+evidence. The subsequent five-based migration adds one allocated and represented tuple overall,
+producing two additional validation images while leaving the number of gaps unchanged.
+There is no cross-split leakage or within-split configured-task redundancy. Validation allocation policy is unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
 is intentionally outside this CCSS-only task.

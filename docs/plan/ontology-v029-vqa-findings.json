@@ -1,12 +1,12 @@
 {
   "spec": "ccss",
-  "library_version": "0.29.0-pre.4.a08f9a911317",
+  "library_version": "0.29.0-pre.5.a88ac7a500c5",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "cdc345d",
+  "cache_commit": "afbfd07",
   "concurrency": 4,
-  "evaluated": 1966,
-  "passed": 1946,
+  "evaluated": 1968,
+  "passed": 1948,
   "failed": 20,
   "semantic_review_samples": 3,
   "evaluator_disagreement_samples": 17,
@@ -2687,6 +2687,422 @@
       "asset_prompts": "environmental-object-image-prompts.json",
       "details": "environmental-object-images.md",
       "note": "Fixed photorealistic assets replace the illustrations; prompts identify the relevant surface. All targets and labels remain unchanged. PhysicalGeometry is defendable in nine judgments and uncertain in the window question because it depicts a fixed frame. All ten samples pass under the existing policy. No VQA retry, ontology change, new descriptor, or checklist exception was used."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "multiples-of-five-migration",
+      "status": "completed",
+      "baseline_commit": "cf7127d",
+      "fix_commit": "ea3ac85",
+      "cache_commit": "afbfd07",
+      "library_version": "0.29.0-pre.5.a88ac7a500c5",
+      "concurrency": 4,
+      "sample_count_before": 1966,
+      "sample_count_after": 1968,
+      "evaluated": 30,
+      "reused": 1938,
+      "failures_before": 20,
+      "failures_after": 20,
+      "resolved": 0,
+      "retired_failed_identities": 0,
+      "newly_rejected": 0,
+      "added_sample_identities": 22,
+      "removed_sample_identities": 20,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "retained_label_changes": 8,
+      "retained_task_fingerprint_changes": 44,
+      "refreshed_retained_plan_receipts": 68,
+      "unchanged_cache_records": 1856,
+      "provenance_only_cache_records": 22,
+      "refreshed_plan_cache_records": 60,
+      "unchanged_retained_judgments": 1938,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "changed_targets": 7,
+        "changed_routes": 8,
+        "changed_retained_plans": 30
+      },
+      "generation": {
+        "rendered": 112,
+        "written_shards": 19,
+        "reused_shards": 272
+      },
+      "verification": {
+        "test_files": 549,
+        "tests": 3511,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "label_signals": 0,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "replayed_samples": 112,
+        "fresh_label_checks": {
+          "defendable": 218,
+          "uncertain": 0,
+          "not_defendable": 0,
+          "multiples_of_five": 30,
+          "steps_of_five": 8
+        },
+        "test_dataset_and_cache_unchanged": true,
+        "split": {
+          "train_images": 1654,
+          "validation_images": 314,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 212,
+          "validation_represented_tuples": 157,
+          "validation_gaps": 55,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        }
+      },
+      "passing_revalidated_samples": [
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~3df0c3c7#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:08:48.588Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The scale and values on the y-axis (0, 5, 10, ..., 40) as well as the category values (10, 35, 30) are multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The y-axis scale increments by consecutive steps of 5: 0, 5, 10, 15, 20, 25, 30, 35, 40."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph#val#question#inst:0",
+          "validated_at": "2026-09-28T16:09:21.985Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The values to represent (10, 25, and 35) are all multiples of the scale factor 5."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:01.715Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "Each card/symbol represents 5 items, meaning the final counts will be multiples of 5."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~2dcae23f#statistical-graphs#data-bar-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:08:49.819Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The category totals (10, 25, 15) and all values marked on the scale are multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The vertical axis progresses in increments of 5 (0, 5, 10, 15, etc.), which is also explicitly noted at the bottom: 'SCALE STEPS BY 5'."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~2dcae23f#statistical-graphs#data-bar-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:08:56.496Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "Each card represents 5 items, resulting in total item values (15, 20, 40) that are multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The y-axis grid lines advance in increments of 5 (0, 5, 10, 15, 20, 25, 30, 35, 40)."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1362ec26#statistical-graphs#data-bar-graph-arithmetic#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:08:54.260Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The values 40, 15, 25, 10, and 15 are all multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The vertical axis of the bar graph increases in increments of 5 (0, 5, 10, ..., 40)."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:08:59.222Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The quantities (40, 15, 10) are all multiples of 5, which matches the scale key of 5 items per symbol."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph-classification#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:04.037Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "Each observation card and graph symbol represents 5 items, which directly relates to counting by multiples of 5 (15, 35, 10)."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~2dcae23f#statistical-graphs#data-bar-graph-classification#train#question#inst:0",
+          "validated_at": "2026-09-28T16:08:56.837Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "Each observation card represents 5 items, and the y-axis tick values are multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The vertical axis scale steps by 5 (0, 5, 10, 15, 20, 25, 30, 35, 40)."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph#val#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:22.779Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The quantities 40, 25, and 15 are multiples of 5, which corresponds to the symbol key 'Each symbol = 5 items'."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-bar-graphs~2dcae23f#statistical-graphs#data-bar-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T16:08:50.490Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The data values (40, 30, 25) and the scale numbers are all multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The vertical axis is labeled in steps of 5 (0, 5, 10, 15, 20, 25, 30, 35, 40), and the subtitle explicitly states 'SCALE STEPS BY 5'."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-two-step-scaled-bar-comparisons~1362ec26#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T16:08:54.323Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The values 10, 20, and 40, as well as the y-axis labels, are all multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The y-axis scale steps by 5 (0, 5, 10, 15, ..., 40), as noted by the label 'SCALE STEPS BY 5'."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-one-step-scaled-bar-comparisons~3df0c3c7#statistical-graphs#data-bar-graph-arithmetic#train#question#inst:0",
+          "validated_at": "2026-09-28T16:08:48.527Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The scale steps and the data values are all multiples of 5."
+          },
+          "steps_of_five_check": {
+            "label": "StepsOf5",
+            "verdict": "defendable",
+            "evidence": "The y-axis scale increments by steps of 5 (0, 5, 10, ...)."
+          }
+        },
+        {
+          "sample_key": "3.MD.B.3-scaled-picture-graphs~924a8ec0#statistical-graphs#data-picture-graph#train#question#inst:0",
+          "validated_at": "2026-09-28T16:08:58.898Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The values 10, 35, and 25 are multiples of 5, which is highly relevant because each symbol represents 5 items."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~da0ee283#time#time-analog#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:07.866Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute hand points to the 15-minute mark, which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~2998fb93#time#time-analog-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:09.692Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value 35 is a multiple of 5, corresponding precisely to the 7th hour marker on the clock."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~da0ee283#time#time-analog#val#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:27.583Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute hand points precisely to the tick for 55, which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~72efcf35#time#time-analog-construction#val#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:28.503Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "15 minutes is a multiple of 5, represented by the green hand pointing exactly to the 3-o'clock mark."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~c7b21921#time#time-analog#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:04.981Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute hand points to the first 5-minute mark (3:05)."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~63a5604f#time#time-digital-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:16.898Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value 55 is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~a1f4d2f9#time#time-digital-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:18.166Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The time includes 'forty-five minutes', which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~2998fb93#time#time-analog-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:12.264Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The time is '7:05', where 5 minutes is a multiple of 5, clearly reflected by the minute hand pointing to the first major 5-minute tick mark."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~63a5604f#time#time-digital-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:18.314Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value is 'fifteen' (15), which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~72efcf35#time#time-analog-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T16:09:12.667Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value '15' is a multiple of 5, which corresponds to the 3 o'clock position (a main tick mark)."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~da0ee283#time#time-analog#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:12.601Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value (45) is a multiple of 5, indicated by the minute hand pointing directly at a major tick."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~72efcf35#time#time-analog-construction#val#question#inst:0",
+          "validated_at": "2026-09-28T16:09:26.325Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value is 35, which is a multiple of 5, aligning with the 5-minute markings (dots) on the clock face."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~a1f4d2f9#time#time-digital-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:21.575Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minutes value (15) is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~c7b21921#time#time-analog#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:05.254Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute hand points to the 15-minute mark, which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~da0ee283#time#time-analog#val#question#inst:0",
+          "validated_at": "2026-09-28T16:09:24.327Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute hand points exactly to the 25-minute mark, which is a multiple of 5."
+          }
+        },
+        {
+          "sample_key": "2.MD.C.7-nearest-five-minute-time~72efcf35#time#time-analog-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T16:09:18.235Z",
+          "pass": true,
+          "multiples_of_five_check": {
+            "label": "MultiplesOf5",
+            "verdict": "defendable",
+            "evidence": "The minute value '35' is a multiple of 5."
+          }
+        }
+      ],
+      "details": "multiples-of-five-migration.md",
+      "note": "Clock minutes and five-scale graph quantities now use MultiplesOf5. Clock sampling excludes minute multiples of ten. Bar views retain StepsOf5 for their numbered axes; genuine skip-counting targets remain unchanged. All 30 fresh judgments pass with 218 defendable checks. The existing 20 failures and their judgments are unchanged; unit-, two- and ten-scale picture-graph semantics remain deferred. No new major issue, VQA retry or rate-limit error occurred."
     }
   ],
   "findings": [

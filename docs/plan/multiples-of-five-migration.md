@@ -71,3 +71,71 @@ strict label-architecture audit. Commit source/dependency changes before canonic
 matching/label churn, cache freshness and split integrity; record any new major issues in
 the [original report](ontology-v029-vqa-rerun.md) and machine-readable findings. Commit VQA
 and documentation separately and push the branch.
+
+## Completed verification
+
+Completed on 2026-09-28. Source/dependency commit: `ea3ac85`. VQA cache commit: `afbfd07`.
+The published dependency is pinned by URL and integrity in the lockfile. The ontology repository
+was not modified.
+
+| Check | Result |
+|---|---|
+| Focused generator/view tests | 107 pass; shared compatibility fixtures add 58 passing checks |
+| Full coverage gate | 3,511 tests across 549 files pass; all configured thresholds pass |
+| Generator coverage | Time: 97.36% statements / 96.96% branches; statistics: 98.33% / 97.95% |
+| CCSS repository checks and production build | Pass |
+| Strict label-architecture audit | Zero violations, 97 review items, zero signals |
+| Matching | 688 targets, 214 compatible pairs, 841 tuples; zero unmatched active targets |
+| Matching delta | Seven targets and eight routes replaced; 30 retained plans change |
+| Canonical generation, concurrency 4 | 112 images rendered; 19 shards written, 272 reused |
+| Mathematical replay | All 112 images reproduce their fingerprints and resolved labels |
+| Live VQA, concurrency 4 | 30 fresh judgments pass; 1,938 reused; no retry or rate-limit error |
+| Label evidence | 218 defendable checks; no uncertain or rejected checks; all general checks pass |
+| Current CCSS cache | 1,948 pass / 20 fail / zero uncached across 1,968 images |
+| Strict dataset audit | Only the 20 previously documented failures; all integrity/freshness checks clean |
+| Isolated test artifacts | Authored targets unchanged; snapshot pointer and cache hashes unchanged |
+
+The initial coverage run exposed two shared compatibility fixtures still referencing the old
+generator capability; both were migrated before the final passing run. A newly added rendering
+fixture also needed its scale parameter typed as the payload's existing `1 | 2 | 5 | 10` union.
+These were test repairs, not changes to the admitted mathematics or target scope.
+
+### VQA and visual evidence
+
+| Consumer | Fresh passing images |
+|---|---:|
+| `time-analog` | 6 |
+| `time-analog-construction` | 6 |
+| `time-digital-construction` | 4 |
+| `data-picture-graph` | 4 |
+| `data-picture-graph-classification` | 2 |
+| `data-bar-graph` | 2 |
+| `data-bar-graph-classification` | 2 |
+| `data-bar-graph-arithmetic` | 4 |
+
+All 30 `MultiplesOf5` checks and eight retained `StepsOf5` checks are defendable. Manual
+inspection covered analog reading at 3:05 p.m., analog construction at 7:05 a.m., digital
+construction from “fifty-five minutes past one a.m.”, the 40/15/10 picture graph and the
+30 − 10 = 20 bar comparison with an axis from 0 to 40 in steps of five. Their prompts,
+question/solution treatment, graph keys, clock hands and numeric evidence are coherent.
+
+### Retained artifacts and allocation
+
+The target migration replaces 20 sample identities with 22. All 1,946 retained images preserve
+their bytes, mathematical fingerprints, seeds and attempts. Eight retained bar images add the
+generator-owned `MultiplesOf5` while preserving view-owned `StepsOf5`; those receive fresh VQA.
+The 44 retained bar images acquire an explicit axis-requirement configuration value, changing
+their task fingerprints without changing pixels or mathematics. Clock-field and bar-schema
+changes refresh 68 retained plan/replay receipts.
+
+Among the 1,938 reused judgments, 1,856 cache records remain byte-identical, 22 change only
+the plan's input provenance, and 60 refresh plan/replay metadata while preserving evaluation
+and timestamp. All 20 existing failure judgments are unchanged. No new major issue occurred.
+The two `StepsOf1` picture-total findings, other picture-scale semantics and the mediated-length
+Ability review remain for discussion; this migration does not claim to resolve them.
+
+The split now has 1,654 training and 314 validation images. Every one of the 841 matched tuples
+has training evidence. Validation represents 157 of 212 allocated tuples, leaving the same 55
+gaps. The new picture-target hash adds two validation images; clock target hashes redistribute
+their validation allocation without changing the clock image total. There is no cross-split
+content leakage or within-split configured-task redundancy.
