@@ -4,25 +4,25 @@
 
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
-successor-evidence, grouped-word-problem, count-out-supply, and completion/explanation corrections on
+successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, and operand-cardinality corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,962 CCSS samples** have current judgments: **1,935 pass (98.6%) and 27 fail**, down from
+All **1,962 CCSS samples** have current judgments: **1,934 pass (98.6%) and 28 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, and the completion/explanation split added 30,
 for a net increase of 26 from the initial dataset.
 There are no uncached samples. The remaining failures comprise **11 samples requiring semantic
-review** and **16 evaluator disagreements**. These are sample counts, not distinct defects;
+review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 28 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 43
-resolved finding records and initial totals are retained separately as history: 28 passed
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 28 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 47
+resolved finding records and initial totals are retained separately as history: 32 passed
 revalidation, and fifteen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
@@ -35,17 +35,20 @@ labels; their input/result bounds and independent operand digit profiles are now
 All 20 current offset/successor images and all ten bounded count-out images pass. The latter now
 receive their available collection size from the generator, including valid exact-size pools.
 Property and hundreds-bundle completion now have appropriate Abilities and distinct explanation
-tasks. All 40 new samples pass their Ability and general visual/math checks; 38 pass overall.
-Two distributive samples raise a new semantic review about `ThreeOperands` in nested expressions.
-Those failures are preserved without retrying or changing the ontology definition automatically.
+tasks. All 40 replacement samples now pass overall after the agreed operand-cardinality clarification.
+Operands are counted across the complete expression, including nested operations and repeated
+occurrences. Both distributive failures are resolved without changing their images or labels.
+The required 732-sample refresh introduces a separate review of single-place subtraction versus
+place-value partitioning and extends the existing picture-graph scale review to its question.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
 
 This maintenance run upgrades `edugraph-ts` from v0.26.0 through v0.29.0 to the exact
-preview `0.29.0-pre.3.dee88508f2f8`. It adopts the descriptor-text harmonization from v0.28.0,
+preview `0.29.0-pre.4.a08f9a911317`. It adopts the descriptor-text harmonization from v0.28.0,
 the v0.29.0 involvement-statement helper, the broader `MeasuringTime` definition, and the new
-`CorrectnessEvaluation` Ability, and the clarified input/result numeric-range definitions.
+`CorrectnessEvaluation` Ability, the clarified input/result numeric-range definitions, and
+expression-wide operand cardinality.
 Only **CCSS** is regenerated and validated; the isolated `test` dataset and cache
 remain outside this work.
 
@@ -137,6 +140,17 @@ and semantic plans remain unchanged. VQA makes 40 requests at concurrency four: 
 fail only on `ThreeOperands`. It reuses all 1,922 retained judgments, refreshing only
 `generation_plan.inputHash` on 1,726 records. Both original Ability failures retire with passing
 replacement tasks; the separate operand-cardinality findings keep the total at 27. No API error occurs.
+
+The [operand-cardinality follow-up](operand-cardinality.md) clarifies the parent and all three
+concrete operand-count definitions on ontology `main`, then adopts its published preview.
+Canonical reconstruction reuses all 291 shards with no renders or written shards. All 1,962
+images, labels, identities, replay receipts, semantic plans, seeds, and attempts remain unchanged.
+VQA makes 732 required requests at concurrency four: 725 pass and seven fail on unrelated labels.
+All 1,230 unaffected judgments remain byte-identical. Both distributive failures and two previous
+`Formalization` disagreements pass; five previously passing samples receive new label rejections.
+This moves the total from 27 to 28 failures. No API or rate-limit error occurs, and no verdict is
+retried merely to obtain a pass. Operand checks comprise 731 defendable and one uncertain verdict,
+with none rejected; the uncertain pictorial-division sample still passes under the existing policy.
 
 ## Minor repairs
 
@@ -389,27 +403,48 @@ of ones. The dedicated property views share a precise mathematical payload; exis
 vertical completion routes retain their valid property support.
 
 Both old failed identities retire, and their corresponding completion and explanation replacements
-pass. Every new sample passes the relevant Ability and general visual/math checks. Two new
-distributive samples fail only on a separate operand-count interpretation, documented below.
+pass. Every new sample passes the relevant Ability and general visual/math checks. The two
+initial distributive operand-count failures now pass after the clarification documented below.
 The [detailed report](procedure-task-separation.md) records source, matching, tests, and cache evidence.
-
-## Major findings requiring follow-up
 
 ### Operand cardinality in nested distributive expressions
 
-**New semantic review from the 2026-09-28 follow-up:** two otherwise passing distributive tasks
-are rejected for `ThreeOperands`. The pinned definition is "A mathematical operation instance
-with exactly three explicit operands", illustrated by `4 + 7 + 5`.
+**Resolved on 2026-09-28:** the user clarified that every individual number in the expression is
+an operand. Ontology `main` commit `a08f9a9` updates `OperandCardinality`, `TwoOperands`,
+`ThreeOperands`, and `FourOperands`; dependency commit `969ccdc` adopts preview
+`0.29.0-pre.4.a08f9a911317`. The concrete definition template is:
 
-- The box-format solution shows `6 × (10 + 1) = 66`, with the expansion `6 × 10 + 6 × 1 = 60 + 6 = 66`.
-- The dedicated completion question shows `8 × (2 + 10)` and `(8 × 2) + (8 × 10)`, leaving the result blank.
+> A mathematical expression with exactly N explicit operand occurrences, counted across all nested operations.
 
-Each original expression has three explicit numeric inputs. Each individual multiplication or
-addition within it, however, has two operands. The evaluator applies the latter interpretation;
-the flat-addition example does not settle how nested mixed-operation expressions should be counted.
-Review the intended ontology boundary and both producers' `ThreeOperands` declarations together.
-Do not remove a target claim or add an unrelated three-addend expression merely to pass VQA
-(`SPEC-3`, `TSPEC-13`). Both raw failures remain in the cache and findings JSON; no forced retry was made.
+Thus `8 × (2 + 10)` has three operand occurrences, while `(8 × 2) + (8 × 10)` has four;
+the repeated 8 counts twice. The result in `8 × (2 + 10) = 96` is not an extra operand of the
+left-hand expression, and its grouped subexpression is not counted again.
+
+Both original distributive samples now pass. Their `ThreeOperands` declarations remain intact,
+and all images and target labels are unchanged. The required refresh rechecks 732 affected
+samples once at concurrency four, with no rejected operand label. Cache commit: `c645060`.
+The [detailed report](operand-cardinality.md) records the single passing-but-uncertain pictorial
+division verdict and all unrelated new findings. No prompt or checklist exemption was introduced.
+
+## Major findings requiring follow-up
+
+### Single-place subtraction versus place-value partitioning
+
+**New semantic review from the operand-cardinality refresh:** the unchanged written-method
+question asks the learner to model `90 − 60`, showing nine tens, six tens, and a tens-unit
+vertical subtraction. `SubtractionPlaceValuePartitioning` requires decomposing operands into
+place-value parts and coordinating partial differences. The image uses only one occupied place,
+so the evaluator's objection identifies a real boundary to settle.
+
+The shared `1.NBT.C.6` target builder selects this Area and `MultiplesOf10` for the concrete,
+written-method, and explanation variants. Adding nonzero ones to force multiple partial
+differences would change the standard's intended task. Review whether single-place unit
+subtraction belongs in this Area or should have a different target/producer declaration
+(`SPEC-3`, `TSPEC-13`). The arithmetic and visualization are correct; no wording-only repair
+or automatic relabeling was made.
+
+The reported sample is
+`1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0`.
 
 ### Spatial assembly versus concept composition
 
@@ -449,9 +484,11 @@ precision, while the inspected image contains only a single time with minute val
 
 Review whether these descriptors are intended to cover scale/granularity, or whether those need
 different target and producer encodings. Six digital-construction samples across two targets
-claim `StepsOf5`. The observed pictograph failure is
+claim `StepsOf5`. The original pictograph failure is
 `1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0`.
 This is a semantic boundary decision; decorative sequences would not repair the original task.
+The required operand refresh also rejects its question, which shows category counts of 3, 2,
+and 5 with a one-item-per-symbol legend. Both current verdicts concern the same scale-versus-sequence issue.
 All clock samples pass after the MeasuringTime definition update, but the `StepsOf5` definition
 and task evidence are unchanged, so that semantic review remains open.
 
@@ -488,7 +525,11 @@ revalidation, without prompt/checklist weakening or repeated retries until a pas
 - Shape-attribute comparisons explicitly display decimal numerals such as 1, 8, 0, and 6.
   Single-digit counts do not require a separate place-value lesson to support `Base10`.
 - An array's ten equal square unit cells support `Square`, even when their outer boundary is
-  rectangular. Its `BoxArrangement` evaluation already recognizes the unit grid.
+  rectangular. Its `BoxArrangement` evaluation already recognizes the unit grid. The operand
+  refresh repeats this objection on the solution's eight square cells in a two-by-four rectangle.
+- A dollar currency task shows `75¢ + 50¢` using 25-cent coins. `Dollar` identifies the currency
+  system, including its minor denomination; it does not require a dollar symbol, bill, or
+  dollar-denominated value. The operand refresh introduces that unsupported requirement.
 - Crossing an hour boundary does not inherently turn a single requested time addition or
   subtraction into multiple semantic operations. The rejected `SingleStep` questions require
   one result from supplied values; carrying/borrowing is part of executing that operation.
@@ -497,10 +538,10 @@ revalidation, without prompt/checklist weakening or repeated retries until a pas
   by revalidation of the repaired counting view.
 - A line-plot solution was reported to plot `3¼` instead of a supplied `3¾`. The actual Pencil
   card reads `3¼`, and recorded-recipe replay produces 3.25; all six plotted measurements match.
-- Two missing-operand equations, `433 - □ = 198` and `54 ÷ □ = 2`, are rejected for
+- Two missing-operand equations, `433 - □ = 198` and `54 ÷ □ = 2`, were rejected for
   `Formalization` because no informal-to-formal translation is requested. The actual definition
   covers expressing information according to formal rules and conventions; it does not impose
-  that additional translation requirement.
+  that additional translation requirement. Both pass the required operand refresh with unchanged images.
 - The place-value comparison `10 < 100` is rejected for `NumbersWithoutZero` because its ones
   columns say "none". Those are representational components of nonzero task values, consistent
   with the user's clarification and the ontology's exclusion of zero digits as separate quantities.
@@ -515,10 +556,12 @@ and the shape recognition correction reduced it to 27. Category ordering preserv
 the necessary offset rechecks later moved it to 28 through the separate numeric-bound review.
 No further retries were made to chase a passing result. The required numeric-range refresh later
 passes the previous equal-addends and digit-answer counting questions and two shape comparisons.
-It also introduces new interpretations of unchanged tasks. The 16 current disagreements comprise
-two fraction word-problem solutions, six shape-attribute comparisons, one square-cell array
-question, three time-interval tasks, two missing-operand formal equations, one representational
-zero-component judgment, and one parity question's decimal notation.
+It also introduces new interpretations of unchanged tasks. The later operand refresh resolves
+the two missing-operand formal-equation disagreements, restores the earlier equal-addends flag,
+and adds the square-array solution and cents-denomination flags. The 17 current disagreements
+comprise two fraction word-problem solutions, six shape-attribute comparisons, two square-cell
+array images, three time-interval tasks, one representational zero-component judgment, one parity
+question's decimal notation, one equal-addends question, and one currency-system judgment.
 The table records the original 2026-09-26 recheck.
 
 | Generator / view | Rechecked | Failures before | Failures after |
@@ -619,18 +662,25 @@ build, and all generator coverage thresholds. The new property producer has 94.1
 and 95.23% branch coverage. All 1,536 captured legacy payloads and PRNG continuations are identical.
 Matching now has 688 targets, 214 compatible pairs, and 841 tuples: five added completion targets,
 16 added routes, and five removed routes, with no changed retained semantic plans. The strict
-label audit remains at zero violations and 97 review items. Current VQA is **1,935 pass / 27 fail /
+label audit remains at zero violations and 97 review items. That checkpoint is **1,935 pass / 27 fail /
 zero uncached**, in cache commit `f8f6fc8`; all retained judgments and timestamps are unchanged.
+
+The operand-cardinality preview passes the same **3,434 tests across 543 files**, all coverage
+thresholds, repository checks, and the build. Ontology validation also passes its complete Docker
+gate and hosted Linux/Windows checks. Matching remains at 688 targets, 214 compatible pairs,
+and 841 tuples, with no changed retained semantic plans; the strict label audit remains at zero
+violations and 97 review items. Current VQA is **1,934 pass / 28 fail / zero uncached**, in cache
+commit `c645060`. Exactly 732 judgments are refreshed and all 1,230 unaffected records are unchanged.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Completion/explanation split: 1,962 renders, 226 shards written, 65 reused; all 1,922 retained image hashes unchanged |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Forty live judgments: 38 pass, two operand-cardinality flags; 1,922 reused; final 1,935 pass / 27 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Operand-cardinality preview: zero renders, zero shards written, 291 reused; all 1,962 image hashes unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 732 live judgments: 725 pass, seven unrelated flags; 1,230 reused; final 1,934 pass / 28 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 28 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=6268e29` | Latest follow-up: 1,922 identical retained images, zero changed images/seeds/attempts, 40 added/ten removed identities |
+| `npm run report:churn -- --spec=ccss --ref=791d038` | Latest follow-up: all 1,962 images identical, zero changed seeds/attempts, no added or removed identities |
 | `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,837 identical retained images, 43 intended changes, 82 added/56 removed identities; the same three explained successor retry changes |
 
 The final split contains 1,654 training and 308 validation images. All 841 matched tuples have

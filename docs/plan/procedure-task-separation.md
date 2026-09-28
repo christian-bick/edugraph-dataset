@@ -118,7 +118,12 @@ Canonical image inspection covers every task family, property law, and mode, inc
 100-result boundary and all hundreds-bundle images. The matching, replay, and unit checks cover
 the mathematical payloads independently of VQA.
 
-## New semantic review: operand cardinality
+## Operand-cardinality review at this checkpoint
+
+**Subsequently resolved:** the [operand-cardinality follow-up](operand-cardinality.md) records
+the user's expression-wide interpretation, ontology preview adoption, and passing revalidation
+of both samples below. All 40 replacement samples now pass. The figures in this document
+preserve the earlier completion/explanation checkpoint.
 
 Two new distributive samples are rejected for `ThreeOperands`:
 

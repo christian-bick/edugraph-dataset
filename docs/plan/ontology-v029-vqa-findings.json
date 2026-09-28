@@ -1,15 +1,15 @@
 {
   "spec": "ccss",
-  "library_version": "0.29.0-pre.3.dee88508f2f8",
+  "library_version": "0.29.0-pre.4.a08f9a911317",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "f8f6fc8",
+  "cache_commit": "c645060",
   "concurrency": 4,
   "evaluated": 1962,
-  "passed": 1935,
-  "failed": 27,
+  "passed": 1934,
+  "failed": 28,
   "semantic_review_samples": 11,
-  "evaluator_disagreement_samples": 16,
+  "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
     "report_commit": "1d5b58a",
@@ -1802,6 +1802,75 @@
       },
       "note": "Property completion uses ProcedureExecution; hundred-bundle reading uses DirectUnderstanding. Separate leaves retain ProcedureUnderstanding with explicit how/why tasks. All 40 new samples pass Ability and general visual/math checks; 38 pass overall. Two distributive samples raise a separate ThreeOperands semantic review. A precise property producer preserves complete law evidence, while legacy box and vertical completion routes remain available. No ontology change or forced retry. The fixed ten-tens relation adds one validation-coverage gap after deterministic deduplication, without cross-split leakage.",
       "details": "procedure-task-separation.md"
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "operand-cardinality",
+      "status": "completed",
+      "baseline_commit": "791d038",
+      "ontology_commit": "a08f9a9",
+      "dependency_commit": "969ccdc",
+      "cache_commit": "c645060",
+      "library_version": "0.29.0-pre.4.a08f9a911317",
+      "concurrency": 4,
+      "evaluated": 732,
+      "reused": 1230,
+      "rendered": 0,
+      "reused_shards": 291,
+      "written_shards": 0,
+      "sample_count_before": 1962,
+      "sample_count_after": 1962,
+      "failures_before": 27,
+      "failures_after": 28,
+      "resolved": 4,
+      "newly_rejected": 5,
+      "newly_passing_samples": [
+        "3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+        "2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+        "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+        "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0"
+      ],
+      "newly_rejected_samples": [
+        "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+        "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
+        "1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+        "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
+        "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0"
+      ],
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "added_sample_identities": 0,
+      "removed_sample_identities": 0,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "changed_retained_plans": 0
+      },
+      "verification": {
+        "test_files": 543,
+        "tests": 3434,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "structural_or_stale_cache_issues": 0,
+        "uncached": 0,
+        "test_dataset_and_cache_unchanged": true
+      },
+      "operand_label_verdicts": {
+        "defendable": 731,
+        "uncertain": [
+          {
+            "sample_key": "3.OA.A.2-partitive-division~1d471dcd#equal-groups-collection#operations-equal-groups#val#question#inst:0",
+            "label": "TwoOperands",
+            "verdict": "uncertain",
+            "evidence": "The division task implies the two-operand operation 4 divided by 2, but there is no explicit mathematical expression written out in symbols."
+          }
+        ],
+        "not_defendable": []
+      },
+      "details": "operand-cardinality.md",
+      "note": "Operand cardinality counts individual occurrences across a whole expression, including nested operations. All three concrete definitions and their parent now state this explicitly. Repeated values count separately; the result is not an extra operand of the original expression. Target labels and images are unchanged; all affected judgments were refreshed once without prompt or checklist changes."
     }
   ],
   "findings": [
@@ -1827,6 +1896,26 @@
     {
       "classification": "semantic_review_required",
       "topic": "symbol-scale-versus-sequence-steps",
+      "disposition": "The unchanged question shows category counts of 3, 2, and 5, a one-item-per-symbol legend, and a total expression. It does not display a sequence advancing by one. This extends the existing StepsOf1 symbol-scale review from the solution to the question; review scale/granularity separately from sequence steps without adding an unrelated decorative sequence.",
+      "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0",
+      "generator": "statistical-graphs",
+      "view": "data-picture-graph-arithmetic",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "StepsOf1",
+          "verdict": "not_defendable",
+          "evidence": "There are no consecutive values or sequences advancing in steps of 1 displayed in the image; the values used are 2, 3, and 5."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label 'StepsOf1' is not defendable because there are no consecutive number sequences or progressions of step size 1 in the image.",
+      "validated_at": "2026-09-28T07:51:36.150Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
+      "topic": "symbol-scale-versus-sequence-steps",
       "sample_key": "1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0",
       "generator": "statistical-graphs",
       "view": "data-picture-graph-arithmetic",
@@ -1835,13 +1924,24 @@
         {
           "label": "StepsOf1",
           "verdict": "not_defendable",
-          "evidence": "There are no lists or sequences of consecutive numbers changing by steps of 1."
+          "evidence": "There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1.",
-      "validated_at": "2026-09-25T22:38:26.936Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate"
+      "reasoning": "Labels not defendable: StepsOf1: There is no sequential counting line, number line, or sequence of consecutive values with a step size of 1.",
+      "validated_at": "2026-09-28T07:51:36.632Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.C.4-find-total~358e3f7e#statistical-graphs#data-picture-graph-arithmetic#train#solution#inst:0\" --no-validate",
+      "revalidation": {
+        "previous_validated_at": "2026-09-25T22:38:26.936Z",
+        "previous_rejected_labels": [
+          {
+            "label": "StepsOf1",
+            "verdict": "not_defendable",
+            "evidence": "There are no lists or sequences of consecutive numbers changing by steps of 1."
+          }
+        ],
+        "previous_reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1."
+      }
     },
     {
       "classification": "evaluator_disagreement",
@@ -1864,6 +1964,26 @@
     },
     {
       "classification": "semantic_review_required",
+      "topic": "single-place-subtraction-versus-place-value-partitioning",
+      "disposition": "The unchanged question models 90 - 60 with nine and six tens, then asks for their difference using a tens-unit vertical method. SubtractionPlaceValuePartitioning explicitly requires decomposing operands into place-value parts and coordinating partial differences. This task has only one occupied place. The shared 1.NBT.C.6 target builder constrains inputs to multiples of ten, so adding nonzero ones would change the intended competency. Review whether single-place unit subtraction belongs in this Area or needs a different target/producer declaration; retain the raw verdict pending that semantic decision.",
+      "sample_key": "1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0",
+      "generator": "place-value-arithmetic",
+      "view": "place-value-arithmetic-written-method",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "SubtractionPlaceValuePartitioning",
+          "verdict": "not_defendable",
+          "evidence": "The subtraction task 90 - 60 only operates on the tens place value (9 tens - 6 tens) with no ones, so there is no partitioning of operands into multiple place-value parts (like tens and ones) to coordinate partial differences."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "The ontology label SubtractionPlaceValuePartitioning is not defendable because the task 90 - 60 only involves subtracting single-digit quantities of tens, without any decomposition of multi-digit numbers into multiple place-value parts (e.g., tens and ones) and without coordination of multiple partial differences.",
+      "validated_at": "2026-09-28T07:50:40.007Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "semantic_review_required",
       "topic": "environmental-illustration-versus-physical-manipulative",
       "sample_key": "2.G.A.1-identify-supported-shapes~656bf423#shape-env-shapes#shape-env-shapes#train#solution#inst:0",
       "generator": "shape-env-shapes",
@@ -1883,22 +2003,43 @@
     },
     {
       "classification": "evaluator_disagreement",
-      "topic": "formal-conventions-versus-informal-translation",
-      "sample_key": "2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
-      "generator": "arithmetic-ops-pairs",
-      "view": "operations-boxes-inversion",
+      "topic": "currency-system-versus-denomination",
+      "disposition": "The image shows 75 cents plus 50 cents using five 25-cent coins. Dollar denotes the currency system, which includes minor denominations; its definition does not require a dollar-denominated value, dollar bill, or dollar symbol. The evaluator adds that denomination requirement. Preserve the verdict without changing the valid cents task or retrying.",
+      "sample_key": "2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0",
+      "generator": "currency-arithmetic",
+      "view": "currency-word-problem",
       "mode": "question",
       "rejected_labels": [
         {
-          "label": "Formalization",
+          "label": "Dollar",
           "verdict": "not_defendable",
-          "evidence": "There is no task requiring the translation of informal ideas, visual representations, or word problems into a formal system; the equation template is already provided."
+          "evidence": "The entire exercise is formulated in cents (¢), without using the dollar ($) symbol or dollar bills."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "The label 'Formalization' is not defendable because there is no active translation, conversion, or formalizing of informal text/diagrams into formal symbols; the equation is already fully formatted and presented.",
-      "validated_at": "2026-09-27T19:46:35.777Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
+      "reasoning": "The label 'Dollar' is not defendable because the exercise only contains cents (¢) and no dollar-denominated values or symbols ($).",
+      "validated_at": "2026-09-28T07:44:07.732Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.MD.C.8-currency-word-problems~8179576a#currency-arithmetic#currency-word-problem#train#question#inst:0\" --no-validate"
+    },
+    {
+      "classification": "evaluator_disagreement",
+      "topic": "observable-evidence-or-task-granularity",
+      "disposition": "The unchanged question shows 7 + 7 and explicitly identifies the repeated equal addend. Its necessarily even hidden result is 14. This is a recurrence of the earlier reviewed EvenNumbers disagreement, which passed during the numeric-range refresh; preserve the new verdict without exposing the answer or retrying.",
+      "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+      "generator": "arithmetic-ops-pairs",
+      "view": "operations-boxes",
+      "mode": "question",
+      "rejected_labels": [
+        {
+          "label": "EvenNumbers",
+          "verdict": "not_defendable",
+          "evidence": "There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task."
+        }
+      ],
+      "failed_general_checks": [],
+      "reasoning": "Labels not defendable: EvenNumbers: There are no even numbers visible in the image, and the concept of even divisibility is not relevant to the task.",
+      "validated_at": "2026-09-28T07:38:22.244Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -1987,72 +2128,44 @@
         {
           "label": "Square",
           "verdict": "not_defendable",
-          "evidence": "The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+          "evidence": "The shape being studied and solved for is a non-square rectangle (5 by 2 units)."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus.",
-      "validated_at": "2026-09-26T09:06:34.588Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "operand-cardinality-in-nested-expressions",
-      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
-      "generator": "arithmetic-ops-triples",
-      "view": "operations-boxes",
-      "mode": "solution",
-      "rejected_labels": [
-        {
-          "label": "ThreeOperands",
-          "verdict": "not_defendable",
-          "evidence": "There is no mathematical operation instance containing exactly three explicit operands (e.g., a + b + c)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "The label ThreeOperands is not defendable because there is no operation instance containing exactly three explicit operands like a + b + c.",
-      "validated_at": "2026-09-27T23:19:58.032Z",
-      "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "operand-cardinality-in-nested-expressions",
-      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0",
-      "generator": "arithmetic-property-relations",
-      "view": "operations-properties",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ThreeOperands",
-          "verdict": "not_defendable",
-          "evidence": "There is no operation instance in the expression containing exactly three explicit operands (like a + b + c)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ThreeOperands: There is no operation instance in the expression containing exactly three explicit operands (like a + b + c).",
-      "validated_at": "2026-09-27T23:20:45.061Z",
-      "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0\" --no-validate"
+      "reasoning": "The ontology label 'Square' is not defendable because the exercise is about a non-square rectangle (5x2), not a square.",
+      "validated_at": "2026-09-28T07:51:11.019Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#question#inst:0\" --no-validate",
+      "revalidation": {
+        "previous_validated_at": "2026-09-26T09:06:34.588Z",
+        "previous_rejected_labels": [
+          {
+            "label": "Square",
+            "verdict": "not_defendable",
+            "evidence": "The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+          }
+        ],
+        "previous_reasoning": "Labels not defendable: Square: The shape under study is a non-square rectangle of dimensions 2 by 5; while unit squares are used as grid cells, the geometric properties of a square are not the focus."
+      }
     },
     {
       "classification": "evaluator_disagreement",
-      "topic": "formal-conventions-versus-informal-translation",
-      "sample_key": "3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
-      "generator": "arithmetic-ops-pairs",
-      "view": "operations-boxes-inversion",
-      "mode": "question",
+      "topic": "observable-evidence-or-task-granularity",
+      "disposition": "The unchanged solution visibly tiles a two-by-four rectangle with eight equal square units and uses their area to infer the missing side. Square includes related measurements; it does not require the outer boundary to be square. This repeats the reviewed unit-cell disagreement on the question image. Preserve the new verdict without changing the valid area model or retrying.",
+      "sample_key": "3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0",
+      "generator": "shape-unit-square-grid",
+      "view": "shape-square-array-inversion",
+      "mode": "solution",
       "rejected_labels": [
         {
-          "label": "Formalization",
+          "label": "Square",
           "verdict": "not_defendable",
-          "evidence": "There is no formalization or translation of information from an informal description into a formal framework."
+          "evidence": "The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities."
         }
       ],
       "failed_general_checks": [],
-      "reasoning": "Labels not defendable: Formalization: There is no formalization or translation of information from an informal description into a formal framework.",
-      "validated_at": "2026-09-27T19:46:49.477Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
+      "reasoning": "Labels not defendable: Square: The shape being studied and solved is a non-square rectangle (2 by 4 units). The presence of unit squares for area measurement does not constitute the study of squares as geometric entities.",
+      "validated_at": "2026-09-28T07:51:09.751Z",
+      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.MD.C.7a-tiling-side-length-product~ea8e7937#shape-unit-square-grid#shape-square-array-inversion#train#solution#inst:0\" --no-validate"
     },
     {
       "classification": "evaluator_disagreement",
@@ -4028,6 +4141,124 @@
         "reasoning": "The label 'ProcedureUnderstanding' is not defendable because the task is a direct conversion exercise and does not prompt the learner for any procedural explanation or justification.",
         "validated_at": "2026-09-27T19:58:06.123Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.A.1b-hundreds~229993b4#place-value-hundreds-bundles#place-value-hundreds-bundles#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+      "resolution": "operand-cardinality-definition-refresh",
+      "ontology_commit": "a08f9a9",
+      "dependency_commit": "969ccdc",
+      "cache_commit": "c645060",
+      "validated_at": "2026-09-28T07:39:31.788Z",
+      "pass": true,
+      "note": "Passed during required revalidation of the unchanged task. Its other descriptor definitions did not change; this result does not by itself resolve a separate semantic question.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "formal-conventions-versus-informal-translation",
+        "sample_key": "3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+        "generator": "arithmetic-ops-pairs",
+        "view": "operations-boxes-inversion",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Formalization",
+            "verdict": "not_defendable",
+            "evidence": "There is no formalization or translation of information from an informal description into a formal framework."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: Formalization: There is no formalization or translation of information from an informal description into a formal framework.",
+        "validated_at": "2026-09-27T19:46:49.477Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.C.7-compute-within-100~31bb489d#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+      "resolution": "operand-cardinality-definition-refresh",
+      "ontology_commit": "a08f9a9",
+      "dependency_commit": "969ccdc",
+      "cache_commit": "c645060",
+      "validated_at": "2026-09-28T07:39:10.960Z",
+      "pass": true,
+      "note": "Passed during required revalidation of the unchanged task. Its other descriptor definitions did not change; this result does not by itself resolve a separate semantic question.",
+      "previous_finding": {
+        "classification": "evaluator_disagreement",
+        "topic": "formal-conventions-versus-informal-translation",
+        "sample_key": "2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0",
+        "generator": "arithmetic-ops-pairs",
+        "view": "operations-boxes-inversion",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "Formalization",
+            "verdict": "not_defendable",
+            "evidence": "There is no task requiring the translation of informal ideas, visual representations, or word problems into a formal system; the equation template is already provided."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label 'Formalization' is not defendable because there is no active translation, conversion, or formalizing of informal text/diagrams into formal symbols; the equation is already fully formatted and presented.",
+        "validated_at": "2026-09-27T19:46:35.777Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"2.NBT.B.7-written-add-subtract~9bf8899c#arithmetic-ops-pairs#operations-boxes-inversion#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+      "resolution": "operand-cardinality-definition-refresh",
+      "ontology_commit": "a08f9a9",
+      "dependency_commit": "969ccdc",
+      "cache_commit": "c645060",
+      "validated_at": "2026-09-28T07:42:52.773Z",
+      "pass": true,
+      "note": "The unchanged distributive expression passes with the clarified expression-wide operand definition.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "operand-cardinality-in-nested-expressions",
+        "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0",
+        "generator": "arithmetic-ops-triples",
+        "view": "operations-boxes",
+        "mode": "solution",
+        "rejected_labels": [
+          {
+            "label": "ThreeOperands",
+            "verdict": "not_defendable",
+            "evidence": "There is no mathematical operation instance containing exactly three explicit operands (e.g., a + b + c)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "The label ThreeOperands is not defendable because there is no operation instance containing exactly three explicit operands like a + b + c.",
+        "validated_at": "2026-09-27T23:19:58.032Z",
+        "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-ops-triples#operations-boxes#train#solution#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0",
+      "resolution": "operand-cardinality-definition-refresh",
+      "ontology_commit": "a08f9a9",
+      "dependency_commit": "969ccdc",
+      "cache_commit": "c645060",
+      "validated_at": "2026-09-28T07:53:16.552Z",
+      "pass": true,
+      "note": "The unchanged distributive expression passes with the clarified expression-wide operand definition.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "operand-cardinality-in-nested-expressions",
+        "sample_key": "3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0",
+        "generator": "arithmetic-property-relations",
+        "view": "operations-properties",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ThreeOperands",
+            "verdict": "not_defendable",
+            "evidence": "There is no operation instance in the expression containing exactly three explicit operands (like a + b + c)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ThreeOperands: There is no operation instance in the expression containing exactly three explicit operands (like a + b + c).",
+        "validated_at": "2026-09-27T23:20:45.061Z",
+        "disposition": "The nested distributive expression has three numeric leaves, but each individual addition or multiplication has two operands. Review whether ThreeOperands counts the whole expression or one operation instance. The current definition and its flat-addition example do not settle that boundary; preserve the verdict without a retry or automatic relabeling.",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"3.OA.B.5-distributive-property~bcbf8b0e#arithmetic-property-relations#operations-properties#val#question#inst:0\" --no-validate"
       }
     }
   ]

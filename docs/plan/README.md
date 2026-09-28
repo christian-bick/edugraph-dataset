@@ -5,7 +5,7 @@ Completed consolidation and migration documents are preserved unchanged in
 These items are not newly scheduled by the archive move.
 
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
-  record minor task-evidence repairs and remaining classification and numeric-boundary reviews.
+  record minor task-evidence repairs and remaining semantic reviews.
   The [numeral-system ownership correction](numeral-system-ownership.md),
   [MeasuringTime definition correction](measuring-time-definition.md),
   [equation classification correction](equation-correctness.md),
@@ -13,10 +13,11 @@ These items are not newly scheduled by the archive move.
   [category ordering extension](category-ordering.md),
   [arithmetic-offset label correction](arithmetic-offset-labels.md),
   [numeric-range and successor correction](numeric-range-bounds.md),
-  [bounded count-out supply correction](count-out-supply.md), and
-  [completion/explanation separation](procedure-task-separation.md) are complete;
-  the current cache has 27 remaining failures among 1,962 CCSS images: 11 samples requiring
-  semantic review and 16 evaluator disagreements. Complete ordering now has its own
+  [bounded count-out supply correction](count-out-supply.md),
+  [completion/explanation separation](procedure-task-separation.md), and
+  [operand-cardinality clarification](operand-cardinality.md) are complete;
+  the current cache has 28 remaining failures among 1,962 CCSS images: 11 samples requiring
+  semantic review and 17 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
@@ -25,9 +26,12 @@ These items are not newly scheduled by the archive move.
   The 2.NBT.B.8 starting cutoff of 900 is intentionally ignored, as recorded in its target block.
   Count-out pools now come from a bounded generator interval, including equality; all ten new
   images pass. Property application and bundle reading now have appropriate completion Abilities
-  and separate explanation tasks. Of their 40 new samples, 38 pass; two distributive expressions
-  raise a separate review of `ThreeOperands` in nested operations. All 40 pass Ability and general
-  visual/math checks. The fixed ten-tens explanation adds one validation-coverage gap, bringing
+  and separate explanation tasks. All 40 replacement samples now pass after clarifying that
+  operand cardinality counts occurrences across all nested operations. The 732 required rechecks
+  retain all images and leave no rejected operand label; one pictorial-division verdict is uncertain
+  but passes under the existing policy. A new review concerns single-place subtraction versus
+  place-value partitioning; the picture-graph scale review now includes its question as well.
+  The fixed ten-tens explanation adds one validation-coverage gap, bringing
   that total to 56 without leakage. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.
   The equation follow-up also
