@@ -4538,6 +4538,84 @@
       "details": "vqa-flash-high-pilot.md",
       "results": "vqa-flash-high-pilot.json",
       "note": "Independent one-pass trial of all 17 existing CCSS failures with identical prompts, images, definitions, checklists, schema and pass policy; only thinkingLevel changes to HIGH. Ten failures become fully defendable passes. Four Base10, two SingleStep and one Square rejection remain. No judgment is promoted to the official cache. No passing or known-invalid controls were included, and the run does not separate thinking-level effects from stochastic variation or an unrecorded historical model-version change."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "pro-high-thinking-pilot",
+      "status": "pilot-completed-not-promoted",
+      "baseline_commit": "717fe4130abee4b851fcc990f3c9ddb253282aeb",
+      "library_version": "0.29.0-pre.5.a88ac7a500c5",
+      "model": "gemini-3.1-pro-preview",
+      "thinking_level": "HIGH",
+      "concurrency": 3,
+      "trial_evaluated": 17,
+      "trial_passed": 10,
+      "trial_failed": 7,
+      "trial_all_labels_defendable": 9,
+      "trial_passed_with_uncertainty": 1,
+      "trial_label_checks": {
+        "defendable": 134,
+        "uncertain": 1,
+        "not_defendable": 10
+      },
+      "trial_general_checks_failed": 1,
+      "newly_rejected_labels": 3,
+      "compared_with_flash_high": {
+        "flash_passed": 10,
+        "pro_passed": 10,
+        "both_passed": 6,
+        "flash_failed_pro_passed": 4,
+        "flash_passed_pro_failed": 4,
+        "both_failed": 3,
+        "newly_rejected_labels": 7
+      },
+      "errors": 0,
+      "retries": 0,
+      "rate_limit_errors": 0,
+      "usage": {
+        "promptTokenCount": 35376,
+        "candidatesTokenCount": 9743,
+        "thoughtsTokenCount": 24011,
+        "totalTokenCount": 69130,
+        "cachedContentTokenCount": null
+      },
+      "wall_time_ms": 99464,
+      "official_evaluated": 1968,
+      "official_passed": 1951,
+      "official_failed": 17,
+      "cache_changed": false,
+      "ccss_images_and_metadata_unchanged": true,
+      "test_dataset_and_cache_unchanged": true,
+      "flash_trial_inputs_and_results_unchanged": true,
+      "additional_review_candidates": [
+        {
+          "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+          "label": "Formalization",
+          "status": "unconfirmed-review-candidate",
+          "note": "Pro treats illustrative argument/report examples as requirements. Separately review whether filling an already formal equation demonstrates the intended formal-expression capability."
+        },
+        {
+          "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+          "general_check": "text_minimal",
+          "status": "unconfirmed-review-candidate",
+          "note": "Pro considers the repeated-addition caption redundant. The leaf checklist already recognizes repeated operands as the witness; review the caption against the global text-economy criterion."
+        },
+        {
+          "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+          "label": "AdditiveCount",
+          "status": "unconfirmed-review-candidate",
+          "note": "The total of three is supplied and the requested answer is a parity classification. Review whether countable objects suffice for successive-accumulation evidence."
+        },
+        {
+          "sample_key": "2.OA.C.3-object-group-parity~d636d951#counting-basic#counting-objects-parity#train#question#inst:0",
+          "label": "NumerationWithIntegers",
+          "status": "unconfirmed-review-candidate",
+          "note": "Review the boundary between an integer quantity and the sequence/order/magnitude competency. Pro rejects the label; Flash accepts the collection magnitude."
+        }
+      ],
+      "details": "vqa-pro-high-pilot.md",
+      "results": "vqa-pro-high-pilot.json",
+      "note": "The same 17 images, prompts, definitions, checklists, schema, policy and HIGH setting as the Flash pilot, with only the requested model changed. Pro also passes ten and fails seven; four sample verdicts change in each direction. Nine passes are fully defendable, and one relies on uncertain Base10 evidence. Three additional label objections and one text-economy objection are preserved as unconfirmed review candidates. Official judgments and classifications are unchanged. This one-pass comparison on selected failures does not establish overall accuracy or justify automatic adjudication."
     }
   ],
   "findings": [

@@ -32,6 +32,14 @@ rejections occurred. The remaining rejections are four `Base10`, two `SingleStep
 committed cache, so the official counts and strict-audit result above remain unchanged.
 This single run on selected failures does not establish an overall accuracy improvement.
 
+The subsequent [Pro/high comparison](vqa-pro-high-pilot.md) on the exact same inputs also
+returns **10 passes / seven failures**, with four verdicts changing in each direction versus
+Flash. Nine Pro passes are fully defendable; one relies on an uncertain `Base10` verdict.
+Pro additionally objects to `Formalization`, `AdditiveCount`, `NumerationWithIntegers`, and
+the equal-addend banner's text economy. These are documented as unconfirmed review candidates
+in the experiment, separate from the original cached failure classifications. Both pilot records
+are retained without changing official judgments or counts.
+
 [The machine-readable findings](ontology-v029-vqa-findings.json) contain the 17 active failed
 samples with current evidence, dispositions, replay commands, and revalidation results. The 58
 resolved finding records and initial totals are retained separately as history: 38 passed

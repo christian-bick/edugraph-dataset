@@ -113,5 +113,7 @@ This first pilot deliberately covers existing failures only. It has no passing o
 controls and only one observation per case. The observed 10/17 reversal rate is not an accuracy
 estimate, and it does not separate increased thinking from ordinary rerun variability or a
 possible change in the served model version. Higher thinking is promising, but does not by
-itself resolve the remaining semantic inconsistency. A subsequent comparison with Pro/high
-and reviewed control cases would be useful before adopting a production review policy.
+itself resolve the remaining semantic inconsistency. The subsequent
+[Pro/high comparison on the same 17 inputs](vqa-pro-high-pilot.md) also returns ten passes
+and seven failures, with four verdicts changing in each direction and one uncertain Pro pass.
+Reviewed control cases remain necessary before adopting a production review policy.

@@ -29,6 +29,10 @@ These items are not newly scheduled by the archive move.
   The isolated [Flash high-thinking pilot](vqa-flash-high-pilot.md) rechecks all 17 failures
   with the same prompts: ten pass with fully defendable labels and seven still fail.
   Trial judgments are preserved separately; the official cache and its 17 failures are unchanged.
+  The [Pro/high comparison](vqa-pro-high-pilot.md) on the same 17 inputs also returns ten passes
+  and seven failures, with four verdicts changing in each direction. Only nine Pro passes are
+  fully defendable; one is uncertain. Three additional label objections and one text-economy
+  objection are recorded as review candidates, with all official judgments preserved.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist
