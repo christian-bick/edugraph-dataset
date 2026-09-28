@@ -25,7 +25,8 @@ function write(root: string, path: string, content: string): void {
 afterEach(() => {
     for (const root of fixtures.splice(0)) {
         if (!resolve(root).startsWith(`${fixtureRoot}${sep}`)) throw new Error('Unexpected fixture cleanup path');
-        rmSync(root, {recursive: true, force: true});
+        // Allow bounded retries for transient Windows fixture file locks.
+        rmSync(root, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
     }
 });
 
