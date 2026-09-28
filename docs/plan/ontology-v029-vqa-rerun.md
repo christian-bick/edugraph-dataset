@@ -40,6 +40,13 @@ the equal-addend banner's text economy. These are documented as unconfirmed revi
 in the experiment, separate from the original cached failure classifications. Both pilot records
 are retained without changing official judgments or counts.
 
+The [Flash 3.8/HIGH trial](vqa-flash38-high-pilot.md), using the same 17 inputs and maximum
+supported dynamic thinking, returns **17 passes / zero failures**. Fifteen passes have every
+label defendable; two retain uncertain `EvenNumbers` or `SingleStep` evidence. All 119 general
+checks pass. This is the strongest agreement in the three trials, but has no invalid controls
+and does not settle Pro's additional review candidates. The trial is recorded separately;
+the official cache and its 17 failures remain unchanged.
+
 [The machine-readable findings](ontology-v029-vqa-findings.json) contain the 17 active failed
 samples with current evidence, dispositions, replay commands, and revalidation results. The 58
 resolved finding records and initial totals are retained separately as history: 38 passed

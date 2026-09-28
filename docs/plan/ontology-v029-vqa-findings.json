@@ -4616,6 +4616,97 @@
       "details": "vqa-pro-high-pilot.md",
       "results": "vqa-pro-high-pilot.json",
       "note": "The same 17 images, prompts, definitions, checklists, schema, policy and HIGH setting as the Flash pilot, with only the requested model changed. Pro also passes ten and fails seven; four sample verdicts change in each direction. Nine passes are fully defendable, and one relies on uncertain Base10 evidence. Three additional label objections and one text-economy objection are preserved as unconfirmed review candidates. Official judgments and classifications are unchanged. This one-pass comparison on selected failures does not establish overall accuracy or justify automatic adjudication."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "flash38-high-thinking-pilot",
+      "status": "pilot-completed-not-promoted",
+      "baseline_commit": "258d8dfa11d23aac2dc07963f0bae1d2356017c6",
+      "library_version": "0.29.0-pre.5.a88ac7a500c5",
+      "model": "gemini-3.8-flash",
+      "thinking_level": "HIGH",
+      "thinking_setting": "Highest supported dynamic level, with no explicit numeric thinking budget or output-token cap.",
+      "concurrency": 3,
+      "trial_evaluated": 17,
+      "trial_passed": 17,
+      "trial_failed": 0,
+      "trial_all_labels_defendable": 15,
+      "trial_passed_with_uncertainty": 2,
+      "trial_label_checks": {
+        "defendable": 143,
+        "uncertain": 2,
+        "not_defendable": 0
+      },
+      "trial_general_checks_failed": 0,
+      "newly_rejected_labels": 0,
+      "comparisons": {
+        "flash35": {
+          "previous_model": "gemini-3.5-flash",
+          "previous_passed": 10,
+          "flash38_passed": 17,
+          "both_passed": 10,
+          "previous_failed_flash38_passed": 7,
+          "previous_passed_flash38_failed": 0,
+          "both_failed": 0,
+          "newly_rejected_labels": 0
+        },
+        "pro31": {
+          "previous_model": "gemini-3.1-pro-preview",
+          "previous_passed": 10,
+          "flash38_passed": 17,
+          "both_passed": 10,
+          "previous_failed_flash38_passed": 7,
+          "previous_passed_flash38_failed": 0,
+          "both_failed": 0,
+          "newly_rejected_labels": 0
+        }
+      },
+      "errors": 0,
+      "retries": 0,
+      "rate_limit_errors": 0,
+      "usage": {
+        "promptTokenCount": 35376,
+        "candidatesTokenCount": 8932,
+        "thoughtsTokenCount": 27694,
+        "totalTokenCount": 72002,
+        "cachedContentTokenCount": null
+      },
+      "wall_time_ms": 58763,
+      "official_evaluated": 1968,
+      "official_passed": 1951,
+      "official_failed": 17,
+      "cache_changed": false,
+      "ccss_images_and_metadata_unchanged": true,
+      "test_dataset_and_cache_unchanged": true,
+      "earlier_trial_inputs_and_results_unchanged": true,
+      "uncertain_cases": [
+        {
+          "sample_key": "2.OA.C.3-even-equal-addends~88f610cb#arithmetic-ops-pairs#operations-boxes#train#question#inst:0",
+          "checks": [
+            {
+              "label": "EvenNumbers",
+              "verdict": "uncertain",
+              "evidence": "The visible addends are odd (7), but adding identical integers yields an even total (14), making the involvement of even numbers indirect."
+            }
+          ],
+          "disposition": "Passes the unchanged current policy; remains open under the proposed conservative second-stage policy."
+        },
+        {
+          "sample_key": "3.MD.A.1-time-interval-word-problems~2cc9b380#time-interval-arithmetic#time-interval-word-problem#train#solution#inst:0",
+          "checks": [
+            {
+              "label": "SingleStep",
+              "verdict": "uncertain",
+              "evidence": "While only one explicit arithmetic equation is written (45 + 41 = 86), converting 86 minutes after 5:00 into 6:26 requires a regrouping step across the hour boundary."
+            }
+          ],
+          "disposition": "Passes the unchanged current policy; remains open under the proposed conservative second-stage policy."
+        }
+      ],
+      "prior_pro_review_candidates_closed": false,
+      "details": "vqa-flash38-high-pilot.md",
+      "results": "vqa-flash38-high-pilot.json",
+      "note": "Identical 17 images, prompts, definitions, checklists, schema, policy and request settings to both prior HIGH-thinking pilots, apart from model selection. All 17 pass the existing policy: fifteen are fully defendable and two retain uncertain EvenNumbers or SingleStep checks. All 119 general checks pass. The run has no control cases and does not establish overall accuracy. No judgments are promoted, and prior Pro review candidates remain open."
     }
   ],
   "findings": [

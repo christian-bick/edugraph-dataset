@@ -33,6 +33,10 @@ These items are not newly scheduled by the archive move.
   and seven failures, with four verdicts changing in each direction. Only nine Pro passes are
   fully defendable; one is uncertain. Three additional label objections and one text-economy
   objection are recorded as review candidates, with all official judgments preserved.
+  The [Flash 3.8/HIGH trial](vqa-flash38-high-pilot.md) passes all 17 under the existing policy:
+  fifteen are fully defendable, while `EvenNumbers` and one `SingleStep` verdict remain uncertain.
+  It leads this comparison, but controlled accuracy checks and the additional review candidates
+  remain open. The official cache is unchanged.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist
