@@ -10,7 +10,16 @@ interface CoreProps {
     payload: ViewRenderPayload<'shape-env-shapes'>;
 }
 
-const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
+const objectImages = {
+    clock: {src: '/icons/environment-objects/clock.png', subject: 'clock face', alt: 'A wall clock'},
+    window: {src: '/icons/environment-objects/window.png', subject: 'window frame', alt: 'A window in a wall'},
+    table: {src: '/icons/environment-objects/table.png', subject: 'tabletop', alt: 'A wooden table viewed from above'},
+    pennant: {src: '/icons/environment-objects/pennant.png', subject: 'pennant', alt: 'A fabric pennant on a wooden staff'},
+    'honeycomb cell': {src: '/icons/environment-objects/honeycomb.png', subject: 'opening of a honeycomb cell', alt: 'Open cells in a wax honeycomb'}
+} as const;
+const options = ['circle', 'square', 'rectangle', 'triangle', 'hexagon'];
+
+export const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const data = problem.data;
     validateProblemData('shape-env-shapes', data, ['target', 'answer']);
@@ -21,9 +30,12 @@ const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
     if (target !== 'table' && target !== 'window' && target !== 'clock' && target !== 'pennant' && target !== 'honeycomb cell') {
         throw new ViewValidationError('shape-env-shapes', `Unsupported target environment shape: ${target}`);
     }
+    if (!options.includes(answer)) {
+        throw new ViewValidationError('shape-env-shapes', `Unsupported shape answer: ${answer}`);
+    }
 
-    const promptText = `What shape is the ${target}?`;
-    const options = ['circle', 'square', 'rectangle', 'triangle', 'hexagon'];
+    const objectImage = objectImages[target];
+    const promptText = `What shape is the ${objectImage.subject}?`;
 
     const getBtnClass = (opt: string) => {
         let cls = "flex-1 min-w-[120px] py-3 px-2.5 border-2 rounded-lg text-center font-semibold text-[1rem] transition-all duration-200 cursor-pointer ";
@@ -46,35 +58,9 @@ const ShapeEnvShapesCore = ({ config: _config, payload }: CoreProps) => {
                     {promptText}
                 </div>
                 
-                <div className="flex justify-center items-center w-[420px] h-[220px] bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] p-[15px] box-border">
-                    {target === 'pennant' ? (
-                        <div className="relative w-[170px] h-[180px]">
-                            <div className="absolute left-[28px] top-[8px] w-[8px] h-[164px] bg-slate-600 rounded-full" />
-                            <div
-                                className="absolute left-[36px] top-[18px] w-[120px] h-[95px] bg-amber-400 border-2 border-amber-600"
-                                style={{ clipPath: 'polygon(0 0, 100% 50%, 0 100%)' }}
-                            />
-                        </div>
-                    ) : target === 'honeycomb cell' ? (
-                        <div
-                            className="w-[150px] h-[132px] bg-amber-300 border-[8px] border-amber-600"
-                            style={{ clipPath: 'polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)' }}
-                        />
-                    ) : (
-                    <div className="relative w-[320px] h-[180px] bg-sky-100 border-[2.5px] border-sky-600 rounded-lg overflow-hidden">
-                        {/* Table */}
-                        <div className="absolute bottom-0 left-[60px] width-[200px] height-[50px] bg-[#8b5a2b] border-2 border-[#5c3a21] rounded" style={{ width: '200px', height: '50px' }}></div>
-                        <div className="absolute bottom-0 left-[75px] w-3 h-[35px] bg-[#5c3a21]"></div>
-                        <div className="absolute bottom-0 right-[75px] w-3 h-[35px] bg-[#5c3a21]"></div>
-                        {/* Window */}
-                        <div className="absolute top-[15px] left-[30px] w-[50px] h-[50px] bg-white border-3 border-slate-500 grid grid-cols-2 grid-rows-2 gap-[2px]">
-                            <div className="bg-sky-200"></div><div className="bg-sky-200"></div>
-                            <div className="bg-sky-200"></div><div className="bg-sky-200"></div>
-                        </div>
-                        {/* Clock */}
-                        <div className="absolute top-[20px] right-[40px] w-[45px] h-[45px] rounded-full bg-white border-[3.5px] border-red-500 flex justify-center items-center font-bold text-[8px] text-slate-700">12</div>
-                    </div>
-                    )}
+                <div className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl mb-[25px] overflow-hidden box-border">
+                    <img src={objectImage.src} alt={objectImage.alt} width={480} height={320}
+                        className="block w-full h-[320px] object-contain" />
                 </div>
 
                 <div className="flex flex-wrap gap-3 w-full justify-center">
@@ -93,12 +79,14 @@ export const ShapeEnvShapes = withConfig(ShapeEnvShapesViewSchema, ShapeEnvShape
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'shape-env-shapes'>) => {
-    const container = document.getElementById('view');
-    if (container) {
-        if (!root) {
-            root = createRoot(container);
+if (typeof window !== 'undefined') {
+    window.renderView = (payload: ViewRenderPayload<'shape-env-shapes'>) => {
+        const container = document.getElementById('view');
+        if (container) {
+            if (!root) {
+                root = createRoot(container);
+            }
+            root.render(<ShapeEnvShapes payload={payload} />);
         }
-        root.render(<ShapeEnvShapes payload={payload} />);
-    }
-};
+    };
+}

@@ -1,2 +1,2 @@
-- **Identity:** A recognizable real-world object and geometric-shape choices define identifying the object's shape.
+- **Identity:** A realistic object image and geometric-shape choices define identifying the shape of the named object or surface. Its relevant outline is fully visible and recognizable.
 - **Modes:** Question Mode leaves every shape choice neutral; Solution Mode identifies the shape represented by the object.
