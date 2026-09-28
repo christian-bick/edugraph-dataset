@@ -131,12 +131,13 @@ policy remains in force.
 
 ## Related review: identifying a whole from equal shares
 
-`shape-partition-whole-composition` still supplies `ConceptComposition` to four `1.G.A.3` targets:
-`~4bab0d00`, `~ba423cc2`, `~c952a879`, and `~d0afc141`. All eight images currently pass VQA;
-their judgments and images are unchanged. These exercises ask what halves or fourths make,
-with the answer “one whole.” The standard requests describing that fraction relationship,
-so changing it to `SpatialGeneration` would change the intended competency (`TSPEC-6`).
+**Resolved in the subsequent [whole-share Ability correction](whole-share-ability.md).** At this
+checkpoint, `shape-partition-whole-composition` still supplied `ConceptComposition` to four
+`1.G.A.3` targets: `~4bab0d00`, `~ba423cc2`, `~c952a879`, and `~d0afc141`. All eight images passed
+VQA, but their explanations conflated combining pieces with combining concepts. The task asks
+what halves or fourths make, with the answer “one whole.” The standard requests describing
+that fraction relationship; `SpatialGeneration` would change the intended competency (`TSPEC-6`).
 
-Review the appropriate Ability for recognizing or explaining the part/whole relationship
-separately. This concern is recorded in the original report and machine-readable follow-up,
-without inventing failing verdicts for currently passing images or weakening the construction fix.
+The approved follow-up replaces the Ability with `ConceptualThinking` in the view and all four
+targets. All eight replacement images retain the same pixels and pass VQA. This resolves a
+review of previously passing images without changing the active failed-sample count.

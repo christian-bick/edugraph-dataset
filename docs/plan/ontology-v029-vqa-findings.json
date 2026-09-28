@@ -3,7 +3,7 @@
   "library_version": "0.29.0-pre.4.a08f9a911317",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "6348f13",
+  "cache_commit": "227f7d4",
   "concurrency": 4,
   "evaluated": 1966,
   "passed": 1940,
@@ -2318,10 +2318,205 @@
           "1.G.A.3-compose-whole-from-shares~c952a879",
           "1.G.A.3-compose-whole-from-shares~d0afc141"
         ],
-        "note": "Four target variants ask learners to identify a whole from equal shares. Review the appropriate Ability for describing this fraction relationship separately from spatial construction; preserve the current passing evidence until that semantic decision."
+        "note": "Four target variants ask learners to identify a whole from equal shares. Review the appropriate Ability for describing this fraction relationship separately from spatial construction; preserve the current passing evidence until that semantic decision.",
+        "status": "resolved",
+        "resolved_on": "2026-09-28",
+        "resolution": "Replace ConceptComposition with ConceptualThinking in the view and all four target variants.",
+        "resolution_details": "whole-share-ability.md"
       },
       "details": "spatial-composition.md",
       "note": "Construction targets preserve ShapeSynthesis and composition levels while using SpatialGeneration. The new construction view requires an arrangement and shows generator-supplied component regions in solutions. The previous selection view remains available with SpatialImagination. No ontology or dependency changes."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "whole-share-ability",
+      "status": "completed",
+      "baseline_commit": "db117e0",
+      "fix_commit": "6f29fe9",
+      "cache_commit": "227f7d4",
+      "library_version": "0.29.0-pre.4.a08f9a911317",
+      "concurrency": 4,
+      "sample_count_before": 1966,
+      "sample_count_after": 1966,
+      "evaluated": 8,
+      "reused": 1958,
+      "failures_before": 26,
+      "failures_after": 26,
+      "retired_failed_identities": 0,
+      "newly_rejected": 0,
+      "added_sample_identities": 8,
+      "removed_sample_identities": 8,
+      "replacement_images_unchanged": 8,
+      "replacement_content_and_task_fingerprints_unchanged": 8,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "unchanged_cache_records": 1958,
+      "provenance_only_cache_records": 0,
+      "unchanged_retained_judgments": 1958,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "replaced_targets": 4,
+        "replaced_routes": 4,
+        "changed_retained_plans": 0
+      },
+      "generation": {
+        "rendered": 8,
+        "written_shards": 1,
+        "reused_shards": 290
+      },
+      "verification": {
+        "test_files": 546,
+        "tests": 3491,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "fresh_label_checks": {
+          "defendable": 48,
+          "uncertain": 0,
+          "not_defendable": 0
+        },
+        "test_dataset_and_cache_unchanged": true,
+        "split": {
+          "train_images": 1654,
+          "validation_images": 312,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 211,
+          "validation_represented_tuples": 156,
+          "validation_gaps": 55,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        }
+      },
+      "passing_replacement_samples": [
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~0597f710#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-28T14:08:08.613Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~26154679#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-28T14:08:06.554Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~8a743889#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-28T14:08:12.015Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~bc655b2a#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-28T14:08:12.892Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~0597f710#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-28T14:08:08.477Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~bc655b2a#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-28T14:08:15.313Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~8a743889#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-28T14:08:11.248Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~26154679#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-28T14:08:07.420Z",
+          "pass": true
+        }
+      ],
+      "previous_passing_samples": [
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~d0afc141#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-25T22:35:40.340Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combining the concepts of fractional parts (fourths) to construct the concept of one whole."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~ba423cc2#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-25T22:35:33.651Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combining two fractional parts (halves) to compose a single whole shape represents concept composition of fraction and shape parts."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~c952a879#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-25T22:35:36.361Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combines the concept of equal-share fractions (halves) and shape synthesis (composing parts into a whole shape)."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~c952a879#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-25T22:35:37.419Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "The exercise asks what two halves compose to make, arriving at 'one whole'."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~4bab0d00#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-25T22:35:33.025Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combines the concept of fractional parts ('fourths') to form the coherent concept of 'one whole'."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~ba423cc2#shape-partition#shape-partition-whole-composition#train#solution#inst:0",
+          "validated_at": "2026-09-25T22:35:36.017Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combining the concept of halves to form the concept of 'one whole'."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~4bab0d00#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-25T22:35:31.825Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combines the concept of unit fractions (fourths) and shape composition to identify a single whole."
+          }
+        },
+        {
+          "sample_key": "1.G.A.3-compose-whole-from-shares~d0afc141#shape-partition#shape-partition-whole-composition#train#question#inst:0",
+          "validated_at": "2026-09-25T22:35:37.940Z",
+          "pass": true,
+          "previous_concept_composition_check": {
+            "label": "ConceptComposition",
+            "verdict": "defendable",
+            "evidence": "Combining separate fractional parts (fourths) to understand they compose a whole."
+          }
+        }
+      ],
+      "details": "whole-share-ability.md",
+      "note": "The task recognizes the existing relationship between equal shares and one whole. ConceptualThinking replaces the unsupported ConceptComposition claim without changing the exercise, geometric evidence, or requested response. The old passing verdicts are preserved as historical evaluator overacceptance, not as evidence for retaining the label. Active failures and resolved-failure history are unchanged."
     }
   ],
   "findings": [
