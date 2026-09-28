@@ -26,6 +26,9 @@ These items are not newly scheduled by the archive move.
   the current cache has 17 remaining failures among 1,968 CCSS images, all evaluator
   disagreements. No semantic-review failures remain. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
+  The isolated [Flash high-thinking pilot](vqa-flash-high-pilot.md) rechecks all 17 failures
+  with the same prompts: ten pass with fully defendable labels and seven still fail.
+  Trial judgments are preserved separately; the official cache and its 17 failures are unchanged.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
   profiles. All 20 current offset/successor images pass, and the invalid step-operand checklist

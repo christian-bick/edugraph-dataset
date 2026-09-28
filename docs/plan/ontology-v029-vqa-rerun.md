@@ -24,6 +24,14 @@ The strict audit fails on those 17 recorded verdicts. It reports **zero** datase
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
+An isolated [Flash high-thinking pilot](vqa-flash-high-pilot.md) on those same 17 failures
+produced **10 passes / seven failures** with unchanged images, prompts, definitions, and pass
+policy. All ten passes have only defendable label checks; no uncertain verdicts or new
+rejections occurred. The remaining rejections are four `Base10`, two `SingleStep`, and one
+`Square`. These experimental judgments are recorded separately and have not replaced the
+committed cache, so the official counts and strict-audit result above remain unchanged.
+This single run on selected failures does not establish an overall accuracy improvement.
+
 [The machine-readable findings](ontology-v029-vqa-findings.json) contain the 17 active failed
 samples with current evidence, dispositions, replay commands, and revalidation results. The 58
 resolved finding records and initial totals are retained separately as history: 38 passed
