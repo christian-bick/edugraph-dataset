@@ -1352,6 +1352,19 @@ export type ShapeComposeShapesProblem = {
     compositionDepth: 1 | 2;
 };
 
+/** Mathematical regions in a common coordinate frame, independent of their projection. */
+export type ShapeAssemblyRegion =
+    | {kind: 'polygon'; points: [number, number][]}
+    | {kind: 'sector'; radius: number; start: number; end: number}
+    | {kind: 'box'; min: [number, number, number]; max: [number, number, number]}
+    | {kind: 'radial-solid'; solid: 'cone' | 'cylinder'; radius: number;
+        start: number; end: number; bottom: number; top: number};
+
+/** Parts correspond, in order, to the inputs in the semantic composition tree. */
+export type ShapeAssembly = {region: ShapeAssemblyRegion; parts: ShapeAssembly[]};
+
+export type ShapeAssemblyProblem = ShapeComposeShapesProblem & {assembly: ShapeAssembly};
+
 export type FractionShape = 'circle' | 'rectangle';
 export type FractionParts = 2 | 3 | 4 | 6 | 8;
 export type FractionShareName = 'half' | 'fourth' | 'quarter';
@@ -2033,6 +2046,7 @@ export interface ViewTypeMap {
     'shape-build-from-count': ShapeAttributeCountSpecificationProblem;
     'shape-build-from-parts': ShapeEdgeCompositionProblem;
     'shape-compose-shapes': ShapeComposeShapesProblem;
+    'shape-compose-shapes-construction': ShapeAssemblyProblem;
     'shape-partition-equal': ShapePartitionProblem;
     'shape-partition-fraction-interpretation': ShapeFractionRegionProblem;
     'shape-partition-share-comparison': ShapeUnitShareComparisonProblem;

@@ -54,13 +54,14 @@ describe('ShapeComposeShapesGenerator', () => {
         })).toThrow(GeneratorValidationError);
     });
 
-    it('returns only the canonical composition tree and its calculated depth', () => {
+    it('preserves the canonical composition tree and adds a geometric witness', () => {
         const stub = generator.generate({
             classify: Area.Rectangle,
             compositionStructure: Scope.SingleLevelComposition
         })!;
 
-        expect(stub.data).toEqual({
+        const {assembly, ...relation} = stub.data;
+        expect(relation).toEqual({
             compositionTree: {
                 kind: 'composite',
                 shape: 'rectangle',
@@ -71,6 +72,7 @@ describe('ShapeComposeShapesGenerator', () => {
             },
             compositionDepth: 1
         });
+        expect(assembly.parts).toHaveLength(2);
     });
 
     it.each(SHAPE_CASES)(
@@ -87,7 +89,7 @@ describe('ShapeComposeShapesGenerator', () => {
             expect(stub.data.compositionTree.inputs.every(
                 input => input.kind === 'primitive'
             )).toBe(true);
-            expect(Object.keys(stub.data).sort()).toEqual(['compositionDepth', 'compositionTree']);
+            expect(Object.keys(stub.data).sort()).toEqual(['assembly', 'compositionDepth', 'compositionTree']);
             expectValidRecursiveTree(stub.data.compositionTree);
         }
     );
@@ -106,7 +108,7 @@ describe('ShapeComposeShapesGenerator', () => {
             expect(stub.data.compositionTree.inputs.some(
                 input => input.kind === 'composite'
             )).toBe(true);
-            expect(Object.keys(stub.data).sort()).toEqual(['compositionDepth', 'compositionTree']);
+            expect(Object.keys(stub.data).sort()).toEqual(['assembly', 'compositionDepth', 'compositionTree']);
             expectValidRecursiveTree(stub.data.compositionTree);
         }
     );

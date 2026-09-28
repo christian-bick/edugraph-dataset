@@ -3,8 +3,8 @@ import {
     ShapeCompositionShapeId,
     ShapeCompositionTargetId,
     ShapeComposeShapesProblem
-} from '../../../../types/problems.ts';
-import {ViewValidationError} from '../../../helpers/validation.ts';
+} from '../../../types/problems.ts';
+import {ViewValidationError} from '../../helpers/validation.ts';
 
 export type ShapeCompositionGlyph = 'triangle' | 'circle' | 'cube' | 'cone' | 'cylinder' | 'generic';
 

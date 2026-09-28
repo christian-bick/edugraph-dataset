@@ -57,6 +57,13 @@ explicit wider unions. For example, mass and liquid volume have separate produce
 the general strategy view accepts the named strategy union. Target requirements remain
 independent learner-task participation policies.
 
+Shape composition uses `ShapeAssemblyProblem`, which extends the semantic composition tree
+with geometric regions witnessing each component, intermediate, and whole. The construction
+view projects those supplied regions and requests an arrangement; the existing selection view
+continues to accept the narrower tree contract. Their Abilities are `SpatialGeneration` and
+`SpatialImagination`, respectively. Geometric partitions are producer data; diagram projection,
+piece trays, drawing spaces and solution colors belong to the views.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting

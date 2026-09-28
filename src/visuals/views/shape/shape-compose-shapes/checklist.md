@@ -1,2 +1,2 @@
-- **Identity:** Primitive pieces visibly relate to a target directly or through one reusable intermediate stage, making the composition structure identifiable.
+- **Identity:** Predict which component shapes can form the pictured target, directly or through one reusable intermediate stage.
 - **Modes:** Question Mode hides composition seams and leaves choices neutral; Solution Mode reveals the seams and identifies the pieces that compose the target.

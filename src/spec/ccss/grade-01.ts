@@ -572,7 +572,7 @@ const singleLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
-        Ability.ConceptComposition
+        Ability.SpatialGeneration
     ])
     .applyLabelVariants([
         [Area.Rectangle],
@@ -592,7 +592,7 @@ const multiLevelCompositionBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeSynthesis,
         Scope.MultiLevelComposition,
-        Ability.ConceptComposition
+        Ability.SpatialGeneration
     ])
     .applyLabelVariants([
         [Area.Rectangle],

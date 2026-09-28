@@ -516,7 +516,7 @@ const composeShapesBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
-        Ability.ConceptComposition
+        Ability.SpatialGeneration
     ])
     .applyLabelVariants([
         [Area.Rectangle],
@@ -527,7 +527,7 @@ const composeShapesOtherBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.ShapeSynthesis,
         Scope.SingleLevelComposition,
-        Ability.ConceptComposition
+        Ability.SpatialGeneration
     ])
     .applyLabelVariants([
         [Area.Triangle],

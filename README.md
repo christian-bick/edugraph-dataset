@@ -27,6 +27,9 @@ The architecture is split into three main parts:
 *   **The Body (Views):** HTML/CSS renderers that turn abstract math into visual DOM elements.
 *   **The Heart (Orchestrator):** A Playwright-powered Node.js pipeline that generates permutations, injects them into views, captures screenshots, and compiles the dataset metadata.
 
+For example, shape-composition exercises separate predicting suitable pieces from constructing
+an arrangement. Construction solutions use explicit component geometry supplied by the generator.
+
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 
 ## First Steps

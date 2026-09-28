@@ -5,7 +5,7 @@ import {
     shapeCompositionLabel,
     shapeCompositionOptions,
     validateShapeComposition
-} from './presentation.ts';
+} from '../shape-composition-presentation.ts';
 
 const rectangle: ShapeComposeShapesProblem = {
     compositionTree: {

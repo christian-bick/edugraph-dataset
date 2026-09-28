@@ -17,7 +17,7 @@ import {
     shapeCompositionOptions,
     ShapeCompositionOption,
     validateShapeComposition
-} from './presentation.ts';
+} from '../shape-composition-presentation.ts';
 import '../../../../tailwind.css';
 
 interface CoreProps {

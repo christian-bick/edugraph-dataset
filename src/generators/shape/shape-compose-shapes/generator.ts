@@ -7,12 +7,13 @@ import {
     ShapeCompositionRoot,
     ShapeCompositionShapeId,
     ShapeCompositionTargetId,
-    ShapeComposeShapesProblem
+    ShapeAssemblyProblem
 } from '../../../types/problems.ts';
 import {
     ShapeComposeShapesGeneratorConfig,
     ShapeComposeShapesGeneratorSchema
 } from './spec.ts';
+import {createShapeAssembly} from './assembly.ts';
 
 type CompositionStructure =
     | typeof Scope.SingleLevelComposition
@@ -169,7 +170,7 @@ function multiLevelComposition(label: string): ShapeCompositionRoot | null {
 }
 
 export class ShapeComposeShapesGenerator implements ProblemGenerator<
-    ShapeComposeShapesProblem,
+    ShapeAssemblyProblem,
     ShapeComposeShapesGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'shape';
@@ -177,7 +178,7 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<
 
     generate(
         config: ShapeComposeShapesGeneratorConfig
-    ): ProblemStub<ShapeComposeShapesProblem> | null {
+    ): ProblemStub<ShapeAssemblyProblem> | null {
         validateConfigFields('shape-compose-shapes', config, [
             'classify',
             'compositionStructure'
@@ -200,7 +201,8 @@ export class ShapeComposeShapesGenerator implements ProblemGenerator<
         return {
             data: {
                 compositionTree,
-                compositionDepth
+                compositionDepth,
+                assembly: createShapeAssembly(compositionTree)
             }
         };
     }

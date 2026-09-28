@@ -1,0 +1,2 @@
+- **Identity:** Given component shapes and a target, construct their spatial arrangement; two-stage tasks also require constructing the intermediate shapes before joining them.
+- **Modes:** Question Mode shows the separate pieces and unpartitioned targets with empty drawing spaces. Solution Mode shows how all pieces fit without gaps or interior overlaps, preserving the pieces and both stages where applicable.
