@@ -5,7 +5,7 @@ Completed consolidation and migration documents are preserved unchanged in
 These items are not newly scheduled by the archive move.
 
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
-  record minor task-evidence repairs and remaining semantic reviews.
+  record completed semantic repairs and remaining evaluator disagreements.
   The [numeral-system ownership correction](numeral-system-ownership.md),
   [MeasuringTime definition correction](measuring-time-definition.md),
   [equation classification correction](equation-correctness.md),
@@ -20,10 +20,11 @@ These items are not newly scheduled by the archive move.
   [spatial-construction correction](spatial-composition.md),
   [whole-share Ability correction](whole-share-ability.md),
   [realistic environmental-object images](environmental-object-images.md),
-  [multiples-of-five migration](multiples-of-five-migration.md), and
-  [picture-graph quantity/axis separation](picture-graph-scales.md) are complete;
-  the current cache has 18 remaining failures among 1,970 CCSS images: 1 sample requiring
-  semantic review and 17 evaluator disagreements. Complete ordering now has its own
+  [multiples-of-five migration](multiples-of-five-migration.md),
+  [picture-graph quantity/axis separation](picture-graph-scales.md), and
+  [logical-inference correction](logical-inference.md) are complete;
+  the current cache has 17 remaining failures among 1,968 CCSS images, all evaluator
+  disagreements. No semantic-review failures remain. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
   bounds now include their actual operands and hidden results, independently of operand digit
@@ -50,9 +51,14 @@ These items are not newly scheduled by the archive move.
   resolved: quantity labels use `EvenNumbers`, `MultiplesOf5` and `MultiplesOf10`, while single-unit
   tasks have no divisibility claim. Bar views own all genuine axis steps. All 54 fresh judgments
   pass with 348 defendable label checks, replacing both unit-picture failures with passing samples.
+  Mediated comparison now uses `LogicalInference`, and solutions retain the longer/shorter question.
+  Both replacement samples pass all eight label checks; the question retains exactly the pixels
+  of the previously rejected validation question.
   There are 55 validation-coverage gaps without leakage; the earlier drop from 56 reflects a
   changed target allocation. The five-based and subsequent graph-scale migrations each add two
   validation images and one allocated/represented tuple, leaving that gap count unchanged.
+  The logical-inference target hash removes one allocated/represented validation tuple and its two
+  images; the same 55 gaps remain.
   The fixed ten-tens explanation remains one of those gaps. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.
   The equation follow-up also

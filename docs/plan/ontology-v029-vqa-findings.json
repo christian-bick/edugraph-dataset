@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.5.a88ac7a500c5",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "b851404",
+  "cache_commit": "440c59e",
   "concurrency": 4,
-  "evaluated": 1970,
-  "passed": 1952,
-  "failed": 18,
-  "semantic_review_samples": 1,
+  "evaluated": 1968,
+  "passed": 1951,
+  "failed": 17,
+  "semantic_review_samples": 0,
   "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -4386,28 +4386,120 @@
       ],
       "details": "picture-graph-scales.md",
       "note": "Picture-graph quantities use EvenNumbers, MultiplesOf5 or MultiplesOf10; an empty quantity-label selection explicitly resolves scale one. Single-unit tasks remain without step or divisibility claims. Bar views own all four genuine axis steps and scaled bar targets request both quantity and axis constraints. All 54 fresh judgments pass with 348 defendable checks, replacing both rejected unit-picture identities. The remaining eighteen judgments are unchanged. No new major issue, VQA retry or rate-limit error occurred."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "logical-inference-correction",
+      "status": "completed",
+      "baseline_commit": "51a9efd",
+      "fix_commit": "e8ded35",
+      "cache_commit": "440c59e",
+      "library_version": "0.29.0-pre.5.a88ac7a500c5",
+      "concurrency": 4,
+      "sample_count_before": 1970,
+      "sample_count_after": 1968,
+      "evaluated": 2,
+      "reused": 1966,
+      "failures_before": 18,
+      "failures_after": 17,
+      "resolved": 1,
+      "retired_failed_identities": 1,
+      "newly_rejected": 0,
+      "added_sample_identities": 2,
+      "removed_sample_identities": 4,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "retained_label_changes": 0,
+      "retained_task_fingerprint_changes": 0,
+      "refreshed_retained_plan_receipts": 0,
+      "unchanged_cache_records": 1966,
+      "provenance_only_cache_records": 0,
+      "refreshed_plan_cache_records": 0,
+      "unchanged_retained_judgments": 1966,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "changed_targets": 1,
+        "changed_routes": 1,
+        "changed_retained_plans": 0
+      },
+      "generation": {
+        "rendered": 2,
+        "written_shards": 1,
+        "reused_shards": 289
+      },
+      "verification": {
+        "test_scope": "affected generator and view",
+        "test_files": 3,
+        "tests": 16,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "label_signals": 0,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "replayed_samples": 2,
+        "fresh_label_checks": {
+          "defendable": 8,
+          "uncertain": 0,
+          "not_defendable": 0,
+          "logical_inference": 2
+        },
+        "rejected_question_pixels_preserved": true,
+        "rejected_question_sample_key": "1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0",
+        "replacement_question_sample_key": "1.MD.A.1-mediated-length-comparison~fbd9ce83#measurement-mediated-comparison#measure-mediated-comparison#train#question#inst:0",
+        "test_dataset_and_cache_unchanged": true,
+        "split": {
+          "train_images": 1654,
+          "validation_images": 314,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 212,
+          "validation_represented_tuples": 157,
+          "validation_gaps": 55,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        }
+      },
+      "passing_revalidated_samples": [
+        {
+          "sample_key": "1.MD.A.1-mediated-length-comparison~fbd9ce83#measurement-mediated-comparison#measure-mediated-comparison#train#question#inst:0",
+          "labels": [
+            "Less",
+            "LogicalInference",
+            "MeasuringLength",
+            "MediatedRelation"
+          ],
+          "validated_at": "2026-09-28T17:55:22.071Z",
+          "pass": true,
+          "logical_inference_check": {
+            "label": "LogicalInference",
+            "verdict": "defendable",
+            "evidence": "Requires deductive inference to conclude that because A < B and B < C, Ribbon A is shorter than Ribbon C."
+          }
+        },
+        {
+          "sample_key": "1.MD.A.1-mediated-length-comparison~fbd9ce83#measurement-mediated-comparison#measure-mediated-comparison#train#solution#inst:0",
+          "labels": [
+            "Greater",
+            "LogicalInference",
+            "MeasuringLength",
+            "MediatedRelation"
+          ],
+          "validated_at": "2026-09-28T17:55:19.578Z",
+          "pass": true,
+          "logical_inference_check": {
+            "label": "LogicalInference",
+            "verdict": "defendable",
+            "evidence": "The task requires inferring which ribbon is longer (A or C) using the transitivity of the 'longer' relation (A > B and B > C implies A > C)."
+          }
+        }
+      ],
+      "details": "logical-inference.md",
+      "note": "LogicalInference directly describes the existing transitive length-comparison task. The generator, payload and other target routes are unchanged. Solutions now retain the requested comparison. Both new judgments pass all eight label checks; the other 1,966 cache records are byte-identical. The new hash removes one allocated/represented validation tuple and two images, without changing split policy or the 55 existing gaps. No semantic-review failure remains; seventeen evaluator disagreements are unchanged. No new issue, VQA retry or rate-limit error occurred."
     }
   ],
   "findings": [
-    {
-      "classification": "semantic_review_required",
-      "topic": "concrete-inference-versus-concept-derivation",
-      "sample_key": "1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0",
-      "generator": "measurement-mediated-comparison",
-      "view": "measure-mediated-comparison",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ConceptDerivation",
-          "verdict": "not_defendable",
-          "evidence": "There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length)."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ConceptDerivation: There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length).",
-      "validated_at": "2026-09-26T08:57:59.788Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
-    },
     {
       "classification": "evaluator_disagreement",
       "topic": "representational-zero-components",
@@ -7017,6 +7109,67 @@
           ],
           "previous_reasoning": "Labels not defendable: StepsOf1: There are no lists or sequences of consecutive numbers changing by steps of 1."
         }
+      }
+    },
+    {
+      "sample_key": "1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0",
+      "resolution": "mediated-logical-inference",
+      "resolution_type": "target_corrected",
+      "fix_commit": "e8ded35",
+      "cache_commit": "440c59e",
+      "replacement_samples": [
+        {
+          "sample_key": "1.MD.A.1-mediated-length-comparison~fbd9ce83#measurement-mediated-comparison#measure-mediated-comparison#train#question#inst:0",
+          "labels": [
+            "Less",
+            "LogicalInference",
+            "MeasuringLength",
+            "MediatedRelation"
+          ],
+          "validated_at": "2026-09-28T17:55:22.071Z",
+          "pass": true,
+          "logical_inference_check": {
+            "label": "LogicalInference",
+            "verdict": "defendable",
+            "evidence": "Requires deductive inference to conclude that because A < B and B < C, Ribbon A is shorter than Ribbon C."
+          }
+        },
+        {
+          "sample_key": "1.MD.A.1-mediated-length-comparison~fbd9ce83#measurement-mediated-comparison#measure-mediated-comparison#train#solution#inst:0",
+          "labels": [
+            "Greater",
+            "LogicalInference",
+            "MeasuringLength",
+            "MediatedRelation"
+          ],
+          "validated_at": "2026-09-28T17:55:19.578Z",
+          "pass": true,
+          "logical_inference_check": {
+            "label": "LogicalInference",
+            "verdict": "defendable",
+            "evidence": "The task requires inferring which ribbon is longer (A or C) using the transitivity of the 'longer' relation (A > B and B > C implies A > C)."
+          }
+        }
+      ],
+      "note": "The target and view replace ConceptDerivation with LogicalInference, and solutions retain the longer/shorter request. The changed target hash is training-only under the existing allocation policy, retiring four identities and replacing them with two passing training samples. The new question is pixel-identical to this rejected validation question. The old verdict is retained as history, not recorded as a passing retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "concrete-inference-versus-concept-derivation",
+        "sample_key": "1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0",
+        "generator": "measurement-mediated-comparison",
+        "view": "measure-mediated-comparison",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ConceptDerivation",
+            "verdict": "not_defendable",
+            "evidence": "There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length)."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ConceptDerivation: There is no new mathematical concept being derived from existing knowledge in this exercise. The exercise is a straightforward logical deduction of a transitive relationship (ordering length).",
+        "validated_at": "2026-09-26T08:57:59.788Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.MD.A.1-mediated-length-comparison~1b505a26#measurement-mediated-comparison#measure-mediated-comparison#val#question#inst:0\" --no-validate"
       }
     }
   ]

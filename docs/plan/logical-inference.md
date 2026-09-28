@@ -43,3 +43,41 @@ the source correction, regenerate through the canonical affected graph and perfo
 VQA at concurrency four. Inspect both modes, exact replay, cache/image churn and split integrity.
 Update the original report and machine-readable findings, retain the retired failure's evidence,
 commit the validation and documentation separately, and push the branch.
+
+## Completed verification
+
+Implementation commit: `e8ded35`. All 16 focused generator/view tests across three files pass,
+as do CCSS repository checks and the production build. The strict label audit reports zero
+violations, 97 existing review items and zero signals. Matching confirms 688 targets, 214
+compatible pairs and 841 tuples: exactly one target and route are replaced, no retained plan
+changes, and no active target loses its implementation.
+
+Canonical generation at concurrency four renders two training images, writes one shard and
+reuses 289. The four old sample identities retire as expected. Both recorded draws replay
+exactly with the corrected labels, mathematical fingerprints and valid relation chains. Manual
+inspection confirms the question withholds its choice and the solution retains the full longer/
+shorter request while highlighting the correct endpoint. The new question asks for the shorter
+ribbon from A < B and B < C; the independent solution asks for the longer ribbon from A > B
+and B > C. The question is byte-identical to the previously rejected validation image.
+
+Cache commit: `440c59e`. Cache-aware VQA at concurrency four evaluates both new samples;
+both pass with all eight label checks defendable and every general check passing. Both
+`LogicalInference` explanations explicitly identify the transitive deduction. The other 1,966
+cache records are byte-identical, as are their images, labels, mathematical/task fingerprints,
+plans/replay receipts, seeds and attempts. No new issue, VQA retry or rate-limit error occurred.
+
+CCSS now contains 1,968 samples: 1,951 pass, 17 fail, none uncached. The remaining rejected
+judgments are the existing evaluator disagreements. The strict dataset audit exits 1 solely
+for those seventeen verdicts; structural, renderer-identity, cache-format and freshness checks
+are clean. The retired semantic-review failure is retained in the original report's history with
+both passing replacement samples, rather than presented as a passing retry of the old identity.
+
+The split contains 1,654 training and 314 validation images. All 841 matched tuples have
+training evidence; 212 are allocated to validation and 157 have validation evidence. The new
+target hash removes one allocated/represented validation tuple and two images, leaving the
+existing 55 gaps. There is no cross-split leakage or configured-task redundancy. Allocation
+policy is unchanged. The isolated test snapshot pointer and every test cache file remain
+byte-identical to the captured baseline.
+
+The [original report](ontology-v029-vqa-rerun.md) and its
+[machine-readable findings](ontology-v029-vqa-findings.json) record the completed correction.

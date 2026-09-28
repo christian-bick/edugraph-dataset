@@ -6,27 +6,28 @@ Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definiti
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
 whole-tens subtraction, spatial-construction, whole-share Ability, environmental-image,
-multiples-of-five, and picture-graph scale corrections on
+multiples-of-five, picture-graph scale, and logical-inference corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,970 CCSS samples** have current judgments: **1,952 pass (99.1%) and 18 fail**, down from
+All **1,968 CCSS samples** have current judgments: **1,951 pass (99.1%) and 17 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, the completion/explanation split added 30,
 and the whole-tens target correction added four. The multiples-of-five and subsequent graph-scale
-target migrations each add two validation images through the existing allocation policy, for a net
-increase of 34 from the initial dataset. There are no uncached samples. The remaining failures comprise
-**1 sample requiring semantic review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
-some semantic concerns also affect currently passing samples.
+target migrations each add two validation images through the existing allocation policy. The
+logical-inference target correction retires two validation images under that same policy, for a net
+increase of 32 from the initial dataset. There are no uncached samples. The remaining failures are
+**17 evaluator disagreements**; **no semantic-review failures remain**. These are sample counts,
+not distinct defects.
 
-The strict audit fails on those 18 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 17 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 18 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 57
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 17 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 58
 resolved finding records and initial totals are retained separately as history: 38 passed
-revalidation, and nineteen were retired with corrected targets or producer contracts and replaced
+revalidation, and twenty were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
@@ -59,6 +60,9 @@ defendable label checks. This resolves the five-minute precision review. The sub
 correction replaces the remaining picture sequence claims with quantity constraints, preserving
 single-unit tasks without a divisibility label. Bar views own their numbered axis steps. All 54 fresh
 judgments pass with 348 defendable label checks, resolving both unit-picture failures without a new rejection.
+Mediated length comparison now uses `LogicalInference` and keeps the requested comparison visible
+in solution mode. Both replacement samples pass all eight label checks, resolving the final
+semantic-review failure; the new question's pixels are identical to the previously rejected question.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -623,20 +627,30 @@ Both original rejected records remain in resolved history as retired targets, no
 No VQA retry, checklist change, rate-limit error or new major issue occurred. See the
 [detailed migration record](picture-graph-scales.md) for consumer adoption and verification.
 
-## Major findings requiring follow-up
-
 ### Concrete inference versus deriving a concept
 
-`measure-mediated-comparison` shows A shorter than B and B shorter than C, then asks which of
-A or C is shorter. `ConceptDerivation` covers inferring a new concept or conceptual relationship;
-the evaluator overlooks the latter alternative. However, this task appears to apply transitivity
-to particular ribbons rather than derive a conceptual relationship.
+**Resolved on 2026-09-28** in `e8ded35`, with VQA results in `440c59e`. The user approved
+`LogicalInference` for applying transitivity to particular ribbons: A shorter than B and B shorter
+than C imply A shorter than C. The eligible descriptor already exists in the pinned ontology.
+The view declaration and CCSS target change together, retaining `MeasuringLength`,
+`MediatedRelation` and the generated comparison direction (`SPEC-V5`, `SPEC-3`, `TSPEC-13`).
 
-Review `LogicalInference` as a more direct eligible Ability for this premise-to-conclusion task.
-The view declaration and `1.MD.A.1-mediated-length-comparison~1b505a26` target must be reviewed
-together, preserving the measurement and mediated-relation claims (`SPEC-V5`, `SPEC-3`, `TSPEC-13`).
-Four canonical samples share that target; its validation question was rejected. The underlying
-relation chain and rendered comparison evidence are coherent.
+The generator and mathematical payload are unchanged. The renderer now keeps the question
+visible in solution mode, making the requested longer/shorter relation explicit beside the selected
+endpoint (`IMPL-V5`). Both replacement samples receive passing judgments with all eight label
+checks defendable and every general check passing. Their `LogicalInference` evidence explicitly
+identifies the valid A-to-B-to-C deduction. The new training question is pixel-identical to the old
+rejected validation question, providing direct evidence for the label correction.
+
+One target identity and route are replaced with no loss of competency matching. The new
+`1.MD.A.1-mediated-length-comparison~fbd9ce83` hash is allocated to training only, so four old
+identities retire and two training images replace them. The rejected validation record remains in
+resolved history as a retired target, not a passing retry. All 1,966 retained images, metadata
+identities and cache records are unchanged. No new failure, VQA retry, rate-limit error or major
+issue occurred. The [detailed follow-up](logical-inference.md) records verification and allocation.
+
+All semantic-review failure categories in this report are now resolved. The remaining recorded
+failures are the evaluator disagreements below.
 
 ## Evaluator disagreements
 
@@ -853,19 +867,26 @@ audit remains at zero violations, 97 review items and zero signals. All 74 graph
 exactly. Cache `b851404` contains **1,952 pass / 18 fail / zero uncached**. The two retired scale
 failures have passing replacements, and the other 18 verdicts are unchanged.
 
+The logical-inference follow-up passes **16 focused tests across three files**, CCSS repository
+checks and the production build. The strict label audit retains zero violations, 97 review items
+and zero signals. Matching retains 688 targets, 214 compatible pairs and 841 tuples, replacing one
+target identity and route without changing other plans. Both canonical samples replay exactly.
+Cache `440c59e` contains **1,951 pass / 17 fail / zero uncached**. Both new judgments pass all
+eight label checks, and all 1,966 retained cache records are byte-identical.
+
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Graph-scale migration: 74 renders, 13 shards written, 278 reused; 54 added/52 removed identities, no retained-image changes |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 54 live judgments, all passing with 348 defendable label checks; 1,916 reused; final 1,952 pass / 18 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 18 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Logical-inference correction: two renders, one shard written, 289 reused; two added/four removed identities, no retained-image changes |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | Two live judgments, both passing with eight defendable label checks; 1,966 reused; final 1,951 pass / 17 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 17 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=163fb9e` | Latest follow-up: 1,916 identical retained images, 54 added/52 removed identities, no retained seed/attempt changes |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,693 identical retained images, 53 intended changes, 224 added/190 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=51a9efd` | Latest follow-up: 1,966 identical retained images, two added/four removed identities, no retained seed/attempt changes |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,689 identical retained images, 53 intended changes, 226 added/194 removed identities; the same three explained successor retry changes |
 
-The final split contains 1,654 training and 316 validation images. All 841 matched tuples have
-training evidence. Of 213 tuples allocated to validation, 158 have validation evidence. The 55
+The final split contains 1,654 training and 314 validation images. All 841 matched tuples have
+training evidence. Of 212 tuples allocated to validation, 157 have validation evidence. The 55
 remaining gaps include the ten-tens explanation route added earlier: its fixed mathematical
 relation repeats the training payload. Generation records 50 duplicate attempts before linking
 that request to the existing training sample. It is not counted as independent validation evidence.
@@ -873,6 +894,8 @@ The previous total of 56 gaps falls by one because the corrected whole-share tar
 longer allocate the rectangle/halves variant to validation; that earlier correction added no validation
 evidence. Each subsequent graph-label migration adds one allocated and represented tuple overall,
 producing two additional validation images per migration while leaving the number of gaps unchanged.
+The logical-inference target hash subsequently removes one allocated/represented validation tuple
+and its two images, leaving the same 55 gaps.
 There is no cross-split leakage or within-split configured-task redundancy. Validation allocation policy is unchanged.
 
 The `test` cache is byte-for-byte unchanged from baseline `644254d`. Its obsolete ontology context
