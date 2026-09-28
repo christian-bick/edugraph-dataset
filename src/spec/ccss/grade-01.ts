@@ -403,7 +403,7 @@ const mediatedLengthComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.MeasuringLength,
         Scope.MediatedRelation,
-        Ability.ConceptDerivation
+        Ability.LogicalInference
     ]);
 
 // --- 1.MD.A.2: Express length as a whole number of iterated units ---

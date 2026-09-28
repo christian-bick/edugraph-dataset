@@ -101,7 +101,7 @@ const MeasureMediatedComparisonCore = ({config: _config, payload}: CoreProps) =>
         <div className="flex w-fit items-center justify-center rounded-2xl bg-white p-[30px] font-sans shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
             <div className="flex w-[650px] flex-col items-center gap-4">
                 <div className="flex h-[48px] items-center justify-center text-center text-[1.25rem] font-bold leading-snug text-slate-700">
-                    {isSolutionView ? '' : prompt}
+                    {prompt}
                 </div>
 
                 <PremiseCard

@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measure-mediated-comparison',
-    generalLabels: [Ability.ConceptDerivation]
+    generalLabels: [Ability.LogicalInference]
 };
 
 export const MeasureMediatedComparisonViewSchema = {} as const;
