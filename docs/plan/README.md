@@ -15,9 +15,10 @@ These items are not newly scheduled by the archive move.
   [numeric-range and successor correction](numeric-range-bounds.md),
   [bounded count-out supply correction](count-out-supply.md),
   [completion/explanation separation](procedure-task-separation.md),
-  [operand-cardinality clarification](operand-cardinality.md), and
-  [whole-tens subtraction correction](whole-tens-subtraction.md) are complete;
-  the current cache has 27 remaining failures among 1,966 CCSS images: 10 samples requiring
+  [operand-cardinality clarification](operand-cardinality.md),
+  [whole-tens subtraction correction](whole-tens-subtraction.md), and
+  [spatial-construction correction](spatial-composition.md) are complete;
+  the current cache has 26 remaining failures among 1,966 CCSS images: 9 samples requiring
   semantic review and 17 evaluator disagreements. Complete ordering now has its own
   view, with least/most selection preserved as a separate supporting subskill.
   Offset tasks retain arithmetic direction without sequence-position labels. Whole-task numeric
@@ -33,7 +34,10 @@ These items are not newly scheduled by the archive move.
   but passes under the existing policy. Whole-tens targets now use `Subtraction` with `PlaceValue`,
   retaining their model, written-method, and explanation requirements; identifiable partitioning
   remains supported elsewhere. All 16 corrected samples pass without changing any retained image
-  or judgment. The picture-graph scale review includes its question as well.
+  or judgment. Spatial construction now has its own view with `SpatialGeneration`, while
+  selection/prediction remains available with `SpatialImagination`. All 42 construction images
+  pass. A related Ability review covers four whole-from-shares fraction targets whose eight
+  images currently pass. The picture-graph scale review includes its question as well.
   The fixed ten-tens explanation adds one validation-coverage gap, bringing
   that total to 56 without leakage. A division-story
   wording defect and singular/plural agreement were repaired during revalidation.

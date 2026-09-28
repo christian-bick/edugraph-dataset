@@ -3,12 +3,12 @@
   "library_version": "0.29.0-pre.4.a08f9a911317",
   "baseline_commit": "644254d",
   "updated_on": "2026-09-28",
-  "cache_commit": "3ea12ff",
+  "cache_commit": "6348f13",
   "concurrency": 4,
   "evaluated": 1966,
-  "passed": 1939,
-  "failed": 27,
-  "semantic_review_samples": 10,
+  "passed": 1940,
+  "failed": 26,
+  "semantic_review_samples": 9,
   "evaluator_disagreement_samples": 17,
   "initial_rerun": {
     "completed_on": "2026-09-26",
@@ -2023,6 +2023,305 @@
       ],
       "details": "whole-tens-subtraction.md",
       "note": "Six 1.NBT.C.6 variants use Subtraction and PlaceValue, preserving the concrete-model, written-method, and explanation tasks and both result-zero variants. The generator rejects partitioning with its direct whole-tens profile. Existing general partitioning routes, mathematics, renderers, ontology definitions, and retained images remain unchanged."
+    },
+    {
+      "completed_on": "2026-09-28",
+      "topic": "spatial-composition",
+      "status": "completed",
+      "baseline_commit": "9c31272",
+      "fix_commit": "5361115",
+      "projection_fix_commit": "48f0e96",
+      "cache_commit": "6348f13",
+      "library_version": "0.29.0-pre.4.a08f9a911317",
+      "concurrency": 4,
+      "sample_count_before": 1966,
+      "sample_count_after": 1966,
+      "evaluated": 42,
+      "reused": 1924,
+      "failures_before": 27,
+      "failures_after": 26,
+      "retired_failed_identities": 1,
+      "newly_rejected": 0,
+      "added_sample_identities": 42,
+      "removed_sample_identities": 42,
+      "shared_image_changes": 0,
+      "retained_seed_changes": 0,
+      "retained_attempt_changes": 0,
+      "unchanged_cache_records": 204,
+      "provenance_only_cache_records": 1720,
+      "unchanged_retained_judgments": 1924,
+      "matching": {
+        "targets": 688,
+        "compatible_pairs": 214,
+        "tuples": 841,
+        "corrected_authored_targets": 24,
+        "replaced_normalized_targets": 21,
+        "replaced_routes": 21,
+        "changed_retained_plans": 0
+      },
+      "generation": {
+        "rendered": 1966,
+        "written_shards": 224,
+        "reused_shards": 67,
+        "projection_repair": {
+          "rendered": 42,
+          "written_shards": 1,
+          "reused_shards": 290
+        }
+      },
+      "verification": {
+        "test_files": 546,
+        "tests": 3491,
+        "focused_tests": 94,
+        "label_violations": 0,
+        "label_review_items": 97,
+        "uncached": 0,
+        "structural_or_stale_cache_issues": 0,
+        "fresh_label_checks": {
+          "defendable": 168,
+          "uncertain": 0,
+          "not_defendable": 0
+        },
+        "split": {
+          "train_images": 1654,
+          "validation_images": 312,
+          "matched_tuples": 841,
+          "validation_allocated_tuples": 212,
+          "validation_represented_tuples": 156,
+          "validation_gaps": 56,
+          "leakage": 0,
+          "configured_task_redundancy": 0
+        },
+        "test_dataset_and_cache_unchanged": true
+      },
+      "passing_replacement_samples": [
+        {
+          "sample_key": "1.G.A.2-single-level-composition~ff5df220#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:58.079Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~c11907da#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:29.711Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~f1024b0b#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:50.058Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~fad1214e#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:55.826Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~38125630#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:13.280Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~fa34c76c#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:36.080Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~fe82e107#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:53.961Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~8c02d44c#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:22.641Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~70a6be99#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:43.428Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~bf5a9d72#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:23.989Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~fad1214e#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:51.831Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~3edded49#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:17.091Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~ecaca2db#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:29.385Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~ff5df220#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:56.148Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~527f064f#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:38.270Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~6204e3c2#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:18.491Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~a789c327#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:44.757Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~527f064f#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:38.910Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~6204e3c2#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:19.291Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~f1024b0b#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:48.778Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~d923fbb4#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:47.566Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~fa34c76c#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:34.235Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~70a6be99#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:42.779Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~5f3e6c8a#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:38.386Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~49fdbb9f#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:33.852Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~1f320c83#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:08.218Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~d923fbb4#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:50.076Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~1f320c83#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:09.966Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~30b8efc9#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:12.083Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~38125630#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:14.069Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.G.B.6-compose-shapes-other~660a6bd4#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:59.913Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~3edded49#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:17.471Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~bf5a9d72#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:24.242Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~a789c327#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:45.678Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~49fdbb9f#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:34.817Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~fe82e107#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:54.025Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~8c02d44c#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:22.186Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~30b8efc9#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:10.256Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.G.B.6-compose-shapes-other~660a6bd4#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "validated_at": "2026-09-28T13:30:59.666Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~ecaca2db#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:29.911Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-multi-level-composition~c11907da#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:29.183Z",
+          "pass": true
+        },
+        {
+          "sample_key": "1.G.A.2-single-level-composition~5f3e6c8a#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "validated_at": "2026-09-28T13:30:40.440Z",
+          "pass": true
+        }
+      ],
+      "related_open_review": {
+        "view": "shape-partition-whole-composition",
+        "standard": "1.G.A.3",
+        "label": "ConceptComposition",
+        "currently_failing": false,
+        "passing_images": 8,
+        "target_ids": [
+          "1.G.A.3-compose-whole-from-shares~4bab0d00",
+          "1.G.A.3-compose-whole-from-shares~ba423cc2",
+          "1.G.A.3-compose-whole-from-shares~c952a879",
+          "1.G.A.3-compose-whole-from-shares~d0afc141"
+        ],
+        "note": "Four target variants ask learners to identify a whole from equal shares. Review the appropriate Ability for describing this fraction relationship separately from spatial construction; preserve the current passing evidence until that semantic decision."
+      },
+      "details": "spatial-composition.md",
+      "note": "Construction targets preserve ShapeSynthesis and composition levels while using SpatialGeneration. The new construction view requires an arrangement and shows generator-supplied component regions in solutions. The previous selection view remains available with SpatialImagination. No ontology or dependency changes."
     }
   ],
   "findings": [
@@ -2545,25 +2844,6 @@
       "reasoning": "Labels not defendable: Base10: The task only involves single-digit numbers (0 and 2) representing simple counts, without any demonstration of positional decimal notation or place-value concepts.",
       "validated_at": "2026-09-27T19:58:47.730Z",
       "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.4-compare-shape-attributes~f66abc4a#shape-compare-attributes#shape-compare-attributes#train#question#inst:0\" --no-validate"
-    },
-    {
-      "classification": "semantic_review_required",
-      "topic": "spatial-assembly-versus-concept-composition",
-      "sample_key": "K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0",
-      "generator": "shape-compose-shapes",
-      "view": "shape-compose-shapes",
-      "mode": "question",
-      "rejected_labels": [
-        {
-          "label": "ConceptComposition",
-          "verdict": "not_defendable",
-          "evidence": "The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height."
-        }
-      ],
-      "failed_general_checks": [],
-      "reasoning": "Labels not defendable: ConceptComposition: The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height.",
-      "validated_at": "2026-09-25T22:32:48.337Z",
-      "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
     }
   ],
   "resolved_findings": [
@@ -4455,6 +4735,58 @@
         "reasoning": "The ontology label SubtractionPlaceValuePartitioning is not defendable because the task 90 - 60 only involves subtracting single-digit quantities of tens, without any decomposition of multi-digit numbers into multiple place-value parts (e.g., tens and ones) and without coordination of multiple partial differences.",
         "validated_at": "2026-09-28T07:50:40.007Z",
         "replay_command": "npm run test:sample -- --spec=ccss --sample=\"1.NBT.C.6-model-to-written-method~c00f3bc6#place-value-arithmetic#place-value-arithmetic-written-method#train#question#inst:0\" --no-validate"
+      }
+    },
+    {
+      "sample_key": "K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0",
+      "resolution": "spatial-construction-task-correction",
+      "resolution_type": "target_corrected",
+      "fix_commit": "5361115",
+      "projection_fix_commit": "48f0e96",
+      "cache_commit": "6348f13",
+      "replacement_samples": [
+        {
+          "sample_key": "K.G.B.6-compose-shapes-other~660a6bd4#shape-compose-shapes#shape-compose-shapes-construction#train#solution#inst:0",
+          "labels": [
+            "http://edugraph.io/edu/Hexagon",
+            "http://edugraph.io/edu/ShapeSynthesis",
+            "http://edugraph.io/edu/SingleLevelComposition",
+            "http://edugraph.io/edu/SpatialGeneration"
+          ],
+          "validated_at": "2026-09-28T13:30:59.913Z",
+          "pass": true
+        },
+        {
+          "sample_key": "K.G.B.6-compose-shapes-other~660a6bd4#shape-compose-shapes#shape-compose-shapes-construction#train#question#inst:0",
+          "labels": [
+            "http://edugraph.io/edu/Hexagon",
+            "http://edugraph.io/edu/ShapeSynthesis",
+            "http://edugraph.io/edu/SingleLevelComposition",
+            "http://edugraph.io/edu/SpatialGeneration"
+          ],
+          "validated_at": "2026-09-28T13:30:59.666Z",
+          "pass": true
+        }
+      ],
+      "note": "The selection identity retires from CCSS. Its replacement asks for a spatial construction and supplies a geometric solution witness. The old rejected judgment is preserved as history, not recorded as a passing retry.",
+      "previous_finding": {
+        "classification": "semantic_review_required",
+        "topic": "spatial-assembly-versus-concept-composition",
+        "sample_key": "K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0",
+        "generator": "shape-compose-shapes",
+        "view": "shape-compose-shapes",
+        "mode": "question",
+        "rejected_labels": [
+          {
+            "label": "ConceptComposition",
+            "verdict": "not_defendable",
+            "evidence": "The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height."
+          }
+        ],
+        "failed_general_checks": [],
+        "reasoning": "Labels not defendable: ConceptComposition: The task is a spatial shape synthesis task (assembling geometric pieces to form a shape) rather than a combination of abstract concepts like combining area and height.",
+        "validated_at": "2026-09-25T22:32:48.337Z",
+        "replay_command": "npm run test:sample -- --spec=ccss --sample=\"K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0\" --no-validate"
       }
     }
   ]

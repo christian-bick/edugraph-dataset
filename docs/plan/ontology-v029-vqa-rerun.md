@@ -5,26 +5,26 @@
 Updated on 2026-09-28 after the numeral-system ownership, MeasuringTime definition, equation
 correctness, shape recognition, category ordering, arithmetic-offset label, numeric-range,
 successor-evidence, grouped-word-problem, count-out-supply, completion/explanation, operand-cardinality,
-and whole-tens subtraction corrections on
+whole-tens subtraction, and spatial-construction corrections on
 branch `codex/ontology-v029-vqa-rerun`.
-All **1,966 CCSS samples** have current judgments: **1,939 pass (98.6%) and 27 fail**, down from
+All **1,966 CCSS samples** have current judgments: **1,940 pass (98.7%) and 26 fail**, down from
 51 failures in the initial 2026-09-26 rerun. Target-label and producer-contract corrections changed
 sample identities and validation allocation: the equation update removed two images, the shape
 update added four, the ordering extension added four, the numeric-range correction removed eight,
 the count-out producer replacement removed two, the completion/explanation split added 30,
 and the whole-tens target correction added four, for a net increase of 30 from the initial dataset.
-There are no uncached samples. The remaining failures comprise **10 samples requiring semantic
+There are no uncached samples. The remaining failures comprise **9 samples requiring semantic
 review** and **17 evaluator disagreements**. These are sample counts, not distinct defects;
 some semantic concerns also affect currently passing samples.
 
-The strict audit fails on those 27 recorded verdicts. It reports **zero** dataset-structure,
+The strict audit fails on those 26 recorded verdicts. It reports **zero** dataset-structure,
 renderer-identity, duplicate-cache, malformed-cache, missing-key, obsolete-module, or stale-cache
 issues. Every final failure concerns label evidence; none fails a general visual/math check.
 
-[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 27 active failed
-samples with current evidence, dispositions, replay commands, and revalidation results. The 48
+[The machine-readable findings](ontology-v029-vqa-findings.json) contain the 26 active failed
+samples with current evidence, dispositions, replay commands, and revalidation results. The 49
 resolved finding records and initial totals are retained separately as history: 32 passed
-revalidation, and sixteen were retired with corrected targets or producer contracts and replaced
+revalidation, and seventeen were retired with corrected targets or producer contracts and replaced
 by passing samples. This history includes the word-problem defect repaired during the numeric-range follow-up.
 The authorized
 corrections moved numeral-system ownership to the views supplying its evidence and changed the
@@ -42,8 +42,11 @@ occurrences. Both distributive failures are resolved without changing their imag
 The subsequent whole-tens correction resolves the single-place subtraction review: six
 `1.NBT.C.6` targets now use `Subtraction` with `PlaceValue`, preserving their model, written-method,
 and explanation requirements. Identifiable partitioning routes remain supported, with unchanged
-images and judgments. All 16 replacement whole-tens samples pass. The picture-graph scale review
-introduced by the required 732-sample refresh remains open for its question and solution.
+images and judgments. All 16 replacement whole-tens samples pass. Spatial construction now has
+its own view and `SpatialGeneration` Ability, preserving the selection task with `SpatialImagination`.
+All 42 replacement construction images pass. The picture-graph scale review introduced by the
+required 732-sample refresh remains open for its question and solution. A separate Ability review
+for four currently passing whole-from-shares fraction targets is documented below.
 Resolved and remaining findings are described below.
 
 ## Scope and implementation
@@ -166,6 +169,19 @@ remain unchanged, including all six existing general subtraction-partitioning im
 `generation_plan.inputHash` changes on 40 retained cache records; the other 1,910 are byte-identical.
 The old partitioning failure retires with its corrected target, reducing total failures from 28
 to 27. No new rejection, API error, or rate-limit error occurs.
+
+The [spatial-composition follow-up](spatial-composition.md) preserves selection/prediction with
+`SpatialImagination`, adds a construction view with `SpatialGeneration`, and corrects 24 authored
+K.G.B.6/1.G.A.2 variants, yielding 21 normalized target/route replacements. A generator extension
+supplies explicit component geometry for single and multiple composition stages. The shared
+type change triggers 1,966 renders, 224 written shards and 67 reused shards. Visual inspection
+finds a hidden-edge projection defect, repaired before VQA with 42 further renders in one shard
+and 290 reused shards. Forty-two new construction identities replace the 42 selection identities.
+All 1,924 retained images, labels, seeds, attempts, replay receipts and semantic plans are unchanged.
+VQA makes 42 requests at concurrency four, all passing, and reuses 1,924 judgments. Only
+`generation_plan.inputHash` changes on 1,720 retained cache records; the other 204 are byte-identical.
+The hexagon selection failure retires with its corrected task, reducing total failures from 27
+to 26. No new rejection, API error, or rate-limit error occurs.
 
 ## Minor repairs
 
@@ -463,18 +479,42 @@ this is not recorded as a passing retry of the old task. Cache commit: `3ea12ff`
 The [detailed report](whole-tens-subtraction.md) records target/view coverage, visual inspection,
 tests, unchanged retained samples, and split evidence.
 
-## Major findings requiring follow-up
-
 ### Spatial assembly versus concept composition
 
-`shape-compose-shapes` claims `ConceptComposition`, whose statement concerns combining related
-concepts into a coherent new or more complex concept. The inspected question asks which pieces
-make a hexagon and offers "Six triangles" or "Six circles". Review whether this spatial assembly
-task establishes the claimed conceptual performance, or needs a different Ability or stronger
-conceptual task evidence. Do not settle this by changing the wording alone (`SPEC-V5`, `TSPEC-13`).
+**Resolved on 2026-09-28:** the user approved preserving `ShapeSynthesis` and using the spatial
+Ability actually elicited. `ConceptComposition` concerns combining related concepts into a more
+complex concept. Selecting "Six triangles" to make a hexagon does not establish that performance,
+nor does it fulfill the construction requested by K.G.B.6 and 1.G.A.2 (`SPEC-V5`, `TSPEC-13`).
 
-The reported sample is
-`K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0`.
+Commit `5361115` retains `shape-compose-shapes` with `SpatialImagination` and adds
+`shape-compose-shapes-construction` with `SpatialGeneration`. The new task asks learners to draw
+an arrangement, showing how all pieces join; solutions render the generator's geometric witness.
+Two-stage tasks require intermediate constructions before the final assembly. The corrected
+CCSS targets retain their shapes, `ShapeSynthesis`, and composition levels. All 24 authored
+variants normalize to 21 replaced targets/routes; the prediction capability remains available
+without adding unsupported selection targets to construction standards.
+
+All 42 construction images pass, with all 168 label checks defendable. Commit `48f0e96` repairs
+hidden-face projection before validation; cache commit `6348f13` records the final judgments.
+The old failed identity
+`K.G.B.6-compose-shapes-other~4e78fdaa#shape-compose-shapes#shape-compose-shapes#train#question#inst:0`
+retires with its target and remains in resolved history. Its replacement hexagon question and
+solution pass. The [detailed report](spatial-composition.md) records the contract, consumer
+adoption, geometry tests, visual inspection, and unchanged retained samples.
+
+## Major findings requiring follow-up
+
+### Identifying a whole from equal shares versus concept composition
+
+The separate `shape-partition-whole-composition` view still supplies `ConceptComposition` to
+four `1.G.A.3-compose-whole-from-shares` variants: `~4bab0d00`, `~ba423cc2`, `~c952a879`, and
+`~d0afc141`. The task asks what the shown halves or fourths make, with the answer "one whole."
+This is a fraction relationship rather than constructing a spatial arrangement.
+
+All eight associated images currently pass VQA and remain unchanged. Review whether recognizing
+or explaining that relationship warrants a different Ability. The standard requests describing
+the whole as two halves or four quarters; relabeling it `SpatialGeneration` would change the
+intended competency (`TSPEC-6`). This is a related semantic concern, not eight new VQA failures.
 
 ### Environmental illustrations versus physical manipulatives
 
@@ -696,19 +736,27 @@ repository checks, and the build. One initial coverage run encountered an existi
 temporary-fixture cleanup `EPERM`; a single rerun passes without a source change. All 52 focused
 generator/view tests pass. Matching remains at 688 targets, 214 compatible pairs, and 841 tuples:
 six targets and their six routes are replaced, with no changed retained semantic plans. The strict
-label audit remains at zero violations and 97 review items. Current VQA is **1,939 pass / 27 fail /
+label audit remains at zero violations and 97 review items. That checkpoint is **1,939 pass / 27 fail /
 zero uncached**, in cache commit `3ea12ff`. All 1,950 retained judgments and timestamps are unchanged.
+
+The spatial-construction correction passes **3,491 tests across 546 files**, all coverage
+thresholds, repository checks, and the build. All 94 focused tests pass. The new geometry helper
+also has a dedicated coverage run: 97.33% statements, 94.59% branches, and 100% functions/lines.
+Matching remains at 688 targets, 214 compatible pairs, and 841 tuples: 21 normalized targets
+and their routes are replaced, with no changed retained semantic plans. The strict label audit
+remains at zero violations and 97 review items. Current VQA is **1,940 pass / 26 fail / zero
+uncached**, in cache commit `6348f13`. All 1,924 retained judgments and timestamps are unchanged.
 
 Current verification commands and outcomes (2026-09-28):
 
 | Command | Outcome |
 | --- | --- |
-| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Whole-tens correction: 56 renders, six shards written, 285 reused; all 1,950 retained image hashes unchanged |
-| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 16 live judgments, all passing; 1,950 reused; final 1,939 pass / 27 fail / zero uncached; exits 1 for the documented failures |
-| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 27 failing cache records; all structural, freshness, and integrity checks clean |
+| `npm run generate:dataset -- --spec=ccss --affected --concurrency=4` | Spatial construction: 1,966 renders, 224 shards written, 67 reused; projection repair: 42 renders, one shard written, 290 reused; all 1,924 retained image hashes unchanged |
+| `npm run validate:dataset -- --spec=ccss --concurrency=4` | 42 live judgments, all passing; 1,924 reused; final 1,940 pass / 26 fail / zero uncached; exits 1 for the documented failures |
+| `npm run audit:dataset -- --spec=ccss` | Exits 1 solely for those 26 failing cache records; all structural, freshness, and integrity checks clean |
 | `npm run report:splits -- --spec=ccss` | No cross-split leakage or within-split task redundancy; every matched tuple has training evidence |
-| `npm run report:churn -- --spec=ccss --ref=e39b9f4` | Latest follow-up: all 1,950 retained images identical, zero changed seeds/attempts, 16 added/12 removed identities |
-| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,825 identical retained images, 43 intended changes, 98 added/68 removed identities; the same three explained successor retry changes |
+| `npm run report:churn -- --spec=ccss --ref=9c31272` | Latest follow-up: all 1,924 retained images identical, zero changed seeds/attempts, 42 added/42 removed identities |
+| `npm run report:churn -- --spec=ccss --ref=644254d` | Entire maintenance run: 1,783 identical retained images, 43 intended changes, 140 added/110 removed identities; the same three explained successor retry changes |
 
 The final split contains 1,654 training and 312 validation images. All 841 matched tuples have
 training evidence. Of 212 tuples allocated to validation, 156 have validation evidence. The 56
