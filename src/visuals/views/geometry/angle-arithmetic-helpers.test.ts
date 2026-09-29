@@ -74,7 +74,6 @@ describe('angle arithmetic view projection', () => {
             task: 'solve-unknown-angle',
             unknownRole: 'whole',
             prompt: 'Find the measure of angle AOC.',
-            wholePartEquation: '45° + 70° = ?°',
             questionEquation: '45° + 70° = ?°',
             solutionEquation: '45° + 70° = 115°',
             answer: '115°',
@@ -100,20 +99,16 @@ describe('angle arithmetic view projection', () => {
             task: 'solve-unknown-angle',
             unknownRole: 'left-component',
             prompt: 'Find the measure of angle AOB.',
-            wholePartEquation: '?° + 85° = 150°',
-            solutionWholePartEquation: '65° + 85° = 150°',
-            questionEquation: '150° − 85° = ?°',
-            solutionEquation: '150° − 85° = 65°',
+            questionEquation: operation === 'addition' ? '?° + 85° = 150°' : '150° − 85° = ?°',
+            solutionEquation: operation === 'addition' ? '65° + 85° = 150°' : '150° − 85° = 65°',
             answer: '65°'
         });
         expect(right).toMatchObject({
             task: 'solve-unknown-angle',
             unknownRole: 'right-component',
             prompt: 'Find the measure of angle BOC.',
-            wholePartEquation: '65° + ?° = 150°',
-            solutionWholePartEquation: '65° + 85° = 150°',
-            questionEquation: '150° − 65° = ?°',
-            solutionEquation: '150° − 65° = 85°',
+            questionEquation: operation === 'addition' ? '65° + ?° = 150°' : '150° − 65° = ?°',
+            solutionEquation: operation === 'addition' ? '65° + 85° = 150°' : '150° − 65° = 85°',
             answer: '85°'
         });
     });

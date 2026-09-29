@@ -1,2 +1,2 @@
-- **Identity:** A whole angle and one adjacent component require subtracting to determine the unknown component angle.
-- **Modes:** Question Mode withholds one component measure; Solution Mode reveals the inverse equation, measure, and explanation without changing the partition.
+- **Identity:** A whole angle and one adjacent component determine an unknown component, framed by either a missing-addend equation or a subtraction equation.
+- **Modes:** Question Mode withholds one component measure; Solution Mode completes the same equation and reveals the measure and explanation without changing the partition.

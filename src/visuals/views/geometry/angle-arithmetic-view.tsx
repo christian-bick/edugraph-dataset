@@ -221,15 +221,8 @@ function QuestionEquations({data}: {data: AngleArithmeticViewModel}) {
             </div>
         );
     }
-    const showWholePart = data.task === 'solve-unknown-angle'
-        && data.unknownRole !== 'whole';
     return (
-        <div className={showWholePart ? 'grid grid-cols-2 gap-3' : ''}>
-            {showWholePart && (
-                <div className="flex min-h-[58px] items-center justify-center rounded-xl border-2 border-sky-200 bg-sky-50 px-3 text-center font-mono text-[0.98rem] font-extrabold text-sky-900">
-                    {data.wholePartEquation}
-                </div>
-            )}
+        <div>
             <div className="flex min-h-[58px] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-3 text-center font-mono text-[1.02rem] font-extrabold text-slate-700">
                 {data.questionEquation}
             </div>
@@ -283,9 +276,6 @@ export const AngleArithmeticView = ({payload, task: requestedTask, viewId}: Angl
             )}
             {isSolutionView && (
                 <div className="mt-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 px-5 py-3 text-center text-emerald-800">
-                    {viewModel.task === 'solve-unknown-angle' && viewModel.unknownRole !== 'whole' && (
-                        <div className="font-mono text-[1.08rem] font-extrabold">{viewModel.solutionWholePartEquation}</div>
-                    )}
                     <div className="font-mono text-[1.08rem] font-extrabold">{viewModel.solutionEquation}</div>
                     <div className="mt-1 text-[0.98rem] font-extrabold">{viewModel.answerStatement}</div>
                     <div className="mt-1 text-[0.86rem] font-semibold leading-snug text-slate-700">{viewModel.explanation}</div>

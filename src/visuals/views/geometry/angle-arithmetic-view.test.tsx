@@ -24,12 +24,12 @@ const render = (
 
 describe('angle arithmetic rendered evidence', () => {
     it.each([
-        ['addition', 2, '?° + 85° = 150°', '150° − 85°', '65°', 'AOB'],
-        ['addition', 3, '65° + ?° = 150°', '150° − 65°', '85°', 'BOC'],
-        ['subtraction', 2, '?° + 85° = 150°', '150° − 85°', '65°', 'AOB'],
-        ['subtraction', 3, '65° + ?° = 150°', '150° − 65°', '85°', 'BOC']
-    ] as const)('keeps addition and inversion visible for %s at seed %i', (
-        operation, seed, questionAddition, inverse, answer, unknownAngle
+        ['addition', 2, '?° + 85° = 150°', '65° + 85° = 150°', '−', '65°', 'AOB'],
+        ['addition', 3, '65° + ?° = 150°', '65° + 85° = 150°', '−', '85°', 'BOC'],
+        ['subtraction', 2, '150° − 85° = ?°', '150° − 85° = 65°', '+', '65°', 'AOB'],
+        ['subtraction', 3, '150° − 65° = ?°', '150° − 65° = 85°', '+', '85°', 'BOC']
+    ] as const)('shows only the selected %s framing at seed %i', (
+        operation, seed, questionEquation, solutionEquation, otherOperator, answer, unknownAngle
     ) => {
         const data: AngleArithmeticProblem = {
             operation,
@@ -37,13 +37,13 @@ describe('angle arithmetic rendered evidence', () => {
             wholeAngleMeasure: 150
         };
         const question = render(data, 'solve-unknown-component', seed, false);
-        expect(question).toContain(`>${questionAddition}</div>`);
-        expect(question).toContain(`>${inverse} = ?°</div>`);
+        expect(question).toContain(`>${questionEquation}</div>`);
+        expect(question).not.toContain(otherOperator);
         expect(question).not.toContain(answer);
 
         const solution = render(data, 'solve-unknown-component', seed, true);
-        expect(solution).toContain('>65° + 85° = 150°</div>');
-        expect(solution).toContain(`>${inverse} = ${answer}</div>`);
+        expect(solution).toContain(`>${solutionEquation}</div>`);
+        expect(solution).not.toContain(otherOperator);
         expect(solution).toContain(`>Angle ${unknownAngle} measures ${answer}.</div>`);
         expect(solution).not.toContain('?°');
         expect(render(data, 'solve-unknown-component', seed, true)).toBe(solution);
@@ -56,7 +56,16 @@ describe('angle arithmetic rendered evidence', () => {
             wholeAngleMeasure: 90
         }, 'solve-unknown-component', 1743605284, true);
         expect(solution).toContain('>45° + 45° = 90°</div>');
-        expect(solution).toContain('>90° − 45° = 45°</div>');
+        expect(solution).not.toContain('−');
+    });
+
+    it('distinguishes the two formerly byte-identical production questions', () => {
+        const data = {adjacentAngleMeasures: [65, 85] as [number, number], wholeAngleMeasure: 150};
+        const addition = render({...data, operation: 'addition'}, 'solve-unknown-component', 995952438, false);
+        const subtraction = render({...data, operation: 'subtraction'}, 'solve-unknown-component', 511871888, false);
+        expect(addition).not.toBe(subtraction);
+        expect(addition).toContain('>?° + 85° = 150°</div>');
+        expect(subtraction).toContain('>150° − 85° = ?°</div>');
     });
 
     it('keeps the unknown-whole answer withheld and shows its completed addition once', () => {

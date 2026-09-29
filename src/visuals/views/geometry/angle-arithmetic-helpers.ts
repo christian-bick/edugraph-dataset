@@ -32,14 +32,11 @@ type ExplainAngleAdditionPresentation = AngleArithmeticPresentationBase & {
 type SolveUnknownWholePresentation = AngleArithmeticPresentationBase & {
     task: 'solve-unknown-angle';
     unknownRole: 'whole';
-    wholePartEquation: string;
 };
 
 type SolveUnknownComponentPresentation = AngleArithmeticPresentationBase & {
     task: 'solve-unknown-angle';
     unknownRole: 'left-component' | 'right-component';
-    wholePartEquation: string;
-    solutionWholePartEquation: string;
 };
 
 export type AngleArithmeticPresentation =
@@ -98,7 +95,6 @@ export const buildAngleArithmeticPresentation = (
             task: 'solve-unknown-angle',
             unknownRole: 'whole',
             prompt: 'Find the measure of angle AOC.',
-            wholePartEquation: questionEquation,
             questionEquation,
             solutionEquation: numericAddition,
             answer: `${wholeMeasure}°`,
@@ -115,21 +111,22 @@ export const buildAngleArithmeticPresentation = (
     const knownMeasure = solvesLeft ? rightMeasure : leftMeasure;
     const unknownAngleName = solvesLeft ? 'AOB' : 'BOC';
     const knownAngleName = solvesLeft ? 'BOC' : 'AOB';
-    const wholePartEquation = solvesLeft
+    const missingAddendEquation = solvesLeft
         ? `?° + ${rightMeasure}° = ${wholeMeasure}°`
         : `${leftMeasure}° + ?° = ${wholeMeasure}°`;
+    const isAddition = data.operation === 'addition';
 
     return {
         task: 'solve-unknown-angle',
         unknownRole,
         prompt: `Find the measure of angle ${unknownAngleName}.`,
-        wholePartEquation,
-        solutionWholePartEquation: numericAddition,
-        questionEquation: `${wholeMeasure}° − ${knownMeasure}° = ?°`,
-        solutionEquation: `${wholeMeasure}° − ${knownMeasure}° = ${unknownMeasure}°`,
+        questionEquation: isAddition ? missingAddendEquation : `${wholeMeasure}° − ${knownMeasure}° = ?°`,
+        solutionEquation: isAddition ? numericAddition : `${wholeMeasure}° − ${knownMeasure}° = ${unknownMeasure}°`,
         answer: `${unknownMeasure}°`,
         answerStatement: `Angle ${unknownAngleName} measures ${unknownMeasure}°.`,
-        explanation: `Angle AOC is ${wholeMeasure}°. Subtract angle ${knownAngleName}, ${knownMeasure}°, to find angle ${unknownAngleName}: ${unknownMeasure}°.`
+        explanation: isAddition
+            ? `Angles AOB and BOC add to the ${wholeMeasure}° whole.`
+            : `Angle AOC is ${wholeMeasure}°. Subtract angle ${knownAngleName}, ${knownMeasure}°, to find angle ${unknownAngleName}: ${unknownMeasure}°.`
     };
 };
 
