@@ -31,6 +31,7 @@
     "validate:asset-index": "vite-node src/scripts/validate-asset-index.ts",
     "validate:dataset": "vite-node src/scripts/validate-dataset.ts",
     "audit:dataset": "vite-node src/scripts/validate-dataset.ts --audit",
+    "audit:images": "vite-node src/scripts/audit-dataset-images.ts",
     "audit:dataset:report": "vite-node src/scripts/validate-dataset.ts --audit --report-only",
     "test:vqa": "vite-node src/scripts/validate-dataset.ts",
     "report:coverage": "vite-node src/scripts/generate-coverage-report.ts",

@@ -18,6 +18,7 @@ import {
     type MetadataRow,
 } from '../lib/dataset-merge.ts';
 import {readDatasetSnapshot, type DatasetSnapshot} from '../lib/dataset-store.ts';
+import {auditPublishedImages, formatDatasetImageAudit} from '../lib/dataset-image-audit.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -130,6 +131,11 @@ async function main(): Promise<void> {
     // mirroring the generation-time rule across standards.
     const train = mergeSplit('train', unionSpecs, unionDir);
     const validation = mergeSplit('validation', unionSpecs, unionDir, train.contentIndex);
+    const imageAudit = auditPublishedImages(unionDir);
+    console.log(formatDatasetImageAudit(imageAudit));
+    if (imageAudit.issues.length > 0) {
+        throw new Error('Merged dataset failed image byte validation; resolve the reported conflicts before publication.');
+    }
 
     console.log(`\n--- Contribution by Standard ---`);
     console.log(`| Standard | Split | Offered | Merged | Duplicate |`);

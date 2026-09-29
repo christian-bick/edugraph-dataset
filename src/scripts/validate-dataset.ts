@@ -45,13 +45,13 @@ import {
 } from '../lib/matching.ts';
 import {
     readDatasetSnapshot,
-    verifyDatasetSnapshotIntegrity,
     type DatasetSnapshot
 } from '../lib/dataset-store.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
 import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
 import {readSampleReplayRecord} from '../lib/sample-replay.ts';
+import {auditSnapshotImages} from '../lib/dataset-image-audit.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -546,12 +546,13 @@ async function main() {
     }
 
     if (auditMode) {
-        const integrity = verifyDatasetSnapshotIntegrity(DATASET_SNAPSHOT);
-        counters.add('dataset.integrity_files_read', integrity.files_verified);
-        counters.add('dataset.integrity_bytes_read', integrity.bytes_read);
+        const imageAudit = auditSnapshotImages(DATASET_SNAPSHOT);
+        counters.add('dataset.integrity_files_read', imageAudit.checked);
+        counters.add('dataset.integrity_bytes_read', imageAudit.bytesRead);
+        counters.add('dataset.image_duplicate_groups', imageAudit.duplicates.length);
         const structureIssues = [
             ...datasetStructureIssues(filtered, missingSplits),
-            ...integrity.issues
+            ...imageAudit.issues
         ];
         const cacheAudit = auditVqaCache(
             resolve(CACHE_DIR, datasetFolderName),
@@ -563,11 +564,13 @@ async function main() {
         console.log(`Passing coverage: ${cacheAudit.passed}/${cacheAudit.expected}`);
         console.log(`Uncovered images: ${cacheAudit.expected - cacheAudit.passed}`);
         console.log(`Dataset structure issues: ${structureIssues.length}`);
+        console.log(`Byte-identical image groups: ${imageAudit.duplicates.length}`);
         console.log(`Renderer identity issues: ${rendererIssues.length}`);
         for (const [kind, count] of Object.entries(cacheAudit.counts)) {
             console.log(`Cache ${kind}${kind === 'missing' ? ' keys' : ''}: ${count}`);
         }
         for (const issue of structureIssues) console.error(`❌ DATASET: ${issue}`);
+        for (const warning of imageAudit.warnings) console.warn(`⚠️ DATASET: ${warning}`);
         for (const issue of rendererIssues) console.error(`❌ RENDERER: ${issue}`);
         for (const issue of cacheAudit.issues) console.error(`❌ CACHE ${issue.kind.toUpperCase()}: ${issue.message}`);
 

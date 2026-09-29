@@ -125,6 +125,16 @@ Check that validation content is disjoint from train, free of duplicates, and co
 npm run report:splits -- --spec=ccss
 ```
 
+Check the actual PNG bytes for duplicates, including identical images with conflicting
+labels or question/solution flags and images shared across train and validation:
+```bash
+npm run audit:images -- --spec=ccss
+npm run audit:images -- --spec=union
+```
+This offline audit reports every byte-identical group. Conflicting annotations and
+cross-split duplicates fail; same-split copies with identical annotations produce warnings.
+The strict dataset audit and union merge enforce these checks automatically before release.
+
 **2c. Audit the Committed VQA Cache**
 Release validation is a strict offline, read-only check. It never calls Gemini or changes
 the cache, and it requires exact passing coverage for canonical images:
