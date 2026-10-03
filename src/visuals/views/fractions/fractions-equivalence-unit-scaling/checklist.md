@@ -1,0 +1,2 @@
+- **Identity:** Two aligned bars show the same whole and equal shaded amount with finer equal partitions. The given fraction equation and unit multiplier of one ask why the scaling preserves value.
+- **Modes:** Question Mode leaves the reason to explain; Solution Mode connects multiplication by one and the increased part counts to the unchanged shaded amount.

@@ -548,13 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const fractionEquivalenceUnitScalingImplementation = defineImplementationPackage({
-    id: 'fraction-equivalence-unit-scaling',
-    description: 'Extend fraction equivalence with an explicit n/n unit multiplier and interpret why multiplying by one preserves value.',
-    generators: [{module: 'fraction-equivalence', strategy: 'expand'}],
-    views: [{module: 'fractions-equivalence-unit-scaling', strategy: 'new'}]
-});
-
 const unlikeDenominatorArithmeticImplementation = defineImplementationPackage({
     id: 'unlike-denominator-fraction-arithmetic',
     description: 'Extend fraction addition and subtraction to unlike original denominators and mixed numbers, retaining equivalent-fraction conversion and complete same-whole word problems across common and unlike denominators.',
@@ -841,16 +834,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.4b-calculate-fractional-area', fractionalRectangleAreaBuilder),
     ...toTargets('5.NF.B.4b-represent-fraction-product', fractionAreaProductRepresentationBuilder),
     ...toTargets('5.NF.B.5a-compare-product-factor', fractionProductFactorComparisonBuilder),
-    ...toTargets('5.NF.B.5b-explain-fraction-scaling', fractionScalingExplanationBuilder)
+    ...toTargets('5.NF.B.5b-explain-fraction-scaling', fractionScalingExplanationBuilder),
+    ...toTargets('5.NF.B.5b-equivalence-unit-scaling', fractionEquivalenceUnitScalingBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.B.5b-equivalence-unit-scaling',
-        fractionEquivalenceUnitScalingBuilder,
-        fractionEquivalenceUnitScalingImplementation,
-        'Expose a/b times n/n = na/nb with n/n equal to one and ask why this unit scaling changes the fraction representation while preserving its quantity.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.2-explain-power-ten-zero-patterns',
         explainPowerTenZeroPatternsBuilder,

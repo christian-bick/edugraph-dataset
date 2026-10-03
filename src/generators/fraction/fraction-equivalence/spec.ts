@@ -14,7 +14,8 @@ export const spec: GeneratorSpec = {
 };
 
 export const FractionEquivalenceGeneratorSchema = {
-    usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)]
+    usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)],
+    usesProportionalScaling: [[Area.ProportionalScaling], hasLabel(Area.ProportionalScaling)]
 } as const;
 
 export type FractionEquivalenceGeneratorConfig = ConfigFromSchema<

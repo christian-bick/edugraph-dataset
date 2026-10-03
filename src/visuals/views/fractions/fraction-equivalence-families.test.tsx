@@ -16,7 +16,10 @@ describe('equivalence payload families', () => {
     it('renders every admitted scaling and whole-number family in both modes', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const proper = new FractionEquivalenceGenerator().generate({usesMultiplication: true}).data;
+            const proper = new FractionEquivalenceGenerator().generate({
+                usesMultiplication: true,
+                usesProportionalScaling: false
+            }).data;
             const tenths = new FractionTenthsEquivalenceGenerator().generate({}).data;
             const whole = new FractionWholeEquivalenceGenerator().generate({}).data;
             for (const solution of [false, true]) {

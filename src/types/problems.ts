@@ -1997,6 +1997,17 @@ export type ProperFractionEquivalenceProblem = {
     relation: 'equal';
 };
 
+/** Exact n/n = 1 witness; the numerator and denominator equal the pair's scaleFactor. */
+export type FractionUnitMultiplier =
+    | {numerator: 2; denominator: 2; value: 1}
+    | {numerator: 3; denominator: 3; value: 1}
+    | {numerator: 4; denominator: 4; value: 1};
+
+/** The unit-scaling view requires the witness; existing equivalence views accept the base shape. */
+export type ProperFractionUnitScalingProblem = ProperFractionEquivalenceProblem & {
+    unitMultiplier: FractionUnitMultiplier;
+};
+
 export type WholeNumberFractionEquivalenceProblem = {
     task: 'represent-whole-as-fraction';
     wholeNumber: 1 | 2 | 3;
@@ -2049,11 +2060,11 @@ export type TenthsToHundredthsProblem = {
 };
 
 export type FractionEquivalenceProblem =
-    | ProperFractionEquivalenceProblem
+    | ProperFractionUnitScalingProblem
     | WholeNumberFractionEquivalenceProblem
     | TenthsToHundredthsProblem;
 
-export type FractionScalingProblem = ProperFractionEquivalenceProblem | TenthsToHundredthsProblem;
+export type FractionScalingProblem = ProperFractionUnitScalingProblem | TenthsToHundredthsProblem;
 
 export type FractionLineProblem = FractionNumberLineProblem | FractionEquivalenceProblem;
 
@@ -2930,7 +2941,7 @@ export interface ViewTypeMap {
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-decimal-rounding-line': DecimalRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;
-    'numbers-fraction-line-classification': ProperFractionEquivalenceProblem;
+    'numbers-fraction-line-classification': ProperFractionUnitScalingProblem;
     'numbers-fraction-line-formalization': FractionEquivalenceProblem;
     'numbers-fraction-line-explanation': FractionEquivalenceProblem;
     'operations-number-array-total': NumberArrayProblem;
@@ -3084,7 +3095,8 @@ export interface ViewTypeMap {
     'geometry-angle-arithmetic-inversion': AngleArithmeticProblem;
     'geometry-primitives-drawing': GeometryPrimitivesProblem;
     'geometry-primitives-identification': GeometryPrimitivesProblem;
-    'fractions-equivalence-model': ProperFractionEquivalenceProblem;
+    'fractions-equivalence-model': ProperFractionUnitScalingProblem;
+    'fractions-equivalence-unit-scaling': ProperFractionUnitScalingProblem;
     'fractions-equivalence-completion-model': FractionScalingProblem;
     'fractions-equivalence-explanation-model': FractionScalingProblem;
     'fractions-whole-equivalence': WholeNumberFractionEquivalenceProblem;
