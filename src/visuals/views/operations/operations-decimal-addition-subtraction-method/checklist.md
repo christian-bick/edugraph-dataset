@@ -1,0 +1,2 @@
+- **Identity:** The same decimal addition or subtraction task asks for a base-ten piece model, an aligned written calculation, and a written place-value explanation.
+- **Modes:** Question Mode shows the operand pieces but leaves the result, exchange work, written calculation, and explanation blank; Solution Mode shows countable ten-for-one exchanges when needed, the final pieces and calculation, and an explanation consistent with them.

@@ -1085,6 +1085,89 @@ export type DecimalPlaceComparisonProblem = DecimalPlaceComparisonBase & (
     }>
 );
 
+export type DecimalAddSubtractPlace = 'hundredths' | 'tenths' | 'ones';
+
+/**
+ * An exact nonnegative decimal below 10. The aligned digits are always
+ * [ones, tenths, hundredths], including zero placeholders; the numeral is the
+ * canonical, unpadded writing of valueInHundredths / 100.
+ */
+export type DecimalAddSubtractNumber = Readonly<{
+    valueInHundredths: number;
+    canonicalNumeral: string;
+    alignedDigits: readonly [number, number, number];
+}>;
+
+/** Ordered from hundredths through ones, even when a place has digit zero. */
+export type DecimalAddSubtractColumnStep = Readonly<{
+    place: DecimalAddSubtractPlace;
+    firstDigit: number;
+    secondDigit: number;
+    regroupIn: 0 | 1;
+    regroupOut: 0 | 1;
+    workingUnits: number;
+    resultDigit: number;
+}>;
+
+/** Counts of drawable whole squares, tenth rods, and hundredth cells. */
+export type DecimalAddSubtractUnitCounts = Readonly<{
+    ones: number;
+    tenths: number;
+    hundredths: number;
+}>;
+
+export type DecimalAddSubtractModelStep =
+    | Readonly<{
+        kind: 'join-second' | 'remove-second';
+        before: DecimalAddSubtractUnitCounts;
+        after: DecimalAddSubtractUnitCounts;
+    }>
+    | Readonly<{
+        kind: 'compose-ten' | 'decompose-one';
+        /** The lower of the two adjacent places involved in the exchange. */
+        lowerPlace: 'hundredths' | 'tenths';
+        before: DecimalAddSubtractUnitCounts;
+        after: DecimalAddSubtractUnitCounts;
+    }>;
+
+/**
+ * Exact base-ten arithmetic through hundredths. All three values are integer
+ * hundredths in [0, 999], with result = first +/- second. `columns` records
+ * the written calculation in hundredths, tenths, ones order. In addition,
+ * workingUnits = firstDigit + secondDigit + regroupIn, resultDigit is its
+ * remainder mod 10, and regroupOut is the carry. In subtraction,
+ * workingUnits = firstDigit - regroupIn + 10 * regroupOut, and resultDigit =
+ * workingUnits - secondDigit; regroupOut borrows from the next higher place.
+ * The final regroupOut is zero.
+ *
+ * `model.initial` is the first operand's unit counts. Addition joins the
+ * second operand then composes tens from lower units, ending at the normalized
+ * result counts. Subtraction decomposes higher units as needed, then removes
+ * the second operand componentwise. Each exchange preserves the represented
+ * hundredths and each step's `after` equals the next step's `before`. Thus a
+ * zero-tenths cascade such as 1.02 - 0.38 records one whole becoming ten
+ * tenths before one tenth becomes ten hundredths.
+ */
+export type DecimalAddSubtractProblem = Readonly<{
+    kind: 'decimal-add-subtract';
+    base: 10;
+    scale: 100;
+    operation: 'addition' | 'subtraction';
+    first: DecimalAddSubtractNumber;
+    second: DecimalAddSubtractNumber;
+    result: DecimalAddSubtractNumber;
+    columns: readonly [
+        DecimalAddSubtractColumnStep,
+        DecimalAddSubtractColumnStep,
+        DecimalAddSubtractColumnStep
+    ];
+    model: Readonly<{
+        initial: DecimalAddSubtractUnitCounts;
+        steps: readonly DecimalAddSubtractModelStep[];
+        final: DecimalAddSubtractUnitCounts;
+    }>;
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3188,6 +3271,7 @@ export interface ViewTypeMap {
     'numbers-decimal-name-writing': DecimalWritingProblem;
     'numbers-decimal-expanded-form': DecimalPlaceValueExpandedProblem;
     'numbers-decimal-place-comparison': DecimalPlaceComparisonProblem;
+    'operations-decimal-addition-subtraction-method': DecimalAddSubtractProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

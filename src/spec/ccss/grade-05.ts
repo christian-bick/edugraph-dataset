@@ -148,13 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalAddSubtractImplementation = defineImplementationPackage({
-    id: 'decimal-addition-subtraction-methods',
-    description: 'Connect decimal addition and subtraction models, aligned written calculations, and explanations of regrouping and place-value units.',
-    generators: [{module: 'decimal-addition-subtraction', strategy: 'new'}],
-    views: [{module: 'operations-decimal-addition-subtraction-method', strategy: 'new'}]
-});
-
 const decimalMultiplicationImplementation = defineImplementationPackage({
     id: 'decimal-multiplication-method',
     description: 'Connect products of decimal operands through hundredths to exact partition models, a written calculation, and place-value reasoning.',
@@ -803,22 +796,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.3a-write-decimal-numerals', writeDecimalNumeralsBuilder),
     ...toTargets('5.NBT.A.3a-write-decimal-number-names', writeDecimalNumberNamesBuilder),
     ...toTargets('5.NBT.A.3a-decimal-expanded-form', writeDecimalExpandedFormBuilder),
-    ...toTargets('5.NBT.A.3b-compare-decimals', compareDecimalsThroughThousandthsBuilder)
+    ...toTargets('5.NBT.A.3b-compare-decimals', compareDecimalsThroughThousandthsBuilder),
+    ...toTargets('5.NBT.B.7-add-decimals-with-models', addDecimalsWithModelsBuilder),
+    ...toTargets('5.NBT.B.7-subtract-decimals-with-models', subtractDecimalsWithModelsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.B.7-add-decimals-with-models',
-        addDecimalsWithModelsBuilder,
-        decimalAddSubtractImplementation,
-        'Add decimal operands through hundredths using a concrete-model drawing, complete a corresponding written calculation, and explain the place-value strategy. Keep the model, calculation and written reasoning together; include regrouping and preserve exact intermediate and result values.'
-    ),
-    ...toImplementationTodos(
-        '5.NBT.B.7-subtract-decimals-with-models',
-        subtractDecimalsWithModelsBuilder,
-        decimalAddSubtractImplementation,
-        'Subtract decimal operands through hundredths using a concrete-model drawing, complete a corresponding written calculation, and explain the place-value strategy. Keep nonnegative differences, regrouping, zero placeholders, the model and the written reasoning coherent.'
-    ),
     ...toImplementationTodos(
         '5.NBT.B.7-multiply-decimals-with-models',
         multiplyDecimalsWithModelsBuilder,
