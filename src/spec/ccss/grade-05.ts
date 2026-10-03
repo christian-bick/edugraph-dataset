@@ -2,7 +2,6 @@ import DatasetPermutationBuilder, {
     defineImplementationPackage,
     toImplementationTodos
 } from '../../lib/dataset-permutation-builder.ts';
-import {defineOntologyPackage, toOntologyTodo} from '../../lib/ontology-todo.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import type {
     BeyondScopeEntry,
@@ -14,42 +13,50 @@ import type {
 
 // Operations and Algebraic Thinking (5.OA)
 
-const groupedExpressionsImplementation = defineImplementationPackage({
-    id: 'grouped-numerical-expressions',
-    description: 'Construct meaningful grouping and evaluate numerical expressions with grouping-first reasoning.',
-    generators: [{module: 'arithmetic-grouped-expressions', strategy: 'new'}],
+const numericalExpressionsImplementation = defineImplementationPackage({
+    id: 'numerical-expression-tasks',
+    description: 'Construct, interpret and evaluate numerical expression structure using shared grouped and ungrouped expression trees.',
+    generators: [{module: 'arithmetic-numerical-expressions', strategy: 'new'}],
     views: [
         {module: 'operations-grouping-write', strategy: 'new'},
-        {module: 'operations-grouping-evaluate', strategy: 'new'}
+        {module: 'operations-grouping-evaluate', strategy: 'new'},
+        {module: 'operations-numerical-expression-write', strategy: 'new'},
+        {module: 'operations-numerical-expression-interpretation', strategy: 'new'}
     ]
 });
 
 const patternCorrespondenceImplementation = defineImplementationPackage({
     id: 'paired-pattern-correspondence',
-    description: 'Infer and explain relationships between aligned terms of two numerical patterns.',
+    description: 'Generate aligned numerical patterns from their supplied rules, and infer or explain relationships between their corresponding terms.',
     generators: [{module: 'arithmetic-paired-patterns', strategy: 'new'}],
     views: [
         {module: 'operations-pattern-correspondence', strategy: 'new'},
-        {module: 'operations-pattern-correspondence-explanation', strategy: 'new'}
+        {module: 'operations-pattern-correspondence-explanation', strategy: 'new'},
+        {module: 'operations-paired-pattern-generation', strategy: 'new'}
     ]
 });
 
 const patternCoordinateImplementation = defineImplementationPackage({
     id: 'pattern-coordinate-plotting',
-    description: 'Plot supplied ordered coordinate pairs drawn from corresponding numerical-pattern terms.',
+    description: 'Form ordered coordinate pairs from aligned numerical-pattern terms and plot the resulting pairs in separate task projections.',
     generators: [{module: 'coordinate-pattern-pairs', strategy: 'new'}],
-    views: [{module: 'coordinate-plot-pattern-pairs', strategy: 'new'}]
+    views: [
+        {module: 'coordinate-plot-pattern-pairs', strategy: 'new'},
+        {module: 'coordinate-form-pattern-pairs', strategy: 'new'}
+    ]
 });
 
 const useGroupingBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.ParenthesesUsage,
+    Area.GroupedExpression,
+    Area.NumericalExpression,
     Area.OrderOfOperations,
     Scope.ArabicNumerals,
     Ability.Formalization
 ]);
 
 const evaluateGroupedExpressionsBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.ParenthesesUsage,
+    Area.GroupedExpression,
+    Area.NumericalExpression,
     Area.OrderOfOperations,
     Scope.ArabicNumerals,
     Ability.ProcedureExecution
@@ -74,6 +81,50 @@ const graphPatternPairsBuilder = new DatasetPermutationBuilder().addLabels([
     Scope.IntegerNumbers,
     Scope.NumbersWithoutNegatives,
     Ability.VisualArticulation
+]);
+
+const writeNumericalExpressionBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.NumericalExpression,
+    Scope.ArabicNumerals,
+    Ability.Formalization,
+    Ability.TextualReception
+]);
+
+const interpretNumericalExpressionBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.NumericalExpression,
+    Scope.ArabicNumerals,
+    Ability.Interpretation
+]);
+
+const generatePairedPatternsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.PatternGeneration,
+    Scope.PairedPatterns,
+    Scope.ArabicNumerals,
+    Ability.ProcedureExecution
+]);
+
+const formPatternPairsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.OrderedCoordinatePair,
+    Scope.PairedPatterns,
+    Scope.ArabicNumerals,
+    Ability.Formalization
+]);
+
+const interpretCoordinateComponentsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.OrderedCoordinatePair,
+    Area.CoordinateAxes,
+    Area.Origin,
+    Scope.CartesianCoordinateSystem,
+    Scope.TwoDimensional,
+    Ability.Interpretation
+]);
+
+const interpretContextualCoordinatesBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.OrderedCoordinatePair,
+    Scope.CartesianCoordinateSystem,
+    Scope.NumbersWithoutNegatives,
+    Ability.Interpretation,
+    Ability.TextualReception
 ]);
 
 // Number and Operations in Base Ten (5.NBT)
@@ -156,6 +207,195 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.ThreeDigitDividend],
         [Scope.FourDigitDividend]
     ]);
+
+const powersOfTenImplementation = defineImplementationPackage({
+    id: 'powers-of-ten',
+    description: 'Relate powers of ten with nonnegative integer exponents to whole-number zero patterns, decimal scaling, and exponent notation.',
+    generators: [
+        {module: 'whole-number-power-ten-scaling', strategy: 'new'},
+        {module: 'decimal-power-ten-scaling', strategy: 'new'},
+        {module: 'powers-of-ten', strategy: 'new'}
+    ],
+    views: [
+        {module: 'numbers-power-ten-zero-pattern-explanation', strategy: 'new'},
+        {module: 'numbers-power-ten-decimal-pattern-explanation', strategy: 'new'},
+        {module: 'numbers-power-ten-exponent-notation', strategy: 'new'}
+    ]
+});
+
+const decimalWritingImplementation = defineImplementationPackage({
+    id: 'decimal-reading-writing',
+    description: 'Represent nonnegative decimal values through thousandths for numeral reading, numeral writing, and written number names.',
+    generators: [{module: 'decimal-writing', strategy: 'new'}],
+    views: [
+        {module: 'numbers-decimal-numeral-reading', strategy: 'new'},
+        {module: 'numbers-decimal-numeral-writing', strategy: 'new'},
+        {module: 'numbers-decimal-name-writing', strategy: 'new'}
+    ]
+});
+
+const decimalExpandedFormImplementation = defineImplementationPackage({
+    id: 'decimal-expanded-form',
+    description: 'Connect decimal numerals through thousandths to sums of digit-times-place contributions, including fractional place units.',
+    generators: [{module: 'decimal-place-value-expanded', strategy: 'new'}],
+    views: [{module: 'numbers-decimal-expanded-form', strategy: 'new'}]
+});
+
+const decimalPlaceComparisonImplementation = defineImplementationPackage({
+    id: 'decimal-place-comparison',
+    description: 'Compare nonnegative decimals through thousandths using aligned place values and record the resulting equality or inequality.',
+    generators: [{module: 'decimal-place-comparison', strategy: 'new'}],
+    views: [{module: 'numbers-decimal-place-comparison', strategy: 'new'}]
+});
+
+const decimalAddSubtractImplementation = defineImplementationPackage({
+    id: 'decimal-addition-subtraction-methods',
+    description: 'Connect decimal addition and subtraction models, aligned written calculations, and explanations of regrouping and place-value units.',
+    generators: [{module: 'decimal-addition-subtraction', strategy: 'new'}],
+    views: [{module: 'operations-decimal-addition-subtraction-method', strategy: 'new'}]
+});
+
+const decimalMultiplicationImplementation = defineImplementationPackage({
+    id: 'decimal-multiplication-method',
+    description: 'Connect products of decimal operands through hundredths to exact partition models, a written calculation, and place-value reasoning.',
+    generators: [{module: 'decimal-multiplication-model', strategy: 'new'}],
+    views: [{module: 'operations-decimal-multiplication-method', strategy: 'new'}]
+});
+
+const decimalDivisionImplementation = defineImplementationPackage({
+    id: 'decimal-division-method',
+    description: 'Connect decimal division models and exact quotient relations to a written calculation and an explanation of the chosen strategy.',
+    generators: [{module: 'decimal-division-model', strategy: 'new'}],
+    views: [{module: 'operations-decimal-division-method', strategy: 'new'}]
+});
+
+// The conjunction admits exponent zero and excludes negative exponents in this
+// nonnegative Grade 5 domain; Base10 alone would not constrain a power's base.
+const grade5WholeNumberPowerContext = [
+    Scope.PowersOf10,
+    Scope.IntegerExponent,
+    Scope.NumbersWithoutNegatives,
+    Scope.Base10
+];
+
+const explainPowerTenZeroPatternsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.PatternRecognition,
+    Area.PlaceValue,
+    Area.Multiplication,
+    Area.Exponentiation,
+    ...grade5WholeNumberPowerContext,
+    Scope.IntegerNumbers,
+    Scope.ArabicNumerals,
+    Ability.ProcedureUnderstanding,
+    Ability.TextualArticulation
+]);
+
+const explainDecimalPowerTenPatternsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PatternRecognition,
+        Area.PlaceValue,
+        Area.ProportionalScaling,
+        Area.Exponentiation,
+        ...grade5WholeNumberPowerContext,
+        Scope.DecimalNumbers,
+        Scope.ArabicNumerals,
+        Ability.ProcedureUnderstanding,
+        Ability.TextualArticulation
+    ])
+    .applyLabelVariants([[Area.Multiplication], [Area.Division]]);
+
+const formalizePowersOfTenBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Exponentiation,
+    ...grade5WholeNumberPowerContext,
+    Scope.IntegerNumbers,
+    Scope.ArabicNumerals,
+    Ability.Formalization
+]);
+
+// These are cumulative input precision bounds, not exact digit counts.
+// Preserve cases that require the thousandths place as well as coarser values.
+const grade5DecimalWritingContext = [
+    Scope.ThousandthDecimals,
+    Scope.Base10,
+    Scope.NumbersWithoutNegatives
+];
+
+const readDecimalNumeralsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.DecimalNotation,
+    ...grade5DecimalWritingContext,
+    Scope.ArabicNumerals,
+    Ability.TextualReception
+]);
+
+const writeDecimalNumeralsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.DecimalNotation,
+    ...grade5DecimalWritingContext,
+    Scope.ArabicNumerals,
+    Ability.VisualArticulation
+]);
+
+const writeDecimalNumberNamesBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.NumberNameNotation,
+    ...grade5DecimalWritingContext,
+    Ability.TextualArticulation
+]);
+
+const writeDecimalExpandedFormBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.PlaceValue,
+    Area.Sum,
+    ...grade5DecimalWritingContext,
+    Scope.ArabicNumerals,
+    Ability.Formalization
+]);
+
+const compareDecimalsThroughThousandthsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.PlaceValue,
+        ...grade5DecimalWritingContext,
+        Scope.TwoOperands,
+        Scope.ArabicNumerals,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Area.NumericInequality, Scope.Greater],
+        [Area.NumericEquality, Scope.Equal],
+        [Area.NumericInequality, Scope.Less]
+    ]);
+
+// HundredthDecimals constrains the operands. Intermediate quantities and results
+// retain their exact precision, including products/quotients beyond hundredths.
+const grade5DecimalArithmeticLabels = [
+    Area.PlaceValue,
+    Scope.HundredthDecimals,
+    Scope.Base10,
+    Scope.NumbersWithoutNegatives,
+    Scope.TwoOperands,
+    Scope.ArabicNumerals,
+    Scope.VisualNumbers,
+    Ability.ProcedureExecution,
+    Ability.ProcedureUnderstanding,
+    Ability.TextualArticulation
+];
+
+const addDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Addition,
+    ...grade5DecimalArithmeticLabels
+]);
+
+const subtractDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Subtraction,
+    ...grade5DecimalArithmeticLabels
+]);
+
+const multiplyDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Multiplication,
+    ...grade5DecimalArithmeticLabels
+]);
+
+const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Division,
+    ...grade5DecimalArithmeticLabels
+]);
 
 const measurementUnitConversionImplementation = defineImplementationPackage({
     id: 'measurement-unit-conversion-decimals',
@@ -243,23 +483,21 @@ const compositePrismVolumeImplementation = defineImplementationPackage({
 
 const coordinateSystemFoundationsImplementation = defineImplementationPackage({
     id: 'coordinate-system-foundations',
-    description: 'Specify a Cartesian coordinate system through perpendicular axes, coherent scales and a shared zero origin.',
-    generators: [
-        {module: 'coordinate-system', strategy: 'new'}
-    ],
+    description: 'Specify a Cartesian coordinate system and interpret ordered components as travel from its origin along corresponding named axes.',
+    generators: [{module: 'coordinate-system', strategy: 'new'}],
     views: [
-        {module: 'coordinate-system-specification', strategy: 'new'}
+        {module: 'coordinate-system-specification', strategy: 'new'},
+        {module: 'coordinate-components-interpretation', strategy: 'new'}
     ]
 });
 
 const contextualCoordinateGraphingImplementation = defineImplementationPackage({
     id: 'contextual-coordinate-graphing',
-    description: 'Graph nonnegative ordered quantities from necessary real-world or mathematical context on named and scaled coordinate axes.',
-    generators: [
-        {module: 'coordinate-context', strategy: 'new'}
-    ],
+    description: 'Graph nonnegative ordered quantities from a situation and interpret their coordinate roles, values and units in separate task projections.',
+    generators: [{module: 'coordinate-context', strategy: 'new'}],
     views: [
-        {module: 'coordinate-context-plotting', strategy: 'new'}
+        {module: 'coordinate-context-plotting', strategy: 'new'},
+        {module: 'coordinate-context-interpretation', strategy: 'new'}
     ]
 });
 
@@ -498,9 +736,16 @@ const fractionBenchmarkArithmeticImplementation = defineImplementationPackage({
 
 const fractionQuotientMeaningImplementation = defineImplementationPackage({
     id: 'fraction-quotient-meaning',
-    description: 'Represent the equal-sharing and division relationship between a fraction numerator, denominator and value.',
+    description: 'Model exact division relations for fraction meaning, whole-number sharing with fractional or mixed quotients, and both unit-fraction division orientations; preserve operand roles and inverse multiplication across interpretation, calculation, story creation and explanation.',
     generators: [{module: 'fraction-quotient-model', strategy: 'new'}],
-    views: [{module: 'fractions-quotient-interpretation', strategy: 'new'}]
+    views: [
+        {module: 'fractions-quotient-interpretation', strategy: 'new'},
+        {module: 'fractions-division-interpretation', strategy: 'new'},
+        {module: 'fractions-division-execution', strategy: 'new'},
+        {module: 'fractions-division-story-creation', strategy: 'new'},
+        {module: 'fractions-division-inverse-explanation', strategy: 'new'},
+        {module: 'fractions-division-word-problem', strategy: 'new'}
+    ]
 });
 
 const generalFractionProductsImplementation = defineImplementationPackage({
@@ -541,6 +786,120 @@ const fractionEquivalenceUnitScalingImplementation = defineImplementationPackage
     generators: [{module: 'fraction-equivalence', strategy: 'expand'}],
     views: [{module: 'fractions-equivalence-unit-scaling', strategy: 'new'}]
 });
+
+const unlikeDenominatorArithmeticImplementation = defineImplementationPackage({
+    id: 'unlike-denominator-fraction-arithmetic',
+    description: 'Extend fraction addition and subtraction to unlike original denominators and mixed numbers, retaining equivalent-fraction conversion and complete same-whole word problems across common and unlike denominators.',
+    generators: [{module: 'fraction-arithmetic', strategy: 'expand'}],
+    views: [
+        {module: 'fractions-operation-model', strategy: 'expand'},
+        {module: 'fractions-word-problem', strategy: 'expand'}
+    ]
+});
+
+const grade5FractionArithmeticNumberKinds = [
+    [Scope.FractionNumbers],
+    [Scope.MixedNumbers]
+];
+
+const unlikeDenominatorArithmeticBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.FractionEquivalence,
+        Scope.UnlikeDenominators,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
+    .applyLabelVariants(grade5FractionArithmeticNumberKinds);
+
+const grade5FractionArithmeticWordProblemsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Equation,
+        Scope.SingleFrameOfReference,
+        Ability.TextualReception,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
+    .applyLabelVariants([[Scope.CommonDenominator], [Scope.UnlikeDenominators]])
+    .applyLabelVariants(grade5FractionArithmeticNumberKinds);
+
+const wholeNumberFractionQuotientProblemsBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.Division,
+    Area.Equation,
+    Scope.IntegerDividend,
+    Scope.IntegerDivisor,
+    Scope.FractionQuotient,
+    Scope.NumbersWithoutNegatives,
+    Ability.TextualReception,
+    Ability.ProcedureExecution
+]);
+
+// The role pair identifies the unit-fraction operand; the producer must retain that
+// operand's numerator-one condition in the original expression and its story/model.
+const unitFractionDividendLabels = [
+    Area.Division,
+    Scope.FractionDividend,
+    Scope.IntegerDivisor,
+    Scope.UnitFractions,
+    Scope.NumbersWithoutNegatives
+];
+
+const unitFractionDivisorLabels = [
+    Area.Division,
+    Scope.IntegerDividend,
+    Scope.FractionDivisor,
+    Scope.UnitFractions,
+    Scope.NumbersWithoutNegatives
+];
+
+const interpretUnitFractionDividendBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDividendLabels,
+    Ability.Interpretation
+]);
+
+const computeUnitFractionDividendBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDividendLabels,
+    Ability.ProcedureExecution
+]);
+
+const createUnitFractionDividendStoryBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDividendLabels,
+    Ability.TextualArticulation
+]);
+
+const explainUnitFractionDividendBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDividendLabels,
+    Area.Multiplication,
+    Ability.ProcedureUnderstanding
+]);
+
+const interpretUnitFractionDivisorBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDivisorLabels,
+    Ability.Interpretation
+]);
+
+const computeUnitFractionDivisorBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDivisorLabels,
+    Ability.ProcedureExecution
+]);
+
+const createUnitFractionDivisorStoryBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDivisorLabels,
+    Ability.TextualArticulation
+]);
+
+const explainUnitFractionDivisorBuilder = new DatasetPermutationBuilder().addLabels([
+    ...unitFractionDivisorLabels,
+    Area.Multiplication,
+    Ability.ProcedureUnderstanding
+]);
+
+const unitFractionDivisionProblemsBuilder = new DatasetPermutationBuilder()
+    .addLabels([
+        Area.Equation,
+        Ability.TextualReception,
+        Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([unitFractionDividendLabels, unitFractionDivisorLabels]);
 
 const fractionBenchmarkEstimateBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -662,77 +1021,6 @@ const generalFractionProductProblemsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.FractionNumbers], [Scope.MixedNumbers]]);
 
-// Shared ontology packages; each leaf reference retains its complete competency.
-
-const numericalExpressionOntology = defineOntologyPackage({
-    id: 'numerical-expression-tasks',
-    description: 'Add an eligible NumericalExpression Area in the mathematical-expression family for expressions composed of numbers and operations without a relational operator. Support writing and interpreting expression structure without requiring grouping symbols or evaluation.',
-    changes: [
-        { dimension: 'Area', entities: ['NumericalExpression'] }
-    ]
-});
-
-const pairedPatternOntology = defineOntologyPackage({
-    id: 'paired-pattern-context',
-    description: 'Add a PairedPatterns Scope in pattern-task contexts for aligned numerical sequences generated simultaneously from their respective supplied rules and starting conditions. Preserve its distinction from generating one sequence and from interpreting a correspondence between sequences.',
-    changes: [
-        { dimension: 'Scope', entities: ['PairedPatterns'] }
-    ]
-});
-
-const orderedCoordinatePairOntology = defineOntologyPackage({
-    id: 'ordered-coordinate-pairs',
-    description: 'Add an OrderedCoordinatePair Area in coordinate geometry and representation for forming and interpreting ordered components, their correspondence to named axes, travel from the origin, and contextual meanings, independently of locating and marking a point.',
-    changes: [
-        { dimension: 'Area', entities: ['OrderedCoordinatePair'] }
-    ]
-});
-
-const powersOfTenOntology = defineOntologyPackage({
-    id: 'powers-of-ten-context',
-    description: 'Add a WholeNumberPowersOfTen Scope in numerical contexts for exponentiation, constraining the power base to ten and the exponent to a nonnegative integer. This power constraint is distinct from the existing Base10 positional-notation Scope.',
-    changes: [
-        { dimension: 'Scope', entities: ['WholeNumberPowersOfTen'] }
-    ]
-});
-
-const decimalPrecisionOntology = defineOntologyPackage({
-    id: 'decimal-place-precision',
-    description: 'Add cumulative input/display precision Scopes in decimal-number contexts through tenths, hundredths, and thousandths, with capability to evidence each named deepest place. Distinguish these input/display bounds from the precision of intermediate values and results, and from the existing DecimalPrecission mathematical topic.',
-    changes: [
-        {
-            dimension: 'Scope',
-            entities: ['TenthsPrecision', 'HundredthsPrecision', 'ThousandthsPrecision']
-        }
-    ]
-});
-
-const unlikeDenominatorOntology = defineOntologyPackage({
-    id: 'unlike-denominator-fraction-arithmetic',
-    description: 'Add an UnlikeDenominators Scope in relational contexts for fractional operands, constraining the original operands before conversion to equivalent common-denominator forms. Preserve unlike-denominator arithmetic and word problems without imposing a least-common-denominator requirement.',
-    changes: [
-        { dimension: 'Scope', entities: ['UnlikeDenominators'] }
-    ]
-});
-
-const fractionDivisionRolesOntology = defineOntologyPackage({
-    id: 'fraction-division-operand-roles',
-    description: 'Add role-specific numerical contexts for whole-number and unit-fraction dividends and divisors, and fractional or mixed-number quotients. Each Scope constrains its named role rather than every number in the artifact; divisors remain nonzero under the division contract. Distinguish the two unit-fraction division orientations and whole-number division with fractional results.',
-    changes: [
-        {
-            dimension: 'Scope',
-            entities: [
-                'WholeNumberDividend',
-                'WholeNumberDivisor',
-                'UnitFractionDividend',
-                'UnitFractionDivisor',
-                'FractionalQuotient',
-                'MixedNumberQuotient'
-            ]
-        }
-    ]
-});
-
 // The current catalog cannot yet realize any complete reviewed Grade 5 target.
 export const spec: CompetencyTarget[] = [];
 
@@ -740,13 +1028,13 @@ export const implementationTodos: ImplementationTodo[] = [
     ...toImplementationTodos(
         '5.OA.A.1-use-grouping',
         useGroupingBuilder,
-        groupedExpressionsImplementation,
+        numericalExpressionsImplementation,
         'Elicit grouping symbols that express a described calculation order; include parentheses, brackets and braces with mathematically necessary grouping.'
     ),
     ...toImplementationTodos(
         '5.OA.A.1-evaluate-grouped-expressions',
         evaluateGroupedExpressionsBuilder,
-        groupedExpressionsImplementation,
+        numericalExpressionsImplementation,
         'Show a meaningfully grouped numeral expression and request its value; the solution preserves grouping-first steps and the final result.'
     ),
     ...toImplementationTodos(
@@ -959,190 +1247,189 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
     ),
+    ...toImplementationTodos(
+        '5.OA.A.2-write-numerical-expression',
+        writeNumericalExpressionBuilder,
+        numericalExpressionsImplementation,
+        'Present a necessary written description of a numerical calculation and elicit an expression that records its operations and order without a relation sign or a computed answer. Preserve both grouped and ungrouped calculations; the solution shows the corresponding expression rather than replacing it with an equation.'
+    ),
+    ...toImplementationTodos(
+        '5.OA.A.2-interpret-numerical-expression',
+        interpretNumericalExpressionBuilder,
+        numericalExpressionsImplementation,
+        'Show numerical expressions and elicit the meaning of their operations, grouping or multiplicative relationship without evaluating their values. Include comparisons such as an expression being three times another; the solution explains the structure while leaving the indicated sum and product uncomputed.'
+    ),
+    ...toImplementationTodos(
+        '5.OA.B.3-generate-paired-patterns',
+        generatePairedPatternsBuilder,
+        patternCorrespondenceImplementation,
+        'Supply two numerical recurrence rules and their starting conditions, and request terms in both sequences with corresponding positions aligned. The solution preserves both complete sequences, including the source example of add 3 and add 6 from zero; generating a single sequence or only inferring a relationship does not complete this task.'
+    ),
+    ...toImplementationTodos(
+        '5.OA.B.3-form-pattern-pairs',
+        formPatternPairsBuilder,
+        patternCoordinateImplementation,
+        'Show two aligned numerical sequences with their respective rules and starts, designate the first and second component roles, and elicit ordered pairs from corresponding terms. The solution preserves each sequence-to-component association; forming pair notation does not require locating or marking points.'
+    ),
+    ...toImplementationTodos(
+        '5.G.A.1-interpret-coordinate-components',
+        interpretCoordinateComponentsBuilder,
+        coordinateSystemFoundationsImplementation,
+        'Show perpendicular named axes with a common zero origin, coherent scales and an ordered pair. Elicit an interpretation of how far each component indicates travel from the origin along its corresponding axis, preserving first and second component order; the solution explains that association without substituting a point-marking task.'
+    ),
+    ...toImplementationTodos(
+        '5.G.A.2-interpret-contextual-coordinates',
+        interpretContextualCoordinatesBuilder,
+        contextualCoordinateGraphingImplementation,
+        'Provide necessary real-world or mathematical situation text and first-quadrant coordinates on named and scaled axes. Elicit what each component means in that situation, preserving the associated quantity, value and applicable unit; the solution explains both components rather than merely repeating the pair or plotting a point.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.2-explain-power-ten-zero-patterns',
+        explainPowerTenZeroPatternsBuilder,
+        powersOfTenImplementation,
+        'Explain zero patterns in products of whole numbers and powers of ten. Visible repeated factors, exponent notation and aligned place values must support the written explanation; include exponent zero and distinguish existing zeros from zeros introduced by scaling.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.2-explain-decimal-power-ten-patterns',
+        explainDecimalPowerTenPatternsBuilder,
+        powersOfTenImplementation,
+        'Explain decimal-placement patterns under multiplication or division by powers of ten with nonnegative integer exponents. Show before-and-after values, the selected power and changed digit place values; include exponent zero, both directions, and values crossing the units place.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.2-formalize-powers-of-ten',
+        formalizePowersOfTenBuilder,
+        powersOfTenImplementation,
+        'Write a power of ten using exponent notation from repeated factors or the corresponding value. Require the power expression as the response; include 10^0 = 1 through the value case rather than pretending it has a positive number of factors.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.3a-read-decimal-numerals',
+        readDecimalNumeralsBuilder,
+        decimalWritingImplementation,
+        'Read a supplied decimal numeral and identify its written value or place-value meaning, including decimals whose meaning requires the thousandths place. Distinguish this receptive task from producing number names or copying numerals.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.3a-write-decimal-numerals',
+        writeDecimalNumeralsBuilder,
+        decimalWritingImplementation,
+        'Write the correctly positioned base-ten decimal numeral from a supplied number name or place-value representation. Include zero placeholders and values requiring thousandths; the requested numeral must not already be provided for copying.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.3a-write-decimal-number-names',
+        writeDecimalNumberNamesBuilder,
+        decimalWritingImplementation,
+        'Produce a written number name for a supplied decimal through thousandths. Preserve the whole and fractional quantities and the named fractional unit, including values whose last necessary place is thousandths.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.3a-decimal-expanded-form',
+        writeDecimalExpandedFormBuilder,
+        decimalExpandedFormImplementation,
+        'Express a supplied decimal through thousandths as a sum of digit-times-place contributions, with fractional units 1/10, 1/100 and 1/1000 as needed. The expanded expression and original numeral must denote the same value.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.A.3b-compare-decimals',
+        compareDecimalsThroughThousandthsBuilder,
+        decimalPlaceComparisonImplementation,
+        'Compare two decimals by aligning and examining their digit place values, then record >, = or <. Include deciding places through thousandths, whole parts, unequal displayed precision and equal values with trailing zeros; keep the comparison procedure visible.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.B.7-add-decimals-with-models',
+        addDecimalsWithModelsBuilder,
+        decimalAddSubtractImplementation,
+        'Add decimal operands through hundredths using a concrete-model drawing, complete a corresponding written calculation, and explain the place-value strategy. Keep the model, calculation and written reasoning together; include regrouping and preserve exact intermediate and result values.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.B.7-subtract-decimals-with-models',
+        subtractDecimalsWithModelsBuilder,
+        decimalAddSubtractImplementation,
+        'Subtract decimal operands through hundredths using a concrete-model drawing, complete a corresponding written calculation, and explain the place-value strategy. Keep nonnegative differences, regrouping, zero placeholders, the model and the written reasoning coherent.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.B.7-multiply-decimals-with-models',
+        multiplyDecimalsWithModelsBuilder,
+        decimalMultiplicationImplementation,
+        'Multiply decimal operands through hundredths using a partition or area-model drawing, complete a corresponding written calculation, and explain how the place-value units determine the product. Preserve exact products beyond hundredths, such as 0.12 times 0.03 = 0.0036.'
+    ),
+    ...toImplementationTodos(
+        '5.NBT.B.7-divide-decimals-with-models',
+        divideDecimalsWithModelsBuilder,
+        decimalDivisionImplementation,
+        'Divide decimal operands through hundredths using a sharing or grouping drawing, complete a corresponding written calculation, and explain why the strategy produces the quotient. The divisor is nonzero; preserve exact quotients beyond hundredths when required and do not reduce the competency to a decimal-divisor shift.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.A.1-unlike-denominator-arithmetic',
+        unlikeDenominatorArithmeticBuilder,
+        unlikeDenominatorArithmeticImplementation,
+        'Add and subtract fractions with unlike original denominators, including mixed numbers, by displaying equivalent replacements with a common denominator and then the resulting sum or difference. Preserve the original denominators and each conversion factor; a valid common denominator need not be the least one. Include both fractional and mixed-number operand forms with nonnegative quantities and results.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.A.2-fraction-word-problems',
+        grade5FractionArithmeticWordProblemsBuilder,
+        unlikeDenominatorArithmeticImplementation,
+        'Solve complete same-whole fraction addition and subtraction word problems, retaining common- and unlike-denominator cases and fractional or mixed-number forms in one competency. Make the reference whole, story quantities, equation or model and exact answer agree; retain the original unlike denominators before any conversion. Existing common-denominator support is only part of this delivery.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.3-whole-number-division-problems',
+        wholeNumberFractionQuotientProblemsBuilder,
+        fractionQuotientMeaningImplementation,
+        'Solve sharing stories with a nonnegative whole-number dividend and nonzero whole-number divisor, expressing the quotient as a fraction or mixed number. Show the corresponding division relation or sharing model and interpret the share in the story units. FractionQuotient covers both output forms; allow zero dividends and integral-valued results written as fractions, and do not impose a global no-zero constraint.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7a-interpret-unit-fraction-dividend',
+        interpretUnitFractionDividendBuilder,
+        fractionQuotientMeaningImplementation,
+        'Interpret a unit-fraction dividend divided by a nonzero whole-number divisor using the visible original operands and a coherent division relation or sharing model. The numerator-one fraction is the amount being divided; explain what the quotient means rather than merely calculating it.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7a-compute-unit-fraction-dividend',
+        computeUnitFractionDividendBuilder,
+        fractionQuotientMeaningImplementation,
+        'Compute a unit fraction divided by a nonzero whole number. Preserve the numerator-one original dividend, integer divisor and exact fractional quotient, with a response requiring the missing result and a solution exposing the consistent division relation or model.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7a-create-division-story',
+        createUnitFractionDividendStoryBuilder,
+        fractionQuotientMeaningImplementation,
+        'Create a written story for a specified unit-fraction dividend divided by a nonzero whole-number divisor. The amount being shared, number of shares and resulting share must agree with the given original division expression or model.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7a-explain-inverse-multiplication',
+        explainUnitFractionDividendBuilder,
+        fractionQuotientMeaningImplementation,
+        'Explain the quotient by showing why multiplying it by the nonzero whole-number divisor reconstructs the original unit-fraction dividend; for example, connect (1/3) divided by 4 = 1/12 with (1/12) times 4 = 1/3. Require the inverse relationship as reasoning, not an unrelated multiplication exercise.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7b-interpret-unit-fraction-divisor',
+        interpretUnitFractionDivisorBuilder,
+        fractionQuotientMeaningImplementation,
+        'Interpret a whole-number dividend divided by a unit-fraction divisor using the visible original operands and a coherent division relation or group-size model. The numerator-one fraction is the size of each group; explain how the quotient counts groups in the available whole-number quantity.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7b-compute-unit-fraction-divisor',
+        computeUnitFractionDivisorBuilder,
+        fractionQuotientMeaningImplementation,
+        'Compute a nonnegative whole number divided by a unit fraction. Preserve the whole-number original dividend, numerator-one divisor and exact count of groups. Permit a zero dividend with a zero quotient; the divisor stays nonzero under the division contract.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7b-create-division-story',
+        createUnitFractionDivisorStoryBuilder,
+        fractionQuotientMeaningImplementation,
+        'Create a written story for a specified whole-number dividend divided by a unit-fraction divisor. The available amount, numerator-one fractional group size and number of groups must agree with the original expression or model.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7b-explain-inverse-multiplication',
+        explainUnitFractionDivisorBuilder,
+        fractionQuotientMeaningImplementation,
+        'Explain why multiplying the quotient by the unit-fraction divisor reconstructs the original whole-number dividend; for example, connect 4 divided by 1/5 = 20 with 20 times 1/5 = 4. Preserve the fractional group-size meaning and require the inverse relationship as reasoning.'
+    ),
+    ...toImplementationTodos(
+        '5.NF.B.7c-unit-fraction-division-problems',
+        unitFractionDivisionProblemsBuilder,
+        fractionQuotientMeaningImplementation,
+        'Solve real-world problems in both orientations: a unit fraction divided by a nonzero whole number, and a nonnegative whole number divided by a unit fraction. Use necessary story quantities and a model or equation that preserves which original operand is the numerator-one fraction and what the quotient measures. Keep both orientations in this one competency.'
+    ),
 ];
 
-export const ontologyTodos: OntologyTodo[] = [
-    toOntologyTodo(
-        '5.OA.A.2',
-        'Write numerical expressions from described calculations',
-        numericalExpressionOntology,
-        'Express a described calculation as a numerical expression without a relation sign. Preserve the general expression-writing competency without requiring grouping symbols or a computed value.'
-    ),
-    toOntologyTodo(
-        '5.OA.A.2',
-        'Interpret numerical expression structure without evaluation',
-        numericalExpressionOntology,
-        'Interpret how the operations and grouping in a numerical expression relate quantities, including multiplicative comparisons, without calculating the indicated result or replacing the task with equation solving.'
-    ),
-    toOntologyTodo(
-        '5.OA.B.3',
-        'Generate aligned numerical patterns from paired rules',
-        pairedPatternOntology,
-        'Generate both numerical sequences from their respective given rules and starting conditions, retaining aligned corresponding terms. A single generated sequence does not express the complete paired-rule competency.'
-    ),
-    toOntologyTodo(
-        '5.OA.B.3',
-        'Form ordered pairs from corresponding pattern terms',
-        orderedCoordinatePairOntology,
-        'Form ordered coordinate pairs from corresponding terms of two numerical patterns while preserving which sequence supplies each component. Pair formation is distinct from plotting the resulting points.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.2',
-        'Explain zero patterns in products by powers of ten',
-        powersOfTenOntology,
-        'Explain why multiplication by powers of ten with nonnegative integer exponents produces the observed zero patterns. Connect the exponent, repeated factors of ten, and base-ten place values through visible equations and written reasoning.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.2',
-        'Explain decimal placement under powers-of-ten scaling',
-        powersOfTenOntology,
-        'Explain decimal-placement patterns when a decimal is multiplied or divided by a power of ten with a nonnegative integer exponent. Preserve both operation directions and connect before-and-after values to their changed place values.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.2',
-        'Denote powers of ten using whole-number exponents',
-        powersOfTenOntology,
-        'Represent a repeated product of tens or its equivalent value using exponent notation with base ten and a nonnegative integer exponent. The requested response must express the power, rather than only evaluate it.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.3a',
-        'Read base-ten decimal numerals through thousandths',
-        decimalPrecisionOntology,
-        'Read the meaning of base-ten decimal numerals through thousandths, including values whose interpretation requires the thousandths place. Preserve the full precision progression rather than using the current tenths-and-hundredths task family.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.3a',
-        'Write base-ten decimal numerals through thousandths',
-        decimalPrecisionOntology,
-        'Write a decimal numeral from a number name or place-value representation through thousandths, with values that require the deepest named place and a coherent correspondence between the representation and numeral.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.3a',
-        'Write decimal number names through thousandths',
-        decimalPrecisionOntology,
-        'Express decimals through thousandths in written number names that preserve the value and named fractional place. The task must elicit number-name output rather than numeral copying.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.3a',
-        'Write decimal expanded form through thousandths',
-        decimalPrecisionOntology,
-        'Express a decimal through thousandths as a coherent sum of digit-times-place contributions, including fractional place values, and relate the expanded expression to the original numeral.'
-    ),
-    toOntologyTodo(
-        '5.NBT.A.3b',
-        'Compare decimals through thousandths by place value',
-        decimalPrecisionOntology,
-        'Compare two decimals through thousandths using the meaning of each digit position, and record the result with greater-than, equal-to, or less-than symbols. Include deciding places through thousandths rather than duplicating the Grade 4 hundredths comparison domain.'
-    ),
-    toOntologyTodo(
-        '5.NBT.B.7',
-        'Add decimals with models, a written method, and reasoning',
-        decimalPrecisionOntology,
-        'Add decimals through hundredths using concrete-model drawings and place-value or operation relationships, relate the strategy to a written calculation, and explain why it works. The input/display precision bound must not silently constrain every intermediate value or result.'
-    ),
-    toOntologyTodo(
-        '5.NBT.B.7',
-        'Subtract decimals with models, a written method, and reasoning',
-        decimalPrecisionOntology,
-        'Subtract decimals through hundredths using concrete-model drawings and place-value or operation relationships, relate the strategy to a written calculation, and explain why it works. Keep the model, written method, and reasoning together as the complete subtraction competency.'
-    ),
-    toOntologyTodo(
-        '5.NBT.B.7',
-        'Multiply decimals with models, a written method, and reasoning',
-        decimalPrecisionOntology,
-        'Multiply decimals through hundredths using concrete-model drawings and place-value or operation relationships, relate the strategy to a written calculation, and explain why it works. Distinguish operand precision from the precision required by intermediate products and the result.'
-    ),
-    toOntologyTodo(
-        '5.NBT.B.7',
-        'Divide decimals with models, a written method, and reasoning',
-        decimalPrecisionOntology,
-        'Divide decimals through hundredths using concrete-model drawings and place-value or operation relationships, relate the strategy to a written calculation, and explain why it works. Do not replace the complete competency with the single decimal-divisor-shift strategy.'
-    ),
-    toOntologyTodo(
-        '5.G.A.1',
-        'Interpret ordered coordinate components and axis correspondence',
-        orderedCoordinatePairOntology,
-        'Interpret the first and second components of an ordered coordinate pair as travel from the origin along their corresponding named axes. Preserve the order and axis conventions independently of the separate point-marking action.'
-    ),
-    toOntologyTodo(
-        '5.G.A.2',
-        'Interpret coordinate values in their situation',
-        orderedCoordinatePairOntology,
-        'Explain what each coordinate component of a point means in the represented real-world or mathematical situation, including its associated quantity and unit. Contextual interpretation remains distinct from graphing the point.'
-    ),
-    toOntologyTodo(
-        '5.NF.A.1',
-        'Add and subtract unlike-denominator fractions using equivalence',
-        unlikeDenominatorOntology,
-        'Add and subtract fractions with unlike original denominators, including mixed numbers, by replacing them with equivalent fractions that have common denominators. Preserve both operations and do not require the chosen common denominator to be the least one.'
-    ),
-    toOntologyTodo(
-        '5.NF.A.2',
-        'Solve same-whole fraction addition and subtraction word problems',
-        unlikeDenominatorOntology,
-        'Solve addition and subtraction word problems whose fractions refer to the same whole, including unlike-denominator cases, using visual fraction models or equations. Keep the full solving competency together rather than activating only its same-denominator subset.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.3',
-        'Solve whole-number division stories with fractional quotients',
-        fractionDivisionRolesOntology,
-        'Solve word problems with a whole-number dividend and nonzero whole-number divisor whose quotient is a fraction or mixed number. Use a model or equation that preserves the dividend, divisor, and quotient roles and interprets the resulting share in context.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7a',
-        'Interpret a unit fraction divided by a whole number',
-        fractionDivisionRolesOntology,
-        'Interpret division with a unit-fraction dividend and a nonzero whole-number divisor using a coherent fraction model or division relation. Preserve which operand is the fractional quantity being divided.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7a',
-        'Compute a unit fraction divided by a whole number',
-        fractionDivisionRolesOntology,
-        'Compute the quotient of a unit-fraction dividend divided by a nonzero whole-number divisor, retaining the directional operand roles and a model or equation that exposes the resulting fractional quantity.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7a',
-        'Create a story for unit-fraction-by-whole-number division',
-        fractionDivisionRolesOntology,
-        'Write a story context for a specified unit-fraction dividend divided by a nonzero whole-number divisor. The quantities, sharing action, and resulting share must agree with the given division expression.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7a',
-        'Explain unit-fraction division through inverse multiplication',
-        fractionDivisionRolesOntology,
-        'Explain why a unit-fraction dividend divided by a nonzero whole-number divisor gives the stated quotient by showing that the quotient multiplied by the divisor reconstructs the unit-fraction dividend.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7b',
-        'Interpret a whole number divided by a unit fraction',
-        fractionDivisionRolesOntology,
-        'Interpret division with a whole-number dividend and a unit-fraction divisor using a coherent fraction model or division relation. Preserve the unit fraction as the size of each group rather than the quantity being shared.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7b',
-        'Compute a whole number divided by a unit fraction',
-        fractionDivisionRolesOntology,
-        'Compute the quotient of a whole-number dividend divided by a unit-fraction divisor, retaining the directional operand roles and a model or equation that exposes how many unit-fraction groups fit.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7b',
-        'Create a story for whole-number-by-unit-fraction division',
-        fractionDivisionRolesOntology,
-        'Write a story context for a specified whole-number dividend divided by a unit-fraction divisor. The available amount, unit-fraction group size, and number of groups must agree with the given division expression.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7b',
-        'Explain whole-number-by-unit-fraction division through multiplication',
-        fractionDivisionRolesOntology,
-        'Explain why a whole-number dividend divided by a unit-fraction divisor gives the stated quotient by showing that the quotient multiplied by the unit-fraction divisor reconstructs the whole-number dividend.'
-    ),
-    toOntologyTodo(
-        '5.NF.B.7c',
-        'Solve real-world problems in both unit-fraction division orientations',
-        fractionDivisionRolesOntology,
-        'Solve real-world problems involving both a unit fraction divided by a nonzero whole number and a whole number divided by a unit fraction. Use visual fraction models or equations that preserve the quantities, operand roles, and meaning of each quotient.'
-    ),
-];
+export const ontologyTodos: OntologyTodo[] = [];
 
 export const beyondScope: BeyondScopeEntry[] = [];
 
