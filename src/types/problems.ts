@@ -646,6 +646,42 @@ export type PlaceValueScalingProblem = {
     scaleFactor: 10;
 };
 
+export type DecimalScalingPlaceName =
+    | 'hundreds'
+    | 'tens'
+    | 'ones'
+    | 'tenths'
+    | 'hundredths'
+    | 'thousandths';
+
+export type DecimalScalingExponent = -3 | -2 | -1 | 0 | 1 | 2;
+
+export type DecimalScalingPlace = {
+    name: DecimalScalingPlaceName;
+    exponent: DecimalScalingExponent;
+    /** Zero-based position in the left-to-right base-ten chart. */
+    digitIndex: 0 | 1 | 2 | 3 | 4 | 5;
+    /** Exact place unit and selected digit contribution, both in thousandths. */
+    unitInThousandths: number;
+    digitValueInThousandths: number;
+};
+
+/**
+ * Exact adjacent-place evidence across whole and fractional base-ten places.
+ * Digits run from hundreds to thousandths. The places contain the same nonzero
+ * digit, are adjacent, and satisfy higherValue = 10 * lowerValue and
+ * lowerValue = higherValue / 10. Fractional digits are zero in whole cases.
+ */
+export type DecimalAdjacentPlaceScalingProblem = {
+    kind: 'decimal-adjacent-place-scaling';
+    digits: readonly [number, number, number, number, number, number];
+    numberInThousandths: number;
+    repeatedDigit: number;
+    higherPlace: DecimalScalingPlace;
+    lowerPlace: DecimalScalingPlace;
+    scale: {factor: 10; reciprocalNumerator: 1; reciprocalDenominator: 10};
+};
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -2036,6 +2072,7 @@ export interface ViewTypeMap {
     'place-value-arithmetic-written-method': PlaceValueArithmeticProblem;
     'place-value-arithmetic-explanation': PlaceValueArithmeticProblem;
     'place-value-scaling': PlaceValueScalingProblem;
+    'numbers-decimal-place-value-scaling': DecimalAdjacentPlaceScalingProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

@@ -1,0 +1,2 @@
+- **Identity:** The learner derives both adjacent-place scale relationships for the same highlighted digit from a chart spanning whole and fractional base-ten places.
+- **Modes:** Question Mode shows the two exact digit values but withholds the scale factors in both inverse equations; Solution Mode fills ten-times and one-tenth relationships with coherent multiplication and division equations.

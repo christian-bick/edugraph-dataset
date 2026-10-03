@@ -97,13 +97,6 @@ const interpretContextualCoordinatesBuilder = new DatasetPermutationBuilder().ad
 
 // Number and Operations in Base Ten (5.NBT)
 
-const decimalPlaceScalingImplementation = defineImplementationPackage({
-    id: 'decimal-adjacent-place-scaling',
-    description: 'Relate adjacent whole-number and fractional place values in both reciprocal directions.',
-    generators: [{module: 'decimal-place-value-scaling', strategy: 'new'}],
-    views: [{module: 'numbers-decimal-place-value-scaling', strategy: 'new'}]
-});
-
 const decimalRoundingImplementation = defineImplementationPackage({
     id: 'decimal-place-rounding',
     description: 'Round decimals to an explicitly requested whole-number or fractional place.',
@@ -998,16 +991,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.B.3-explain-pattern-correspondence', explainPatternCorrespondenceBuilder),
     ...toTargets('5.OA.B.3-generate-paired-patterns', generatePairedPatternsBuilder),
     ...toTargets('5.OA.B.3-graph-pattern-pairs', graphPatternPairsBuilder),
-    ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder)
+    ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder),
+    ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.1-adjacent-decimal-place-scaling',
-        adjacentDecimalPlaceScalingBuilder,
-        decimalPlaceScalingImplementation,
-        'Use whole-number and decimal place charts in the same implementation; elicit both the ten-times and reciprocal one-tenth relationships between equal digits in adjacent places.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.4-round-decimals',
         roundDecimalsBuilder,
