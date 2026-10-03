@@ -1,0 +1,2 @@
+- **Identity:** Decimal division is represented by a countable 0.01-cell dividend pool, a divisor-sized cell bar, grouping work, and an ordered written quotient trace.
+- **Modes:** Question Mode leaves the grouped bars, quotient digits and result, inverse check, and strategy explanation blank; Solution Mode shows full and partial divisor-sized bars, every quotient place including zero digits, an exact quotient and inverse check, and an explanation tied to the cells.

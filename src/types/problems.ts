@@ -1235,6 +1235,95 @@ export type DecimalMultiplicationProblem = Readonly<{
     }>;
 }>;
 
+/** A decimal operand represented exactly as an integer count of hundredths. */
+export type DecimalDivisionOperand = Readonly<{
+    valueInHundredths: number;
+    canonicalNumeral: string;
+    /** Ones, tenths, hundredths, including positional zero placeholders. */
+    alignedDigits: readonly [number, number, number];
+}>;
+
+/** One divisor-sized grouping bar, measured in hundredth-unit cells. */
+export type DecimalDivisionGroupingBar = Readonly<{
+    kind: 'full' | 'partial';
+    /** Zero-based position in the ordered full-then-partial bar sequence. */
+    index: number;
+    capacityCells: number;
+    filledCells: number;
+    quotientContributionInTenThousandths: number;
+}>;
+
+export type DecimalDivisionPlace =
+    | 'ones'
+    | 'tenths'
+    | 'hundredths'
+    | 'thousandths'
+    | 'ten-thousandths';
+
+/** One exact step of dividing integer hundredth-unit counts. */
+export type DecimalDivisionStep = Readonly<{
+    place: DecimalDivisionPlace;
+    partialDividend: number;
+    quotientDigit: number;
+    subtrahend: number;
+    remainder: number;
+}>;
+
+/**
+ * Exact decimal division with a concrete grouping and a written unit-count
+ * trace. Dividend and nonzero divisor are integer hundredths with three
+ * aligned digits; the quotient is an exact integer ten-thousandths, so
+ * dividendInHundredths * 10000 is divisible by divisorInHundredths. The
+ * canonical quotient numeral uses its minimum required precision (0–4).
+ *
+ * Grouping bars each have divisorInHundredths cells of value 0.01. The first
+ * floor(dividend / divisor) bars are full, followed by at most one partial
+ * bar with the remainder's cells. Filled cells sum to the dividend's
+ * hundredth count; each bar's exact quotient contribution is
+ * filledCells * 10000 / capacityCells, and contributions sum to the quotient.
+ * Canonical samples use at most 16 cells per bar, four full bars and 80 drawn
+ * cells so the model remains countable.
+ *
+ * The division trace starts at the ones place with the dividend's hundredth
+ * count. Later partial dividends are ten times the preceding remainder. Each
+ * step subtracts divisorInHundredths * quotientDigit, records a nonnegative
+ * remainder below the divisor, and includes zero quotient digits, if needed.
+ * Steps follow place order through ten-thousandths and stop at zero remainder;
+ * their digits reconstruct the quotient exactly. The inverse witnesses
+ * dividend = divisor * quotient in millionths without decimal rounding.
+ */
+export type DecimalDivisionProblem = Readonly<{
+    kind: 'decimal-division-model';
+    base: 10;
+    operandScale: 100;
+    quotientScale: 10000;
+    dividend: DecimalDivisionOperand;
+    divisor: DecimalDivisionOperand;
+    quotient: Readonly<{
+        valueInTenThousandths: number;
+        canonicalNumeral: string;
+        precision: 0 | 1 | 2 | 3 | 4;
+        /** Ones through ten-thousandths, including zero placeholders. */
+        alignedDigits: readonly [number, number, number, number, number];
+    }>;
+    grouping: Readonly<{
+        unitValueInHundredths: 1;
+        cellsPerGroup: number;
+        fullGroupCount: number;
+        remainderCells: number;
+        bars: readonly DecimalDivisionGroupingBar[];
+    }>;
+    divisionTrace: Readonly<{
+        dividendUnitCount: number;
+        divisorUnitCount: number;
+        steps: readonly DecimalDivisionStep[];
+    }>;
+    inverse: Readonly<{
+        divisorTimesQuotientInMillionths: number;
+        dividendInMillionths: number;
+    }>;
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3340,6 +3429,7 @@ export interface ViewTypeMap {
     'numbers-decimal-place-comparison': DecimalPlaceComparisonProblem;
     'operations-decimal-addition-subtraction-method': DecimalAddSubtractProblem;
     'operations-decimal-multiplication-method': DecimalMultiplicationProblem;
+    'operations-decimal-division-method': DecimalDivisionProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

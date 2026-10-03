@@ -148,13 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalDivisionImplementation = defineImplementationPackage({
-    id: 'decimal-division-method',
-    description: 'Connect decimal division models and exact quotient relations to a written calculation and an explanation of the chosen strategy.',
-    generators: [{module: 'decimal-division-model', strategy: 'new'}],
-    views: [{module: 'operations-decimal-division-method', strategy: 'new'}]
-});
-
 // The conjunction admits exponent zero and excludes negative exponents in this
 // nonnegative Grade 5 domain; Base10 alone would not constrain a power's base.
 const grade5WholeNumberPowerContext = [
@@ -792,16 +785,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.3b-compare-decimals', compareDecimalsThroughThousandthsBuilder),
     ...toTargets('5.NBT.B.7-add-decimals-with-models', addDecimalsWithModelsBuilder),
     ...toTargets('5.NBT.B.7-subtract-decimals-with-models', subtractDecimalsWithModelsBuilder),
-    ...toTargets('5.NBT.B.7-multiply-decimals-with-models', multiplyDecimalsWithModelsBuilder)
+    ...toTargets('5.NBT.B.7-multiply-decimals-with-models', multiplyDecimalsWithModelsBuilder),
+    ...toTargets('5.NBT.B.7-divide-decimals-with-models', divideDecimalsWithModelsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.B.7-divide-decimals-with-models',
-        divideDecimalsWithModelsBuilder,
-        decimalDivisionImplementation,
-        'Divide decimal operands through hundredths using a sharing or grouping drawing, complete a corresponding written calculation, and explain why the strategy produces the quotient. The divisor is nonzero; preserve exact quotients beyond hundredths when required and do not reduce the competency to a decimal-divisor shift.'
-    ),
     ...toImplementationTodos(
         '5.NF.A.1-unlike-denominator-arithmetic',
         unlikeDenominatorArithmeticBuilder,
