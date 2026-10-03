@@ -107,6 +107,7 @@ describe('catalogs and end-to-end matching', () => {
                 'unsupported-label',
                 'missing-required-label',
                 'rejected-label',
+                'empty-label-domain',
                 'incompatible-label-variants'
             ])
                 .toContain(rejection.verdict.reason);

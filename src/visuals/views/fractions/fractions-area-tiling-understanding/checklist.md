@@ -1,0 +1,2 @@
+- **Identity:** The visible outer rectangle has unequal fractional sides and is covered by congruent square tiles whose side is a unit fraction; the learner explains why tile area agrees with the side-length product.
+- **Modes:** Question Mode shows the tile arrangement, side measurements, and exact unit-fraction tile area but leaves the equality explanation blank. Solution Mode shows the exact count, square-unit total, and why it equals length × width.

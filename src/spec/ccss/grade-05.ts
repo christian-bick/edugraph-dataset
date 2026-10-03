@@ -548,17 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const fractionalRectangleAreaImplementation = defineImplementationPackage({
-    id: 'fractional-rectangle-area',
-    description: 'Model exact fractional rectangle dimensions and unit-fraction square tiles for area reasoning, computation and product construction.',
-    generators: [{module: 'fraction-rectangle-area', strategy: 'new'}],
-    views: [
-        {module: 'fractions-area-tiling-understanding', strategy: 'new'},
-        {module: 'fractions-rectangle-area', strategy: 'new'},
-        {module: 'fractions-area-product-construction', strategy: 'new'}
-    ]
-});
-
 const fractionScalingReasoningImplementation = defineImplementationPackage({
     id: 'fraction-scaling-reasoning',
     description: 'Model a positive reference quantity, fractional scale and product comparison for reasoning from the scale relative to one.',
@@ -857,28 +846,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.7c-unit-fraction-division-problems', unitFractionDivisionProblemsBuilder),
     ...toTargets('5.NF.B.4a-partition-product', fractionPartitionProductBuilder),
     ...toTargets('5.NF.B.4a-create-product-story', fractionProductStoryCreationBuilder),
-    ...toTargets('5.NF.B.6-fraction-product-problems', generalFractionProductProblemsBuilder)
+    ...toTargets('5.NF.B.6-fraction-product-problems', generalFractionProductProblemsBuilder),
+    ...toTargets('5.NF.B.4b-tile-fractional-rectangle', fractionalRectangleTilingBuilder),
+    ...toTargets('5.NF.B.4b-calculate-fractional-area', fractionalRectangleAreaBuilder),
+    ...toTargets('5.NF.B.4b-represent-fraction-product', fractionAreaProductRepresentationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.B.4b-tile-fractional-rectangle',
-        fractionalRectangleTilingBuilder,
-        fractionalRectangleAreaImplementation,
-        'Show fractional side lengths and square tiles with explicit unit-fraction side lengths and areas; ask why the tiled area equals the product of the rectangle sides. Preserve the outer rectangle, including unequal sides, separately from its square tiles.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.4b-calculate-fractional-area',
-        fractionalRectangleAreaBuilder,
-        fractionalRectangleAreaImplementation,
-        'Provide a rectangle with two fractional side measurements and require their product as its area, with consistent square units.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.4b-represent-fraction-product',
-        fractionAreaProductRepresentationBuilder,
-        fractionalRectangleAreaImplementation,
-        'Give two fraction factors and ask the learner to construct or annotate a rectangle whose side lengths and area represent their product.'
-    ),
     ...toImplementationTodos(
         '5.NF.B.5a-compare-product-factor',
         fractionProductFactorComparisonBuilder,

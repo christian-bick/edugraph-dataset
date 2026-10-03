@@ -1,0 +1,2 @@
+- **Identity:** The learner draws a rectangle with the two given fractional sides on a blank unit-fraction lattice and labels its area product.
+- **Modes:** Question Mode has no target rectangle or filled area and leaves the product blank. Solution Mode draws and labels the completed rectangle and states its exact area in square units.

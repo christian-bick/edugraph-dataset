@@ -1,0 +1,2 @@
+- **Identity:** The learner multiplies two shown fractional side lengths to calculate the area of the pictured rectangle in square units.
+- **Modes:** Question Mode shows the measured rectangle with an empty product and area. Solution Mode fills the exact side product and area in square units.

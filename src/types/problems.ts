@@ -2349,6 +2349,75 @@ export type FractionProductProblem = FractionProductCommon & (
     }>
 );
 
+/** An exact positive rational measured in the outer rectangle's chosen unit. */
+export type FractionRectangleAreaRational = Readonly<{
+    numerator: number;
+    denominator: number;
+}>;
+
+/** Zero-based cell in the complete Cartesian grid of congruent square tiles. */
+export type FractionRectangleTileCell = Readonly<{
+    row: number;
+    column: number;
+}>;
+
+/**
+ * Ability-neutral fractional rectangle and exact square-tile lattice. The
+ * outer rectangle starts at (0, 0), has two unequal positive, nonintegral
+ * rational side lengths in one linear unit, and is distinct from each square
+ * tile. Every rational has positive safe-integer components. Its area is the
+ * exact side product in square units, with no floating-point approximation.
+ *
+ * Let the original length and width be a/b and c/d. The grid denominator L
+ * is lcm(b, d); its square tile has side 1/L linear unit and area 1/L² square
+ * unit. Columns = aL/b, rows = cL/d, tileCount = rows × columns, and
+ * tiledAreaSquareUnits = tileCount/L² = areaSquareUnits = ac/bd. Cells list
+ * every (row, column) in row-major order, each exactly once, with
+ * 0 <= row < rows and 0 <= column < columns. Their closed boundaries may
+ * meet, but their interiors do not overlap; together they cover the outer
+ * rectangle without gaps. Rows and columns differ because the outer sides
+ * are unequal. L, rows, columns, and tileCount are bounded for a legible
+ * square-cell rendering; the generator keeps tileCount <= 100.
+ *
+ * `tileProof`, when present, adds the explicit row-area and counted-tile
+ * equality chain for the selected tiling proof profile. Its tileCount and
+ * tileArea repeat the grid's exact factors, oneRowArea is columns/L²,
+ * countedArea is tileCount × tileArea = rows × oneRowArea, and
+ * sideProductArea is (a/b) × (c/d); both areas equal areaSquareUnits exactly.
+ * The common lattice and tile-sum value remain present when it is absent,
+ * so every consuming view can render every producer member. No prompt,
+ * unknown, requested reasoning, or layout choice appears in this payload.
+ */
+export type FractionRectangleAreaProblem = Readonly<{
+    kind: 'fraction-rectangle-area';
+    linearUnit: 'unit';
+    squareUnit: 'square-unit';
+    outerRectangle: Readonly<{
+        length: FractionRectangleAreaRational;
+        width: FractionRectangleAreaRational;
+    }>;
+    areaSquareUnits: FractionRectangleAreaRational;
+    tileGrid: Readonly<{
+        partitionDenominator: number;
+        squareTile: Readonly<{
+            side: FractionRectangleAreaRational;
+            areaSquareUnits: FractionRectangleAreaRational;
+        }>;
+        rows: number;
+        columns: number;
+        tileCount: number;
+        cells: readonly FractionRectangleTileCell[];
+        tiledAreaSquareUnits: FractionRectangleAreaRational;
+    }>;
+    tileProof?: Readonly<{
+        tileCount: number;
+        tileAreaSquareUnits: FractionRectangleAreaRational;
+        oneRowAreaSquareUnits: FractionRectangleAreaRational;
+        countedAreaSquareUnits: FractionRectangleAreaRational;
+        sideProductAreaSquareUnits: FractionRectangleAreaRational;
+    }>;
+}>;
+
 export type FractionArithmeticOperation = 'addition' | 'subtraction';
 
 export type LikeDenominatorFractionValue = {
@@ -2996,6 +3065,9 @@ export interface ViewTypeMap {
     'fractions-product-partition-interpretation': FractionProductProblem;
     'fractions-product-story-creation': FractionProductProblem;
     'fractions-product-word-problem': FractionProductProblem;
+    'fractions-area-tiling-understanding': FractionRectangleAreaProblem;
+    'fractions-rectangle-area': FractionRectangleAreaProblem;
+    'fractions-area-product-construction': FractionRectangleAreaProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;
     'fractions-operation-model': FractionArithmeticProblem;
     'fractions-understanding-model': FractionArithmeticProblem;
