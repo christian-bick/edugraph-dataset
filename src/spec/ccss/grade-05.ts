@@ -337,16 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const contextualCoordinateGraphingImplementation = defineImplementationPackage({
-    id: 'contextual-coordinate-graphing',
-    description: 'Graph nonnegative ordered quantities from a situation and interpret their coordinate roles, values and units in separate task projections.',
-    generators: [{module: 'coordinate-context', strategy: 'new'}],
-    views: [
-        {module: 'coordinate-context-plotting', strategy: 'new'},
-        {module: 'coordinate-context-interpretation', strategy: 'new'}
-    ]
-});
-
 const shapeCategoryHierarchyImplementation = defineImplementationPackage({
     id: 'shape-category-hierarchy',
     description: 'Model a hierarchy of plane-shape categories for inherited-property inference and classification through defining attributes.',
@@ -894,16 +884,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.MD.C.5c-volume-additivity', volumeAdditivityBuilder),
     ...toTargets('5.MD.C.5c-composite-volume', compositeVolumeBuilder),
     ...toTargets('5.G.A.1-define-coordinate-system', defineCoordinateSystemBuilder),
-    ...toTargets('5.G.A.1-interpret-coordinate-components', interpretCoordinateComponentsBuilder)
+    ...toTargets('5.G.A.1-interpret-coordinate-components', interpretCoordinateComponentsBuilder),
+    ...toTargets('5.G.A.2-graph-contextual-points', graphContextualPointsBuilder),
+    ...toTargets('5.G.A.2-interpret-contextual-coordinates', interpretContextualCoordinatesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.G.A.2-graph-contextual-points',
-        graphContextualPointsBuilder,
-        contextualCoordinateGraphingImplementation,
-        'Use necessary real-world or mathematical prose to supply paired quantities, then ask the learner to mark the corresponding first-quadrant points on named and scaled coordinate axes.'
-    ),
     ...toImplementationTodos(
         '5.G.B.3-inherited-shape-attributes',
         inheritedShapeAttributesBuilder,
@@ -987,12 +973,6 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductProblemsBuilder,
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.G.A.2-interpret-contextual-coordinates',
-        interpretContextualCoordinatesBuilder,
-        contextualCoordinateGraphingImplementation,
-        'Provide necessary real-world or mathematical situation text and first-quadrant coordinates on named and scaled axes. Elicit what each component means in that situation, preserving the associated quantity, value and applicable unit; the solution explains both components rather than merely repeating the pair or plotting a point.'
     ),
     ...toImplementationTodos(
         '5.NBT.A.2-explain-power-ten-zero-patterns',

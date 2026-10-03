@@ -1,0 +1,2 @@
+- **Identity:** The learner reads the park descriptions to construct and label three first-quadrant landmark points on a named, scaled Cartesian grid.
+- **Modes:** Question Mode gives each landmark's eastward and northward block counts only in situation prose and leaves the grid unmarked. Solution Mode marks A, B, and C at the exact described positions and shows the matching ordered pairs.

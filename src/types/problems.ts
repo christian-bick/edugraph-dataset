@@ -587,6 +587,48 @@ export type CoordinateSystemProblem = Readonly<{
     }>;
 }>;
 
+export type ContextualCoordinateValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type ContextualCoordinateLocationId = 'pond' | 'garden' | 'playground';
+export type ContextualCoordinateLocation<Id extends ContextualCoordinateLocationId> = Readonly<{
+    id: Id;
+    xValue: ContextualCoordinateValue;
+    yValue: ContextualCoordinateValue;
+}>;
+
+/**
+ * Three distinct park locations measured from the named gate. `xValue` is the
+ * number of blocks east of the gate and `yValue` the number of blocks north;
+ * each is a positive safe integer at most 8, so every location is in the
+ * nonnegative first quadrant. No two locations have the same (xValue, yValue).
+ * `referenceLocationId` designates one existing landmark in the situation;
+ * it does not prescribe a learner action. Both quantities share the gate as
+ * their zero reference and use the same block unit. Views supply the prose,
+ * Cartesian axes, plotted markers, ordered-pair notation, and task wording.
+ */
+export type ContextualCoordinateProblem = Readonly<{
+    kind: 'contextual-coordinate-locations';
+    situation: Readonly<{
+        kind: 'park-map';
+        originLandmark: 'park-gate';
+        horizontalQuantity: Readonly<{
+            kind: 'eastward-distance';
+            positiveDirection: 'east';
+            unitId: 'block';
+        }>;
+        verticalQuantity: Readonly<{
+            kind: 'northward-distance';
+            positiveDirection: 'north';
+            unitId: 'block';
+        }>;
+    }>;
+    locations: readonly [
+        ContextualCoordinateLocation<'pond'>,
+        ContextualCoordinateLocation<'garden'>,
+        ContextualCoordinateLocation<'playground'>
+    ];
+    referenceLocationId: ContextualCoordinateLocationId;
+}>;
+
 export type LegacyIntegerRoundingProblem = {
     number: number;
     roundingPlace: 10 | 100;
@@ -2452,6 +2494,8 @@ export interface ViewTypeMap {
     'coordinate-form-pattern-pairs': CoordinatePatternPairsProblem;
     'coordinate-system-specification': CoordinateSystemProblem;
     'coordinate-components-interpretation': CoordinateSystemProblem;
+    'coordinate-context-plotting': ContextualCoordinateProblem;
+    'coordinate-context-interpretation': ContextualCoordinateProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-decimal-rounding-line': DecimalRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;

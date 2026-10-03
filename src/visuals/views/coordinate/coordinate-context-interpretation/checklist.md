@@ -1,0 +1,2 @@
+- **Identity:** The learner reads a necessary park-map situation and interprets both values of a displayed landmark pair as eastward and northward block distances from the gate.
+- **Modes:** Question Mode shows named, scaled axes, the selected point and its ordered pair, and leaves each component's contextual meaning open. Solution Mode explains each value with the correct landmark, distance, direction, block unit, and zero reference.
