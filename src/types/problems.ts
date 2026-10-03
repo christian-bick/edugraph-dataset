@@ -902,9 +902,33 @@ export type MeasurementUnitEquivalence = {
     smallerValue: number;
 };
 
+/**
+ * One exact equality for the pair's two units. Both counts are positive safe
+ * integers in hundredths, and smallerHundredths = largerHundredths * pair.factor.
+ */
+export type MeasurementConversionExactEquality = {
+    largerHundredths: number;
+    smallerHundredths: number;
+};
+
+/**
+ * Two symmetric conversion equalities, available for either task direction.
+ * Integer examples have integral quantities on both sides of each equality.
+ * Decimal examples have a fractional larger-unit quantity in each equality.
+ */
+export type MeasurementConversionNumericExamples = {
+    numberKind: 'integer' | 'decimal';
+    equalities: readonly [
+        MeasurementConversionExactEquality,
+        MeasurementConversionExactEquality
+    ];
+};
+
 export type StandardUnitEquivalencesProblem = {
     pair: MeasurementConversionPair;
     equivalents: readonly MeasurementUnitEquivalence[];
+    /** Absent for the legacy five-row unit-equivalence profile. */
+    numericExamples?: MeasurementConversionNumericExamples;
 };
 
 export type MeasurementConversionProblem =

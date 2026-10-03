@@ -337,17 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const measurementUnitConversionImplementation = defineImplementationPackage({
-    id: 'measurement-unit-conversion-decimals',
-    description: 'Extend within-system conversion to integer and fractional decimal measurements in both directions, preserving exact unit equivalences.',
-    generators: [
-        {module: 'measurement-conversion', strategy: 'expand'}
-    ],
-    views: [
-        {module: 'measure-conversion-execution', strategy: 'expand'}
-    ]
-});
-
 const measurementMultistepConversionImplementation = defineImplementationPackage({
     id: 'measurement-multistep-conversions',
     description: 'Represent conversion and subsequent calculation in canonical multistep measurement stories with coherent units and equations.',
@@ -974,16 +963,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder),
     ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder),
     ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder),
-    ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder)
+    ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder),
+    ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.A.1-convert-within-system',
-        convertWithinSystemBuilder,
-        measurementUnitConversionImplementation,
-        'Convert the same measured quantity between the named units in both directions. Include actual fractional decimal values as well as integers, with exact factors and coherent results; do not limit the task to larger-to-smaller integer conversion.'
-    ),
     ...toImplementationTodos(
         '5.MD.A.1-multistep-conversion-problems',
         multistepConversionProblemsBuilder,

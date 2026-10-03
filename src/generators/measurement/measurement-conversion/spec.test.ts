@@ -20,6 +20,7 @@ describe('MeasurementConversionGenerator spec integration', () => {
     it.each(unitPairCases)('resolves %s independently of the requested projection', (pairLabels, pairId) => {
         setSeed(pairId);
         const reference = generateWithLabels(generator, [...pairLabels])!;
+        expect(reference.data).not.toHaveProperty('numericExamples');
         for (const projection of [
             [Area.UnitScaleRelation, Ability.ConceptDerivation],
             [Ability.ProcedureExecution],
@@ -29,7 +30,24 @@ describe('MeasurementConversionGenerator spec integration', () => {
             const stub = generateWithLabels(generator, [...pairLabels, ...projection])!;
             expect(stub.data).toEqual(reference.data);
             expect(stub.data.pair.id).toBe(pairId);
+            expect(stub.data).not.toHaveProperty('numericExamples');
             expect(new Set(stub.labels)).toEqual(new Set(pairLabels));
+        }
+    });
+
+    it.each(unitPairCases)('resolves explicit integer and decimal profiles for %s', (pairLabels, pairId) => {
+        for (const [numberLabel, numberKind] of [
+            [Scope.IntegerNumbers, 'integer'],
+            [Scope.DecimalNumbers, 'decimal']
+        ] as const) {
+            setSeed(`${pairId}-${numberKind}`);
+            const stub = generateWithLabels(generator, [
+                ...pairLabels, numberLabel, Ability.ProcedureExecution
+            ])!;
+            expect(stub.data.pair.id).toBe(pairId);
+            expect(stub.data.equivalents).toHaveLength(5);
+            expect(stub.data.numericExamples?.numberKind).toBe(numberKind);
+            expect(new Set(stub.labels)).toEqual(new Set([...pairLabels, numberLabel]));
         }
     });
 
@@ -40,11 +58,22 @@ describe('MeasurementConversionGenerator spec integration', () => {
         expect(() => generateWithLabels(generator, labels)).toThrow('Unsupported exact label combination');
     });
 
+    it('rejects simultaneous integer and decimal profiles', () => {
+        expect(() => generateWithLabels(generator, [
+            Area.UnitFactorScaling,
+            Scope.PoundScale,
+            Scope.OunceScale,
+            Scope.IntegerNumbers,
+            Scope.DecimalNumbers
+        ])).toThrow('Unsupported exact label combination');
+    });
+
     it('completes a broad request with a fully labeled named-unit pair', () => {
         setSeed('unit-pair-fallback');
         const stub = generateWithLabels(generator, [Ability.ProcedureExecution])!;
         const data = stub.data;
         const expected = unitPairCases.find(([, pairId]) => pairId === data.pair.id)!;
         expect(new Set(stub.labels)).toEqual(new Set(expected[0]));
+        expect(data).not.toHaveProperty('numericExamples');
     });
 });

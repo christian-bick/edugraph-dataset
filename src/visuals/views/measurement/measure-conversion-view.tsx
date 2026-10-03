@@ -2,6 +2,7 @@ import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     GenericUnitScaleRelationProblem,
+    MeasurementConversionNumericExamples,
     MeasurementConversionProblem,
     StandardUnitEquivalencesProblem
 } from '../../../types/problems.ts';
@@ -17,6 +18,8 @@ import {
 } from '../../helpers/measurement-conversion.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
+    formatConversionHundredths,
+    formatConversionMeasurement,
     isValidMeasureConversionProblem
 } from './measure-conversion-helpers.ts';
 
@@ -260,6 +263,90 @@ const LargerToSmaller = ({data, isSolutionView}: {
     );
 };
 
+const BidirectionalConversions = ({data, numericExamples, isSolutionView}: {
+    data: StandardUnitEquivalencesProblem;
+    numericExamples: MeasurementConversionNumericExamples;
+    isSolutionView: boolean;
+}) => {
+    const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
+    const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
+    const factor = formatStandardNumeral(data.pair.factor);
+    const [forward, reverse] = numericExamples.equalities;
+    const rows = [
+        {
+            label: 'Larger to smaller',
+            sourceHundredths: forward.largerHundredths,
+            resultHundredths: forward.smallerHundredths,
+            sourceUnit: data.pair.largerUnit,
+            resultUnit: data.pair.smallerUnit,
+            sourceSymbol: larger.symbol,
+            resultSymbol: smaller.symbol,
+            operation: '×'
+        },
+        {
+            label: 'Smaller to larger',
+            sourceHundredths: reverse.smallerHundredths,
+            resultHundredths: reverse.largerHundredths,
+            sourceUnit: data.pair.smallerUnit,
+            resultUnit: data.pair.largerUnit,
+            sourceSymbol: smaller.symbol,
+            resultSymbol: larger.symbol,
+            operation: '÷'
+        }
+    ] as const;
+
+    return (
+        <>
+            <div className="mt-5 rounded-xl border border-indigo-300 bg-indigo-50 px-5 py-3 text-center">
+                <div className="text-xs font-bold uppercase tracking-[0.12em] text-indigo-700">Given unit relation</div>
+                <div className="mt-1 font-mono text-lg font-bold text-indigo-950">
+                    {formatUnitEquivalence(data.pair)}
+                </div>
+            </div>
+            <div className="mt-4 space-y-3">
+                {rows.map((row, index) => {
+                    const source = formatConversionHundredths(row.sourceHundredths);
+                    const result = formatConversionHundredths(row.resultHundredths);
+                    const equality = `${formatConversionMeasurement(row.sourceHundredths, row.sourceUnit)} = ${formatConversionMeasurement(row.resultHundredths, row.resultUnit)}`;
+                    return (
+                        <div className="rounded-xl border-2 border-slate-200 bg-white px-4 py-3" key={row.label}>
+                            <div className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                                {index + 1}. {row.label}
+                            </div>
+                            <div className="mt-2 grid grid-cols-[1fr_106px_1fr] items-stretch gap-3">
+                                <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-center">
+                                    <div className="text-xs font-semibold text-indigo-700">Given measure</div>
+                                    <div className="font-mono text-xl font-bold text-indigo-950">{source} {row.sourceSymbol}</div>
+                                </div>
+                                <div className="flex items-center justify-center rounded-lg bg-slate-100 font-mono text-lg font-bold text-slate-800">
+                                    {row.operation} {factor}
+                                </div>
+                                <div className={`rounded-lg border px-3 py-2 text-center ${isSolutionView ? 'border-emerald-400 bg-emerald-50' : 'border-dashed border-sky-300 bg-sky-50'}`}>
+                                    <div className={`text-xs font-semibold ${isSolutionView ? 'text-emerald-700' : 'text-sky-700'}`}>Converted measure</div>
+                                    <div className={`font-mono text-xl font-bold ${isSolutionView ? 'text-emerald-950' : 'text-sky-900'}`}>
+                                        {isSolutionView ? result : '?'} {row.resultSymbol}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className={`mt-2 text-center font-mono text-base font-bold ${isSolutionView ? 'text-emerald-900' : 'text-slate-700'}`}>
+                                {source} {row.operation} {factor} = {isSolutionView ? result : '?'}
+                            </div>
+                            {isSolutionView ? (
+                                <div className="mt-1 text-center text-sm font-semibold text-emerald-800">{equality}</div>
+                            ) : null}
+                        </div>
+                    );
+                })}
+            </div>
+            {isSolutionView ? (
+                <div className="mt-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-center text-sm font-semibold text-emerald-950">
+                    Multiply by {factor} to count smaller units; divide by {factor} to count larger units.
+                </div>
+            ) : null}
+        </>
+    );
+};
+
 export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversionViewProps) => {
     const data: MeasurementConversionProblem = payload.problem.data;
     validateProblemData(viewId, data, []);
@@ -280,10 +367,16 @@ export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversion
         );
     }
 
+    const numericExamples = 'pair' in data && mode === 'execution'
+        ? data.numericExamples
+        : undefined;
+
     const prompt = !('pair' in data)
         ? 'The same length is measured with large units and small units. Which unit size needs more units?'
         : mode === 'derivation'
         ? `Use the equivalent ${getQuantityName(data.pair.quantityKind)} to determine how many ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural} equal 1 ${getMeasurementUnitPresentation(data.pair.largerUnit).singular}.`
+        : numericExamples !== undefined
+        ? 'Convert one measure to smaller units and another measure to larger units.'
         : `Convert ${formatMeasurement(data.equivalents[0]!.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
 
     return (
@@ -292,6 +385,8 @@ export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversion
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
                     {mode === 'derivation'
                         ? 'Derive a unit-size relation'
+                        : numericExamples !== undefined
+                        ? 'Convert in both directions'
                         : 'Convert to a smaller unit'}
                 </div>
                 <div className="mt-1 text-xl font-bold text-slate-800">{prompt}</div>
@@ -303,6 +398,8 @@ export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversion
                     <div className="mt-5"><UnitPair data={data} /></div>
                     {mode === 'derivation'
                         ? <RelativeUnitSize data={data} isSolutionView={payload.isSolutionView} />
+                        : numericExamples !== undefined
+                        ? <BidirectionalConversions data={data} numericExamples={numericExamples} isSolutionView={payload.isSolutionView} />
                         : <LargerToSmaller data={data} isSolutionView={payload.isSolutionView} />}
                 </>
             )}

@@ -6,7 +6,9 @@ import {formatTableValue, hasCoherentConversionTable} from './helpers.ts';
 
 const buildEquivalences = (seed: string): StandardUnitEquivalencesProblem => {
     setSeed(seed);
-    const data = new MeasurementConversionGenerator().generate({unitPair: 'kilometer-meter'}).data;
+    const data = new MeasurementConversionGenerator().generate({
+        unitPair: 'kilometer-meter', numericProfile: 'legacy'
+    }).data;
     return data;
 };
 

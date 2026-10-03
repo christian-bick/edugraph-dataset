@@ -30,6 +30,18 @@ const resolveUnitPair = selectExactLabelSetMap([
     ...unitPairFallbacks.map((labels, index) => [labels, unitPairValues[index]!] as const)
 ] as const);
 
+const numericProfileFallbacks = [
+    [],
+    [Scope.IntegerNumbers],
+    [Scope.DecimalNumbers]
+] as const;
+
+const resolveNumericProfile = selectExactLabelSetMap([
+    [numericProfileFallbacks[0], 'legacy'],
+    [numericProfileFallbacks[1], 'integer'],
+    [numericProfileFallbacks[2], 'decimal']
+] as const);
+
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-conversion',
     generalLabels: [Area.UnitScaleRelation]
@@ -57,6 +69,11 @@ export const MeasurementConversionGeneratorSchema = {
         ],
         resolveUnitPair,
         unitPairFallbacks
+    ],
+    numericProfile: [
+        [Scope.IntegerNumbers, Scope.DecimalNumbers],
+        resolveNumericProfile,
+        numericProfileFallbacks
     ]
 } as const;
 
