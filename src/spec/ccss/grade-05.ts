@@ -97,13 +97,6 @@ const interpretContextualCoordinatesBuilder = new DatasetPermutationBuilder().ad
 
 // Number and Operations in Base Ten (5.NBT)
 
-const twoDigitDivisionImplementation = defineImplementationPackage({
-    id: 'two-digit-divisor-division',
-    description: 'Extend partial-quotient division and its illustrated explanation to two-digit divisors, including exact division.',
-    generators: [{module: 'multi-digit-division', strategy: 'expand'}],
-    views: [{module: 'operations-division-area-model', strategy: 'expand'}]
-});
-
 // DecimalNumbers includes base-ten whole-number examples as well as fractional places.
 // Keep both directions and both place contexts in this complete competency.
 const adjacentDecimalPlaceScalingBuilder = new DatasetPermutationBuilder().addLabels([
@@ -980,16 +973,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder),
     ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder),
     ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder),
-    ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder)
+    ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder),
+    ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.B.6-two-digit-divisor-division',
-        twoDigitDivisorDivisionBuilder,
-        twoDigitDivisionImplementation,
-        'Compute and explain a quotient with a two-digit divisor using place-value partial quotients and coherent equations or area representation. Include exact division instead of retaining a nonzero-remainder invariant.'
-    ),
     ...toImplementationTodos(
         '5.MD.A.1-convert-within-system',
         convertWithinSystemBuilder,

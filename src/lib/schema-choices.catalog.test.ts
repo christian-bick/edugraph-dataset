@@ -113,10 +113,15 @@ describe('catalog label choice contracts', () => {
         expect(resolveSchemaChoices(schema, mixed, {task: mixed}).config.task).toBe('decompose-mixed');
     });
 
-    it('includes custom singleton and tool choices without resolver probing', () => {
+    it('includes division profile and tool choices without resolver probing', () => {
         const divisor = {divisorDigits: MultiDigitDivisionGeneratorSchema.divisorDigits};
-        expect(choices(divisor, [])[0].alternatives.map(choice => choice.labels)).toEqual([[Scope.SingleDigitDivisor]]);
-        expect(resolveSchemaChoices(divisor, [], {divisorDigits: [Scope.SingleDigitDivisor]}).config.divisorDigits).toBe(1);
+        const legacyProfile = [
+            Area.ImperfectDivisibility, Scope.NumbersWithoutZero, Scope.SingleDigitDivisor
+        ];
+        expect(choices(divisor, [])[0].alternatives.map(choice => choice.labels))
+            .toEqual([legacyProfile, [Scope.TwoDigitDivisor]]);
+        expect(resolveSchemaChoices(divisor, [], {divisorDigits: legacyProfile}).config.divisorDigits).toBe(1);
+        expect(resolveSchemaChoices(divisor, [], {divisorDigits: [Scope.TwoDigitDivisor]}).config.divisorDigits).toBe(2);
         const tool = {tool: MeasurementLengthGeneratorSchema.tool};
         expect(resolveSchemaChoices(tool, [Scope.PhysicalRuler], {tool: [Scope.PhysicalRuler]}).config.tool)
             .toBe(Scope.PhysicalRuler);

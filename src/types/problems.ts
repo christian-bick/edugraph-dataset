@@ -298,6 +298,7 @@ export type DivisionOperandDecomposition = {
 };
 
 export type DivisionPartialQuotientStep = {
+    /** Decimal quotient digit, 0–9; a zero-place step is representable. */
     quotientDigit: number;
     placeValue: 1 | 10 | 100 | 1000;
     partialQuotient: number;
@@ -306,6 +307,15 @@ export type DivisionPartialQuotientStep = {
     remainingAfter: number;
 };
 
+/**
+ * Exact base-ten partial-quotient division. The dividend has 1–4 digits and the
+ * divisor has 1–2 digits, matching their recorded widths and decompositions.
+ * Ordered steps subtract divisor * partialQuotient from the running amount;
+ * their chunks sum to quotient, and the final remaining amount is remainder.
+ * In all cases dividend = divisor * quotient + remainder, with 0 <= remainder
+ * < divisor. A zero remainder is valid for exact division, and zero quotient
+ * digits may be represented without changing this payload shape.
+ */
 export type MultiDigitDivisionProblem = {
     task: 'multi-digit-division';
     dividend: number;
@@ -313,7 +323,7 @@ export type MultiDigitDivisionProblem = {
     quotient: number;
     remainder: number;
     dividendDigits: 1 | 2 | 3 | 4;
-    divisorDigits: 1;
+    divisorDigits: 1 | 2;
     dividendDecomposition: DivisionOperandDecomposition;
     divisorDecomposition: DivisionOperandDecomposition;
     partialQuotients: readonly DivisionPartialQuotientStep[];

@@ -55,7 +55,7 @@ const problemFor = (dividend: number, divisor: number): MultiDigitDivisionProble
         quotient,
         remainder,
         dividendDigits: String(dividend).length as 1 | 2 | 3 | 4,
-        divisorDigits: 1,
+        divisorDigits: String(divisor).length as 1 | 2,
         dividendDecomposition: decompose(dividend),
         divisorDecomposition: decompose(divisor),
         partialQuotients
@@ -67,7 +67,13 @@ describe('operations-division-area-model validation', () => {
         [7, 3, 1],
         [97, 8, 2],
         [987, 8, 3],
-        [9999, 2, 4]
+        [9999, 2, 4],
+        [120, 12, 2],
+        [1008, 12, 2],
+        [909, 12, 2],
+        [1008, 24, 2],
+        [811, 8, 3],
+        [99, 9, 2]
     ])('accepts the authored %i ÷ %i profile with %i partial quotients', (dividend, divisor, steps) => {
         const problem = problemFor(dividend, divisor);
         expect(problem.partialQuotients).toHaveLength(steps);
@@ -100,12 +106,46 @@ describe('operations-division-area-model validation', () => {
             questionSubtractionEquation: '? − ? = ?',
             solutionSubtractionEquation: '987 − 800 = 187'
         });
+        expect(presentation.explanation).toBe('Each partial quotient is multiplied by 8 and subtracted from the running remainder. The partial quotients 100 + 20 + 3 add to 123, and the final subtraction leaves 3. Check: 8 × 123 + 3 = 987. Therefore, 987 ÷ 8 = 123 R 3.');
+    });
+
+    it('represents exact division and zero-place chunks without a false positive remainder', () => {
+        const problem = problemFor(1008, 12);
+        const presentation = multiDigitDivisionPresentation(problem);
+        expect(problem.partialQuotients.map(step => step.partialQuotient)).toEqual([80, 4]);
+        expect(problem.remainder).toBe(0);
+        expect(presentation).toMatchObject({
+            questionEquation: '1,008 ÷ 12 = ? R ?',
+            solutionEquation: '1,008 ÷ 12 = 84 (remainder 0)',
+            partialQuotientsSumEquation: '80 + 4 = 84',
+            multiplicationCheckEquation: '12 × 84 = 1,008',
+            remainderStatement: 'Nothing remains, so 1,008 is exactly divisible by 12.'
+        });
+        expect(presentation.explanation).toContain('960 + 48');
+        expect(presentation.explanation).toContain('leaving 0');
+
+        const zeroPlace = problemFor(811, 8);
+        expect(zeroPlace.partialQuotients.map(step => step.partialQuotient)).toEqual([100, 0, 1]);
+        expect(isValidMultiDigitDivisionProblem(zeroPlace)).toBe(true);
+        expect(multiDigitDivisionPresentation(zeroPlace).partialQuotients[1]).toMatchObject({
+            solutionMultiplicationEquation: '8 × 0 = 0',
+            solutionSubtractionEquation: '11 − 0 = 11'
+        });
     });
 
     it.each([
-        ['zero dividend digit', () => problemFor(909, 2)],
-        ['zero quotient digit', () => problemFor(811, 8)],
-        ['exact division', () => problemFor(99, 9)],
+        ['incorrect divisor width', () => ({...problemFor(909, 12), divisorDigits: 1})],
+        ['wrong zero place in dividend decomposition', () => {
+            const problem = problemFor(909, 12);
+            const parts = [...problem.dividendDecomposition.parts];
+            parts[1] = {...parts[1]!, digit: 1, value: 10};
+            return {...problem, dividendDecomposition: {...problem.dividendDecomposition, parts}};
+        }],
+        ['missing zero quotient step', () => {
+            const problem = problemFor(811, 8);
+            return {...problem, partialQuotients: problem.partialQuotients.filter(step => step.quotientDigit !== 0)};
+        }],
+        ['invalid exact remainder', () => ({...problemFor(120, 12), remainder: 1})],
         ['missing quotient step', () => {
             const problem = problemFor(987, 8);
             return {...problem, partialQuotients: problem.partialQuotients.slice(1)};

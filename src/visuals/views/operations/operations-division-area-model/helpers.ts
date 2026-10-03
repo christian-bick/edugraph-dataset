@@ -16,15 +16,11 @@ const PLACE_NAMES = new Map<
     [1000, 'thousands']
 ]);
 
-const hasOnlyNonZeroDigits = (value: number): boolean =>
-    Number.isSafeInteger(value)
-    && value > 0
-    && !String(value).includes('0');
-
 const samePart = (
-    actual: DivisionPlaceValuePart,
+    actual: DivisionPlaceValuePart | undefined,
     expected: DivisionPlaceValuePart
-): boolean => actual.digit === expected.digit
+): boolean => actual !== undefined
+    && actual.digit === expected.digit
     && actual.placeValue === expected.placeValue
     && actual.value === expected.value;
 
@@ -52,7 +48,7 @@ const isValidDecomposition = (
 };
 
 const expectedQuotientParts = (quotient: number): DivisionPlaceValuePart[] =>
-    expectedParts(quotient).filter(part => part.digit !== 0);
+    expectedParts(quotient);
 
 export type DivisionDisplayDecomposition = DivisionOperandDecomposition & {
     equation: string;
@@ -109,8 +105,23 @@ export const multiDigitDivisionPresentation = (
     const quotientExpression = partialQuotients
         .map(step => formatStandardNumeral(step.partialQuotient))
         .join(' + ');
-    const solutionEquation = `${dividendText} ÷ ${divisorText} = ${quotientText} R ${remainderText}`;
-    const multiplicationCheckEquation = `${divisorText} × ${quotientText} + ${remainderText} = ${dividendText}`;
+    const exact = data.remainder === 0;
+    const solutionEquation = exact
+        ? `${dividendText} ÷ ${divisorText} = ${quotientText} (remainder 0)`
+        : `${dividendText} ÷ ${divisorText} = ${quotientText} R ${remainderText}`;
+    const multiplicationCheckEquation = exact
+        ? `${divisorText} × ${quotientText} = ${dividendText}`
+        : `${divisorText} × ${quotientText} + ${remainderText} = ${dividendText}`;
+    const removedProducts = partialQuotients
+        .map(step => formatStandardNumeral(step.partialProduct))
+        .join(' + ');
+    const remainderStatement = exact
+        ? `Nothing remains, so ${dividendText} is exactly divisible by ${divisorText}.`
+        : `The remainder ${remainderText} is positive and less than the divisor ${divisorText}.`;
+    const legacyPresentation = data.divisorDigits === 1 && !exact;
+    const explanation = legacyPresentation
+        ? `Each partial quotient is multiplied by ${divisorText} and subtracted from the running remainder. The partial quotients ${quotientExpression} add to ${quotientText}, and the final subtraction leaves ${remainderText}. Check: ${multiplicationCheckEquation}. Therefore, ${solutionEquation}.`
+        : `The quotient chunks ${quotientExpression} add to ${quotientText}. Multiplying each chunk by ${divisorText} removes ${removedProducts} from ${dividendText} in order, leaving ${remainderText}. ${remainderStatement} Check: ${multiplicationCheckEquation}.`;
     return {
         dividendDecomposition: decompositionPresentation(data.dividendDecomposition),
         divisorDecomposition: decompositionPresentation(data.divisorDecomposition),
@@ -120,8 +131,8 @@ export const multiDigitDivisionPresentation = (
         solutionEquation,
         partialQuotientsSumEquation: `${quotientExpression} = ${quotientText}`,
         multiplicationCheckEquation,
-        remainderStatement: `The remainder ${remainderText} is positive and less than the divisor ${divisorText}.`,
-        explanation: `Each partial quotient is multiplied by ${divisorText} and subtracted from the running remainder. The partial quotients ${quotientExpression} add to ${quotientText}, and the final subtraction leaves ${remainderText}. Check: ${multiplicationCheckEquation}. Therefore, ${solutionEquation}.`
+        remainderStatement,
+        explanation
     };
 };
 
@@ -129,22 +140,24 @@ export const isValidMultiDigitDivisionProblem = (
     data: MultiDigitDivisionProblem
 ): boolean => {
     if (data.task !== 'multi-digit-division') return false;
-    if (!hasOnlyNonZeroDigits(data.dividend)
-        || !hasOnlyNonZeroDigits(data.divisor)
+    if (!Number.isSafeInteger(data.dividend)
+        || !Number.isSafeInteger(data.divisor)
+        || data.dividend < 2
         || data.dividend > 9999
         || data.divisor < 2
-        || data.divisor > 9
-        || data.dividend <= data.divisor
-        || String(data.quotient).includes('0')) return false;
+        || data.divisor > 99
+        || data.dividend < data.divisor) return false;
 
     if (data.dividendDigits !== String(data.dividend).length
-        || data.divisorDigits !== 1
+        || data.divisorDigits !== String(data.divisor).length
+        || data.divisorDigits < 1
+        || data.divisorDigits > 2
         || data.dividendDigits < 1
         || data.dividendDigits > 4
         || !Number.isSafeInteger(data.quotient)
         || data.quotient <= 0
         || !Number.isSafeInteger(data.remainder)
-        || data.remainder <= 0
+        || data.remainder < 0
         || data.remainder >= data.divisor
         || data.divisor * data.quotient + data.remainder !== data.dividend) return false;
 
@@ -161,12 +174,14 @@ export const isValidMultiDigitDivisionProblem = (
         const step = data.partialQuotients[index]!;
         const partialProduct = data.divisor * expected.value;
         const remainingAfter = remaining - partialProduct;
-        if (step.quotientDigit !== expected.digit
+        if (step === undefined
+            || step.quotientDigit !== expected.digit
             || step.placeValue !== expected.placeValue
             || step.partialQuotient !== expected.value
             || step.remainingBefore !== remaining
             || step.partialProduct !== partialProduct
-            || step.remainingAfter !== remainingAfter) return false;
+            || step.remainingAfter !== remainingAfter
+            || step.remainingAfter < 0) return false;
         remaining = remainingAfter;
     }
     if (remaining !== data.remainder

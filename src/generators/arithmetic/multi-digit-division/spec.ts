@@ -1,11 +1,18 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {selectExactLabelMap} from '../../../lib/resolvers.ts';
-import {ConfigFromSchema, ResolverFn, withLabelChoices} from '../../../types/schema.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 
-const resolveDivisorDigits: ResolverFn<1 | undefined> = labels =>
-    labels.includes(Scope.SingleDigitDivisor) ? 1 : undefined;
-withLabelChoices(resolveDivisorDigits, {kind: 'alternatives'});
+const divisorProfiles = [
+    [Scope.SingleDigitDivisor, Area.ImperfectDivisibility, Scope.NumbersWithoutZero],
+    [Scope.TwoDigitDivisor]
+] as const;
+
+const resolveDivisorDigits = selectExactLabelSetMap([
+    [divisorProfiles[0], 1],
+    [divisorProfiles[1], 2]
+] as const);
 
 const resolveDividendDigits = selectExactLabelMap([
     [Scope.SingleDigitDividend, 1],
@@ -19,21 +26,28 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.DivisionPartialQuotients,
         Area.Modulo,
-        Area.ImperfectDivisibility,
         Area.Multiplication,
         Area.Subtraction,
         Scope.TwoOperands,
         Scope.IntegerNumbers,
         Scope.Base10,
-        Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithoutZero
-    ]
+        Scope.NumbersWithoutNegatives
+    ],
+    compatibility: [generatorLabelRule('divisor-dividend-width', [
+        Scope.TwoDigitDivisor, Scope.SingleDigitDividend
+    ], selected => !selected(Scope.TwoDigitDivisor) || !selected(Scope.SingleDigitDividend))]
 };
 
 export const MultiDigitDivisionGeneratorSchema = {
     divisorDigits: [
-        [Scope.SingleDigitDivisor],
-        resolveDivisorDigits
+        [
+            Scope.SingleDigitDivisor,
+            Scope.TwoDigitDivisor,
+            Area.ImperfectDivisibility,
+            Scope.NumbersWithoutZero
+        ],
+        resolveDivisorDigits,
+        divisorProfiles
     ],
     dividendDigits: [
         [

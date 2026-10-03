@@ -50,6 +50,28 @@ const candidatesByDividendDigits = new Map<DividendDigits, readonly DivisionCand
 const randomItem = <T>(items: readonly T[]): T =>
     items[Math.floor(random() * items.length)]!;
 
+const randomInteger = (minimum: number, maximum: number): number =>
+    minimum + Math.floor(random() * (maximum - minimum + 1));
+
+/** Build a two-digit-divisor instance from its exact quotient and remainder bounds. */
+const buildTwoDigitDivisorCandidate = (dividendDigits: Exclude<DividendDigits, 1>): DivisionCandidate => {
+    const minimum = 10 ** (dividendDigits - 1);
+    const maximum = 10 ** dividendDigits - 1;
+    const exact = random() < 0.5;
+    // 99 has no non-exact two-digit dividend: 99 * 1 + 1 already has three digits.
+    const divisor = randomInteger(10, dividendDigits === 2 && !exact ? 98 : 99);
+    const minimumQuotient = Math.max(1, Math.ceil(
+        (minimum - (exact ? 0 : divisor - 1)) / divisor
+    ));
+    const maximumQuotient = Math.floor((maximum - (exact ? 0 : 1)) / divisor);
+    const quotient = randomInteger(minimumQuotient, maximumQuotient);
+    const minimumRemainder = exact ? 0 : Math.max(1, minimum - divisor * quotient);
+    const maximumRemainder = exact ? 0 : Math.min(divisor - 1, maximum - divisor * quotient);
+    const remainder = randomInteger(minimumRemainder, maximumRemainder);
+
+    return {dividend: divisor * quotient + remainder, divisor, quotient, remainder};
+};
+
 const buildDecomposition = (operand: number): DivisionOperandDecomposition => {
     const digits = String(operand).split('').map(Number);
     const parts = digits.map((digit, index): DivisionPlaceValuePart => {
@@ -106,7 +128,7 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
             'dividendDigits'
         ]);
 
-        if (config.divisorDigits !== 1) {
+        if (config.divisorDigits !== 1 && config.divisorDigits !== 2) {
             throw new GeneratorValidationError(
                 'multi-digit-division',
                 `Unsupported divisor digit count "${config.divisorDigits}".`
@@ -122,7 +144,16 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
             );
         }
 
-        const {dividend, divisor, quotient, remainder} = randomItem(candidates);
+        if (config.divisorDigits === 2 && dividendDigits === 1) {
+            throw new GeneratorValidationError(
+                'multi-digit-division',
+                'A two-digit divisor requires a dividend of at least two digits.'
+            );
+        }
+
+        const {dividend, divisor, quotient, remainder} = config.divisorDigits === 1
+            ? randomItem(candidates)
+            : buildTwoDigitDivisorCandidate(dividendDigits as Exclude<DividendDigits, 1>);
         const dividendDecomposition = buildDecomposition(dividend);
         const divisorDecomposition = buildDecomposition(divisor);
         const partialQuotients = buildPartialQuotients(dividend, divisor, quotient);
@@ -135,7 +166,7 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
                 quotient,
                 remainder,
                 dividendDigits,
-                divisorDigits: 1,
+                divisorDigits: config.divisorDigits,
                 dividendDecomposition,
                 divisorDecomposition,
                 partialQuotients

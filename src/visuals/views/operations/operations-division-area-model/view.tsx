@@ -79,7 +79,7 @@ const PartialQuotientSteps = ({
     </div>
 );
 
-const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) => {
+export const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-division-area-model', data, [
@@ -101,12 +101,13 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
         );
     }
     const presentation = multiDigitDivisionPresentation(data);
+    const legacyPresentation = data.divisorDigits === 1 && data.remainder > 0;
 
     return (
         <div className="w-[920px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-center">
                 <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
-                    Place-value division area model
+                    {legacyPresentation ? 'Place-value division area model' : 'Place-value partial quotients'}
                 </div>
                 <div className="mt-1 text-xl font-bold text-slate-800">{presentation.prompt}</div>
                 <div className={`mx-auto mt-3 w-fit rounded-lg border-2 px-6 py-2 font-mono text-2xl font-bold ${isSolutionView ? 'border-emerald-400 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-700'}`}>
@@ -135,7 +136,9 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
 
             <div className="mt-4">
                 <div className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Equal regions show the ordered partial-quotient steps
+                    {legacyPresentation
+                        ? 'Equal regions show the ordered partial-quotient steps'
+                        : 'Each step links a quotient chunk to an amount removed'}
                 </div>
                 <PartialQuotientSteps presentation={presentation} isSolutionView={isSolutionView} />
             </div>
@@ -152,17 +155,34 @@ const OperationsDivisionAreaModelCore = ({config: _config, payload}: CoreProps) 
                             <div className="mt-1 font-mono text-sm font-bold">{presentation.multiplicationCheckEquation}</div>
                         </div>
                         <div className="rounded-lg bg-white/75 px-3 py-2">
-                            <div className="text-[0.68rem] font-bold uppercase tracking-wide text-emerald-700">Nonzero remainder</div>
+                            <div className="text-[0.68rem] font-bold uppercase tracking-wide text-emerald-700">
+                                {legacyPresentation ? 'Nonzero remainder' : 'Remainder'}
+                            </div>
                             <div className="mt-1 text-sm font-bold">{presentation.remainderStatement}</div>
                         </div>
                     </div>
-                    <div className="mt-3 text-sm font-semibold leading-relaxed text-emerald-900">
-                        {presentation.explanation}
-                    </div>
+                    {legacyPresentation ? (
+                        <div className="mt-3 text-sm font-semibold leading-relaxed text-emerald-900">
+                            {presentation.explanation}
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mt-3 text-xs font-bold uppercase tracking-wide text-emerald-700">Why the steps work</div>
+                            <div className="mt-1 text-sm font-semibold leading-relaxed text-emerald-900">
+                                {presentation.explanation}
+                            </div>
+                        </>
+                    )}
                 </div>
-            ) : (
+            ) : legacyPresentation ? (
                 <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-500">
                     Choose each place-value quotient chunk, multiply, subtract, and record the amount left.
+                </div>
+            ) : (
+                <div className="mt-4 rounded-xl border-2 border-dashed border-slate-300 px-5 py-3 text-sm font-semibold text-slate-600">
+                    <div>Choose each place-value quotient chunk, multiply, subtract, and record the amount left.</div>
+                    <div className="mt-2">Explain how the quotient chunks and amounts removed account for the dividend.</div>
+                    <div className="mt-2 h-7 border-b border-dashed border-slate-400" aria-label="Unresolved explanation" />
                 </div>
             )}
         </div>
