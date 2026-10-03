@@ -2145,6 +2145,115 @@ export type FractionBenchmarkArithmeticProblem = Readonly<{
     }>;
 }>;
 
+/** Exact, nonnegative quotient value. A denominator is positive; the original
+ * division form may deliberately be unreduced, including 0/b and a multiple
+ * of b written as a/b. All components are safe integers. */
+export type FractionQuotientValue = Readonly<{
+    numerator: number;
+    denominator: number;
+}>;
+
+/** The dimensioned story equality is groupCount × measurePerGroup = totalMeasure. */
+export type FractionQuotientEquationWitness = Readonly<{
+    totalMeasure: FractionQuotientValue;
+    groupCount: FractionQuotientValue;
+    measurePerGroup: FractionQuotientValue;
+}>;
+
+type FractionQuotientCommon = Readonly<{
+    kind: 'fraction-quotient';
+    /** The original operand roles are retained; dividend ÷ divisor = quotient. */
+    dividend: FractionQuotientValue;
+    divisor: FractionQuotientValue;
+    quotient: FractionQuotientValue;
+    /** Explicit exact reconstruction, quotient × divisor = dividend. */
+    inverse: Readonly<{
+        quotientFactor: FractionQuotientValue;
+        divisorFactor: FractionQuotientValue;
+        reconstructedDividend: FractionQuotientValue;
+    }>;
+    /** Present only when a contextual equation is a selected mathematical profile. */
+    equationWitness?: FractionQuotientEquationWitness;
+    /** Present only for the expanded inverse-multiplication profile. */
+    multiplicationWitness?: Readonly<{
+        /** Raw numerator and denominator products before any reduction. */
+        unreducedProduct: FractionQuotientValue;
+        reconstructedDividend: FractionQuotientValue;
+    }>;
+}>;
+
+/**
+ * Three exact, Ability-neutral interpretations of division. All values are
+ * nonnegative; divisors are nonzero. Whole counts and original unit-fraction
+ * denominators are small enough to draw: whole counts are at most 6, integer
+ * divisors are 1–6, unit-fraction denominators are 2–6, and explicit part
+ * counts are at most 36. A rational equality means cross-product equality,
+ * never binary floating-point approximation.
+ *
+ * In whole-by-whole, a whole units divided among b recipients gives the
+ * unreduced quotient a/b, even when a is zero or divisible by b. Cutting each
+ * whole into b parts gives a×b total parts and a parts per recipient.
+ * In unit-fraction-by-whole, 1/b of a measured unit shared among n recipients
+ * becomes n pieces of size 1/(b×n), one per recipient. In whole-by-unit-fraction,
+ * n whole measured units contain n×b groups of size 1/b; n may be zero.
+ * These original roles and typed quantity units support sharing and group-count
+ * stories without embedding task wording, a requested unknown, or answer prose.
+ *
+ * `inverse` always reconstructs the dividend exactly from the original
+ * divisor and quotient. The optional `equationWitness` records the contextual
+ * equality, with groupCount=divisor and measurePerGroup=quotient for sharing,
+ * or groupCount=quotient and measurePerGroup=divisor for group counting. The
+ * optional `multiplicationWitness` records the literal numerator/denominator
+ * product of quotient and divisor before reduction, equal to the dividend.
+ */
+export type FractionQuotientProblem = FractionQuotientCommon & (
+    | Readonly<{
+        orientation: 'whole-by-whole';
+        model: Readonly<{
+            kind: 'equal-sharing';
+            wholeUnitCount: number;
+            recipientCount: number;
+            partsPerWhole: number;
+            totalParts: number;
+            partsPerRecipient: number;
+        }>;
+        story: Readonly<{
+            material: 'ribbon' | 'rope';
+            measureUnit: 'meter';
+            recipientUnit: 'person';
+        }>;
+    }>
+    | Readonly<{
+        orientation: 'unit-fraction-by-whole';
+        model: Readonly<{
+            kind: 'unit-part-sharing';
+            wholePartitionCount: number;
+            recipientCount: number;
+            refinedPartitionCount: number;
+            sharedFineParts: number;
+        }>;
+        story: Readonly<{
+            material: 'ribbon' | 'rope';
+            measureUnit: 'meter';
+            recipientUnit: 'person';
+        }>;
+    }>
+    | Readonly<{
+        orientation: 'whole-by-unit-fraction';
+        model: Readonly<{
+            kind: 'unit-part-group-count';
+            wholeUnitCount: number;
+            partsPerWhole: number;
+            groupCount: number;
+        }>;
+        story: Readonly<{
+            material: 'ribbon' | 'rope';
+            measureUnit: 'meter';
+            groupUnit: 'piece';
+        }>;
+    }>
+);
+
 export type FractionArithmeticOperation = 'addition' | 'subtraction';
 
 export type LikeDenominatorFractionValue = {
@@ -2783,6 +2892,12 @@ export interface ViewTypeMap {
     'fractions-compare-models': FractionComparisonProblem;
     'fractions-benchmark-estimate': FractionBenchmarkArithmeticProblem;
     'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
+    'fractions-quotient-interpretation': FractionQuotientProblem;
+    'fractions-division-interpretation': FractionQuotientProblem;
+    'fractions-division-execution': FractionQuotientProblem;
+    'fractions-division-story-creation': FractionQuotientProblem;
+    'fractions-division-inverse-explanation': FractionQuotientProblem;
+    'fractions-division-word-problem': FractionQuotientProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;
     'fractions-operation-model': FractionArithmeticProblem;
     'fractions-understanding-model': FractionArithmeticProblem;

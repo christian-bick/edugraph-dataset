@@ -1,0 +1,2 @@
+- **Identity:** A fraction is paired with its numerator-divided-by-denominator form and an equal-sharing model; the learner explains why the two forms have the same value.
+- **Modes:** Question Mode shows the fraction and division forms but leaves their sharing meaning unexplained. Solution Mode connects the numerator wholes, denominator equal shares, and value of each share.

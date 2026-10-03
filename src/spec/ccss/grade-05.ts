@@ -548,20 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const fractionQuotientMeaningImplementation = defineImplementationPackage({
-    id: 'fraction-quotient-meaning',
-    description: 'Model exact division relations for fraction meaning, whole-number sharing with fractional or mixed quotients, and both unit-fraction division orientations; preserve operand roles and inverse multiplication across interpretation, calculation, story creation and explanation.',
-    generators: [{module: 'fraction-quotient-model', strategy: 'new'}],
-    views: [
-        {module: 'fractions-quotient-interpretation', strategy: 'new'},
-        {module: 'fractions-division-interpretation', strategy: 'new'},
-        {module: 'fractions-division-execution', strategy: 'new'},
-        {module: 'fractions-division-story-creation', strategy: 'new'},
-        {module: 'fractions-division-inverse-explanation', strategy: 'new'},
-        {module: 'fractions-division-word-problem', strategy: 'new'}
-    ]
-});
-
 const generalFractionProductsImplementation = defineImplementationPackage({
     id: 'general-fraction-products',
     description: 'Generate exact whole, fractional and mixed-number products with equal-partition relations for interpretation, story creation and contextual calculation.',
@@ -868,16 +854,21 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.G.B.3-inherited-shape-attributes', inheritedShapeAttributesBuilder),
     ...toTargets('5.G.B.4-classify-shape-hierarchy', classifyShapeHierarchyBuilder),
     ...toTargets('5.NF.A.2-benchmark-estimate', fractionBenchmarkEstimateBuilder),
-    ...toTargets('5.NF.A.2-benchmark-reasonableness', fractionBenchmarkReasonablenessBuilder)
+    ...toTargets('5.NF.A.2-benchmark-reasonableness', fractionBenchmarkReasonablenessBuilder),
+    ...toTargets('5.NF.B.3-interpret-quotient', fractionQuotientInterpretationBuilder),
+    ...toTargets('5.NF.B.3-whole-number-division-problems', wholeNumberFractionQuotientProblemsBuilder),
+    ...toTargets('5.NF.B.7a-interpret-unit-fraction-dividend', interpretUnitFractionDividendBuilder),
+    ...toTargets('5.NF.B.7a-compute-unit-fraction-dividend', computeUnitFractionDividendBuilder),
+    ...toTargets('5.NF.B.7a-create-division-story', createUnitFractionDividendStoryBuilder),
+    ...toTargets('5.NF.B.7a-explain-inverse-multiplication', explainUnitFractionDividendBuilder),
+    ...toTargets('5.NF.B.7b-interpret-unit-fraction-divisor', interpretUnitFractionDivisorBuilder),
+    ...toTargets('5.NF.B.7b-compute-unit-fraction-divisor', computeUnitFractionDivisorBuilder),
+    ...toTargets('5.NF.B.7b-create-division-story', createUnitFractionDivisorStoryBuilder),
+    ...toTargets('5.NF.B.7b-explain-inverse-multiplication', explainUnitFractionDivisorBuilder),
+    ...toTargets('5.NF.B.7c-unit-fraction-division-problems', unitFractionDivisionProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.B.3-interpret-quotient',
-        fractionQuotientInterpretationBuilder,
-        fractionQuotientMeaningImplementation,
-        'Pair a fraction with equal sharing or an equivalent division equation and ask why dividing its numerator by its denominator gives its value.'
-    ),
     ...toImplementationTodos(
         '5.NF.B.4a-partition-product',
         fractionPartitionProductBuilder,
@@ -1015,66 +1006,6 @@ export const implementationTodos: ImplementationTodo[] = [
         grade5FractionArithmeticWordProblemsBuilder,
         unlikeDenominatorArithmeticImplementation,
         'Solve complete same-whole fraction addition and subtraction word problems, retaining common- and unlike-denominator cases and fractional or mixed-number forms in one competency. Make the reference whole, story quantities, equation or model and exact answer agree; retain the original unlike denominators before any conversion. Existing common-denominator support is only part of this delivery.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.3-whole-number-division-problems',
-        wholeNumberFractionQuotientProblemsBuilder,
-        fractionQuotientMeaningImplementation,
-        'Solve sharing stories with a nonnegative whole-number dividend and nonzero whole-number divisor, expressing the quotient as a fraction or mixed number. Show the corresponding division relation or sharing model and interpret the share in the story units. FractionQuotient covers both output forms; allow zero dividends and integral-valued results written as fractions, and do not impose a global no-zero constraint.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7a-interpret-unit-fraction-dividend',
-        interpretUnitFractionDividendBuilder,
-        fractionQuotientMeaningImplementation,
-        'Interpret a unit-fraction dividend divided by a nonzero whole-number divisor using the visible original operands and a coherent division relation or sharing model. The numerator-one fraction is the amount being divided; explain what the quotient means rather than merely calculating it.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7a-compute-unit-fraction-dividend',
-        computeUnitFractionDividendBuilder,
-        fractionQuotientMeaningImplementation,
-        'Compute a unit fraction divided by a nonzero whole number. Preserve the numerator-one original dividend, integer divisor and exact fractional quotient, with a response requiring the missing result and a solution exposing the consistent division relation or model.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7a-create-division-story',
-        createUnitFractionDividendStoryBuilder,
-        fractionQuotientMeaningImplementation,
-        'Create a written story for a specified unit-fraction dividend divided by a nonzero whole-number divisor. The amount being shared, number of shares and resulting share must agree with the given original division expression or model.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7a-explain-inverse-multiplication',
-        explainUnitFractionDividendBuilder,
-        fractionQuotientMeaningImplementation,
-        'Explain the quotient by showing why multiplying it by the nonzero whole-number divisor reconstructs the original unit-fraction dividend; for example, connect (1/3) divided by 4 = 1/12 with (1/12) times 4 = 1/3. Require the inverse relationship as reasoning, not an unrelated multiplication exercise.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7b-interpret-unit-fraction-divisor',
-        interpretUnitFractionDivisorBuilder,
-        fractionQuotientMeaningImplementation,
-        'Interpret a whole-number dividend divided by a unit-fraction divisor using the visible original operands and a coherent division relation or group-size model. The numerator-one fraction is the size of each group; explain how the quotient counts groups in the available whole-number quantity.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7b-compute-unit-fraction-divisor',
-        computeUnitFractionDivisorBuilder,
-        fractionQuotientMeaningImplementation,
-        'Compute a nonnegative whole number divided by a unit fraction. Preserve the whole-number original dividend, numerator-one divisor and exact count of groups. Permit a zero dividend with a zero quotient; the divisor stays nonzero under the division contract.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7b-create-division-story',
-        createUnitFractionDivisorStoryBuilder,
-        fractionQuotientMeaningImplementation,
-        'Create a written story for a specified whole-number dividend divided by a unit-fraction divisor. The available amount, numerator-one fractional group size and number of groups must agree with the original expression or model.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7b-explain-inverse-multiplication',
-        explainUnitFractionDivisorBuilder,
-        fractionQuotientMeaningImplementation,
-        'Explain why multiplying the quotient by the unit-fraction divisor reconstructs the original whole-number dividend; for example, connect 4 divided by 1/5 = 20 with 20 times 1/5 = 4. Preserve the fractional group-size meaning and require the inverse relationship as reasoning.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.7c-unit-fraction-division-problems',
-        unitFractionDivisionProblemsBuilder,
-        fractionQuotientMeaningImplementation,
-        'Solve real-world problems in both orientations: a unit fraction divided by a nonzero whole number, and a nonnegative whole number divided by a unit fraction. Use necessary story quantities and a model or equation that preserves which original operand is the numerator-one fraction and what the quotient measures. Keep both orientations in this one competency.'
     ),
 ];
 

@@ -1,0 +1,2 @@
+- **Identity:** The learner calculates the missing quotient from the original division expression and a countable equal-part model.
+- **Modes:** Question Mode leaves the quotient blank while retaining the operands and partition. Solution Mode gives the exact quotient and relates it to the visible shares or groups.

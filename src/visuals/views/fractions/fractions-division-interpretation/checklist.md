@@ -1,0 +1,2 @@
+- **Identity:** The original division operands and equal-part model are visible; the learner interprets the quotient as a share size or a count of unit-fraction groups.
+- **Modes:** Question Mode withholds the quotient's meaning. Solution Mode explains what is shared or counted and gives the quotient with its contextual unit.

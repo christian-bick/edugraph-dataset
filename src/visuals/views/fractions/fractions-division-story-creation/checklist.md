@@ -1,0 +1,2 @@
+- **Identity:** A division expression and equal-part model are supplied, and the learner writes a real-world story preserving the amount and sharing or group-size roles.
+- **Modes:** Question Mode leaves the story unwritten. Solution Mode gives a coherent story question with the same operands, units, and quotient meaning.
