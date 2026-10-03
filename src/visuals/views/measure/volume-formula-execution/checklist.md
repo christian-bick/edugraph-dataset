@@ -1,0 +1,2 @@
+- **Identity:** A rectangular prism supplies either three measured edges or a measured base area and height, and asks for a volume calculation.
+- **Modes:** Question Mode leaves formula substitution and volume unfinished. Solution Mode substitutes exactly the supplied quantities into the matching volume formula and gives the result in cubic units.

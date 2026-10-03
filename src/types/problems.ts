@@ -1304,6 +1304,84 @@ export type UnitCubeVolumeProblem = {
     cubeCount: number;
 };
 
+/** Measurements supplied for a volume formula; both forms describe the same prism. */
+export type RectangularPrismMeasuredInput =
+    | Readonly<{
+        kind: 'three-edges';
+        lengthUnits: number;
+        widthUnits: number;
+        heightUnits: number;
+    }>
+    | Readonly<{
+        kind: 'base-area-height';
+        baseAreaSquareUnits: number;
+        heightUnits: number;
+    }>;
+
+export type RectangularPrismCellGroup = Readonly<{
+    index: number;
+    cells: readonly Readonly<UnitCubeCell>[];
+    cubeCount: number;
+}>;
+
+/**
+ * Exact packing and product witnesses for one rectangular prism. The abstract
+ * linear unit is u: every occupied cell is a side-1 cube of volume 1 u³.
+ * `occupiedCells` contains every coordinate in [0, length) × [0, width) ×
+ * [0, height) exactly once, in layer-row-column order. The cubes have disjoint
+ * interiors and fill the prism without gaps. `heightLayers` partitions those
+ * cells by layer index, in ascending order, with length × width cells each.
+ *
+ * The exact equalities are baseAreaSquareUnits = length × width and
+ * cubeCount = volumeCubicUnits = length × width × height =
+ * baseAreaSquareUnits × height. The measured input repeats the corresponding
+ * canonical values and identifies whether a formula receives three edge
+ * lengths or the two operands base area and height. When present,
+ * `countedPackingEquivalence` explicitly connects the complete packing to
+ * measured volume: cubesPerLayer = length × width = baseAreaSquareUnits,
+ * layerCount = height, countedCubes = cubesPerLayer × layerCount = cubeCount,
+ * and countedVolumeCubicUnits = countedCubes × 1 = volumeCubicUnits.
+ * `modeledTripleProduct`, when present, binds the ordered three factors
+ * length, width, height to the same unit-cube layer geometry and their product.
+ * These two relation witnesses are mutually exclusive and require three-edge
+ * measured input. An associative regrouping requires `modeledTripleProduct`.
+ * If present,
+ * `associativeRegrouping` partitions the same occupied cells by column into
+ * length slices of width × height cells and witnesses
+ * (length × width) × height = length × (width × height).
+ * All counts, dimensions, and products are positive safe integers. The payload
+ * contains no prompt, unknown, or solution wording; views choose the task.
+ */
+export type RectangularPrismVolumeProblem = Readonly<{
+    kind: 'rectangular-prism-volume';
+    unitId: 'generic';
+    unitCubeEdgeLength: 1;
+    dimensions: Readonly<{length: 2 | 3 | 4; width: 2 | 3; height: 2 | 3}>;
+    occupiedCells: readonly Readonly<UnitCubeCell>[];
+    heightLayers: readonly RectangularPrismCellGroup[];
+    baseAreaSquareUnits: number;
+    cubeCount: number;
+    volumeCubicUnits: number;
+    measuredInput: RectangularPrismMeasuredInput;
+    countedPackingEquivalence?: Readonly<{
+        cubesPerLayer: number;
+        layerCount: number;
+        countedCubes: number;
+        unitCubeVolumeCubicUnits: 1;
+        countedVolumeCubicUnits: number;
+    }>;
+    modeledTripleProduct?: Readonly<{
+        factors: readonly [number, number, number];
+        cubesPerLayer: number;
+        layerCount: number;
+        product: number;
+    }>;
+    associativeRegrouping?: Readonly<{
+        widthHeightProduct: number;
+        columnSlices: readonly RectangularPrismCellGroup[];
+    }>;
+}>;
+
 export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
 
 export type StatisticalCategory = {
@@ -2359,6 +2437,10 @@ export interface ViewTypeMap {
     'volume-unit-cube-specification': UnitCubeVolumeProblem;
     'volume-packing-interpretation': UnitCubeVolumeProblem;
     'volume-unit-cube-count': UnitCubeVolumeProblem;
+    'volume-packing-product-explanation': RectangularPrismVolumeProblem;
+    'volume-product-model': RectangularPrismVolumeProblem;
+    'volume-formula-execution': RectangularPrismVolumeProblem;
+    'volume-formula-story': RectangularPrismVolumeProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;

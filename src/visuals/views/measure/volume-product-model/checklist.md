@@ -1,0 +1,2 @@
+- **Identity:** A dimensioned but unfilled prism and empty unit-cube slots ask the learner to build a three-factor cube model; when two groupings appear, they partition the same cubes by base layers and column slices.
+- **Modes:** Question Mode leaves the cube model and product unfinished. Solution Mode fills every cube slot and shows the triple product; when two groupings appear, it shows their equal parenthesized products.

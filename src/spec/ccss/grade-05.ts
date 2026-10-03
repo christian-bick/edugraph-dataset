@@ -337,20 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const rectangularPrismVolumeImplementation = defineImplementationPackage({
-    id: 'rectangular-prism-volume',
-    description: 'Connect whole-number rectangular-prism cube packings, triple products and volume formulas through separate explanation, construction and calculation tasks.',
-    generators: [
-        {module: 'volume-rectangular-prism', strategy: 'new'}
-    ],
-    views: [
-        {module: 'volume-packing-product-explanation', strategy: 'new'},
-        {module: 'volume-product-model', strategy: 'new'},
-        {module: 'volume-formula-execution', strategy: 'new'},
-        {module: 'volume-formula-story', strategy: 'new'}
-    ]
-});
-
 const compositePrismVolumeImplementation = defineImplementationPackage({
     id: 'composite-prism-volume',
     description: 'Explain and apply volume additivity for exactly two nonoverlapping rectangular prisms in geometric and contextual tasks.',
@@ -924,28 +910,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.MD.B.2-line-plot-fraction-problems', linePlotFractionProblemsBuilder),
     ...toTargets('5.MD.C.3a-unit-cube', unitCubeSpecificationBuilder),
     ...toTargets('5.MD.C.3b-volume-from-packing', volumeFromPackingBuilder),
-    ...toTargets('5.MD.C.4-count-unit-cubes', countUnitCubesBuilder)
+    ...toTargets('5.MD.C.4-count-unit-cubes', countUnitCubesBuilder),
+    ...toTargets('5.MD.C.5a-packing-product-connection', packingProductConnectionBuilder),
+    ...toTargets('5.MD.C.5a-represent-triple-products', representTripleProductsBuilder),
+    ...toTargets('5.MD.C.5b-volume-formulas', rectangularPrismVolumeFormulasBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.C.5a-packing-product-connection',
-        packingProductConnectionBuilder,
-        rectangularPrismVolumeImplementation,
-        'Show whole-number prism edges and complete unit-cube layers. Request an explanation and equations connecting the cube count to length times width times height and, equivalently, base area times height.'
-    ),
-    ...toImplementationTodos(
-        '5.MD.C.5a-represent-triple-products',
-        representTripleProductsBuilder,
-        rectangularPrismVolumeImplementation,
-        'Ask the learner to construct or annotate a prism model of a three-factor whole-number product. When associativity is requested, show equivalent parenthesizations through regrouped cube layers.'
-    ),
-    ...toImplementationTodos(
-        '5.MD.C.5b-volume-formulas',
-        rectangularPrismVolumeFormulasBuilder,
-        rectangularPrismVolumeImplementation,
-        'Calculate prism volume from either three supplied edge lengths or supplied base area and height, with formula substitution and cubic units. The contextual leaf must require understanding the story to obtain the relevant measurements.'
-    ),
     ...toImplementationTodos(
         '5.MD.C.5c-volume-additivity',
         volumeAdditivityBuilder,

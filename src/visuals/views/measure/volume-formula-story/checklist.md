@@ -1,0 +1,2 @@
+- **Identity:** A brief crate story is the only source of the measurements needed to calculate rectangular-prism volume.
+- **Modes:** Question Mode asks for the volume and leaves the formula, substitution, and answer unfinished. Solution Mode extracts the story quantities, applies the matching formula, and answers in cubic units.
