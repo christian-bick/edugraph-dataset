@@ -34,10 +34,11 @@ function SingleUnitCube({edgeUnit}: {edgeUnit: string}) {
     );
 }
 
-function AssembledPrism({bounds}: {bounds: UnitCubeVolumeProblem['bounds']}) {
+function AssembledPrism({bounds, compact}: {bounds: UnitCubeVolumeProblem['bounds']; compact?: boolean}) {
     const {width, height} = prismViewport(bounds);
     return (
-        <svg viewBox={`0 0 ${width} ${height}`} className="mx-auto h-[240px] w-full max-w-[330px]"
+        <svg viewBox={`0 0 ${width} ${height}`}
+            className={compact ? 'mx-auto h-[142px] w-full max-w-[220px]' : 'mx-auto h-[240px] w-full max-w-[330px]'}
             role="img" aria-label="Assembled solid with unit-cube seams on its outside faces">
             {assembledPrismFaces(bounds).map((face, index) => (
                 <polygon key={index} points={polygonPoints(face.points)} fill={FACE_COLOR[face.surface]}
@@ -138,8 +139,15 @@ function SpecificationBody({data, isSolutionView}: {
                 <div className="space-y-3 text-lg font-semibold text-slate-800">
                     <div className="rounded-lg bg-white p-3">Edge length: <b>1 {unit.length}</b> <span className="text-sm text-slate-500">(length)</span></div>
                     <div className="rounded-lg bg-white p-3">One square face: <b>1 {unit.square}</b> <span className="text-sm text-slate-500">(area)</span></div>
-                    <div className="rounded-lg bg-white p-3">Whole solid: <b>{isSolutionView ? `1 ${unit.cubic}` : '?'}</b> <span className="text-sm text-slate-500">(volume)</span></div>
+                    <div className="rounded-lg bg-white p-3">Whole cube: <b>{isSolutionView ? `1 ${unit.cubic}` : '?'}</b> <span className="text-sm text-slate-500">(volume)</span></div>
                 </div>
+            </div>
+            <div className="mt-3 flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2">
+                <div className="w-[220px] shrink-0"><AssembledPrism bounds={data.bounds} compact /></div>
+                <p className="text-sm font-medium text-slate-700">
+                    This larger solid is built from copies of the cube shown above. Each copy has the same
+                    1 {unit.length} edge length.
+                </p>
             </div>
             <AnswerPanel isSolutionView={isSolutionView} questionLabel="Name and volume:">
                 A cube with every edge 1 {unit.length} is a unit cube. Its face has area 1 {unit.square},

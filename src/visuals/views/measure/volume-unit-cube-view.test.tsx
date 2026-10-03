@@ -28,6 +28,19 @@ const traced = (data: UnitCubeVolumeProblem): UnitCubeVolumeProblem => ({
     ...data,
     countingTrace: data.occupiedCells.map((cell, index) => ({cell, ordinal: index + 1}))
 });
+const withBounds = (
+    data: UnitCubeVolumeProblem, bounds: UnitCubeVolumeProblem['bounds']
+): UnitCubeVolumeProblem => {
+    const cubeCount = bounds.columns * bounds.rows * bounds.layers;
+    return {
+        ...data, bounds, cubeCount, countingTrace: undefined,
+        occupiedCells: Array.from({length: cubeCount}, (_, index) => ({
+            column: index % bounds.columns,
+            row: Math.floor(index / bounds.columns) % bounds.rows,
+            layer: Math.floor(index / (bounds.columns * bounds.rows))
+        }))
+    };
+};
 
 const specification = (data: UnitCubeVolumeProblem, isSolutionView: boolean) => {
     const payload: ViewRenderPayload<'volume-unit-cube-specification'> = {
@@ -64,6 +77,23 @@ describe('unit cube specification and packing views', () => {
         expect(solution).toContain('unit cube');
         expect(solution).toContain('1 u³');
         expect(specification(data, false)).toContain('viewBox="0 0 330 225"');
+    });
+
+    it('shows a bound-specific larger solid in both specification modes without exposing its volume', () => {
+        const data = fixture('generic');
+        const small = withBounds(data, {columns: 2, rows: 2, layers: 1});
+        const large = withBounds(data, {columns: 4, rows: 3, layers: 2});
+        for (const isSolutionView of [false, true]) {
+            const smallMarkup = specification(small, isSolutionView);
+            const largeMarkup = specification(large, isSolutionView);
+            expect(smallMarkup).toContain('This larger solid is built from copies of the cube shown above.');
+            expect(smallMarkup).toContain('h-[142px]');
+            expect(smallMarkup.match(/<polygon/g)).toHaveLength(11);
+            expect(largeMarkup.match(/<polygon/g)).toHaveLength(29);
+            expect(smallMarkup).not.toBe(largeMarkup);
+            expect(visible(smallMarkup)).not.toContain(`${small.cubeCount} u³`);
+            expect(visible(largeMarkup)).not.toContain(`${large.cubeCount} u³`);
+        }
     });
 
     it('explains the complete packing without revealing the explanation in Q', () => {
