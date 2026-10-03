@@ -935,6 +935,27 @@ export type MeasurementConversionProblem =
     | GenericUnitScaleRelationProblem
     | StandardUnitEquivalencesProblem;
 
+/**
+ * A two-step measurement relation: convert the source quantity into the other
+ * unit, then add another quantity already expressed in that target unit.
+ * `conversion` obeys the pair factor; all counts are positive safe integers in
+ * hundredths. The converted target count is the equality's smaller count when
+ * sourceSide is 'larger', or its larger count when sourceSide is 'smaller'.
+ * `totalTargetHundredths` equals that count plus `additionalTargetHundredths`.
+ * Integer stories have every count divisible by 100. Decimal stories have a
+ * fractional source or additional given quantity. The view chooses the prompt
+ * and which result to withhold.
+ */
+export type MeasurementConversionStoryProblem = {
+    kind: 'measurement-conversion-story';
+    pair: MeasurementConversionPair;
+    numberKind: 'integer' | 'decimal';
+    sourceSide: 'larger' | 'smaller';
+    conversion: MeasurementConversionExactEquality;
+    additionalTargetHundredths: number;
+    totalTargetHundredths: number;
+};
+
 export type MeasurementWordProblemKind =
     | 'length'
     | 'time'
@@ -2227,6 +2248,7 @@ export interface ViewTypeMap {
     'measure-conversion-derivation': MeasurementConversionProblem;
     'measure-conversion-execution': StandardUnitEquivalencesProblem;
     'measure-conversion-table': StandardUnitEquivalencesProblem;
+    'measure-conversion-problems': MeasurementConversionStoryProblem;
     'measure-length-estimate': MeasurementEstimateProblem;
     'measure-length-difference': MeasurementLengthDifferenceProblem;
     'measure-attributes': MeasurementAttributeProblem;

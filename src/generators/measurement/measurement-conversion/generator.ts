@@ -7,69 +7,11 @@ import {
     MeasurementConversionPairId,
     StandardUnitEquivalencesProblem
 } from '../../../types/problems.ts';
+import {measurementConversionPairSeeds} from '../helpers.ts';
 import {
     MeasurementConversionGeneratorConfig,
     MeasurementConversionGeneratorSchema
 } from './spec.ts';
-
-const pairSeeds: Record<MeasurementConversionPairId, MeasurementConversionPair> = {
-    'kilometer-meter': {
-        id: 'kilometer-meter',
-        quantityKind: 'length',
-        scalingKind: 'magnitude',
-        largerUnit: 'kilometer',
-        smallerUnit: 'meter',
-        factor: 1000
-    },
-    'meter-centimeter': {
-        id: 'meter-centimeter',
-        quantityKind: 'length',
-        scalingKind: 'magnitude',
-        largerUnit: 'meter',
-        smallerUnit: 'centimeter',
-        factor: 100
-    },
-    'kilogram-gram': {
-        id: 'kilogram-gram',
-        quantityKind: 'weight',
-        scalingKind: 'magnitude',
-        largerUnit: 'kilogram',
-        smallerUnit: 'gram',
-        factor: 1000
-    },
-    'pound-ounce': {
-        id: 'pound-ounce',
-        quantityKind: 'weight',
-        scalingKind: 'factor',
-        largerUnit: 'pound',
-        smallerUnit: 'ounce',
-        factor: 16
-    },
-    'liter-milliliter': {
-        id: 'liter-milliliter',
-        quantityKind: 'liquid-volume',
-        scalingKind: 'magnitude',
-        largerUnit: 'liter',
-        smallerUnit: 'milliliter',
-        factor: 1000
-    },
-    'hour-minute': {
-        id: 'hour-minute',
-        quantityKind: 'time',
-        scalingKind: 'factor',
-        largerUnit: 'hour',
-        smallerUnit: 'minute',
-        factor: 60
-    },
-    'minute-second': {
-        id: 'minute-second',
-        quantityKind: 'time',
-        scalingKind: 'factor',
-        largerUnit: 'minute',
-        smallerUnit: 'second',
-        factor: 60
-    }
-};
 
 const randomInteger = (minimum: number, maximum: number): number =>
     minimum + Math.floor(random() * (maximum - minimum + 1));
@@ -104,7 +46,7 @@ const buildNumericExamples = (
 };
 
 const buildPair = (id: MeasurementConversionPairId): MeasurementConversionPair =>
-    ({...pairSeeds[id]});
+    ({...measurementConversionPairSeeds[id]});
 
 const buildUnitEquivalences = (
     pair: MeasurementConversionPair
@@ -136,7 +78,7 @@ export class MeasurementConversionGenerator implements ProblemGenerator<
     ): ProblemStub<StandardUnitEquivalencesProblem> {
         validateConfigFields('measurement-conversion', config, ['unitPair', 'numericProfile']);
 
-        const pairSeed = pairSeeds[config.unitPair!];
+        const pairSeed = measurementConversionPairSeeds[config.unitPair!];
         if (!pairSeed) {
             throw new GeneratorValidationError(
                 'measurement-conversion',

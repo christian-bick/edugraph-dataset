@@ -337,17 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const measurementMultistepConversionImplementation = defineImplementationPackage({
-    id: 'measurement-multistep-conversions',
-    description: 'Represent conversion and subsequent calculation in canonical multistep measurement stories with coherent units and equations.',
-    generators: [
-        {module: 'measurement-conversion-problems', strategy: 'new'}
-    ],
-    views: [
-        {module: 'measure-conversion-problems', strategy: 'new'}
-    ]
-});
-
 const fractionalMeasurementLinePlotImplementation = defineImplementationPackage({
     id: 'fractional-measurement-line-plots',
     description: 'Support denominator-specific measurement data and line-plot construction with halves, quarters and eighths.',
@@ -964,16 +953,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder),
     ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder),
     ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder),
-    ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder)
+    ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder),
+    ...toTargets('5.MD.A.1-multistep-conversion-problems', multistepConversionProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.A.1-multistep-conversion-problems',
-        multistepConversionProblemsBuilder,
-        measurementMultistepConversionImplementation,
-        'Use a necessary real-world story whose solution requires unit conversion followed by further calculation. Show the conversion equality and successive calculation steps with consistent units.'
-    ),
     ...toImplementationTodos(
         '5.MD.B.2-construct-fractional-line-plot',
         constructGrade5FractionalLinePlotBuilder,

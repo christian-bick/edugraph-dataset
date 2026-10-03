@@ -1,0 +1,2 @@
+- **Identity:** A real-world story gives one measured quantity in a source unit and another in the requested unit; finding their total requires converting the first quantity and then adding the two quantities in the requested unit.
+- **Modes:** Question Mode leaves both equations and the total unanswered while showing the two givens and unit relation. Solution Mode shows an exact factor equation, equivalent measurements, an addition equation with consistent units, and the total asked for in the story.
