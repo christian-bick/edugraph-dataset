@@ -1,0 +1,2 @@
+- **Identity:** A fraction product and equal-part model are given, and the learner writes a coherent measured-quantity story preserving q, b equal parts, and a selected parts.
+- **Modes:** Question Mode leaves the story and product blank. Solution Mode gives a complete real-world question and exact unit-bearing answer matching the model.

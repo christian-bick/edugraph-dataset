@@ -1,0 +1,2 @@
+- **Identity:** The full measured quantity q is divided into b equal parts in each copy, and a blue parts are selected; the learner explains how this represents (a/b) × q.
+- **Modes:** Question Mode shows the measured ruler and selected parts without their value or product explanation. Solution Mode identifies q/b, counts the selected parts across copies, and connects their total to (a × q) ÷ b.

@@ -1,0 +1,2 @@
+- **Identity:** A ribbon or rope story supplies both factors only in necessary prose under one measured reference quantity; the learner finds the product.
+- **Modes:** Question Mode leaves the equation and answer blank. Solution Mode shows the matching exact multiplication, measured answer, and partition model, including mixed-number factors when present.

@@ -548,17 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const generalFractionProductsImplementation = defineImplementationPackage({
-    id: 'general-fraction-products',
-    description: 'Generate exact whole, fractional and mixed-number products with equal-partition relations for interpretation, story creation and contextual calculation.',
-    generators: [{module: 'fraction-products', strategy: 'new'}],
-    views: [
-        {module: 'fractions-product-partition-interpretation', strategy: 'new'},
-        {module: 'fractions-product-story-creation', strategy: 'new'},
-        {module: 'fractions-product-word-problem', strategy: 'new'}
-    ]
-});
-
 const fractionalRectangleAreaImplementation = defineImplementationPackage({
     id: 'fractional-rectangle-area',
     description: 'Model exact fractional rectangle dimensions and unit-fraction square tiles for area reasoning, computation and product construction.',
@@ -865,22 +854,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.7b-compute-unit-fraction-divisor', computeUnitFractionDivisorBuilder),
     ...toTargets('5.NF.B.7b-create-division-story', createUnitFractionDivisorStoryBuilder),
     ...toTargets('5.NF.B.7b-explain-inverse-multiplication', explainUnitFractionDivisorBuilder),
-    ...toTargets('5.NF.B.7c-unit-fraction-division-problems', unitFractionDivisionProblemsBuilder)
+    ...toTargets('5.NF.B.7c-unit-fraction-division-problems', unitFractionDivisionProblemsBuilder),
+    ...toTargets('5.NF.B.4a-partition-product', fractionPartitionProductBuilder),
+    ...toTargets('5.NF.B.4a-create-product-story', fractionProductStoryCreationBuilder),
+    ...toTargets('5.NF.B.6-fraction-product-problems', generalFractionProductProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.B.4a-partition-product',
-        fractionPartitionProductBuilder,
-        generalFractionProductsImplementation,
-        'Show b equal parts of a whole or fractional quantity q and a selected parts; ask how the model represents (a/b) times q and the equivalent sequence a times q divided by b.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.4a-create-product-story',
-        fractionProductStoryCreationBuilder,
-        generalFractionProductsImplementation,
-        'Provide a fraction-of-quantity equation or partition model and ask for a coherent written story preserving the numerator, denominator, equal parts and quantities, including fractional q.'
-    ),
     ...toImplementationTodos(
         '5.NF.B.4b-tile-fractional-rectangle',
         fractionalRectangleTilingBuilder,
@@ -916,12 +896,6 @@ export const implementationTodos: ImplementationTodo[] = [
         fractionEquivalenceUnitScalingBuilder,
         fractionEquivalenceUnitScalingImplementation,
         'Expose a/b times n/n = na/nb with n/n equal to one and ask why this unit scaling changes the fraction representation while preserving its quantity.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.6-fraction-product-problems',
-        generalFractionProductProblemsBuilder,
-        generalFractionProductsImplementation,
-        'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
     ),
     ...toImplementationTodos(
         '5.NBT.A.2-explain-power-ten-zero-patterns',

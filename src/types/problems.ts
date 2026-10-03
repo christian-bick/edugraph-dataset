@@ -2254,6 +2254,101 @@ export type FractionQuotientProblem = FractionQuotientCommon & (
     }>
 );
 
+/** Positive exact rational value; original operand forms need not be reduced. */
+export type FractionProductValue = Readonly<{
+    numerator: number;
+    denominator: number;
+}>;
+
+export type FractionProductFractionOperand = Readonly<{
+    form: 'fraction';
+    numerator: number;
+    denominator: number;
+}>;
+
+export type FractionProductMixedOperand = Readonly<{
+    form: 'mixed';
+    whole: number;
+    fractionNumerator: number;
+    denominator: number;
+    improperNumerator: number;
+}>;
+
+type FractionProductCommon = Readonly<{
+    kind: 'fraction-product';
+    sharedWhole: 1;
+    /** Dimensionless a/b factor and measured reference quantity q. */
+    multiplierValue: FractionProductValue;
+    quantityValue: FractionProductValue;
+    product: FractionProductValue;
+    /** One measured length supplies the reference for every equal part and result. */
+    context: Readonly<{
+        material: 'ribbon' | 'rope';
+        measureUnit: 'meter';
+    }>;
+    partition: Readonly<{
+        /** b equal parts divide each copy of q itself, even when q is fractional. */
+        equalPartsPerCopy: number;
+        /** a selected q/b parts; mixed a/b uses its improper numerator. */
+        selectedPartCount: number;
+        /** The least number of q copies able to contain all selected parts. */
+        copyCount: number;
+        availablePartCount: number;
+        onePartValue: FractionProductValue;
+        /** a × q, before division by b. */
+        scaledQuantity: FractionProductValue;
+    }>;
+    /** Explicit dimensioned equality in the Area.Equation mathematical profile. */
+    equationWitness?: Readonly<{
+        factor: FractionProductValue;
+        referenceMeasure: FractionProductValue;
+        productMeasure: FractionProductValue;
+        measureUnit: 'meter';
+    }>;
+}>;
+
+/**
+ * Ability-neutral fraction-of-quantity multiplication. All integer components
+ * are positive safe integers except a mixed operand's whole, which is at least
+ * one. Fraction factors may be proper or improper. Fraction-form q may also be
+ * a whole value written with denominator one; contextual word profiles use two
+ * noninteger factors. Mixed-form profiles retain both original mixed notations
+ * and their exact improper values, with improperNumerator = whole × denominator
+ * + fractionNumerator and 0 < fractionNumerator < denominator. In the fraction
+ * arm, each canonical value repeats its original numerator and denominator
+ * exactly, without reducing them; in the mixed arm, its numerator is the
+ * corresponding improperNumerator and its denominator is unchanged. This
+ * preserves the selected-part count named by the original factor.
+ *
+ * Let multiplierValue = a/b and quantityValue = q. The partition witness has
+ * equalPartsPerCopy = b, selectedPartCount = a, copyCount = ceil(a/b),
+ * availablePartCount = copyCount × b, onePartValue = q/b, and
+ * scaledQuantity = a × q. Each copy is the entire measured quantity q, divided
+ * into b equal parts; exactly a of these parts are selected across the copies.
+ * Thus product = a × (q/b) = (a × q)/b. All equalities are exact rational
+ * cross-products. The numerator and denominator have distinct model roles,
+ * including when the multiplier is improper or written as a mixed number.
+ * For legible models, 2 ≤ b ≤ 6, 1 ≤ a < 3b, 1 ≤ copyCount ≤ 3, and
+ * availablePartCount ≤ 18. The measured quantity q is positive and at most
+ * six units; its original denominator is at most six.
+ * `equationWitness`, when present, repeats multiplierValue × quantityValue =
+ * product as factor × referenceMeasure = productMeasure with meter units; no prompt, blank, or requested
+ * reasoning is stored in the payload. All three views accept both operand forms
+ * and both presence states of the optional witness.
+ */
+export type FractionProductProblem = FractionProductCommon & (
+    | Readonly<{
+        operandForm: 'fractions';
+        multiplier: FractionProductFractionOperand;
+        quantity: FractionProductFractionOperand;
+    }>
+    | Readonly<{
+        operandForm: 'mixed-numbers';
+        multiplier: FractionProductMixedOperand;
+        quantity: FractionProductMixedOperand;
+    }>
+);
+
 export type FractionArithmeticOperation = 'addition' | 'subtraction';
 
 export type LikeDenominatorFractionValue = {
@@ -2898,6 +2993,9 @@ export interface ViewTypeMap {
     'fractions-division-story-creation': FractionQuotientProblem;
     'fractions-division-inverse-explanation': FractionQuotientProblem;
     'fractions-division-word-problem': FractionQuotientProblem;
+    'fractions-product-partition-interpretation': FractionProductProblem;
+    'fractions-product-story-creation': FractionProductProblem;
+    'fractions-product-word-problem': FractionProductProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;
     'fractions-operation-model': FractionArithmeticProblem;
     'fractions-understanding-model': FractionArithmeticProblem;
