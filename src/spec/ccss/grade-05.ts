@@ -548,16 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const fractionBenchmarkArithmeticImplementation = defineImplementationPackage({
-    id: 'fraction-benchmark-arithmetic',
-    description: 'Generate exact fraction operands, benchmark comparisons and bounds for estimation and answer-reasonableness tasks.',
-    generators: [{module: 'fraction-benchmark-arithmetic', strategy: 'new'}],
-    views: [
-        {module: 'fractions-benchmark-estimate', strategy: 'new'},
-        {module: 'fractions-benchmark-reasonableness', strategy: 'new'}
-    ]
-});
-
 const fractionQuotientMeaningImplementation = defineImplementationPackage({
     id: 'fraction-quotient-meaning',
     description: 'Model exact division relations for fraction meaning, whole-number sharing with fractional or mixed quotients, and both unit-fraction division orientations; preserve operand roles and inverse multiplication across interpretation, calculation, story creation and explanation.',
@@ -876,22 +866,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.G.A.2-graph-contextual-points', graphContextualPointsBuilder),
     ...toTargets('5.G.A.2-interpret-contextual-coordinates', interpretContextualCoordinatesBuilder),
     ...toTargets('5.G.B.3-inherited-shape-attributes', inheritedShapeAttributesBuilder),
-    ...toTargets('5.G.B.4-classify-shape-hierarchy', classifyShapeHierarchyBuilder)
+    ...toTargets('5.G.B.4-classify-shape-hierarchy', classifyShapeHierarchyBuilder),
+    ...toTargets('5.NF.A.2-benchmark-estimate', fractionBenchmarkEstimateBuilder),
+    ...toTargets('5.NF.A.2-benchmark-reasonableness', fractionBenchmarkReasonablenessBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.A.2-benchmark-estimate',
-        fractionBenchmarkEstimateBuilder,
-        fractionBenchmarkArithmeticImplementation,
-        'Ask for an approximate sum or difference without exact arithmetic; visible operand fractions, benchmark comparisons and worked bounds share one reference whole.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.A.2-benchmark-reasonableness',
-        fractionBenchmarkReasonablenessBuilder,
-        fractionBenchmarkArithmeticImplementation,
-        'Present reasonable and unreasonable candidate fraction sums or differences and ask for a judgment justified by benchmark bounds relative to the same whole.'
-    ),
     ...toImplementationTodos(
         '5.NF.B.3-interpret-quotient',
         fractionQuotientInterpretationBuilder,

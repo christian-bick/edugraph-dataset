@@ -1,0 +1,2 @@
+- **Identity:** Both fractions appear on aligned zero-to-one number lines with quarter benchmarks and one explicitly shared whole; the task asks for a lower and upper benchmark interval for their sum or difference.
+- **Modes:** Question Mode shows the operand comparisons and leaves both result bounds blank. Solution Mode combines the appropriate quarter endpoints and states the interval; when a nearest-quarter estimate is available, it also shows those replacements and their estimated result without an exact computation.

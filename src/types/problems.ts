@@ -2085,6 +2085,66 @@ export type FractionComparisonProblem =
     | LegacyFractionComparisonProblem
     | UnlikeFractionComparisonProblem;
 
+export type FractionBenchmarkRational = Readonly<{
+    numerator: number;
+    denominator: number;
+}>;
+
+export type FractionBenchmarkQuarterTick = 0 | 1 | 2 | 3 | 4;
+
+export type FractionBenchmarkOperand = Readonly<{
+    value: FractionBenchmarkRational;
+    lowerTick: FractionBenchmarkQuarterTick;
+    upperTick: FractionBenchmarkQuarterTick;
+    relationToHalf: 'less' | 'equal' | 'greater';
+}>;
+
+/**
+ * Exact same-whole fraction arithmetic with quarter-unit reference bounds.
+ * Operands are proper, positive fractions with positive safe-integer
+ * denominators (including fifths); all stored rationals have positive safe-
+ * integer denominators and are in lowest terms. Each operand lies between
+ * lowerTick/4 and upperTick/4, inclusively. Equal ticks mean an exact quarter;
+ * otherwise the ticks are adjacent. `relationToHalf` compares the same operand
+ * to 2/4. All comparisons use the one unit identified by `sharedWhole`.
+ *
+ * `exactResult` is first ± second. For addition, the closed result bounds are
+ * (first.lowerTick + second.lowerTick)/4 through
+ * (first.upperTick + second.upperTick)/4. For subtraction, they are
+ * (first.lowerTick - second.upperTick)/4 through
+ * (first.upperTick - second.lowerTick)/4. The sampled values and bounds are
+ * nonnegative. A reasonable candidate equals the exact result; an
+ * unreasonable one lies strictly outside these bounds.
+ *
+ * `approximation` is present only in the NumericApproximation mathematical
+ * profile. Its ticks are nearest quarter replacements (upper wins a tie), at
+ * least one replacement differs from its operand, and `estimatedResult` is
+ * their exact sum or difference. This is mathematical evidence, not a prompt,
+ * selected unknown, or answer wording; both views accept either profile.
+ */
+export type FractionBenchmarkArithmeticProblem = Readonly<{
+    kind: 'fraction-benchmark-arithmetic';
+    operation: 'addition' | 'subtraction';
+    sharedWhole: 1;
+    first: FractionBenchmarkOperand;
+    second: FractionBenchmarkOperand;
+    exactResult: FractionBenchmarkRational;
+    resultBounds: Readonly<{
+        lower: FractionBenchmarkRational;
+        upper: FractionBenchmarkRational;
+    }>;
+    candidate: Readonly<{
+        value: FractionBenchmarkRational;
+        judgment: 'reasonable' | 'unreasonable';
+    }>;
+    approximation?: Readonly<{
+        kind: 'nearest-quarter';
+        firstTick: FractionBenchmarkQuarterTick;
+        secondTick: FractionBenchmarkQuarterTick;
+        estimatedResult: FractionBenchmarkRational;
+    }>;
+}>;
+
 export type FractionArithmeticOperation = 'addition' | 'subtraction';
 
 export type LikeDenominatorFractionValue = {
@@ -2721,6 +2781,8 @@ export interface ViewTypeMap {
     'fractions-whole-equivalence': WholeNumberFractionEquivalenceProblem;
     'fractions-compare-benchmark-models': FractionComparisonProblem;
     'fractions-compare-models': FractionComparisonProblem;
+    'fractions-benchmark-estimate': FractionBenchmarkArithmeticProblem;
+    'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;
     'fractions-operation-model': FractionArithmeticProblem;
     'fractions-understanding-model': FractionArithmeticProblem;

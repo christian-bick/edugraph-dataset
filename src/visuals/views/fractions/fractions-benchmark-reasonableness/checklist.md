@@ -1,0 +1,2 @@
+- **Identity:** A proposed sum or difference is judged against quarter-benchmark evidence for two fractions measured against one shared whole.
+- **Modes:** Question Mode shows the candidate and operand comparisons but leaves the verdict and justification blank. Solution Mode calculates the certified lower and upper benchmark bounds and explains whether the candidate falls inside or outside them.
