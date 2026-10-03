@@ -1,0 +1,2 @@
+- **Identity:** An explicitly named rounding place, decimal input, adjacent candidate numerals, midpoint, and scaled source point make the rounding task identifiable.
+- **Modes:** Question Mode leaves the rounded answer and selected candidate unmarked; Solution Mode highlights the chosen endpoint and explains a nearest-candidate or halfway-up decision.

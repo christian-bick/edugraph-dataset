@@ -506,6 +506,37 @@ export type IntegerRoundingProblem =
     | LegacyIntegerRoundingProblem
     | MultiDigitIntegerRoundingProblem;
 
+/** One requested decimal rounding place and its exact unit in ten-thousandths. */
+export type DecimalRoundingPlace =
+    | {name: 'hundreds'; quantumInTenThousandths: 1000000}
+    | {name: 'tens'; quantumInTenThousandths: 100000}
+    | {name: 'ones'; quantumInTenThousandths: 10000}
+    | {name: 'tenths'; quantumInTenThousandths: 1000}
+    | {name: 'hundredths'; quantumInTenThousandths: 100}
+    | {name: 'thousandths'; quantumInTenThousandths: 10};
+
+/**
+ * Exact decimal rounding evidence: all numeric fields are safe integers measured
+ * in ten-thousandths. The input is nonnegative with input % 10000 !== 0.
+ * With q = roundingPlace.quantumInTenThousandths, lower and upper are adjacent
+ * multiples (upper = lower + q) and lower < input < upper. Midpoint = lower + q/2;
+ * positive distances are input - lower and upper - input, summing to q.
+ * The rounded value is the nearer candidate; equal distances tie upward.
+ */
+export type DecimalRoundingProblem = {
+    kind: 'decimal-place-rounding';
+    inputInTenThousandths: number;
+    roundingPlace: DecimalRoundingPlace;
+    lowerCandidateInTenThousandths: number;
+    upperCandidateInTenThousandths: number;
+    midpointInTenThousandths: number;
+    roundedInTenThousandths: number;
+    direction: 'down' | 'up';
+    isMidpointTie: boolean;
+    distanceToLowerInTenThousandths: number;
+    distanceToUpperInTenThousandths: number;
+};
+
 export type EqualGroupsOperation =
     | 'addition'
     | 'multiplication'
@@ -2051,6 +2082,7 @@ export interface ViewTypeMap {
     'coordinate-plot-pattern-pairs': CoordinatePatternPairsProblem;
     'coordinate-form-pattern-pairs': CoordinatePatternPairsProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
+    'numbers-decimal-rounding-line': DecimalRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;
     'numbers-fraction-line-classification': ProperFractionEquivalenceProblem;
     'numbers-fraction-line-formalization': FractionEquivalenceProblem;

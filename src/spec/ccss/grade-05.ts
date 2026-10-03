@@ -97,13 +97,6 @@ const interpretContextualCoordinatesBuilder = new DatasetPermutationBuilder().ad
 
 // Number and Operations in Base Ten (5.NBT)
 
-const decimalRoundingImplementation = defineImplementationPackage({
-    id: 'decimal-place-rounding',
-    description: 'Round decimals to an explicitly requested whole-number or fractional place.',
-    generators: [{module: 'decimal-rounding', strategy: 'new'}],
-    views: [{module: 'numbers-decimal-rounding-line', strategy: 'new'}]
-});
-
 const standardMultiplicationImplementation = defineImplementationPackage({
     id: 'whole-number-standard-multiplication',
     description: 'Execute the conventional written multiplication algorithm for multi-digit whole-number factors.',
@@ -992,16 +985,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.B.3-generate-paired-patterns', generatePairedPatternsBuilder),
     ...toTargets('5.OA.B.3-graph-pattern-pairs', graphPatternPairsBuilder),
     ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder),
-    ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder)
+    ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder),
+    ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.4-round-decimals',
-        roundDecimalsBuilder,
-        decimalRoundingImplementation,
-        'Specify the rounding place and show the decimal input, adjacent rounding candidates and answer space; support requested fractional places as well as whole-number places.'
-    ),
     ...toImplementationTodos(
         '5.NBT.B.5-multiplication-standard-algorithm',
         standardMultiplicationBuilder,
