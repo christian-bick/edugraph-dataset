@@ -223,6 +223,69 @@ export type MultiDigitMultiplicationProblem = {
     product: number;
 };
 
+/** One multiplicand digit multiplied by one multiplier digit, right to left. */
+export type StandardMultiplicationDigitStep = {
+    /** Zero-based decimal place in the unshifted partial product. */
+    placeIndex: number;
+    multiplicandDigit: number;
+    carryIn: number;
+    /** multiplicandDigit * the row's multiplierDigit + carryIn. */
+    workingValue: number;
+    resultDigit: number;
+    carryOut: number;
+};
+
+/** One conventional partial-product row, including rows for zero multiplier digits. */
+export type StandardMultiplicationPartialRow = {
+    /** Zero-based decimal place of this digit in the multiplier. */
+    shiftPlaces: number;
+    multiplierDigit: number;
+    /** One step per multiplicand digit, ordered from ones to highest place. */
+    columns: readonly StandardMultiplicationDigitStep[];
+    /** Carry after the highest multiplicand digit; the leading digit when nonzero. */
+    leadingCarry: number;
+    unshiftedProduct: number;
+    alignedProduct: number;
+};
+
+/** One column in the sum of the place-aligned partial-product rows. */
+export type StandardMultiplicationSumColumn = {
+    placeIndex: number;
+    /** One digit per partial row, in the same order as partialRows. */
+    addendDigits: readonly number[];
+    carryIn: number;
+    workingValue: number;
+    resultDigit: number;
+    carryOut: number;
+};
+
+/**
+ * Exact conventional vertical multiplication of positive whole-number factors.
+ * The multiplicand has 2–4 digits, the multiplier has 2–3, and both are at least 10.
+ * All values are safe integers. partialRows are ordered by multiplier digits from
+ * ones upward, including zero digits; row j has shiftPlaces = j and multiplierDigit
+ * = floor(multiplier / 10^j) % 10. Each row's columns run from ones upward with
+ * carryIn initially zero and then equal to the preceding carryOut. Each step has
+ * workingValue = multiplicandDigit * multiplierDigit + carryIn,
+ * resultDigit = workingValue % 10, and carryOut = floor(workingValue / 10).
+ * leadingCarry equals the final carryOut, unshiftedProduct equals multiplicand
+ * times multiplierDigit, and alignedProduct = unshiftedProduct * 10^shiftPlaces.
+ * sumColumns likewise run from ones upward with one column per product digit.
+ * Each addend digit comes from its row's alignedProduct; carryIn starts at zero
+ * and then equals the preceding carryOut. Each workingValue is carryIn plus
+ * sum(addendDigits), with resultDigit = workingValue % 10 and carryOut =
+ * floor(workingValue / 10). The result digits reconstruct product =
+ * multiplicand * multiplier = sum(alignedProduct), and the final carryOut is zero.
+ */
+export type StandardMultiplicationProblem = {
+    kind: 'whole-number-standard-multiplication';
+    multiplicand: number;
+    multiplier: number;
+    product: number;
+    partialRows: readonly StandardMultiplicationPartialRow[];
+    sumColumns: readonly StandardMultiplicationSumColumn[];
+};
+
 export type DivisionPlaceValuePart = {
     digit: number;
     placeValue: 1 | 10 | 100 | 1000;
@@ -2051,6 +2114,7 @@ export interface ViewTypeMap {
     'operations-multiplicative-comparison': MultiplicativeComparisonProblem;
     'operations-multiplicative-comparison-word-problem': MultiplicativeComparisonProblem;
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
+    'operations-multiplication-standard-algorithm': StandardMultiplicationProblem;
     'operations-division-area-model': MultiDigitDivisionProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;

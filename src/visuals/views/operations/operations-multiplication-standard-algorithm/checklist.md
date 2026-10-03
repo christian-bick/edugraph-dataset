@@ -1,0 +1,2 @@
+- **Identity:** A conventional right-aligned vertical multiplication workspace shows two multi-digit whole-number factors, one place-shifted partial-product row per multiplier digit, carry positions, and a separate summation rule.
+- **Modes:** Question Mode leaves multiplication carries, partial-product digits, summation carries, and final digits unresolved while showing row shifts; Solution Mode fills each aligned row, its carries, and the summed product.

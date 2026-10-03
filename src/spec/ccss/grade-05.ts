@@ -97,13 +97,6 @@ const interpretContextualCoordinatesBuilder = new DatasetPermutationBuilder().ad
 
 // Number and Operations in Base Ten (5.NBT)
 
-const standardMultiplicationImplementation = defineImplementationPackage({
-    id: 'whole-number-standard-multiplication',
-    description: 'Execute the conventional written multiplication algorithm for multi-digit whole-number factors.',
-    generators: [{module: 'standard-algorithm-multiplication', strategy: 'new'}],
-    views: [{module: 'operations-multiplication-standard-algorithm', strategy: 'new'}]
-});
-
 const twoDigitDivisionImplementation = defineImplementationPackage({
     id: 'two-digit-divisor-division',
     description: 'Extend partial-quotient division and its illustrated explanation to two-digit divisors, including exact division.',
@@ -986,16 +979,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.B.3-graph-pattern-pairs', graphPatternPairsBuilder),
     ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder),
     ...toTargets('5.NBT.A.1-adjacent-decimal-place-scaling', adjacentDecimalPlaceScalingBuilder),
-    ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder)
+    ...toTargets('5.NBT.A.4-round-decimals', roundDecimalsBuilder),
+    ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.B.5-multiplication-standard-algorithm',
-        standardMultiplicationBuilder,
-        standardMultiplicationImplementation,
-        'Use multi-digit factors and expose the conventional vertical algorithm with aligned partial-product rows, carries and summation; a final-product-only equation is insufficient.'
-    ),
     ...toImplementationTodos(
         '5.NBT.B.6-two-digit-divisor-division',
         twoDigitDivisorDivisionBuilder,
