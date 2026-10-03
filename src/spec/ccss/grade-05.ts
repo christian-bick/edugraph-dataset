@@ -337,17 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const measurementLinePlotFractionProblemsImplementation = defineImplementationPackage({
-    id: 'measurement-line-plot-fraction-problems',
-    description: 'Solve contextual problems from fractional measurement line plots using the Grade 5 operations, including equal redistribution.',
-    generators: [
-        {module: 'measurement-line-plot-problems', strategy: 'new'}
-    ],
-    views: [
-        {module: 'measurement-line-plot-problems', strategy: 'new'}
-    ]
-});
-
 const unitCubeVolumeImplementation = defineImplementationPackage({
     id: 'unit-cube-volume',
     description: 'Model complete unit-cube packings for unit specification, volume interpretation and counting in standard or improvised cubic units.',
@@ -944,16 +933,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder),
     ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder),
     ...toTargets('5.MD.A.1-multistep-conversion-problems', multistepConversionProblemsBuilder),
-    ...toTargets('5.MD.B.2-construct-fractional-line-plot', constructGrade5FractionalLinePlotBuilder)
+    ...toTargets('5.MD.B.2-construct-fractional-line-plot', constructGrade5FractionalLinePlotBuilder),
+    ...toTargets('5.MD.B.2-line-plot-fraction-problems', linePlotFractionProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.B.2-line-plot-fraction-problems',
-        linePlotFractionProblemsBuilder,
-        measurementLinePlotFractionProblemsImplementation,
-        'Supply a completed line plot and a necessary contextual question requiring the selected Grade 5 fraction operation. Include equal redistribution and coherent measurement units rather than restricting the task to shortest/longest arithmetic.'
-    ),
     ...toImplementationTodos(
         '5.MD.C.3a-unit-cube',
         unitCubeSpecificationBuilder,

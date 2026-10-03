@@ -1,0 +1,2 @@
+- **Identity:** A completed fractional line plot shows exactly five beaker measurements in one cup scale, and the contextual question requires reading selected marks or their frequency to calculate with those measurements.
+- **Modes:** Question Mode leaves the equation and answer unresolved. Solution Mode keeps the plot visible and shows an exact cup-labeled calculation and answer; for equal redistribution it shows the total from all five plotted amounts before dividing it among five beakers.

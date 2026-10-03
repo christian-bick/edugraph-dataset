@@ -1238,6 +1238,39 @@ export type MeasurementExtremaProblem = MeasurementDataProblem & {
     extremaRelation: MeasurementExtremaRelation;
 };
 
+/**
+ * Every numerator is an exact count of 1/denominator cups. Binary operands
+ * identify plotted beaker levels: addition uses the two least-filled beakers,
+ * and subtraction uses the fullest and second-least-filled beakers. Those
+ * ranked levels are unambiguous. Multiplication uses the unique modal level;
+ * its frequency equals the number of observations at that level. Division
+ * redistributes the sum of all five plotted amounts equally into five beakers.
+ * Each result is exact on the same denominator lattice.
+ */
+export type MeasurementLinePlotFractionRelation =
+    | {operation: 'addition'; operandNumerators: readonly [number, number]; resultNumerator: number}
+    | {operation: 'subtraction'; minuendNumerator: number; subtrahendNumerator: number; resultNumerator: number}
+    | {operation: 'multiplication'; operandNumerator: number; frequency: number; resultNumerator: number}
+    | {operation: 'division'; totalNumerator: number; recipientCount: 5; shareNumerator: number};
+
+/**
+ * Five identical beakers of liquid measured in cups in one frame. Each
+ * observation is a positive safe integer numerator in the shared 1/d cup
+ * lattice (d = denominator) and fits from 1 through 3 cups. At least one
+ * observation has an odd numerator, witnessing the exact selected half,
+ * quarter, or eighth denominator. The relation's selected plotted operands
+ * and result retain that denominator witness. Arithmetic and any division
+ * intermediate are exact integer-numerator equalities; the view chooses the
+ * story wording, unknowns, and solution presentation.
+ */
+export type MeasurementLinePlotFractionProblem = {
+    kind: 'beaker-liquid-line-plot';
+    unit: 'cup';
+    denominator: 2 | 4 | 8;
+    observationNumerators: readonly [number, number, number, number, number];
+    relation: MeasurementLinePlotFractionRelation;
+};
+
 export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
 
 export type StatisticalCategory = {
@@ -2289,6 +2322,7 @@ export interface ViewTypeMap {
     'measurement-data-table': MeasurementDataProblem;
     'measurement-line-plot': MeasurementDataProblem;
     'measurement-line-plot-arithmetic': MeasurementExtremaProblem;
+    'measurement-line-plot-problems': MeasurementLinePlotFractionProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;
