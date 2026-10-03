@@ -1,0 +1,2 @@
+- **Identity:** Two decimal numerals are aligned through thousandths, and the learner fills a greater-than, equal-to, or less-than comparison.
+- **Modes:** Question Mode leaves the relation symbol blank and gives no deciding-place highlight; Solution Mode fills the symbol and identifies either the first differing place or agreement in every aligned place, including equivalent numerals with different written precision.

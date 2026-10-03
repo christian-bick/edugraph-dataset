@@ -148,13 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalPlaceComparisonImplementation = defineImplementationPackage({
-    id: 'decimal-place-comparison',
-    description: 'Compare nonnegative decimals through thousandths using aligned place values and record the resulting equality or inequality.',
-    generators: [{module: 'decimal-place-comparison', strategy: 'new'}],
-    views: [{module: 'numbers-decimal-place-comparison', strategy: 'new'}]
-});
-
 const decimalAddSubtractImplementation = defineImplementationPackage({
     id: 'decimal-addition-subtraction-methods',
     description: 'Connect decimal addition and subtraction models, aligned written calculations, and explanations of regrouping and place-value units.',
@@ -809,16 +802,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.3a-read-decimal-numerals', readDecimalNumeralsBuilder),
     ...toTargets('5.NBT.A.3a-write-decimal-numerals', writeDecimalNumeralsBuilder),
     ...toTargets('5.NBT.A.3a-write-decimal-number-names', writeDecimalNumberNamesBuilder),
-    ...toTargets('5.NBT.A.3a-decimal-expanded-form', writeDecimalExpandedFormBuilder)
+    ...toTargets('5.NBT.A.3a-decimal-expanded-form', writeDecimalExpandedFormBuilder),
+    ...toTargets('5.NBT.A.3b-compare-decimals', compareDecimalsThroughThousandthsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.3b-compare-decimals',
-        compareDecimalsThroughThousandthsBuilder,
-        decimalPlaceComparisonImplementation,
-        'Compare two decimals by aligning and examining their digit place values, then record >, = or <. Include deciding places through thousandths, whole parts, unequal displayed precision and equal values with trailing zeros; keep the comparison procedure visible.'
-    ),
     ...toImplementationTodos(
         '5.NBT.B.7-add-decimals-with-models',
         addDecimalsWithModelsBuilder,

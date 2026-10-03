@@ -1034,6 +1034,57 @@ export type DecimalPlaceValueExpandedProblem = Readonly<{
     sumTerms: readonly DecimalExpandedPlace[];
 }>;
 
+export type DecimalPlaceComparisonPlace =
+    | 'hundreds' | 'tens' | 'ones'
+    | 'tenths' | 'hundredths' | 'thousandths';
+
+/**
+ * Exact value is `valueInThousandths / 1000`. The three whole and three
+ * fractional digits are aligned with the same places on both operands;
+ * `displayPrecision` independently controls the numeral's trailing zeros.
+ */
+export type DecimalPlaceComparisonOperand = Readonly<{
+    wholePart: number;
+    wholeDigits: readonly [number, number, number];
+    fractionalDigits: readonly [number, number, number];
+    displayPrecision: 1 | 2 | 3;
+    displayNumeral: string;
+    valueInThousandths: number;
+}>;
+
+type DecimalPlaceComparisonBase = Readonly<{
+    kind: 'decimal-place-comparison';
+    base: 10;
+    left: DecimalPlaceComparisonOperand;
+    right: DecimalPlaceComparisonOperand;
+}>;
+
+/**
+ * The relation compares the exact thousandths values. An inequality witness
+ * names the first unequal place after every listed higher place agrees;
+ * equality witnesses agreement at all six aligned places. Thus `2.3` and
+ * `2.300` can be equal despite different displayed precision.
+ */
+export type DecimalPlaceComparisonProblem = DecimalPlaceComparisonBase & (
+    | Readonly<{
+        relation: 'greater' | 'less';
+        witness: Readonly<{
+            kind: 'first-difference';
+            decidingPlace: DecimalPlaceComparisonPlace;
+            higherEqualPlaces: readonly DecimalPlaceComparisonPlace[];
+            leftDigit: number;
+            rightDigit: number;
+        }>;
+    }>
+    | Readonly<{
+        relation: 'equal';
+        witness: Readonly<{
+            kind: 'all-places-equal';
+            equalPlaces: readonly DecimalPlaceComparisonPlace[];
+        }>;
+    }>
+);
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3136,6 +3187,7 @@ export interface ViewTypeMap {
     'numbers-decimal-numeral-writing': DecimalWritingProblem;
     'numbers-decimal-name-writing': DecimalWritingProblem;
     'numbers-decimal-expanded-form': DecimalPlaceValueExpandedProblem;
+    'numbers-decimal-place-comparison': DecimalPlaceComparisonProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
