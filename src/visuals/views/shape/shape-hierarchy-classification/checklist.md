@@ -1,0 +1,2 @@
+- **Identity:** The learner arranges quadrilateral, rectangle, rhombus, and square in a multilevel inclusion diagram using the shown defining properties and, when figures are shown, assigns each figure to every applicable category.
+- **Modes:** Question Mode leaves category nodes and figure memberships blank. Solution Mode fills the diamond so the square points to both rectangle and rhombus, and every shown figure letter appears in all and only its true category boxes.

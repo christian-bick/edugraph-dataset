@@ -337,18 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const shapeCategoryHierarchyImplementation = defineImplementationPackage({
-    id: 'shape-category-hierarchy',
-    description: 'Model a hierarchy of plane-shape categories for inherited-property inference and classification through defining attributes.',
-    generators: [
-        {module: 'shape-category-hierarchy', strategy: 'new'}
-    ],
-    views: [
-        {module: 'shape-inherited-attributes', strategy: 'new'},
-        {module: 'shape-hierarchy-classification', strategy: 'new'}
-    ]
-});
-
 // Measurement and Data (5.MD)
 
 const grade5MeasurementUnitPairs = [
@@ -886,22 +874,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.G.A.1-define-coordinate-system', defineCoordinateSystemBuilder),
     ...toTargets('5.G.A.1-interpret-coordinate-components', interpretCoordinateComponentsBuilder),
     ...toTargets('5.G.A.2-graph-contextual-points', graphContextualPointsBuilder),
-    ...toTargets('5.G.A.2-interpret-contextual-coordinates', interpretContextualCoordinatesBuilder)
+    ...toTargets('5.G.A.2-interpret-contextual-coordinates', interpretContextualCoordinatesBuilder),
+    ...toTargets('5.G.B.3-inherited-shape-attributes', inheritedShapeAttributesBuilder),
+    ...toTargets('5.G.B.4-classify-shape-hierarchy', classifyShapeHierarchyBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.G.B.3-inherited-shape-attributes',
-        inheritedShapeAttributesBuilder,
-        shapeCategoryHierarchyImplementation,
-        'Provide a plane-shape category inclusion and a defining property of the broader category. Ask the learner to infer and justify the inherited property of the narrower category.'
-    ),
-    ...toImplementationTodos(
-        '5.G.B.4-classify-shape-hierarchy',
-        classifyShapeHierarchyBuilder,
-        shapeCategoryHierarchyImplementation,
-        'Ask the learner to place plane figures or categories into a multilevel hierarchy using defining properties, preserving inclusions such as squares within both rectangles and rhombuses.'
-    ),
     ...toImplementationTodos(
         '5.NF.A.2-benchmark-estimate',
         fractionBenchmarkEstimateBuilder,

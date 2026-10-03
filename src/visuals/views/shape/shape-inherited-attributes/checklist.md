@@ -1,0 +1,2 @@
+- **Identity:** A true inclusion of squares in a broader plane-shape category and that category's defining attribute support deriving an attribute every square inherits.
+- **Modes:** Question Mode supplies the broader property and inclusion but leaves the square's property and reason unfinished. Solution Mode names the inherited attribute and gives the causal category-inclusion explanation.

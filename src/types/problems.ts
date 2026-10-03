@@ -1670,6 +1670,68 @@ export type ShapeSubsumptionProblem = {
     category: 'quadrilateral';
 };
 
+export type ShapeHierarchyCategory = 'quadrilateral' | 'rectangle' | 'rhombus' | 'square';
+export type ShapeHierarchyProperty = 'four-straight-sides' | 'four-right-angles' | 'four-equal-sides';
+export type ShapeHierarchyVertex = Readonly<{x: number; y: number}>;
+
+export type ShapeHierarchyInheritance =
+    | Readonly<{broader: 'rectangle'; narrower: 'square'; property: 'four-right-angles'}>
+    | Readonly<{broader: 'rhombus'; narrower: 'square'; property: 'four-equal-sides'}>;
+
+type ShapeHierarchyFigure<K extends string, A extends 0 | 4, E extends boolean,
+    M extends readonly ShapeHierarchyCategory[]> = Readonly<{
+        kind: K;
+        vertices: readonly [
+            ShapeHierarchyVertex, ShapeHierarchyVertex,
+            ShapeHierarchyVertex, ShapeHierarchyVertex
+        ];
+        rightAngleCount: A;
+        allSidesEqual: E;
+        memberships: M;
+    }>;
+
+export type ShapeHierarchyClassificationCases = readonly [
+    ShapeHierarchyFigure<'other-quadrilateral', 0, false, readonly ['quadrilateral']>,
+    ShapeHierarchyFigure<'rectangle-only', 4, false, readonly ['rectangle', 'quadrilateral']>,
+    ShapeHierarchyFigure<'rhombus-only', 0, true, readonly ['rhombus', 'quadrilateral']>,
+    ShapeHierarchyFigure<'square', 4, true,
+        readonly ['square', 'rectangle', 'rhombus', 'quadrilateral']>
+];
+
+/**
+ * A four-category plane-shape diamond. Each listed attribute holds for every
+ * member of that category, and each inclusion means every narrower-category
+ * member belongs to the broader category. The square is directly contained in
+ * BOTH rectangle and rhombus; both are contained in quadrilateral. The
+ * inheritance witness selects a true broader property of the square without
+ * prescribing a learner action.
+ *
+ * `classificationCases` is present only for the ShapeClassification profile.
+ * Its four simple quadrilaterals have distinct cyclic integer vertices in a
+ * bounded plane grid; squared side lengths and vertex dot products exactly
+ * verify the stated equality/right-angle facts and complete memberships.
+ * The non-square rectangle and rhombus witness the two distinct branches.
+ * When absent, the category relations still form a valid inheritance problem.
+ * Views choose prompts, blanks, answer presentation, and diagram layout.
+ */
+export type ShapeCategoryHierarchyProblem = Readonly<{
+    kind: 'shape-category-hierarchy';
+    categoryAttributes: Readonly<{
+        quadrilateral: readonly ['four-straight-sides'];
+        rectangle: readonly ['four-straight-sides', 'four-right-angles'];
+        rhombus: readonly ['four-straight-sides', 'four-equal-sides'];
+        square: readonly ['four-straight-sides', 'four-right-angles', 'four-equal-sides'];
+    }>;
+    directInclusions: readonly [
+        Readonly<{narrower: 'rectangle'; broader: 'quadrilateral'}>,
+        Readonly<{narrower: 'rhombus'; broader: 'quadrilateral'}>,
+        Readonly<{narrower: 'square'; broader: 'rectangle'}>,
+        Readonly<{narrower: 'square'; broader: 'rhombus'}>
+    ];
+    inheritance: ShapeHierarchyInheritance;
+    classificationCases?: ShapeHierarchyClassificationCases;
+}>;
+
 export type ShapeClassificationCoordinate = {
     x: number;
     y: number;
@@ -2606,6 +2668,8 @@ export interface ViewTypeMap {
     'shape-classify-dim': ShapeClassifyDimProblem;
     'shape-compare-attributes': ShapeCompareAttributesProblem;
     'shape-classify-attributes': ShapeAttributeClassificationProblem;
+    'shape-inherited-attributes': ShapeCategoryHierarchyProblem;
+    'shape-hierarchy-classification': ShapeCategoryHierarchyProblem;
     'shape-line-symmetry-drawing': ShapeLineSymmetryProblem;
     'shape-line-symmetry-identification': ShapeLineSymmetryProblem;
     'shape-same-attribute': ShapeSameAttributeProblem;
