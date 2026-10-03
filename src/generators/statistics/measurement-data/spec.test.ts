@@ -1,9 +1,13 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {matchTarget} from '../../../lib/matching.ts';
+import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
+import {
+    MeasurementLinePlotViewSchema, spec as linePlotSpec
+} from '../../../visuals/views/data/measurement-line-plot/spec.ts';
 import {MeasurementDataGenerator} from './generator.ts';
-import {MeasurementDataGeneratorSchema} from './spec.ts';
+import {MeasurementDataGeneratorSchema, spec} from './spec.ts';
 
 describe('measurement-data schema integration', () => {
     it.each([
@@ -45,9 +49,58 @@ describe('measurement-data schema integration', () => {
         }
     });
 
+    it.each([
+        [Scope.HalfFractions, 'half', 2],
+        [Scope.QuarterFractions, 'quarter', 4],
+        [Scope.EighthFractions, 'eighth', 8]
+    ] as const)('resolves the exact %s denominator on a single frame',
+        (fractionLabel, numberKind, subdivisions) => {
+            const labels = [fractionLabel, Scope.SingleFrameOfReference];
+            const resolution = extractConfig(MeasurementDataGeneratorSchema, labels);
+            expect(resolution.config).toMatchObject({numberKind, useSingleFrame: true});
+            expect(resolution.resolvedLabels).toContain(fractionLabel);
+            expect(resolution.resolvedLabels).toContain(Scope.SingleFrameOfReference);
+            const result = generateWithLabels(new MeasurementDataGenerator(), labels)!;
+            expect(result.data.subdivisions).toBe(subdivisions);
+            expect(result.data.observations.some(({value}) =>
+                (value * subdivisions) % 2 === 1)).toBe(true);
+            expect(result.labels).toContain(fractionLabel);
+        });
+
+    it('matches an exact denominator request without requiring a single-frame label', () => {
+        const target = {
+            id: 'half-without-explicit-frame',
+            labels: [Area.Statistics, Scope.HalfFractions, Scope.LinePlot,
+                Scope.ProvidedMeasurement, Ability.VisualArticulation]
+        };
+        const verdict = matchTarget(target, {
+            generatorId: spec.generatorId,
+            labels: [...spec.generalLabels, ...extractSchemaLabels(MeasurementDataGeneratorSchema)],
+            generalLabels: spec.generalLabels,
+            schema: MeasurementDataGeneratorSchema,
+            spec,
+            problemType: 'MeasurementDataProblem'
+        }, {
+            viewId: linePlotSpec.viewId,
+            supportedLabels: [...linePlotSpec.generalLabels, ...extractSchemaLabels(MeasurementLinePlotViewSchema)],
+            generalLabels: linePlotSpec.generalLabels,
+            schema: MeasurementLinePlotViewSchema,
+            spec: linePlotSpec,
+            problemType: 'MeasurementDataProblem'
+        });
+        expect(verdict).toMatchObject({matched: true});
+        if (!verdict.matched) return;
+        expect(verdict.plan.domains.find(domain => domain.field === 'numberKind')?.alternatives
+            .map(choice => choice.labels)).toEqual([[Scope.HalfFractions]]);
+        expect(verdict.plan.domains.find(domain => domain.field === 'useSingleFrame')?.alternatives
+            .map(choice => choice.labels)).toContainEqual([]);
+    });
+
     it('rejects competing numeric kinds and unit choices', () => {
         for (const labels of [
             [Scope.IntegerNumbers, Scope.FractionNumbers],
+            [Scope.HalfFractions, Scope.QuarterFractions],
+            [Scope.FractionNumbers, Scope.EighthFractions],
             [Scope.CentimeterScale, Scope.InchScale]
         ]) expect(() => extractConfig(MeasurementDataGeneratorSchema, labels)).toThrow();
     });

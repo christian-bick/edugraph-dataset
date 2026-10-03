@@ -14,6 +14,16 @@ const shuffle = <T>(values: T[]): T[] => {
 const makeObservations = (lengths: readonly number[]): MeasurementObservation[] =>
     objects.map((object, index) => ({object, value: lengths[index]!}));
 
+export const makeHalfUnitObservations = (): MeasurementObservation[] => {
+    const repeatedHalf = (2 + Math.floor(random() * 6)) * 2 + 1;
+    const wholeUnit = (2 + Math.floor(random() * 7)) * 2;
+    const halfUnits = shuffle([
+        repeatedHalf, repeatedHalf, wholeUnit,
+        ...Array.from({length: objects.length - 3}, () => 4 + Math.floor(random() * 13))
+    ]);
+    return makeObservations(halfUnits.map(value => value / 2));
+};
+
 export const makeEighthUnitObservations = (): MeasurementObservation[] => {
     const axisStartEighths = (1 + Math.floor(random() * 2)) * 8;
     const interiorOffset = 5 + Math.floor(random() * 10);

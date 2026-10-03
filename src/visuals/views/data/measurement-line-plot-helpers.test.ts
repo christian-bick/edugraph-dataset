@@ -4,7 +4,7 @@ import {formatMeasurement, validateMeasurementData} from './helpers.ts';
 import {buildMeasurementLinePlot, validateMeasurementExtremaRelation} from './measurement-line-plot-helpers.ts';
 
 const objects: MeasurementObservation['object'][] = ['pencil', 'crayon', 'ribbon', 'key', 'brush', 'block'];
-const problem = (lengths: readonly number[], subdivisions: 1 | 4 | 8): MeasurementDataProblem => ({
+const problem = (lengths: readonly number[], subdivisions: 1 | 2 | 4 | 8): MeasurementDataProblem => ({
     unit: subdivisions === 1 ? 'cm' : 'in',
     subdivisions,
     observations: objects.map((object, index) => ({object, value: lengths[index]!}))
@@ -32,6 +32,19 @@ describe('measurement line-plot projection', () => {
             '1', '1⅛', '1¼', '1⅜', '1½', '1⅝', '1¾', '1⅞',
             '2', '2⅛', '2¼', '2⅜', '2½', '2⅝', '2¾', '2⅞', '3'
         ]);
+    });
+
+    it('derives a half-unit scale and frequency from six half-lattice measurements', () => {
+        const data = problem([2, 2.5, 3.5, 3.5, 5, 8], 2);
+        const model = buildMeasurementLinePlot(data, 'fixture');
+        expect(model).toMatchObject({start: 2, end: 8, step: 0.5});
+        expect(model.ticks).toHaveLength(13);
+        expect(model.ticks.map(tick => tick.display)).toEqual([
+            '2', '2½', '3', '3½', '4', '4½', '5', '5½', '6', '6½', '7', '7½', '8'
+        ]);
+        expect(model.ticks.find(tick => tick.value === 3.5)?.count).toBe(2);
+        expect(model.ticks.reduce((sum, tick) => sum + tick.count, 0)).toBe(6);
+        expect(formatMeasurement(2.5, data.unit)).toBe('2½ in');
     });
 
     it('validates a canonical extrema relation and rejects missing or inconsistent arithmetic', () => {
@@ -63,6 +76,7 @@ describe('measurement line-plot projection', () => {
     it.each(['cm', 'in'] as const)('uses subdivision precision independently of %s', unit => {
         for (const [values, subdivisions, expectedEnd] of [
             [[2, 3, 4, 4, 7, 10], 1, 10],
+            [[2, 2.5, 3.5, 3.5, 5, 8], 2, 8],
             [[2.25, 2.5, 3, 4, 7, 8], 4, 8],
             [[1.125, 1.25, 1.5, 1.5, 2.625, 3], 8, 3]
         ] as const) {
@@ -84,5 +98,9 @@ describe('measurement line-plot projection', () => {
         expect(() => validateMeasurementData(problem([2, 3, 4, 4, 7, 11], 1), 'fixture')).toThrow();
         expect(() => validateMeasurementData(problem([2, 3, 4, 4, 7, 8], 4), 'fixture')).toThrow();
         expect(() => validateMeasurementData(problem([1, 2, 3, 3, 3, 4], 8), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([2, 3, 4, 4, 7, 8], 2), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([2.25, 2.5, 3.5, 3.5, 5, 8], 2), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([1.5, 2.5, 3.5, 3.5, 5, 8], 2), 'fixture')).toThrow();
+        expect(() => validateMeasurementData(problem([2.5, 3.5, 4.5, 5.5, 7, 8.5], 2), 'fixture')).toThrow();
     });
 });

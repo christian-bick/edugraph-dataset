@@ -82,12 +82,13 @@ function MeasurementRow({observation, data, reveal}: {observation: MeasurementOb
     );
 }
 
-const MeasurementDataTableCore = ({payload}: CoreProps) => {
+export const MeasurementDataTableCore = ({payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateMeasurementData(data, 'measurement-data-table');
     const unitName = data.unit === 'cm' ? 'centimeter' : 'inch';
-    const precision = data.subdivisions === 1 ? '' : data.subdivisions === 4 ? 'quarter ' : 'eighth ';
+    const precision = data.subdivisions === 1 ? '' : data.subdivisions === 2 ? 'half '
+        : data.subdivisions === 4 ? 'quarter ' : 'eighth ';
     return (
         <div className="w-[690px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Collect length data</div>

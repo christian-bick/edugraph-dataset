@@ -1221,9 +1221,16 @@ export type MeasurementExtremaRelation = {
     answer: number;
 };
 
+/**
+ * Six lengths in one measurement unit and plot frame. `subdivisions` is the
+ * denominator of the unit lattice: every observation has an integer value
+ * when multiplied by it. For fractional denominators (2, 4, or 8), at least
+ * one observation has an odd scaled numerator, witnessing that exact
+ * denominator rather than only a coarser fraction.
+ */
 export type MeasurementDataProblem = {
     unit: 'cm' | 'in';
-    subdivisions: 1 | 4 | 8;
+    subdivisions: 1 | 2 | 4 | 8;
     observations: MeasurementObservation[];
 };
 

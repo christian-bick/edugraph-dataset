@@ -46,6 +46,14 @@ export function validateMeasurementData(data: MeasurementDataProblem, viewId: st
         }
         return;
     }
+    if (data.subdivisions === 2) {
+        const halfUnits = data.observations.map(({value}) => value * 2);
+        if (halfUnits.some(value => !Number.isInteger(value) || value < 4 || value > 16)
+            || !halfUnits.some(value => value % 2 === 1)) {
+            throw new ViewValidationError(viewId, 'Half-unit lengths must include a half-unit value from 2 through 8.');
+        }
+        return;
+    }
     if (data.subdivisions === 4) {
         const quarterUnits = data.observations.map(({value}) => value * 4);
         if (quarterUnits.some(value => !Number.isInteger(value) || value < 8 || value > 32)

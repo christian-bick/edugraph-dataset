@@ -7,18 +7,48 @@ import {MeasurementExtremaGenerator} from '../../../generators/statistics/measur
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import {setSeed} from '../../../lib/random.ts';
+import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
+import type {MeasurementDataProblem} from '../../../types/problems.ts';
 import {MeasurementLinePlotView} from './measurement-line-plot-view.tsx';
 import {MeasurementDataTableViewSchema, spec as tableSpec} from './measurement-data-table/spec.ts';
 
 let MeasurementDataTable: typeof import('./measurement-data-table/view.tsx')['MeasurementDataTable'];
+let MeasurementDataTableCore: typeof import('./measurement-data-table/view.tsx')['MeasurementDataTableCore'];
 
 beforeAll(async () => {
     vi.stubGlobal('window', {});
-    ({MeasurementDataTable} = await import('./measurement-data-table/view.tsx'));
+    ({MeasurementDataTable, MeasurementDataTableCore} = await import('./measurement-data-table/view.tsx'));
 });
 afterAll(() => vi.unstubAllGlobals());
 
 describe('measurement precision across views', () => {
+    it.each(['cm', 'in'] as const)('shows an exact half-unit ruler and plot in %s', unit => {
+        const objects = ['pencil', 'crayon', 'ribbon', 'key', 'brush', 'block'] as const;
+        const lengths = [2, 2.5, 3.5, 3.5, 5, 8];
+        const data: MeasurementDataProblem = {
+            unit,
+            subdivisions: 2,
+            observations: objects.map((object, index) => ({object, value: lengths[index]!}))
+        };
+        const payload: ViewRenderPayload<'measurement-data-table'> = {
+            problem: {type: 'statistics', data, labels: []},
+            targetLabels: [], viewId: 'measurement-data-table', seed: 42, isSolutionView: false
+        };
+        const tableQuestion = renderToStaticMarkup(<MeasurementDataTableCore config={{}} payload={payload} />);
+        const tableSolution = renderToStaticMarkup(<MeasurementDataTableCore config={{}} payload={{...payload, isSolutionView: true}} />);
+        expect(tableQuestion).toContain(`nearest half ${unit === 'cm' ? 'centimeter' : 'inch'}`);
+        expect(tableQuestion).toContain(`? ${unit}`);
+        expect(tableSolution).toContain(`2½ ${unit}`);
+        const plotQuestion = renderToStaticMarkup(<MeasurementLinePlotView mode="construction" payload={payload} viewId="fixture" />);
+        const plotSolution = renderToStaticMarkup(<MeasurementLinePlotView mode="construction" payload={{...payload, isSolutionView: true}} viewId="fixture" />);
+        expect(plotQuestion).toContain('Empty line plot with 13 ticks');
+        expect(plotQuestion).toContain(`Each tick mark represents ½ ${unit === 'cm' ? 'centimeter' : 'inch'}.`);
+        expect(plotQuestion).toContain('3½');
+        expect(plotQuestion.match(/>×</g)).toBeNull();
+        expect(plotSolution).toContain('Completed line plot with 13 ticks');
+        expect(plotSolution.match(/>×</g)).toHaveLength(6);
+    });
+
     it.each([
         ['integer', false, 'cm', 'centimeter'],
         ['integer', false, 'in', 'inch'],

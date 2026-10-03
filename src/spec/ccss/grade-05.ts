@@ -337,17 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const fractionalMeasurementLinePlotImplementation = defineImplementationPackage({
-    id: 'fractional-measurement-line-plots',
-    description: 'Support denominator-specific measurement data and line-plot construction with halves, quarters and eighths.',
-    generators: [
-        {module: 'measurement-data', strategy: 'expand'}
-    ],
-    views: [
-        {module: 'measurement-line-plot', strategy: 'expand'}
-    ]
-});
-
 const measurementLinePlotFractionProblemsImplementation = defineImplementationPackage({
     id: 'measurement-line-plot-fraction-problems',
     description: 'Solve contextual problems from fractional measurement line plots using the Grade 5 operations, including equal redistribution.',
@@ -954,16 +943,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.B.5-multiplication-standard-algorithm', standardMultiplicationBuilder),
     ...toTargets('5.NBT.B.6-two-digit-divisor-division', twoDigitDivisorDivisionBuilder),
     ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder),
-    ...toTargets('5.MD.A.1-multistep-conversion-problems', multistepConversionProblemsBuilder)
+    ...toTargets('5.MD.A.1-multistep-conversion-problems', multistepConversionProblemsBuilder),
+    ...toTargets('5.MD.B.2-construct-fractional-line-plot', constructGrade5FractionalLinePlotBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.B.2-construct-fractional-line-plot',
-        constructGrade5FractionalLinePlotBuilder,
-        fractionalMeasurementLinePlotImplementation,
-        'Provide fractional measurement observations and an appropriately subdivided blank line plot. Ask for one mark per observation, preserve the requested denominator evidence, and reveal the completed frequency plot in the solution.'
-    ),
     ...toImplementationTodos(
         '5.MD.B.2-line-plot-fraction-problems',
         linePlotFractionProblemsBuilder,

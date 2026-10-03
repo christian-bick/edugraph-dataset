@@ -1,5 +1,8 @@
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {
+    makeEighthUnitObservations, makeQuarterUnitObservations, makeWholeUnitObservations
+} from '../measurement-data-helpers.ts';
 import {MeasurementDataGenerator} from './generator.ts';
 
 describe('MeasurementDataGenerator', () => {
@@ -35,6 +38,54 @@ describe('MeasurementDataGenerator', () => {
             expect(generator.generate(config).data).toEqual(data);
         }
     });
+
+    it.each([
+        ['half', 2], ['quarter', 4], ['eighth', 8]
+    ] as const)('generates exact %s-unit measurements under either frame selection', (numberKind, subdivisions) => {
+        for (const unitScale of ['cm', 'in'] as const) {
+            for (const useSingleFrame of [false, true] as const) for (let seed = 0; seed < 80; seed++) {
+                const config = {numberKind, unitScale, useSingleFrame};
+                setSeed(seed);
+                const data = generator.generate(config).data;
+                const ticks = data.observations.map(({value}) => value * subdivisions);
+                const objects = data.observations.map(({object}) => object);
+                expect(data.unit).toBe(unitScale);
+                expect(data.subdivisions).toBe(subdivisions);
+                expect(data.observations).toHaveLength(6);
+                expect(new Set(objects).size).toBe(6);
+                const minimum = numberKind === 'eighth' ? 1 : 2;
+                const maximum = numberKind === 'eighth' ? 4 : 8;
+                expect(ticks.every(value => Number.isInteger(value) && value >= minimum * subdivisions
+                    && value <= maximum * subdivisions)).toBe(true);
+                expect(ticks.some(value => value % 2 === 1)).toBe(true);
+                if (numberKind === 'half') {
+                    expect(new Set(ticks).size).toBeLessThan(6);
+                    expect(ticks.some(value => value % 2 === 0)).toBe(true);
+                }
+                setSeed(seed);
+                expect(generator.generate(config).data).toEqual(data);
+                setSeed(seed);
+                expect(generator.generate({...config, useSingleFrame: !useSingleFrame}).data).toEqual(data);
+            }
+        }
+    });
+
+    it.each([
+        ['integer', false, 1, makeWholeUnitObservations],
+        ['fraction', false, 4, makeQuarterUnitObservations],
+        ['fraction', true, 8, makeEighthUnitObservations]
+    ] as const)('keeps the legacy %s/%s observation draw and RNG continuation',
+        (numberKind, useSingleFrame, subdivisions, sample) => {
+            for (let seed = 0; seed < 20; seed++) {
+                setSeed(seed);
+                const observations = sample();
+                const continuation = getRandomState();
+                setSeed(seed);
+                const data = generator.generate({numberKind, unitScale: 'cm', useSingleFrame}).data;
+                expect(data).toEqual({unit: 'cm', subdivisions, observations});
+                expect(getRandomState()).toBe(continuation);
+            }
+        });
 
     it('rejects absent, invalid, and incompatible configuration', () => {
         const valid = {numberKind: 'integer', unitScale: 'cm', useSingleFrame: false} as const;

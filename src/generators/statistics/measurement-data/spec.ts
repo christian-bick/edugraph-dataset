@@ -25,16 +25,27 @@ import {generatorLabelRule} from '../../compatibility-rules.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-data',
     compatibility: [generatorLabelRule('single-frame-fractions', [
-        Scope.SingleFrameOfReference, Scope.FractionNumbers
-    ], selected => !selected(Scope.SingleFrameOfReference) || selected(Scope.FractionNumbers))],
+        Scope.SingleFrameOfReference, Scope.FractionNumbers,
+        Scope.HalfFractions, Scope.QuarterFractions, Scope.EighthFractions
+    ], selected => !selected(Scope.SingleFrameOfReference)
+        || selected(Scope.FractionNumbers)
+        || selected(Scope.HalfFractions)
+        || selected(Scope.QuarterFractions)
+        || selected(Scope.EighthFractions))],
     generalLabels: [Area.Statistics]
 };
 
 export const MeasurementDataGeneratorSchema = {
-    numberKind: [[Scope.IntegerNumbers, Scope.FractionNumbers], selectExactLabelMap([
+    numberKind: [[
+        Scope.IntegerNumbers, Scope.FractionNumbers,
+        Scope.HalfFractions, Scope.QuarterFractions, Scope.EighthFractions
+    ], selectExactLabelMap([
         [Scope.IntegerNumbers, 'integer'],
-        [Scope.FractionNumbers, 'fraction']
-    ] as const)],
+        [Scope.FractionNumbers, 'fraction'],
+        [Scope.HalfFractions, 'half'],
+        [Scope.QuarterFractions, 'quarter'],
+        [Scope.EighthFractions, 'eighth']
+    ] as const), [[Scope.IntegerNumbers], [Scope.FractionNumbers]]],
     unitScale: [
         [Scope.CentimeterScale, Scope.InchScale],
         resolveUnitScale,

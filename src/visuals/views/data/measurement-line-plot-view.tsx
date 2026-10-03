@@ -23,7 +23,7 @@ type MeasurementLinePlotViewProps = {
 });
 
 const stepText = (subdivisions: MeasurementDataProblem['subdivisions']): string =>
-    subdivisions === 1 ? '1' : subdivisions === 4 ? '¼' : '⅛';
+    subdivisions === 1 ? '1' : subdivisions === 2 ? '½' : subdivisions === 4 ? '¼' : '⅛';
 
 const LinePlot = ({
     data,
