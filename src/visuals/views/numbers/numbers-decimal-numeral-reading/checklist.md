@@ -1,0 +1,2 @@
+- **Identity:** A decimal numeral through thousandths is supplied and the learner identifies its written meaning among distinct number names.
+- **Modes:** Question Mode shows several unmarked meanings, exactly one of which matches the numeral; Solution Mode marks that choice and retains the numeral and alternatives.

@@ -1,0 +1,2 @@
+- **Identity:** A decimal's number name is supplied, and the learner writes its correctly placed digits and decimal point as a numeral.
+- **Modes:** Question Mode shows the name and blank place-value response slots, including a blank separator, without showing the answer numeral. Solution Mode fills the digits, zero placeholders, decimal point, and complete numeral.

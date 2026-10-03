@@ -148,17 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalWritingImplementation = defineImplementationPackage({
-    id: 'decimal-reading-writing',
-    description: 'Represent nonnegative decimal values through thousandths for numeral reading, numeral writing, and written number names.',
-    generators: [{module: 'decimal-writing', strategy: 'new'}],
-    views: [
-        {module: 'numbers-decimal-numeral-reading', strategy: 'new'},
-        {module: 'numbers-decimal-numeral-writing', strategy: 'new'},
-        {module: 'numbers-decimal-name-writing', strategy: 'new'}
-    ]
-});
-
 const decimalExpandedFormImplementation = defineImplementationPackage({
     id: 'decimal-expanded-form',
     description: 'Connect decimal numerals through thousandths to sums of digit-times-place contributions, including fractional place units.',
@@ -823,28 +812,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.5b-equivalence-unit-scaling', fractionEquivalenceUnitScalingBuilder),
     ...toTargets('5.NBT.A.2-explain-power-ten-zero-patterns', explainPowerTenZeroPatternsBuilder),
     ...toTargets('5.NBT.A.2-explain-decimal-power-ten-patterns', explainDecimalPowerTenPatternsBuilder),
-    ...toTargets('5.NBT.A.2-formalize-powers-of-ten', formalizePowersOfTenBuilder)
+    ...toTargets('5.NBT.A.2-formalize-powers-of-ten', formalizePowersOfTenBuilder),
+    ...toTargets('5.NBT.A.3a-read-decimal-numerals', readDecimalNumeralsBuilder),
+    ...toTargets('5.NBT.A.3a-write-decimal-numerals', writeDecimalNumeralsBuilder),
+    ...toTargets('5.NBT.A.3a-write-decimal-number-names', writeDecimalNumberNamesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.3a-read-decimal-numerals',
-        readDecimalNumeralsBuilder,
-        decimalWritingImplementation,
-        'Read a supplied decimal numeral and identify its written value or place-value meaning, including decimals whose meaning requires the thousandths place. Distinguish this receptive task from producing number names or copying numerals.'
-    ),
-    ...toImplementationTodos(
-        '5.NBT.A.3a-write-decimal-numerals',
-        writeDecimalNumeralsBuilder,
-        decimalWritingImplementation,
-        'Write the correctly positioned base-ten decimal numeral from a supplied number name or place-value representation. Include zero placeholders and values requiring thousandths; the requested numeral must not already be provided for copying.'
-    ),
-    ...toImplementationTodos(
-        '5.NBT.A.3a-write-decimal-number-names',
-        writeDecimalNumberNamesBuilder,
-        decimalWritingImplementation,
-        'Produce a written number name for a supplied decimal through thousandths. Preserve the whole and fractional quantities and the named fractional unit, including values whose last necessary place is thousandths.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.3a-decimal-expanded-form',
         writeDecimalExpandedFormBuilder,

@@ -1,0 +1,2 @@
+- **Identity:** A decimal numeral through thousandths is supplied, and the learner writes its full number name with the correct whole and fractional unit.
+- **Modes:** Question Mode withholds the written name; Solution Mode supplies it, preserving necessary internal zeros through the named fraction such as eight thousandths for 5.008.

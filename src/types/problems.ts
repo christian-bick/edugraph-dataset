@@ -968,6 +968,40 @@ export type PowerTenNotationProblem = Readonly<{
     power: PowerTenPower;
 }>;
 
+/**
+ * An exact nonnegative base-ten value through thousandths. The chosen precision
+ * is the last necessary fractional place: its final digit is nonzero. The
+ * three digits always include zero placeholders, so 5.008 has wholePart 5,
+ * digits [0, 0, 8], numerator 8, denominator 1000, and valueInThousandths
+ * 5008. The numeral is the canonical written form of the same value.
+ */
+export type DecimalWritingProblem = Readonly<{
+    kind: 'decimal-writing';
+    base: 10;
+    wholePart: number;
+    valueInThousandths: number;
+    canonicalNumeral: string;
+    fractionalPart:
+        | Readonly<{
+            precision: 'tenths';
+            digits: readonly [number, 0, 0];
+            numerator: number;
+            denominator: 10;
+        }>
+        | Readonly<{
+            precision: 'hundredths';
+            digits: readonly [number, number, 0];
+            numerator: number;
+            denominator: 100;
+        }>
+        | Readonly<{
+            precision: 'thousandths';
+            digits: readonly [number, number, number];
+            numerator: number;
+            denominator: 1000;
+        }>;
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3066,6 +3100,9 @@ export interface ViewTypeMap {
     'numbers-power-ten-zero-pattern-explanation': WholeNumberPowerTenScalingProblem;
     'numbers-power-ten-decimal-pattern-explanation': DecimalPowerTenScalingProblem;
     'numbers-power-ten-exponent-notation': PowerTenNotationProblem;
+    'numbers-decimal-numeral-reading': DecimalWritingProblem;
+    'numbers-decimal-numeral-writing': DecimalWritingProblem;
+    'numbers-decimal-name-writing': DecimalWritingProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
