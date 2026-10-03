@@ -1,0 +1,2 @@
+- **Identity:** A decimal numeral and aligned base-ten place columns, including zeros, lead to an expanded sum of its nonzero digit values with fractional units.
+- **Modes:** Question Mode leaves the sum terms blank while keeping the numeral, place chart, and addition structure visible; Solution Mode reveals the ordered nonzero digit × unit terms and their equality to the original numeral.

@@ -1002,6 +1002,38 @@ export type DecimalWritingProblem = Readonly<{
         }>;
 }>;
 
+export type DecimalExpandedPlace = Readonly<{
+    name: WholeNumberPlaceName | 'tenths' | 'hundredths' | 'thousandths';
+    /** Base-ten place exponent; the fractional places are -1, -2, and -3. */
+    exponent: number;
+    digit: number;
+    /** Exact place unit, e.g. 100/1, 1/10, or 1/1000. */
+    unitNumerator: number;
+    unitDenominator: 1 | 10 | 100 | 1000;
+    /** Exactly digit * unitNumerator / unitDenominator * 1000. */
+    contributionInThousandths: number;
+}>;
+
+/**
+ * Exact decimal decomposition through thousandths. `places` is ordered from
+ * the highest whole place through thousandths without gaps, retaining zero
+ * placeholders. `sumTerms` contains precisely the nonzero places in the same
+ * order (at least two), and their exact contributions sum to the value. The
+ * numeral, whole part, padded fractional digits, and precision all agree with
+ * `valueInThousandths`.
+ */
+export type DecimalPlaceValueExpandedProblem = Readonly<{
+    kind: 'decimal-place-value-expanded';
+    base: 10;
+    wholePart: number;
+    fractionalDigits: readonly [number, number, number];
+    fractionalPrecision: 1 | 2 | 3;
+    valueInThousandths: number;
+    canonicalNumeral: string;
+    places: readonly DecimalExpandedPlace[];
+    sumTerms: readonly DecimalExpandedPlace[];
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3103,6 +3135,7 @@ export interface ViewTypeMap {
     'numbers-decimal-numeral-reading': DecimalWritingProblem;
     'numbers-decimal-numeral-writing': DecimalWritingProblem;
     'numbers-decimal-name-writing': DecimalWritingProblem;
+    'numbers-decimal-expanded-form': DecimalPlaceValueExpandedProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

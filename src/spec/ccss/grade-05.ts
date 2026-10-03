@@ -148,13 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalExpandedFormImplementation = defineImplementationPackage({
-    id: 'decimal-expanded-form',
-    description: 'Connect decimal numerals through thousandths to sums of digit-times-place contributions, including fractional place units.',
-    generators: [{module: 'decimal-place-value-expanded', strategy: 'new'}],
-    views: [{module: 'numbers-decimal-expanded-form', strategy: 'new'}]
-});
-
 const decimalPlaceComparisonImplementation = defineImplementationPackage({
     id: 'decimal-place-comparison',
     description: 'Compare nonnegative decimals through thousandths using aligned place values and record the resulting equality or inequality.',
@@ -815,16 +808,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.2-formalize-powers-of-ten', formalizePowersOfTenBuilder),
     ...toTargets('5.NBT.A.3a-read-decimal-numerals', readDecimalNumeralsBuilder),
     ...toTargets('5.NBT.A.3a-write-decimal-numerals', writeDecimalNumeralsBuilder),
-    ...toTargets('5.NBT.A.3a-write-decimal-number-names', writeDecimalNumberNamesBuilder)
+    ...toTargets('5.NBT.A.3a-write-decimal-number-names', writeDecimalNumberNamesBuilder),
+    ...toTargets('5.NBT.A.3a-decimal-expanded-form', writeDecimalExpandedFormBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.3a-decimal-expanded-form',
-        writeDecimalExpandedFormBuilder,
-        decimalExpandedFormImplementation,
-        'Express a supplied decimal through thousandths as a sum of digit-times-place contributions, with fractional units 1/10, 1/100 and 1/1000 as needed. The expanded expression and original numeral must denote the same value.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.3b-compare-decimals',
         compareDecimalsThroughThousandthsBuilder,
