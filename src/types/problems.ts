@@ -1,5 +1,34 @@
 export type ArithmeticOperation = 'addition' | 'subtraction' | 'multiplication' | 'division';
 
+/**
+ * A numerical expression with mathematical grouping independent of its displayed delimiter.
+ * Every value is exact: operation values equal the result of their children, and a group
+ * has the same value as its enclosed expression. Generators select representable results.
+ */
+export type NumericalExpressionNode =
+    | {kind: 'number'; value: number}
+    | {
+        kind: 'operation';
+        operation: ArithmeticOperation;
+        left: NumericalExpressionNode;
+        right: NumericalExpressionNode;
+        value: number;
+    }
+    | {kind: 'group'; expression: NumericalExpressionNode; value: number};
+
+/**
+ * Ability-neutral expression data shared by writing, evaluation, and interpretation views.
+ * When present, the expression is structurally `factor` times `reference`; their exact
+ * values must satisfy that relation without requiring either value to be shown to a learner.
+ */
+export type NumericalExpressionProblem = {
+    expression: NumericalExpressionNode;
+    multiplicativeComparison?: {
+        reference: NumericalExpressionNode;
+        factor: number;
+    };
+};
+
 type ArithmeticProblemBase = {
     operation: ArithmeticOperation;
     answer: number;
@@ -1909,6 +1938,10 @@ export type GeometryPrimitivesProblem = {
 export interface ViewTypeMap {
     'operations-vertical': ArithmeticProblem;
     'operations-vertical-inversion': ArithmeticProblem;
+    'operations-grouping-write': NumericalExpressionProblem;
+    'operations-grouping-evaluate': NumericalExpressionProblem;
+    'operations-numerical-expression-write': NumericalExpressionProblem;
+    'operations-numerical-expression-interpretation': NumericalExpressionProblem;
     'operations-standard-algorithm': StandardAlgorithmProblem;
     'operations-known-fact-derivation': KnownFactDerivationProblem;
     'operations-known-fact-inversion': KnownFactDerivationProblem;

@@ -1,0 +1,2 @@
+- **Identity:** The learner adds grouping symbols to a numeral sequence so it matches a stated calculation order.
+- **Modes:** Question Mode shows the ungrouped sequence and withholds the completed expression; Solution Mode shows the correctly grouped expression without calculating its value.

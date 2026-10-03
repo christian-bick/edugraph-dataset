@@ -1,6 +1,7 @@
 import DatasetPermutationBuilder, {
     defineImplementationPackage,
-    toImplementationTodos
+    toImplementationTodos,
+    toTargets
 } from '../../lib/dataset-permutation-builder.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import type {
@@ -12,18 +13,6 @@ import type {
 } from '../../types/ml-engine.ts';
 
 // Operations and Algebraic Thinking (5.OA)
-
-const numericalExpressionsImplementation = defineImplementationPackage({
-    id: 'numerical-expression-tasks',
-    description: 'Construct, interpret and evaluate numerical expression structure using shared grouped and ungrouped expression trees.',
-    generators: [{module: 'arithmetic-numerical-expressions', strategy: 'new'}],
-    views: [
-        {module: 'operations-grouping-write', strategy: 'new'},
-        {module: 'operations-grouping-evaluate', strategy: 'new'},
-        {module: 'operations-numerical-expression-write', strategy: 'new'},
-        {module: 'operations-numerical-expression-interpretation', strategy: 'new'}
-    ]
-});
 
 const patternCorrespondenceImplementation = defineImplementationPackage({
     id: 'paired-pattern-correspondence',
@@ -1021,22 +1010,14 @@ const generalFractionProductProblemsBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([[Scope.FractionNumbers], [Scope.MixedNumbers]]);
 
-// The current catalog cannot yet realize any complete reviewed Grade 5 target.
-export const spec: CompetencyTarget[] = [];
+export const spec: CompetencyTarget[] = [
+    ...toTargets('5.OA.A.1-use-grouping', useGroupingBuilder),
+    ...toTargets('5.OA.A.1-evaluate-grouped-expressions', evaluateGroupedExpressionsBuilder),
+    ...toTargets('5.OA.A.2-write-numerical-expression', writeNumericalExpressionBuilder),
+    ...toTargets('5.OA.A.2-interpret-numerical-expression', interpretNumericalExpressionBuilder)
+];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.OA.A.1-use-grouping',
-        useGroupingBuilder,
-        numericalExpressionsImplementation,
-        'Elicit grouping symbols that express a described calculation order; include parentheses, brackets and braces with mathematically necessary grouping.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.A.1-evaluate-grouped-expressions',
-        evaluateGroupedExpressionsBuilder,
-        numericalExpressionsImplementation,
-        'Show a meaningfully grouped numeral expression and request its value; the solution preserves grouping-first steps and the final result.'
-    ),
     ...toImplementationTodos(
         '5.OA.B.3-identify-pattern-correspondence',
         identifyPatternCorrespondenceBuilder,
@@ -1246,18 +1227,6 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductProblemsBuilder,
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.A.2-write-numerical-expression',
-        writeNumericalExpressionBuilder,
-        numericalExpressionsImplementation,
-        'Present a necessary written description of a numerical calculation and elicit an expression that records its operations and order without a relation sign or a computed answer. Preserve both grouped and ungrouped calculations; the solution shows the corresponding expression rather than replacing it with an equation.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.A.2-interpret-numerical-expression',
-        interpretNumericalExpressionBuilder,
-        numericalExpressionsImplementation,
-        'Show numerical expressions and elicit the meaning of their operations, grouping or multiplicative relationship without evaluating their values. Include comparisons such as an expression being three times another; the solution explains the structure while leaving the indicated sum and product uncomputed.'
     ),
     ...toImplementationTodos(
         '5.OA.B.3-generate-paired-patterns',

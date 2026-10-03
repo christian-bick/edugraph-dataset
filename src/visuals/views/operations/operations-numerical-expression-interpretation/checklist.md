@@ -1,0 +1,2 @@
+- **Identity:** The learner explains what the operations, grouping, or multiplicative comparison in a visible numerical expression mean.
+- **Modes:** Question Mode withholds the interpretation; Solution Mode explains the expression's structure while leaving its indicated calculations unevaluated.
