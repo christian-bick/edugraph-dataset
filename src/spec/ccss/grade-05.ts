@@ -148,13 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const decimalMultiplicationImplementation = defineImplementationPackage({
-    id: 'decimal-multiplication-method',
-    description: 'Connect products of decimal operands through hundredths to exact partition models, a written calculation, and place-value reasoning.',
-    generators: [{module: 'decimal-multiplication-model', strategy: 'new'}],
-    views: [{module: 'operations-decimal-multiplication-method', strategy: 'new'}]
-});
-
 const decimalDivisionImplementation = defineImplementationPackage({
     id: 'decimal-division-method',
     description: 'Connect decimal division models and exact quotient relations to a written calculation and an explanation of the chosen strategy.',
@@ -798,16 +791,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.A.3a-decimal-expanded-form', writeDecimalExpandedFormBuilder),
     ...toTargets('5.NBT.A.3b-compare-decimals', compareDecimalsThroughThousandthsBuilder),
     ...toTargets('5.NBT.B.7-add-decimals-with-models', addDecimalsWithModelsBuilder),
-    ...toTargets('5.NBT.B.7-subtract-decimals-with-models', subtractDecimalsWithModelsBuilder)
+    ...toTargets('5.NBT.B.7-subtract-decimals-with-models', subtractDecimalsWithModelsBuilder),
+    ...toTargets('5.NBT.B.7-multiply-decimals-with-models', multiplyDecimalsWithModelsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.B.7-multiply-decimals-with-models',
-        multiplyDecimalsWithModelsBuilder,
-        decimalMultiplicationImplementation,
-        'Multiply decimal operands through hundredths using a partition or area-model drawing, complete a corresponding written calculation, and explain how the place-value units determine the product. Preserve exact products beyond hundredths, such as 0.12 times 0.03 = 0.0036.'
-    ),
     ...toImplementationTodos(
         '5.NBT.B.7-divide-decimals-with-models',
         divideDecimalsWithModelsBuilder,

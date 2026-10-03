@@ -1,0 +1,2 @@
+- **Identity:** A countable hundredth-by-hundredth area grid is partitioned into disjoint place-value regions for decimal multiplication, alongside partial-product and written-strategy work.
+- **Modes:** Question Mode shows the factors, side lengths, and grid but leaves each region count and partial product, the final product, and the explanation blank; Solution Mode gives exact region counts and areas, their sum, the completed multiplication, and why each cell is one ten-thousandth square unit.

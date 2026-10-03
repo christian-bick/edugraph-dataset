@@ -1168,6 +1168,73 @@ export type DecimalAddSubtractProblem = Readonly<{
     }>;
 }>;
 
+export type DecimalMultiplicationPlace = 'ones' | 'tenths' | 'hundredths';
+
+/**
+ * One nonzero place contribution along an operand's grid axis. Partitions are
+ * ordered ones, tenths, hundredths, omit zero digits, and occupy consecutive
+ * integer hundredth-unit intervals starting at zero.
+ */
+export type DecimalMultiplicationPartition = Readonly<{
+    place: DecimalMultiplicationPlace;
+    digit: number;
+    valueInHundredths: number;
+    startInHundredths: number;
+}>;
+
+/** Exact nonnegative operand below 10, with [ones, tenths, hundredths] digits. */
+export type DecimalMultiplicationOperand = Readonly<{
+    valueInHundredths: number;
+    canonicalNumeral: string;
+    alignedDigits: readonly [number, number, number];
+    partitions: readonly DecimalMultiplicationPartition[];
+}>;
+
+/** A disjoint rectangle for one Cartesian pair of operand place partitions. */
+export type DecimalMultiplicationRegion = Readonly<{
+    firstPartitionIndex: number;
+    secondPartitionIndex: number;
+    columnStart: number;
+    rowStart: number;
+    columns: number;
+    rows: number;
+    cellCount: number;
+    productInTenThousandths: number;
+}>;
+
+/**
+ * Exact area model for decimal multiplication. The first operand partitions
+ * the horizontal axis and the second partitions the vertical axis. Grid
+ * width and height equal their respective integer-hundredths values. Each
+ * cell has area 1/10000, so cellCount = width * height = product in exact
+ * integer ten-thousandths. Every Cartesian pair of nonzero partitions has
+ * one region, in first-then-second partition order, whose offsets and side
+ * lengths match those partitions; the regions tile the grid without overlap
+ * or gaps. Each region's cellCount = columns * rows = its exact partial
+ * product, and the partial products sum to the whole product. Zero operands
+ * have no partitions on their axis and an empty grid/region set. Canonical
+ * generation bounds the countable grid to at most 1440 cells.
+ */
+export type DecimalMultiplicationProblem = Readonly<{
+    kind: 'decimal-multiplication-model';
+    base: 10;
+    operandScale: 100;
+    productScale: 10000;
+    first: DecimalMultiplicationOperand;
+    second: DecimalMultiplicationOperand;
+    product: Readonly<{
+        valueInTenThousandths: number;
+        canonicalNumeral: string;
+    }>;
+    areaGrid: Readonly<{
+        widthInHundredths: number;
+        heightInHundredths: number;
+        cellAreaInTenThousandths: 1;
+        cellCount: number;
+        regions: readonly DecimalMultiplicationRegion[];
+    }>;
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -3272,6 +3339,7 @@ export interface ViewTypeMap {
     'numbers-decimal-expanded-form': DecimalPlaceValueExpandedProblem;
     'numbers-decimal-place-comparison': DecimalPlaceComparisonProblem;
     'operations-decimal-addition-subtraction-method': DecimalAddSubtractProblem;
+    'operations-decimal-multiplication-method': DecimalMultiplicationProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;
