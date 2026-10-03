@@ -16,6 +16,8 @@ describe('FractionArithmeticGenerator spec integration', () => {
         Scope.MixedNumbers,
         Scope.UnitFractions,
         Scope.TenthFractions,
+        Scope.UnlikeDenominators,
+        Area.FractionEquivalence,
         Scope.CommonDenominator,
         Area.Addition,
         Area.Subtraction,
@@ -293,5 +295,70 @@ describe('FractionArithmeticGenerator spec integration', () => {
             operation: 'addition'
         });
         expect(resolvedTenthsHundredths!.data).toEqual(directTenthsHundredths.data);
+    });
+
+    it.each([
+        ['fraction', Scope.FractionNumbers, 'unlike-fraction-operation'],
+        ['mixed', Scope.MixedNumbers, 'unlike-mixed-operation']
+    ] as const)('resolves both Grade 5 unlike %s operations and word routes', (
+        kind, numberScope, expectedTask
+    ) => {
+        for (const [operation, area] of [
+            ['addition', Area.Addition], ['subtraction', Area.Subtraction]
+        ] as const) {
+            for (const word of [false, true]) {
+                const labels = [
+                    area,
+                    numberScope,
+                    Scope.UnlikeDenominators,
+                    Ability.ProcedureExecution,
+                    ...(word
+                        ? [Area.Equation, Scope.SingleFrameOfReference, Ability.TextualReception]
+                        : [Area.FractionEquivalence])
+                ];
+                const seed = `grade5-unlike-${kind}-${operation}-${word}`;
+                setSeed(seed);
+                const stub = generateWithLabels(generator, labels);
+                expect(stub).not.toBeNull();
+                expect(stub!.data.task).toBe(expectedTask);
+                expect(stub!.labels).toContain(Scope.UnlikeDenominators);
+                expect(stub!.labels).toContain(area);
+                if (!word) expect(stub!.labels).toContain(Area.FractionEquivalence);
+                expect(stub!.labels).not.toContain(Scope.CommonDenominator);
+
+                setSeed(seed);
+                expect(generator.generate({
+                    task: expectedTask,
+                    operation,
+                    usesCommonDenominator: false
+                }).data).toEqual(stub!.data);
+            }
+        }
+    });
+
+    it.each([
+        ['fraction', Scope.FractionNumbers, 'fraction-operation'],
+        ['mixed', Scope.MixedNumbers, 'mixed-operation']
+    ] as const)('retains both Grade 5 common-denominator %s word routes', (
+        kind, numberScope, expectedTask
+    ) => {
+        for (const [operation, area] of [
+            ['addition', Area.Addition], ['subtraction', Area.Subtraction]
+        ] as const) {
+            setSeed(`grade5-common-word-${kind}-${operation}`);
+            const stub = generateWithLabels(generator, [
+                area,
+                Area.Equation,
+                Scope.SingleFrameOfReference,
+                Scope.CommonDenominator,
+                numberScope,
+                Ability.TextualReception,
+                Ability.ProcedureExecution
+            ]);
+            expect(stub).not.toBeNull();
+            expect(stub!.data.task).toBe(expectedTask);
+            expect(stub!.labels).toContain(Scope.CommonDenominator);
+            expect(stub!.labels).not.toContain(Scope.UnlikeDenominators);
+        }
     });
 });

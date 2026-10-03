@@ -22,12 +22,20 @@ interface FractionArithmeticViewProps {
 }
 
 const validateData = (viewId: string, data: FractionArithmeticProblem) => {
-    validateProblemData(viewId, data, [
-        'task',
-        'operation',
-        'denominator',
-        'sharedWhole'
-    ]);
+    if (data.task === 'unlike-fraction-operation' || data.task === 'unlike-mixed-operation') {
+        validateProblemData(viewId, data, [
+            'task', 'operation', 'sharedWhole', 'commonDenominator',
+            'first', 'second', 'firstConversion', 'secondConversion',
+            'resultAtCommonDenominator', 'result', 'storyContext'
+        ]);
+    } else {
+        validateProblemData(viewId, data, [
+            'task',
+            'operation',
+            'denominator',
+            'sharedWhole'
+        ]);
+    }
     if (data.task === 'tenths-hundredths-addition') {
         validateProblemData(viewId, data, [
             'firstTenths',
@@ -80,7 +88,9 @@ const AnswerPanel = ({
         {isSolutionView ? (
             <>
                 <div className="text-lg font-extrabold">
-                    <FractionArithmeticText text={data.answerStatement} />
+                    <FractionArithmeticText text={!wordLayout && 'commonDenominator' in data
+                        ? `The ${data.operation === 'addition' ? 'sum' : 'difference'} is ${data.resultDisplay}.`
+                        : data.answerStatement} />
                 </div>
                 <div className="mt-1 text-sm font-semibold leading-snug">
                     <FractionArithmeticText text={data.explanation} />
@@ -142,6 +152,8 @@ export const FractionArithmeticView = ({
                     <div className="mt-3 text-center text-sm font-bold text-slate-500">
                         {data.task === 'tenths-hundredths-addition'
                             ? `Both grids represent ${data.story.wholeLabel}, shown first in tenths and then in hundredths.`
+                            : 'commonDenominator' in data
+                                ? 'Every bar represents the same one-mile whole; the original denominators partition it differently.'
                             : `Every frame represents ${data.story.wholeLabel} divided into ${data.denominator} equal parts.`}
                     </div>
                 </>

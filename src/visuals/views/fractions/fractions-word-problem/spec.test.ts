@@ -10,6 +10,9 @@ describe('fractions-word-problem view spec', () => {
             Scope.VisualNumbers,
             Ability.ProcedureExecution
         ]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([
+            Ability.TextualReception
+        ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

@@ -2971,6 +2971,79 @@ export type MixedFractionOperationProblem = FractionArithmeticCommon & {
     result: MixedFractionValue;
 };
 
+/** One original fractional operand in an unlike-denominator operation. */
+export type UnlikeFractionOperand = Readonly<{
+    numerator: number;
+    denominator: FractionParts;
+}>;
+
+/** Exact conversion of an original operand to the selected common denominator. */
+export type UnlikeFractionConversion = Readonly<{
+    factor: number;
+    /** The original fractional numerator multiplied by factor. */
+    fractionalNumeratorAtCommonDenominator: number;
+    /** For mixed values, also includes whole * commonDenominator. */
+    improperNumeratorAtCommonDenominator: number;
+}>;
+
+/** A normalized rational result; zero has denominator one. */
+export type UnlikeFractionResult = Readonly<{
+    numerator: number;
+    denominator: number;
+}>;
+
+/** A normalized mixed result with 0 <= numerator < denominator. */
+export type UnlikeMixedResult = Readonly<{
+    whole: number;
+    numerator: number;
+    denominator: number;
+}>;
+
+/**
+ * Exact same-whole addition or subtraction of operands with different
+ * original denominators. `commonDenominator` is a positive multiple of both
+ * originals and need not be their least common multiple. For each operand,
+ * factor = commonDenominator / original.denominator; the fractional numerator
+ * is original.numerator * factor, and the improper numerator is
+ * (original.whole * original.denominator + original.numerator) * factor,
+ * taking original.whole as zero for the fraction branch.
+ *
+ * The common-denominator result numerator is the sum or nonnegative
+ * difference of the two converted improper numerators. `result` is the exact
+ * reduced value: cross-products with `resultAtCommonDenominator` agree. The
+ * mixed branch uses a proper reduced fractional part (denominator one when
+ * that part is zero). `storyContext` identifies the measured whole, without
+ * supplying a prompt, unknown, or answer prose. Canonical model samples use
+ * at most 24 common-denominator parts per whole.
+ */
+export type UnlikeFractionArithmeticCommon = {
+    operation: FractionArithmeticOperation;
+    sharedWhole: 1;
+    commonDenominator: number;
+    firstConversion: UnlikeFractionConversion;
+    secondConversion: UnlikeFractionConversion;
+    resultAtCommonDenominator: Readonly<{
+        numerator: number;
+        denominator: number;
+    }>;
+};
+
+export type UnlikeFractionOperationProblem = UnlikeFractionArithmeticCommon & {
+    task: 'unlike-fraction-operation';
+    first: UnlikeFractionOperand;
+    second: UnlikeFractionOperand;
+    result: UnlikeFractionResult;
+    storyContext: 'route-length';
+};
+
+export type UnlikeMixedOperationProblem = UnlikeFractionArithmeticCommon & {
+    task: 'unlike-mixed-operation';
+    first: MixedFractionValue;
+    second: MixedFractionValue;
+    result: UnlikeMixedResult;
+    storyContext: 'route-length';
+};
+
 export type FractionMultiplicationCommon = FractionArithmeticCommon & {
     operation: 'multiplication';
     wholeFactor: number;
@@ -3036,7 +3109,17 @@ export type FractionArithmeticProblem =
     | FractionBinaryOperationProblem
     | FractionDecompositionProblem
     | MixedFractionOperationProblem
+    | UnlikeFractionOperationProblem
+    | UnlikeMixedOperationProblem
     | UnitFractionMultipleProblem
+    | WholeNumberFractionProductProblem
+    | TenthsHundredthsAdditionProblem;
+
+export type FractionArithmeticExecutionProblem =
+    | FractionBinaryOperationProblem
+    | MixedFractionOperationProblem
+    | UnlikeFractionOperationProblem
+    | UnlikeMixedOperationProblem
     | WholeNumberFractionProductProblem
     | TenthsHundredthsAdditionProblem;
 

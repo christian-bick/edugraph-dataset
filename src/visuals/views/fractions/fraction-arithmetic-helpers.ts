@@ -2,7 +2,9 @@ import {
     FractionArithmeticProblem,
     FractionParts,
     LikeDenominatorFractionValue,
-    MixedFractionValue
+    MixedFractionValue,
+    UnlikeFractionOperationProblem,
+    UnlikeMixedOperationProblem
 } from '../../../types/problems.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const;
@@ -37,8 +39,103 @@ const validMixed = (
 const improperNumerator = (value: MixedFractionValue): number =>
     value.whole * value.denominator + value.numerator;
 
+type UnlikeProblem = UnlikeFractionOperationProblem | UnlikeMixedOperationProblem;
+
+const greatestCommonDivisor = (first: number, second: number): number => {
+    let left = first;
+    let right = second;
+    while (right !== 0) {
+        [left, right] = [right, left % right];
+    }
+    return left;
+};
+
+const validUnlikeOperand = (
+    value: UnlikeProblem['first'],
+    mixed: boolean
+): boolean => typeof value === 'object'
+    && value !== null
+    && validDenominator(value.denominator)
+    && Number.isInteger(value.numerator)
+    && value.numerator > 0
+    && (mixed
+        ? 'whole' in value
+            && Number.isInteger(value.whole)
+            && value.whole >= 0
+            && value.numerator < value.denominator
+        : !('whole' in value));
+
+const validUnlikeConversion = (
+    operand: UnlikeProblem['first'],
+    conversion: UnlikeProblem['firstConversion'],
+    commonDenominator: number
+): boolean => typeof conversion === 'object'
+    && conversion !== null
+    && Number.isInteger(conversion.factor)
+    && conversion.factor >= 1
+    && operand.denominator * conversion.factor === commonDenominator
+    && Number.isInteger(conversion.fractionalNumeratorAtCommonDenominator)
+    && conversion.fractionalNumeratorAtCommonDenominator === operand.numerator * conversion.factor
+    && Number.isInteger(conversion.improperNumeratorAtCommonDenominator)
+    && conversion.improperNumeratorAtCommonDenominator === (
+        ('whole' in operand ? operand.whole : 0) * operand.denominator + operand.numerator
+    ) * conversion.factor;
+
+const validUnlikeResult = (data: UnlikeProblem, resultNumerator: number): boolean => {
+    if (typeof data.result !== 'object' || data.result === null
+        || !Number.isInteger(data.result.denominator)
+        || data.result.denominator < 1
+        || !Number.isInteger(data.result.numerator)
+        || data.result.numerator < 0) return false;
+    if (data.task === 'unlike-fraction-operation') {
+        return greatestCommonDivisor(data.result.numerator, data.result.denominator) === 1
+            && (data.result.numerator !== 0 || data.result.denominator === 1)
+            && data.result.numerator * data.commonDenominator
+                === resultNumerator * data.result.denominator;
+    }
+    return Number.isInteger(data.result.whole)
+        && data.result.whole >= 0
+        && data.result.numerator < data.result.denominator
+        && greatestCommonDivisor(data.result.numerator, data.result.denominator) === 1
+        && (data.result.numerator !== 0 || data.result.denominator === 1)
+        && (data.result.whole * data.result.denominator + data.result.numerator)
+            * data.commonDenominator === resultNumerator * data.result.denominator;
+};
+
+const validUnlikeOperation = (data: UnlikeProblem): boolean => {
+    const mixed = data.task === 'unlike-mixed-operation';
+    if (data.sharedWhole !== 1
+        || data.storyContext !== 'route-length'
+        || (data.operation !== 'addition' && data.operation !== 'subtraction')
+        || !Number.isInteger(data.commonDenominator)
+        || data.commonDenominator < 2
+        || data.commonDenominator > 24
+        || !validUnlikeOperand(data.first, mixed)
+        || !validUnlikeOperand(data.second, mixed)
+        || data.first.denominator === data.second.denominator
+        || !validUnlikeConversion(data.first, data.firstConversion, data.commonDenominator)
+        || !validUnlikeConversion(data.second, data.secondConversion, data.commonDenominator)
+        || typeof data.resultAtCommonDenominator !== 'object'
+        || data.resultAtCommonDenominator === null
+        || data.resultAtCommonDenominator.denominator !== data.commonDenominator
+        || !Number.isInteger(data.resultAtCommonDenominator.numerator)) return false;
+    const firstCount = data.firstConversion.improperNumeratorAtCommonDenominator;
+    const secondCount = data.secondConversion.improperNumeratorAtCommonDenominator;
+    const expected = data.operation === 'addition'
+        ? firstCount + secondCount
+        : firstCount - secondCount;
+    return expected >= 0
+        && data.resultAtCommonDenominator.numerator === expected
+        && Math.ceil(firstCount / data.commonDenominator) <= 4
+        && Math.ceil(secondCount / data.commonDenominator) <= 4
+        && Math.ceil(expected / data.commonDenominator) <= 4
+        && validUnlikeResult(data, expected);
+};
+
 const validCommon = (
-    data: Exclude<FractionArithmeticProblem, {task: 'tenths-hundredths-addition'}>
+    data: Exclude<FractionArithmeticProblem, {
+        task: 'tenths-hundredths-addition' | 'unlike-fraction-operation' | 'unlike-mixed-operation'
+    }>
 ): boolean => validDenominator(data.denominator)
     && data.sharedWhole === 1;
 
@@ -175,6 +272,8 @@ export const isValidFractionArithmeticProblem = (data: FractionArithmeticProblem
         case 'unit-fraction-multiple': return validUnitFractionMultiple(data);
         case 'whole-number-fraction-product': return validWholeNumberFractionProduct(data);
         case 'tenths-hundredths-addition': return validTenthsHundredthsAddition(data);
+        case 'unlike-fraction-operation':
+        case 'unlike-mixed-operation': return validUnlikeOperation(data);
         default: return false;
     }
 };

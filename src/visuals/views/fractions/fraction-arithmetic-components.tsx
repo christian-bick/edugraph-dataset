@@ -7,6 +7,7 @@ import {
     TenthsHundredthsAdditionPresentation
 } from './fraction-arithmetic-presentation.ts';
 import {TenthsHundredthsGrid} from './tenths-hundredths-grid.tsx';
+import {UnlikeFractionArithmeticWork} from './fraction-unlike-components.tsx';
 
 const groupStyles: Record<FractionArithmeticModelGroupRole, string> = {
     'first-addend': 'border-sky-600 bg-sky-200 text-sky-950',
@@ -344,6 +345,10 @@ export const FractionArithmeticWork = ({
     data: FractionArithmeticPresentationProblem;
     isSolutionView: boolean;
 }) => {
+    if ('commonDenominator' in data) {
+        return <UnlikeFractionArithmeticWork data={data} isSolutionView={isSolutionView} />;
+    }
+
     if (data.task === 'tenths-hundredths-addition') {
         return <TenthsHundredthsAdditionWork data={data} isSolutionView={isSolutionView} />;
     }

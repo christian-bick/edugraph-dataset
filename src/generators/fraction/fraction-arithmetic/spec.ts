@@ -11,7 +11,9 @@ const fractionArithmeticTaskLabels = [
     Scope.ImproperFractions,
     Scope.MixedNumbers,
     Scope.UnitFractions,
-    Scope.TenthFractions
+    Scope.TenthFractions,
+    Scope.UnlikeDenominators,
+    Area.FractionEquivalence
 ] as const;
 
 export type FractionArithmeticTaskConfig =
@@ -20,6 +22,8 @@ export type FractionArithmeticTaskConfig =
     | 'decompose-proper'
     | 'decompose-mixed'
     | 'mixed-operation'
+    | 'unlike-fraction-operation'
+    | 'unlike-mixed-operation'
     | 'unit-fraction-multiple'
     | 'whole-number-fraction-product-proper'
     | 'whole-number-fraction-product-improper';
@@ -71,6 +75,18 @@ const resolveTask = exactResolver((labels: string[]): FractionArithmeticTaskConf
     ])) {
         return 'whole-number-fraction-product-improper';
     }
+    if (sameLabels(taskLabels, [Scope.FractionNumbers, Scope.UnlikeDenominators])
+        || sameLabels(taskLabels, [
+            Scope.FractionNumbers, Scope.UnlikeDenominators, Area.FractionEquivalence
+        ])) {
+        return 'unlike-fraction-operation';
+    }
+    if (sameLabels(taskLabels, [Scope.MixedNumbers, Scope.UnlikeDenominators])
+        || sameLabels(taskLabels, [
+            Scope.MixedNumbers, Scope.UnlikeDenominators, Area.FractionEquivalence
+        ])) {
+        return 'unlike-mixed-operation';
+    }
     return null;
 });
 withLabelChoices(resolveTask, {
@@ -83,7 +99,11 @@ withLabelChoices(resolveTask, {
         [Scope.MixedNumbers],
         [Area.IteratedOperation, Scope.IntegerNumbers, Scope.UnitFractions],
         [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ProperFractions],
-        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ImproperFractions]
+        [Area.IteratedOperation, Scope.IntegerNumbers, Scope.ImproperFractions],
+        [Scope.FractionNumbers, Scope.UnlikeDenominators],
+        [Scope.FractionNumbers, Scope.UnlikeDenominators, Area.FractionEquivalence],
+        [Scope.MixedNumbers, Scope.UnlikeDenominators],
+        [Scope.MixedNumbers, Scope.UnlikeDenominators, Area.FractionEquivalence]
     ],
     contextLabels: [Area.Addition, Area.Subtraction, Area.Multiplication]
 });
@@ -95,11 +115,18 @@ export const spec: GeneratorSpec = {
     compatibility: [generatorLabelRule('fraction-task-operation', [
         Area.Addition, Area.Subtraction, Area.Multiplication, Area.IteratedOperation,
         Scope.IntegerNumbers, Scope.FractionNumbers, Scope.ProperFractions, Scope.ImproperFractions,
-        Scope.MixedNumbers, Scope.UnitFractions, Scope.TenthFractions, Scope.CommonDenominator
+        Scope.MixedNumbers, Scope.UnitFractions, Scope.TenthFractions, Scope.CommonDenominator,
+        Scope.UnlikeDenominators, Area.FractionEquivalence
     ], selected => {
         const addition = selected(Area.Addition);
         const multiplication = selected(Area.Multiplication);
         const iterated = selected(Area.IteratedOperation);
+        if (selected(Scope.UnlikeDenominators)) {
+            return !selected(Scope.CommonDenominator) && !iterated && !multiplication
+                && (selected(Scope.FractionNumbers) !== selected(Scope.MixedNumbers))
+                && (addition || selected(Area.Subtraction));
+        }
+        if (selected(Area.FractionEquivalence)) return false;
         if (multiplication && !addition) {
             return iterated && selected(Scope.IntegerNumbers) && (
                 selected(Scope.UnitFractions) || selected(Scope.ProperFractions) || selected(Scope.ImproperFractions));

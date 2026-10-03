@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import type {
     BeyondScopeEntry,
@@ -487,16 +483,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const unlikeDenominatorArithmeticImplementation = defineImplementationPackage({
-    id: 'unlike-denominator-fraction-arithmetic',
-    description: 'Extend fraction addition and subtraction to unlike original denominators and mixed numbers, retaining equivalent-fraction conversion and complete same-whole word problems across common and unlike denominators.',
-    generators: [{module: 'fraction-arithmetic', strategy: 'expand'}],
-    views: [
-        {module: 'fractions-operation-model', strategy: 'expand'},
-        {module: 'fractions-word-problem', strategy: 'expand'}
-    ]
-});
-
 const grade5FractionArithmeticNumberKinds = [
     [Scope.FractionNumbers],
     [Scope.MixedNumbers]
@@ -753,6 +739,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.G.A.2-interpret-contextual-coordinates', interpretContextualCoordinatesBuilder),
     ...toTargets('5.G.B.3-inherited-shape-attributes', inheritedShapeAttributesBuilder),
     ...toTargets('5.G.B.4-classify-shape-hierarchy', classifyShapeHierarchyBuilder),
+    ...toTargets('5.NF.A.1-unlike-denominator-arithmetic', unlikeDenominatorArithmeticBuilder),
+    ...toTargets('5.NF.A.2-fraction-word-problems', grade5FractionArithmeticWordProblemsBuilder),
     ...toTargets('5.NF.A.2-benchmark-estimate', fractionBenchmarkEstimateBuilder),
     ...toTargets('5.NF.A.2-benchmark-reasonableness', fractionBenchmarkReasonablenessBuilder),
     ...toTargets('5.NF.B.3-interpret-quotient', fractionQuotientInterpretationBuilder),
@@ -789,20 +777,7 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NBT.B.7-divide-decimals-with-models', divideDecimalsWithModelsBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.A.1-unlike-denominator-arithmetic',
-        unlikeDenominatorArithmeticBuilder,
-        unlikeDenominatorArithmeticImplementation,
-        'Add and subtract fractions with unlike original denominators, including mixed numbers, by displaying equivalent replacements with a common denominator and then the resulting sum or difference. Preserve the original denominators and each conversion factor; a valid common denominator need not be the least one. Include both fractional and mixed-number operand forms with nonnegative quantities and results.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.A.2-fraction-word-problems',
-        grade5FractionArithmeticWordProblemsBuilder,
-        unlikeDenominatorArithmeticImplementation,
-        'Solve complete same-whole fraction addition and subtraction word problems, retaining common- and unlike-denominator cases and fractional or mixed-number forms in one competency. Make the reference whole, story quantities, equation or model and exact answer agree; retain the original unlike denominators before any conversion. Existing common-denominator support is only part of this delivery.'
-    ),
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

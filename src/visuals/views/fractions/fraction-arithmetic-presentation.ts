@@ -15,6 +15,10 @@ import {
     WholeNumberFractionProductProblem
 } from '../../../types/problems.ts';
 import {presentFraction, PresentedFraction} from '../../helpers/fraction.ts';
+import {
+    presentUnlikeFractionArithmetic,
+    UnlikeFractionArithmeticPresentation
+} from './fraction-unlike-presentation.ts';
 
 export type FractionArithmeticPresentation =
     | 'interpretation'
@@ -210,7 +214,8 @@ export type FractionArithmeticPresentationProblem =
     | MixedFractionOperationPresentation
     | UnitFractionMultiplePresentation
     | WholeNumberFractionProductPresentation
-    | TenthsHundredthsAdditionPresentation;
+    | TenthsHundredthsAdditionPresentation
+    | UnlikeFractionArithmeticPresentation;
 
 type GroupSeed = Omit<FractionArithmeticModelGroup, 'startPart'>;
 
@@ -801,7 +806,15 @@ export const presentFractionArithmeticProblem = (
             ? presentWholeNumberFractionProduct(data, true)
             : null;
     }
-    return presentation === 'execution-model' || presentation === 'execution-word'
-        ? presentTenthsHundredthsAddition(data)
-        : null;
+    if (data.task === 'tenths-hundredths-addition') {
+        return presentation === 'execution-model' || presentation === 'execution-word'
+            ? presentTenthsHundredthsAddition(data)
+            : null;
+    }
+    if (data.task === 'unlike-fraction-operation' || data.task === 'unlike-mixed-operation') {
+        return presentation === 'execution-model' || presentation === 'execution-word'
+            ? presentUnlikeFractionArithmetic(data)
+            : null;
+    }
+    return null;
 };
