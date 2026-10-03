@@ -1,0 +1,2 @@
+- **Identity:** The learner plots supplied ordered pairs on a labeled first-quadrant coordinate grid.
+- **Modes:** Question Mode shows two aligned source patterns, their rules and starts, the pair list, and an empty grid with named axes and origin; Solution Mode marks and labels every listed point, including points on an axis.

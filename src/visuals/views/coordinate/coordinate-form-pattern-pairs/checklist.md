@@ -1,0 +1,2 @@
+- **Identity:** The learner writes ordered pairs from corresponding terms of two aligned numerical patterns.
+- **Modes:** Question Mode shows both patterns, their rules and starts, the first/second component roles, and empty pair entries; Solution Mode shows each correctly ordered pair without a plotting task.

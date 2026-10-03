@@ -14,16 +14,6 @@ import type {
 
 // Operations and Algebraic Thinking (5.OA)
 
-const patternCoordinateImplementation = defineImplementationPackage({
-    id: 'pattern-coordinate-plotting',
-    description: 'Form ordered coordinate pairs from aligned numerical-pattern terms and plot the resulting pairs in separate task projections.',
-    generators: [{module: 'coordinate-pattern-pairs', strategy: 'new'}],
-    views: [
-        {module: 'coordinate-plot-pattern-pairs', strategy: 'new'},
-        {module: 'coordinate-form-pattern-pairs', strategy: 'new'}
-    ]
-});
-
 const useGroupingBuilder = new DatasetPermutationBuilder().addLabels([
     Area.GroupedExpression,
     Area.NumericalExpression,
@@ -1006,16 +996,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.A.2-interpret-numerical-expression', interpretNumericalExpressionBuilder),
     ...toTargets('5.OA.B.3-identify-pattern-correspondence', identifyPatternCorrespondenceBuilder),
     ...toTargets('5.OA.B.3-explain-pattern-correspondence', explainPatternCorrespondenceBuilder),
-    ...toTargets('5.OA.B.3-generate-paired-patterns', generatePairedPatternsBuilder)
+    ...toTargets('5.OA.B.3-generate-paired-patterns', generatePairedPatternsBuilder),
+    ...toTargets('5.OA.B.3-graph-pattern-pairs', graphPatternPairsBuilder),
+    ...toTargets('5.OA.B.3-form-pattern-pairs', formPatternPairsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.OA.B.3-graph-pattern-pairs',
-        graphPatternPairsBuilder,
-        patternCoordinateImplementation,
-        'Supply nonnegative integer ordered pairs with horizontal and vertical roles, and a labeled coordinate grid on which to plot them, including points on the axes.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.1-adjacent-decimal-place-scaling',
         adjacentDecimalPlaceScalingBuilder,
@@ -1207,12 +1193,6 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductProblemsBuilder,
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.B.3-form-pattern-pairs',
-        formPatternPairsBuilder,
-        patternCoordinateImplementation,
-        'Show two aligned numerical sequences with their respective rules and starts, designate the first and second component roles, and elicit ordered pairs from corresponding terms. The solution preserves each sequence-to-component association; forming pair notation does not require locating or marking points.'
     ),
     ...toImplementationTodos(
         '5.G.A.1-interpret-coordinate-components',

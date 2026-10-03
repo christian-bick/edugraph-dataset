@@ -462,6 +462,19 @@ export type ArithmeticPairedPatternProblem = {
     correspondence?: ArithmeticPairedPatternCorrespondence;
 };
 
+/**
+ * Ordered pairs derived from two aligned additive patterns. Both sequences and
+ * points have equal length; points[i] is {x: first.terms[i], y: second.terms[i]}.
+ * The first component is horizontal and the second is vertical. All values are
+ * nonnegative safe integers, and at least one point lies on an axis.
+ */
+export type CoordinatePatternPairsProblem = {
+    kind: 'coordinate-pattern-pairs';
+    first: ArithmeticPairedPatternSequence;
+    second: ArithmeticPairedPatternSequence;
+    points: readonly {x: number; y: number}[];
+};
+
 export type LegacyIntegerRoundingProblem = {
     number: number;
     roundingPlace: 10 | 100;
@@ -1999,6 +2012,8 @@ export interface ViewTypeMap {
     'operations-pattern-correspondence': ArithmeticPairedPatternProblem;
     'operations-pattern-correspondence-explanation': ArithmeticPairedPatternProblem;
     'operations-paired-pattern-generation': ArithmeticPairedPatternProblem;
+    'coordinate-plot-pattern-pairs': CoordinatePatternPairsProblem;
+    'coordinate-form-pattern-pairs': CoordinatePatternPairsProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;
     'numbers-fraction-line-classification': ProperFractionEquivalenceProblem;
