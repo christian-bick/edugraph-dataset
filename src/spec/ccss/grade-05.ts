@@ -548,16 +548,6 @@ const classifyShapeHierarchyBuilder = new DatasetPermutationBuilder()
 // Number and Operations—Fractions (5.NF)
 // ==========================================
 
-const fractionScalingReasoningImplementation = defineImplementationPackage({
-    id: 'fraction-scaling-reasoning',
-    description: 'Model a positive reference quantity, fractional scale and product comparison for reasoning from the scale relative to one.',
-    generators: [{module: 'fraction-scaling', strategy: 'new'}],
-    views: [
-        {module: 'fractions-scaling-comparison', strategy: 'new'},
-        {module: 'fractions-scaling-explanation', strategy: 'new'}
-    ]
-});
-
 const fractionEquivalenceUnitScalingImplementation = defineImplementationPackage({
     id: 'fraction-equivalence-unit-scaling',
     description: 'Extend fraction equivalence with an explicit n/n unit multiplier and interpret why multiplying by one preserves value.',
@@ -849,22 +839,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.6-fraction-product-problems', generalFractionProductProblemsBuilder),
     ...toTargets('5.NF.B.4b-tile-fractional-rectangle', fractionalRectangleTilingBuilder),
     ...toTargets('5.NF.B.4b-calculate-fractional-area', fractionalRectangleAreaBuilder),
-    ...toTargets('5.NF.B.4b-represent-fraction-product', fractionAreaProductRepresentationBuilder)
+    ...toTargets('5.NF.B.4b-represent-fraction-product', fractionAreaProductRepresentationBuilder),
+    ...toTargets('5.NF.B.5a-compare-product-factor', fractionProductFactorComparisonBuilder),
+    ...toTargets('5.NF.B.5b-explain-fraction-scaling', fractionScalingExplanationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NF.B.5a-compare-product-factor',
-        fractionProductFactorComparisonBuilder,
-        fractionScalingReasoningImplementation,
-        'Keep the product uncomputed and ask for its relation to a positive reference factor, using the other factor being above, below or equal to one; require an interpretation without evaluating the multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.NF.B.5b-explain-fraction-scaling',
-        fractionScalingExplanationBuilder,
-        fractionScalingReasoningImplementation,
-        'Ask for a written explanation of why a positive quantity grows under a fraction strictly greater than one or shrinks under a fraction less than one; include whole-number enlargement as a familiar comparison.'
-    ),
     ...toImplementationTodos(
         '5.NF.B.5b-equivalence-unit-scaling',
         fractionEquivalenceUnitScalingBuilder,

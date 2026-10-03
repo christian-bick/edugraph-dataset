@@ -1,0 +1,2 @@
+- **Identity:** A positive quantity is multiplied by a fraction, and the learner compares the product with the original quantity using the factor's relation to one.
+- **Modes:** Question Mode shows the original quantity and fraction factor but leaves the product comparison unanswered. Solution Mode shows the correct relation and equal-part reasoning that supports it.

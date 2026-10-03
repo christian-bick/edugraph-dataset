@@ -1,0 +1,2 @@
+- **Identity:** A fraction scales a positive quantity, and the learner explains in words why the product grows or shrinks compared with the original; a whole-number enlargement serves as a familiar reference.
+- **Modes:** Question Mode gives the original quantity, fraction factor, and whole-number example but leaves the requested fraction comparison and explanation open. Solution Mode compares the factor with one and explains the product using equal parts.
