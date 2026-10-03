@@ -548,6 +548,45 @@ export type CoordinatePatternPairsProblem = {
     points: readonly {x: number; y: number}[];
 };
 
+/**
+ * One mathematical two-axis frame. Both axes start at the same (0, 0) origin;
+ * their positive unit vectors (1, 0) and (0, 1) have dot product zero. Each
+ * axis has its own uniform positive tick step, and `tickValues` lists exactly
+ * 0, step, 2 × step, ... through its final tick (4–8 intervals). The x-axis
+ * names the x-coordinate and the y-axis names the y-coordinate.
+ *
+ * `travel` gives separate nonnegative safe-integer distances from the origin
+ * in the positive x/right and y/up directions, each equal to a displayed tick
+ * value. A view may project these as ordered-pair notation and ask for their
+ * interpretation; the payload neither forms that notation nor selects a
+ * learner action, point-plotting task, prompt, or blank.
+ */
+export type CoordinateSystemProblem = Readonly<{
+    kind: 'coordinate-system-foundations';
+    origin: Readonly<{x: 0; y: 0}>;
+    rightAngleDegrees: 90;
+    axes: Readonly<{
+        horizontal: Readonly<{
+            axisName: 'x';
+            coordinateName: 'x';
+            positiveUnitVector: Readonly<{x: 1; y: 0}>;
+            tickStep: 1 | 2;
+            tickValues: readonly number[];
+        }>;
+        vertical: Readonly<{
+            axisName: 'y';
+            coordinateName: 'y';
+            positiveUnitVector: Readonly<{x: 0; y: 1}>;
+            tickStep: 1 | 2;
+            tickValues: readonly number[];
+        }>;
+    }>;
+    travel: Readonly<{
+        xUnits: number;
+        yUnits: number;
+    }>;
+}>;
+
 export type LegacyIntegerRoundingProblem = {
     number: number;
     roundingPlace: 10 | 100;
@@ -2411,6 +2450,8 @@ export interface ViewTypeMap {
     'operations-paired-pattern-generation': ArithmeticPairedPatternProblem;
     'coordinate-plot-pattern-pairs': CoordinatePatternPairsProblem;
     'coordinate-form-pattern-pairs': CoordinatePatternPairsProblem;
+    'coordinate-system-specification': CoordinateSystemProblem;
+    'coordinate-components-interpretation': CoordinateSystemProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-decimal-rounding-line': DecimalRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;

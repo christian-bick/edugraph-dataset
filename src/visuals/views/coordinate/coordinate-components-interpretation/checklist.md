@@ -1,0 +1,2 @@
+- **Identity:** The learner interprets the first and second values of a displayed ordered pair as travel from the origin in the named x and y directions of a perpendicular, scaled coordinate frame.
+- **Modes:** Question Mode displays the pair and fully named, scaled axes but leaves both component meanings open. Solution Mode traces the horizontal leg first and the vertical leg second and explains both distances and directions in that order.

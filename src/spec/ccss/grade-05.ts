@@ -337,16 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const coordinateSystemFoundationsImplementation = defineImplementationPackage({
-    id: 'coordinate-system-foundations',
-    description: 'Specify a Cartesian coordinate system and interpret ordered components as travel from its origin along corresponding named axes.',
-    generators: [{module: 'coordinate-system', strategy: 'new'}],
-    views: [
-        {module: 'coordinate-system-specification', strategy: 'new'},
-        {module: 'coordinate-components-interpretation', strategy: 'new'}
-    ]
-});
-
 const contextualCoordinateGraphingImplementation = defineImplementationPackage({
     id: 'contextual-coordinate-graphing',
     description: 'Graph nonnegative ordered quantities from a situation and interpret their coordinate roles, values and units in separate task projections.',
@@ -902,16 +892,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.MD.C.5a-represent-triple-products', representTripleProductsBuilder),
     ...toTargets('5.MD.C.5b-volume-formulas', rectangularPrismVolumeFormulasBuilder),
     ...toTargets('5.MD.C.5c-volume-additivity', volumeAdditivityBuilder),
-    ...toTargets('5.MD.C.5c-composite-volume', compositeVolumeBuilder)
+    ...toTargets('5.MD.C.5c-composite-volume', compositeVolumeBuilder),
+    ...toTargets('5.G.A.1-define-coordinate-system', defineCoordinateSystemBuilder),
+    ...toTargets('5.G.A.1-interpret-coordinate-components', interpretCoordinateComponentsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.G.A.1-define-coordinate-system',
-        defineCoordinateSystemBuilder,
-        coordinateSystemFoundationsImplementation,
-        'Complete or specify a two-dimensional coordinate system with perpendicular named axes, a common zero origin, coherent scales and the correspondence between axis and coordinate names.'
-    ),
     ...toImplementationTodos(
         '5.G.A.2-graph-contextual-points',
         graphContextualPointsBuilder,
@@ -1001,12 +987,6 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductProblemsBuilder,
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.G.A.1-interpret-coordinate-components',
-        interpretCoordinateComponentsBuilder,
-        coordinateSystemFoundationsImplementation,
-        'Show perpendicular named axes with a common zero origin, coherent scales and an ordered pair. Elicit an interpretation of how far each component indicates travel from the origin along its corresponding axis, preserving first and second component order; the solution explains that association without substituting a point-marking task.'
     ),
     ...toImplementationTodos(
         '5.G.A.2-interpret-contextual-coordinates',

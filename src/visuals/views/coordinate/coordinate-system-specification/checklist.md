@@ -1,0 +1,2 @@
+- **Identity:** The learner completes a two-dimensional coordinate frame with perpendicular axes, a shared origin, coherent number scales, and the first/second-coordinate axis convention.
+- **Modes:** Question Mode leaves axis names, the common zero, all but one anchor tick per axis, and coordinate-position correspondences blank. Solution Mode fills both scales and names, locates the origin, and states the first-horizontal and second-vertical convention.
