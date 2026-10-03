@@ -442,6 +442,26 @@ export type ArithmeticPatternProblem =
     | ArithmeticOperationTablePatternProblem
     | ArithmeticRecurrencePatternProblem;
 
+/** Terms include the start at index zero and advance by the stated increment. */
+export type ArithmeticPairedPatternSequence = {
+    start: number;
+    rule: {kind: 'add-constant'; increment: number};
+    terms: readonly number[];
+};
+
+/** When present, the second term at every position follows this exact relation to the first. */
+export type ArithmeticPairedPatternCorrespondence =
+    | {kind: 'multiplicative'; factor: number}
+    | {kind: 'additive'; difference: number};
+
+/** Complete, aligned numerical sequences; correspondence is present when that relation is claimed. */
+export type ArithmeticPairedPatternProblem = {
+    kind: 'paired-additive-patterns';
+    first: ArithmeticPairedPatternSequence;
+    second: ArithmeticPairedPatternSequence;
+    correspondence?: ArithmeticPairedPatternCorrespondence;
+};
+
 export type LegacyIntegerRoundingProblem = {
     number: number;
     roundingPlace: 10 | 100;
@@ -1976,6 +1996,9 @@ export interface ViewTypeMap {
     'operations-pattern-feature-table': ArithmeticRecurrencePatternProblem;
     'operations-pattern-generation-practice': ArithmeticRecurrencePatternProblem;
     'operations-pattern-generation-table': ArithmeticRecurrencePatternProblem;
+    'operations-pattern-correspondence': ArithmeticPairedPatternProblem;
+    'operations-pattern-correspondence-explanation': ArithmeticPairedPatternProblem;
+    'operations-paired-pattern-generation': ArithmeticPairedPatternProblem;
     'numbers-rounding-line': IntegerRoundingProblem;
     'numbers-fraction-line': FractionNumberLineProblem;
     'numbers-fraction-line-classification': ProperFractionEquivalenceProblem;

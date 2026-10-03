@@ -1,0 +1,2 @@
+- **Identity:** The learner infers a relationship between corresponding terms of two aligned number patterns.
+- **Modes:** Question Mode shows both rules, starts, and aligned terms without stating the relationship; Solution Mode retains them and names the exact relationship.

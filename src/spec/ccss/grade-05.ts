@@ -14,17 +14,6 @@ import type {
 
 // Operations and Algebraic Thinking (5.OA)
 
-const patternCorrespondenceImplementation = defineImplementationPackage({
-    id: 'paired-pattern-correspondence',
-    description: 'Generate aligned numerical patterns from their supplied rules, and infer or explain relationships between their corresponding terms.',
-    generators: [{module: 'arithmetic-paired-patterns', strategy: 'new'}],
-    views: [
-        {module: 'operations-pattern-correspondence', strategy: 'new'},
-        {module: 'operations-pattern-correspondence-explanation', strategy: 'new'},
-        {module: 'operations-paired-pattern-generation', strategy: 'new'}
-    ]
-});
-
 const patternCoordinateImplementation = defineImplementationPackage({
     id: 'pattern-coordinate-plotting',
     description: 'Form ordered coordinate pairs from aligned numerical-pattern terms and plot the resulting pairs in separate task projections.',
@@ -1014,22 +1003,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.OA.A.1-use-grouping', useGroupingBuilder),
     ...toTargets('5.OA.A.1-evaluate-grouped-expressions', evaluateGroupedExpressionsBuilder),
     ...toTargets('5.OA.A.2-write-numerical-expression', writeNumericalExpressionBuilder),
-    ...toTargets('5.OA.A.2-interpret-numerical-expression', interpretNumericalExpressionBuilder)
+    ...toTargets('5.OA.A.2-interpret-numerical-expression', interpretNumericalExpressionBuilder),
+    ...toTargets('5.OA.B.3-identify-pattern-correspondence', identifyPatternCorrespondenceBuilder),
+    ...toTargets('5.OA.B.3-explain-pattern-correspondence', explainPatternCorrespondenceBuilder),
+    ...toTargets('5.OA.B.3-generate-paired-patterns', generatePairedPatternsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.OA.B.3-identify-pattern-correspondence',
-        identifyPatternCorrespondenceBuilder,
-        patternCorrespondenceImplementation,
-        'Show aligned terms from two numerical sequences and elicit a relationship that holds across corresponding terms.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.B.3-explain-pattern-correspondence',
-        explainPatternCorrespondenceBuilder,
-        patternCorrespondenceImplementation,
-        'Preserve both recurrence rules, starts and aligned terms; request a written explanation of why the correspondence holds.'
-    ),
     ...toImplementationTodos(
         '5.OA.B.3-graph-pattern-pairs',
         graphPatternPairsBuilder,
@@ -1227,12 +1207,6 @@ export const implementationTodos: ImplementationTodo[] = [
         generalFractionProductProblemsBuilder,
         generalFractionProductsImplementation,
         'Use necessary story quantities, a matching equation or model and a calculated answer for multiplication of two fractions and mixed numbers under one reference whole; include the complete fraction product domain beyond iterated whole-number multiplication.'
-    ),
-    ...toImplementationTodos(
-        '5.OA.B.3-generate-paired-patterns',
-        generatePairedPatternsBuilder,
-        patternCorrespondenceImplementation,
-        'Supply two numerical recurrence rules and their starting conditions, and request terms in both sequences with corresponding positions aligned. The solution preserves both complete sequences, including the source example of add 3 and add 6 from zero; generating a single sequence or only inferring a relationship does not complete this task.'
     ),
     ...toImplementationTodos(
         '5.OA.B.3-form-pattern-pairs',

@@ -1,0 +1,2 @@
+- **Identity:** The learner applies two given rules to fill later terms in both aligned number patterns.
+- **Modes:** Question Mode shows both starting values and rules with later terms hidden in both rows; Solution Mode shows both complete aligned sequences.

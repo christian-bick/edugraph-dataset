@@ -1,0 +1,2 @@
+- **Identity:** The learner explains in words why a stated relationship holds across two aligned number patterns.
+- **Modes:** Question Mode shows both rules, starts, aligned terms, and the relation but withholds the reason; Solution Mode connects the starts and step rules to the continuing relation.
