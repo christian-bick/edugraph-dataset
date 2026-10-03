@@ -1,0 +1,2 @@
+- **Identity:** A dimensioned two-part stepped prism asks the learner to calculate each rectangular-prism volume and add the results.
+- **Modes:** Question Mode leaves both part products and the total unresolved. Solution Mode shows two exact three-factor products, their cubic-unit volumes, and an addition equation for the whole.

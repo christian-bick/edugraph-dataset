@@ -1,0 +1,2 @@
+- **Identity:** One connected stepped solid is visibly partitioned into two differently colored rectangular prisms meeting at a shared face, and the task asks why their volumes add.
+- **Modes:** Question Mode leaves the reason unfinished. Solution Mode explains that the parts fill the whole without overlapping interiors, that the shared face has no volume, and that the two part volumes add to the whole.

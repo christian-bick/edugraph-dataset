@@ -1382,6 +1382,66 @@ export type RectangularPrismVolumeProblem = Readonly<{
     }>;
 }>;
 
+export type CompositePrismPart = Readonly<{
+    id: 'left' | 'right';
+    origin: Readonly<UnitCubeCell>;
+    dimensions: Readonly<{length: 2 | 3 | 4; depth: 2 | 3; height: 2 | 3 | 4}>;
+    volumeCubicUnits: number;
+}>;
+
+export type CompositePrismPartProduct<Id extends 'left' | 'right'> = Readonly<{
+    partId: Id;
+    factors: readonly [number, number, number];
+    productCubicUnits: number;
+}>;
+
+/**
+ * A connected stepped solid made from exactly two axis-aligned rectangular
+ * prisms, measured in one abstract linear unit u and cubic unit u³. Parts are
+ * ordered left, right. The left origin is (0, 0, 0); the right origin is
+ * (left.length, 0, 0). They have the same positive depth and unequal heights.
+ * Their half-open interiors are disjoint. The explicit shared face is the
+ * column plane at left.length with row span [0, depth) and layer span
+ * [0, min(left.height, right.height)); it has positive area and zero volume.
+ * Thus the two parts meet along a face and exhaust the stepped union with no
+ * overlap or unassigned component. Each part volume is exactly length × depth
+ * × height, and `volumeSum` adds the left and right volumes to the whole.
+ *
+ * When present, `calculationEvidence` records both ordered three-factor
+ * products and the exact addition equation for the same total. It is a
+ * mathematical witness, not a prompt, blank, or requested learner action.
+ * All dimensions, areas, and volumes are positive safe integers.
+ */
+export type CompositePrismVolumeProblem = Readonly<{
+    kind: 'composite-prism-volume';
+    unitId: 'generic';
+    parts: readonly [
+        CompositePrismPart & Readonly<{id: 'left'}>,
+        CompositePrismPart & Readonly<{id: 'right'}>
+    ];
+    sharedFace: Readonly<{
+        planeColumn: number;
+        rowSpan: readonly [0, number];
+        layerSpan: readonly [0, number];
+        areaSquareUnits: number;
+        volumeCubicUnits: 0;
+    }>;
+    volumeSum: Readonly<{
+        addendsCubicUnits: readonly [number, number];
+        totalCubicUnits: number;
+    }>;
+    calculationEvidence?: Readonly<{
+        partProducts: readonly [
+            CompositePrismPartProduct<'left'>,
+            CompositePrismPartProduct<'right'>
+        ];
+        sumEquation: Readonly<{
+            addendsCubicUnits: readonly [number, number];
+            resultCubicUnits: number;
+        }>;
+    }>;
+}>;
+
 export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
 
 export type StatisticalCategory = {
@@ -2441,6 +2501,9 @@ export interface ViewTypeMap {
     'volume-product-model': RectangularPrismVolumeProblem;
     'volume-formula-execution': RectangularPrismVolumeProblem;
     'volume-formula-story': RectangularPrismVolumeProblem;
+    'volume-additivity-explanation': CompositePrismVolumeProblem;
+    'volume-composite-execution': CompositePrismVolumeProblem;
+    'volume-composite-story': CompositePrismVolumeProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;

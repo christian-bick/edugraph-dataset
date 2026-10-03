@@ -337,19 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const compositePrismVolumeImplementation = defineImplementationPackage({
-    id: 'composite-prism-volume',
-    description: 'Explain and apply volume additivity for exactly two nonoverlapping rectangular prisms in geometric and contextual tasks.',
-    generators: [
-        {module: 'volume-composite-prisms', strategy: 'new'}
-    ],
-    views: [
-        {module: 'volume-additivity-explanation', strategy: 'new'},
-        {module: 'volume-composite-execution', strategy: 'new'},
-        {module: 'volume-composite-story', strategy: 'new'}
-    ]
-});
-
 const coordinateSystemFoundationsImplementation = defineImplementationPackage({
     id: 'coordinate-system-foundations',
     description: 'Specify a Cartesian coordinate system and interpret ordered components as travel from its origin along corresponding named axes.',
@@ -913,22 +900,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.MD.C.4-count-unit-cubes', countUnitCubesBuilder),
     ...toTargets('5.MD.C.5a-packing-product-connection', packingProductConnectionBuilder),
     ...toTargets('5.MD.C.5a-represent-triple-products', representTripleProductsBuilder),
-    ...toTargets('5.MD.C.5b-volume-formulas', rectangularPrismVolumeFormulasBuilder)
+    ...toTargets('5.MD.C.5b-volume-formulas', rectangularPrismVolumeFormulasBuilder),
+    ...toTargets('5.MD.C.5c-volume-additivity', volumeAdditivityBuilder),
+    ...toTargets('5.MD.C.5c-composite-volume', compositeVolumeBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.C.5c-volume-additivity',
-        volumeAdditivityBuilder,
-        compositePrismVolumeImplementation,
-        'Explain why two nonoverlapping rectangular prisms exhaust the composite solid and why their volumes may be added. Shared boundary faces must not be treated as overlapping volume.'
-    ),
-    ...toImplementationTodos(
-        '5.MD.C.5c-composite-volume',
-        compositeVolumeBuilder,
-        compositePrismVolumeImplementation,
-        'Calculate the volumes of exactly two nonoverlapping rectangular-prism parts from their dimensions and add them. Geometric and necessary real-world story tasks use separate leaves with coherent equations and cubic units.'
-    ),
     ...toImplementationTodos(
         '5.G.A.1-define-coordinate-system',
         defineCoordinateSystemBuilder,

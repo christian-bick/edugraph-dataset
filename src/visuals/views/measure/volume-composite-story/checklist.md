@@ -1,0 +1,2 @@
+- **Identity:** A joined two-block storage-platform story is the only source of the two prisms’ numerical measurements, with an unlabeled sketch showing their connected shape.
+- **Modes:** Question Mode leaves both component products and the total unanswered. Solution Mode uses the story measurements for both prism products and adds their cubic-unit volumes.
