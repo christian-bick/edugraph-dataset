@@ -337,19 +337,6 @@ const divideDecimalsWithModelsBuilder = new DatasetPermutationBuilder().addLabel
     ...grade5DecimalArithmeticLabels
 ]);
 
-const unitCubeVolumeImplementation = defineImplementationPackage({
-    id: 'unit-cube-volume',
-    description: 'Model complete unit-cube packings for unit specification, volume interpretation and counting in standard or improvised cubic units.',
-    generators: [
-        {module: 'volume-unit-cubes', strategy: 'new'}
-    ],
-    views: [
-        {module: 'volume-unit-cube-specification', strategy: 'new'},
-        {module: 'volume-packing-interpretation', strategy: 'new'},
-        {module: 'volume-unit-cube-count', strategy: 'new'}
-    ]
-});
-
 const rectangularPrismVolumeImplementation = defineImplementationPackage({
     id: 'rectangular-prism-volume',
     description: 'Connect whole-number rectangular-prism cube packings, triple products and volume formulas through separate explanation, construction and calculation tasks.',
@@ -934,28 +921,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.MD.A.1-convert-within-system', convertWithinSystemBuilder),
     ...toTargets('5.MD.A.1-multistep-conversion-problems', multistepConversionProblemsBuilder),
     ...toTargets('5.MD.B.2-construct-fractional-line-plot', constructGrade5FractionalLinePlotBuilder),
-    ...toTargets('5.MD.B.2-line-plot-fraction-problems', linePlotFractionProblemsBuilder)
+    ...toTargets('5.MD.B.2-line-plot-fraction-problems', linePlotFractionProblemsBuilder),
+    ...toTargets('5.MD.C.3a-unit-cube', unitCubeSpecificationBuilder),
+    ...toTargets('5.MD.C.3b-volume-from-packing', volumeFromPackingBuilder),
+    ...toTargets('5.MD.C.4-count-unit-cubes', countUnitCubesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.MD.C.3a-unit-cube',
-        unitCubeSpecificationBuilder,
-        unitCubeVolumeImplementation,
-        'Identify or specify a cube whose every edge is one unit as the unit of volume. Make its one cubic unit distinguishable from the one-unit edge length and a face area.'
-    ),
-    ...toImplementationTodos(
-        '5.MD.C.3b-volume-from-packing',
-        volumeFromPackingBuilder,
-        unitCubeVolumeImplementation,
-        'Show congruent unit cubes that exhaust a solid without gaps or overlaps, and ask why a packing of n cubes gives a volume of n cubic units.'
-    ),
-    ...toImplementationTodos(
-        '5.MD.C.4-count-unit-cubes',
-        countUnitCubesBuilder,
-        unitCubeVolumeImplementation,
-        'Expose all cubes through unambiguous layers or an exploded solid and ask for the counted volume. Use the selected standard cubic unit, or explicitly define the improvised cube unit when no standard scale is requested.'
-    ),
     ...toImplementationTodos(
         '5.MD.C.5a-packing-product-connection',
         packingProductConnectionBuilder,

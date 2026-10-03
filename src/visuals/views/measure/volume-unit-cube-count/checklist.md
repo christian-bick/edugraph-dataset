@@ -1,0 +1,2 @@
+- **Identity:** The solid and separated layers expose every small cube for counting, and the task asks for the solid’s volume in a defined cubic unit.
+- **Modes:** Question Mode leaves layer counts and the total unresolved. Solution Mode counts by layer and gives the same numerical volume with the matching cubic unit; when each cube is numbered, all ordinals are visible only in Solution Mode.

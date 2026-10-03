@@ -1,0 +1,2 @@
+- **Identity:** One three-dimensional cube has all three edge directions marked as one length unit, with its edge length, square-face area, and whole-solid volume kept distinct; the learner names the unit cube and states its volume.
+- **Modes:** Question Mode leaves the volume and defining statement unfinished. Solution Mode identifies the unit cube and shows one cubic unit of volume in the same length unit as the edges.

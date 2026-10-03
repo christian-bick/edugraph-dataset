@@ -1271,6 +1271,39 @@ export type MeasurementLinePlotFractionProblem = {
     relation: MeasurementLinePlotFractionRelation;
 };
 
+export type UnitCubeCell = {
+    column: number;
+    row: number;
+    layer: number;
+};
+
+/**
+ * A complete packing by congruent unit cubes. `generic` defines one abstract
+ * length unit u; the other identifiers use centimeters, inches, or feet.
+ * Every cube has edge length 1 in that linear unit, face area 1 square unit,
+ * and volume 1 corresponding cubic unit.
+ *
+ * `occupiedCells` lists every integer coordinate in the Cartesian product
+ * [0, columns) × [0, rows) × [0, layers), exactly once, ordered first by
+ * layer, then row, then column. Each coordinate denotes the closed side-1
+ * cube at that position. Their interiors do not overlap, shared faces may
+ * touch, and their union fills the bounded solid without gaps. `cubeCount`
+ * equals both the number of cells and columns × rows × layers, so the solid's
+ * volume is exactly `cubeCount` cubic units. When present, `countingTrace`
+ * bijectively enumerates `occupiedCells` in the same canonical order with
+ * ordinals 1 through `cubeCount`; basic packings omit it. Views choose the
+ * learner action rather than the generator encoding a prompt or blank.
+ */
+export type UnitCubeVolumeProblem = {
+    kind: 'unit-cube-packing';
+    unitId: 'generic' | 'cm' | 'in' | 'ft';
+    unitCubeEdgeLength: 1;
+    bounds: {columns: 2 | 3 | 4; rows: 2 | 3; layers: 1 | 2};
+    occupiedCells: readonly UnitCubeCell[];
+    countingTrace?: readonly {cell: UnitCubeCell; ordinal: number}[];
+    cubeCount: number;
+};
+
 export type StatisticalCategoryId = 'apple' | 'book' | 'kite';
 
 export type StatisticalCategory = {
@@ -2323,6 +2356,9 @@ export interface ViewTypeMap {
     'measurement-line-plot': MeasurementDataProblem;
     'measurement-line-plot-arithmetic': MeasurementExtremaProblem;
     'measurement-line-plot-problems': MeasurementLinePlotFractionProblem;
+    'volume-unit-cube-specification': UnitCubeVolumeProblem;
+    'volume-packing-interpretation': UnitCubeVolumeProblem;
+    'volume-unit-cube-count': UnitCubeVolumeProblem;
     'measurement-word-problem-grade4': MeasurementWordProblemGrade4;
     'measurement-number-line': MeasurementNumberLineProblem;
     'data-picture-graph': StatisticalGraphProblem;

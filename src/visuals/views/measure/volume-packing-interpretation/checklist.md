@@ -1,0 +1,2 @@
+- **Identity:** The assembled solid and separated, aligned layers visibly account for every congruent cube, and the task asks why counting a gap-free packing gives volume.
+- **Modes:** Question Mode leaves the causal explanation unfinished. Solution Mode explains that cubes fill the solid without gaps or overlaps and connects the cube count times one cubic unit to the same number of cubic units.
