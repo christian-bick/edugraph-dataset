@@ -1,0 +1,2 @@
+- **Identity:** One selected multiplication or division family shows how the same decimal changes through 10⁰, 10¹, and 10², and asks for a written explanation of the place-value pattern.
+- **Modes:** Question Mode displays exact before-and-after values but withholds the explanation. Solution Mode explains the no-change exponent-zero row and maps digit values across places, including a move across the ones/tenths boundary.

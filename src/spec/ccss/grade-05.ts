@@ -148,21 +148,6 @@ const twoDigitDivisorDivisionBuilder = new DatasetPermutationBuilder()
         [Scope.FourDigitDividend]
     ]);
 
-const powersOfTenImplementation = defineImplementationPackage({
-    id: 'powers-of-ten',
-    description: 'Relate powers of ten with nonnegative integer exponents to whole-number zero patterns, decimal scaling, and exponent notation.',
-    generators: [
-        {module: 'whole-number-power-ten-scaling', strategy: 'new'},
-        {module: 'decimal-power-ten-scaling', strategy: 'new'},
-        {module: 'powers-of-ten', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numbers-power-ten-zero-pattern-explanation', strategy: 'new'},
-        {module: 'numbers-power-ten-decimal-pattern-explanation', strategy: 'new'},
-        {module: 'numbers-power-ten-exponent-notation', strategy: 'new'}
-    ]
-});
-
 const decimalWritingImplementation = defineImplementationPackage({
     id: 'decimal-reading-writing',
     description: 'Represent nonnegative decimal values through thousandths for numeral reading, numeral writing, and written number names.',
@@ -835,28 +820,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('5.NF.B.4b-represent-fraction-product', fractionAreaProductRepresentationBuilder),
     ...toTargets('5.NF.B.5a-compare-product-factor', fractionProductFactorComparisonBuilder),
     ...toTargets('5.NF.B.5b-explain-fraction-scaling', fractionScalingExplanationBuilder),
-    ...toTargets('5.NF.B.5b-equivalence-unit-scaling', fractionEquivalenceUnitScalingBuilder)
+    ...toTargets('5.NF.B.5b-equivalence-unit-scaling', fractionEquivalenceUnitScalingBuilder),
+    ...toTargets('5.NBT.A.2-explain-power-ten-zero-patterns', explainPowerTenZeroPatternsBuilder),
+    ...toTargets('5.NBT.A.2-explain-decimal-power-ten-patterns', explainDecimalPowerTenPatternsBuilder),
+    ...toTargets('5.NBT.A.2-formalize-powers-of-ten', formalizePowersOfTenBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    ...toImplementationTodos(
-        '5.NBT.A.2-explain-power-ten-zero-patterns',
-        explainPowerTenZeroPatternsBuilder,
-        powersOfTenImplementation,
-        'Explain zero patterns in products of whole numbers and powers of ten. Visible repeated factors, exponent notation and aligned place values must support the written explanation; include exponent zero and distinguish existing zeros from zeros introduced by scaling.'
-    ),
-    ...toImplementationTodos(
-        '5.NBT.A.2-explain-decimal-power-ten-patterns',
-        explainDecimalPowerTenPatternsBuilder,
-        powersOfTenImplementation,
-        'Explain decimal-placement patterns under multiplication or division by powers of ten with nonnegative integer exponents. Show before-and-after values, the selected power and changed digit place values; include exponent zero, both directions, and values crossing the units place.'
-    ),
-    ...toImplementationTodos(
-        '5.NBT.A.2-formalize-powers-of-ten',
-        formalizePowersOfTenBuilder,
-        powersOfTenImplementation,
-        'Write a power of ten using exponent notation from repeated factors or the corresponding value. Require the power expression as the response; include 10^0 = 1 through the value case rather than pretending it has a positive number of factors.'
-    ),
     ...toImplementationTodos(
         '5.NBT.A.3a-read-decimal-numerals',
         readDecimalNumeralsBuilder,

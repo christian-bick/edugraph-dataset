@@ -867,6 +867,107 @@ export type DecimalAdjacentPlaceScalingProblem = {
     scale: {factor: 10; reciprocalNumerator: 1; reciprocalDenominator: 10};
 };
 
+/** The empty product 10^0 = 1 has no repeated factors. */
+export type PowerTenPower =
+    | Readonly<{base: 10; exponent: 0; value: 1; repeatedFactors: readonly []}>
+    | Readonly<{base: 10; exponent: 1; value: 10; repeatedFactors: readonly [10]}>
+    | Readonly<{base: 10; exponent: 2; value: 100; repeatedFactors: readonly [10, 10]}>;
+
+/** A source digit's exact whole-number contribution before and after scaling. */
+export type WholePowerTenPlaceShift = Readonly<{
+    digitIndex: number;
+    digit: number;
+    originalPlaceExponent: number;
+    productPlaceExponent: number;
+    originalContribution: number;
+    productContribution: number;
+}>;
+
+export type WholePowerTenZeroPattern =
+    | Readonly<{
+        kind: 'positive';
+        originalTrailingZeros: number;
+        introducedTrailingZeros: number;
+        productTrailingZeros: number;
+    }>
+    | Readonly<{
+        kind: 'zero';
+        originalTrailingZeros: null;
+        introducedTrailingZeros: 0;
+        productTrailingZeros: null;
+    }>;
+
+export type WholePowerTenScaleStep = Readonly<{
+    original: number;
+    power: PowerTenPower;
+    product: number;
+    /** One entry for each source numeral digit, including an existing zero. */
+    placeShifts: readonly WholePowerTenPlaceShift[];
+    zeroPattern: WholePowerTenZeroPattern;
+}>;
+
+/**
+ * The primary series fixes one positive original across exponents 0, 1, and 2.
+ * The two additional witnesses distinguish pre-existing trailing zeros from
+ * the special result 0, for which a trailing-zero count is undefined.
+ */
+export type WholeNumberPowerTenScalingProblem = Readonly<{
+    kind: 'whole-number-power-ten-scaling';
+    primarySeries: readonly [
+        WholePowerTenScaleStep,
+        WholePowerTenScaleStep,
+        WholePowerTenScaleStep
+    ];
+    existingZeroWitness: WholePowerTenScaleStep;
+    zeroWitness: WholePowerTenScaleStep;
+}>;
+
+/** Exact nonnegative decimal: value = unscaled / 10^scale. */
+export type PowerTenDecimalValue = Readonly<{
+    unscaled: number;
+    scale: number;
+    numeral: string;
+}>;
+
+/** A nonzero source digit's exact place-value change. */
+export type DecimalPowerTenPlaceShift = Readonly<{
+    digitIndex: number;
+    digit: number;
+    originalPlaceExponent: number;
+    resultPlaceExponent: number;
+    originalContribution: PowerTenDecimalValue;
+    resultContribution: PowerTenDecimalValue;
+}>;
+
+export type DecimalPowerTenScaleStep = Readonly<{
+    power: PowerTenPower;
+    before: PowerTenDecimalValue;
+    after: PowerTenDecimalValue;
+    placeShifts: readonly DecimalPowerTenPlaceShift[];
+    /** True when a nonzero digit moves across the ones/tenths boundary. */
+    crossesUnitsPlace: boolean;
+}>;
+
+/**
+ * One selected operation and one exact starting decimal across 10^0, 10^1,
+ * and 10^2. At least the 10^2 row crosses the units place.
+ */
+export type DecimalPowerTenScalingProblem = Readonly<{
+    kind: 'decimal-power-ten-scaling';
+    operation: 'multiplication' | 'division';
+    series: readonly [
+        DecimalPowerTenScaleStep,
+        DecimalPowerTenScaleStep,
+        DecimalPowerTenScaleStep
+    ];
+}>;
+
+/** Formalize the value or the positive-length repeated-ten product as 10^n. */
+export type PowerTenNotationProblem = Readonly<{
+    kind: 'power-ten-notation';
+    power: PowerTenPower;
+}>;
+
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
@@ -2962,6 +3063,9 @@ export interface ViewTypeMap {
     'place-value-arithmetic-explanation': PlaceValueArithmeticProblem;
     'place-value-scaling': PlaceValueScalingProblem;
     'numbers-decimal-place-value-scaling': DecimalAdjacentPlaceScalingProblem;
+    'numbers-power-ten-zero-pattern-explanation': WholeNumberPowerTenScalingProblem;
+    'numbers-power-ten-decimal-pattern-explanation': DecimalPowerTenScalingProblem;
+    'numbers-power-ten-exponent-notation': PowerTenNotationProblem;
 
     'counting-objects-simple': CountingProblem;
     'counting-objects-one-to-one': CountingProblem;

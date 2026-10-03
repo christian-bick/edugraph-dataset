@@ -1,0 +1,2 @@
+- **Identity:** A whole-number value or repeated-ten product is given and the learner must formalize it as a power of ten.
+- **Modes:** Question Mode leaves the exponent notation blank; Solution Mode gives 10ⁿ and explains its factor count, including 10⁰ = 1 without fictitious repeated factors.

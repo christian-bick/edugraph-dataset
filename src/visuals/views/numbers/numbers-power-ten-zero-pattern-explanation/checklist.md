@@ -1,0 +1,2 @@
+- **Identity:** A coherent whole-number multiplication series by 10⁰, 10¹, and 10² asks for a written place-value explanation of its ending-zero pattern; an already-zero-ending number and zero itself are included.
+- **Modes:** Question Mode shows the equations but withholds the reasoning. Solution Mode distinguishes original and newly introduced ending zeros, explains digit-place shifts and the exponent-zero case, and treats zero without assigning it a trailing-zero count.
