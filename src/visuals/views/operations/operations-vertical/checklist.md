@@ -1,2 +1,2 @@
-- **Identity:** A vertical arithmetic equation presents all operands and makes the result the single visible unknown.
-- **Modes:** Question Mode leaves the result empty; Solution Mode reveals it below the rule.
+- **Identity:** The learner finds an arithmetic result, shown either in a vertical calculation or in equivalent equations that make a named arithmetic property visible.
+- **Modes:** Question Mode leaves the result blank wherever it occurs; Solution Mode supplies it below the vertical rule or in the equivalent equations.

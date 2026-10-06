@@ -27,7 +27,7 @@ import {
     type CompatibleModulePairIndex
 } from './matching.ts';
 import {CompetencyTarget} from '../types/ml-engine.ts';
-import {partOf, specializes, type CompetencyDescriptor} from 'edugraph-ts';
+import {bundledContext, partOf, specializes, type CompetencyDescriptor} from 'edugraph-ts';
 import {currentRendererEnvironment} from './render-environment.ts';
 import {
     SourceContentIndex,
@@ -747,6 +747,7 @@ export function buildDatasetManifest(options: {
         counters,
         validationPolicyHash
     );
+    const knownLabels = new Set(bundledContext.descriptors().map(descriptor => descriptor.iri));
     for (const key of radixSortUtf8([...targetsByPair.keys()])) {
         const [generatorId, viewId] = key.split('#');
         const generator = generatorById.get(generatorId);
@@ -833,6 +834,7 @@ export function buildDatasetManifest(options: {
         const rowMatchNodes = targetIdsOf(row)
             .map(targetId => matchNodeByTargetAndPair.get(`${targetId}\u0000${key}`))
             .filter((id): id is string => Boolean(id));
+        const missingLabels = (row.labels ?? []).filter(label => !knownLabels.has(ontologyIri(label)));
         addNode(nodes, {
             id: imageId,
             kind: 'image',
@@ -845,35 +847,40 @@ export function buildDatasetManifest(options: {
                 prepared_view: row.prepared_view,
                 image_sha256: imageDigest.sha256
             }),
-            dependencies: [pairNodeId, ...rowMatchNodes],
+            // Retired labels cannot receive a current VQA key. Their explicit
+            // dependencies invalidate the image even when its bytes are reused,
+            // so the owning pair is regenerated before publishing a fresh graph.
+            dependencies: [pairNodeId, ...rowMatchNodes, ...missingLabels.map(ontologyNode)],
             output: {content_hash: imageDigest.sha256, bytes: imageDigest.bytes}
         });
-        const labelDependencies = ontologyDependencies(row.labels ?? [], true);
-        const checklist = checklistDependencies.get(row.view);
-        if (!checklist) throw new Error(`VQA checklist dependencies are missing for view ${row.view}.`);
-        const vqaId = nodeId('vqa', row.sample_key);
-        const vqaDependencies = radixSortUtf8([
-            imageId,
-            validationPolicyId,
-            ...checklist.ids,
-            ...labelDependencies
-        ]);
-        const validationCacheKey = vqaContextResolver.resolve(
-            imageDigest.sha256,
-            checklist.paths,
-            row.labels ?? []
-        ).validationCacheKey;
-        counters?.add('vqa.graph_key_recomputes');
-        addNode(nodes, {
-            id: vqaId,
-            kind: 'vqa-record',
-            input_hash: validationCacheKey,
-            dependencies: vqaDependencies
-        });
         executionNodes.add(imageId);
-        executionNodes.add(vqaId);
         renderNodesByPair.get(key)?.add(imageId);
-        validationNodesByPair.get(key)?.add(vqaId);
+        if (missingLabels.length === 0) {
+            const labelDependencies = ontologyDependencies(row.labels ?? [], true);
+            const checklist = checklistDependencies.get(row.view);
+            if (!checklist) throw new Error(`VQA checklist dependencies are missing for view ${row.view}.`);
+            const vqaId = nodeId('vqa', row.sample_key);
+            const vqaDependencies = radixSortUtf8([
+                imageId,
+                validationPolicyId,
+                ...checklist.ids,
+                ...labelDependencies
+            ]);
+            const validationCacheKey = vqaContextResolver.resolve(
+                imageDigest.sha256,
+                checklist.paths,
+                row.labels ?? []
+            ).validationCacheKey;
+            counters?.add('vqa.graph_key_recomputes');
+            addNode(nodes, {
+                id: vqaId,
+                kind: 'vqa-record',
+                input_hash: validationCacheKey,
+                dependencies: vqaDependencies
+            });
+            executionNodes.add(vqaId);
+            validationNodesByPair.get(key)?.add(vqaId);
+        }
         for (const targetId of targetIdsOf(row)) {
             const targetImages = imageNodesByTarget.get(targetId);
             if (targetImages) targetImages.push(imageId);

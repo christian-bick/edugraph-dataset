@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import {Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     DATASET_MANIFEST_SCHEMA_VERSION,
     DatasetManifest,
@@ -10,6 +10,7 @@ import {
     DatasetManifestEntry,
     affectedDatasetExecutionPairKeys,
     affectedDatasetPairKeys,
+    assertDatasetGenerationScope,
     buildDatasetManifest,
     createDatasetManifest,
     dependencyGraphVqaCacheKey,
@@ -555,6 +556,143 @@ describe('updateDatasetManifest', () => {
 });
 
 describe('buildDatasetManifest', () => {
+    it('regenerates retired-label rows without hiding artifacts or invalidating valid sibling pairs', () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-retired-labels-'));
+        const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');
+        const generatorDir = resolve(projectRoot, 'src', 'generators', 'demo');
+        const viewsRoot = resolve(projectRoot, 'src', 'visuals', 'views');
+        const ontologyDependency = 'https://example.test/ontology-v1.tgz';
+        const retiredName = 'RetiredExpressionForManifestTest';
+        const retiredIri = `http://edugraph.io/edu/${retiredName}`;
+        const labels = [Area.Addition, Ability.ProcedureExecution];
+        const row = (view: string, instance: number, rowLabels: string[]) => ({
+            file_name: `${view}/sample-${instance}.png`,
+            sample_key: `target#demo#${view}#train#question#inst:${instance}`,
+            generator: 'demo', view, target_id: 'target',
+            content_fingerprint: `content-${view}-${instance}`,
+            task_fingerprint: `task-${view}-${instance}`,
+            labels: rowLabels,
+            target_associations: [{spec: 'ccss', target_id: 'target'}]
+        });
+        const rows = [
+            row('affected-view', 0, ['Addition', 'ProcedureExecution']),
+            row('affected-view', 1, [...labels, retiredName]),
+            row('affected-view', 2, [...labels, retiredIri]),
+            row('valid-view', 0, labels)
+        ];
+        const fileContents = () => Object.fromEntries(readdirSync(projectRoot, {recursive: true, encoding: 'utf8'})
+            .filter(path => statSync(resolve(projectRoot, path)).isFile())
+            .sort().map(path => [path, readFileSync(resolve(projectRoot, path)).toString('base64')]));
+
+        try {
+            const fixtureFiles = {
+                'package.json': JSON.stringify({dependencies: {'edugraph-ts': ontologyDependency}}),
+                'package-lock.json': JSON.stringify({packages: {
+                    'node_modules/edugraph-ts': {
+                        version: '1.0.0', resolved: ontologyDependency, integrity: 'sha512-v1'
+                    }
+                }}),
+                'src/generators/demo/spec.ts': 'export const spec = {};',
+                'src/visuals/views/affected-view/spec.ts': 'export const spec = {};',
+                'src/visuals/views/valid-view/spec.ts': 'export const spec = {};',
+                'src/visuals/views/affected-view/checklist.md': 'affected checklist',
+                'src/visuals/views/valid-view/checklist.md': 'valid checklist',
+                'src/visuals/views/checklist.md': 'central checklist',
+                'src/validation/vqa/system-instruction.md': 'validation policy',
+                'src/lib/vqa-policy.ts': 'export const policy = 1;',
+                'cache/vqa/dataset-ccss/demo.jsonl': '{"existing":"validation record"}\n'
+            };
+            for (const [path, content] of Object.entries(fixtureFiles)) {
+                const absolutePath = resolve(projectRoot, path);
+                mkdirSync(resolve(absolutePath, '..'), {recursive: true});
+                writeFileSync(absolutePath, content);
+            }
+            const transaction = beginDatasetStoreTransaction(datasetDir, {
+                fullDataset: true, generatorIds: ['demo']
+            }, 'retired-label-fixture');
+            for (const sample of rows) {
+                const image = resolve(transaction.stagingDir, 'train', sample.file_name);
+                mkdirSync(resolve(image, '..'), {recursive: true});
+                writeFileSync(image, `png-${sample.sample_key}`);
+            }
+            writeFileSync(resolve(transaction.stagingDir, 'train', 'metadata.jsonl'),
+                `${rows.map(sample => JSON.stringify(sample)).join('\n')}\n`);
+            transaction.commit(null);
+
+            const snapshot = readDatasetSnapshot(datasetDir);
+            const options: Parameters<typeof buildDatasetManifest>[0] = {
+                projectRoot, datasetDir, specName: 'ccss', generatedSplits: ['train'],
+                rendererEnvironment: 'canonical', targets: [{id: 'target', labels}],
+                generators: [{
+                    generatorId: 'demo', generalLabels: [Area.Addition], labels: [Area.Addition],
+                    problemType: 'ArithmeticPairProblem', spec: {}, schema: {},
+                    module: {id: 'demo', relativePath: 'demo', absolutePath: generatorDir, category: null}
+                }],
+                views: ['affected-view', 'valid-view'].map(viewId => ({
+                    viewId, generalLabels: [Ability.ProcedureExecution],
+                    supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem',
+                    spec: {viewId, generalLabels: [Ability.ProcedureExecution]}, schema: {},
+                    module: {id: viewId, relativePath: viewId, absolutePath: resolve(viewsRoot, viewId), category: null}
+                }))
+            };
+            // Establish prior image/VQA identities with recognized labels, while the
+            // actual persisted rows retain both forms of the retired descriptor.
+            const baseline = buildDatasetManifest({...options, datasetSnapshot: {
+                ...snapshot, rows: split => snapshot.rows(split).map(sample => ({...sample, labels}))
+            }});
+            const beforeFiles = fileContents();
+            const counters = createWorkCounters();
+            const current = buildDatasetManifest({...options,
+                reuseImageIdentityFrom: baseline.dependency_graph, counters,
+                datasetSnapshot: {...snapshot, imageIdentity: () => {
+                    throw new Error('Cached image identity should be reused.');
+                }}
+            });
+            const previous = manifest({entries: baseline.entries, dependency_graph: baseline.dependency_graph});
+            const plan = planDependencyDelta(baseline.dependency_graph, current.dependency_graph);
+            expect(affectedDatasetPairKeys(plan, current, previous)).toEqual(['demo#affected-view']);
+            expect(counters.get('vqa.graph_key_recomputes')).toBe(2);
+
+            for (const sample of rows) {
+                const imageId = `image:${sample.sample_key}`;
+                const image = current.dependency_graph.nodes[imageId];
+                const before = baseline.dependency_graph.nodes[imageId];
+                expect(image.input_hash).toBe(before.input_hash);
+                expect(image.output).toEqual(before.output);
+                expect(current.entries[`demo#${sample.view}`].render_nodes).toContain(imageId);
+                expect(current.dependency_graph.nodes['asset-index:ccss:target'].dependencies).toContain(imageId);
+                expect(current.dependency_graph.nodes[`shard:demo#${sample.view}#train`].dependencies).toContain(imageId);
+            }
+            for (const sample of rows.slice(1, 3)) {
+                expect(current.dependency_graph.nodes[`image:${sample.sample_key}`].dependencies)
+                    .toContain(`ontology:${retiredName}`);
+                expect(plan.affected_nodes).toContain(`image:${sample.sample_key}`);
+                expect(dependencyGraphVqaCacheKey(current.dependency_graph, sample.sample_key)).toBeNull();
+                expect(current.entries['demo#affected-view'].execution_nodes).not.toContain(`vqa:${sample.sample_key}`);
+            }
+            expect(Object.keys(current.dependency_graph.nodes).filter(id => id.includes(retiredName)))
+                .toEqual([`ontology:${retiredName}`]);
+            for (const sample of [rows[0], rows[3]]) {
+                expect(dependencyGraphVqaCacheKey(current.dependency_graph, sample.sample_key))
+                    .toBe(dependencyGraphVqaCacheKey(baseline.dependency_graph, sample.sample_key));
+            }
+            expect(current.entries['demo#affected-view'].sample_counts).toEqual({train: 3, val: 0});
+            expect(current.entries['demo#valid-view'].sample_counts).toEqual({train: 1, val: 0});
+            expect(current.entries['demo#affected-view'].validation_nodes).toEqual([`vqa:${rows[0].sample_key}`]);
+            expect(current.entries['demo#valid-view'].execution_nodes.every(id => plan.reuse_nodes.includes(id))).toBe(true);
+            expect(() => assertDatasetGenerationScope(previous, current, {
+                fullDataset: false, generatorIds: ['demo'], viewIds: ['valid-view']
+            })).toThrow('first is demo#affected-view');
+            expect(() => assertDatasetGenerationScope(previous, current, {
+                fullDataset: false, generatorIds: ['demo'], viewIds: ['affected-view']
+            })).not.toThrow();
+            expect(fileContents()).toEqual(beforeFiles);
+            expect(snapshot.rows('train').map(sample => sample.labels)).toEqual(rows.map(sample => sample.labels));
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
     it('builds every artifact kind and hashes overlapping source inputs once', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-manifest-build-'));
         const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');

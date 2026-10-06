@@ -1,2 +1,2 @@
-- **Identity:** The learner evaluates a numeral expression whose grouping changes the calculation order.
+- **Identity:** The learner evaluates an arithmetic expression whose grouping symbols change the calculation order.
 - **Modes:** Question Mode shows the grouped expression but withholds its value; Solution Mode keeps the expression visible and shows the grouped calculation before the final value.

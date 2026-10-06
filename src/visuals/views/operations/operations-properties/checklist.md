@@ -1,2 +1,2 @@
 - **Identity:** The named property and paired equation structures make the commutative, associative, or distributive relationship identifiable; distributive tasks show the original product, split addends, both partial products, and their equal sum.
-- **Modes:** Question Mode leaves one value empty; Solution Mode reveals the value that completes the displayed property without changing the equation structure.
+- **Modes:** Question Mode leaves one value to complete, with repeated blanks when the two forms share a result; Solution Mode fills the required positions without changing the equation structure.

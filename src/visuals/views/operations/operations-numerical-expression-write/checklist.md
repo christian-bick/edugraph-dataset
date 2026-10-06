@@ -1,2 +1,2 @@
-- **Identity:** A written description of a calculation asks the learner to write its numerical expression, including any needed grouping and without an equality statement.
-- **Modes:** Question Mode withholds the numerical expression; Solution Mode shows the expression but does not evaluate it.
+- **Identity:** A written description of a calculation asks the learner to write its arithmetic expression, including any needed grouping and without an equality statement.
+- **Modes:** Question Mode withholds the arithmetic expression; Solution Mode shows the expression but does not evaluate it.

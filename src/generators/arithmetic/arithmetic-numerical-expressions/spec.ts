@@ -5,14 +5,14 @@ import {resolveNumericalExpressionStructure} from './resolver.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-numerical-expressions',
-    generalLabels: [Area.NumericalExpression]
+    generalLabels: [Area.ArithmeticExpression]
 };
 
 export const ArithmeticNumericalExpressionsGeneratorSchema = {
     structure: [
-        [Area.GroupedExpression, Area.OrderOfOperations],
+        [Area.GroupingSymbol, Area.OrderOfOperations],
         resolveNumericalExpressionStructure,
-        [[], [Area.GroupedExpression, Area.OrderOfOperations]]
+        [[], [Area.GroupingSymbol, Area.OrderOfOperations]]
     ]
 } as const;
 

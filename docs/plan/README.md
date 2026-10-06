@@ -4,6 +4,10 @@ Completed consolidation and migration documents are preserved unchanged in
 [`docs/history/`](../history/). Their deferred sections remain available through the links below.
 These items are not newly scheduled by the archive move.
 
+- **Algebra preview adoption:** the [pre.8 to pre.10 migration review](algebra-preview-adoption.md)
+  records the expression-label migration, retained-entity semantic review, and planner
+  repair, checklist corrections, and explicit equation prompts. Canonical regeneration,
+  VQA, split integrity, and strict cache verification pass for all 2,290 samples.
 - **Ontology v0.29 VQA follow-up:** [CCSS rerun findings](ontology-v029-vqa-rerun.md)
   record completed semantic repairs and preserved evaluator-disagreement history.
   The [numeral-system ownership correction](numeral-system-ownership.md),

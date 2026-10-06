@@ -7,7 +7,7 @@ export const spec: ViewSpec = {
     viewId: 'operations-grouping-write',
     generalLabels: [Scope.ArabicNumerals, Ability.Formalization],
     compatibility: [
-        requireTargetLabels('grouped-expression-request', [Area.GroupedExpression])
+        requireTargetLabels('grouped-expression-request', [Area.GroupingSymbol])
     ]
 };
 

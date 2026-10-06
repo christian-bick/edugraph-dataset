@@ -147,7 +147,7 @@ function CompositeExecution({data, isSolutionView}: {
                 <CompositeDiagram data={data} />
             </div>
             <PartMeasurements data={data} />
-            <AnswerPanel isSolutionView={isSolutionView} blankLabel="Part A, Part B, total:">
+            <AnswerPanel isSolutionView={isSolutionView} blankLabel="Write equations for Part A, Part B, and the total:">
                 <ProductEquations data={data} />
             </AnswerPanel>
         </div>
@@ -171,7 +171,7 @@ function CompositeStory({data, isSolutionView}: {
             <div className="mt-3 rounded-xl border border-slate-200 bg-white p-2">
                 <CompositeDiagram data={data} />
             </div>
-            <AnswerPanel isSolutionView={isSolutionView} blankLabel="Two products and their sum:">
+            <AnswerPanel isSolutionView={isSolutionView} blankLabel="Write equations for Part A, Part B, and the total:">
                 <ProductEquations data={data} />
             </AnswerPanel>
         </div>
