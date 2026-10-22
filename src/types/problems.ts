@@ -4408,8 +4408,167 @@ export type AlgebraicExpressionProblem = Readonly<{
     context: AlgebraicExpressionContext;
 }>;
 
+export type AffineExpressionId = string;
+export type AffineNodeId = string;
+export type AffineSymbolId = string;
+
+/**
+ * Same actual14 syntax, not a duplicated recursive union. Accepted affine arithmetic
+ * grammar is number/variable/group/negation/binary arithmetic; no powers are needed.
+ * EVERY subtree must normalize to an affine map. Multiplication has a proved constant
+ * child; division has a proved nonzero constant denominator. Syntactic variable use
+ * does not disprove constancy: (x-x+1) is constant1. x/x is outside this all-Q family.
+ * Unique nonempty occurrence IDs within each tree, exact coherent literal spelling,
+ * genuine written grouping, no cycles/sparse data or evaluated symbolic value fields.
+ */
+export type AffineExpression = Readonly<{
+    expressionId: AffineExpressionId;
+    domainId: string;
+    root: ExactSymbolicExpressionNode;
+}>;
+
+/** All declarations are independent unrestricted rational domains; not finite tests. */
+export type CommonAffineDomain = Readonly<{
+    domainId: string;
+    kind: 'independent-rational-variables';
+    symbols: readonly [AlgebraicSymbolDeclaration, ...AlgebraicSymbolDeclaration[]];
+}>;
+
+/** Sorted unique declared symbols, nonzero coefficients only; omission means exact0. */
+export type ExactAffineNormalForm = Readonly<{
+    constant: AlgebraicScalar;
+    coefficients: readonly Readonly<{symbolId: AffineSymbolId; coefficient: AlgebraicScalar}>[];
+}>;
+export type ExactCoefficientArithmetic = Extract<ExactNumericReductionEvidence, {kind: 'binary'}>;
+export type AffineComponentArithmetic = Readonly<{
+    /** null is the constant; include the full child-symbol union even when it cancels. */
+    symbolId: AffineSymbolId | null;
+    arithmetic: ExactCoefficientArithmetic;
+}>;
+
+/** One inductive step per ORIGINAL occurrence; every dependency precedes its parent. */
+export type AffineNormalizationStep = Readonly<{
+    nodeId: AffineNodeId;
+    result: ExactAffineNormalForm;
+}> & (
+    | Readonly<{kind: 'literal'; value: AlgebraicScalar}>
+    | Readonly<{kind: 'variable'; symbolId: AffineSymbolId;
+        /** Always1, independent of any assignment, including when the variable later cancels. */
+        unitCoefficient: Readonly<{numerator: 1; denominator: 1}>}>
+    | Readonly<{kind: 'group'; innerNodeId: AffineNodeId}>
+    | Readonly<{kind: 'negation'; operandNodeId: AffineNodeId;
+        /** Multiply every constant/coefficient by -1, with exact supplied arithmetic. */
+        components: readonly AffineComponentArithmetic[]}>
+    | Readonly<{kind: 'add' | 'subtract'; leftNodeId: AffineNodeId; rightNodeId: AffineNodeId;
+        components: readonly AffineComponentArithmetic[]}>
+    | Readonly<{kind: 'multiply'; constantNodeId: AffineNodeId; affineNodeId: AffineNodeId;
+        constantFactor: AlgebraicScalar; components: readonly AffineComponentArithmetic[]}>
+    | Readonly<{kind: 'divide'; numeratorNodeId: AffineNodeId; constantDenominatorNodeId: AffineNodeId;
+        nonzeroDenominator: AlgebraicScalar; components: readonly AffineComponentArithmetic[]}>
+);
+export type AffineNormalizationProof = Readonly<{
+    expressionId: AffineExpressionId;
+    steps: readonly [AffineNormalizationStep, ...AffineNormalizationStep[]];
+    rootNormalForm: ExactAffineNormalForm;
+}>;
+/** Equal complete maps prove identity for EVERY assignment in the same named all-Q domain. */
+export type UniversalAffineIdentityProof = Readonly<{
+    domainId: string;
+    leftExpressionId: AffineExpressionId;
+    rightExpressionId: AffineExpressionId;
+    leftNormalization: AffineNormalizationProof;
+    rightNormalization: AffineNormalizationProof;
+    commonNormalForm: ExactAffineNormalForm;
+}>;
+
+export type AffineRewriteReference = Readonly<{
+    beforeExpressionId: AffineExpressionId;
+    afterExpressionId: AffineExpressionId;
+    beforeSubtreeId: AffineNodeId;
+    afterSubtreeId: AffineNodeId;
+}>;
+/** Every step changes only its referenced subtree; untouched syntax and IDs persist. */
+export type AffineRewriteStep = AffineRewriteReference & (
+    | Readonly<{kind: 'distribution'; direction: 'factored-to-expanded' | 'expanded-to-factored';
+        scalar: AlgebraicScalar;
+        addendNodeIds: readonly [AffineNodeId, AffineNodeId, ...AffineNodeId[]];
+        productNodeIds: readonly [AffineNodeId, AffineNodeId, ...AffineNodeId[]];
+        coefficientProducts: readonly ExactCoefficientArithmetic[]}>
+    | Readonly<{kind: 'collection'; symbolId: AffineSymbolId;
+        /** Complete signed same-symbol terms at one additive level, including implicit±1. */
+        terms: readonly [
+            Readonly<{termNodeId: AffineNodeId; variableOccurrenceId: AffineNodeId; signedCoefficient: AlgebraicScalar}>,
+            Readonly<{termNodeId: AffineNodeId; variableOccurrenceId: AffineNodeId; signedCoefficient: AlgebraicScalar}>,
+            ...Readonly<{termNodeId: AffineNodeId; variableOccurrenceId: AffineNodeId; signedCoefficient: AlgebraicScalar}>[]];
+        coefficientSums: readonly ExactCoefficientArithmetic[];
+        collectedCoefficient: AlgebraicScalar}>
+    | Readonly<{kind: 'association'; operation: 'addition' | 'multiplication';
+        orderedOperandNodeIds: readonly [AffineNodeId, AffineNodeId, AffineNodeId];
+        beforeGrouping: 'left' | 'right'; afterGrouping: 'left' | 'right'}>
+    | Readonly<{kind: 'commutation'; operation: 'addition' | 'multiplication';
+        /** Actual nonidentical operands swap; the witness is not an unchanged-expression badge. */
+        operandNodeIds: readonly [AffineNodeId, AffineNodeId]}>
+    | Readonly<{kind: 'constant-arithmetic'; arithmetic: ExactCoefficientArithmetic}>
+    | Readonly<{kind: 'coefficient-normalization'; proof: UniversalAffineIdentityProof}>
+);
+
+export type ExactAffineBinding = Readonly<{
+    symbolId: AffineSymbolId;
+    value: AlgebraicScalar;
+    notation: AlgebraicNotation;
+}>;
+export type AffineOccurrenceReplacement = Readonly<{
+    occurrenceNodeId: AffineNodeId;
+    symbolId: AffineSymbolId;
+    value: AlgebraicScalar;
+    notation: AlgebraicNotation;
+}>;
+/** A side may be constant-only after cancellation: empty replacements/work are genuine. */
+export type ExactAffineEvaluation = Readonly<{
+    sourceExpressionId: AffineExpressionId;
+    /** Every and only original variable occurrence; same-ID exact replacement in calculation.expression. */
+    replacements: readonly AffineOccurrenceReplacement[];
+    calculation: ExactNumericCalculation;
+}>;
+/** An assignment disproves one proposed identity; it is never substituted for the common domain. */
+export type AffineCounterexample = Readonly<{
+    domainId: string;
+    bindings: readonly [ExactAffineBinding, ...ExactAffineBinding[]];
+    left: ExactAffineEvaluation;
+    right: ExactAffineEvaluation;
+    unequalValues: Readonly<{left: AlgebraicScalar; right: AlgebraicScalar}>;
+}>;
+
+export type AlgebraExpressionEquivalenceProblem = Readonly<{
+    kind: 'algebra-expression-equivalence';
+    domain: CommonAffineDomain;
+    /** Unique expression IDs, including every full rewrite snapshot; occurrences scoped per tree. */
+    expressions: readonly [AffineExpression, AffineExpression, ...AffineExpression[]];
+    validIdentity: Readonly<{
+        /** Original source contains a variable: invariant AlgebraicExpression is real. */
+        sourceExpressionId: AffineExpressionId;
+        equivalentExpressionId: AffineExpressionId;
+        steps: readonly [AffineRewriteStep, ...AffineRewriteStep[]];
+        universalProof: UniversalAffineIdentityProof;
+    }>;
+    comparison: Readonly<{
+        /** Exactly the validIdentity source, including on a false-candidate member. */
+        sourceExpressionId: AffineExpressionId;
+        candidateExpressionId: AffineExpressionId;
+    }> & (
+        | Readonly<{kind: 'equivalent'; universalProof: UniversalAffineIdentityProof}>
+        | Readonly<{kind: 'not-equivalent'; sourceNormalization: AffineNormalizationProof;
+            candidateNormalization: AffineNormalizationProof;
+            differingComponent: Readonly<{symbolId: AffineSymbolId | null;
+                sourceCoefficient: AlgebraicScalar; candidateCoefficient: AlgebraicScalar}>;
+            counterexample: AffineCounterexample}>
+    );
+}>;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'algebra-equivalent-expression-generate': AlgebraExpressionEquivalenceProblem;
+    'algebra-expression-equivalence-judge': AlgebraExpressionEquivalenceProblem;
     'numerical-power-expression-evaluate': NumericalPowerExpressionProblem;
     'numerical-power-expression-write': NumericalPowerExpressionProblem;
     'algebra-expression-write': AlgebraicExpressionProblem;

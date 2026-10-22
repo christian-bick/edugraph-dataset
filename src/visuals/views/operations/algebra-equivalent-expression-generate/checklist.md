@@ -1,0 +1,2 @@
+- **Identity:** A given letter expression over a named common rational domain asks for an equivalent expression using the stated operation property.
+- **Modes:** Question Mode withholds the equivalent result and all worked rewrites. Solution Mode shows the valid rewrite chain, its actual property and coefficient evidence, and why the resulting expression agrees for every admissible assignment.

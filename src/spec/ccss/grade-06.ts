@@ -18,20 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const algebraExpressionEquivalenceImplementation = defineImplementationPackage({
-    id: 'algebra-expression-equivalence',
-    description:
-        'Generate and judge equivalent literal expressions using operation properties and valid symbolic ' +
-        'witnesses.',
-    generators: [
-        {module: 'algebra-expression-equivalence', strategy: 'new'}
-    ],
-    views: [
-        {module: 'algebra-equivalent-expression-generate', strategy: 'new'},
-        {module: 'algebra-expression-equivalence-judge', strategy: 'new'}
-    ]
-});
-
 const algebraStatementsImplementation = defineImplementationPackage({
     id: 'algebra-statements',
     description:
@@ -1287,34 +1273,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.A.2b-identify-expression-parts', identifyExpressionPartsBuilder),
     ...toTargets('6.EE.A.2b-interpret-subexpressions', interpretSubexpressionsBuilder),
     ...toTargets('6.EE.A.2c-evaluate-variable-expressions', evaluateVariableExpressionsBuilder),
-    ...toTargets('6.EE.B.6-model-contextual-expression', modelContextualExpressionBuilder)
+    ...toTargets('6.EE.B.6-model-contextual-expression', modelContextualExpressionBuilder),
+    ...toTargets('6.EE.A.3-generate-equivalent-expressions', generateEquivalentExpressionsBuilder),
+    ...toTargets('6.EE.A.4-identify-equivalent-expressions', identifyEquivalentExpressionsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.A.3-generate-equivalent-expressions',
-        generateEquivalentExpressionsBuilder,
-        algebraExpressionEquivalenceImplementation,
-        'Produce an equivalent expression with a symbolic property witness. Distribution includes ' +
-        'expansion and extraction of a common multiplier; term collection includes y+y+y=3y. Reordering or ' +
-        'regrouping must preserve the expression for every admissible variable assignment. ' +
-        'DistributingLinearCombinations and CollectingLinearTerms specialize LinearRewriting and therefore ' +
-        'AlgebraicEquivalence; do not repeat the broad ancestor in these variants. For the other property ' +
-        'variants, retain AlgebraicEquivalence explicitly because an arithmetic law does not inherit it. ' +
-        'No new theorem family is required. The canonical payload supplies exact ' +
-        'transformation/equivalence witnesses; the view chooses the requested rewrite.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.A.4-identify-equivalent-expressions',
-        identifyEquivalentExpressionsBuilder,
-        algebraExpressionEquivalenceImplementation,
-        'Compare two expressions over an explicit common domain. Correct examples have a symbolic ' +
-        'equivalence witness; incorrect examples have a valid counterexample or structural reason. ' +
-        'Agreement at finitely many test values does not prove an identity. Do not add Equation merely ' +
-        'because an equals sign appears in a worked witness; this competency concerns expression ' +
-        'equivalence. Distinguish it from checking one candidate in B.5.'
-    ),
     ...toImplementationTodos(
         '6.EE.B.5-check-substitution',
         checkSubstitutionBuilder,

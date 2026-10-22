@@ -1,0 +1,2 @@
+- **Identity:** Two letter expressions over the same explicit rational domain are judged for agreement at every admissible assignment.
+- **Modes:** Question Mode gives the exact expressions and common domain without a verdict, aggregate normal forms or decisive substitution. Solution Mode proves a true identity by equal complete affine coefficient maps, or disproves it with one admissible exact counterexample; agreement at finitely many values is insufficient.
