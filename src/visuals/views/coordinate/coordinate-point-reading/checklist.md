@@ -1,0 +1,2 @@
+- **Identity:** Read exact ordered pairs from lettered points and the coordinate scales.
+- **Modes:** Question Mode shows marked points and complete scale information with blank coordinate responses. Solution Mode supplies ordered pairs in their fraction, decimal or integer notation, preserving written precision.

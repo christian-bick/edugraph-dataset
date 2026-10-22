@@ -18,23 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const signedRationalCoordinatePlaneImplementation = defineImplementationPackage({
-    id: 'signed-rational-coordinate-plane',
-    description:
-        'Read and plot signed rational coordinate pairs, interpret quadrant signs and recognize ' +
-        'sign-change reflections.',
-    generators: [
-        {module: 'coordinate-points', strategy: 'new'},
-        {module: 'coordinate-reflection-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'coordinate-quadrant-interpretation', strategy: 'new'},
-        {module: 'coordinate-sign-reflection', strategy: 'new'},
-        {module: 'coordinate-point-plotting', strategy: 'new'},
-        {module: 'coordinate-point-reading', strategy: 'new'}
-    ]
-});
-
 const signedRationalNumberlineImplementation = defineImplementationPackage({
     id: 'signed-rational-numberline',
     description:
@@ -1369,39 +1352,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.C.5-signed-context-representation', signedContextRepresentationBuilder),
     ...toTargets('6.NS.C.6a-double-opposite', doubleOppositeBuilder),
     ...toTargets('6.NS.C.6a-opposite-line-locations', oppositeLineLocationsBuilder),
-    ...toTargets('6.NS.C.6a-zero-opposite', zeroOppositeBuilder)
+    ...toTargets('6.NS.C.6a-zero-opposite', zeroOppositeBuilder),
+    ...toTargets('6.NS.C.6b-coordinate-sign-quadrants', coordinateSignQuadrantsBuilder),
+    ...toTargets('6.NS.C.6b-coordinate-sign-reflections', coordinateSignReflectionsBuilder),
+    ...toTargets('6.NS.C.6c-rational-coordinate-positioning', rationalCoordinatePositioningBuilder),
+    ...toTargets('6.NS.C.6c-rational-coordinate-reading', rationalCoordinateReadingBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.C.6b-coordinate-sign-quadrants',
-        coordinateSignQuadrantsBuilder,
-        signedRationalCoordinatePlaneImplementation,
-        'Four labeled quadrants, points with signed components, and sign-to-location reasoning; address ' +
-        'axes separately.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6b-coordinate-sign-reflections',
-        coordinateSignReflectionsBuilder,
-        signedRationalCoordinatePlaneImplementation,
-        'Paired coordinate points and their reflections across the x-axis, y-axis or both axes. Interpret ' +
-        'which components change sign and explain the reflected positions, treating points on the axes ' +
-        'separately. Recognition of this relationship does not require discovery of a new concept.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6c-rational-coordinate-positioning',
-        rationalCoordinatePositioningBuilder,
-        signedRationalCoordinatePlaneImplementation,
-        'Mark given integer/fraction/decimal coordinate pairs on scaled axes spanning all quadrants.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6c-rational-coordinate-reading',
-        rationalCoordinateReadingBuilder,
-        signedRationalCoordinatePlaneImplementation,
-        'Read exact component values from marked points in coordinate plane, including fractional ' +
-        'positions and all quadrants.'
-    ),
     ...toImplementationTodos(
         '6.NS.C.6c-rational-numberline-positioning',
         rationalNumberlinePositioningBuilder,

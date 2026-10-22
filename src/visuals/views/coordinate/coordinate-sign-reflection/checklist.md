@@ -1,0 +1,2 @@
+- **Identity:** Interpret the coordinate changes and preserved distances in one or two ordered axis reflections.
+- **Modes:** Question Mode gives the source, every image and each reflecting axis but withholds the interpretation. Solution Mode explains the unchanged coordinate, negated coordinate and equal distances, including fixed and coincident points.
