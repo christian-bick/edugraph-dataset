@@ -3464,8 +3464,20 @@ export type RatioTableComparisonProblem = {
     normalized: {consequent: number; leftAntecedent: number; rightAntecedent: number};
 };
 
+/** Positive percentages give a unique inverse; part = whole times the exact per-hundred factor. */
+export type PercentQuantityProblem = {
+    kind: 'percent-quantity';
+    percent: number;
+    perHundred: {numerator: number; denominator: 100};
+    scaleFactor: RatioRational;
+    whole: RatioRational;
+    part: RatioRational;
+};
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'percent-of-quantity': PercentQuantityProblem;
+    'percent-whole-inversion': PercentQuantityProblem;
     'ratio-language': RatioRelationProblem;
     'unit-rate-language': UnitRateRelationProblem;
     'unit-rate-problem': UnitRateRelationProblem;

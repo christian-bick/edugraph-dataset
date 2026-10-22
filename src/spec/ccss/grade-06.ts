@@ -18,19 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const percentQuantityProblemsImplementation = defineImplementationPackage({
-    id: 'percent-quantity-problems',
-    description:
-        'Use percent as a rate per hundred to find a part or recover its reference whole.',
-    generators: [
-        {module: 'percent-quantity-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'percent-of-quantity', strategy: 'new'},
-        {module: 'percent-whole-inversion', strategy: 'new'}
-    ]
-});
-
 const ratioMeasurementConversionImplementation = defineImplementationPackage({
     id: 'ratio-measurement-conversion',
     description:
@@ -1455,24 +1442,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.RP.A.3a-ratio-table-comparison', ratioTableComparisonBuilder),
     ...toTargets('6.RP.A.3a-ratio-table-construction', ratioTableConstructionBuilder),
     ...toTargets('6.RP.A.3a-ratio-table-missing-values', ratioTableMissingValuesBuilder),
-    ...toTargets('6.RP.A.3b-unit-rate-problems', unitRateProblemsBuilder)
+    ...toTargets('6.RP.A.3b-unit-rate-problems', unitRateProblemsBuilder),
+    ...toTargets('6.RP.A.3c-percent-of-quantity', percentOfQuantityBuilder),
+    ...toTargets('6.RP.A.3c-whole-from-percent', wholeFromPercentBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Ratios and Proportional Relationships (6.RP)
-    ...toImplementationTodos(
-        '6.RP.A.3c-percent-of-quantity',
-        percentOfQuantityBuilder,
-        percentQuantityProblemsImplementation,
-        'Visible percent sign, percent-to-fraction-per-100 equivalence, and multiplication of the ' +
-        'reference whole by that scale factor.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3c-whole-from-percent',
-        wholeFromPercentBuilder,
-        percentQuantityProblemsImplementation,
-        'Given part and percentage, recover the unknown reference whole; retain the per-100 relationship.'
-    ),
     ...toImplementationTodos(
         '6.RP.A.3d-ratio-unit-conversion',
         ratioUnitConversionBuilder,

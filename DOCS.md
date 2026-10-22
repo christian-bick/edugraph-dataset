@@ -69,10 +69,11 @@ the requested count and the available collection size. The generator chooses tha
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
 views retain `counting-basic` and `CountingProblem`, so supply sampling does not alter their data.
 
-Ratio tasks use four discriminated payloads: ordered quantity pairs, exact rational unit rates
+Ratio and percentage tasks use discriminated payloads: ordered quantity pairs, exact rational unit rates
 with scaled-equivalence witnesses, whole-number ratio tables with coordinate scales, and paired
-tables normalized to a common consequent. The seven ratio views project these into written
-interpretation, contextual rate problems, plotting, table construction, completion, and comparison.
+tables normalized to a common consequent, and exact per-hundred quantity relations. Sibling views
+project these into written interpretation, contextual rate problems, plotting, table construction,
+completion, comparison, percentage calculation, and recovering a whole from its part and percent.
 Their shared renderers live under `src/visuals/views/ratio/`; mathematical helpers live under
 `src/generators/ratio/`.
 
@@ -118,7 +119,7 @@ ambiguous and are not silently converted into a concrete unit.
 
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
 
-The [Grade 6 file](src/spec/ccss/grade-06.ts) exports completed ratio and unit-rate builders
+The [Grade 6 file](src/spec/ccss/grade-06.ts) exports implemented competency builders
 through `spec`. Remaining reviewed builders stay in `implementationTodos`, grouped into
 authored generator/view packages, and appear in the coverage backlog without entering generation.
 Partial matches to earlier-grade modules remain diagnostic until a complete competency is
