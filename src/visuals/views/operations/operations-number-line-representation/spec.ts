@@ -1,4 +1,4 @@
-import {rejectTargetLabels} from '../../../../lib/target-policies.ts';
+import {rejectTargetLabels, requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {Ability, deductAdmitting, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
@@ -11,7 +11,8 @@ export const spec: ViewSpec = {
             Scope.NumbersWithoutZero,
             ...deductAdmitting([Scope.NumbersWithNegatives]),
             ...deductAdmitting([Scope.NumbersLarger100])
-        ])
+        ]),
+        requireTargetLabels('number-line-bounded-domain', [Scope.NumbersSmaller100])
     ]
 };
 

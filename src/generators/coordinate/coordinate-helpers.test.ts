@@ -1,8 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../lib/errors.ts';
 import type {RationalCoordinateAxes, RationalCoordinateAxis, SignedRational, SignedRationalNotation} from '../../types/problems.ts';
-import {isCoordinateNotation, isRationalCoordinateAxes, isRationalCoordinateAxis, isRationalCoordinatePoint,
-    makeCoordinateAxis, makeCoordinateNotation, makeCoordinatePoint} from './coordinate-helpers.ts';
+import {isCoordinateLocation, isCoordinateNotation, isRationalCoordinateAxes, isRationalCoordinateAxis, isRationalCoordinatePoint,
+    makeCoordinateAxis, makeCoordinateLocation, makeCoordinateNotation, makeCoordinatePoint} from './coordinate-helpers.ts';
 
 const r = (numerator: number, denominator = 1): SignedRational => ({numerator, denominator});
 const halfTicks = [r(-2), r(-3, 2), r(-1), r(-1, 2), r(0), r(1, 2), r(1), r(3, 2), r(2)];
@@ -91,6 +91,27 @@ describe('complete exact coordinate frames', () => {
 });
 
 describe('formatted exact coordinate points', () => {
+    it('reuses one-dimensional locations without changing point structure or supplied forms', () => {
+        const notation = {kind: 'fraction', numerator: -6, denominator: 4} as const;
+        const location = makeCoordinateLocation(halfAxis, 1, notation);
+        expect(location).toEqual({value: r(-3, 2), tickIndex: 1, notation, sign: -1, magnitude: r(3, 2)});
+        expect(isCoordinateLocation(location, halfAxis)).toBe(true);
+        expect(makeCoordinatePoint('P', axes, 1, 3, {x: notation, y: {kind: 'integer', numeral: '0'}})).toEqual({id: 'P',
+            x: location, y: {value: r(0), tickIndex: 3, notation: {kind: 'integer', numeral: '0'}, sign: 0, magnitude: r(0)},
+            locationTag: 'x-axis'});
+        expect(makeCoordinateLocation(halfAxis, 4)).toEqual({value: r(0), tickIndex: 4,
+            notation: {kind: 'fraction', numerator: 0, denominator: 1}, sign: 0, magnitude: r(0)});
+        expect(isCoordinateLocation(location, {} as RationalCoordinateAxis)).toBe(false);
+        expect(isCoordinateLocation(null, halfAxis)).toBe(false);
+        expect(isCoordinateLocation({...location, sign: -0}, halfAxis)).toBe(false);
+        expect(isCoordinateLocation({...location, notation: {kind: 'integer', numeral: '-1'}}, halfAxis)).toBe(false);
+        for (const index of [-1, 9, -0, 0.5, NaN, Infinity]) {
+            expect(() => makeCoordinateLocation(halfAxis, index)).toThrow(GeneratorValidationError);
+        }
+        expect(() => makeCoordinateLocation({} as RationalCoordinateAxis, 0)).toThrow(GeneratorValidationError);
+        expect(() => makeCoordinateLocation(halfAxis, 1, {kind: 'integer', numeral: '-1'})).toThrow(GeneratorValidationError);
+    });
+
     it.each([[5, 4, 'quadrant-I'], [3, 4, 'quadrant-II'], [3, 2, 'quadrant-III'], [5, 2, 'quadrant-IV'],
         [5, 3, 'x-axis'], [4, 4, 'y-axis'], [4, 3, 'origin']] as const)('supplies exact signs/magnitudes/tag at indices %s,%s', (x, y, tag) => {
         const point = makeCoordinatePoint('P', axes, x, y);

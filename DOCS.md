@@ -120,6 +120,11 @@ frames, with optional complete quadrant evidence. Reflection relations supply co
 after points, the preserved and negated components, and equal distances to each mirror axis.
 Four fixed coordinate views project plotting, reading, quadrant meaning and reflection meaning.
 
+Rational number-line values reuse exact coordinate scalars, notation and axis locations on a
+single complete scale. Positioning and reading have separate views: the former leaves the line
+unmarked, while the latter withholds the marked tick's numeral and retains the other scale
+anchors. Both views use the render seed to choose horizontal or vertical presentation.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
