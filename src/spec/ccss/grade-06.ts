@@ -18,20 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const numericalPowerExpressionsImplementation = defineImplementationPackage({
-    id: 'numerical-power-expressions',
-    description:
-        'Write and evaluate arithmetic expressions with nonnegative integer exponents and conventional ' +
-        'operation order.',
-    generators: [
-        {module: 'numerical-power-expressions', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numerical-power-expression-evaluate', strategy: 'new'},
-        {module: 'numerical-power-expression-write', strategy: 'new'}
-    ]
-});
-
 const algebraExpressionStructureImplementation = defineImplementationPackage({
     id: 'algebra-expression-structure',
     description:
@@ -1312,33 +1298,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.C.8-axis-aligned-coordinate-distance', axisAlignedCoordinateDistanceBuilder),
     ...toTargets('6.NS.C.8-coordinate-plane-problems', coordinatePlaneProblemsBuilder),
     ...toTargets('6.G.A.3-coordinate-polygon-construction', coordinatePolygonConstructionBuilder),
-    ...toTargets('6.G.A.3-coordinate-polygon-side-length', coordinatePolygonSideLengthBuilder)
+    ...toTargets('6.G.A.3-coordinate-polygon-side-length', coordinatePolygonSideLengthBuilder),
+    ...toTargets('6.EE.A.1-evaluate-power-expressions', evaluatePowerExpressionsBuilder),
+    ...toTargets('6.EE.A.1-write-power-expressions', writePowerExpressionsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.A.1-evaluate-power-expressions',
-        evaluatePowerExpressionsBuilder,
-        numericalPowerExpressionsImplementation,
-        'Evaluate a numerical expression containing powers and other operations. The worked result ' +
-        'respects exponentiation, conventional precedence and grouping. The generator enforces integer ' +
-        'exponents >= 0; the IntegerExponent-only configuration includes exponent-zero examples with ' +
-        'nonzero bases. PositiveExponent additionally requires n > 0. Omitting PositiveExponent does not ' +
-        'itself label zero or nonnegativity. Do not constrain all numbers/base signs merely to constrain ' +
-        'the exponent; exclude undefined 0^0 locally.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.A.1-write-power-expressions',
-        writePowerExpressionsBuilder,
-        numericalPowerExpressionsImplementation,
-        'Read a prescribed calculation and write its arithmetic expression with exponent notation; ' +
-        'distinguish an exponent from repeated addition and from multiplying the base by the exponent. The ' +
-        'generator enforces integer exponents >= 0; the IntegerExponent-only configuration includes ' +
-        'exponent-zero examples with nonzero bases. PositiveExponent additionally requires n > 0. Omitting ' +
-        'PositiveExponent does not itself label zero or nonnegativity. Do not constrain all numbers/base ' +
-        'signs merely to constrain the exponent; exclude undefined 0^0 locally.'
-    ),
     ...toImplementationTodos(
         '6.EE.A.2a-write-letter-expressions',
         writeLetterExpressionsBuilder,

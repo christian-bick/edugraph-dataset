@@ -1,0 +1,2 @@
+- **Identity:** A given numerical expression containing exponent notation asks for its value, using the written operation order and genuine grouping.
+- **Modes:** Question Mode leaves all calculation steps and the value unresolved. Solution Mode shows the complete sequence of expression reductions, the power facts and the exact final value; a negative or fractional power base stays visibly atomic, and exponent zero uses a nonzero base.

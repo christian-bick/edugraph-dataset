@@ -4104,8 +4104,99 @@ export type UnitDimensionRelationProblem = {
     cancellations: {numeratorIndex: number; denominatorIndex: number}[];
 };
 
+export type ExactNumericValue = Readonly<SignedRational>;
+export type ExactNumericNotation = Readonly<SignedRationalNotation>;
+
+/** Numeric-only immutable syntax; genuine grouping retains its own occurrence identity. */
+export type ExactNumericalExpressionNode =
+    | Readonly<{id: string; kind: 'number'; value: ExactNumericValue; notation: ExactNumericNotation}>
+    | Readonly<{id: string; kind: 'binary'; operation: ArithmeticOperation;
+        left: ExactNumericalExpressionNode; right: ExactNumericalExpressionNode}>
+    | Readonly<{id: string; kind: 'group'; expression: ExactNumericalExpressionNode}>
+    | Readonly<{id: string; kind: 'negation'; operand: ExactNumericalExpressionNode}>
+    | Readonly<{id: string; kind: 'power'; base: ExactNumericalExpressionNode; exponent: number}>;
+
+/** One exact value per original occurrence, including literals and explicit groups. */
+export type ExactNumericNodeValue = Readonly<{nodeId: string; value: ExactNumericValue}>;
+
+export type ExactPowerFact = Readonly<{
+    nodeId: string;
+    baseValue: ExactNumericValue;
+    exponent: number;
+    result: ExactNumericValue;
+}> & (
+    | Readonly<{kind: 'zero-exponent'; nonzeroBase: true}>
+    | Readonly<{kind: 'positive-exponent';
+        factors: readonly [ExactNumericValue, ...ExactNumericValue[]];
+        /** Exponent n supplies n factors and n-1 successive multiplication results. */
+        cumulativeProducts: readonly ExactNumericValue[]}>
+);
+
+export type ExactNumericPath = readonly ('left' | 'right' | 'expression' | 'operand' | 'base')[];
+export type ExactNumericReductionEvidence =
+    | Readonly<{kind: 'binary'; operation: ArithmeticOperation;
+        operands: readonly [ExactNumericValue, ExactNumericValue]; result: ExactNumericValue}>
+    | Readonly<{kind: 'power'; baseValue: ExactNumericValue; exponent: number; result: ExactNumericValue}>
+    | Readonly<{kind: 'negation'; operand: ExactNumericValue; result: ExactNumericValue}>
+    | Readonly<{kind: 'group'; enclosedValue: ExactNumericValue; result: ExactNumericValue}>;
+
+/**
+ * The path resolves in the preceding snapshot (original syntax for step zero). Only the
+ * next conventional written redex is replaced by a same-ID exact number. Other syntax
+ * and retained notation stay unchanged; the final snapshot is the original root's literal.
+ */
+export type ExactNumericReduction = Readonly<{
+    targetNodeId: string;
+    path: ExactNumericPath;
+    evidence: ExactNumericReductionEvidence;
+    after: ExactNumericalExpressionNode;
+}>;
+
+/** Real competing/binding operations and their exact conventional reduction indices. */
+export type ExactNumericPrecedenceWitness = Readonly<{
+    higherPriorityNodeId: string;
+    lowerPriorityNodeId: string;
+    higherPriorityStep: number;
+    lowerPriorityStep: number;
+    reason: 'inner-group-before-outer-operation' | 'power-before-product-or-sum'
+        | 'product-before-sum' | 'equal-priority-left-to-right';
+}>;
+
+/**
+ * A finite acyclic, uniquely identified numeric tree with at least one power. Safe reduced
+ * exact values, complete power facts and every original nonliteral's immutable reduction
+ * prove the result. Exponents are nonnegative integers; 0^0 and zero divisors are invalid.
+ * Syntax must preserve written binding: compound power bases, binary operands of unary negation
+ * and binary children whose association needs parentheses have explicit groups. Negating a
+ * power directly is valid because powers bind first. Atomic negative or
+ * fractional power-base parentheses are formatting and add no artificial group step.
+ */
+export type NumericalPowerExpressionProblem = Readonly<{
+    kind: 'numerical-power-expression';
+    expression: ExactNumericalExpressionNode;
+    nodeValues: readonly [ExactNumericNodeValue, ...ExactNumericNodeValue[]];
+    powerFacts: readonly [ExactPowerFact, ...ExactPowerFact[]];
+    reductions: readonly [ExactNumericReduction, ...ExactNumericReduction[]];
+    finalValue: ExactNumericValue;
+    precedenceWitness: ExactNumericPrecedenceWitness | null;
+}>;
+
+/**
+ * Builder policy constrains all exact numeric values, exponents and intermediates. The
+ * absolute-value bound is not a separate numerator/denominator or decimal-storage cap.
+ */
+export type ExactNumericExpressionConstraints = Readonly<{
+    domain: 'rational' | 'nonnegative-rational' | 'integer' | 'nonnegative-integer';
+    maximumAbsoluteValue: ExactNumericValue;
+    maximumNodes: number;
+    maximumDepth: number;
+    maximumExponent: number;
+}>;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'numerical-power-expression-evaluate': NumericalPowerExpressionProblem;
+    'numerical-power-expression-write': NumericalPowerExpressionProblem;
     'measure-ratio-conversion': MeasurementRatioRelationProblem;
     'measure-unit-composition': UnitDimensionRelationProblem;
     'percent-of-quantity': PercentQuantityProblem;

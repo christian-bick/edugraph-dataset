@@ -1,0 +1,2 @@
+- **Identity:** Necessary prescribed-calculation prose asks for one numerical expression using exponent notation; the order of subtraction, division and grouped calculations is unambiguous.
+- **Modes:** Question Mode withholds the symbolic expression and all computed work. Solution Mode writes the prescribed expression with the original numbers, exponents and grouping; it does not add a value-finding task.
