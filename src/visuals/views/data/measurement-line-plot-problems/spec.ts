@@ -1,4 +1,4 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
@@ -6,6 +6,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'measurement-line-plot-problems',
     generalLabels: [
+        Area.FrequencyDistribution,
         Scope.LinePlot,
         Scope.ProvidedMeasurement,
         Ability.TextualReception,

@@ -33,7 +33,7 @@ describe('measurement-line-plot-problems schema integration', () => {
     });
 
     it('declares only invariant statistics and single-frame capabilities', () => {
-        expect(spec.generalLabels).toEqual([Area.Statistics, Scope.SingleFrameOfReference]);
+        expect(spec.generalLabels).toEqual([Area.StatisticalVariable, Scope.SingleFrameOfReference]);
     });
 
     it('rejects competing denominator or operation requests', () => {

@@ -494,7 +494,7 @@ const currencyWordProblemsBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.D.9: Generate length-measurement data ---
 const measurementDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.StatisticalVariable,
         Area.MeasuringLength,
         Scope.CentimeterScale,
         Scope.ObservedMeasurement,
@@ -505,7 +505,7 @@ const measurementDataBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.D.9: Represent measurements with a line plot ---
 const measurementLinePlotBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.CentimeterScale,
         Scope.ProvidedMeasurement,
         Scope.IntegerNumbers,
@@ -517,7 +517,7 @@ const measurementLinePlotBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.D.10: Draw a single-unit picture graph ---
 const pictureGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.IntegerNumbers,
         Scope.PictureGraph,
         Ability.VisualArticulation
@@ -526,7 +526,7 @@ const pictureGraphBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.D.10: Draw a single-unit bar graph ---
 const barGraphBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.IntegerNumbers,
         Scope.BarGraph,
         Scope.StepsOf1,
@@ -536,7 +536,7 @@ const barGraphBuilder = new DatasetPermutationBuilder()
 // --- 2.MD.D.10: Solve arithmetic problems from a bar graph ---
 const barGraphProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.IntegerNumbers,
         Scope.BarGraph,
         Scope.StepsOf1,

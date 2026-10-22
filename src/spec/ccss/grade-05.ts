@@ -11,16 +11,16 @@ import type {
 // Operations and Algebraic Thinking (5.OA)
 
 const useGroupingBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.GroupedExpression,
-    Area.NumericalExpression,
+    Area.GroupingSymbol,
+    Area.ArithmeticExpression,
     Area.OrderOfOperations,
     Scope.ArabicNumerals,
     Ability.Formalization
 ]);
 
 const evaluateGroupedExpressionsBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.GroupedExpression,
-    Area.NumericalExpression,
+    Area.GroupingSymbol,
+    Area.ArithmeticExpression,
     Area.OrderOfOperations,
     Scope.ArabicNumerals,
     Ability.ProcedureExecution
@@ -48,14 +48,14 @@ const graphPatternPairsBuilder = new DatasetPermutationBuilder().addLabels([
 ]);
 
 const writeNumericalExpressionBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.NumericalExpression,
+    Area.ArithmeticExpression,
     Scope.ArabicNumerals,
     Ability.Formalization,
     Ability.TextualReception
 ]);
 
 const interpretNumericalExpressionBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.NumericalExpression,
+    Area.ArithmeticExpression,
     Scope.ArabicNumerals,
     Ability.Interpretation
 ]);
@@ -293,7 +293,7 @@ const grade5LinePlotDenominators = [
 ];
 
 const grade5LinePlotLabels = [
-    Area.Statistics,
+    Area.FrequencyDistribution,
     Scope.ProvidedMeasurement,
     Scope.LinePlot,
     Scope.SingleFrameOfReference

@@ -497,10 +497,10 @@ describe('authoritative label plans in matching', () => {
         spec: measurementViewSpec, problemType: 'MeasurementDataProblem', matchingSourceHash: 'view-source'
     };
     const requests = [
-        {id: 'unit-steps', labels: [Area.Statistics, Scope.StepsOf1]},
-        {id: 'single-frame', labels: [Area.Statistics, Scope.SingleFrameOfReference]},
-        {id: 'fraction-steps', labels: [Area.Statistics, Scope.FractionNumbers, Scope.StepsOf1]},
-        {id: 'single-frame-steps', labels: [Area.Statistics, Scope.SingleFrameOfReference, Scope.StepsOf1]}
+        {id: 'unit-steps', labels: [Area.FrequencyDistribution, Scope.StepsOf1]},
+        {id: 'single-frame', labels: [Area.FrequencyDistribution, Scope.SingleFrameOfReference]},
+        {id: 'fraction-steps', labels: [Area.FrequencyDistribution, Scope.FractionNumbers, Scope.StepsOf1]},
+        {id: 'single-frame-steps', labels: [Area.FrequencyDistribution, Scope.SingleFrameOfReference, Scope.StepsOf1]}
     ];
 
     it('uses one planner for direct, indexed, diagnostic and unmatched-target routes', () => {

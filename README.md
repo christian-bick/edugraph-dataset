@@ -27,6 +27,10 @@ The architecture is split into three main parts:
 *   **The Body (Views):** HTML/CSS renderers that turn abstract math into visual DOM elements.
 *   **The Heart (Orchestrator):** A Playwright-powered Node.js pipeline that generates permutations, injects them into views, captures screenshots, and compiles the dataset metadata.
 
+The reviewed [Grade 6 CCSS specification](src/spec/ccss/grade-06.ts) records its competencies
+as implementation TODOs. It extends the curriculum backlog; generated content still comes
+from the active targets in Kindergarten through Grade 5.
+
 For example, shape-composition exercises separate predicting suitable pieces from constructing
 an arrangement. Construction solutions use explicit component geometry supplied by the generator.
 

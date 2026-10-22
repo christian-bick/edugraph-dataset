@@ -32,7 +32,7 @@ export const spec: GeneratorSpec = {
         || selected(Scope.HalfFractions)
         || selected(Scope.QuarterFractions)
         || selected(Scope.EighthFractions))],
-    generalLabels: [Area.Statistics]
+    generalLabels: [Area.StatisticalVariable]
 };
 
 export const MeasurementDataGeneratorSchema = {

@@ -104,8 +104,8 @@ function CoordinateGrid({data, isSolutionView}: {
             const label = markerLabelPosition(point, maximum);
             return <g key={index}>
                 <circle cx={position.x} cy={position.y} r="8" fill="#ffffff" />
-                <circle cx={position.x} cy={position.y} r="5.5" fill="#4f46e5" stroke="#312e81" strokeWidth="1.5" />
-                <text x={label.x} y={label.y} textAnchor={label.anchor} className="fill-indigo-900 text-[13px] font-bold">{markerNames[index]}</text>
+                <circle cx={position.x} cy={position.y} r="5.5" fill="#059669" stroke="#064e3b" strokeWidth="1.5" />
+                <text x={label.x} y={label.y} textAnchor={label.anchor} className="fill-emerald-900 text-[13px] font-bold">{markerNames[index]}</text>
             </g>;
         })}
     </svg>;

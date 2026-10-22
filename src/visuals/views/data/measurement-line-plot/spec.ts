@@ -1,4 +1,4 @@
-import {Ability, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {hasLabel} from '../../../../lib/resolvers.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {ConfigFromSchema} from '../../../../types/schema.ts';
@@ -15,6 +15,7 @@ export const spec: ViewSpec = {
             || labels.exact('generator', Scope.IntegerNumbers)
     }],
     generalLabels: [
+        Area.FrequencyDistribution,
         Scope.LinePlot,
         Scope.ProvidedMeasurement,
         Ability.VisualArticulation

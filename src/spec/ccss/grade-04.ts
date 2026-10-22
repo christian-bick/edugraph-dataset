@@ -358,7 +358,7 @@ const unknownRectangleDimensionBuilder = new DatasetPermutationBuilder()
     ]);
 
 const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.Statistics,
+    Area.FrequencyDistribution,
     Scope.InchScale,
     Scope.ProvidedMeasurement,
     Scope.FractionNumbers,
@@ -369,7 +369,7 @@ const constructFractionalLinePlotBuilder = new DatasetPermutationBuilder().addLa
 
 const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.InchScale,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
