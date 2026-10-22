@@ -1,0 +1,2 @@
+- **Identity:** Interpret a given inequality using two labeled points on a scaled horizontal or vertical number line.
+- **Modes:** Question Mode gives the inequality and points but leaves their positional meaning unexplained. Solution Mode explains the left/right or above/below relationship in green.

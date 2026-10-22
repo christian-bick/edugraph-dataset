@@ -1,0 +1,2 @@
+- **Identity:** Explain the meaning of a given signed inequality in its real-world context.
+- **Modes:** Question Mode gives the comparison and necessary contextual readings but no completed explanation. Solution Mode gives the correct contextual meaning in green.

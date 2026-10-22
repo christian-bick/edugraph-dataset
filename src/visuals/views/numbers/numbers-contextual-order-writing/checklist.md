@@ -1,0 +1,2 @@
+- **Identity:** Read contextual descriptions and write a signed inequality in the requested subject order.
+- **Modes:** Question Mode supplies the quantities and comparison through prose and leaves the inequality blank. Solution Mode writes the correct ordered inequality with its unit in green.

@@ -1,0 +1,2 @@
+- **Identity:** Classify the quantities compared by a signed-order statement and an absolute-value statement.
+- **Modes:** Question Mode gives both complete statements with neutral headings but no classification or explanation. Solution Mode classifies their meanings and explains their consistency in green.

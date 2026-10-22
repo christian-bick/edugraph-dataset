@@ -3858,6 +3858,54 @@ export type RationalNumberlineValuesProblem = {
     point: FormattedSignedRationalLocation;
 };
 
+export type StrictRationalOrder = 'less' | 'greater';
+export type RationalMagnitudeOrder = StrictRationalOrder | 'equal';
+export type OrderedSignedContextMetadata = Extract<SignedRationalContextMetadata,
+    {kind: 'temperature' | 'elevation' | 'balance'}>;
+
+/** Complete increasing scale containing zero; distinct first/second values retain their nominal roles. */
+export type RationalOrderRelationProblem = {
+    kind: 'rational-order-relations';
+    axis: SignedRationalAxis;
+    first: SignedRationalLocation;
+    second: SignedRationalLocation;
+    relation: StrictRationalOrder;
+};
+
+/** One datum and unit, distinct observation IDs, and strictly unequal canonical signed values. */
+export type RationalOrderContextProblem = {
+    kind: 'rational-order-contexts';
+    context: OrderedSignedContextMetadata;
+    first: SignedContextObservation;
+    second: SignedContextObservation;
+    relation: StrictRationalOrder;
+};
+
+/** The zero-to-point segment has exact length point.magnitude, including the zero-length case. */
+export type RationalMagnitudeRelationProblem = {
+    kind: 'rational-magnitude-relations';
+    axis: SignedRationalAxis;
+    point: SignedRationalLocation;
+    distance: {
+        /** Exactly axis.zeroIndex. */
+        fromTickIndex: number;
+        /** Exactly point.tickIndex. */
+        toTickIndex: number;
+        /** Canonical nonnegative absolute value of point.value. */
+        length: SignedRational;
+    };
+};
+
+/** Signed inputs are unequal; distinct opposites can have equal magnitudes. */
+export type RationalMagnitudeContextProblem = {
+    kind: 'rational-magnitude-contexts';
+    context: OrderedSignedContextMetadata;
+    first: SignedContextObservation;
+    second: SignedContextObservation;
+    signedRelation: StrictRationalOrder;
+    magnitudeRelation: RationalMagnitudeOrder;
+};
+
 /** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
 export type RatioRational = {numerator: number; denominator: number};
 
@@ -4007,6 +4055,12 @@ export interface ViewTypeMap {
     'coordinate-point-reading': CoordinatePointsProblem;
     'numbers-rational-line-positioning': RationalNumberlineValuesProblem;
     'numbers-rational-line-reading': RationalNumberlineValuesProblem;
+    'numbers-inequality-line-interpretation': RationalOrderRelationProblem;
+    'numbers-contextual-order-explanation': RationalOrderContextProblem;
+    'numbers-contextual-order-writing': RationalOrderContextProblem;
+    'numbers-absolute-value-distance': RationalMagnitudeRelationProblem;
+    'numbers-contextual-absolute-value': RationalMagnitudeContextProblem;
+    'numbers-order-versus-magnitude': RationalMagnitudeContextProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

@@ -1,0 +1,2 @@
+- **Identity:** Interpret the absolute value of a given point as its nonnegative distance from zero on a scaled number line.
+- **Modes:** Question Mode leaves the absolute-value equation and distance meaning incomplete. Solution Mode gives the exact distance and explanation in green; a point at zero coincides with zero and has no positive-length segment.
