@@ -1,0 +1,2 @@
+- **Identity:** Recover an unknown reference whole from a given percentage and its corresponding quantity, retaining the rate-per-hundred relationship.
+- **Modes:** Question Mode gives the percent and its resulting quantity, leaving the reference whole blank. Solution Mode reveals the reference whole in green and shows division by the scale factor.

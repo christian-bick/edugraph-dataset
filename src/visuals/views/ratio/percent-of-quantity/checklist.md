@@ -1,0 +1,2 @@
+- **Identity:** Calculate a percentage of a given reference whole by using its equivalent fraction per hundred as the scale factor.
+- **Modes:** Question Mode gives the percent and reference whole but withholds their scaled quantity. Solution Mode reveals the correct scaled quantity in green and retains the percent equivalence and multiplication.
