@@ -1,0 +1,2 @@
+- **Identity:** Use necessary map context to identify and measure an aligned polygon side.
+- **Modes:** Question Mode gives the polygon and necessary prose but no completed side calculation or length. Solution Mode gives the correct coordinate difference and physical side length in green.

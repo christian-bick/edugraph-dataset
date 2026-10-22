@@ -1,0 +1,2 @@
+- **Identity:** Read the vertex descriptions and construct the polygon in the stated order.
+- **Modes:** Question Mode requires the prose for vertex locations or identities and leaves all points and edges undrawn. Solution Mode shows the complete closed boundary in green. A given side-distance reference does not replace the necessary vertex descriptions.

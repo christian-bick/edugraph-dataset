@@ -1,0 +1,2 @@
+- **Identity:** Find the separation of two coordinate-aligned points using a coordinate difference and absolute value.
+- **Modes:** Question Mode gives the aligned locations but leaves the calculation and distance blank. Solution Mode shows the exact absolute-value calculation and nonnegative distance in green, including coincident locations.

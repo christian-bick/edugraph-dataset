@@ -1,0 +1,2 @@
+- **Identity:** Plot the given locations and calculate the length of a prescribed horizontal/vertical route.
+- **Modes:** Question Mode leaves points, route segments and total length uncompleted. Solution Mode plots the complete route and shows every leg, cumulative length and total in green.

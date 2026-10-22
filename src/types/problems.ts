@@ -3906,6 +3906,104 @@ export type RationalMagnitudeContextProblem = {
     magnitudeRelation: RationalMagnitudeOrder;
 };
 
+export type CoordinateMetricContext = {
+    kind: 'survey-map';
+    reference: 'survey-origin';
+    lengthUnit: 'meters';
+    positiveX: 'east';
+    positiveY: 'north';
+    /** Exactly one semantic role per referenced point; no instructions or answer prose. */
+    landmarks: readonly {pointId: string; role: 'entrance' | 'bench' | 'fountain' | 'tree' | 'corner'}[];
+};
+
+/** Axis names identify the VARYING coordinate. Endpoints may coincide only outside polygon edges. */
+export type CoordinateAlignedSeparation = {
+    fromId: string;
+    toId: string;
+    varyingAxis: 'x' | 'y';
+    fixedCoordinate: SignedRational;
+    fromCoordinate: SignedRational;
+    toCoordinate: SignedRational;
+    direction: 'increasing' | 'decreasing' | 'stationary';
+    lower: SignedRational;
+    upper: SignedRational;
+    /** Always upper-lower, not an oriented negative travel amount. */
+    orderedDifference: SignedRational;
+    distance: SignedRational;
+};
+
+/**
+ * Operands are the two varying endpoint values, in an explicitly supplied order.
+ * difference=minuend-subtrahend; magnitude=abs(difference)=separation.distance.
+ * Travel from/to roles remain separate. Nonnegative variants use upper-lower,
+ * including when travel runs left/down, so no negative auxiliary value is emitted.
+ * This exact relation needs no second axis or constructed magnitude-line model.
+ */
+export type CoordinateAbsoluteDifference = {
+    minuend: SignedRational;
+    subtrahend: SignedRational;
+    difference: SignedRational;
+    magnitude: SignedRational;
+};
+
+export type CoordinateAxisDistanceProblem = {
+    kind: 'coordinate-axis-distance';
+    axes: RationalCoordinateAxes;
+    first: RationalCoordinatePoint;
+    second: RationalCoordinatePoint;
+    separation: CoordinateAlignedSeparation;
+    absoluteDifference: CoordinateAbsoluteDifference;
+    context: CoordinateMetricContext;
+};
+
+export type CoordinateRouteLeg = CoordinateAlignedSeparation;
+
+export type CoordinateRouteProblem = {
+    kind: 'coordinate-problems';
+    axes: RationalCoordinateAxes;
+    landmarks: readonly [RationalCoordinatePoint, RationalCoordinatePoint, ...RationalCoordinatePoint[]];
+    /** A prescribed rectilinear route through known landmark IDs; repeated visits are permitted. */
+    path: readonly [string, string, ...string[]];
+    legs: readonly [CoordinateRouteLeg, ...CoordinateRouteLeg[]];
+    /** Starts at0; entry k is the sum of the first k leg lengths; length=legs.length+1. */
+    cumulativeLengths: readonly [SignedRational, ...SignedRational[]];
+    totalLength: SignedRational;
+    context: CoordinateMetricContext;
+};
+
+export type CoordinatePolygonEdge = {fromId: string; toId: string};
+export type CoordinatePolygonSideRelation = {
+    edgeIndex: number;
+    separation: CoordinateAlignedSeparation;
+};
+
+/** An explicit upper-minus-lower calculation for one actual coordinate-aligned boundary edge. */
+export type CoordinatePolygonSideDistanceEquation = {
+    edgeIndex: number;
+    minuend: SignedRational;
+    subtrahend: SignedRational;
+    difference: SignedRational;
+};
+
+/**
+ * Vertices and cyclic edges supply complete exact geometry. Pure exact predicates
+ * validate noncollinearity and a simple boundary, including segment touch/overlap;
+ * no extra index-pair list, computed area/perimeter or signed cross-products are emitted.
+ */
+export type CoordinatePolygonProblem = {
+    kind: 'coordinate-polygons';
+    axes: RationalCoordinateAxes;
+    /** Unique IDs AND positions, noncollinear simple boundary in this complete cyclic order. */
+    vertices: readonly [RationalCoordinatePoint, RationalCoordinatePoint, RationalCoordinatePoint, ...RationalCoordinatePoint[]];
+    /** Exactly consecutive vertex pairs, including final-to-first closure. */
+    edges: readonly [CoordinatePolygonEdge, CoordinatePolygonEdge, CoordinatePolygonEdge, ...CoordinatePolygonEdge[]];
+    /** Complete list of horizontal/vertical edge relations, in boundary order, never a diagonal. */
+    alignedSides: readonly [CoordinatePolygonSideRelation, ...CoordinatePolygonSideRelation[]];
+    /** Optional selected mathematical evidence as a required array: unique aligned edge indices in boundary order. */
+    sideDistanceEquations: readonly CoordinatePolygonSideDistanceEquation[];
+    context: CoordinateMetricContext;
+};
+
 /** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
 export type RatioRational = {numerator: number; denominator: number};
 
@@ -4061,6 +4159,14 @@ export interface ViewTypeMap {
     'numbers-absolute-value-distance': RationalMagnitudeRelationProblem;
     'numbers-contextual-absolute-value': RationalMagnitudeContextProblem;
     'numbers-order-versus-magnitude': RationalMagnitudeContextProblem;
+    'coordinate-axis-distance': CoordinateAxisDistanceProblem;
+    'coordinate-axis-distance-story': CoordinateAxisDistanceProblem;
+    'coordinate-problem-plotting': CoordinateRouteProblem;
+    'coordinate-problem-story': CoordinateRouteProblem;
+    'coordinate-polygon-construction': CoordinatePolygonProblem;
+    'coordinate-polygon-construction-story': CoordinatePolygonProblem;
+    'coordinate-polygon-side-length': CoordinatePolygonProblem;
+    'coordinate-polygon-side-length-story': CoordinatePolygonProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

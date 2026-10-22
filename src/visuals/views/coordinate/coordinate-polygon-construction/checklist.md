@@ -1,0 +1,2 @@
+- **Identity:** Construct a polygon by plotting the ordered vertices and closing its boundary.
+- **Modes:** Question Mode supplies vertex coordinates and order but leaves points and edges undrawn. Solution Mode shows the complete closed polygon in green. Any given side-distance reference remains a neutral given.

@@ -1,0 +1,2 @@
+- **Identity:** Read a map description, plot its locations and calculate the length of the prescribed route.
+- **Modes:** Question Mode requires the prose and leaves points, route segments and total blank. Solution Mode gives the complete plotted route, leg calculations, cumulative lengths and physical total in green.

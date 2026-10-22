@@ -1,0 +1,2 @@
+- **Identity:** Find the length of the identified coordinate-aligned polygon side.
+- **Modes:** Question Mode shows the given polygon but withholds the side calculation and length. Solution Mode shows the nonnegative coordinate difference and side length in green.
