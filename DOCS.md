@@ -138,6 +138,11 @@ Polygon configurations can add indexed side-subtraction proofs while retaining o
 contract for construction and length tasks. Eight views provide mathematical and contextual versions;
 their metric diagrams use one pixel scale per coordinate unit across both axes.
 
+Numerical power expressions retain immutable numeric syntax, exact values for every occurrence,
+power facts and successive reduction snapshots in conventional written order. Two fixed views
+evaluate the supplied expression or translate a prescribed calculation into exponent notation.
+The numeric grammar stays separate from expressions containing variables.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
