@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import type {AlgebraicDomainRestriction, AlgebraicExpressionContext, AlgebraicQuantity, AlgebraicQuantityRelation,
     AlgebraicSymbolDeclaration, AlgebraicUnit, ExactSymbolicExpressionNode as Node} from '../../types/problems.ts';
-import {isAlgebraicExpressionContext as valid} from './algebra-context-helpers.ts';
+import {isAlgebraicExpressionContext as valid, isAlgebraicUnitRelation} from './algebra-context-helpers.ts';
 
 let sequence = 0;
 const value = (numerator: number, denominator = 1) => ({numerator, denominator});
@@ -32,6 +32,31 @@ function fixture(quantities: AlgebraicQuantity[], relations: AlgebraicQuantityRe
         variableQuantities: [{symbolId: 'x', quantityId: 'input'}]}, expression: output.expression, symbols: declarations, restrictions};
 }
 const accepts = (data: Fixture): boolean => valid(data.context, data.expression, data.symbols, data.restrictions);
+
+describe('public exact algebraic unit relations', () => {
+    it('reuses exact identities, aliases, products and dimensionless count ratios', () => {
+        expect(isAlgebraicUnitRelation(dollars, unit('money', 'dollar', 1), dollars, 'addition')).toBe(true);
+        expect(isAlgebraicUnitRelation(hours, unit('money', 'dollars per hour', 1, -1), dollars, 'multiplication')).toBe(true);
+        expect(isAlgebraicUnitRelation(meters, meters, unit('area', 'square meters', 0, 0, 0, 2), 'multiplication')).toBe(true);
+        expect(isAlgebraicUnitRelation(numbers, dollars, dollars, 'multiplication')).toBe(true);
+        expect(isAlgebraicUnitRelation(unit('item', 'groups', 0, 0, 1), unit('item', 'tickets per group'), unit('item', 'tickets', 0, 0, 1), 'multiplication')).toBe(true);
+        expect(isAlgebraicUnitRelation(unit('money', 'credits', 1), unit('money', 'credits', 1), unit('money', 'credits', 1), 'addition')).toBe(true);
+    });
+
+    it('rejects conversions, inconsistent unknown atoms, malformed names and unsupported operations totally', () => {
+        expect(isAlgebraicUnitRelation(dollars, unit('money', 'euros', 1), dollars, 'addition')).toBe(false);
+        expect(isAlgebraicUnitRelation(unit('time', 'minutes', 0, 1), unit('money', 'dollars per hour', 1, -1), dollars, 'multiplication')).toBe(false);
+        expect(isAlgebraicUnitRelation(meters, meters, meters, 'multiplication')).toBe(false);
+        expect(isAlgebraicUnitRelation(unit('money', 'foo', 1), unit('time', 'foo', 0, 1), unit('money', 'square foo', 1, 1), 'multiplication')).toBe(false);
+        expect(isAlgebraicUnitRelation(unit('money', 'credits per widgets', 1), numbers, unit('money', 'credits per widgets', 1), 'multiplication')).toBe(false);
+        expect(isAlgebraicUnitRelation(dollars, dollars, dollars, 'subtraction' as never)).toBe(false);
+        for (const malformed of [null, {}, {...dollars, name: 'dollars / hour'}, {...dollars, dimensions: {}},
+            Object.defineProperty({}, 'name', {get() {throw Error('Accessor');}})]) {
+            expect(isAlgebraicUnitRelation(malformed, dollars, dollars, 'addition')).toBe(false);
+        }
+    });
+});
+
 function fixed(): Fixture {
     const base = n(3), rate = n(2), input = group(v());
     return fixture([quantity('fixed', base, dollars, 'fixed-charge'), quantity('rate', rate, unit('money', 'dollars per hour', 1, -1), 'rate'),

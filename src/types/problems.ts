@@ -4565,8 +4565,204 @@ export type AlgebraExpressionEquivalenceProblem = Readonly<{
     );
 }>;
 
+type StatementVariable = Readonly<Pick<AlgebraicSymbolDeclaration, 'symbolId' | 'symbol'>>;
+type StatementRationalDomain = Readonly<Omit<AlgebraicVariableDomain, 'kind'> & {kind: 'rational'}>;
+
+/** Nonempty ambient mathematical universe; a candidate list does not redefine it. */
+export type StatementAmbientDomain =
+    | Readonly<{kind: 'numeric'; values: StatementRationalDomain}>
+    | Readonly<{kind: 'finite'; values: readonly [AlgebraicScalar, ...AlgebraicScalar[]]}>;
+
+export type ExactEquation = Readonly<{
+    operator: 'equal'; left: ExactSymbolicExpressionNode; right: ExactSymbolicExpressionNode
+}>;
+export type ExactStrictInequality = Readonly<{
+    operator: 'less' | 'greater'; left: ExactSymbolicExpressionNode; right: ExactSymbolicExpressionNode
+}>;
+export type ExactAlgebraicStatement = ExactEquation | ExactStrictInequality;
+
+/**
+ * One mathematical assignment, with no candidate identity or original occurrence list.
+ * A verification/ambient truth row can use any member of the AMBIENT domain even if
+ * that value was not supplied in candidateUniverse. Side rows prove all replacements.
+ */
+export type StatementBinding = Readonly<{symbolId: string; value: AlgebraicScalar; notation: AlgebraicNotation}>;
+export type StatementOccurrenceReplacement = Readonly<{
+    occurrenceNodeId: string; symbolId: string; value: AlgebraicScalar; notation: AlgebraicNotation
+}>;
+export type StatementSideEvaluation = Readonly<{
+    /** EXACT complete original variable occurrences on this side, each once. */
+    replacements: readonly StatementOccurrenceReplacement[];
+    /** Original same-ID syntax after replacement; literal sides may have no work. */
+    calculation: ExactNumericCalculation;
+}>;
+export type StatementAssignmentCheck = Readonly<{
+    binding: StatementBinding;
+    left: StatementSideEvaluation;
+    right: StatementSideEvaluation;
+    /** Operator matches the original statement; final exact side values prove truth. */
+    comparison: Readonly<{
+        operator: 'equal' | 'less' | 'greater'; leftValue: AlgebraicScalar; rightValue: AlgebraicScalar; truth: boolean
+    }>;
+}>;
+export type StatementCandidate = Readonly<{id: string; value: AlgebraicScalar; notation: AlgebraicNotation}>;
+/** A candidate ID annotates this row only; it never constrains a core binding type. */
+export type StatementCandidateCheck = StatementAssignmentCheck & Readonly<{candidateId: string}>;
+export type RestrictedCandidateSolutions = Readonly<{
+    /** Precisely the true candidate rows, preserving their input order; empty is valid. */
+    candidateIds: readonly string[];
+    values: readonly AlgebraicScalar[];
+}>;
+
+/** Only unrestricted Q yields this complete open half-line tag. */
+export type StrictRaySolution = Readonly<{
+    kind: 'ray'; boundary: AlgebraicScalar; direction: 'less' | 'greater'; boundaryIncluded: false;
+    /** Positive step; all positive integer n give distinct admitted satisfying values. */
+    infiniteFamily: Readonly<{
+        kind: 'boundary-plus-positive-integer-step'; base: AlgebraicScalar;
+        direction: 'subtract' | 'add'; step: AlgebraicScalar
+    }>;
+}>;
+/** Exact rational-domain intersection, preserving endpoints and holes. */
+export type RestrictedIntervalSolution = Readonly<{
+    kind: 'interval'; lower: AlgebraicDomainBound | null; upper: AlgebraicDomainBound | null;
+    excludedValues: readonly AlgebraicScalar[];
+    /** Strictly ordered safe rational subinterval, inside the result and avoiding holes. */
+    infiniteSubinterval: Readonly<{lower: AlgebraicScalar; upper: AlgebraicScalar; interior: AlgebraicScalar}>;
+}>;
+export type AmbientStatementSolution =
+    | Readonly<{kind: 'empty'; reason: 'constant-contradiction' | 'outside-domain' | 'domain-excluded-by-bound'}>
+    | Readonly<{kind: 'all-domain'; reason: 'constant-identity' | 'domain-entirely-satisfies-bound'}>
+    | Readonly<{kind: 'singleton'; value: AlgebraicScalar; notation: AlgebraicNotation}>
+    | Readonly<{kind: 'finite'; values: readonly [AlgebraicScalar, ...AlgebraicScalar[]]}>
+    | StrictRaySolution
+    | RestrictedIntervalSolution;
+
+/** Full solution cardinality, proved from the actual solution/domain rather than candidate rows. */
+export type StatementSolutionCardinality =
+    | Readonly<{kind: 'finite'; count: number}>
+    | Readonly<{kind: 'infinite'}>;
+
+/** Exactly x+p=q / p*x=q; p/q are literal scalars and x occurs once. */
+export type ElementaryEquationForm =
+    | Readonly<{kind: 'additive'; variableNodeId: string; addend: AlgebraicScalar; total: AlgebraicScalar}>
+    | Readonly<{kind: 'multiplicative'; variableNodeId: string; coefficient: AlgebraicScalar; total: AlgebraicScalar}>;
+export type EquationTransformation =
+    | Readonly<{
+        kind: 'subtract-same-addend'; before: ExactEquation; operand: AlgebraicScalar;
+        after: ExactEquation; rightDifference: AlgebraicScalar
+    }>
+    | Readonly<{
+        kind: 'divide-by-nonzero-coefficient'; before: ExactEquation; divisor: AlgebraicScalar;
+        after: ExactEquation; rightQuotient: AlgebraicScalar
+    }>
+    | Readonly<{kind: 'constant-comparison'; leftConstant: AlgebraicScalar; rightConstant: AlgebraicScalar; equal: boolean}>;
+export type ElementaryEquationSolutionWitness =
+    | Readonly<{
+        kind: 'isolated-variable'; transformations: readonly [EquationTransformation, ...EquationTransformation[]];
+        algebraicValue: AlgebraicScalar; admissible: boolean;
+        /** Present/true iff admissible; independent of finite candidate membership. */
+        verification: StatementAssignmentCheck | null
+    }>
+    | Readonly<{
+        kind: 'zero-coefficient'; coefficient: AlgebraicScalar; constant: AlgebraicScalar;
+        constantTruth: boolean; classification: 'all-domain' | 'empty'
+    }>
+    | Readonly<{
+        kind: 'nonnegative-addend-exceeds-total'; addend: AlgebraicScalar; total: AlgebraicScalar;
+        /** x>=0 and p>q give x+p>=p>q without storing a negative q-p auxiliary value. */
+        addendGreaterThanTotal: true
+    }>;
+
+type StatementNamedQuantity<Meaning extends string> = Readonly<{
+    quantityId: string; meaning: Meaning; unit: AlgebraicUnit
+}>;
+type StatementConstantQuantity<Meaning extends string> = StatementNamedQuantity<Meaning> & Readonly<{
+    value: AlgebraicScalar; notation: AlgebraicNotation
+}>;
+/** Small semantic grammar, not arbitrary expression/context graphs or generated prose. */
+export type ElementaryEquationContext =
+    | Readonly<{
+        /** Abstract mathematical relation admits signed/unrestricted rational inputs. */
+        kind: 'number-relation'; relationship: 'sum' | 'scaled-value';
+        variableQuantity: StatementNamedQuantity<'input-number'>;
+        constantQuantity: StatementConstantQuantity<'added-number' | 'scale-factor'>;
+        resultQuantity: StatementConstantQuantity<'resulting-number'>
+    }>
+    | Readonly<{
+        kind: 'combined-amounts';
+        variableQuantity: StatementNamedQuantity<'initial-amount'>;
+        addedQuantity: StatementConstantQuantity<'added-amount'>;
+        totalQuantity: StatementConstantQuantity<'total-amount'>
+    }>
+    | Readonly<{
+        kind: 'equal-groups';
+        variableQuantity: StatementNamedQuantity<'group-count' | 'amount-per-group' | 'duration'>;
+        multiplierQuantity: StatementConstantQuantity<'amount-per-group' | 'group-count' | 'rate'>;
+        totalQuantity: StatementConstantQuantity<'total-amount'>
+    }>;
+/**
+ * Actual signed context metadata supplies degrees Celsius / meters / dollars and datum.
+ * No invented temperature dimensions and no changes to earlier AlgebraicUnit.
+ * A mathematical threshold model uses the declared ambient domain; no hidden restriction.
+ */
+export type StrictThresholdContext = Readonly<{
+    kind: 'strict-threshold'; context: OrderedSignedContextMetadata;
+    quantityId: string;
+    threshold: Readonly<{quantityId: string; value: AlgebraicScalar; notation: AlgebraicNotation}>;
+    relationship: 'strictly-below-threshold' | 'strictly-above-threshold'
+}>;
+
+type StatementBackbone = Readonly<{
+    variable: StatementVariable;
+    ambientDomain: StatementAmbientDomain;
+    /** Dense nonempty finite collection of unique admitted exact values and unique IDs. */
+    candidateUniverse: readonly [StatementCandidate, ...StatementCandidate[]];
+    /** Exactly one candidate row's binding in symbolId, canonical value AND exact notation. */
+    assignment: StatementBinding;
+    /** Complete one-to-one rows in candidate order, sharing values/notation with their candidates. */
+    candidateChecks: readonly [StatementCandidateCheck, ...StatementCandidateCheck[]];
+    restrictedSolutions: RestrictedCandidateSolutions;
+    /**
+     * Numeric ambient domain: empty array. Finite ambient domain: COMPLETE one row for every
+     * ambient value, even for empty/all/singleton results and values absent from candidates.
+     */
+    ambientChecks: readonly StatementAssignmentCheck[];
+    /** Validated from complete original relation/domain, never inferred from candidate subset. */
+    ambientSolution: AmbientStatementSolution;
+    /** Finite count is a nonnegative safe integer; never a numeric Infinity sentinel. */
+    solutionCardinality: StatementSolutionCardinality
+}>;
+export type AlgebraicEquationProblem = StatementBackbone & Readonly<{
+    kind: 'algebra-equations'; statement: ExactEquation; form: ElementaryEquationForm;
+    solutionWitness: ElementaryEquationSolutionWitness; context: ElementaryEquationContext
+}>;
+
+/** Every relevant supplied location agrees exactly with axis tick/index/sign/magnitude. */
+export type InequalitySolutionLine = Readonly<{
+    axis: SignedRationalAxis;
+    boundary: SignedRationalLocation;
+    /** Complete finite members/domain endpoints/exclusions required by actual ambient solution. */
+    auxiliaryLocations: readonly SignedRationalLocation[]
+}>;
+export type AlgebraicInequalityProblem = StatementBackbone & Readonly<{
+    kind: 'algebra-inequalities'; statement: ExactStrictInequality;
+    /** Left standalone declared variable; right exact literal; no compound expression sides. */
+    bound: Readonly<{variableNodeId: string; value: AlgebraicScalar; notation: AlgebraicNotation; direction: 'less' | 'greater'}>;
+    solutionLine: InequalitySolutionLine; context: StrictThresholdContext
+}>;
+
+/** Both candidate-checking and solution-meaning leaves accept every complete member. */
+export type AlgebraicStatementProblem = AlgebraicEquationProblem | AlgebraicInequalityProblem;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'algebra-substitution-check': AlgebraicStatementProblem;
+    'algebra-solution-meaning': AlgebraicStatementProblem;
+    'algebra-equation-model-solve': AlgebraicEquationProblem;
+    'algebra-inequality-numberline': AlgebraicInequalityProblem;
+    'algebra-inequality-infinite-solutions': AlgebraicInequalityProblem;
+    'algebra-inequality-model': AlgebraicInequalityProblem;
     'algebra-equivalent-expression-generate': AlgebraExpressionEquivalenceProblem;
     'algebra-expression-equivalence-judge': AlgebraExpressionEquivalenceProblem;
     'numerical-power-expression-evaluate': NumericalPowerExpressionProblem;
