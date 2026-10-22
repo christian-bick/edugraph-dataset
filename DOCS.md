@@ -132,6 +132,12 @@ order explanation and writing, absolute-value distance and meaning, and classifi
 two comparison concepts. Contextual magnitude questions retain the given signed inequality
 while withholding the requested absolute values and comparison.
 
+Coordinate problem models carry aligned endpoint separations, prescribed routes with exact leg
+and cumulative lengths, or complete simple polygon boundaries with every aligned side relation.
+Polygon configurations can add indexed side-subtraction proofs while retaining one shared geometry
+contract for construction and length tasks. Eight views provide mathematical and contextual versions;
+their metric diagrams use one pixel scale per coordinate unit across both axes.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

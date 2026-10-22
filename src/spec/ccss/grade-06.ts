@@ -18,28 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const coordinatePlaneProblemsImplementation = defineImplementationPackage({
-    id: 'coordinate-plane-problems',
-    description:
-        'Solve contextual coordinate problems, construct polygons from vertices and find ' +
-        'coordinate-aligned distances.',
-    generators: [
-        {module: 'coordinate-axis-distance', strategy: 'new'},
-        {module: 'coordinate-problems', strategy: 'new'},
-        {module: 'coordinate-polygons', strategy: 'new'}
-    ],
-    views: [
-        {module: 'coordinate-axis-distance', strategy: 'new'},
-        {module: 'coordinate-axis-distance-story', strategy: 'new'},
-        {module: 'coordinate-problem-plotting', strategy: 'new'},
-        {module: 'coordinate-problem-story', strategy: 'new'},
-        {module: 'coordinate-polygon-construction', strategy: 'new'},
-        {module: 'coordinate-polygon-construction-story', strategy: 'new'},
-        {module: 'coordinate-polygon-side-length', strategy: 'new'},
-        {module: 'coordinate-polygon-side-length-story', strategy: 'new'}
-    ]
-});
-
 const numericalPowerExpressionsImplementation = defineImplementationPackage({
     id: 'numerical-power-expressions',
     description:
@@ -1330,26 +1308,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.C.7b-contextual-order-writing', contextualOrderWritingBuilder),
     ...toTargets('6.NS.C.7c-absolute-value-distance', absoluteValueDistanceBuilder),
     ...toTargets('6.NS.C.7c-contextual-absolute-value', contextualAbsoluteValueBuilder),
-    ...toTargets('6.NS.C.7d-order-versus-magnitude', orderVersusMagnitudeBuilder)
+    ...toTargets('6.NS.C.7d-order-versus-magnitude', orderVersusMagnitudeBuilder),
+    ...toTargets('6.NS.C.8-axis-aligned-coordinate-distance', axisAlignedCoordinateDistanceBuilder),
+    ...toTargets('6.NS.C.8-coordinate-plane-problems', coordinatePlaneProblemsBuilder),
+    ...toTargets('6.G.A.3-coordinate-polygon-construction', coordinatePolygonConstructionBuilder),
+    ...toTargets('6.G.A.3-coordinate-polygon-side-length', coordinatePolygonSideLengthBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.C.8-axis-aligned-coordinate-distance',
-        axisAlignedCoordinateDistanceBuilder,
-        coordinatePlaneProblemsImplementation,
-        'Same x or same y is explicit; use absolute value/distance to obtain the separation, including ' +
-        'crossing an axis.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.8-coordinate-plane-problems',
-        coordinatePlaneProblemsBuilder,
-        coordinatePlaneProblemsImplementation,
-        'Plot points and use the graph to answer the supplied mathematical or contextual question; all ' +
-        'four quadrants belong to one complete domain.'
-    ),
-
     // Expressions and Equations (6.EE)
     ...toImplementationTodos(
         '6.EE.A.1-evaluate-power-expressions',
@@ -1595,24 +1561,6 @@ export const implementationTodos: ImplementationTodo[] = [
         'quantities. Retain l*w*h / B*h operand variants. Existing volume-product-model is an additional ' +
         'affected consumer to adopt if the common payload broadens, not an owner of this requested ' +
         'competency.'
-    ),
-    ...toImplementationTodos(
-        '6.G.A.3-coordinate-polygon-construction',
-        coordinatePolygonConstructionBuilder,
-        coordinatePlaneProblemsImplementation,
-        'Given ordered vertex coordinates and scaled axes, construct the polygon by plotting and ' +
-        'connecting successive vertices. Contextual versions require interpreting the coordinate ' +
-        'description. Signed rational coordinates are admitted. Existing first-quadrant pattern plotting ' +
-        'is not the complete competency.'
-    ),
-    ...toImplementationTodos(
-        '6.G.A.3-coordinate-polygon-side-length',
-        coordinatePolygonSideLengthBuilder,
-        coordinatePlaneProblemsImplementation,
-        'A polygon side has equal first or second endpoint coordinates. The learner uses the varying ' +
-        'coordinates to find a nonnegative length; the solution exposes the subtraction/distance ' +
-        'relationship. Only horizontal/vertical sides are required here; do not import arbitrary ' +
-        'Euclidean-distance or Pythagorean requirements.'
     ),
     ...toImplementationTodos(
         '6.G.A.4-construct-solid-net',

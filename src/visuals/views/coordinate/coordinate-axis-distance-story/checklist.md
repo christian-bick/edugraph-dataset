@@ -1,0 +1,2 @@
+- **Identity:** Read necessary map context and find the separation of two aligned locations.
+- **Modes:** Question Mode requires the prose for location roles or units and withholds the calculation and distance. Solution Mode gives the exact absolute-value calculation and physical distance in green.
