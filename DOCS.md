@@ -106,6 +106,12 @@ steps, zero-coefficient cases, strict interval intersections and cardinality evi
 by the producers. Six fixed views project candidate checking, solution meaning, equation
 modeling and solving, inequality graphs, infinite sets or contextual strict constraints.
 
+Variable-role models retain the letter's named rational, integer or nonnegative domain separately
+from the unrestricted rational domain used for affine proofs. A particular condition supplies a
+unique admissible value and its exact verification; a generalized claim supplies an identity valid
+for every member of the named domain. One interpretation view explains these roles from the same
+original relation and quantity meaning.
+
 General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
 and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
 rectangle quantity roles without selecting a task. Five division views accept a union of this

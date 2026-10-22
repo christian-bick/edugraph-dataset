@@ -148,6 +148,7 @@ describe('declared producer/view payload families', () => {
         expect(matchesTarget([Scope.NumbersSmaller20], generator, view)).toEqual({matched: true});
     });
 
+    // The complete catalog scan also runs under coverage as new grade modules are added.
     it('agrees between indexed and direct matching for all CCSS targets', async () => {
         const targets = await loadMatchingTargets('ccss');
         const pairs = buildCompatibleModulePairIndex(generators, views).orderedPairs;
@@ -163,5 +164,5 @@ describe('declared producer/view payload families', () => {
             expect(tuples.length, viewId).toBeGreaterThan(0);
             expect(new Set(tuples.map(tuple => tuple.generatorId)), viewId).toEqual(new Set([generatorId]));
         }
-    }, 120_000);
+    }, 240_000);
 });

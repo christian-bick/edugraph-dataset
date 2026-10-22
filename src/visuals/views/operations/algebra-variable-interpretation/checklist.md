@@ -1,0 +1,2 @@
+- **Identity:** Interpret what a letter represents in a stated quantity, named domain and relation, distinguishing a condition for one fixed situation from a claim for every domain member.
+- **Modes:** Question Mode leaves the letter's role and supporting explanation unresolved. Solution Mode explains its particular unknown value or arbitrary domain membership, retaining the condition or universal relation and the domain.

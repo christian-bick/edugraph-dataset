@@ -4755,8 +4755,65 @@ export type AlgebraicInequalityProblem = StatementBackbone & Readonly<{
 /** Both candidate-checking and solution-meaning leaves accept every complete member. */
 export type AlgebraicStatementProblem = AlgebraicEquationProblem | AlgebraicInequalityProblem;
 
+/** Exactly one of these four infinite named sets, not a finite table of examples. */
+export type VariableMeaningDomain = Readonly<{
+    domainId: string;
+    name: 'rational-numbers' | 'integers' | 'nonnegative-rational-numbers' | 'nonnegative-integers';
+    /** Exact14 domain: unrestricted Q/Z, or inclusive lower0; no upper bound/exclusions. */
+    set: AlgebraicVariableDomain
+}>;
+export type VariableMeaningSymbol = Readonly<{symbolId: string; symbol: string}>;
+export type VariableMeaningQuantity =
+    | Readonly<{kind: 'number'; referent: 'mathematical-number'; unit: 'none'}>
+    | Readonly<{kind: 'count'; referent: 'tokens-in-a-bag'; unit: 'tokens'}>
+    | Readonly<{kind: 'length'; referent: 'segment-length'; unit: 'meters'}>;
+
+export type ParticularUnknownMeaning = Readonly<{
+    kind: 'particular-unknown'; situation: 'one-fixed-situation';
+    uniqueValueWitness: Readonly<{
+        leftNormalization: AffineNormalizationProof;
+        rightNormalization: AffineNormalizationProof;
+        /** Exact left-minus-right coefficient a and constant b; a is nonzero. */
+        coefficientDifference: ExactCoefficientArithmetic;
+        constantDifference: ExactCoefficientArithmetic;
+        /** Exact division (-b)/a; result is in the NAMED domain. */
+        inverseArithmetic: ExactCoefficientArithmetic;
+        uniqueValue: AlgebraicScalar;
+        /**
+         * Reuses16 outer binding/per-side exact calculations, including zero replacements
+         * on a literal side. Its binding value is uniqueValue and its comparison is true.
+         * No candidate ID/list or learner-selected assignment is needed in this package.
+         */
+        verification: StatementAssignmentCheck
+    }>
+}>;
+export type GeneralizedNumberMeaning = Readonly<{
+    kind: 'arbitrary-generalized-number'; quantifier: 'for-every-domain-member';
+    /** Actual15 universal coefficient-map induction, not finite substitution agreement. */
+    universalProof: UniversalAffineIdentityProof;
+    /** All four named sets are subsets of Q; proofDomain is explicitly the all-Q superset. */
+    domainInclusion: 'named-domain-subset-of-rationals'
+}>;
+
+export type AlgebraVariableMeaningProblem = Readonly<{
+    kind: 'algebra-variable-models';
+    domain: VariableMeaningDomain;
+    symbol: VariableMeaningSymbol;
+    quantity: VariableMeaningQuantity;
+    /**
+     * Actual15 all-Q normalization domain containing EXACTLY the primary symbol.
+     * Separate from named Q/Z/N domain; do not relabel an integer set as all Q.
+     */
+    proofDomain: CommonAffineDomain;
+    /** Exactly the two relation sides, sharing proofDomain.domainId and declared symbol. */
+    expressions: readonly [AffineExpression, AffineExpression];
+    relation: Readonly<{leftExpressionId: string; rightExpressionId: string}>;
+    role: ParticularUnknownMeaning | GeneralizedNumberMeaning
+}>;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'algebra-variable-interpretation': AlgebraVariableMeaningProblem;
     'algebra-substitution-check': AlgebraicStatementProblem;
     'algebra-solution-meaning': AlgebraicStatementProblem;
     'algebra-equation-model-solve': AlgebraicEquationProblem;
