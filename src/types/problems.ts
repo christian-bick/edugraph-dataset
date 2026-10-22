@@ -3474,8 +3474,59 @@ export type PercentQuantityProblem = {
     part: RatioRational;
 };
 
+export type MeasurementRatioUnit = {
+    id: string;
+    name: string;
+    symbol: string;
+    system: 'metric' | 'customary' | 'time';
+    dimension: 'length' | 'mass' | 'volume' | 'time';
+};
+
+/**
+ * Both equalities denote the same physical quantity in the two named units.
+ * quantityEquality = unitEquality times scaleFactor on each side;
+ * forwardFactor = unitEquality.second / unitEquality.first, with reciprocal reverseFactor.
+ * The ordered pair has no selected conversion direction or requested unknown.
+ */
+export type MeasurementRatioRelationProblem = {
+    kind: 'measurement-ratio-relation';
+    units: {first: MeasurementRatioUnit; second: MeasurementRatioUnit};
+    unitEquality: {first: RatioRational; second: RatioRational};
+    quantityEquality: {first: RatioRational; second: RatioRational};
+    scaleFactor: RatioRational;
+    forwardFactor: RatioRational;
+    reverseFactor: RatioRational;
+};
+
+export type DimensionUnitSymbol = 'm' | 's' | 'kg';
+export type DimensionUnitPowers = Record<DimensionUnitSymbol, number>;
+export type PhysicalDimensionPowers = Record<'length' | 'time' | 'mass', number>;
+export type DimensionedRational = {
+    value: RatioRational;
+    units: DimensionUnitPowers;
+    dimensions: PhysicalDimensionPowers;
+};
+
+/**
+ * Exact positive values and coherent SI base-unit exponents obey the stated operation.
+ * Raw factor lists expand the product (or reciprocal of the right divisor); cancellation
+ * pairs index equal symbols on opposite sides, each index at most once. Uncancelled
+ * factors give the result's normalized unit and physical-dimension powers.
+ */
+export type UnitDimensionRelationProblem = {
+    kind: 'unit-dimension-relation';
+    operation: 'multiplication' | 'division';
+    left: DimensionedRational;
+    right: DimensionedRational;
+    result: DimensionedRational;
+    unitFactors: {numerator: DimensionUnitSymbol[]; denominator: DimensionUnitSymbol[]};
+    cancellations: {numeratorIndex: number; denominatorIndex: number}[];
+};
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'measure-ratio-conversion': MeasurementRatioRelationProblem;
+    'measure-unit-composition': UnitDimensionRelationProblem;
     'percent-of-quantity': PercentQuantityProblem;
     'percent-whole-inversion': PercentQuantityProblem;
     'ratio-language': RatioRelationProblem;

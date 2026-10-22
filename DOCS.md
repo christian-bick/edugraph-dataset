@@ -77,6 +77,13 @@ completion, comparison, percentage calculation, and recovering a whole from its 
 Their shared renderers live under `src/visuals/views/ratio/`; mathematical helpers live under
 `src/generators/ratio/`.
 
+Measurement-ratio relations retain symmetric exact unit and quantity equalities, including
+across-system conversions, with reciprocal conversion factors. Unit-dimension relations carry
+exact dimensioned operands and results, expanded unit factors, and indexed cancellation
+witnesses. Their generators live under `src/generators/measurement/`; the consuming views under
+`src/visuals/views/measure/` select the conversion direction or present unit composition and
+ask for an explanation alongside the calculation.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

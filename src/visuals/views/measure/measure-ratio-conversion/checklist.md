@@ -1,0 +1,2 @@
+- **Identity:** Convert a rational measure to an equivalent unit by multiplying by a correctly oriented dimensioned ratio of equal quantities, then explain why the physical quantity is unchanged.
+- **Modes:** Question Mode gives the measure and unit equality but withholds the converted measure and explanation. Solution Mode reveals the measure in green, cancels matching source units, and explains that the dimensioned conversion ratio equals one.
