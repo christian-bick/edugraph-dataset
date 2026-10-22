@@ -23,7 +23,7 @@ describe('measurement-extrema schema integration', () => {
         const units = new Set<string>();
         for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
-            const result = generateWithLabels(generator, [Area.Statistics, Ability.ProcedureExecution])!;
+            const result = generateWithLabels(generator, [Area.StatisticalVariable, Ability.ProcedureExecution])!;
             const {operation} = result.data.extremaRelation;
             expect(result.labels).toContain(operation === 'addition' ? Area.Addition : Area.Subtraction);
             expect(result.labels).toContain(result.data.unit === 'in' ? Scope.InchScale : Scope.CentimeterScale);

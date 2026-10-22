@@ -420,11 +420,11 @@ const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
     ]);
 
 const scaledPictureGraphBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.PictureGraph, Ability.VisualArticulation])
+    .addLabels([Area.FrequencyDistribution, Scope.IntegerNumbers, Scope.PictureGraph, Ability.VisualArticulation])
     .applyLabelVariants([[Scope.EvenNumbers], [Scope.MultiplesOf5], [Scope.MultiplesOf10]]);
 
 const scaledBarGraphBuilder = new DatasetPermutationBuilder()
-    .addLabels([Area.Statistics, Scope.IntegerNumbers, Scope.BarGraph, Ability.VisualArticulation])
+    .addLabels([Area.FrequencyDistribution, Scope.IntegerNumbers, Scope.BarGraph, Ability.VisualArticulation])
     .applyLabelVariants([
         [Scope.EvenNumbers, Scope.StepsOf2],
         [Scope.MultiplesOf5, Scope.StepsOf5],
@@ -433,7 +433,7 @@ const scaledBarGraphBuilder = new DatasetPermutationBuilder()
 
 const oneStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
@@ -448,7 +448,7 @@ const oneStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
 
 const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,
@@ -463,7 +463,7 @@ const twoStepScaledBarComparisonBuilder = new DatasetPermutationBuilder()
 
 const generateFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.StatisticalVariable,
         Area.MeasuringLength,
         Scope.ObservedMeasurement,
         Scope.FractionNumbers,
@@ -474,7 +474,7 @@ const generateFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
 
 const plotFractionalMeasurementsBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.ProvidedMeasurement,
         Scope.FractionNumbers,
         Scope.InchScale,

@@ -8,7 +8,7 @@ describe('statistical-graphs spec', () => {
     it('always defaults to scale one without claiming steps or divisibility', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
-            const result = generateWithLabels(new StatisticalGraphsGenerator(), [Area.Statistics])!;
+            const result = generateWithLabels(new StatisticalGraphsGenerator(), [Area.FrequencyDistribution])!;
             expect(result.data.scale).toBe(1);
             expect(result.labels).toEqual([]);
         }
@@ -16,7 +16,7 @@ describe('statistical-graphs spec', () => {
 
     it('labels five-scale quantities as multiples without claiming a sequence', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics, Scope.MultiplesOf5
+            Area.FrequencyDistribution, Scope.MultiplesOf5
         ])!;
         expect(result.labels).toContain(Scope.MultiplesOf5);
         expect(result.labels).not.toContain(Scope.StepsOf5);
@@ -25,7 +25,7 @@ describe('statistical-graphs spec', () => {
 
     it('generates presentation-only graph data without an arithmetic question', () => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Scope.IntegerNumbers,
             Scope.PictureGraph,
             Ability.VisualArticulation
@@ -41,7 +41,7 @@ describe('statistical-graphs spec', () => {
         [Scope.MultiplesOf10, 10]
     ] as const)('resolves %s as a non-unit graph scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Scope.IntegerNumbers,
             Scope.PictureGraph,
             scaleLabel,
@@ -56,7 +56,7 @@ describe('statistical-graphs spec', () => {
         [Area.Subtraction, 'subtraction']
     ] as const)('resolves %s for a single-step graph question', (operationLabel, operation) => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Scope.IntegerNumbers,
             Scope.BarGraph,
             Scope.SingleStep,
@@ -73,7 +73,7 @@ describe('statistical-graphs spec', () => {
         [Scope.MultiplesOf10, 10]
     ] as const)('resolves a one-step subtraction comparison on the %s scale', (scaleLabel, scale) => {
         const data = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Area.Subtraction,
             Scope.IntegerNumbers,
             Scope.BarGraph,
@@ -93,7 +93,7 @@ describe('statistical-graphs spec', () => {
 
     it('resolves a connected multi-step scaled subtraction comparison', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Area.Subtraction,
             Scope.IntegerNumbers,
             Scope.BarGraph,
@@ -113,7 +113,7 @@ describe('statistical-graphs spec', () => {
 
     it('resolves object sorting as canonical observation evidence without consuming Ability', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Area.ObjectSorting,
             Scope.IntegerNumbers,
             Scope.PictureGraph,
@@ -130,7 +130,7 @@ describe('statistical-graphs spec', () => {
 
     it('leaves interpretation and category selection to the view', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Scope.IntegerNumbers,
             Scope.BarGraph,
             Ability.Interpretation
@@ -142,7 +142,7 @@ describe('statistical-graphs spec', () => {
 
     it('resolves three-operand addition as find-total', () => {
         const result = generateWithLabels(new StatisticalGraphsGenerator(), [
-            Area.Statistics,
+            Area.FrequencyDistribution,
             Area.Addition,
             Scope.IntegerNumbers,
             Scope.PictureGraph,

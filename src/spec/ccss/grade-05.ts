@@ -293,7 +293,7 @@ const grade5LinePlotDenominators = [
 ];
 
 const grade5LinePlotLabels = [
-    Area.Statistics,
+    Area.FrequencyDistribution,
     Scope.ProvidedMeasurement,
     Scope.LinePlot,
     Scope.SingleFrameOfReference

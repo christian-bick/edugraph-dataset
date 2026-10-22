@@ -4,6 +4,9 @@ Completed consolidation and migration documents are preserved unchanged in
 [`docs/history/`](../history/). Their deferred sections remain available through the links below.
 These items are not newly scheduled by the archive move.
 
+- **Ontology v0.31 adoption:** the [stable-release migration](ontology-v031-adoption.md)
+  records the statistics label migration and dataset release-readiness checks.
+
 - **Algebra preview adoption:** the [pre.8 to pre.10 migration review](algebra-preview-adoption.md)
   records the expression-label migration, retained-entity semantic review, and planner
   repair, checklist corrections, and explicit equation prompts. Canonical regeneration,

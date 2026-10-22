@@ -30,7 +30,7 @@ describe('graph quantity and axis ownership', () => {
     it.each([construction, arithmetic, classification, interpretation].flatMap(spec =>
         scales.map(scale => ({...scale, spec, viewId: spec.viewId}))))(
         'binds $viewId axis step $scale to its quantity constraint', ({scale, quantityLabels, step, spec}) => {
-            const target = {id: 'graph-axis', labels: [Area.Statistics, ...quantityLabels, step, ...spec.generalLabels,
+            const target = {id: 'graph-axis', labels: [Area.FrequencyDistribution, ...quantityLabels, step, ...spec.generalLabels,
                 ...(spec === arithmetic ? [Area.Subtraction, Scope.SingleStep] : [])]};
             const view = {viewId: spec.viewId, generalLabels: spec.generalLabels, schema: BarGraphViewSchema, spec};
             const result = planModelCompatibility(target, producer, view);
@@ -58,7 +58,7 @@ describe('graph quantity and axis ownership', () => {
 
     it.each(scales)('admits scale $scale picture graphs without claiming a sequence', ({scale, quantityLabels, step}) => {
         const view = {viewId: picture.viewId, generalLabels: picture.generalLabels, schema: DataPictureGraphViewSchema, spec: picture};
-        const target = {id: 'picture-scale', labels: [Area.Statistics, ...quantityLabels, ...picture.generalLabels]};
+        const target = {id: 'picture-scale', labels: [Area.FrequencyDistribution, ...quantityLabels, ...picture.generalLabels]};
         const result = planModelCompatibility(target, producer, view);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);

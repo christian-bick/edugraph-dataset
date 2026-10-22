@@ -56,7 +56,7 @@ describe('metadata model compatibility', () => {
         [[Scope.SingleFrameOfReference], 'fraction'],
         [[Scope.SingleFrameOfReference, Scope.FractionNumbers], 'fraction']
     ] as const)('constrains each actual draw for %j', (requested, numberKind) => {
-        const target = {id: 'measurement-regression', labels: [Area.Statistics, ...requested]};
+        const target = {id: 'measurement-regression', labels: [Area.FrequencyDistribution, ...requested]};
         const result = planModelCompatibility(target, generator, view, 'source-and-ontology-inputs');
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);
@@ -72,7 +72,7 @@ describe('metadata model compatibility', () => {
             if (rendered.config.usesUnitSteps) expect(stub.data.subdivisions).toBe(1);
             if (generated.config.useSingleFrame) expect(stub.data.subdivisions).toBe(8);
         }
-        expect(target.labels).toEqual([Area.Statistics, ...requested]);
+        expect(target.labels).toEqual([Area.FrequencyDistribution, ...requested]);
     });
 
     it.each([
@@ -87,7 +87,7 @@ describe('metadata model compatibility', () => {
     });
 
     it('retains both number kinds when no unit-step or single-frame constraint applies', () => {
-        const result = planModelCompatibility({id: 'unrestricted', labels: [Area.Statistics]}, generator, view);
+        const result = planModelCompatibility({id: 'unrestricted', labels: [Area.FrequencyDistribution]}, generator, view);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);
         expect(result.plan.domains.find(domain => domain.field === 'numberKind')!.alternatives)

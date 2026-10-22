@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-line-plot-problems',
-    generalLabels: [Area.Statistics, Scope.SingleFrameOfReference]
+    generalLabels: [Area.StatisticalVariable, Scope.SingleFrameOfReference]
 };
 
 export const MeasurementLinePlotProblemsGeneratorSchema = {

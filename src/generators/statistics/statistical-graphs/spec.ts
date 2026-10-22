@@ -26,7 +26,7 @@ export const spec: GeneratorSpec = {
         const scaled = selected(Scope.EvenNumbers) || selected(Scope.MultiplesOf5) || selected(Scope.MultiplesOf10);
         return !(sorting || total) || !scaled;
     })],
-    generalLabels: [Area.Statistics, Scope.IntegerNumbers]
+    generalLabels: [Area.FrequencyDistribution, Scope.IntegerNumbers]
 };
 
 export const StatisticalGraphsGeneratorSchema = {

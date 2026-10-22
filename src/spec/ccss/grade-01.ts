@@ -475,7 +475,7 @@ const digitalTimeReadingBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.C.4: Organize and represent data in three categories ---
 const organizeCategoricalDataBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Area.ObjectSorting,
         Scope.IntegerNumbers,
         Ability.ConceptClassification,
@@ -489,7 +489,7 @@ const organizeCategoricalDataBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.C.4: Read the count in one category ---
 const readCategoryCountBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Scope.IntegerNumbers,
         Ability.Interpretation
     ])
@@ -501,7 +501,7 @@ const readCategoryCountBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.C.4: Find the total across three categories ---
 const categoricalDataTotalBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Area.Addition,
         Scope.IntegerNumbers,
         Scope.ThreeOperands,
@@ -515,7 +515,7 @@ const categoricalDataTotalBuilder = new DatasetPermutationBuilder()
 // --- 1.MD.C.4: Compare two categories in an unscaled bar graph ---
 const categoricalDataComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.Statistics,
+        Area.FrequencyDistribution,
         Area.Subtraction,
         Scope.IntegerNumbers,
         Scope.BarGraph,

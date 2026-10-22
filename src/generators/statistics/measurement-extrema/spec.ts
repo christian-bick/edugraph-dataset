@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-extrema',
-    generalLabels: [Area.Statistics, Scope.FractionNumbers, Scope.SingleFrameOfReference]
+    generalLabels: [Area.StatisticalVariable, Scope.FractionNumbers, Scope.SingleFrameOfReference]
 };
 
 export const MeasurementExtremaGeneratorSchema = {

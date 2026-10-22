@@ -70,7 +70,7 @@ describe('measurement-data schema integration', () => {
     it('matches an exact denominator request without requiring a single-frame label', () => {
         const target = {
             id: 'half-without-explicit-frame',
-            labels: [Area.Statistics, Scope.HalfFractions, Scope.LinePlot,
+            labels: [Area.FrequencyDistribution, Scope.HalfFractions, Scope.LinePlot,
                 Scope.ProvidedMeasurement, Ability.VisualArticulation]
         };
         const verdict = matchTarget(target, {
