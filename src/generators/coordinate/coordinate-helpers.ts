@@ -2,6 +2,7 @@ import {GeneratorValidationError} from '../../lib/errors.ts';
 import type {CoordinateLocationTag, FormattedSignedRationalLocation, RationalCoordinateAxes, RationalCoordinateAxis,
     RationalCoordinatePoint, SignedRational, SignedRationalNotation} from '../../types/problems.ts';
 import {absoluteSignedRational, isCanonicalSignedRational, makeSignedRational} from '../number/signed-rational-helpers.ts';
+import {isSignedRationalAxis} from '../number/signed-rational-axis-helpers.ts';
 
 const helperId = 'rational-coordinates';
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -41,22 +42,11 @@ export function makeCoordinateNotation(value: SignedRational, kind: SignedRation
 
 /** Validate the generic axis, including unequal or nonsymmetric frames and endpoint zero. */
 export function isRationalCoordinateAxis(value: unknown): value is RationalCoordinateAxis {
-    if (!record(value) || !isCanonicalSignedRational(value.minimum) || !isCanonicalSignedRational(value.maximum)
-        || !isCanonicalSignedRational(value.step) || value.step.numerator <= 0
-        || !Array.isArray(value.ticks) || value.ticks.length < 2 || !Array.from(value.ticks).every(isCanonicalSignedRational)
-        || !integer(value.zeroIndex) || value.zeroIndex < 0 || value.zeroIndex >= value.ticks.length
-        || !Array.isArray(value.tickNotations) || value.tickNotations.length !== value.ticks.length) return false;
-    const ticks: SignedRational[] = value.ticks;
-    const notations: unknown[] = value.tickNotations;
-    const step = value.step;
-    if (!same(value.minimum, ticks[0]!) || !same(value.maximum, ticks[ticks.length - 1]!)
-        || ticks[value.zeroIndex]!.numerator !== 0 || !isCoordinateNotation(step, value.stepNotation)
-        || !Array.from(notations).every((notation, index) => isCoordinateNotation(ticks[index]!, notation))) return false;
-    return ticks.slice(1).every((tick, index) => {
-        const previous = ticks[index]!;
-        return (BigInt(tick.numerator) * BigInt(previous.denominator) - BigInt(previous.numerator) * BigInt(tick.denominator)) * BigInt(step.denominator)
-            === BigInt(step.numerator) * BigInt(tick.denominator) * BigInt(previous.denominator);
-    });
+    if (!isSignedRationalAxis(value)) return false;
+    const {tickNotations, stepNotation} = value as typeof value & Record<string, unknown>;
+    return Array.isArray(tickNotations) && tickNotations.length === value.ticks.length
+        && isCoordinateNotation(value.step, stepNotation)
+        && Array.from(tickNotations).every((notation, index) => isCoordinateNotation(value.ticks[index]!, notation));
 }
 
 export const isRationalCoordinateAxes = (value: unknown): value is RationalCoordinateAxes => record(value)

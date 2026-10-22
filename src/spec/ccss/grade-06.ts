@@ -18,27 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const rationalOrderAndMagnitudeImplementation = defineImplementationPackage({
-    id: 'rational-order-and-magnitude',
-    description:
-        'Interpret and express rational order and absolute magnitude, including their different meanings ' +
-        'in signed contexts.',
-    generators: [
-        {module: 'rational-order-relations', strategy: 'new'},
-        {module: 'rational-order-contexts', strategy: 'new'},
-        {module: 'rational-magnitude-relations', strategy: 'new'},
-        {module: 'rational-magnitude-contexts', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numbers-inequality-line-interpretation', strategy: 'new'},
-        {module: 'numbers-contextual-order-explanation', strategy: 'new'},
-        {module: 'numbers-contextual-order-writing', strategy: 'new'},
-        {module: 'numbers-absolute-value-distance', strategy: 'new'},
-        {module: 'numbers-contextual-absolute-value', strategy: 'new'},
-        {module: 'numbers-order-versus-magnitude', strategy: 'new'}
-    ]
-});
-
 const coordinatePlaneProblemsImplementation = defineImplementationPackage({
     id: 'coordinate-plane-problems',
     description:
@@ -1345,62 +1324,17 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.C.6c-rational-coordinate-positioning', rationalCoordinatePositioningBuilder),
     ...toTargets('6.NS.C.6c-rational-coordinate-reading', rationalCoordinateReadingBuilder),
     ...toTargets('6.NS.C.6c-rational-numberline-positioning', rationalNumberlinePositioningBuilder),
-    ...toTargets('6.NS.C.6c-rational-numberline-reading', rationalNumberlineReadingBuilder)
+    ...toTargets('6.NS.C.6c-rational-numberline-reading', rationalNumberlineReadingBuilder),
+    ...toTargets('6.NS.C.7a-inequality-line-interpretation', inequalityLineInterpretationBuilder),
+    ...toTargets('6.NS.C.7b-contextual-order-explanation', contextualOrderExplanationBuilder),
+    ...toTargets('6.NS.C.7b-contextual-order-writing', contextualOrderWritingBuilder),
+    ...toTargets('6.NS.C.7c-absolute-value-distance', absoluteValueDistanceBuilder),
+    ...toTargets('6.NS.C.7c-contextual-absolute-value', contextualAbsoluteValueBuilder),
+    ...toTargets('6.NS.C.7d-order-versus-magnitude', orderVersusMagnitudeBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.C.7a-inequality-line-interpretation',
-        inequalityLineInterpretationBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Interpret an explicit inequality as left/right ordering of two points, including negative values ' +
-        'and appropriate orientation. The competency concerns the form and meaning of an inequality ' +
-        'statement; NumericInequality now specifically identifies unequal numerical values. Less/Greater ' +
-        'retain the actual order direction.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.7b-contextual-order-explanation',
-        contextualOrderExplanationBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Read the necessary real-world context, then interpret and explain its provided inequality while ' +
-        'preserving sign and physical direction. The competency concerns the form and meaning of an ' +
-        'inequality statement; NumericInequality now specifically identifies unequal numerical values. ' +
-        'Less/Greater retain the actual order direction.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.7b-contextual-order-writing',
-        contextualOrderWritingBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Turn contextual comparisons into accurate signed rational inequality statements. The competency ' +
-        'concerns the form and meaning of an inequality statement; NumericInequality now specifically ' +
-        'identifies unequal numerical values. Less/Greater retain the actual order direction.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.7c-absolute-value-distance',
-        absoluteValueDistanceBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Absolute-value bars, point a and measured distance to zero; explain nonnegative distance ' +
-        'independently of sign.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.7c-contextual-absolute-value',
-        contextualAbsoluteValueBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Context makes magnitude distinct from direction; write and interpret a relation such as ∣−30∣=30 ' +
-        'for debt size.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.7d-order-versus-magnitude',
-        orderVersusMagnitudeBuilder,
-        rationalOrderAndMagnitudeImplementation,
-        'Signed-order and absolute-magnitude statements appear side by side, such as -40 < -30 and ∣-40∣ > ' +
-        '∣-30∣. Classify what each statement compares and explain why a smaller signed balance can mean a ' +
-        'larger debt magnitude; include unequal negative values where the order reverses. Inequality ' +
-        'supplies the meaning of the contrasted order statements. NumericInequality would only establish ' +
-        'non-equality, and a single Less/Greater Scope would not identify which of the two comparisons it ' +
-        'qualifies.'
-    ),
     ...toImplementationTodos(
         '6.NS.C.8-axis-aligned-coordinate-distance',
         axisAlignedCoordinateDistanceBuilder,

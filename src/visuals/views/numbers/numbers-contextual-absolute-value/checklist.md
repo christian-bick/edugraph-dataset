@@ -1,0 +1,2 @@
+- **Identity:** Write and interpret absolute-value equations for two contextual signed quantities.
+- **Modes:** Question Mode retains the given signed inequality but withholds absolute-value equations, magnitude comparison and meanings. Solution Mode gives the correct magnitudes and contextual meanings in green.

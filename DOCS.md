@@ -125,6 +125,13 @@ single complete scale. Positioning and reading have separate views: the former l
 unmarked, while the latter withholds the marked tick's numeral and retains the other scale
 anchors. Both views use the render seed to choose horizontal or vertical presentation.
 
+Rational order models retain nominal first/second values and their strict inequality. Absolute
+magnitude models retain exact zero-to-point distances or paired contextual observations with
+both signed and magnitude comparisons. Six fixed views project line interpretation, contextual
+order explanation and writing, absolute-value distance and meaning, and classification of the
+two comparison concepts. Contextual magnitude questions retain the given signed inequality
+while withholding the requested absolute values and comparison.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
