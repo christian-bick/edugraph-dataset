@@ -18,18 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const standardDivisionAlgorithmImplementation = defineImplementationPackage({
-    id: 'standard-division-algorithm',
-    description:
-        'Carry out and visibly record the standard division algorithm for multi-digit whole numbers.',
-    generators: [
-        {module: 'standard-algorithm-division', strategy: 'new'}
-    ],
-    views: [
-        {module: 'operations-division-standard-algorithm', strategy: 'new'}
-    ]
-});
-
 const decimalStandardAlgorithmsImplementation = defineImplementationPackage({
     id: 'decimal-standard-algorithms',
     description:
@@ -1419,19 +1407,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.A.1-fraction-division-inverse-explanation', fractionDivisionInverseExplanationBuilder),
     ...toTargets('6.NS.A.1-fraction-division-model-construction', fractionDivisionModelConstructionBuilder),
     ...toTargets('6.NS.A.1-fraction-division-story-creation', fractionDivisionStoryCreationBuilder),
-    ...toTargets('6.NS.A.1-fraction-division-word-problems', fractionDivisionWordProblemsBuilder)
+    ...toTargets('6.NS.A.1-fraction-division-word-problems', fractionDivisionWordProblemsBuilder),
+    ...toTargets('6.NS.B.2-standard-division', standardDivisionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.B.2-standard-division',
-        standardDivisionBuilder,
-        standardDivisionAlgorithmImplementation,
-        'Actual standard long-division columns: quotient-place choices, multiplication, subtraction, ' +
-        'bringing down/regrouping, and final exact quotient or remainder. Do not restrict divisors to the ' +
-        'existing two-digit cap.'
-    ),
     ...toImplementationTodos(
         '6.NS.B.3-standard-decimal-addition',
         standardDecimalAdditionBuilder,

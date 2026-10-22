@@ -91,6 +91,11 @@ contract and the earlier unit-fraction quotient model; a separate model-construc
 the general contract. Parent renderers preserve the earlier producer's task presentations; execution
 also shows a separate unit-partition reference for a zero dividend and any selected multiplication check.
 
+Whole-number standard division uses `StandardDivisionProblem`: original digits, positional quotient
+digits, and a complete sequence of partial dividends, products, remainders and bring-down witnesses.
+The standard-algorithm view places these supplied steps in conventional long-division columns,
+including internal zero quotient digits and divisors with three digits.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

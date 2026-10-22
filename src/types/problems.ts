@@ -286,6 +286,47 @@ export type StandardMultiplicationProblem = {
     sumColumns: readonly StandardMultiplicationSumColumn[];
 };
 
+/** One positional long-division subtraction, ending at the stated original dividend column. */
+export type StandardDivisionStep = {
+    columnIndex: number;
+    placeValue: number;
+    previousRemainder: number;
+    /** The first step consumes a prefix; every subsequent step consumes one digit. */
+    broughtDownDigits: readonly number[];
+    partialDividend: number;
+    quotientDigit: number;
+    product: number;
+    remainder: number;
+    nextBringDown?: {sourceColumn: number; digit: number; partialDividend: number};
+};
+
+/**
+ * Exact base-ten standard division of a multi-digit whole dividend by a positive
+ * whole divisor. The first step consumes the shortest dividend prefix at least
+ * the divisor, or all digits when the quotient is zero. Subsequent steps consume
+ * every remaining digit, including after a zero remainder. A step's partial
+ * dividend is previousRemainder * 10^broughtDownDigits.length plus those digits;
+ * product = divisor * quotientDigit and remainder = partialDividend - product,
+ * with 0 <= remainder < divisor. Steps and quotient digits have equal length;
+ * quotientStartColumn is the first step's columnIndex. Written quotient digits
+ * retain internal/trailing zeros and have no leading zero except the sole 0.
+ * Place values are 10^(dividendDigits.length - 1 - columnIndex). The optional
+ * nextBringDown records the next step's original source digit and partial value.
+ * Globally dividend = divisor * quotient + remainder. All numbers are safe integers.
+ */
+export type StandardDivisionProblem = {
+    kind: 'whole-number-standard-division';
+    base: 10;
+    dividend: number;
+    divisor: number;
+    quotient: number;
+    remainder: number;
+    dividendDigits: readonly number[];
+    quotientStartColumn: number;
+    quotientDigits: readonly number[];
+    steps: readonly StandardDivisionStep[];
+};
+
 export type DivisionPlaceValuePart = {
     digit: number;
     placeValue: 1 | 10 | 100 | 1000;
@@ -3636,6 +3677,7 @@ export interface ViewTypeMap {
     'operations-multiplication-area-model': MultiDigitMultiplicationProblem;
     'operations-multiplication-standard-algorithm': StandardMultiplicationProblem;
     'operations-division-area-model': MultiDigitDivisionProblem;
+    'operations-division-standard-algorithm': StandardDivisionProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

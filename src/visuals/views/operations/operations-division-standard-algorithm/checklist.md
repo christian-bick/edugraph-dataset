@@ -1,0 +1,2 @@
+- **Identity:** A conventional long-division bracket places the whole-number divisor beside the dividend and asks for the quotient and remainder using the standard algorithm.
+- **Modes:** Question Mode leaves quotient and work blank. Solution Mode aligns every quotient digit with its dividend column and shows each multiplication, subtraction, brought-down digit, and final remainder, retaining internal and trailing zero quotient places.
