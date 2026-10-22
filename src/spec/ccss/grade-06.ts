@@ -18,24 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const algebraStatementsImplementation = defineImplementationPackage({
-    id: 'algebra-statements',
-    description:
-        'Model, interpret and solve elementary equations and inequalities, check candidates and represent ' +
-        'complete solution sets.',
-    generators: [
-        {module: 'algebra-equations', strategy: 'new'},
-        {module: 'algebra-inequalities', strategy: 'new'}
-    ],
-    views: [
-        {module: 'algebra-substitution-check', strategy: 'new'},
-        {module: 'algebra-solution-meaning', strategy: 'new'},
-        {module: 'algebra-equation-model-solve', strategy: 'new'},
-        {module: 'algebra-inequality-numberline', strategy: 'new'},
-        {module: 'algebra-inequality-infinite-solutions', strategy: 'new'},
-        {module: 'algebra-inequality-model', strategy: 'new'}
-    ]
-});
 
 const algebraVariableMeaningImplementation = defineImplementationPackage({
     id: 'algebra-variable-meaning',
@@ -1275,28 +1257,17 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.A.2c-evaluate-variable-expressions', evaluateVariableExpressionsBuilder),
     ...toTargets('6.EE.B.6-model-contextual-expression', modelContextualExpressionBuilder),
     ...toTargets('6.EE.A.3-generate-equivalent-expressions', generateEquivalentExpressionsBuilder),
-    ...toTargets('6.EE.A.4-identify-equivalent-expressions', identifyEquivalentExpressionsBuilder)
+    ...toTargets('6.EE.A.4-identify-equivalent-expressions', identifyEquivalentExpressionsBuilder),
+    ...toTargets('6.EE.B.5-check-substitution', checkSubstitutionBuilder),
+    ...toTargets('6.EE.B.5-interpret-solution-process', interpretSolutionProcessBuilder),
+    ...toTargets('6.EE.B.7-model-and-solve-rational-equations', modelAndSolveRationalEquationsBuilder),
+    ...toTargets('6.EE.B.8-graph-inequality-solutions', graphInequalitySolutionsBuilder),
+    ...toTargets('6.EE.B.8-interpret-infinite-solutions', interpretInfiniteSolutionsBuilder),
+    ...toTargets('6.EE.B.8-model-strict-inequalities', modelStrictInequalitiesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.B.5-check-substitution',
-        checkSubstitutionBuilder,
-        algebraStatementsImplementation,
-        'Substitute a given candidate from a stated set, calculate the resulting values, and judge the ' +
-        'relation\'s truth. The worked answer shows consistent substitution and truth, without claiming ' +
-        'that one check determines the complete solution set.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.5-interpret-solution-process',
-        interpretSolutionProcessBuilder,
-        algebraStatementsImplementation,
-        'A relation and a specified candidate set are supplied. Explain why the process selects precisely ' +
-        'the candidates making the relation true, including empty or multiple matches where applicable. ' +
-        'The supplied candidate domain is part of the mathematics and must be visible. This is meaning of ' +
-        'solving, not a mandatory requirement to perform a particular transformation technique.'
-    ),
     ...toImplementationTodos(
         '6.EE.B.6-interpret-variable-roles',
         interpretVariableRolesBuilder,
@@ -1306,46 +1277,6 @@ export const implementationTodos: ImplementationTodo[] = [
         'symbol meaning are visible or necessarily supplied by text. Use the precise role selected by the ' +
         'task. Do not label generic Algebra, and do not equate generalized variables with arbitrary ' +
         'function-argument occurrence.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.7-model-and-solve-rational-equations',
-        modelAndSolveRationalEquationsBuilder,
-        algebraStatementsImplementation,
-        'Read a mathematical or real-world quantitative problem, formulate x+p=q or px=q, and determine ' +
-        'the complete solution in the stated nonnegative rational domain. The supplied quantities, ' +
-        'equation and solution agree; integer, fraction and finite-decimal examples remain admissible. ' +
-        'Routine px=q tasks may require p>0 locally while allowing x=0 or q=0; do not globally exclude ' +
-        'zero. If a zero-coefficient relation is admitted, handle it faithfully without dividing by zero. ' +
-        'Empty/full-domain classifications are a validity boundary, not an additional Grade 6 competency ' +
-        'or an implementation-completion requirement. Equation describes formalization, EquationSolving ' +
-        'the independent mathematical objective, and AlgebraicModeling the construction of the relation ' +
-        'from quantities.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.8-graph-inequality-solutions',
-        graphInequalitySolutionsBuilder,
-        algebraStatementsImplementation,
-        'Given x>c or x<c over the stated unrestricted domain, draw an open endpoint at c and a correctly ' +
-        'directed ray on a scaled number line. The ray represents the whole solution set rather than a few ' +
-        'satisfying points. GraphicalAlgebraicRepresentation identifies the solution-set representation.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.8-interpret-infinite-solutions',
-        interpretInfiniteSolutionsBuilder,
-        algebraStatementsImplementation,
-        'Explain that x>c or x<c over an unrestricted rational or real domain has infinitely many ' +
-        'satisfying values, excludes c, and has no last value in the indicated direction. Do not carry the ' +
-        'infinity claim into a context with an explicitly finite candidate set or bounded discrete domain. ' +
-        'The algebraic solution-set example must state its domain.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.8-model-strict-inequalities',
-        modelStrictInequalitiesBuilder,
-        algebraStatementsImplementation,
-        'Read a condition, identify its quantity and boundary, and write the correct strict inequality. ' +
-        'The problem\'s admissible domain remains explicit when it restricts values. NoExpressions means ' +
-        'neither statement side is composite, not that a single variable ceases to be a mathematical ' +
-        'expression.'
     ),
     ...toImplementationTodos(
         '6.EE.C.9-model-dependent-quantity',

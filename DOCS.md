@@ -99,6 +99,13 @@ alongside an equivalent or non-equivalent comparison candidate. A counterexample
 numeric calculations on both sides. Separate views request a valid rewrite or judge universal
 equivalence, so one substituted value is never presented as proof of an identity.
 
+Elementary equations and strict inequalities share exact assignment calculations and explicit
+rational or finite ambient domains. Their finite candidate truth tables, restricted candidate
+solutions and complete ambient solution certificates are distinct mathematical objects. Inverse
+steps, zero-coefficient cases, strict interval intersections and cardinality evidence are supplied
+by the producers. Six fixed views project candidate checking, solution meaning, equation
+modeling and solving, inequality graphs, infinite sets or contextual strict constraints.
+
 General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
 and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
 rectangle quantity roles without selecting a task. Five division views accept a union of this

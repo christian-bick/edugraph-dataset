@@ -125,6 +125,17 @@ function consistentUnits(units: readonly Unit[]): void {
     }
 }
 
+/** Exact same-unit sum or product, using the existing coherent-name grammar without conversions. */
+export function isAlgebraicUnitRelation(first: unknown, second: unknown, result: unknown,
+    operation: 'addition' | 'multiplication'): boolean {
+    try {
+        const a = unit(first), b = unit(second), output = unit(result);
+        consistentUnits([a, b, output]);
+        return operation === 'addition' ? sameUnit(a, b) && sameUnit(a, output)
+            : operation === 'multiplication' && sameUnit(unitProduct(a, b), output);
+    } catch { return false; }
+}
+
 function primitive(node: Node, symbols: readonly AlgebraicSymbolDeclaration[]): Range {
     const source = atom(node);
     if (source.kind === 'number') {
