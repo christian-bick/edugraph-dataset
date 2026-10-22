@@ -92,6 +92,13 @@ classification, grouped-operand interpretation, direct or contextual evaluation,
 modeling. The generic exact numeric calculation engine under `src/generators/arithmetic/`
 also serves numerical power expressions through their existing power-required contract.
 
+Affine equivalence uses the same symbolic syntax with a common domain of independent rational
+variables. Each subtree has an exact coefficient-map induction proof; local rewrite witnesses
+record distribution, collection, regrouping or reordering. One valid source rewrite is retained
+alongside an equivalent or non-equivalent comparison candidate. A counterexample supplies full
+numeric calculations on both sides. Separate views request a valid rewrite or judge universal
+equivalence, so one substituted value is never presented as proof of an identity.
+
 General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
 and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
 rectangle quantity roles without selecting a task. Five division views accept a union of this
