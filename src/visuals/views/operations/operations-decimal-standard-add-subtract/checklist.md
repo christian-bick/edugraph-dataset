@@ -1,0 +1,2 @@
+- **Identity:** A conventional decimal addition or subtraction workspace aligns the operands by the decimal point and asks for the result using the written standard algorithm.
+- **Modes:** Question Mode leaves regrouping, column calculations and the result unresolved. Solution Mode shows aligned digits, carries or corrected borrowed digits, and the complete result at the original common decimal precision.

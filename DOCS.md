@@ -96,6 +96,12 @@ digits, and a complete sequence of partial dividends, products, remainders and b
 The standard-algorithm view places these supplied steps in conventional long-division columns,
 including internal zero quotient digits and divisors with three digits.
 
+Decimal standard algorithms use exact coefficient/scale/numeral values, preserving supplied trailing
+zeros. Their payloads retain common-scale add/subtract columns, complete unscaled multiplication
+rows with decimal placement, or scale-equivalent long division with original and appended digits.
+The three decimal standard-algorithm views consume these traces directly; the earlier decimal
+method and whole-number algorithm families retain their own contracts.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
