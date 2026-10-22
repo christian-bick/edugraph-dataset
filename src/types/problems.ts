@@ -327,6 +327,134 @@ export type StandardDivisionProblem = {
     steps: readonly StandardDivisionStep[];
 };
 
+/**
+ * Exact nonnegative base-ten value coefficient / 10^scale. Coefficient and scale
+ * are safe integers, 0 <= scale <= 15 keeps decimal powers safe, and numeral is their exact positional spelling:
+ * no scientific notation or redundant integer leading zeros, exactly scale
+ * fractional digits, and an integer zero below one. Supplied trailing zeros remain.
+ */
+export type ExactDecimalValue = {
+    coefficient: number;
+    scale: number;
+    numeral: string;
+};
+
+/** One addition or subtraction column, ordered from the rightmost place upward. */
+export type DecimalStandardAddSubtractColumn = {
+    placeExponent: number;
+    topDigit: number;
+    bottomDigit: number;
+    regroupIn: 0 | 1;
+    regroupOut: 0 | 1;
+    /** Addition: a+b+in. Subtraction: a-in+10*out, before subtracting b. */
+    workingValue: number;
+    resultDigit: number;
+};
+
+/**
+ * Original decimal forms plus their common-scale alignment and complete column
+ * trace. Alignment scale is max(original scales); coefficients/numerals append
+ * zeros exactly. Result retains that scale. Columns cover every fractional place
+ * and at least the ones place, all operand digits, and an addition overflow when
+ * present. Regroup state connects adjacent columns and ends at zero. Subtraction
+ * is nonnegative; workingValue is after borrowing and never a temporary -1.
+ */
+export type DecimalStandardAddSubtractProblem = {
+    kind: 'decimal-standard-add-subtract';
+    base: 10;
+    operation: 'addition' | 'subtraction';
+    top: ExactDecimalValue;
+    bottom: ExactDecimalValue;
+    result: ExactDecimalValue;
+    alignment: {
+        scale: number;
+        topCoefficient: number;
+        bottomCoefficient: number;
+        topNumeral: string;
+        bottomNumeral: string;
+    };
+    columns: readonly DecimalStandardAddSubtractColumn[];
+};
+
+/**
+ * Full integer coefficient multiplication followed by exact decimal placement.
+ * Operand digit arrays are minimal, most significant first (zero is [0]). Every
+ * multiplier digit has a partial row, including zero digits; every multiplicand
+ * digit has a carry step. The existing row/column arithmetic invariants apply
+ * without the old whole-number operand-width restrictions. Sum columns cover
+ * minimal unscaled-product digits (one column when zero). Product coefficient
+ * equals unscaledProduct and its scale equals the sum of original scales.
+ * Decimal-placement coefficientDigits are minimal; paddedDigits have at least
+ * totalScale+1 positions and decimalIndex = paddedDigits.length-totalScale.
+ */
+export type DecimalStandardMultiplicationProblem = {
+    kind: 'decimal-standard-multiplication';
+    base: 10;
+    multiplicand: ExactDecimalValue;
+    multiplier: ExactDecimalValue;
+    multiplicandDigits: readonly number[];
+    multiplierDigits: readonly number[];
+    product: ExactDecimalValue;
+    unscaledProduct: number;
+    partialRows: readonly StandardMultiplicationPartialRow[];
+    sumColumns: readonly StandardMultiplicationSumColumn[];
+    decimalPlacement: {
+        totalScale: number;
+        coefficientDigits: readonly number[];
+        paddedDigits: readonly number[];
+        decimalIndex: number;
+    };
+};
+
+export type DecimalStandardDivisionStep = {
+    endColumnIndex: number;
+    quotientPlaceExponent: number;
+    source: 'original' | 'extension-zero';
+    previousRemainder: number;
+    broughtDownDigits: readonly number[];
+    partialDividend: number;
+    quotientDigit: number;
+    product: number;
+    remainder: number;
+};
+
+/**
+ * Exact terminating division, preserving original decimal forms. Both operands
+ * are multiplied by 10^originalDivisor.scale; the normalized divisor is its
+ * original positive coefficient. The normalized dividend can remain decimal.
+ * sourceDigits spell that normalized dividend with the point omitted, retaining
+ * its integer zero and supplied fractional zeros; decimalIndex counts integer
+ * digits. The first step consumes the shortest integer prefix >= divisor, or
+ * all integer digits with quotient 0. Later steps consume one original digit,
+ * then extension zeros only when needed. All original digits are consumed even
+ * after remainder 0. Step exponent is decimalIndex-1-endColumnIndex; each partial
+ * equals previousRemainder*10^broughtDownDigits.length plus those digits, product
+ * equals normalizedDivisor*quotientDigit, and remainder is partial-product in
+ * [0,normalizedDivisor). The final remainder is 0. Quotient digits correspond
+ * exactly to steps, including internal and decimal zeros; a below-one quotient
+ * has a written ones-place 0. Quotient display scale retains original normalized
+ * fractional precision or the greater precision needed for exact termination.
+ * Every coefficient, power and integer working value in the payload is safe.
+ */
+export type DecimalStandardDivisionProblem = {
+    kind: 'decimal-standard-division';
+    base: 10;
+    dividend: ExactDecimalValue;
+    divisor: ExactDecimalValue;
+    quotient: ExactDecimalValue;
+    normalization: {
+        shiftPlaces: number;
+        powerOfTen: number;
+        dividend: ExactDecimalValue;
+        divisor: number;
+    };
+    sourceDigits: readonly number[];
+    decimalIndex: number;
+    quotientStartColumn: number;
+    quotientDigits: readonly number[];
+    steps: readonly DecimalStandardDivisionStep[];
+};
+
 export type DivisionPlaceValuePart = {
     digit: number;
     placeValue: 1 | 10 | 100 | 1000;
@@ -3678,6 +3806,9 @@ export interface ViewTypeMap {
     'operations-multiplication-standard-algorithm': StandardMultiplicationProblem;
     'operations-division-area-model': MultiDigitDivisionProblem;
     'operations-division-standard-algorithm': StandardDivisionProblem;
+    'operations-decimal-standard-add-subtract': DecimalStandardAddSubtractProblem;
+    'operations-decimal-standard-multiplication': DecimalStandardMultiplicationProblem;
+    'operations-decimal-standard-division': DecimalStandardDivisionProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

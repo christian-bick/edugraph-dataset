@@ -1,0 +1,2 @@
+- **Identity:** A decimal long-division task makes an equivalent division with a whole-number divisor and calculates an exact decimal quotient.
+- **Modes:** Question Mode withholds the normalization, quotient decimal point and completed work. Solution Mode shows both operands scaled equally, aligned quotient digits and decimal point, every multiplication and subtraction, all original digits brought down, any appended zeros and the final zero remainder.

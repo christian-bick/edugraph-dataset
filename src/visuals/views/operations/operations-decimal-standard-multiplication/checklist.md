@@ -1,0 +1,2 @@
+- **Identity:** A decimal multiplication task uses the full coefficient multiplication algorithm followed by decimal placement based on both original factors.
+- **Modes:** Question Mode leaves working and product blank. Solution Mode includes every shifted partial-product row, including zero rows, multiplication and summation carries, the unscaled product, and decimal padding and placement.

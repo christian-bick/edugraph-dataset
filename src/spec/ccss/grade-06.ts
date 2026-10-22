@@ -18,23 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const decimalStandardAlgorithmsImplementation = defineImplementationPackage({
-    id: 'decimal-standard-algorithms',
-    description:
-        'Record the standard algorithms for addition, subtraction, multiplication and division of ' +
-        'multi-digit decimals.',
-    generators: [
-        {module: 'standard-algorithm-decimal-add-subtract', strategy: 'new'},
-        {module: 'standard-algorithm-decimal-division', strategy: 'new'},
-        {module: 'standard-algorithm-decimal-multiplication', strategy: 'new'}
-    ],
-    views: [
-        {module: 'operations-decimal-standard-add-subtract', strategy: 'new'},
-        {module: 'operations-decimal-standard-division', strategy: 'new'},
-        {module: 'operations-decimal-standard-multiplication', strategy: 'new'}
-    ]
-});
-
 const commonFactorMultipleReasoningImplementation = defineImplementationPackage({
     id: 'common-factor-multiple-reasoning',
     description:
@@ -1408,37 +1391,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.A.1-fraction-division-model-construction', fractionDivisionModelConstructionBuilder),
     ...toTargets('6.NS.A.1-fraction-division-story-creation', fractionDivisionStoryCreationBuilder),
     ...toTargets('6.NS.A.1-fraction-division-word-problems', fractionDivisionWordProblemsBuilder),
-    ...toTargets('6.NS.B.2-standard-division', standardDivisionBuilder)
+    ...toTargets('6.NS.B.2-standard-division', standardDivisionBuilder),
+    ...toTargets('6.NS.B.3-standard-decimal-addition', standardDecimalAdditionBuilder),
+    ...toTargets('6.NS.B.3-standard-decimal-division', standardDecimalDivisionBuilder),
+    ...toTargets('6.NS.B.3-standard-decimal-multiplication', standardDecimalMultiplicationBuilder),
+    ...toTargets('6.NS.B.3-standard-decimal-subtraction', standardDecimalSubtractionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.B.3-standard-decimal-addition',
-        standardDecimalAdditionBuilder,
-        decimalStandardAlgorithmsImplementation,
-        'Decimal-place alignment, regrouping and answer within a complete written standard algorithm; no ' +
-        'hundredths-only restriction.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.B.3-standard-decimal-division',
-        standardDecimalDivisionBuilder,
-        decimalStandardAlgorithmsImplementation,
-        'A scale-equivalent dividend/divisor pair where needed, followed by conventional long division and ' +
-        'correct decimal quotient placement.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.B.3-standard-decimal-multiplication',
-        standardDecimalMultiplicationBuilder,
-        decimalStandardAlgorithmsImplementation,
-        'Standard partial-product arrangement and correct decimal placement in the exact product.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.B.3-standard-decimal-subtraction',
-        standardDecimalSubtractionBuilder,
-        decimalStandardAlgorithmsImplementation,
-        'Aligned decimal subtraction with necessary regrouping, including differing input precision.'
-    ),
     ...toImplementationTodos(
         '6.NS.B.4-extract-full-common-factor',
         extractFullCommonFactorBuilder,
