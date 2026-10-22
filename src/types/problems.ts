@@ -2722,6 +2722,89 @@ export type FractionQuotientProblem = FractionQuotientCommon & (
     }>
 );
 
+export type FractionDivisionContext =
+    | {
+        kind: 'sharing';
+        material: 'juice';
+        measureUnit: 'liter';
+        groupUnit: 'batch';
+        totalMeasure: FractionQuotientValue;
+        groupCount: FractionQuotientValue;
+        measurePerGroup: FractionQuotientValue;
+    }
+    | {
+        kind: 'measured-groups';
+        material: 'juice';
+        measureUnit: 'liter';
+        groupUnit: 'serving';
+        totalMeasure: FractionQuotientValue;
+        groupCount: FractionQuotientValue;
+        measurePerGroup: FractionQuotientValue;
+    }
+    | {
+        kind: 'rectangle';
+        lengthUnit: 'meter';
+        areaUnit: 'square meter';
+        area: FractionQuotientValue;
+        firstSide: FractionQuotientValue;
+        secondSide: FractionQuotientValue;
+    };
+
+/**
+ * General nonnegative fraction division retains the original expressed operand forms.
+ * Fraction roles have denominator 2, 3, 4 or 6; integer roles have denominator 1.
+ * Operand magnitudes are at most 4 and the divisor is positive. The quotient is reduced;
+ * reciprocal is the literal original d/c and reciprocalProduct is the literal ad/bc.
+ * Inverse and optional mathematical witnesses preserve exact cross-product equality.
+ *
+ * The numerical model uses LCM(b,d) ticks per whole, independently of physical units.
+ * Groups have width divisorTicks; filledTicks equals that width except in the final
+ * partial group. Their contiguous intervals cover the dividend, and coverageTicks
+ * includes both the full final group frame and a divisor reference. Zero has no groups.
+ * Contexts assign the same canonical values to truthful physical roles; sharing uses
+ * divisor batches, measured groups use quotient servings-worth, and rectangles have
+ * positive area, first side = divisor, second side = quotient, with aspect at most 6.
+ * No field selects a learner task or a requested unknown.
+ */
+export type FractionDivisionRelationProblem = {
+    kind: 'fraction-division-relation';
+    operandProfile: 'fraction-by-fraction' | 'fraction-by-integer' | 'integer-by-fraction';
+    dividend: FractionQuotientValue;
+    divisor: FractionQuotientValue;
+    quotient: FractionQuotientValue;
+    reciprocal: FractionQuotientValue;
+    reciprocalProduct: FractionQuotientValue;
+    inverse: {
+        quotientFactor: FractionQuotientValue;
+        divisorFactor: FractionQuotientValue;
+        reconstructedDividend: FractionQuotientValue;
+    };
+    model: {
+        kind: 'common-unit-groups';
+        ticksPerWhole: number;
+        dividendTicks: number;
+        divisorTicks: number;
+        completeGroups: number;
+        remainderTicks: number;
+        fractionalGroup: FractionQuotientValue;
+        coverageTicks: number;
+        groups: {startTick: number; endTick: number; filledTicks: number}[];
+    };
+    context: FractionDivisionContext;
+    equationWitness?: {
+        firstFactor: FractionQuotientValue;
+        secondFactor: FractionQuotientValue;
+        product: FractionQuotientValue;
+    };
+    multiplicationWitness?: {
+        unreducedProduct: FractionQuotientValue;
+        reconstructedDividend: FractionQuotientValue;
+    };
+};
+
+/** The five shared division tasks preserve the legacy producer while admitting general operands. */
+export type FractionDivisionProblem = FractionQuotientProblem | FractionDivisionRelationProblem;
+
 /** Positive exact rational value; original operand forms need not be reduced. */
 export type FractionProductValue = Readonly<{
     numerator: number;
@@ -3764,11 +3847,12 @@ export interface ViewTypeMap {
     'fractions-benchmark-estimate': FractionBenchmarkArithmeticProblem;
     'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
     'fractions-quotient-interpretation': FractionQuotientProblem;
-    'fractions-division-interpretation': FractionQuotientProblem;
-    'fractions-division-execution': FractionQuotientProblem;
-    'fractions-division-story-creation': FractionQuotientProblem;
-    'fractions-division-inverse-explanation': FractionQuotientProblem;
-    'fractions-division-word-problem': FractionQuotientProblem;
+    'fractions-division-interpretation': FractionDivisionProblem;
+    'fractions-division-execution': FractionDivisionProblem;
+    'fractions-division-story-creation': FractionDivisionProblem;
+    'fractions-division-inverse-explanation': FractionDivisionProblem;
+    'fractions-division-word-problem': FractionDivisionProblem;
+    'fractions-division-model-construction': FractionDivisionRelationProblem;
     'fractions-product-partition-interpretation': FractionProductProblem;
     'fractions-product-story-creation': FractionProductProblem;
     'fractions-product-word-problem': FractionProductProblem;

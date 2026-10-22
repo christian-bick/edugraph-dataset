@@ -18,24 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const generalFractionDivisionImplementation = defineImplementationPackage({
-    id: 'general-fraction-division',
-    description:
-        'Extend fraction division to general nonnegative rational operands with execution, interpretation, ' +
-        'inverse reasoning and contextual tasks.',
-    generators: [
-        {module: 'fraction-division-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'fractions-division-execution', strategy: 'expand'},
-        {module: 'fractions-division-interpretation', strategy: 'expand'},
-        {module: 'fractions-division-inverse-explanation', strategy: 'expand'},
-        {module: 'fractions-division-model-construction', strategy: 'new'},
-        {module: 'fractions-division-story-creation', strategy: 'expand'},
-        {module: 'fractions-division-word-problem', strategy: 'expand'}
-    ]
-});
-
 const standardDivisionAlgorithmImplementation = defineImplementationPackage({
     id: 'standard-division-algorithm',
     description:
@@ -1431,53 +1413,17 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.RP.A.3c-percent-of-quantity', percentOfQuantityBuilder),
     ...toTargets('6.RP.A.3c-whole-from-percent', wholeFromPercentBuilder),
     ...toTargets('6.RP.A.3d-ratio-unit-conversion', ratioUnitConversionBuilder),
-    ...toTargets('6.RP.A.3d-unit-products-quotients', unitProductsQuotientsBuilder)
+    ...toTargets('6.RP.A.3d-unit-products-quotients', unitProductsQuotientsBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-execution', fractionDivisionExecutionBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-interpretation', fractionDivisionInterpretationBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-inverse-explanation', fractionDivisionInverseExplanationBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-model-construction', fractionDivisionModelConstructionBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-story-creation', fractionDivisionStoryCreationBuilder),
+    ...toTargets('6.NS.A.1-fraction-division-word-problems', fractionDivisionWordProblemsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-execution',
-        fractionDivisionExecutionBuilder,
-        generalFractionDivisionImplementation,
-        'Original operands and exact quotient with fraction-by-fraction computation, including ' +
-        'improper/mixed values as appropriate.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-interpretation',
-        fractionDivisionInterpretationBuilder,
-        generalFractionDivisionImplementation,
-        'Explain what a fractional quotient means in a consistent visual/contextual division relation; ' +
-        'diagrams must represent non-unit fraction divisors.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-inverse-explanation',
-        fractionDivisionInverseExplanationBuilder,
-        generalFractionDivisionImplementation,
-        'Explain why quotient × divisor reconstructs dividend, including the general fraction relationship ' +
-        'ad/bc and numerical models.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-model-construction',
-        fractionDivisionModelConstructionBuilder,
-        generalFractionDivisionImplementation,
-        'Construct a correctly scaled visual fraction model showing the quotient, with original fractional ' +
-        'quantities and grouping/sharing interpretation preserved.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-story-creation',
-        fractionDivisionStoryCreationBuilder,
-        generalFractionDivisionImplementation,
-        'Given division expression, write a context whose roles and units produce exactly that quotient; ' +
-        'support non-unit operands.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.A.1-fraction-division-word-problems',
-        fractionDivisionWordProblemsBuilder,
-        generalFractionDivisionImplementation,
-        'Solve a dimensioned story with original operands, quotient, equation and coherent supporting ' +
-        'model; sharing, measurement division and missing rectangle side contexts must be supported.'
-    ),
     ...toImplementationTodos(
         '6.NS.B.2-standard-division',
         standardDivisionBuilder,

@@ -1,0 +1,2 @@
+- **Identity:** Construct a scaled visual model of the original fraction division using a consistent whole and divisor-sized groups.
+- **Modes:** Question Mode gives the original operands and a drawing space without the completed grouping model. Solution Mode shows the completed model and its exact quotient, including any partial group.
