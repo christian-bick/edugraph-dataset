@@ -19,18 +19,6 @@ import type {
 // Shared implementation packages
 
 
-const algebraVariableMeaningImplementation = defineImplementationPackage({
-    id: 'algebra-variable-meaning',
-    description:
-        'Interpret explicitly designated unknown and generalized variable roles in their mathematical ' +
-        'domains.',
-    generators: [
-        {module: 'algebra-variable-models', strategy: 'new'}
-    ],
-    views: [
-        {module: 'algebra-variable-interpretation', strategy: 'new'}
-    ]
-});
 
 const algebraCovariationImplementation = defineImplementationPackage({
     id: 'algebra-covariation',
@@ -1263,21 +1251,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.B.7-model-and-solve-rational-equations', modelAndSolveRationalEquationsBuilder),
     ...toTargets('6.EE.B.8-graph-inequality-solutions', graphInequalitySolutionsBuilder),
     ...toTargets('6.EE.B.8-interpret-infinite-solutions', interpretInfiniteSolutionsBuilder),
-    ...toTargets('6.EE.B.8-model-strict-inequalities', modelStrictInequalitiesBuilder)
+    ...toTargets('6.EE.B.8-model-strict-inequalities', modelStrictInequalitiesBuilder),
+    ...toTargets('6.EE.B.6-interpret-variable-roles', interpretVariableRolesBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.B.6-interpret-variable-roles',
-        interpretVariableRolesBuilder,
-        algebraVariableMeaningImplementation,
-        'Explain the stated role of a symbol in its context: one particular value to determine, or an ' +
-        'arbitrary member of a named domain in a relationship valid for all such members. The domain and ' +
-        'symbol meaning are visible or necessarily supplied by text. Use the precise role selected by the ' +
-        'task. Do not label generic Algebra, and do not equate generalized variables with arbitrary ' +
-        'function-argument occurrence.'
-    ),
     ...toImplementationTodos(
         '6.EE.C.9-model-dependent-quantity',
         modelDependentQuantityBuilder,
