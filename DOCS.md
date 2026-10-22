@@ -84,6 +84,14 @@ witnesses. Their generators live under `src/generators/measurement/`; the consum
 `src/visuals/views/measure/` select the conversion direction or present unit composition and
 ask for an explanation alongside the calculation.
 
+Algebra expression tasks use one symbolic tree, complete symbol domains and bindings, its exact
+numeric substitution, structural proofs and a parameter or quantitative context. Helpers under
+`src/generators/algebra/` validate the linked mathematics; the six leaves under
+`src/visuals/views/operations/` project it into prescribed expression writing, component
+classification, grouped-operand interpretation, direct or contextual evaluation, and quantity
+modeling. The generic exact numeric calculation engine under `src/generators/arithmetic/`
+also serves numerical power expressions through their existing power-required contract.
+
 General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
 and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
 rectangle quantity roles without selecting a task. Five division views accept a union of this

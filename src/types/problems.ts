@@ -4193,10 +4193,231 @@ export type ExactNumericExpressionConstraints = Readonly<{
     maximumExponent: number;
 }>;
 
+/** General numeric calculation component; literal-only and unpowered instances are valid. */
+export type ExactNumericCalculation = Readonly<{
+    expression: ExactNumericalExpressionNode;
+    nodeValues: readonly [ExactNumericNodeValue, ...ExactNumericNodeValue[]];
+    powerFacts: readonly ExactPowerFact[];
+    reductions: readonly ExactNumericReduction[];
+    finalValue: ExactNumericValue;
+    precedenceWitness: ExactNumericPrecedenceWitness | null;
+}>;
+
+export type AlgebraicScalar = ExactNumericValue;
+export type AlgebraicNotation = ExactNumericNotation;
+
+/**
+ * Separate recursive symbolic superset; every numeric calculation tree is structurally
+ * assignable, while the numeric-only recursive union remains unchanged.
+ * Unique nonempty ids within each tree; no cycles, sparse children or -0.
+ * A variable refers to a declaration, not an arbitrary string expression.
+ */
+export type ExactSymbolicExpressionNode =
+    | Extract<ExactNumericalExpressionNode, {kind: 'number'}>
+    | Readonly<{id: string; kind: 'variable'; symbolId: string}>
+    | Readonly<{id: string; kind: 'binary'; operation: ArithmeticOperation;
+        left: ExactSymbolicExpressionNode; right: ExactSymbolicExpressionNode}>
+    | Readonly<{id: string; kind: 'group'; expression: ExactSymbolicExpressionNode}>
+    | Readonly<{id: string; kind: 'negation'; operand: ExactSymbolicExpressionNode}>
+    | Readonly<{id: string; kind: 'power'; base: ExactSymbolicExpressionNode; exponent: number}>;
+
+export type AlgebraicDomainBound = Readonly<{value: AlgebraicScalar; inclusive: boolean}>;
+/** The domain means ALL its admitted values, not merely the supplied assignment. */
+export type AlgebraicVariableDomain = Readonly<{
+    kind: 'rational' | 'integer';
+    lower: AlgebraicDomainBound | null;
+    upper: AlgebraicDomainBound | null;
+    excludedValues: readonly AlgebraicScalar[];
+}>;
+export type AlgebraicSymbolDeclaration = Readonly<{
+    symbolId: string;
+    /** Unambiguous identifier: a Unicode letter followed by letters, digits or underscores. */
+    symbol: string;
+    domain: AlgebraicVariableDomain;
+}>;
+/** Original expression node references retain division / exponent-zero domains. */
+export type AlgebraicDomainRestriction = Readonly<{
+    kind: 'nonzero-expression';
+    expressionNodeId: string;
+    reason: 'division-denominator' | 'zero-exponent-base';
+}>;
+export type AlgebraicBinding = Readonly<{
+    symbolId: string;
+    value: AlgebraicScalar;
+    notation: AlgebraicNotation;
+    /** EXACT complete set of original variable occurrences replaced by this binding. */
+    occurrenceNodeIds: readonly [string, ...string[]];
+}>;
+
+/**
+ * Every declared symbol is used, has exactly one admissible binding, and every
+ * occurrence is replaced consistently. Number/operator/group ids and original
+ * literal spelling are unchanged; variable nodes become same-id number leaves
+ * with the binding's supplied notation. No symbolic nonliteral has a value field.
+ * Empty powerFacts are valid here, unlike the power-required problem.
+ * nodeValues covers EVERY substituted original node. Reduction snapshots follow
+ * the numeric engine's true written-precedence procedure and exact same-id replacement.
+ */
+export type AlgebraicSubstitution = Readonly<{
+    bindings: readonly [AlgebraicBinding, ...AlgebraicBinding[]];
+    substitutedExpression: ExactNumericalExpressionNode;
+    nodeValues: readonly [ExactNumericNodeValue, ...ExactNumericNodeValue[]];
+    powerFacts: readonly ExactPowerFact[];
+    reductions: readonly ExactNumericReduction[];
+    finalValue: AlgebraicScalar;
+    finalNotation: AlgebraicNotation;
+    precedenceWitness: ExactNumericPrecedenceWitness | null;
+}>;
+
+/**
+ * This names a MATHEMATICAL instance of the same parameterization relation:
+ * either original symbolic syntax or its fully substituted numeric syntax.
+ * Numeric structural targets therefore show a genuine ArithmeticExpression;
+ * symbolic structural targets show a genuine AlgebraicExpression.
+ */
+export type AlgebraicStructuralExpression =
+    | Readonly<{kind: 'symbolic'; expression: ExactSymbolicExpressionNode}>
+    | Readonly<{kind: 'numeric'; expression: ExactNumericalExpressionNode}>;
+
+/** All refs in structural/group facts are scoped to structuralExpression. */
+export type AlgebraicComponentRef = Readonly<{nodeId: string}>;
+/**
+ * sourceNodeId is the unsigned source subtree; polarity includes every enclosing
+ * subtraction/negation at the stated additive level. signedExpression supplies
+ * the COMPLETE component, not positive 3y mislabeled as the term -3y.
+ * A derived enclosing negation has a fresh id; surviving subtree ids are retained.
+ */
+export type SignedAlgebraicTerm = Readonly<{
+    sourceNodeId: string;
+    polarity: 1 | -1;
+    signedExpression: ExactSymbolicExpressionNode;
+}>;
+
+export type AlgebraicStructuralRelation =
+    | Readonly<{kind: 'additive-components'; levelNodeId: string;
+        terms: readonly [SignedAlgebraicTerm, SignedAlgebraicTerm, ...SignedAlgebraicTerm[]]}>
+    | Readonly<{kind: 'multiplicative-components'; productNodeId: string;
+        factors: readonly [AlgebraicComponentRef, AlgebraicComponentRef, ...AlgebraicComponentRef[]]}>
+    | Readonly<{kind: 'coefficient'; additiveLevelNodeId: string; term: SignedAlgebraicTerm;
+        coefficient: AlgebraicScalar; coefficientNotation: AlgebraicNotation;
+        /** The designated nonconstant variable part, including its grouping. */
+        variablePart: ExactSymbolicExpressionNode;
+        /** Variable-free factor values; coefficient = term.polarity * their product (empty product 1). */
+        constantFactors: readonly AlgebraicScalar[];
+        variableSymbolIds: readonly [string, ...string[]]}>
+    | Readonly<{kind: 'sum'; operationNodeId: string;
+        addends: readonly [AlgebraicComponentRef, AlgebraicComponentRef]}>
+    | Readonly<{kind: 'product'; operationNodeId: string;
+        factors: readonly [AlgebraicComponentRef, AlgebraicComponentRef]}>
+    | Readonly<{kind: 'quotient'; operationNodeId: string;
+        numerator: AlgebraicComponentRef; denominator: AlgebraicComponentRef}>;
+
+/**
+ * The actual group node is a complete operand in the referenced enclosing node.
+ * Group selection is mathematical incidence, not a requested highlight/unknown.
+ * A source group id, inner id and operand position are all supplied; the view
+ * need only format/highlight them and choose its fixed interpretation response.
+ */
+export type AlgebraicGroupedOperand = Readonly<{
+    groupNodeId: string;
+    innerNodeId: string;
+    parentNodeId: string;
+    enclosingOperation: ArithmeticOperation | 'negation' | 'power';
+    position: 'left' | 'right' | 'operand' | 'base';
+}>;
+
+export type AlgebraicUnit = Readonly<{
+    /** Subject distinguishes, for example, tickets from containers. */
+    subject: 'number' | 'money' | 'time' | 'item' | 'length' | 'area' | 'volume';
+    /** Coherent atomic unit identity, optionally square/cubic or '<unit> per <unit>'; no implicit conversions. */
+    name: string;
+    dimensions: Readonly<{currency: number; time: number; count: number; length: number}>;
+}>;
+export type AlgebraicQuantity = Readonly<{
+    quantityId: string;
+    meaning: 'fixed-charge' | 'rate' | 'duration' | 'group-count' | 'amount-per-group'
+        | 'initial-amount' | 'added-amount' | 'removed-amount' | 'remaining-amount'
+        | 'total-amount' | 'share-count' | 'amount-per-share' | 'length' | 'width'
+        | 'edge' | 'area' | 'volume' | 'input-number' | 'output-number';
+    unit: AlgebraicUnit;
+    /** Exact mathematical quantity definition, never a ready-written story/prompt. */
+    expression: ExactSymbolicExpressionNode;
+}>;
+
+/** Semantic quantitative relationships; no operation words or prose instructions. */
+export type AlgebraicQuantityRelation =
+    | Readonly<{kind: 'fixed-and-proportional'; resultId: string; fixedId: string; rateId: string; inputId: string}>
+    | Readonly<{kind: 'equal-groups'; resultId: string; groupCountId: string; amountPerGroupId: string}>
+    | Readonly<{kind: 'combined-amounts'; resultId: string; firstId: string; secondId: string}>
+    | Readonly<{kind: 'remaining-amount'; resultId: string; initialId: string; removedId: string}>
+    | Readonly<{kind: 'equal-sharing'; resultId: string; totalId: string; shareCountId: string}>
+    | Readonly<{kind: 'rectangular-measure'; resultId: string; lengthId: string; widthId: string}>
+    | Readonly<{kind: 'cubical-measure'; resultId: string; edgeId: string; measure: 'volume' | 'surface-area'}>;
+
+/**
+ * parameter-description supports ordinary operation-phrase/formula members with
+ * mathematical input numbers; it is NOT automatically an AlgebraicModeling claim.
+ * quantitative-system supplies the object/quantity relationships needed by true
+ * modeling members. Its graph is connected to the SAME main expression, has no
+ * cycles, uses every quantity, and respects exact dimensions/count domains.
+ * Admitted quantitative graphs use constant/symbol atoms as primitive inputs and exact
+ * typed operation definitions for derived quantities. Whole-domain interval/sign
+ * propagation proves physical quantities nonnegative, counts integral and share-counts
+ * positive. Remaining amounts require lower(initial) >= upper(removed); correlated
+ * cases requiring a different positivity proof are outside this constructive family.
+ * Count-valued sharing requires integrality by construction, not one sampled quotient.
+ * outputQuantityId's expression equals the main symbolic syntax. Output units
+ * and symbol-to-quantity meanings are canonical context, never a requested answer.
+ */
+export type AlgebraicExpressionContext =
+    | Readonly<{kind: 'parameter-description';
+        parameters: readonly [Readonly<{symbolId: string; meaning: 'number'}>, ...Readonly<{symbolId: string; meaning: 'number'}>[]];
+        resultMeaning: 'number'}>
+    | Readonly<{kind: 'quantitative-system'; setting: 'purchase' | 'production' | 'sharing' | 'measurement';
+        quantities: readonly [AlgebraicQuantity, ...AlgebraicQuantity[]];
+        relations: readonly [AlgebraicQuantityRelation, ...AlgebraicQuantityRelation[]];
+        outputQuantityId: string;
+        variableQuantities: readonly [Readonly<{symbolId: string; quantityId: string}>, ...Readonly<{symbolId: string; quantityId: string}>[]]}>
+;
+
+/**
+ * COMPLETE UNIFORM PAYLOAD: all six leaves accept every coherent member.
+ * One symbolic expression + one assignment + its exact numeric instance, not
+ * six independent task objects. Unclaimed linked facts may be hidden; every
+ * EMITTED mathematical claim must remain evidenced in either mode.
+ *
+ * Original syntax contains a genuine numeric literal or literal power exponent, so
+ * numeral projections retain evidence even when assignments are hidden. Modeling
+ * contexts expose meaningful numeric quantities, relations or domain bounds.
+ * At least one complete structural relation and grouped-operand incidence are
+ * supplied in every member so no fixed sibling rejects a permitted member.
+ * For the genuine grouped profile, the group must contain a real inner operation.
+ * A plain expression may group a single operand (5-(y)); syntax formatting must
+ * preserve explicit groups. Standalone AST helpers may also accept ungrouped 5-y;
+ * that is not by itself a complete six-consumer problem without a group witness.
+ */
+export type AlgebraicExpressionProblem = Readonly<{
+    kind: 'algebra-expressions';
+    expression: ExactSymbolicExpressionNode;
+    symbols: readonly [AlgebraicSymbolDeclaration, ...AlgebraicSymbolDeclaration[]];
+    restrictions: readonly AlgebraicDomainRestriction[];
+    substitution: AlgebraicSubstitution;
+    structuralExpression: AlgebraicStructuralExpression;
+    structuralRelations: readonly [AlgebraicStructuralRelation, ...AlgebraicStructuralRelation[]];
+    groupedOperands: readonly [AlgebraicGroupedOperand, ...AlgebraicGroupedOperand[]];
+    context: AlgebraicExpressionContext;
+}>;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
     'numerical-power-expression-evaluate': NumericalPowerExpressionProblem;
     'numerical-power-expression-write': NumericalPowerExpressionProblem;
+    'algebra-expression-write': AlgebraicExpressionProblem;
+    'algebra-expression-parts': AlgebraicExpressionProblem;
+    'algebra-subexpression-interpretation': AlgebraicExpressionProblem;
+    'algebra-expression-evaluate': AlgebraicExpressionProblem;
+    'algebra-formula-evaluate': AlgebraicExpressionProblem;
+    'algebra-expression-model': AlgebraicExpressionProblem;
     'measure-ratio-conversion': MeasurementRatioRelationProblem;
     'measure-unit-composition': UnitDimensionRelationProblem;
     'percent-of-quantity': PercentQuantityProblem;

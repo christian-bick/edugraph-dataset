@@ -1,0 +1,2 @@
+- **Identity:** Necessary prescribed-operation prose asks for a letter expression, preserving order-sensitive subtraction and division.
+- **Modes:** Question Mode withholds the symbolic expression, numeric assignment and computed work. Solution Mode writes the original expression with the given letter meanings and genuine grouping, without adding a value-finding task.

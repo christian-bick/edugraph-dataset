@@ -1,0 +1,2 @@
+- **Identity:** Necessary contextual prose identifies admissible input values or the requested quantity for a given formula, which is then evaluated by substitution.
+- **Modes:** Question Mode leaves the numeric replacement and result unresolved, with no redundant ready input table. Solution Mode shows consistent substitution, the full exact calculation and the answer with the contextual unit when supplied.

@@ -18,24 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const algebraExpressionStructureImplementation = defineImplementationPackage({
-    id: 'algebra-expression-structure',
-    description:
-        'Represent literal expressions and structural roles, interpret subexpressions, substitute values ' +
-        'and model quantitative situations.',
-    generators: [
-        {module: 'algebra-expressions', strategy: 'new'}
-    ],
-    views: [
-        {module: 'algebra-expression-write', strategy: 'new'},
-        {module: 'algebra-expression-parts', strategy: 'new'},
-        {module: 'algebra-subexpression-interpretation', strategy: 'new'},
-        {module: 'algebra-expression-evaluate', strategy: 'new'},
-        {module: 'algebra-formula-evaluate', strategy: 'new'},
-        {module: 'algebra-expression-model', strategy: 'new'}
-    ]
-});
-
 const algebraExpressionEquivalenceImplementation = defineImplementationPackage({
     id: 'algebra-expression-equivalence',
     description:
@@ -1300,61 +1282,16 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.G.A.3-coordinate-polygon-construction', coordinatePolygonConstructionBuilder),
     ...toTargets('6.G.A.3-coordinate-polygon-side-length', coordinatePolygonSideLengthBuilder),
     ...toTargets('6.EE.A.1-evaluate-power-expressions', evaluatePowerExpressionsBuilder),
-    ...toTargets('6.EE.A.1-write-power-expressions', writePowerExpressionsBuilder)
+    ...toTargets('6.EE.A.1-write-power-expressions', writePowerExpressionsBuilder),
+    ...toTargets('6.EE.A.2a-write-letter-expressions', writeLetterExpressionsBuilder),
+    ...toTargets('6.EE.A.2b-identify-expression-parts', identifyExpressionPartsBuilder),
+    ...toTargets('6.EE.A.2b-interpret-subexpressions', interpretSubexpressionsBuilder),
+    ...toTargets('6.EE.A.2c-evaluate-variable-expressions', evaluateVariableExpressionsBuilder),
+    ...toTargets('6.EE.B.6-model-contextual-expression', modelContextualExpressionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.A.2a-write-letter-expressions',
-        writeLetterExpressionsBuilder,
-        algebraExpressionStructureImplementation,
-        'A written calculation already specifies the operation and includes a letter standing for a ' +
-        'number; the learner writes its symbolic form, including order-sensitive phrases such as subtract ' +
-        'y from 5. Do not add AlgebraicModeling merely because prose is present: the operation ' +
-        'relationship is already specified. AlgebraicExpression supplies the observable literal-expression ' +
-        'distinction from Grade 5 numerical translation.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.A.2b-identify-expression-parts',
-        identifyExpressionPartsBuilder,
-        algebraExpressionStructureImplementation,
-        'Classify a displayed expression component by its additive, multiplicative, quotient or ' +
-        'coefficient role. Across configurations cover every named category, with the numeric 2(8+7) ' +
-        'example as well as literal expressions. A coefficient configuration must identify the designated ' +
-        'variable part. Term, Factor and Coefficient identify structural roles. Addition, Multiplication ' +
-        'and Division identify the operation whose expression is a sum, product or quotient; these tasks ' +
-        'classify rather than execute it. They do not require a new Sum/Product/Quotient Area. Use ' +
-        'correlated expression-kind/role variants: Coefficient requires a designated variable part and is ' +
-        'paired only with AlgebraicExpression. The arithmetic/literal alternatives retain the source\'s ' +
-        'explicit numerical example without making variables incidental labels. The generator carries an ' +
-        'Ability-neutral expression tree and its role metadata. The view selects the component it asks ' +
-        'about; never put learner-facing highlighting or a selected question into the generator payload.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.A.2b-interpret-subexpressions',
-        interpretSubexpressionsBuilder,
-        algebraExpressionStructureImplementation,
-        'Explain how a grouped expression is one complete input of the enclosing operation while retaining ' +
-        'its inner structure, for example the sum (8+7) as one factor in 2(8+7), or x+2 in 3(x+2). ' +
-        'GroupedExpression was removed; the expression kind plus GroupingSymbol and Operand express the ' +
-        'observable composition. Do not add every primitive appearing incidentally in the expression.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.A.2c-evaluate-variable-expressions',
-        evaluateVariableExpressionsBuilder,
-        algebraExpressionStructureImplementation,
-        'Given a variable expression or formula and admissible values, replace every relevant occurrence ' +
-        'consistently and evaluate in conventional order. Include rational inputs, unparenthesized ' +
-        'precedence and optional powers; contextual formula text must be necessary to identify values or ' +
-        'the requested quantity. The generator enforces integer exponents >= 0; the IntegerExponent-only ' +
-        'configuration includes exponent-zero examples with nonzero bases. PositiveExponent additionally ' +
-        'requires n > 0. Omitting PositiveExponent does not itself label zero or nonnegativity. Do not ' +
-        'constrain all numbers/base signs merely to constrain the exponent; exclude undefined 0^0 locally. ' +
-        'A separate no-power alternative retains ordinary substitution examples. Whole-number powers are ' +
-        'included within the competency rather than imposed on every instance. Formula evaluation does not ' +
-        'automatically claim the geometry theorem behind a supplied formula.'
-    ),
     ...toImplementationTodos(
         '6.EE.A.3-generate-equivalent-expressions',
         generateEquivalentExpressionsBuilder,
@@ -1404,18 +1341,6 @@ export const implementationTodos: ImplementationTodo[] = [
         'symbol meaning are visible or necessarily supplied by text. Use the precise role selected by the ' +
         'task. Do not label generic Algebra, and do not equate generalized variables with arbitrary ' +
         'function-argument occurrence.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.B.6-model-contextual-expression',
-        modelContextualExpressionBuilder,
-        algebraExpressionStructureImplementation,
-        'Read a real-world or mathematical situation, choose the quantity represented by a letter and its ' +
-        'admissible values, identify the needed relationship, and write the resulting expression. The ' +
-        'situation must require extracting the relationship rather than merely translating an operation ' +
-        'phrase. This resolves the former contextual-expression-modeling ontology package. ' +
-        'AlgebraicModeling is available; do not propose QuantitativeSituation or another new ontology ' +
-        'label. Keep this distinct from A.2a operation-phrase translation. No equivalence declaration is ' +
-        'justified.'
     ),
     ...toImplementationTodos(
         '6.EE.B.7-model-and-solve-rational-equations',

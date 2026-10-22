@@ -1,0 +1,2 @@
+- **Identity:** A complete grouped subexpression is interpreted as one input of its enclosing operation while retaining its internal expression.
+- **Modes:** Question Mode marks the whole group and leaves its enclosing role unexplained. Solution Mode explains the actual enclosing operation and operand position, without replacing the inner structure by a computed value.
