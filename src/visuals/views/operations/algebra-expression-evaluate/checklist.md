@@ -1,0 +1,2 @@
+- **Identity:** A given letter expression and admissible assignments ask for consistent substitution and exact evaluation in conventional written order.
+- **Modes:** Question Mode withholds the numeric replacement, calculation steps and result. Solution Mode replaces every variable occurrence consistently and shows the full numeric calculation, genuine group steps and any power facts.

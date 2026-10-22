@@ -1,0 +1,2 @@
+- **Identity:** A quantitative situation asks the learner to identify relevant quantities, choose a letter and admissible values, and construct an expression for their relationship.
+- **Modes:** Question Mode gives necessary quantitative facts and domain information while withholding the ready expression, canonical variable choices and numeric assignment. Solution Mode identifies quantity meanings and domains and writes the expression with the contextual units; it does not add an evaluation task.
