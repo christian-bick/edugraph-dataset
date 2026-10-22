@@ -84,6 +84,13 @@ witnesses. Their generators live under `src/generators/measurement/`; the consum
 `src/visuals/views/measure/` select the conversion direction or present unit composition and
 ask for an explanation alongside the calculation.
 
+General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
+and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
+rectangle quantity roles without selecting a task. Five division views accept a union of this
+contract and the earlier unit-fraction quotient model; a separate model-construction view accepts
+the general contract. Parent renderers preserve the earlier producer's task presentations; execution
+also shows a separate unit-partition reference for a zero dividend and any selected multiplication check.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

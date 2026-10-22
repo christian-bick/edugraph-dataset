@@ -121,6 +121,24 @@ function modelExplanation(data: FractionQuotientProblem): string {
     return `${data.model.wholeUnitCount} whole meters contain ${data.model.groupCount} parts of size ${measure(data.divisor)}. The quotient counts ${answerWithUnit(data)}.`;
 }
 
+function EmptyDividendReference({partsPerWhole}: {partsPerWhole: number}) {
+    const x = 100;
+    const width = 570;
+    return <svg viewBox="0 0 760 210" className="h-[210px] w-[760px] max-w-full" role="img"
+        aria-label="Empty zero-meter dividend and a separate one-meter partition reference">
+        <text x="22" y="27" className="fill-slate-700 text-[15px] font-bold">Dividend: 0 meters</text>
+        <rect x={x} y="42" width={width} height="38" rx="6" fill="#f8fafc" stroke="#94a3b8" strokeWidth="2" strokeDasharray="6 4" />
+        <text x="385" y="67" textAnchor="middle" className="fill-slate-500 text-[15px]">Empty dividend</text>
+        <text x="22" y="121" className="fill-slate-700 text-[15px] font-bold">One-meter partition reference</text>
+        {Array.from({length: partsPerWhole}, (_, index) => <g key={index}>
+            <rect x={x + index * width / partsPerWhole} y="137" width={width / partsPerWhole} height="42"
+                fill="#e0e7ff" stroke="#475569" strokeWidth="1.5" />
+            <text x={x + (index + 0.5) * width / partsPerWhole} y="164" textAnchor="middle"
+                className="fill-slate-800 text-[14px] font-semibold">1/{partsPerWhole} m</text>
+        </g>)}
+    </svg>;
+}
+
 function NotationTask({data, isSolutionView}: Omit<Props, 'task'>) {
     const fraction: FractionQuotientValue = data.quotient;
     const notation = formatOriginalFraction(fraction);
@@ -158,8 +176,18 @@ function ExecutionTask({data, isSolutionView}: Omit<Props, 'task'>) {
     return <>
         <p className="text-base text-slate-700">Use the equal parts in the model to find the quotient.</p>
         <Expression data={data} showAnswer={isSolutionView} />
-        <div className="mt-4"><Model data={data} /></div>
-        {isSolutionView && <Answer>{modelExplanation(data)}</Answer>}
+        <div className="mt-4">{data.orientation !== 'unit-fraction-by-whole' && data.model.wholeUnitCount === 0
+            ? <EmptyDividendReference partsPerWhole={data.model.partsPerWhole} />
+            : <Model data={data} />}</div>
+        {isSolutionView && <Answer>
+            {modelExplanation(data)}
+            {data.multiplicationWitness && <div className="mt-2 font-mono font-bold" data-evidence="execution-multiplication-check">
+                {displayedQuotient(data)} × {formatQuotientValue(data.divisor)} = {formatOriginalFraction(data.multiplicationWitness.unreducedProduct)} = {formatQuotientValue(data.multiplicationWitness.reconstructedDividend)}
+            </div>}
+        </Answer>}
+        {!isSolutionView && data.multiplicationWitness && <Blank>
+            <span className="font-mono" data-evidence="execution-multiplication-check">______ × {formatQuotientValue(data.divisor)} = {formatQuotientValue(data.dividend)}</span>
+        </Blank>}
     </>;
 }
 

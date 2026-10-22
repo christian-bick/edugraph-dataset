@@ -12,6 +12,54 @@ const sample = (relationProfile: Parameters<FractionQuotientModelGenerator['gene
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('fraction quotient task projections', () => {
+    it('replays the zero-dividend failure with an empty amount and a separate correct partition reference', () => {
+        setSeed(1130970508);
+        const data = generator.generate({relationProfile: 'unit-divisor-inverse'}).data;
+        expect(data.orientation).toBe('whole-by-unit-fraction');
+        expect(data.dividend).toEqual({numerator: 0, denominator: 1});
+        expect(data.divisor).toEqual({numerator: 1, denominator: 3});
+        const question = renderToStaticMarkup(<FractionQuotientBody data={data} task="division-execution" isSolutionView={false} />);
+        const solution = renderToStaticMarkup(<FractionQuotientBody data={data} task="division-execution" isSolutionView />);
+        expect(visible(question)).toContain('Dividend: 0 meters');
+        expect(visible(question)).toContain('Empty dividend');
+        expect(visible(question)).toContain('One-meter partition reference');
+        expect(question.match(/>1\/3 m<\/text>/g)).toHaveLength(3);
+        expect(visible(question)).toContain('______ × 1/3 = 0');
+        expect(question).not.toContain('emerald');
+        expect(visible(question)).not.toMatch(/0 pieces|0 groups|0 ×/);
+        expect(visible(solution)).toContain('0 × 1/3 = 0/3 = 0');
+        expect(solution).toMatch(/text-emerald-950[^>]*>[\s\S]*data-evidence="execution-multiplication-check"/);
+    });
+
+    it('shows selected multiplication evidence for nonzero unit-dividend and unit-divisor execution', () => {
+        for (const relationProfile of ['unit-dividend-inverse', 'unit-divisor-inverse'] as const) {
+            const data = sample(relationProfile);
+            const question = renderToStaticMarkup(<FractionQuotientBody data={data} task="division-execution" isSolutionView={false} />);
+            const solution = renderToStaticMarkup(<FractionQuotientBody data={data} task="division-execution" isSolutionView />);
+            expect(question).toContain('data-evidence="execution-multiplication-check"');
+            expect(visible(question)).toMatch(/______ × .* = /);
+            expect(solution).toContain('data-evidence="execution-multiplication-check"');
+            expect(visible(solution)).toContain(`${data.multiplicationWitness!.unreducedProduct.numerator}/${data.multiplicationWitness!.unreducedProduct.denominator}`);
+        }
+        const basic = sample('unit-dividend-basic');
+        for (const isSolutionView of [false, true]) {
+            const markup = renderToStaticMarkup(<FractionQuotientBody data={basic} task="division-execution" isSolutionView={isSolutionView} />);
+            expect(markup).not.toContain('data-evidence="execution-multiplication-check"');
+            expect(markup).not.toContain('One-meter partition reference');
+        }
+    });
+
+    it('keeps the zero-reference and execution check changes out of other legacy task identities', () => {
+        setSeed(1130970508);
+        const data = generator.generate({relationProfile: 'unit-divisor-inverse'}).data;
+        for (const task of ['division-interpretation', 'division-story-creation', 'division-inverse-explanation', 'division-word-problem'] as const) {
+            const markup = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView />);
+            expect(markup).not.toContain('One-meter partition reference');
+            expect(markup).not.toContain('data-evidence="execution-multiplication-check"');
+            expect(visible(markup)).toContain('0 meters: no unit parts to count');
+        }
+    });
+
     it('keeps execution result blank in Q and relates answer to partition in S', () => {
         for (const relationProfile of ['whole-sharing-equation', 'unit-dividend-basic', 'unit-divisor-basic'] as const) {
             const data = sample(relationProfile);

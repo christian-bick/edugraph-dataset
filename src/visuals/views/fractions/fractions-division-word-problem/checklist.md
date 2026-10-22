@@ -1,2 +1,2 @@
-- **Identity:** A real-world ribbon or rope story supplies the division quantities only in prose and asks for the share size or number of unit-fraction pieces.
-- **Modes:** Question Mode leaves the equation and unit-bearing answer blank. Solution Mode shows the matching partition, original division equation, exact quotient, and contextual answer.
+- **Identity:** A real-world sharing, measured-group, or missing-rectangle-side story supplies the division quantities in prose and asks for the corresponding quotient with units.
+- **Modes:** Question Mode withholds the solved equation and unit-bearing answer. Solution Mode shows a coherent supporting model, original division equation, exact quotient, and contextual answer.
