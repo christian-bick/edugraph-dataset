@@ -546,6 +546,59 @@ export type FactorMultipleRelationsProblem =
     | OneDigitMultipleTestProblem
     | FactorClassificationProblem;
 
+/** A full common-factor extraction, with positive original addends at most 100. */
+export type FullCommonFactorDistributionProblem = {
+    kind: 'full-common-factor-distribution';
+    addends: readonly [number, number];
+    sum: number;
+    /** Complete ascending positive common divisors; the last is gcd > 1. */
+    commonDivisors: readonly number[];
+    gcd: number;
+    residualAddends: readonly [number, number];
+    residualSum: number;
+    /** Complete common-divisor list proves the residual addends are coprime. */
+    residualCommonDivisors: readonly [1];
+    /** gcd times each residual, in original addend order. */
+    distributedProducts: readonly [number, number];
+};
+
+export type CommonDivisorWitness = {
+    kind: 'defined';
+    value: number;
+    commonDivisors: readonly number[];
+    /** inputs = value times these nonnegative, coprime cofactors. */
+    cofactors: readonly [number, number];
+    cofactorCommonDivisors: readonly [1];
+} | {kind: 'undefined-zero-pair'};
+
+export type CommonMultipleWitness = {
+    kind: 'positive';
+    value: number;
+    /** The opposite GCD cofactors: inputs[i] times commonMultipliers[i] = value. */
+    commonMultipliers: readonly [number, number];
+    commonProducts: readonly [number, number];
+} | {
+    kind: 'zero-extension';
+    value: 0;
+    /** Complete indices of zero inputs; the zero extension applies iff nonempty. */
+    zeroInputIndices: readonly (0 | 1)[];
+    /** Both inputs times zero, without division by an input or a claimed least positive value. */
+    zeroProducts: readonly [0, 0];
+};
+
+/**
+ * Both canonical relations for whole inputs 0..100. GCD(0,0) is undefined;
+ * LCM is extended to zero when either input is zero. Positive LCM uses the
+ * supplied coprime GCD cofactors u,v: L = gcd*u*v = first*v = second*u.
+ * No field selects a learner task; either pair view accepts every witness branch.
+ */
+export type CommonFactorMultipleProblem = {
+    kind: 'common-factor-multiple-relations';
+    inputs: readonly [number, number];
+    gcd: CommonDivisorWitness;
+    lcm: CommonMultipleWitness;
+};
+
 export type ArithmeticWordProblemTwoStep = {
     kind: 'two-step';
     num1: number;
@@ -3809,6 +3862,9 @@ export interface ViewTypeMap {
     'operations-decimal-standard-add-subtract': DecimalStandardAddSubtractProblem;
     'operations-decimal-standard-multiplication': DecimalStandardMultiplicationProblem;
     'operations-decimal-standard-division': DecimalStandardDivisionProblem;
+    'operations-full-common-factor': FullCommonFactorDistributionProblem;
+    'numbers-greatest-common-factor': CommonFactorMultipleProblem;
+    'numbers-least-common-multiple': CommonFactorMultipleProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

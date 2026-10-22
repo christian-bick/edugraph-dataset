@@ -102,6 +102,12 @@ rows with decimal placement, or scale-equivalent long division with original and
 The three decimal standard-algorithm views consume these traces directly; the earlier decimal
 method and whole-number algorithm families retain their own contracts.
 
+Common-factor relations supply complete positive common divisors and coprime cofactors. The paired
+GCD/LCM model retains both relations, including undefined GCD at (0,0) and the explicit zero LCM
+convention; its two views select their fixed task. Full common-factor extraction has a separate
+sum/distribution model with the greatest factor and coprime residual addends. These three leaves
+share rendering and validation helpers across the operations and numbers categories.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
