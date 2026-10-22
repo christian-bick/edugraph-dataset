@@ -1,0 +1,2 @@
+- **Identity:** Interpret zero as the single fixed position under taking the opposite.
+- **Modes:** Question Mode shows zero and its opposite at one position on an oriented scale and withholds the explanation. Solution Mode explains why the position is unchanged and why -0 = 0.

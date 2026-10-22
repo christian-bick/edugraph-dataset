@@ -1,0 +1,2 @@
+- **Identity:** Interpret two successive opposite operations and their effect on the starting rational value.
+- **Modes:** Question Mode gives the two exact opposite steps and zero/negative numerical context but withholds the requested interpretation. Solution Mode explains the return to the original value, including a zero starting value.

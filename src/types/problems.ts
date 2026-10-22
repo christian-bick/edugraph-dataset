@@ -3728,6 +3728,73 @@ export type GeometryPrimitivesProblem = {
 };
 
 
+/** Safe reduced integer components, positive denominator, canonical zero 0/1, and no negative zero. */
+export type SignedRational = {numerator: number; denominator: number};
+export type RationalSign = -1 | 0 | 1;
+
+/** Complete exact uniform scale containing zero; symmetry belongs to each producer. */
+export type SignedRationalAxis = {
+    minimum: SignedRational;
+    maximum: SignedRational;
+    step: SignedRational;
+    ticks: readonly SignedRational[];
+    zeroIndex: number;
+};
+
+export type SignedRationalLocation = {
+    value: SignedRational;
+    tickIndex: number;
+    sign: RationalSign;
+    /** Supplied nonnegative absolute value, in the same canonical rational form. */
+    magnitude: SignedRational;
+};
+
+export type SignedRationalContextMetadata =
+    | {kind: 'temperature'; reference: 'celsius-zero'; unit: 'degrees-celsius'}
+    | {kind: 'elevation'; reference: 'sea-level'; unit: 'meters'}
+    | {kind: 'balance'; reference: 'settled-balance'; unit: 'dollars'}
+    | {kind: 'charge'; reference: 'neutral-net-charge'; unit: 'coulombs'};
+
+export type SignedContextObservation = {
+    id: string;
+    value: SignedRational;
+    /** Supplied nonnegative absolute value. */
+    magnitude: SignedRational;
+    sign: RationalSign;
+};
+
+/** The reference is semantic metadata; a zero observation is an actual value, not an absent record. */
+export type SignedRationalContextProblem = {
+    kind: 'signed-rational-contexts';
+    context: SignedRationalContextMetadata;
+    observations: readonly [SignedContextObservation, ...SignedContextObservation[]];
+};
+
+/** Symmetric 5..11-tick axis and complete negation, reflection and distance witnesses. */
+export type RationalOppositeRelationProblem = {
+    kind: 'rational-opposite-relations';
+    axis: SignedRationalAxis;
+    original: SignedRationalLocation;
+    opposite: SignedRationalLocation;
+    doubleOpposite: SignedRationalLocation;
+    zeroFixedPoint: {
+        value: SignedRational;
+        opposite: SignedRational;
+        tickIndex: number;
+        oppositeTickIndex: number;
+    };
+    oppositePair: {
+        negative: SignedRationalLocation;
+        positive: SignedRationalLocation;
+        commonMagnitude: SignedRational;
+    };
+    unequalSignedPair: {
+        negative: SignedRationalLocation;
+        positive: SignedRationalLocation;
+        equalMagnitude: false;
+    };
+};
+
 /** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
 export type RatioRational = {numerator: number; denominator: number};
 
@@ -3865,6 +3932,12 @@ export interface ViewTypeMap {
     'operations-full-common-factor': FullCommonFactorDistributionProblem;
     'numbers-greatest-common-factor': CommonFactorMultipleProblem;
     'numbers-least-common-multiple': CommonFactorMultipleProblem;
+    'numbers-contextual-zero': SignedRationalContextProblem;
+    'numbers-signed-context-interpretation': SignedRationalContextProblem;
+    'numbers-signed-context-formalization': SignedRationalContextProblem;
+    'numbers-double-opposite': RationalOppositeRelationProblem;
+    'numbers-opposite-locations': RationalOppositeRelationProblem;
+    'numbers-zero-opposite': RationalOppositeRelationProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

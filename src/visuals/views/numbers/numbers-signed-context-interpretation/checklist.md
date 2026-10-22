@@ -1,0 +1,2 @@
+- **Identity:** Explain what each signed rational reading means in its stated context.
+- **Modes:** Question Mode gives signed readings and asks for their contextual meanings. Solution Mode gives the meanings of positive, negative and zero readings with correct units and reference directions.
