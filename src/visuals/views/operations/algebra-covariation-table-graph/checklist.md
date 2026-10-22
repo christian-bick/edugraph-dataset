@@ -1,0 +1,2 @@
+- **Identity:** Complete a table and ordered pairs from a contextual equation and graph the same relationship on quantity-labeled, scaled axes.
+- **Modes:** Question Mode leaves output cells, ordered pairs and graph marks unresolved. Solution Mode fills the corresponding values and plotted relationship; real inputs have a continuous segment, while integer counts have isolated points. Graph-window cuts remain distinct from actual domain endpoints.

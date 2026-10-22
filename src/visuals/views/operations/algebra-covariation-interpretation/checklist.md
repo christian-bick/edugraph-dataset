@@ -1,0 +1,2 @@
+- **Identity:** Interpret one relationship shown by an equation, table and scaled graph, explaining the variable roles and a corresponding table row and plotted point.
+- **Modes:** Question Mode gives the representations without the requested role or correspondence explanation. Solution Mode connects one row's input, equation substitution and output with its plotted point and explains the independent/dependent roles.

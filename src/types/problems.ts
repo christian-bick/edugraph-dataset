@@ -4811,8 +4811,240 @@ export type AlgebraVariableMeaningProblem = Readonly<{
     role: ParticularUnknownMeaning | GeneralizedNumberMeaning
 }>;
 
+/** Closed REAL interval with exact rational endpoints; not a rational-only point set. */
+export type CovariationRealDomain = Readonly<{
+    kind: 'real'; minimum: AlgebraicScalar; maximum: AlgebraicScalar;
+}>;
+/** Actual first/last nonnegative INTEGER inputs, minimum<maximum; at least two values. */
+export type CovariationCountDomain = Readonly<{
+    kind: 'integer'; minimum: AlgebraicScalar; maximum: AlgebraicScalar;
+}>;
+export type CovariationQuantityDomain = CovariationRealDomain | CovariationCountDomain;
+
+type CovariationQuantityIdentity = Readonly<{
+    quantityId: string;
+    symbolId: string;
+    /** Actual14 unambiguous letter-led symbol, distinct from the other quantity symbol. */
+    symbol: string;
+    unit: AlgebraicUnit;
+}>;
+export type CovaryingInputQuantity = CovariationQuantityIdentity & (
+    | Readonly<{meaning: 'elapsed-time' | 'rental-duration' | 'production-time'; domain: CovariationRealDomain}>
+    | Readonly<{meaning: 'item-count'; domain: CovariationCountDomain}>
+);
+/** Every cost, distance and length OUTPUT has a nonnegative REAL admissible envelope. */
+export type CovaryingOutputQuantity = CovariationQuantityIdentity & Readonly<{
+    meaning: 'distance-traveled' | 'rental-cost' | 'total-cost' | 'total-length';
+    domain: CovariationRealDomain;
+}>;
+export type CovaryingQuantity = CovaryingInputQuantity | CovaryingOutputQuantity;
+
+/** Primitive situation facts, coherent even when no quantitative-origin proof is selected. */
+export type AffineQuantityContext = Readonly<{
+    /** Exact named rate×input=output and initial+output=output identities; no conversions. */
+    rateUnit: AlgebraicUnit;
+    initialUnit: AlgebraicUnit;
+}> & (
+    | Readonly<{kind: 'constant-speed'; timeQuantityId: string; distanceQuantityId: string;
+        speed: AlgebraicScalar; speedNotation: AlgebraicNotation}>
+    | Readonly<{kind: 'rental-charge'; durationQuantityId: string; costQuantityId: string;
+        initialCharge: AlgebraicScalar; initialChargeNotation: AlgebraicNotation;
+        hourlyCharge: AlgebraicScalar; hourlyChargeNotation: AlgebraicNotation}>
+    | Readonly<{kind: 'item-purchase'; countQuantityId: string; costQuantityId: string;
+        fixedCharge: AlgebraicScalar; fixedChargeNotation: AlgebraicNotation;
+        itemPrice: AlgebraicScalar; itemPriceNotation: AlgebraicNotation}>
+    | Readonly<{kind: 'constant-production'; timeQuantityId: string; lengthQuantityId: string;
+        initialLength: AlgebraicScalar; initialLengthNotation: AlgebraicNotation;
+        lengthPerTime: AlgebraicScalar; lengthPerTimeNotation: AlgebraicNotation}>
+);
+
+/** Outer output=RHS equation, not an equation-shaped expression node and never f(x). */
+export type AffineCovariationEquation = Readonly<{
+    outputSymbolId: string;
+    inputSymbolId: string;
+    /** Exact actual14 syntax, restricted by the complete affine proof below. */
+    right: ExactSymbolicExpressionNode;
+    /** Positive slope, nonnegative intercept; BOTH zero and positive intercepts are admitted. */
+    slope: AlgebraicScalar; slopeNotation: AlgebraicNotation;
+    intercept: AlgebraicScalar; interceptNotation: AlgebraicNotation;
+}>;
+
+/**
+ * Complete ORIGINAL-tree coefficient induction, common to EVERY proof variant.
+ * proofDomain has EXACTLY the input declaration with actual unrestricted all-Q domain.
+ * rhsExpression uses that domainId and the EXACT equation.right tree/IDs/notation.
+ * normalization proves root map intercept+slope*input, with slope>0/intercept>=0.
+ *
+ * This all-Q metadata retains its identity. Its unpowered rational-coefficient affine
+ * induction also holds over R: rational constants embed, arithmetic preserves maps,
+ * multiplication has a proved constant child, division a proved NONZERO constant.
+ * EVERY original subtree passes. Therefore the same rule is defined on the whole
+ * named real input interval, without pretending Q=R or inferring a law from samples.
+ * No free boolean claiming real extension and no duplicate real AST is needed.
+ */
+export type CovariationAffineLawProof = Readonly<{
+    proofDomain: CommonAffineDomain;
+    rhsExpression: AffineExpression;
+    normalization: AffineNormalizationProof;
+}>;
+
+/** One exact instance of the SAME equation; only the original input is substituted. */
+export type CovariationValueWitness = Readonly<{
+    input: AlgebraicScalar; inputNotation: AlgebraicNotation;
+    scaledInput: AlgebraicScalar; scaledInputNotation: AlgebraicNotation;
+    output: AlgebraicScalar; outputNotation: AlgebraicNotation;
+    evaluation: Readonly<{
+        binding: StatementBinding;
+        /** Complete original RHS input occurrences, same IDs and exact binding spelling. */
+        replacements: readonly StatementOccurrenceReplacement[];
+        /** Generic actual14 calculation; empty power/reduction arrays may be valid. */
+        calculation: ExactNumericCalculation;
+    }>;
+}>;
+
+/**
+ * Positive affine monotonicity plus the exact endpoint evaluations proves WHOLE-domain
+ * image bounds and inclusion in the real output envelope. For real input, every value
+ * in the closed interval between these outputs is attained. For integer input, the
+ * SAME endpoints bound the finite image but do NOT assert interior real values occur.
+ */
+export type CovariationDomainImage = Readonly<{
+    atMinimumInput: CovariationValueWitness;
+    atMaximumInput: CovariationValueWitness;
+}> & (
+    | Readonly<{imageKind: 'real-interval-image'}>
+    | Readonly<{imageKind: 'discrete-endpoint-envelope'}>
+);
+export type CovariationTableRow = Readonly<{rowId: string; value: CovariationValueWitness}>;
+
+/** Canonical input is x/horizontal, output y/vertical; the view never swaps these roles. */
+export type CovariationGraphValue = Readonly<{
+    point: RationalCoordinatePoint;
+    value: CovariationValueWitness;
+}>;
+export type CovariationGraphWindow = Readonly<{
+    /** Exact intersection of input domain, x range and affine preimage of y range. */
+    minimumInput: AlgebraicScalar;
+    maximumInput: AlgebraicScalar;
+}>;
+export type CovariationGraphGeometry =
+    | Readonly<{kind: 'discrete-points';
+        /** ALL consecutive admitted integer inputs within the full window; isolated points. */
+        visibleValues: readonly [CovariationGraphValue, ...CovariationGraphValue[]]}>
+    | Readonly<{kind: 'continuous-affine-segment';
+        /** Full visible affine segment, mathematically justified by the real law above. */
+        first: CovariationGraphValue; last: CovariationGraphValue;
+        firstBoundary: 'domain-endpoint' | 'window-cut';
+        lastBoundary: 'domain-endpoint' | 'window-cut'}>;
+export type CovariationGraph = Readonly<{
+    axes: RationalCoordinateAxes;
+    horizontalQuantityId: string;
+    verticalQuantityId: string;
+    window: CovariationGraphWindow;
+    /** Complete unique row-to-point map, preserving each row's exact input/output notation. */
+    tablePoints: readonly [Readonly<{rowId: string; point: RationalCoordinatePoint}>,
+        Readonly<{rowId: string; point: RationalCoordinatePoint}>,
+        ...Readonly<{rowId: string; point: RationalCoordinatePoint}>[]];
+    geometry: CovariationGraphGeometry;
+}>;
+
+/**
+ * Explicit DESIGNATED quantity↔symbol/domain↔original relation/axis incidence proof.
+ * This adds actual role-incidence relations to the common numerical correspondence;
+ * it does not merely repeat NumericFunction totality/uniqueness under a role tag.
+ */
+export type CovariationDependencyProof = Readonly<{
+    kind: 'designated-quantity-dependency';
+    inputIncidence: Readonly<{
+        quantityId: string; symbolId: string;
+        /** Resolves to input.quantityId and hence its independently admitted full domain. */
+        domainQuantityId: string;
+        /** All and only ORIGINAL RHS input occurrences; unique set, any valid list order. */
+        occurrenceNodeIds: readonly [string, ...string[]];
+        horizontalQuantityId: string;
+    }>;
+    outputIncidence: Readonly<{
+        quantityId: string; symbolId: string;
+        /** Resolves to output.quantityId and its admissible real envelope. */
+        domainQuantityId: string;
+        isolatedLeftSymbolId: string;
+        rightRootNodeId: string;
+        verticalQuantityId: string;
+    }>;
+    /** Exact reference to the COMMON original-tree affine law, never another sampled rule. */
+    lawExpressionId: string;
+    /** Exactly domainImage's minimum/maximum ORIGINAL input values, in that order. */
+    endpointInputValues: readonly [AlgebraicScalar, AlgebraicScalar];
+}>;
+
+/** Source rate minus the original RHS's proved input coefficient equals canonical0. */
+export type CovariationRateLink = Readonly<{
+    source: 'speed' | 'hourlyCharge' | 'itemPrice' | 'lengthPerTime';
+    expressionId: string; rootNodeId: string; inputSymbolId: string;
+    /** Subtraction operands [actual typed source rate, normalization root coefficient]. */
+    equality: ExactCoefficientArithmetic;
+}>;
+/** Source initial amount minus the original RHS's proved constant equals canonical0. */
+export type CovariationInitialLink = Readonly<{
+    /** Constant-speed distance traveled has the explicitly defined zero-distance origin. */
+    source: 'zero-distance-origin' | 'initialCharge' | 'fixedCharge' | 'initialLength';
+    expressionId: string; rootNodeId: string;
+    /** Subtraction operands [actual source initial amount, normalization root constant]. */
+    equality: ExactCoefficientArithmetic;
+}>;
+/**
+ * Symbolic model CONSTRUCTION from primitive situation facts, including exact unit,
+ * quantity/symbol/domain and fact→coefficient relations. Not a model-name badge.
+ */
+export type CovariationOriginProof = Readonly<{
+    kind: 'quantitative-origin';
+    /** Input and output incidences, each exactly once; coherent alternate row order allowed. */
+    quantitySymbols: readonly [
+        Readonly<{quantityId: string; symbolId: string; domainQuantityId: string}>,
+        Readonly<{quantityId: string; symbolId: string; domainQuantityId: string}>
+    ];
+    rateLink: CovariationRateLink;
+    initialLink: CovariationInitialLink;
+    unitRelations: readonly [
+        /** rateUnit × input.unit = output.unit, with actual coherent named identities. */
+        Readonly<{operation: 'multiplication'; first: AlgebraicUnit; second: AlgebraicUnit; result: AlgebraicUnit}>,
+        /** initialUnit + output.unit = output.unit; no dimensional-only unit aliases. */
+        Readonly<{operation: 'addition'; first: AlgebraicUnit; second: AlgebraicUnit; result: AlgebraicUnit}>
+    ];
+}>;
+
+/**
+ * Real selected proof constructions, not a copied profile/label/task field.
+ * The tuples correspond to bare numerical correspondence, designated dependency,
+ * and quantitative origin WITH designated dependency. No origin-only member.
+ * Unselected proof objects are absent, not present with an ignored boolean flag.
+ */
+export type CovariationSelectedRelations =
+    | readonly []
+    | readonly [CovariationDependencyProof]
+    | readonly [CovariationDependencyProof, CovariationOriginProof];
+
+/** Uniform COMPLETE backbone accepted by ALL three consumers for EVERY proof member. */
+export type AlgebraCovariationBackbone = Readonly<{
+    kind: 'algebra-covariation';
+    input: CovaryingInputQuantity;
+    output: CovaryingOutputQuantity;
+    context: AffineQuantityContext;
+    equation: AffineCovariationEquation;
+    lawProof: CovariationAffineLawProof;
+    domainImage: CovariationDomainImage;
+    table: readonly [CovariationTableRow, CovariationTableRow, ...CovariationTableRow[]];
+    graph: CovariationGraph;
+}>;
+export type AlgebraCovariationProblem = AlgebraCovariationBackbone & Readonly<{
+    selectedRelations: CovariationSelectedRelations;
+}>;
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'algebra-dependent-equation-model': AlgebraCovariationProblem;
+    'algebra-covariation-interpretation': AlgebraCovariationProblem;
+    'algebra-covariation-table-graph': AlgebraCovariationProblem;
     'algebra-variable-interpretation': AlgebraVariableMeaningProblem;
     'algebra-substitution-check': AlgebraicStatementProblem;
     'algebra-solution-meaning': AlgebraicStatementProblem;

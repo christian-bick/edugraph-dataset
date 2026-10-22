@@ -112,6 +112,14 @@ unique admissible value and its exact verification; a generalized claim supplies
 for every member of the named domain. One interpretation view explains these roles from the same
 original relation and quantity meaning.
 
+Covariation models retain named quantities, physical units and real or integer input domains
+with one exact affine output equation. Original-tree normalization proves the law beyond the
+sampled table, while exact substitutions locate every supplied row and the complete visible
+graph. Count inputs produce isolated points; real intervals produce a justified segment with
+explicit window cuts. Selected quantity-role and quantitative-origin proofs add checked
+incidences and source-fact links. Three fixed views model, interpret or tabulate and graph
+the same complete payload.
+
 General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
 and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
 rectangle quantity roles without selecting a task. Five division views accept a union of this

@@ -1,0 +1,2 @@
+- **Identity:** Construct an equation for one changing quantity in terms of another from a quantitative situation, defining the letters, their domains and their independent/dependent roles.
+- **Modes:** Question Mode gives necessary situation facts and domains while withholding the completed symbol definitions, role explanation and equation. Solution Mode presents that model with meaningful units and explains how the rate and initial amount appear in the equation.
