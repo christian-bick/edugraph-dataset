@@ -1,0 +1,2 @@
+- **Identity:** Recover missing corresponding quantities from a fixed relationship in an equivalent-ratio table.
+- **Modes:** Question Mode leaves one antecedent and one consequent blank while preserving complete rows. Solution Mode fills the blanks and shows the equivalent ratios.

@@ -1,0 +1,2 @@
+- **Identity:** An ordered ratio of two named quantities asks for a written “for every” interpretation that preserves the first and second quantities.
+- **Modes:** Question Mode withholds the interpretation. Solution Mode shows a complete sentence matching the stated ratio and quantity order.

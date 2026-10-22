@@ -1,0 +1,2 @@
+- **Identity:** Construct several distinct positive whole-number rows equivalent to a given ordered ratio in a headed two-column table.
+- **Modes:** Question Mode gives the first row and leaves the other rows blank. Solution Mode provides one possible complete equivalent-ratio table.

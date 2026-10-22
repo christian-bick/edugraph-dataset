@@ -1,6 +1,7 @@
 import DatasetPermutationBuilder, {
     defineImplementationPackage,
-    toImplementationTodos
+    toImplementationTodos,
+    toTargets
 } from '../../lib/dataset-permutation-builder.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import type {
@@ -16,28 +17,6 @@ import type {
 // an earlier-grade slice matching one permutation does not implement the whole task.
 
 // Shared implementation packages
-
-const ratioAndRateReasoningImplementation = defineImplementationPackage({
-    id: 'ratio-and-rate-reasoning',
-    description:
-        'Represent and interpret ratios and unit rates, construct and compare equivalent-ratio tables, and ' +
-        'solve rate problems.',
-    generators: [
-        {module: 'ratio-relations', strategy: 'new'},
-        {module: 'unit-rate-relations', strategy: 'new'},
-        {module: 'ratio-tables', strategy: 'new'},
-        {module: 'ratio-table-comparisons', strategy: 'new'}
-    ],
-    views: [
-        {module: 'ratio-language', strategy: 'new'},
-        {module: 'unit-rate-language', strategy: 'new'},
-        {module: 'ratio-coordinate-plotting', strategy: 'new'},
-        {module: 'ratio-table-comparison', strategy: 'new'},
-        {module: 'ratio-table-construction', strategy: 'new'},
-        {module: 'ratio-table-missing-values', strategy: 'new'},
-        {module: 'unit-rate-problem', strategy: 'new'}
-    ]
-});
 
 const percentQuantityProblemsImplementation = defineImplementationPackage({
     id: 'percent-quantity-problems',
@@ -1469,65 +1448,18 @@ const selectContextualSummariesBuilder = new DatasetPermutationBuilder().addLabe
     Ability.ProcedureApplicability
 ]);
 
-export const spec: CompetencyTarget[] = [];
+export const spec: CompetencyTarget[] = [
+    ...toTargets('6.RP.A.1-ratio-language', ratioLanguageBuilder),
+    ...toTargets('6.RP.A.2-unit-rate-language', unitRateLanguageBuilder),
+    ...toTargets('6.RP.A.3a-ratio-coordinate-plotting', ratioCoordinatePlottingBuilder),
+    ...toTargets('6.RP.A.3a-ratio-table-comparison', ratioTableComparisonBuilder),
+    ...toTargets('6.RP.A.3a-ratio-table-construction', ratioTableConstructionBuilder),
+    ...toTargets('6.RP.A.3a-ratio-table-missing-values', ratioTableMissingValuesBuilder),
+    ...toTargets('6.RP.A.3b-unit-rate-problems', unitRateProblemsBuilder)
+];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Ratios and Proportional Relationships (6.RP)
-    ...toImplementationTodos(
-        '6.RP.A.1-ratio-language',
-        ratioLanguageBuilder,
-        ratioAndRateReasoningImplementation,
-        'Two named quantities, their ordered ratio, and a requested written “for every” explanation ' +
-        'preserving which quantity is antecedent/consequent.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.2-unit-rate-language',
-        unitRateLanguageBuilder,
-        ratioAndRateReasoningImplementation,
-        'Named quantity units, nonzero consequent, original ratio and normalization to one consequent ' +
-        'unit, with written interpretation of the quotient. Exact rational arithmetic; no complex ' +
-        'fractions.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3a-ratio-coordinate-plotting',
-        ratioCoordinatePlottingBuilder,
-        ratioAndRateReasoningImplementation,
-        'Equivalent-ratio table and corresponding coordinate points on scaled axes; retain table evidence ' +
-        'as well as plotting. Equivalent-ratio tables represent a mathematical correspondence, so the ' +
-        'current relational table Scope is more specific than a generic data table.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3a-ratio-table-comparison',
-        ratioTableComparisonBuilder,
-        ratioAndRateReasoningImplementation,
-        'Two tables expanded to a common quantity value, then a defensible smaller/equal/larger ratio ' +
-        'decision with ordered quantities preserved. Equivalent-ratio tables represent a mathematical ' +
-        'correspondence, so the current relational table Scope is more specific than a generic data table.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3a-ratio-table-construction',
-        ratioTableConstructionBuilder,
-        ratioAndRateReasoningImplementation,
-        'Headed quantity columns, whole-number measurements, and a learner-produced set of equivalent ' +
-        'rows. Equivalent-ratio tables represent a mathematical correspondence, so the current relational ' +
-        'table Scope is more specific than a generic data table.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3a-ratio-table-missing-values',
-        ratioTableMissingValuesBuilder,
-        ratioAndRateReasoningImplementation,
-        'An incomplete equivalent-ratio table, known corresponding values and a blank input recovered from ' +
-        'the fixed relationship. Equivalent-ratio tables represent a mathematical correspondence, so the ' +
-        'current relational table Scope is more specific than a generic data table.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3b-unit-rate-problems',
-        unitRateProblemsBuilder,
-        ratioAndRateReasoningImplementation,
-        'Story supplies dimensioned quantities; solution obtains per-one rate and scales to the requested ' +
-        'quantity. Price/speed must both occur in the complete implementation domain, not be separate ' +
-        'supported slices.'
-    ),
     ...toImplementationTodos(
         '6.RP.A.3c-percent-of-quantity',
         percentOfQuantityBuilder,

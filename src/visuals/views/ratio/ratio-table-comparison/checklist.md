@@ -1,0 +1,2 @@
+- **Identity:** Compare two ordered ratios by extending headed equivalent-ratio tables to the same consequent quantity.
+- **Modes:** Question Mode withholds the final antecedents and comparison. Solution Mode completes both tables and compares their antecedents for the common consequent, preserving the names and order of both quantities.

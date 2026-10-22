@@ -1,0 +1,2 @@
+- **Identity:** A price or constant-speed story asks for a per-one rate and a quantity at the same rate for a specified new amount.
+- **Modes:** Question Mode supplies the numerical givens in prose and withholds the rate, scaling work and final answer. Solution Mode shows the original ordered quantities, division to a per-one rate, multiplication of both quantities by the same factor, and a contextual answer with units.
