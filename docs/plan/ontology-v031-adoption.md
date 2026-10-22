@@ -43,9 +43,10 @@ additional claim through their grouping of observations. This preserves single o
 across compatible generator/view pairs, including measurement producers whose payloads
 extend the shared measurement-data type.
 
-The migration changes labels and their derived target identities, not the generators'
-mathematical behavior or the views' rendering. Existing regression fixtures adopt the
-same vocabulary. The baseline has 128 `Statistics`-labeled samples; ontology changes to
+The statistics migration changes labels and their derived target identities, not the
+generators' mathematical behavior. Existing regression fixtures adopt the same vocabulary.
+Live validation later exposed one independent solution-color defect, repaired below.
+The baseline has 128 `Statistics`-labeled samples; ontology changes to
 other used definitions or ancestry can invalidate additional artifacts independently.
 
 ## Verification and release boundary
@@ -77,13 +78,16 @@ checklist. The evaluator test now verifies that the prompt includes the actual l
 checklist in full. Production validation policy and checklists remain unchanged.
 
 Canonical generation rebuilt the dependency graph and selected 243 generator/view pairs,
-rendering 2,212 images. Content addressing reused 337 shards and wrote 34. The final
-snapshot contains 2,292 samples: 1,916 training and 376 validation images.
+rendering 2,212 images. Content addressing initially reused 337 shards and wrote 34.
+The solution-color repair then regenerated four coordinate-pattern images, changing only
+one image and replacing one shard. The final snapshot contains 2,292 samples in 371 shards:
+1,916 training and 376 validation images.
 
 | Comparison with the preserved baseline | Count |
 | --- | ---: |
 | Retained sample identities | 2,164 |
-| Retained images with identical pixels | 2,164 |
+| Retained images with identical pixels | 2,163 |
+| Retained images with corrected solution colors | 1 |
 | Retained seed or attempt shifts | 0 |
 | Removed statistics sample identities | 126 |
 | New migrated sample identities | 128 |
@@ -105,20 +109,39 @@ Its validated asset index covers all 822 exact target label sets with 2,306 samp
 associations; shared evidence explains the difference from physical-image count. The index
 uses `v0.31.0-01` only as a prospective release revision; no dataset tag was created.
 
-### Remaining live-validation gate
+### Completed live validation and solution-color repair
 
-The strict offline cache audit finds 2,142 current passing judgments, 150 missing current
-keys and 148 stale records. There are no failing, malformed or duplicate judgments and no
-dataset-structure or renderer-identity issues. The 150 required evaluations comprise
-128 new sample identities and 22 retained images whose labels or ontology context changed.
-Live Gemini validation is awaiting the user's explicit approval. No cache record has been
-rewritten, copied to a new identity or treated as current without that evaluation.
+With explicit user approval, live Gemini validation evaluated all 150 affected samples on
+2026-10-22: 128 new sample identities and 22 retained images whose labels or ontology
+context changed. All passed under the existing LOW/HIGH policy, with two independent HIGH
+reviews. No fresh final label verdict is uncertain.
 
-Consequently, the source migration, canonical generation and merged-artifact coverage are
-verified, but the dataset is **not yet release-ready**. After approved live validation,
-rerun the strict audit, inspect cache churn against the original content commit, and commit
-the refreshed cache. If a finding requires a source repair, regenerate its affected pairs
-and repeat the relevant artifact checks.
+Manual inspection of those two reviews found that the coordinate-pattern plotting solution
+still used purple markers and labels, contrary to the central green solution convention
+([IMPL-V5](../implementation-view.md#impl-v5--question-and-solution-preserve-the-task-while-serving-different-roles),
+[CHK-V6](../checklist-view.md#chk-v6--keep-one-minimal-observable-contract-per-view)). LOW had
+correctly identified this defect; HIGH had overlooked it. The renderer now uses green for
+the solution markers and labels. Regeneration preserves the question and both sibling
+pair-forming images exactly. The repaired solution passes a fresh LOW evaluation; the
+other 2,291 judgments are reused. The second HIGH review concerns a fractional line plot:
+direct inspection confirms all six marks agree with the supplied measurements.
+
+The final strict offline audit passes **2,292/2,292 samples**, with zero missing, stale,
+failing, duplicate or malformed cache records and no structure, renderer or image-integrity
+issues. Against the original baseline, the cache contains 150 fresh records and removes
+148 stale records. All 2,142 retained judgments, review histories and timestamps remain
+unchanged. Of those, 2,024 complete records are byte-identical; the remaining 118 only
+refresh `generation_plan.inputHash` to match the canonical dataset's provenance. The nine
+previously uncertain passing records remain unchanged under the existing policy.
+
+Final churn verification finds 128 added identities, 126 removed identities and the one
+explained color change, with no seed or attempt shifts. The affected view's seven tests,
+type checking and generator/view specification validation pass after the repair. The merged
+artifact and asset index are rebuilt and revalidated against the final images. No ontology
+label, checklist or evaluation rule was weakened to obtain passing coverage.
+
+The source migration, canonical generation, exact VQA coverage and merged-artifact coverage
+are now verified: the dataset is **locally ready for the release workflow**.
 
 The dataset is prepared locally on the existing branch. Dataset publication remains a
 separate action: it requires integration to clean synchronized `main`, successful CI on
