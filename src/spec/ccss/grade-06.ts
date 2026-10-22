@@ -18,21 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const ratioMeasurementConversionImplementation = defineImplementationPackage({
-    id: 'ratio-measurement-conversion',
-    description:
-        'Apply ratio reasoning to unit conversion and explain unit composition and cancellation in ' +
-        'products and quotients.',
-    generators: [
-        {module: 'measurement-ratio-relations', strategy: 'new'},
-        {module: 'unit-dimension-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'measure-ratio-conversion', strategy: 'new'},
-        {module: 'measure-unit-composition', strategy: 'new'}
-    ]
-});
-
 const generalFractionDivisionImplementation = defineImplementationPackage({
     id: 'general-fraction-division',
     description:
@@ -1444,30 +1429,12 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.RP.A.3a-ratio-table-missing-values', ratioTableMissingValuesBuilder),
     ...toTargets('6.RP.A.3b-unit-rate-problems', unitRateProblemsBuilder),
     ...toTargets('6.RP.A.3c-percent-of-quantity', percentOfQuantityBuilder),
-    ...toTargets('6.RP.A.3c-whole-from-percent', wholeFromPercentBuilder)
+    ...toTargets('6.RP.A.3c-whole-from-percent', wholeFromPercentBuilder),
+    ...toTargets('6.RP.A.3d-ratio-unit-conversion', ratioUnitConversionBuilder),
+    ...toTargets('6.RP.A.3d-unit-products-quotients', unitProductsQuotientsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
-    // Ratios and Proportional Relationships (6.RP)
-    ...toImplementationTodos(
-        '6.RP.A.3d-ratio-unit-conversion',
-        ratioUnitConversionBuilder,
-        ratioMeasurementConversionImplementation,
-        'Dimensioned equality/conversion ratio, correctly oriented multiplication or division, and ' +
-        'explanation of why equivalent quantities are preserved. Include within- and across-system ' +
-        'relationships and rational measures.'
-    ),
-    ...toImplementationTodos(
-        '6.RP.A.3d-unit-products-quotients',
-        unitProductsQuotientsBuilder,
-        ratioMeasurementConversionImplementation,
-        'Explicit dimensioned quantities and a product or quotient whose units are composed and ' +
-        'simplified; explain cancellation and the resulting dimension, for example (m/s)*s=m or m/s. ' +
-        'Merely changing meters to centimeters is insufficient. Resolved by merged ' +
-        'Area.UnitDimensionality; no UnitProductComposition/UnitQuotientComposition/UnitCancellation ' +
-        'extension is required. Keep unit arithmetic independent of conversion-only examples.'
-    ),
-
     // The Number System (6.NS)
     ...toImplementationTodos(
         '6.NS.A.1-fraction-division-execution',

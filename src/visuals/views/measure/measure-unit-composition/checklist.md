@@ -1,0 +1,2 @@
+- **Identity:** Multiply or divide dimensioned rational quantities, simplify the unit factors, and explain the resulting physical dimension.
+- **Modes:** Question Mode shows the operands and raw unit factors without revealing the numeric result, simplified units, or explanation. Solution Mode marks actual cancellation pairs and shows the result in green with its physical dimension.
