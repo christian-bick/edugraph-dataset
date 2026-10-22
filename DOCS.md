@@ -108,6 +108,12 @@ convention; its two views select their fixed task. Full common-factor extraction
 sum/distribution model with the greatest factor and coprime residual addends. These three leaves
 share rendering and validation helpers across the operations and numbers categories.
 
+Signed rational contexts use reduced signed values with typed datum and unit metadata, plus
+observation signs and magnitudes. Their zero and directed-quantity configurations share one
+payload. Opposite relations carry an exact scaled axis, two successive negations, a zero fixed
+point, a true opposite pair and an unequal pair with unlike signs. These values are separate
+from the nonnegative ratio contract; six fixed views project their contextual or positional meaning.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

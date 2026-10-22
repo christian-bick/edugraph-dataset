@@ -1,0 +1,2 @@
+- **Identity:** Read contextual directions and magnitudes, then write the corresponding signed rational values.
+- **Modes:** Question Mode gives the necessary prose and unsigned magnitudes with blank signed responses. Solution Mode supplies the exact signed values and units while retaining the descriptions.

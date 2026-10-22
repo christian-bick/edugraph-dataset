@@ -1,0 +1,2 @@
+- **Identity:** Interpret signed rational positions on oriented number lines, including a true opposite pair and an unequal-distance unlike-sign pair.
+- **Modes:** Question Mode gives both exact scaled pairs with zero and asks for interpretation. Solution Mode explains the sign-to-side correspondence and uses supplied distances to distinguish true opposites from merely unlike signs.

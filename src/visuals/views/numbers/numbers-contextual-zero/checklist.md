@@ -1,0 +1,2 @@
+- **Identity:** Explain the meaning of zero in the stated temperature, elevation, net-balance or net-charge situation.
+- **Modes:** Question Mode supplies readings and the reference framework but withholds the requested explanation. Solution Mode explains the contextual reference meaning of zero.

@@ -18,25 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const signedRationalMeaningImplementation = defineImplementationPackage({
-    id: 'signed-rational-meaning',
-    description:
-        'Interpret contextual signs, zero, opposite locations and repeated negation for rational ' +
-        'quantities.',
-    generators: [
-        {module: 'signed-rational-contexts', strategy: 'new'},
-        {module: 'rational-opposite-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numbers-contextual-zero', strategy: 'new'},
-        {module: 'numbers-signed-context-interpretation', strategy: 'new'},
-        {module: 'numbers-signed-context-formalization', strategy: 'new'},
-        {module: 'numbers-double-opposite', strategy: 'new'},
-        {module: 'numbers-opposite-locations', strategy: 'new'},
-        {module: 'numbers-zero-opposite', strategy: 'new'}
-    ]
-});
-
 const signedRationalCoordinatePlaneImplementation = defineImplementationPackage({
     id: 'signed-rational-coordinate-plane',
     description:
@@ -1382,55 +1363,17 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.B.3-standard-decimal-subtraction', standardDecimalSubtractionBuilder),
     ...toTargets('6.NS.B.4-extract-full-common-factor', extractFullCommonFactorBuilder),
     ...toTargets('6.NS.B.4-greatest-common-factor', greatestCommonFactorBuilder),
-    ...toTargets('6.NS.B.4-least-common-multiple', leastCommonMultipleBuilder)
+    ...toTargets('6.NS.B.4-least-common-multiple', leastCommonMultipleBuilder),
+    ...toTargets('6.NS.C.5-contextual-zero', contextualZeroBuilder),
+    ...toTargets('6.NS.C.5-signed-context-interpretation', signedContextInterpretationBuilder),
+    ...toTargets('6.NS.C.5-signed-context-representation', signedContextRepresentationBuilder),
+    ...toTargets('6.NS.C.6a-double-opposite', doubleOppositeBuilder),
+    ...toTargets('6.NS.C.6a-opposite-line-locations', oppositeLineLocationsBuilder),
+    ...toTargets('6.NS.C.6a-zero-opposite', zeroOppositeBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.C.5-contextual-zero',
-        contextualZeroBuilder,
-        signedRationalMeaningImplementation,
-        'Written explanation of zero as the situation\'s reference/balance, not automatically “nothing.”'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.5-signed-context-interpretation',
-        signedContextInterpretationBuilder,
-        signedRationalMeaningImplementation,
-        'Necessary context distinguishes both directions/values around a common reference: temperature, ' +
-        'elevation, credit/debit, or charge; explain sign meaning.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.5-signed-context-representation',
-        signedContextRepresentationBuilder,
-        signedRationalMeaningImplementation,
-        'Read a signed-direction context and write the correctly signed rational values.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6a-double-opposite',
-        doubleOppositeBuilder,
-        signedRationalMeaningImplementation,
-        'A number and two successive opposite operations, with an expression such as -(-3)=3 and a ' +
-        'coherent positional or contextual explanation. Recognize that the second opposite returns the ' +
-        'original value for positive, negative and zero starting values; no independent theorem derivation ' +
-        'is required.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6a-opposite-line-locations',
-        oppositeLineLocationsBuilder,
-        signedRationalMeaningImplementation,
-        'A horizontal or vertical number line with explicit zero and orientation, including positive and ' +
-        'negative points at unequal distances as well as a true opposite pair. Interpret the signs as ' +
-        'opposite sides of zero; do not infer equal magnitude merely from unlike signs. Opposite signs do ' +
-        'not imply that the two numbers are additive opposites. Equal distance is a special case, not an ' +
-        'invariant of this competency.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6a-zero-opposite',
-        zeroOppositeBuilder,
-        signedRationalMeaningImplementation,
-        'Zero shown as the fixed point under opposite-side reflection; explain why −0=0.'
-    ),
     ...toImplementationTodos(
         '6.NS.C.6b-coordinate-sign-quadrants',
         coordinateSignQuadrantsBuilder,
