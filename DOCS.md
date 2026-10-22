@@ -114,6 +114,12 @@ payload. Opposite relations carry an exact scaled axis, two successive negations
 point, a true opposite pair and an unequal pair with unlike signs. These values are separate
 from the nonnegative ratio contract; six fixed views project their contextual or positional meaning.
 
+Rational coordinate payloads retain exact values, their integer/fraction/decimal notation and
+locations on independently scaled axes. Point configurations distinguish nonnegative and signed
+frames, with optional complete quadrant evidence. Reflection relations supply connected before/
+after points, the preserved and negated components, and equal distances to each mirror axis.
+Four fixed coordinate views project plotting, reading, quadrant meaning and reflection meaning.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.

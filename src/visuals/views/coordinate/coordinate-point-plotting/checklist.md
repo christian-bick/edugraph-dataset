@@ -1,0 +1,2 @@
+- **Identity:** Plot and label supplied exact ordered pairs on a scaled Cartesian plane.
+- **Modes:** Question Mode supplies ordered pairs and an empty scaled grid without completed point locations. Solution Mode places and labels every supplied point in green while retaining the given pairs.

@@ -3795,6 +3795,61 @@ export type RationalOppositeRelationProblem = {
     };
 };
 
+/** Exact display form; unreduced fractions and decimal trailing zeros retain their supplied spelling. */
+export type SignedRationalNotation =
+    | {kind: 'integer'; numeral: string}
+    | {kind: 'fraction'; numerator: number; denominator: number}
+    | {kind: 'decimal'; coefficient: number; scale: number; numeral: string};
+
+export type FormattedSignedRationalLocation = SignedRationalLocation & {notation: SignedRationalNotation};
+/** Complete uniform scale; zero may be an endpoint and x/y scales may differ. */
+export type RationalCoordinateAxis = SignedRationalAxis & {
+    tickNotations: readonly SignedRationalNotation[];
+    stepNotation: SignedRationalNotation;
+};
+export type CoordinateLocationTag =
+    | 'quadrant-I' | 'quadrant-II' | 'quadrant-III' | 'quadrant-IV'
+    | 'x-axis' | 'y-axis' | 'origin';
+export type RationalCoordinatePoint = {
+    id: string;
+    x: FormattedSignedRationalLocation;
+    y: FormattedSignedRationalLocation;
+    locationTag: CoordinateLocationTag;
+};
+export type RationalCoordinateAxes = {x: RationalCoordinateAxis; y: RationalCoordinateAxis};
+
+export type CoordinatePointsProblem = {
+    kind: 'coordinate-points';
+    axes: RationalCoordinateAxes;
+    points: readonly [RationalCoordinatePoint, ...RationalCoordinatePoint[]];
+};
+
+/** Each step links exact points and preserves distance to its supplied perpendicular foot. */
+export type CoordinateReflectionStep = {
+    axis: 'x' | 'y';
+    before: RationalCoordinatePoint;
+    after: RationalCoordinatePoint;
+    unchanged: {component: 'x' | 'y'; value: SignedRational};
+    negated: {
+        component: 'x' | 'y';
+        before: SignedRational;
+        after: SignedRational;
+        valueChanged: boolean;
+    };
+    mirror: {
+        foot: RationalCoordinatePoint;
+        beforeDistance: SignedRational;
+        afterDistance: SignedRational;
+    };
+};
+/** Steps connect in order; coherent repeated-axis involutions are valid members as well. */
+export type CoordinateReflectionRelationProblem = {
+    kind: 'coordinate-reflection-relations';
+    axes: RationalCoordinateAxes;
+    original: RationalCoordinatePoint;
+    steps: readonly [CoordinateReflectionStep] | readonly [CoordinateReflectionStep, CoordinateReflectionStep];
+};
+
 /** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
 export type RatioRational = {numerator: number; denominator: number};
 
@@ -3938,6 +3993,10 @@ export interface ViewTypeMap {
     'numbers-double-opposite': RationalOppositeRelationProblem;
     'numbers-opposite-locations': RationalOppositeRelationProblem;
     'numbers-zero-opposite': RationalOppositeRelationProblem;
+    'coordinate-quadrant-interpretation': CoordinatePointsProblem;
+    'coordinate-sign-reflection': CoordinateReflectionRelationProblem;
+    'coordinate-point-plotting': CoordinatePointsProblem;
+    'coordinate-point-reading': CoordinatePointsProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

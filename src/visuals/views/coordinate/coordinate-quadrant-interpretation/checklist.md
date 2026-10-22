@@ -1,0 +1,2 @@
+- **Identity:** Explain how coordinate signs determine quadrant, axis or origin locations.
+- **Modes:** Question Mode gives the ordered pairs, marked points and visible quadrant regions but withholds sign-to-location reasoning. Solution Mode explains each location, treating zero coordinates and the origin separately.
