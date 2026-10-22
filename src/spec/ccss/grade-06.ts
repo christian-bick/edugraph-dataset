@@ -20,20 +20,6 @@ import type {
 
 
 
-const algebraCovariationImplementation = defineImplementationPackage({
-    id: 'algebra-covariation',
-    description:
-        'Model dependent quantities and relate the same numerical relationship through equations, tables ' +
-        'and graphs.',
-    generators: [
-        {module: 'algebra-covariation', strategy: 'new'}
-    ],
-    views: [
-        {module: 'algebra-dependent-equation-model', strategy: 'new'},
-        {module: 'algebra-covariation-interpretation', strategy: 'new'},
-        {module: 'algebra-covariation-table-graph', strategy: 'new'}
-    ]
-});
 
 const polygonAreaDissectionImplementation = defineImplementationPackage({
     id: 'polygon-area-dissection',
@@ -1252,42 +1238,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.B.8-graph-inequality-solutions', graphInequalitySolutionsBuilder),
     ...toTargets('6.EE.B.8-interpret-infinite-solutions', interpretInfiniteSolutionsBuilder),
     ...toTargets('6.EE.B.8-model-strict-inequalities', modelStrictInequalitiesBuilder),
-    ...toTargets('6.EE.B.6-interpret-variable-roles', interpretVariableRolesBuilder)
+    ...toTargets('6.EE.B.6-interpret-variable-roles', interpretVariableRolesBuilder),
+    ...toTargets('6.EE.C.9-model-dependent-quantity', modelDependentQuantityBuilder),
+    ...toTargets('6.EE.C.9-relate-equation-table-graph', relateEquationTableGraphBuilder),
+    ...toTargets('6.EE.C.9-tabulate-and-graph-covariation', tabulateAndGraphCovariationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
-    ...toImplementationTodos(
-        '6.EE.C.9-model-dependent-quantity',
-        modelDependentQuantityBuilder,
-        algebraCovariationImplementation,
-        'The situation supplies two related changing quantities. Define their symbols and domains, ' +
-        'identify the chosen input and corresponding output roles, and write the output quantity in terms ' +
-        'of the input. Do not restrict all relationships to proportional motion merely because the source ' +
-        'gives d=65t as an example. Each proposed model must remain within Grade 6 mathematics. ' +
-        'IndependentVariable and DependentVariable identify explicitly elicited roles here; do not add ' +
-        'them to unrelated expressions merely because ' +
-        'variables occur.'
-    ),
-    ...toImplementationTodos(
-        '6.EE.C.9-relate-equation-table-graph',
-        relateEquationTableGraphBuilder,
-        algebraCovariationImplementation,
-        'Read an equation with a corresponding table and graph. Identify independent/dependent roles and ' +
-        'explain how the same input/output relationship appears in all representations, including ' +
-        'correspondence between table entries and plotted points. This is not a request for unrestricted ' +
-        'function theory or function notation such as f(x).'
-    ),
-    ...toImplementationTodos(
-        '6.EE.C.9-tabulate-and-graph-covariation',
-        tabulateAndGraphCovariationBuilder,
-        algebraCovariationImplementation,
-        'From a contextual equation, form corresponding input/output values in a table and plot the ' +
-        'resulting ordered pairs on meaningfully labeled axes with units. Both table and graph retain the ' +
-        'same relationship. Use algebraic table/graph representation scopes instead of a data-table claim ' +
-        'for a functional relationship. The given equation\'s syntax is used to construct corresponding ' +
-        'values; Equation is therefore necessary content rather than incidental decoration.'
-    ),
 
     // Geometry (6.G)
     ...toImplementationTodos(
