@@ -1,0 +1,2 @@
+- **Identity:** Read the value of P from a scaled horizontal or vertical number line.
+- **Modes:** Question Mode marks P, hides its numeric tick label and leaves the answer blank; at least two other labeled ticks and the step remain visible. Solution Mode gives the exact value and marked location in green.

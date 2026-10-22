@@ -1,0 +1,2 @@
+- **Identity:** Place the given value on a scaled horizontal or vertical number line.
+- **Modes:** Question Mode gives the value and leaves the line unmarked. Solution Mode marks its correct location and shows the exact value in green.

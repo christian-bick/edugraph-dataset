@@ -3850,6 +3850,14 @@ export type CoordinateReflectionRelationProblem = {
     steps: readonly [CoordinateReflectionStep] | readonly [CoordinateReflectionStep, CoordinateReflectionStep];
 };
 
+/** Complete exact scale with at least three ticks and one located value, retaining supplied notation. */
+export type RationalNumberlineValuesProblem = {
+    kind: 'rational-numberline-values';
+    axis: RationalCoordinateAxis;
+    /** Value equals the supplied axis tick; sign, magnitude and notation agree exactly. */
+    point: FormattedSignedRationalLocation;
+};
+
 /** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
 export type RatioRational = {numerator: number; denominator: number};
 
@@ -3997,6 +4005,8 @@ export interface ViewTypeMap {
     'coordinate-sign-reflection': CoordinateReflectionRelationProblem;
     'coordinate-point-plotting': CoordinatePointsProblem;
     'coordinate-point-reading': CoordinatePointsProblem;
+    'numbers-rational-line-positioning': RationalNumberlineValuesProblem;
+    'numbers-rational-line-reading': RationalNumberlineValuesProblem;
     'numbers-factors-multiples': FactorPairsOrMultipleTestProblem;
     'numbers-prime-classification': PrimeClassificationProblem;
     'numbers-composite-classification': CompositeClassificationProblem;

@@ -83,17 +83,32 @@ function locationTag(x: number, y: number): CoordinateLocationTag {
     return x > 0 ? y > 0 ? 'quadrant-I' : 'quadrant-IV' : y > 0 ? 'quadrant-II' : 'quadrant-III';
 }
 
-function isLocation(value: unknown, axis: RationalCoordinateAxis): value is FormattedSignedRationalLocation {
-    return record(value) && isCanonicalSignedRational(value.value) && isCanonicalSignedRational(value.magnitude)
+export function isCoordinateLocation(value: unknown, axis: RationalCoordinateAxis): value is FormattedSignedRationalLocation {
+    return isRationalCoordinateAxis(axis) && record(value) && isCanonicalSignedRational(value.value) && isCanonicalSignedRational(value.magnitude)
         && integer(value.tickIndex) && value.tickIndex >= 0 && value.tickIndex < axis.ticks.length
         && same(value.value, axis.ticks[value.tickIndex]!) && !Object.is(value.sign, -0) && value.sign === Math.sign(value.value.numerator)
         && value.magnitude.numerator === Math.abs(value.value.numerator) && value.magnitude.denominator === value.value.denominator
         && isCoordinateNotation(value.value, value.notation);
 }
 
+/** Locate one exact value without introducing an artificial second coordinate. */
+export function makeCoordinateLocation(axis: RationalCoordinateAxis, tickIndex: number,
+    notation?: SignedRationalNotation): FormattedSignedRationalLocation {
+    if (!isRationalCoordinateAxis(axis) || !integer(tickIndex) || tickIndex < 0 || tickIndex >= axis.ticks.length) {
+        throw new GeneratorValidationError(helperId, 'A coherent exact axis and valid tick index are required.');
+    }
+    const value = axis.ticks[tickIndex]!;
+    const selected = notation === undefined ? axis.tickNotations[tickIndex]! : notation;
+    if (!isCoordinateNotation(value, selected)) {
+        throw new GeneratorValidationError(helperId, 'Location notation must equal its exact value.');
+    }
+    return {value: {...value}, tickIndex, notation: {...selected}, sign: Math.sign(value.numerator) as -1 | 0 | 1,
+        magnitude: absoluteSignedRational(value)};
+}
+
 export function isRationalCoordinatePoint(value: unknown, axes: RationalCoordinateAxes): value is RationalCoordinatePoint {
     return isRationalCoordinateAxes(axes) && record(value) && typeof value.id === 'string' && value.id.length > 0 && value.id.trim() === value.id
-        && isLocation(value.x, axes.x) && isLocation(value.y, axes.y) && value.locationTag === locationTag(value.x.sign, value.y.sign);
+        && isCoordinateLocation(value.x, axes.x) && isCoordinateLocation(value.y, axes.y) && value.locationTag === locationTag(value.x.sign, value.y.sign);
 }
 
 export function makeCoordinatePoint(id: string, axes: RationalCoordinateAxes, xTickIndex: number, yTickIndex: number,
@@ -109,9 +124,7 @@ export function makeCoordinatePoint(id: string, axes: RationalCoordinateAxes, xT
     if (!record(selected) || !isCoordinateNotation(xValue, selected.x) || !isCoordinateNotation(yValue, selected.y)) {
         throw new GeneratorValidationError(helperId, 'Point notation must equal its exact coordinate value.');
     }
-    const location = (value: SignedRational, tickIndex: number, notation: SignedRationalNotation): FormattedSignedRationalLocation =>
-        ({value: {...value}, tickIndex, notation: {...notation}, sign: Math.sign(value.numerator) as -1 | 0 | 1, magnitude: absoluteSignedRational(value)});
-    const x = location(xValue, xTickIndex, selected.x);
-    const y = location(yValue, yTickIndex, selected.y);
+    const x = makeCoordinateLocation(axes.x, xTickIndex, selected.x);
+    const y = makeCoordinateLocation(axes.y, yTickIndex, selected.y);
     return {id, x, y, locationTag: locationTag(x.sign, y.sign)};
 }

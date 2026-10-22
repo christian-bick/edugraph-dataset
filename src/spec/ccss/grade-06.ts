@@ -18,19 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const signedRationalNumberlineImplementation = defineImplementationPackage({
-    id: 'signed-rational-numberline',
-    description:
-        'Read and construct rational-number locations on horizontal and vertical number lines.',
-    generators: [
-        {module: 'rational-numberline-values', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numbers-rational-line-positioning', strategy: 'new'},
-        {module: 'numbers-rational-line-reading', strategy: 'new'}
-    ]
-});
-
 const rationalOrderAndMagnitudeImplementation = defineImplementationPackage({
     id: 'rational-order-and-magnitude',
     description:
@@ -1356,24 +1343,13 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.C.6b-coordinate-sign-quadrants', coordinateSignQuadrantsBuilder),
     ...toTargets('6.NS.C.6b-coordinate-sign-reflections', coordinateSignReflectionsBuilder),
     ...toTargets('6.NS.C.6c-rational-coordinate-positioning', rationalCoordinatePositioningBuilder),
-    ...toTargets('6.NS.C.6c-rational-coordinate-reading', rationalCoordinateReadingBuilder)
+    ...toTargets('6.NS.C.6c-rational-coordinate-reading', rationalCoordinateReadingBuilder),
+    ...toTargets('6.NS.C.6c-rational-numberline-positioning', rationalNumberlinePositioningBuilder),
+    ...toTargets('6.NS.C.6c-rational-numberline-reading', rationalNumberlineReadingBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.C.6c-rational-numberline-positioning',
-        rationalNumberlinePositioningBuilder,
-        signedRationalNumberlineImplementation,
-        'Construct marked locations for supplied values on correctly scaled horizontal/vertical lines.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.C.6c-rational-numberline-reading',
-        rationalNumberlineReadingBuilder,
-        signedRationalNumberlineImplementation,
-        'Read the value of a marked point from origin, direction and exact scale; both horizontal and ' +
-        'vertical layouts.'
-    ),
     ...toImplementationTodos(
         '6.NS.C.7a-inequality-line-interpretation',
         inequalityLineInterpretationBuilder,
