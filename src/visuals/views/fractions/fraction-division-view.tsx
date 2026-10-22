@@ -28,10 +28,18 @@ function Blank({children}: {children: ReactNode}) {
     return <section className="mt-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-lg text-slate-700">{children}</section>;
 }
 
+/** A font-independent response box; the square Unicode glyph uses an unpinned system fallback. */
+function AnswerBlank() {
+    return <span role="img" aria-label="Unresolved value" data-response="answer-blank" style={{
+        display: 'inline-block', width: '0.65em', height: '0.65em', border: '1px solid currentColor',
+        boxSizing: 'border-box', verticalAlign: '-0.025em'
+    }} />;
+}
+
 function DivisionExpression({data, showQuotient, solution}: {data: FractionDivisionRelationProblem; showQuotient: boolean; solution: boolean}) {
     return <div className="my-4 rounded-xl bg-slate-100 p-4 text-center font-mono text-2xl font-semibold">
         {divisionFactor(data.dividend)} ÷ {divisionFactor(data.divisor)} ={' '}
-        <span className={solution ? 'font-bold text-emerald-800' : ''}>{showQuotient ? divisionNumber(data.quotient) : '□'}</span>
+        <span className={solution ? 'font-bold text-emerald-800' : ''}>{showQuotient ? divisionNumber(data.quotient) : <AnswerBlank />}</span>
     </div>;
 }
 
@@ -91,7 +99,7 @@ function AdditionalRelation({data, solution}: {data: FractionDivisionRelationPro
         {solution ? <>{divisionFactor(data.inverse.quotientFactor)} × {divisionFactor(data.inverse.divisorFactor)}
             {data.multiplicationWitness && <> = {originalDivisionFraction(data.multiplicationWitness.unreducedProduct)}</>}
             {' '}= {originalDivisionOperand(data.inverse.reconstructedDividend)}</>
-            : <>{divisionFactor(data.divisor)} × □ = {originalDivisionOperand(data.dividend)}</>}
+            : <>{divisionFactor(data.divisor)} × <AnswerBlank /> = {originalDivisionOperand(data.dividend)}</>}
     </div>;
 }
 
@@ -133,7 +141,7 @@ function InverseTask({data, isSolutionView}: TaskProps) {
                 {data.multiplicationWitness && <> = {originalDivisionFraction(data.multiplicationWitness.unreducedProduct)}</>}
                 {' '}= {originalDivisionOperand(data.inverse.reconstructedDividend)}</p>
             <p className="mt-2">The exact quotient times the divisor is the original amount, including the last fractional group.</p>
-        </Answer> : <Blank><span className="font-mono">{divisionFactor(data.quotient)} × {divisionFactor(data.divisor)} = □</span>
+        </Answer> : <Blank><span className="font-mono">{divisionFactor(data.quotient)} × {divisionFactor(data.divisor)} = <AnswerBlank /></span>
             <p className="mt-3">Why does this reconstruct the dividend? ____________________</p></Blank>}
     </>;
 }

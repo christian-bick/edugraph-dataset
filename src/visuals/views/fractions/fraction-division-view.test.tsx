@@ -19,12 +19,14 @@ const data: FractionDivisionRelationProblem = {
 const render = (task: GeneralFractionDivisionTask, solution: boolean, problem = data): string =>
     renderToStaticMarkup(<GeneralFractionDivisionBody data={problem} isSolutionView={solution} task={task} />);
 const text = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+const answerBlanks = (markup: string): number => [...markup.matchAll(/data-response="answer-blank"/g)].length;
 
 describe('general fraction division task projections', () => {
     it('shows a truthful fractional last group without rounding it into a complete group', () => {
         const question = render('division-execution', false);
         const solution = render('division-execution', true);
-        expect(text(question)).toContain('(7/6) ÷ (3/4) = □');
+        expect(text(question)).toContain('(7/6) ÷ (3/4) =');
+        expect(answerBlanks(question)).toBe(2);
         expect(question).not.toContain('14/9');
         expect(question).not.toContain('5/9');
         const groupWidths = [...question.matchAll(/<rect[^>]* y="147" width="([^"]+)"/g)].map(match => Number(match[1]));
@@ -77,7 +79,8 @@ describe('general fraction division task projections', () => {
         const question = render('division-inverse-explanation', false);
         const solution = render('division-inverse-explanation', true);
         expect(text(question)).toContain('(7/6) ÷ (3/4) = 14/9');
-        expect(text(question)).toContain('(14/9) × (3/4) = □');
+        expect(text(question)).toContain('(14/9) × (3/4) =');
+        expect(answerBlanks(question)).toBe(1);
         expect(question).not.toContain('28/18');
         expect(question).not.toContain('leaving a/b');
         expect(text(solution)).toContain('(a/b) ÷ (c/d) = (a × d)/(b × c)');
@@ -89,10 +92,49 @@ describe('general fraction division task projections', () => {
             const question = render(task, false);
             const solution = render(task, true);
             expect(question).toContain('data-evidence="product-relation"');
-            expect(text(question)).toContain('(3/4) × □ = 7/6');
+            expect(text(question)).toContain('(3/4) ×');
+            expect(text(question)).toContain('= 7/6');
+            expect(answerBlanks(question)).toBe(2);
             expect(question).not.toContain('14/9');
             expect(question).not.toContain('emerald');
             expect(solution).toContain('emerald');
             expect(text(solution)).toContain('(14/9) × (3/4) = 42/36 = 7/6');
         });
+
+    it('draws quotient, missing-factor and reconstruction blanks without a fallback font glyph', () => {
+        const noOptionalWitnesses = {...data, equationWitness: undefined, multiplicationWitness: undefined};
+        const quotientQuestion = render('division-execution', false, noOptionalWitnesses);
+        const factorQuestion = render('division-model-construction', false);
+        const inverseQuestion = render('division-inverse-explanation', false);
+        expect(answerBlanks(quotientQuestion)).toBe(1);
+        expect(answerBlanks(factorQuestion)).toBe(2);
+        expect(answerBlanks(inverseQuestion)).toBe(1);
+        for (const question of [quotientQuestion, factorQuestion, inverseQuestion]) {
+            expect(question).not.toContain('□');
+            expect(question).toContain('aria-label="Unresolved value"');
+            expect(question).toContain('display:inline-block;width:0.65em;height:0.65em;border:1px solid currentColor');
+            expect(question).not.toContain('emerald');
+            expect(question).not.toContain('42/36');
+        }
+        expect(quotientQuestion).not.toContain('14/9');
+        expect(factorQuestion).not.toContain('14/9');
+        expect(text(inverseQuestion)).toContain('(7/6) ÷ (3/4) = 14/9');
+    });
+
+    it('adds no answer boxes to solved relations or the prose-only word question', () => {
+        const tasks: readonly GeneralFractionDivisionTask[] = ['division-execution', 'division-interpretation',
+            'division-inverse-explanation', 'division-story-creation', 'division-word-problem', 'division-model-construction'];
+        for (const task of tasks) {
+            const solution = render(task, true);
+            expect(answerBlanks(solution)).toBe(0);
+            expect(solution).not.toContain('□');
+            expect(solution).toContain('14/9');
+            expect(solution).toContain('emerald');
+        }
+        const wordQuestion = render('division-word-problem', false);
+        expect(answerBlanks(wordQuestion)).toBe(0);
+        expect(wordQuestion).toContain('Equation: ____________________');
+        expect(wordQuestion).not.toContain('14/9');
+        expect(wordQuestion).not.toContain('emerald');
+    });
 });
