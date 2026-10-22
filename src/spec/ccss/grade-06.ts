@@ -18,22 +18,6 @@ import type {
 
 // Shared implementation packages
 
-const commonFactorMultipleReasoningImplementation = defineImplementationPackage({
-    id: 'common-factor-multiple-reasoning',
-    description:
-        'Find greatest common divisors and least common multiples, and extract a full common factor from a ' +
-        'whole-number sum.',
-    generators: [
-        {module: 'common-factor-distribution-relations', strategy: 'new'},
-        {module: 'common-factor-multiple-relations', strategy: 'new'}
-    ],
-    views: [
-        {module: 'operations-full-common-factor', strategy: 'new'},
-        {module: 'numbers-greatest-common-factor', strategy: 'new'},
-        {module: 'numbers-least-common-multiple', strategy: 'new'}
-    ]
-});
-
 const signedRationalMeaningImplementation = defineImplementationPackage({
     id: 'signed-rational-meaning',
     description:
@@ -1395,42 +1379,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.NS.B.3-standard-decimal-addition', standardDecimalAdditionBuilder),
     ...toTargets('6.NS.B.3-standard-decimal-division', standardDecimalDivisionBuilder),
     ...toTargets('6.NS.B.3-standard-decimal-multiplication', standardDecimalMultiplicationBuilder),
-    ...toTargets('6.NS.B.3-standard-decimal-subtraction', standardDecimalSubtractionBuilder)
+    ...toTargets('6.NS.B.3-standard-decimal-subtraction', standardDecimalSubtractionBuilder),
+    ...toTargets('6.NS.B.4-extract-full-common-factor', extractFullCommonFactorBuilder),
+    ...toTargets('6.NS.B.4-greatest-common-factor', greatestCommonFactorBuilder),
+    ...toTargets('6.NS.B.4-least-common-multiple', leastCommonMultipleBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // The Number System (6.NS)
-    ...toImplementationTodos(
-        '6.NS.B.4-extract-full-common-factor',
-        extractFullCommonFactorBuilder,
-        commonFactorMultipleReasoningImplementation,
-        'Two given whole-number addends from 1 through 100, their nontrivial greatest common factor, and ' +
-        'equivalent factored form c(a+b), where gcd(a,b)=1. For 36+8, the result is 4(9+2); 2(18+4) does ' +
-        'not complete the requested factor extraction. GreatestCommonDivisor + DistributiveLaw ' +
-        'distinguishes full extraction from partial use of distributivity. The 1..100 restriction applies ' +
-        'to the original addends; sums/results can exceed 100. This is numeric arithmetic, so no ' +
-        'variable-expression or algebraic-factorization label is added merely for notation.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.B.4-greatest-common-factor',
-        greatestCommonFactorBuilder,
-        commonFactorMultipleReasoningImplementation,
-        'Two stated whole-number inputs, valid common divisors and the greatest one, or another ' +
-        'mathematically valid GCD method. Include equal inputs and one-zero cases; the inputs are not both ' +
-        'zero. Merged GreatestCommonDivisor explicitly includes greatest common factor as a synonym. ' +
-        'Enforce each input <=100 locally; do not invent a Grade6-only range Scope. The excluded (0,0) ' +
-        'input has no greatest positive common divisor.'
-    ),
-    ...toImplementationTodos(
-        '6.NS.B.4-least-common-multiple',
-        leastCommonMultipleBuilder,
-        commonFactorMultipleReasoningImplementation,
-        'Two whole-number inputs and their least common multiple, with a correct ' +
-        'common-multiple/factorization relation. Each input is at most 12, but the result may be larger; ' +
-        'e.g. lcm(11,12)=132. Do not use a fraction-specific LCD concept. Operand bounds belong to the ' +
-        'canonical generator constraints; a global NumbersSmaller12/100 would wrongly cap valid results. ' +
-        'Zero follows the published LCM convention.'
-    ),
     ...toImplementationTodos(
         '6.NS.C.5-contextual-zero',
         contextualZeroBuilder,

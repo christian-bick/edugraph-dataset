@@ -1,0 +1,2 @@
+- **Identity:** Find the greatest positive common factor of two whole numbers.
+- **Modes:** Question Mode leaves the factor and work unresolved. Solution Mode shows all positive common factors and the greatest, with reconstruction of both inputs; for two zero inputs, it truthfully states that no greatest positive common divisor exists.

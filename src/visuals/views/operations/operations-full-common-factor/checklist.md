@@ -1,0 +1,2 @@
+- **Identity:** Rewrite a whole-number sum by extracting its greatest common factor, leaving coprime addends inside the parentheses.
+- **Modes:** Question Mode shows the original sum and leaves factoring and work blank. Solution Mode shows the greatest common factor, distributive expansion and factored sum, with coprime residual addends confirming full extraction.

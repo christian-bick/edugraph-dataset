@@ -1,0 +1,2 @@
+- **Identity:** Find the least common multiple of two whole numbers.
+- **Modes:** Question Mode leaves the multiple and work unresolved. Solution Mode uses coprime GCD cofactors and products of both inputs to show the least positive common multiple, or explicitly applies the zero-input convention to give 0.
