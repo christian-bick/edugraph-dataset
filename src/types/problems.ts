@@ -3423,11 +3423,56 @@ export type GeometryPrimitivesProblem = {
 };
 
 
-/**
- * ViewTypeMap acts as the compile-time contract mapping visual view identifiers
- * to their expected mathematical problem data schemas.
- */
+/** Exact reduced rational with a positive denominator; ratio quantities are nonnegative. */
+export type RatioRational = {numerator: number; denominator: number};
+
+export type RatioQuantity = {name: string; unit: string; value: RatioRational};
+
+/** Ordered quantities retain the antecedent/consequent meanings independently of a task. */
+export type RatioRelationProblem = {
+    kind: 'ratio-relation';
+    antecedent: RatioQuantity;
+    consequent: RatioQuantity;
+};
+
+/** Unit rate and a scaled equivalent pair are exact witnesses, never selected unknowns. */
+export type UnitRateRelationProblem = {
+    kind: 'unit-rate';
+    context: 'price' | 'speed';
+    antecedent: RatioQuantity;
+    consequent: RatioQuantity;
+    unitRate: RatioRational;
+    scaleFactor: RatioRational;
+    scaled: {antecedent: RatioRational; consequent: RatioRational};
+};
+
+/** Positive whole-number pairs share one ratio; all graph bounds include every row. */
+export type RatioTableProblem = {
+    kind: 'ratio-table';
+    quantities: [{name: string; unit: string}, {name: string; unit: string}];
+    base: [number, number];
+    rows: {antecedent: number; consequent: number; scale: number}[];
+    coordinateScale: {xStep: number; yStep: number; xMax: number; yMax: number};
+};
+
+/** The final rows share a consequent, so antecedents witness the ordered ratio comparison. */
+export type RatioTableComparisonProblem = {
+    kind: 'ratio-table-comparison';
+    left: RatioTableProblem;
+    right: RatioTableProblem;
+    relation: 'less' | 'equal' | 'greater';
+    normalized: {consequent: number; leftAntecedent: number; rightAntecedent: number};
+};
+
+/** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'ratio-language': RatioRelationProblem;
+    'unit-rate-language': UnitRateRelationProblem;
+    'unit-rate-problem': UnitRateRelationProblem;
+    'ratio-coordinate-plotting': RatioTableProblem;
+    'ratio-table-construction': RatioTableProblem;
+    'ratio-table-missing-values': RatioTableProblem;
+    'ratio-table-comparison': RatioTableComparisonProblem;
     'operations-vertical': ArithmeticProblem;
     'operations-vertical-inversion': ArithmeticProblem;
     'operations-grouping-write': NumericalExpressionProblem;

@@ -1,0 +1,3 @@
+- **Identity:** A contextual ordered ratio is normalized to one unit of the second quantity and asks for a written interpretation of that unit rate.
+- **Modes:** Question Mode withholds the written interpretation. Solution Mode explains the quotient with correctly ordered quantities and units.
+- **Essential specifics:** The original ratio, divide-both-quantities normalization and multiply-both-quantities equivalent ratio remain visible.

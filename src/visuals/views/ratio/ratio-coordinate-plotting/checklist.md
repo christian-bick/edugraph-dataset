@@ -1,0 +1,2 @@
+- **Identity:** Plot all pairs from an equivalent-ratio table on a scaled coordinate grid, using the first column as x and the second as y.
+- **Modes:** Question Mode shows the full table and an unplotted labeled grid. Solution Mode retains the table and plots every pair at the correct scaled location.

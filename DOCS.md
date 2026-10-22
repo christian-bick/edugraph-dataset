@@ -69,6 +69,13 @@ the requested count and the available collection size. The generator chooses tha
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
 views retain `counting-basic` and `CountingProblem`, so supply sampling does not alter their data.
 
+Ratio tasks use four discriminated payloads: ordered quantity pairs, exact rational unit rates
+with scaled-equivalence witnesses, whole-number ratio tables with coordinate scales, and paired
+tables normalized to a common consequent. The seven ratio views project these into written
+interpretation, contextual rate problems, plotting, table construction, completion, and comparison.
+Their shared renderers live under `src/visuals/views/ratio/`; mathematical helpers live under
+`src/generators/ratio/`.
+
 Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
 union. The completion and explanation views share that mathematical payload and parent-level
 rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
@@ -111,9 +118,9 @@ ambiguous and are not silently converted into a concrete unit.
 
 A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
 
-The [Grade 6 file](src/spec/ccss/grade-06.ts) currently exports its reviewed builders through
-`implementationTodos`, grouped into authored generator/view packages. Its active `spec` is
-empty, so those targets appear in the coverage backlog without entering dataset generation.
+The [Grade 6 file](src/spec/ccss/grade-06.ts) exports completed ratio and unit-rate builders
+through `spec`. Remaining reviewed builders stay in `implementationTodos`, grouped into
+authored generator/view packages, and appear in the coverage backlog without entering generation.
 Partial matches to earlier-grade modules remain diagnostic until a complete competency is
 implemented; the authoring rules are in [target-spec.md](docs/target-spec.md).
 
