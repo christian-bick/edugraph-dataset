@@ -1,0 +1,2 @@
+- **Identity:** Extract and describe the observational unit, recorded attribute, recording method and units from the study and data.
+- **Modes:** Question Mode gives the source facts and leaves the descriptions blank. Solution Mode states the actual unit, attribute, method and measurement units in green, linked to the observations and occasions.
