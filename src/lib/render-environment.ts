@@ -3,7 +3,7 @@ export const CANONICAL_RENDERER_PLATFORM = 'linux/amd64';
 export const CANONICAL_RENDERER_IMAGE =
     'mcr.microsoft.com/playwright:v1.60.0-noble@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948';
 export const CANONICAL_RENDERER_ID =
-    'playwright-1.60.0-noble-linux-amd64@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948';
+    'playwright-1.60.0-noble-linux-amd64@sha256:9bd26ad900bb5e0f4dee75839e957a89ae89c2b7ab1e76050e559790e946b948:capture-fit-view-v1';
 export const CANONICAL_RENDERER_PORT = 4173;
 export const RENDERER_ENVIRONMENT_VARIABLE = 'EDUGRAPH_RENDERER_ENVIRONMENT';
 export const CONTAINER_GENERATION_VARIABLE = 'EDUGRAPH_CONTAINER_GENERATION';
@@ -11,7 +11,8 @@ export const RENDERER_PORT_VARIABLE = 'EDUGRAPH_RENDERER_PORT';
 
 /**
  * Browser-context defaults are explicit so a Playwright upgrade cannot silently
- * change pixels through a new locale, viewport, scale, or media preference.
+ * change pixels through a new locale, viewport, scale, or media preference. Each
+ * capture starts at this viewport; taller cards grow only its height to fit.
  */
 export const RENDER_CONTEXT_OPTIONS = {
     viewport: { width: 1280, height: 720 },

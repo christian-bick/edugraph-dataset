@@ -110,6 +110,11 @@ Within one spec dataset, every sample has a **structural identity**: the tuple `
 
 The consequence: a code change only invalidates the samples whose identity inputs it actually touches. Sample identity remains pipeline metadata and is not part of the generator payload.
 
+Each screenshot starts from the nominal fixed-width viewport and zero scroll. When a view is
+taller than that viewport, capture grows only the viewport height to contain the complete card
+before taking the transparent element screenshot. The capture policy is versioned in the canonical
+renderer identity, so a policy change invalidates render reuse explicitly.
+
 Operational rows retain `generation_plan_hash`, the full `generation_plan`, `generation_replay`
 (actual origin sample key, attempt, seed, and selected assignment), and `prepared_view`. When a
 solution reuses its question's draw, its artifact key remains the solution key and its replay

@@ -19,8 +19,14 @@ describe('render environment', () => {
         expect(CANONICAL_RENDERER_PLATFORM).toBe('linux/amd64');
     });
 
-    it('keeps the screenshot ceiling at the canonical 1280px viewport width', () => {
+    it('starts captures at 1280x720 while retaining the fixed width ceiling', () => {
         expect(RENDER_CONTEXT_OPTIONS.viewport).toEqual({width: 1280, height: 720});
+    });
+
+    it('versions the fitted capture policy separately from the canonical browser image', () => {
+        expect(CANONICAL_RENDERER_ID).toMatch(/:capture-fit-view-v1$/);
+        expect(CANONICAL_RENDERER_ID.split('@sha256:')[1]?.split(':')[0])
+            .toBe(CANONICAL_RENDERER_IMAGE.split('@sha256:')[1]);
     });
 
     it('uses the explicit environment identity when generation is containerized', () => {

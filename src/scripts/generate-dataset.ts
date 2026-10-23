@@ -57,6 +57,7 @@ import {
 import {beginDatasetStoreTransaction} from '../lib/dataset-store.ts';
 import { CONTAINER_GENERATION_VARIABLE, RENDER_CONTEXT_OPTIONS } from '../lib/render-environment.ts';
 import {currentRendererEnvironment} from '../lib/render-environment.ts';
+import {captureViewScreenshot} from '../lib/capture-view.ts';
 import {inspectDevelopmentInputObservation} from '../lib/development-observation.ts';
 import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
 import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
@@ -260,7 +261,7 @@ async function renderSamples(
                     if (viewError) throw new Error(viewError.trim());
 
                     const outPath = resolve(splitOutputDir, sample.fileName);
-                    await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
+                    await captureViewScreenshot(page, outPath);
 
                     metadata.push({
                         file_name: sample.fileName,

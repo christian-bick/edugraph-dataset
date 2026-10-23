@@ -2,6 +2,8 @@ import { chromium } from 'playwright';
 import { resolve } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { RenderPayload } from '../types/ml-engine.ts';
+import {captureViewScreenshot} from './capture-view.ts';
+import {RENDER_CONTEXT_OPTIONS} from './render-environment.ts';
 
 const BASE_URL = process.env.RENDER_BASE_URL ?? 'http://localhost:5173';
 
@@ -30,7 +32,7 @@ export async function renderTasks(
     const browser = await chromium.launch({ headless: true });
     const written: string[] = [];
     try {
-        const context = await browser.newContext();
+        const context = await browser.newContext(RENDER_CONTEXT_OPTIONS);
         const page = await context.newPage();
         let currentViewUrl = '';
 
@@ -65,7 +67,7 @@ export async function renderTasks(
             await page.waitForTimeout(60);
 
             const outPath = resolve(outDir, task.fileName);
-            await page.locator('#view').screenshot({ path: outPath, omitBackground: true });
+            await captureViewScreenshot(page, outPath);
             written.push(outPath);
         }
         await context.close();
