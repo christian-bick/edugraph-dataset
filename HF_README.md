@@ -12,7 +12,7 @@ tags:
 - education
 - reasoning
 size_categories:
-- n<1K
+- 1K<n<10K
 configs:
 - config_name: default
   data_files:
@@ -25,6 +25,8 @@ configs:
 # EduGraph Exercises Dataset
 
 **EduGraph Exercises** is a synthetic ML dataset of math-related visual problems, precisely labeled for training AI models in the education sector. 
+
+The dataset covers in-scope Common Core State Standards for Mathematics from Kindergarten through Grade 6 (K–6). See the [Coverage Explorer](https://coverage.edugraph.io) for detailed competency coverage and scope exclusions.
 
 Every image in this dataset is programmatically generated using the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology) to ensure that visual features are mathematically bound to their pedagogical labels.
 
@@ -55,7 +57,7 @@ The dataset is split into `train` and `validation` folders. Each split contains:
 ### Metadata Schema
 Each entry in `metadata.jsonl` contains:
 - `file_name`: Path to the image file (relative to the split root).
-- `tags`: List of semantic labels from the EduGraph Ontology.
+- `labels`: List of semantic labels from the EduGraph Ontology.
 - `solution`: Boolean indicating whether the image shows a solved state.
 
 ## Versioning & Integrity
