@@ -95,6 +95,15 @@ seed, and reveals the classifications and contextual reasons in Solution Mode.
 The required variation configuration selects either a collection containing
 anticipated variation or one containing only single-observation and constant-rule cases.
 
+Numerical-data studies retain individual observation identities, measurement methods
+and precision, exact summaries, frequency memberships and complete dot/bin/box
+geometry. Separate selected theorem objects witness the configured statistical
+relations. Finite shape evidence uses actual frequency reflections and support gaps;
+contextual departures require a given routine band, an observed majority and a
+checked nearest-record separation. Counterfactual summaries change one recorded
+value under its original attribute constraints. Fixed interpretation views project
+these supplied facts without selecting a learner task inside the producer.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting

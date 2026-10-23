@@ -5689,6 +5689,8 @@ export interface ViewTypeMap {
     'net-surface-area': PolyhedralNetProblem;
     'net-surface-area-story': PolyhedralNetProblem;
     'statistical-question-classification': StatisticalQuestionsProblem;
+    'distribution-description': NumericalDataProblem;
+    'distribution-patterns-context': NumericalDataProblem;
 }
 
 
@@ -5923,3 +5925,296 @@ export type StatisticalQuestionsProblem = {
      */
     investigations: readonly [StatisticalInvestigation, ...StatisticalInvestigation[]];
 };
+
+
+/** Complete shared numerical-data model for sequential packages23–28; only actual current leaves receive view mappings. */
+export type NumericalDataScalar = Readonly<AlgebraicScalar>;
+
+export type NumericalDataPosition = Readonly<{
+    value: NumericalDataScalar;
+    /** Exact possibly NONINTEGER interval coordinate: value=min+step*axisPosition. */
+    axisPosition: NumericalDataScalar;
+}>;
+
+/** Names label source facts; they never contain a ready question/answer/reason. */
+export type NumericalDataStudy = Readonly<{
+    id: string;
+    populationName: string;
+    observationalUnitName: string;
+    units: readonly [Readonly<{id: string; name: string}>, ...Readonly<{id: string; name: string}>[]];
+    occasions: readonly [Readonly<{id: string; name: string}>, ...Readonly<{id: string; name: string}>[]];
+    selection: 'distinct-units' | 'repeated-occasions';
+    attribute: Readonly<{id: string; name: string}> & (
+        | Readonly<{kind: 'length'; unit: 'centimeters' | 'meters'; method: 'ruler'; precision: NumericalDataScalar}>
+        | Readonly<{kind: 'duration'; unit: 'seconds' | 'minutes'; method: 'timer'; precision: NumericalDataScalar}>
+        | Readonly<{kind: 'temperature'; unit: 'degrees-celsius'; method: 'thermometer'; precision: NumericalDataScalar}>
+        | Readonly<{kind: 'count'; unit: 'items'; method: 'counted'; countedObject: string}>
+    );
+    /** Real investigation context, never an instruction to choose a named method. */
+    goal:
+        | Readonly<{kind: 'describe-recorded-collection'}>
+        | Readonly<{kind: 'routine-member'}>
+        | Readonly<{kind: 'equally-allocated-total'}>;
+}>;
+
+export type NumericalDataRecord = Readonly<{
+    id: string;
+    unitId: string;
+    occasionId: string;
+    value: NumericalDataScalar;
+}>;
+
+/** A middle position in one actual ordered subcollection; positions are ONE-based. */
+export type NumericalMiddle = Readonly<{
+    orderedRecordIds: readonly [string, ...string[]];
+    positions: readonly [number] | readonly [number, number];
+    centralRecordIds: readonly [string] | readonly [string, string];
+    centralValues: readonly [NumericalDataScalar] | readonly [NumericalDataScalar, NumericalDataScalar];
+    value: NumericalDataScalar;
+}>;
+
+export type NumericalDataSummaryCore = Readonly<{
+    count: number;
+    /** Complete stable permutation of original records, preserving ties. */
+    orderedRecordIds: readonly [string, ...string[]];
+    sum: NumericalDataScalar;
+    minimum: NumericalDataScalar;
+    maximum: NumericalDataScalar;
+    mean: NumericalDataScalar;
+    median: NumericalMiddle;
+    quartiles: Readonly<{
+        convention: 'median-of-halves-excluding-odd-center';
+        lowerHalf: NumericalMiddle;
+        upperHalf: NumericalMiddle;
+        q1: NumericalDataScalar;
+        q3: NumericalDataScalar;
+    }>;
+    iqr: NumericalDataScalar;
+    /** One row per record, in original order; center is ALWAYS the arithmetic mean. */
+    deviations: readonly Readonly<{recordId: string; value: NumericalDataScalar;
+        signedDifference: NumericalDataScalar; absoluteDifference: NumericalDataScalar}>[];
+    absoluteDeviationSum: NumericalDataScalar;
+    mad: NumericalDataScalar;
+}>;
+
+export type NumericalFrequency = Readonly<{
+    id: string;
+    value: NumericalDataScalar;
+    recordIds: readonly [string, ...string[]];
+    count: number;
+}>;
+
+export type NumericalDataPlots = Readonly<{
+    /** Complete scales; existing SignedRationalAxis honestly requires zero present. */
+    valueAxis: Readonly<SignedRationalAxis>;
+    /** Nonnegative frequency scale, min0/zeroIndex0; no copied plot-choice flag. */
+    countAxis: Readonly<SignedRationalAxis>;
+    dots: readonly Readonly<{recordId: string; frequencyId: string;
+        valueLocation: NumericalDataPosition; stackOrdinal: number; stackLocation: NumericalDataPosition}>[];
+    histogram: Readonly<{
+        convention: 'equal-width-left-closed-right-open-final-right-closed';
+        width: NumericalDataScalar;
+        bins: readonly [Readonly<{id: string; lower: NumericalDataScalar; upper: NumericalDataScalar;
+            lowerClosed: true; upperClosed: boolean; recordIds: readonly string[]; count: number;
+            left: NumericalDataPosition; right: NumericalDataPosition; top: NumericalDataPosition}>,
+            ...Readonly<{id: string; lower: NumericalDataScalar; upper: NumericalDataScalar;
+                lowerClosed: true; upperClosed: boolean; recordIds: readonly string[]; count: number;
+                left: NumericalDataPosition; right: NumericalDataPosition; top: NumericalDataPosition}>[]];
+    }>;
+    box: Readonly<{
+        quartileConvention: 'median-of-halves-excluding-odd-center';
+        whiskerConvention: 'observed-minimum-maximum';
+        minimum: NumericalDataPosition;
+        q1: NumericalDataPosition;
+        median: NumericalDataPosition;
+        q3: NumericalDataPosition;
+        maximum: NumericalDataPosition;
+    }>;
+}>;
+
+export type NumericalShapeFacts = Readonly<{
+    /** Complete adjacent support gaps, not a mean-minus-median shortcut. */
+    gaps: readonly Readonly<{leftFrequencyId: string; rightFrequencyId: string; width: NumericalDataScalar}>[];
+    /** Largest class multiplicity, not the number of modes. */
+    maximumFrequency: number;
+    /**
+     * Complete global maximum-frequency support classes, including ties.
+     * These are NOT automatically distinct local peaks or convention-independent
+     * modes: an all-unique/flat collection can honestly be described as flat.
+     */
+    maximumFrequencyIds: readonly [string, ...string[]];
+    midrange: NumericalDataScalar;
+    /** Reflect every occupied support value about midrange; absent reflection has count0. */
+    reflections: readonly Readonly<{frequencyId: string; reflectedValue: NumericalDataScalar;
+        reflectedFrequencyId: string | null; count: number; reflectedCount: number}>[];
+    leftMedianExtent: NumericalDataScalar;
+    rightMedianExtent: NumericalDataScalar;
+}>;
+
+export type NumericalMeanProof = Readonly<{
+    kind: 'arithmetic-mean';
+    recordIds: readonly [string, ...string[]];
+    sum: NumericalDataScalar;
+    quotient: ExactCoefficientArithmetic;
+}>;
+
+export type NumericalMiddleProof = Readonly<{
+    middle: NumericalMiddle;
+    arithmetic:
+        | Readonly<{kind: 'single-central-value'; recordId: string; value: NumericalDataScalar}>
+        /**
+         * The exact relation (first+second)/2=result. Do not require storing the
+         * potentially unsafe UNREPRESENTED numerator first+second separately.
+         */
+        | Readonly<{kind: 'central-pair-average'; operands: readonly [NumericalDataScalar, NumericalDataScalar];
+            divisor: 2; result: NumericalDataScalar}>;
+}>;
+
+export type NumericalMedianProof = Readonly<{kind: 'median'; positional: NumericalMiddleProof}>;
+
+export type NumericalQuartileProof = Readonly<{
+    kind: 'quartiles'; convention: 'median-of-halves-excluding-odd-center';
+    lowerHalf: NumericalMiddleProof; upperHalf: NumericalMiddleProof;
+}>;
+
+export type NumericalMadProof = Readonly<{
+    kind: 'mean-absolute-deviation';
+    center: NumericalDataScalar;
+    deviations: readonly Readonly<{recordId: string; subtraction: ExactCoefficientArithmetic;
+        signedDifference: NumericalDataScalar; absoluteDifference: NumericalDataScalar}>[];
+    absoluteDeviationSum: NumericalDataScalar;
+    quotient: ExactCoefficientArithmetic;
+}>;
+
+export type NumericalIqrProof = Readonly<{
+    kind: 'interquartile-range';
+    quartiles: NumericalQuartileProof;
+    subtraction: ExactCoefficientArithmetic;
+}>;
+
+export type NumericalFrequencyProof = Readonly<{
+    kind: 'frequency-partition';
+    classes: readonly [Readonly<{frequencyId: string; recordIds: readonly [string, ...string[]]; count: number}>,
+        ...Readonly<{frequencyId: string; recordIds: readonly [string, ...string[]]; count: number}>[]];
+    histogramMemberships: readonly Readonly<{binId: string; recordIds: readonly string[]; count: number}>[];
+    totalCount: number;
+}>;
+
+export type NumericalSampleProof = Readonly<{
+    kind: 'sample-cardinality';
+    /** Complete bijection onto1..N; repeated values retain different record IDs. */
+    enumeration: readonly Readonly<{recordId: string; ordinal: number}>[];
+    count: number;
+}>;
+
+export type NumericalVariableProof = Readonly<{
+    kind: 'variable-recording';
+    attributeId: string;
+    /** Actual recording incidences, not a metadata-only selected Boolean. */
+    incidences: readonly Readonly<{recordId: string; unitId: string; occasionId: string;
+        attributeId: string; method: NumericalDataStudy['attribute']['method']; value: NumericalDataScalar}>[];
+}>;
+
+export type NumericalShapeProof = Readonly<{
+    kind: 'empirical-shape';
+    /** Selected mathematical witnesses may be symmetric or asymmetric; never a skew answer badge. */
+    symmetry:
+        | Readonly<{kind: 'reflection-equality'; center: NumericalDataScalar;
+            pairs: readonly Readonly<{frequencyId: string; reflectedFrequencyId: string; commonCount: number}>[]}>
+        | Readonly<{kind: 'reflection-inequality'; center: NumericalDataScalar;
+            frequencyId: string; reflectedValue: NumericalDataScalar;
+            reflectedFrequencyId: string | null; firstCount: number; secondCount: number}>;
+    /** Same neutral global-maximum classes; no inferred number-of-peaks claim. */
+    maximumFrequencyIds: readonly [string, ...string[]];
+    medianTailComparison: Readonly<{left: NumericalDataScalar; right: NumericalDataScalar; relation: 'less' | 'equal' | 'greater'}>;
+    /** Complete support gap facts allow truthful descriptions of isolated tails/gaps. */
+    gaps: readonly Readonly<{leftFrequencyId: string; rightFrequencyId: string; width: NumericalDataScalar}>[];
+}>;
+
+export type NumericalVariabilityProof = Readonly<{
+    kind: 'observed-variability';
+    orderedRecordIds: readonly [string, string];
+    lower: NumericalDataScalar; upper: NumericalDataScalar;
+    positiveDifference: ExactCoefficientArithmetic;
+}>;
+
+/**
+ * A reference for unusualness, not a hard admissibility bound on recorded values.
+ * This constructive criterion also requires an EMPIRICAL separation from the
+ * majority of actual observations inside the routine band. A band violation
+ * alone does not prove that an observation is unusual relative to these data.
+ */
+export type NumericalDepartureCriterion = Readonly<{
+    kind: 'separated-from-routine-majority';
+    lower: NumericalDataScalar;
+    upper: NumericalDataScalar;
+    /** Positive distance in the recorded attribute unit; equality qualifies. */
+    minimumSeparation: NumericalDataScalar;
+    referenceSource: 'routine-operation-reference' | 'study-reference-range';
+}>;
+
+export type NumericalDepartureFacts = Readonly<{
+    criterion: NumericalDepartureCriterion;
+    /** Complete every-record comparisons; equality is IN the reference band. */
+    comparisons: readonly Readonly<{recordId: string; lowerRelation: 'less' | 'equal' | 'greater';
+        upperRelation: 'less' | 'equal' | 'greater'; outside: boolean}>[];
+    /** COMPLETE in-band set, a strict majority of this actual collection. */
+    ordinaryRecordIds: readonly [string, ...string[]];
+    /**
+     * One row for EVERY out-of-band record, to an actual closest in-band record;
+     * ties may choose either closest ID. Thus each stored distance is the minimum
+     * empirical separation from the reference group, not just from the band edge.
+     */
+    separations: readonly Readonly<{recordId: string; nearestOrdinaryRecordId: string;
+        subtraction: ExactCoefficientArithmetic; absoluteDifference: NumericalDataScalar;
+        thresholdRelation: 'less' | 'equal' | 'greater'}>[];
+    /** Exactly out-of-band records whose minimum separation is >= the threshold. */
+    exceptionalRecordIds: readonly string[];
+}>;
+
+export type NumericalOutlierProof = Readonly<{
+    kind: 'criterion-backed-departure';
+    facts: NumericalDepartureFacts;
+    /** Nonempty for a selected StatisticalOutlier claim; shared facts may have none. */
+    exceptionalRecordIds: readonly [string, ...string[]];
+}>;
+
+/** Mathematical counterfactual change, not a recommendation or choose-method flag. */
+export type NumericalSensitivityProof = Readonly<{
+    kind: 'single-record-replacement';
+    recordId: string;
+    originalValue: NumericalDataScalar;
+    replacementValue: NumericalDataScalar;
+    referenceSource: 'documented-routine-value';
+    /** Same original record identity set, evaluated with exactly one changed value. */
+    modified: NumericalDataSummaryCore;
+    modifiedProofs: readonly [NumericalMeanProof, NumericalMedianProof, NumericalMadProof, NumericalIqrProof];
+    changes: readonly [
+        Readonly<{measure: 'mean'; difference: ExactCoefficientArithmetic; absoluteDifference: NumericalDataScalar}>,
+        Readonly<{measure: 'median'; difference: ExactCoefficientArithmetic; absoluteDifference: NumericalDataScalar}>,
+        Readonly<{measure: 'mad'; difference: ExactCoefficientArithmetic; absoluteDifference: NumericalDataScalar}>,
+        Readonly<{measure: 'iqr'; difference: ExactCoefficientArithmetic; absoluteDifference: NumericalDataScalar}>
+    ];
+    /** Actual change comparisons, not a universal robustness theorem. */
+    centerChangeRelation: 'less' | 'equal' | 'greater';
+    spreadChangeRelation: 'less' | 'equal' | 'greater';
+}>;
+
+export type NumericalDataRelation = NumericalMeanProof | NumericalMedianProof | NumericalQuartileProof
+    | NumericalMadProof | NumericalIqrProof | NumericalFrequencyProof | NumericalSampleProof | NumericalVariableProof
+    | NumericalShapeProof | NumericalVariabilityProof | NumericalOutlierProof | NumericalSensitivityProof;
+
+export type NumericalDataProblem = Readonly<{
+    kind: 'numerical-data';
+    study: NumericalDataStudy;
+    /** At least4 records; duplicates in VALUE are retained, IDs remain unique. */
+    records: readonly [NumericalDataRecord, NumericalDataRecord, NumericalDataRecord, NumericalDataRecord, ...NumericalDataRecord[]];
+    summary: NumericalDataSummaryCore;
+    frequencies: readonly [NumericalFrequency, ...NumericalFrequency[]];
+    plots: NumericalDataPlots;
+    shapeFacts: NumericalShapeFacts;
+    /** Criterion is real semantic input; null means no criterion was specified. */
+    departureFacts: NumericalDepartureFacts | null;
+    /** Nonempty genuine checked relation objects; no copied profile/raw labels. */
+    relations: readonly [NumericalDataRelation, ...NumericalDataRelation[]];
+}>;
