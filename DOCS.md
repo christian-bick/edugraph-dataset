@@ -106,6 +106,9 @@ these supplied facts without selecting a learner task inside the producer.
 Single-summary interpretation leaves give one center or spread value and explain
 it in the study's original units. Their plans select the corresponding single
 statistical claim, while both renderers accept the complete shared data family.
+The numerical distribution construction view supplies records and blank scaled
+axes for a line plot, histogram or box plot. Solutions project the producer's
+dot, bin or quartile geometry and show the corresponding construction evidence.
 
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within

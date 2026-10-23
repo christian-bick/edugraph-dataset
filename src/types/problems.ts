@@ -5693,6 +5693,7 @@ export interface ViewTypeMap {
     'distribution-patterns-context': NumericalDataProblem;
     'center-summary-interpretation': NumericalDataProblem;
     'variation-summary-interpretation': NumericalDataProblem;
+    'numerical-distribution-plot': NumericalDataProblem;
 }
 
 

@@ -1,0 +1,2 @@
+- **Identity:** Construct the requested numerical line plot, histogram or box plot from the original recorded observations and stated display convention.
+- **Modes:** Question Mode supplies the observations, units, scales and necessary bin or quartile convention while leaving the plot empty. Solution Mode adds the complete accurate plot in green, retaining repeated observations or the stated five-number and min/max-whisker convention.

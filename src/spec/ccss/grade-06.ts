@@ -27,18 +27,6 @@ import type {
 
 
 
-const numericalDistributionPlotsImplementation = defineImplementationPackage({
-    id: 'numerical-distribution-plots',
-    description:
-        'Construct dot plots, histograms and box plots from numerical data using explicit display ' +
-        'conventions.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'numerical-distribution-plot', strategy: 'new'}
-    ]
-});
 
 const numericalDataContextSummaryImplementation = defineImplementationPackage({
     id: 'numerical-data-context-summary',
@@ -1171,7 +1159,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.SP.A.2-describe-distribution', describeDistributionBuilder),
     ...toTargets('6.SP.B.5c-describe-contextual-patterns', describeContextualPatternsBuilder),
     ...toTargets('6.SP.A.3-interpret-center-summary', interpretCenterSummaryBuilder),
-    ...toTargets('6.SP.A.3-interpret-variation-summary', interpretVariationSummaryBuilder)
+    ...toTargets('6.SP.A.3-interpret-variation-summary', interpretVariationSummaryBuilder),
+    ...toTargets('6.SP.B.4-construct-numerical-distribution-plot', constructNumericalDistributionPlotBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1180,17 +1169,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.B.4-construct-numerical-distribution-plot',
-        constructNumericalDistributionPlotBuilder,
-        numericalDistributionPlotsImplementation,
-        'A numerical data set and the requested display convention are supplied. The learner constructs ' +
-        'the plot with a numerical axis, accurate frequencies or quartiles, and appropriate units. A ' +
-        'histogram states bins; a box plot states the finite-data quartile/whisker convention. One whole ' +
-        'competency retains all three representations. Use FrequencyDistribution for dot plots/histograms ' +
-        'and Quartile+Median for box plots, avoiding a frequency-only mathematical claim on a box plot. ' +
-        'Equal-width histogram bins suffice at this grade; no density or outlier-fence rule is imposed.'
-    ),
     ...toImplementationTodos(
         '6.SP.B.5a-observation-count',
         observationCountBuilder,
