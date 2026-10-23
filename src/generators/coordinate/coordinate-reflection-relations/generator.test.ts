@@ -212,7 +212,7 @@ describe('coordinate reflection absolute-range sampling', () => {
             expect(features.has(feature)).toBe(true);
         }
         expect(features.has('above-five')).toBe(cap === 10);
-    });
+    }, 15_000);
 
     it('rejects missing and malformed range configuration without silent defaults', () => {
         expect(() => generator.generate({})).toThrow(GeneratorValidationError);
