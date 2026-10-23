@@ -1,0 +1,2 @@
+- **Identity:** Arrange detached triangular pieces to match the target outline, then find the area of the original polygon. The original outline and stated number of copies distinguish its area from the assembled whole.
+- **Modes:** Question Mode withholds the assembled placements, seams and area calculations. Solution Mode shows the completed rigid assembly and exact calculation back to the original polygon's area, accounting for copies, with completed work and answer in green.

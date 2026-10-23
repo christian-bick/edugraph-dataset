@@ -64,6 +64,13 @@ continues to accept the narrower tree contract. Their Abilities are `SpatialGene
 `SpatialImagination`, respectively. Geometric partitions are producer data; diagram projection,
 piece trays, drawing spaces and solution colors belong to the views.
 
+Polygon area dissection uses an exact metric point registry, source triangle partitions,
+measured and derived lengths, complete internal cuts, and rigid copy placements. Geometry
+helpers under `src/generators/shape/` check containment, disjoint interiors and independent
+whole areas; the model helper links these to length dependencies, square units and copy
+normalization. Four fixed composition/decomposition views retain the original region and
+project either plain dimension premises or necessary contextual prose.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
