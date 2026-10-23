@@ -1,0 +1,2 @@
+- **Identity:** A fully packed rectangular prism, visible cube layers and the small cube edge establish a count-times-cube-volume calculation in the original cubic unit.
+- **Modes:** Question Mode leaves the total count and volume calculation unfinished. Solution Mode shows the cube count, each small cube's volume, and their product as the prism's volume.

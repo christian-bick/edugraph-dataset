@@ -71,6 +71,13 @@ whole areas; the model helper links these to length dependencies, square units a
 normalization. Four fixed composition/decomposition views retain the original region and
 project either plain dimension premises or necessary contextual prose.
 
+Rectangular prism volume shares a named union of side-one integer packings and exact
+fractional-scale packings. The fractional model separates integer cell indices and counts
+from physical lengths, areas and volumes in the original unit, with supplied count, scale,
+layer and product witnesses. Its helper lives under `src/generators/measurement/`.
+Five prism consumers under `src/visuals/views/measure/` project that shared contract;
+the fractional renderer branches before the existing integer layout.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting

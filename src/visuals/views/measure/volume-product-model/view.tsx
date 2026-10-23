@@ -4,6 +4,8 @@ import {validateProblemData, ViewValidationError} from '../../../helpers/validat
 import {withConfig} from '../../withConfig.tsx';
 import {isValidRectangularPrismVolume} from '../volume-rectangular-prism-helpers.ts';
 import {RectangularPrismBody} from '../volume-rectangular-prism-view.tsx';
+import {FractionalRectangularPrismBody} from '../fractional-prism-view.tsx';
+import {validateFractionalPrismPresence} from '../fractional-prism-validation.ts';
 import {VolumeProductModelViewConfig, VolumeProductModelViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -19,10 +21,13 @@ export const VolumeProductModelCore = ({payload}: CoreProps) => {
         'kind', 'unitId', 'unitCubeEdgeLength', 'dimensions', 'occupiedCells',
         'heightLayers', 'baseAreaSquareUnits', 'cubeCount', 'volumeCubicUnits', 'measuredInput'
     ]);
+    validateFractionalPrismPresence(VIEW_ID, data);
     if (!isValidRectangularPrismVolume(data)) {
         throw new ViewValidationError(VIEW_ID, 'Expected exact prism dimensions, packing partitions, and products.');
     }
-    return <RectangularPrismBody data={data} isSolutionView={payload.isSolutionView} task="product-model" />;
+    return data.kind === 'fractional-rectangular-prism-volume'
+        ? <FractionalRectangularPrismBody data={data} isSolutionView={payload.isSolutionView} task="product-model" />
+        : <RectangularPrismBody data={data} isSolutionView={payload.isSolutionView} task="product-model" />;
 };
 
 export const VolumeProductModelView = withConfig(VolumeProductModelViewSchema, VolumeProductModelCore);

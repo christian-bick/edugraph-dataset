@@ -1,5 +1,5 @@
 import type {
-    RectangularPrismCellGroup, RectangularPrismVolumeProblem
+    RectangularPrismCellGroup, IntegerRectangularPrismVolumeProblem as RectangularPrismVolumeProblem
 } from '../../../types/problems.ts';
 import {
     assembledPrismFaces, polygonPoints, prismViewport, projectCubeCorner
