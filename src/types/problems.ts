@@ -5040,8 +5040,211 @@ export type AlgebraCovariationProblem = AlgebraCovariationBackbone & Readonly<{
     selectedRelations: CovariationSelectedRelations;
 }>;
 
+export type PolygonAreaPointId = string;
+/** Metric diagram geometry, structurally compatible with ExactCoordinateVertex; no axis/tick claim. */
+export type PolygonAreaPoint = Readonly<{id: PolygonAreaPointId; x: AlgebraicScalar; y: AlgebraicScalar}>;
+export type PolygonAreaBoundary = readonly [PolygonAreaPointId, PolygonAreaPointId, PolygonAreaPointId, ...PolygonAreaPointId[]];
+export type PolygonAreaSegment = Readonly<{fromId: PolygonAreaPointId; toId: PolygonAreaPointId}>;
+
+/** Exact measured source length or a proved length calculation; no learner-known/unknown flag. */
+export type PolygonAreaLengthMeasure = Readonly<{
+    measureId: string;
+    segment: PolygonAreaSegment;
+    value: AlgebraicScalar;
+    notation: AlgebraicNotation;
+}> & (
+    /** Primitive SOURCE premise: both endpoints belong to source boundary/cell vertices/
+     * source height feet. Every primitive is context-listed and grounds source-cell
+     * base/height calculations. Target-only endpoint lengths cannot be primitive givens. */
+    | Readonly<{kind: 'measured-length'}>
+    | Readonly<{kind: 'sum-or-difference'; firstMeasureId: string; secondMeasureId: string;
+        /** Correct addition/subtraction operands and result, all in the same length unit. */
+        arithmetic: ExactCoefficientArithmetic}>
+    | Readonly<{kind: 'scaled-length'; sourceMeasureId: string; factor: AlgebraicScalar;
+        /** source length × nonnegative dimensionless factor; exact provided work. */
+        arithmetic: ExactCoefficientArithmetic}>
+);
+
+/** Complete source shape facts, not an unchecked shape/profile name. */
+export type PolygonAreaShapeFacts = Readonly<{
+    orientation: 'clockwise' | 'counterclockwise';
+    /** Every cyclic source edge exactly once, in boundary order. */
+    sides: readonly Readonly<{edgeIndex: number; fromId: string; toId: string; squaredLength: AlgebraicScalar}>[];
+    /** Complete maximal classes of equal ORIGINAL squared side lengths. Omit singletons;
+     * groups are disjoint, indices unique, and each contains every edge of that length.
+     * The view assigns tick styles to these supplied classes without deriving equality. */
+    equalLengthEdgeGroups: readonly (readonly [number, number, ...number[]])[];
+    /** Every original vertex once; dot/cross use (previous-vertex),(next-vertex), in that
+     * order. Convex cross sign is OPPOSITE cyclic orientation; reflex has the same sign.
+     * Classify reflex/straight before using dot sign for acute/right/obtuse. */
+    angles: readonly Readonly<{vertexId: string; previousId: string; nextId: string;
+        dotProduct: AlgebraicScalar; crossProduct: AlgebraicScalar;
+        kind: 'acute' | 'right' | 'obtuse' | 'straight' | 'reflex'}>[];
+    /** All parallel nonidentical edge-index pairs, unique unordered pairs. */
+    parallelEdgePairs: readonly Readonly<{firstEdgeIndex: number; secondEdgeIndex: number}>[];
+}>;
+
+/** Positive triangle and its exact perpendicular base/height geometry. */
+export type PolygonAreaTriangle = Readonly<{
+    cellId: string;
+    vertices: readonly [PolygonAreaPointId, PolygonAreaPointId, PolygonAreaPointId];
+    base: Readonly<{firstId: string; secondId: string; measureId: string}>;
+    height: Readonly<{apexId: string; footId: string; measureId: string;
+        /** Checked against the supporting base segment; extensions are NOT partition cuts. */
+        footLocation: 'base-segment' | 'base-line-extension'}>;
+    baseHeightProduct: ExactCoefficientArithmetic;
+    halfProduct: ExactCoefficientArithmetic;
+    area: AlgebraicScalar;
+}>;
+/** Actual maximal/atomic source partition segment, incident to exactly these two cells. */
+export type PolygonAreaCut = PolygonAreaSegment & Readonly<{
+    cutId: string;
+    adjacentCellIds: readonly [string, string];
+}>;
+/** Complete term permutation and exact cumulative additions; a single term needs no additions. */
+export type PolygonAreaSum = Readonly<{
+    pieceIds: readonly [string, ...string[]];
+    additions: readonly ExactCoefficientArithmetic[];
+    total: AlgebraicScalar;
+}>;
+
+/** Rational Euclidean isometry; M^T M=I and det(M)=±1, never a shear or scaling. */
+export type PolygonAreaIsometry = Readonly<{
+    matrix: readonly [readonly [AlgebraicScalar, AlgebraicScalar], readonly [AlgebraicScalar, AlgebraicScalar]];
+    translation: Readonly<{x: AlgebraicScalar; y: AlgebraicScalar}>;
+}>;
+export type PolygonAreaPlacement = Readonly<{
+    placementId: string;
+    sourceCellId: string;
+    /** Every source cell appears exactly once for each integer copyIndex0..copyCount−1. */
+    copyIndex: number;
+    transform: PolygonAreaIsometry;
+    /** Exact unique source-ID set {three vertices,height foot}; size3 if footId reuses
+     * a vertex ID, otherwise4. Equal coordinates with distinct IDs retain both identities. */
+    pointMap: readonly Readonly<{sourceId: string; targetId: string}>[];
+    vertices: readonly [PolygonAreaPointId, PolygonAreaPointId, PolygonAreaPointId];
+    heightFootId: PolygonAreaPointId;
+    /** Unchanged source triangle area, checked geometrically and by exact isometry. */
+    area: AlgebraicScalar;
+}>;
+
+/** Both source partition and actual rigid copy assembly are supplied to every fixed leaf. */
+export type PolygonAreaAssembly = Readonly<{
+    copyCount: number;
+    targetBoundary: PolygonAreaBoundary;
+    placements: readonly [PolygonAreaPlacement, PolygonAreaPlacement, ...PolygonAreaPlacement[]];
+    /** Complete placement areas; independent containment/disjointness checks establish union. */
+    areaSum: PolygonAreaSum;
+    /** sourceArea×copyCount=targetArea, then targetArea÷copyCount=sourceArea. */
+    copyAreaProduct: ExactCoefficientArithmetic;
+    sourceAreaNormalization: ExactCoefficientArithmetic;
+}> & (
+    | Readonly<{areaDerivation: Readonly<{kind: 'rectangle-product';
+        /** Adjacent perpendicular full target rectangle edges, not source cell lengths. */
+        firstMeasureId: string; secondMeasureId: string; product: ExactCoefficientArithmetic}>}>
+    /** This tagged branch uses exactly the enclosing assembly.areaSum; no duplicate sum. */
+    | Readonly<{areaDerivation: Readonly<{kind: 'triangle-area-sum'}>}>
+);
+
+export type PolygonAreaDimensionRole = Readonly<{
+    measureId: string;
+    meaning: 'base-span' | 'perpendicular-height' | 'diagonal-span' | 'offset-span';
+}>;
+/** Semantic object/dimension identity, not a generated story, task or selected blank. */
+export type PolygonAreaContext = Readonly<{
+    kind: 'floor-region' | 'garden-bed' | 'fabric-panel';
+    sourceRegionId: string;
+    /** Exact nonempty dependency closure of every SOURCE-cell base/height measure,
+     * including all primitive premises and required derived source lengths. Every node
+     * in this closure has source boundary/cell-vertex/source-foot endpoints; no source
+     * calculation depends on target-only geometry. Q projects its symbolic D-ID/factor
+     * relations and primitive values, withholding derived numeric results/work. Other
+     * assembly/target dependencies stay in S. Views lookup this supplied closure only. */
+    dimensions: readonly [PolygonAreaDimensionRole, ...PolygonAreaDimensionRole[]];
+}>;
+
+export type PolygonAreaDissectionProblem = Readonly<{
+    kind: 'polygon-area-dissection';
+    /** Global exact geometry registry; IDs unique, equal coordinates may have distinct identities. */
+    points: readonly [PolygonAreaPoint, ...PolygonAreaPoint[]];
+    units: Readonly<{length: AlgebraicUnit; area: AlgebraicUnit}>;
+    measures: readonly [PolygonAreaLengthMeasure, ...PolygonAreaLengthMeasure[]];
+    source: Readonly<{
+        regionId: string;
+        boundary: PolygonAreaBoundary;
+        shapeFacts: PolygonAreaShapeFacts;
+        cells: readonly [PolygonAreaTriangle, PolygonAreaTriangle, ...PolygonAreaTriangle[]];
+        /** Complete internal cell-edge arrangement, never an external altitude extension. */
+        cuts: readonly [PolygonAreaCut, ...PolygonAreaCut[]];
+        areaSum: PolygonAreaSum;
+        area: AlgebraicScalar;
+    }>;
+    assembly: PolygonAreaAssembly;
+    context: PolygonAreaContext;
+}>;
+
+/**
+ * Canonical polygon area dissection invariants / full uniform acceptance:
+ * - Common AreaCalculation; exact genuine eight shape/method schema bundles unchanged.
+ *   Shape facts prove the selected source class. No invariant Polygon ancestor, copied
+ *   raw ontology label, requested method/Ability/blank, prose answer or tray layout.
+ * - Pure length L1 and square-area L2 identities use the existing named unit engine:
+ *   length×length=area. Values/coordinates are in that ONE unit system, without conversions.
+ * - Every triangle's base endpoints/apex are exactly its vertices, lengths positive and
+ *   squared Euclidean distances equal supplied squared values. Foot lies on the base
+ *   supporting line, altitude perpendicular; its segment/extension tag is exact.
+ *   Area=(base×height)/2, exact. Derived lengths resolve acyclically to sufficient
+ *   primitive measured source dimensions; source/target measure endpoints are checked.
+ *   Context dimensions is exactly the source-cell base/height dependency closure, all
+ *   source-owned. Q supplies its actual symbolic length relations/factors and primitive
+ *   numeric values; arbitrary ratios are never presumed inferable from a diagram alone.
+ *   Derived numeric values/work and assembly-only dependencies remain withheld in Q.
+ * - Source polygon is simple/noncollinear; >=2 positive cells exactly partition it.
+ *   Each cell is contained, cell interiors are pairwise disjoint, and the complete sum
+ *   equals independent exact shoelace area. Vertex containment or equal sums ALONE
+ *   never prove partition. Cuts are the complete non-boundary atomic cell edges with
+ *   correct adjacent cells; touches/T-junction subdivisions are handled exactly.
+ * - Shape facts contain every source side/angle/parallel pair and every maximal equal-
+ *   length side class of size>=2, backed by exact side squares; no equality is inferred
+ *   in a view. Triangle angles follow
+ *   exact dot/squared-length predicates. Reflex angles are distinguished before using
+ *   dot sign. Parallelogram/rhombus/kite/INCLUSIVE trapezoid use correct side/parallel
+ *   relationships. Named quadrilaterals exclude straight consecutive vertices; a
+ *   trapezoid's parallel pair must be opposite sides. Generic polygon may retain valid
+ *   straight subdivisions. Canonical corpus includes >=5 convex AND concave
+ *   nonrectilinear cases; no centroid/arbitrary-vertex fan assumption is accepted.
+ * - copyCount is a positive integer; complete cells×copyCount placements preserve all
+ *   vertices/height foot exactly under rational isometry. Target cells are contained,
+ *   interiors disjoint and union equals its simple targetBoundary. Same full guard
+ *   applies to original and assembled cells. Source area is NEVER confused with target
+ *   copy area; right-triangle doubling has explicit2 normalization.
+ * - Target rectangle-product branch proves actual rectangle geometry and adjacent full
+ *   edge measures. Other coherent targets use complete exact triangle-area sums. Both
+ *   methods remain available uniformly, so all4 fixed runtime leaves accept all8
+ *   source families. Detached Q piece-tray positions are view layout, not generator data.
+ * - Named correlated profiles stay: RightTriangle+Synthesis; AcuteTriangle+Decomposition;
+ *   ObtuseTriangle+Decomposition; Parallelogram+Synthesis; Rhombus/Trapezoid/Kite/Polygon
+ *   each+Decomposition. Four fixed plain/story leaves own ProcedureExecution plus
+ *   SpatialGeneration or VisualDecomposition, and optional fixed TextualReception.
+ * - CompositionQ retains the uncut ORIGINAL source outline/source-area identity and
+ *   copyCount premise beside detached measured pieces/necessary target outline, no
+ *   assembled placements/area result. S actual rigid assembly/whole/copy work and source answer.
+ *   DecompositionQ measured source outline, no cuts/cell areas; S complete true cuts,
+ *   cell base/height/work and source total. A given height bracket must not draw an
+ *   unknown cut. StoryQ needs prose to identify a necessary dimension/source region;
+ *   never duplicate every numeric premise on a fully sufficient diagram.
+ * - Total guards validate counts before allocations, dense arrays before traversal and
+ *   exact safe reduced values before Number conversion. Catch cycles/accessors. Accept
+ *   coherent literal blueprints, alternate valid sum/proof orders and rational rotations
+ *   beyond canonical templates; sampler scale/tick/readability caps do not narrow types.
+ */
+
 /** Maps each visual view identifier to its complete accepted mathematical payload. */
 export interface ViewTypeMap {
+    'polygon-area-composition': PolygonAreaDissectionProblem;
+    'polygon-area-composition-story': PolygonAreaDissectionProblem;
+    'polygon-area-decomposition': PolygonAreaDissectionProblem;
+    'polygon-area-decomposition-story': PolygonAreaDissectionProblem;
     'algebra-dependent-equation-model': AlgebraCovariationProblem;
     'algebra-covariation-interpretation': AlgebraCovariationProblem;
     'algebra-covariation-table-graph': AlgebraCovariationProblem;

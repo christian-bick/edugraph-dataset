@@ -1,0 +1,2 @@
+- **Identity:** Partition the measured original polygon into triangles and calculate its area.
+- **Modes:** Question Mode withholds partition cuts, triangle areas and the final area. Solution Mode shows the complete triangular partition, perpendicular base-height measurements and exact area sum, with completed work and answer in green.

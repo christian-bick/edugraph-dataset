@@ -21,21 +21,6 @@ import type {
 
 
 
-const polygonAreaDissectionImplementation = defineImplementationPackage({
-    id: 'polygon-area-dissection',
-    description:
-        'Find polygon areas through composition and decomposition across the complete triangle, ' +
-        'quadrilateral and polygon profiles.',
-    generators: [
-        {module: 'polygon-area-dissection', strategy: 'new'}
-    ],
-    views: [
-        {module: 'polygon-area-composition', strategy: 'new'},
-        {module: 'polygon-area-composition-story', strategy: 'new'},
-        {module: 'polygon-area-decomposition', strategy: 'new'},
-        {module: 'polygon-area-decomposition-story', strategy: 'new'}
-    ]
-});
 
 const fractionalPrismVolumeImplementation = defineImplementationPackage({
     id: 'fractional-prism-volume',
@@ -1241,24 +1226,14 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.B.6-interpret-variable-roles', interpretVariableRolesBuilder),
     ...toTargets('6.EE.C.9-model-dependent-quantity', modelDependentQuantityBuilder),
     ...toTargets('6.EE.C.9-relate-equation-table-graph', relateEquationTableGraphBuilder),
-    ...toTargets('6.EE.C.9-tabulate-and-graph-covariation', tabulateAndGraphCovariationBuilder)
+    ...toTargets('6.EE.C.9-tabulate-and-graph-covariation', tabulateAndGraphCovariationBuilder),
+    ...toTargets('6.G.A.1-polygon-area-dissection', polygonAreaDissectionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
 
     // Geometry (6.G)
-    ...toImplementationTodos(
-        '6.G.A.1-polygon-area-dissection',
-        polygonAreaDissectionBuilder,
-        polygonAreaDissectionImplementation,
-        'A measured polygon and a valid area-preserving composition or dissection expose all required ' +
-        'lengths and square-unit area. The learner supplies the construction/decomposition and ' +
-        'calculation; story versions require the text to identify relevant dimensions or the requested ' +
-        'area. Preserve correlated shape/method profiles. The general polygon configuration includes ' +
-        'nontrivial polygons beyond the named triangle/quadrilateral profiles, including concave cases; no ' +
-        'supported rectilinear-only slice becomes active.'
-    ),
     ...toImplementationTodos(
         '6.G.A.2-fractional-cube-packing',
         fractionalCubePackingBuilder,
