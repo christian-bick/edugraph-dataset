@@ -1,10 +1,11 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import {RectangularPrismCellGroup, RectangularPrismVolumeProblem, UnitCubeCell} from '../../../types/problems.ts';
+import {FractionalRectangularPrismVolumeProblem, IntegerRectangularPrismVolumeProblem, RectangularPrismCellGroup, RectangularPrismVolumeProblem, UnitCubeCell} from '../../../types/problems.ts';
+import {buildFractionalRectangularPrismVolumeProblem, type FractionalPrismRelationProfile} from '../fractional-rectangular-prism-helpers.ts';
 import {VolumeRectangularPrismGeneratorConfig, VolumeRectangularPrismGeneratorSchema} from './spec.ts';
 
-type Dimensions = RectangularPrismVolumeProblem['dimensions'];
+type Dimensions = IntegerRectangularPrismVolumeProblem['dimensions'];
 type RelationProfile = VolumeRectangularPrismGeneratorConfig['relationProfile'];
 
 const dimensions: readonly Dimensions[] = ([2, 3, 4] as const).flatMap(length =>
@@ -14,12 +15,26 @@ const dimensions: readonly Dimensions[] = ([2, 3, 4] as const).flatMap(length =>
             .map(height => ({length, width, height}))));
 
 const profiles: readonly RelationProfile[] = [
+    'packing-count',
     'packing-equivalence',
     'triple-product',
     'associative-triple-product',
     'edge-formula',
     'base-area-formula'
 ];
+
+const fractionalPackings = ([2, 3, 4] as const).flatMap(partitionDenominator =>
+    dimensions.filter(({length, width, height}) => [length, width, height].some(value => value % partitionDenominator !== 0))
+        .map(({length, width, height}) => ({partitionDenominator, packingBounds: {columns: length, rows: width, layers: height}})));
+
+/** Counts select actual fractional physical measurements; no profile is copied into the model. */
+const sampleFractionalPrism = (relationProfile: FractionalPrismRelationProfile): FractionalRectangularPrismVolumeProblem => {
+    const options = fractionalPackings.filter(({packingBounds: {columns, rows, layers}, partitionDenominator: n}) =>
+        (relationProfile !== 'associative-triple-product' || columns !== layers)
+        && (relationProfile !== 'base-area-formula' || (columns * rows) % (n * n) !== 0 || layers % n !== 0));
+    const input = options[Math.floor(random() * options.length)]!;
+    return buildFractionalRectangularPrismVolumeProblem({...input, relationProfile});
+};
 
 const sampleDimensions = (profile: RelationProfile): Dimensions => {
     const options = profile === 'associative-triple-product'
@@ -54,10 +69,20 @@ export class VolumeRectangularPrismGenerator implements ProblemGenerator<
     type: AbstractProblem['type'] = 'measurement';
     schema = VolumeRectangularPrismGeneratorSchema;
 
+    generate(config: VolumeRectangularPrismGeneratorConfig & {numberDomain: 'integer'}): ProblemStub<IntegerRectangularPrismVolumeProblem>;
+    generate(config: VolumeRectangularPrismGeneratorConfig & {numberDomain: 'fractional'}): ProblemStub<FractionalRectangularPrismVolumeProblem>;
+    generate(config: VolumeRectangularPrismGeneratorConfig): ProblemStub<RectangularPrismVolumeProblem>;
     generate(config: VolumeRectangularPrismGeneratorConfig): ProblemStub<RectangularPrismVolumeProblem> {
-        validateConfigFields('volume-rectangular-prism', config, ['relationProfile']);
-        if (!profiles.includes(config.relationProfile)) {
+        validateConfigFields('volume-rectangular-prism', config, ['relationProfile', 'numberDomain']);
+        if (!config.relationProfile || !profiles.includes(config.relationProfile)) {
             throw new GeneratorValidationError('volume-rectangular-prism', 'Expected a supported prism relation profile.');
+        }
+        if (config.numberDomain !== 'integer' && config.numberDomain !== 'fractional') {
+            throw new GeneratorValidationError('volume-rectangular-prism', 'Expected an integer or fractional physical measurement domain.');
+        }
+        if (config.numberDomain === 'fractional') return {data: sampleFractionalPrism(config.relationProfile)};
+        if (config.relationProfile === 'packing-count') {
+            throw new GeneratorValidationError('volume-rectangular-prism', 'Bare cube counting is supported in the fractional measurement domain.');
         }
 
         const shape = sampleDimensions(config.relationProfile);

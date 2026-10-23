@@ -3,7 +3,7 @@ import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {VolumeRectangularPrismGenerator} from '../../../generators/measurement/volume-rectangular-prism/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import type {RectangularPrismVolumeProblem} from '../../../types/problems.ts';
+import type {IntegerRectangularPrismVolumeProblem as RectangularPrismVolumeProblem} from '../../../types/problems.ts';
 
 type Profile = 'packing-equivalence' | 'triple-product' | 'associative-triple-product'
     | 'edge-formula' | 'base-area-formula';
@@ -27,7 +27,9 @@ afterAll(() => vi.unstubAllGlobals());
 
 const fixture = (relationProfile: Profile, seed = 27): RectangularPrismVolumeProblem => {
     setSeed(`${relationProfile}-${seed}`);
-    return new VolumeRectangularPrismGenerator().generate({relationProfile}).data;
+    const data = new VolumeRectangularPrismGenerator().generate({relationProfile, numberDomain: 'integer'}).data;
+    if (data.kind !== 'rectangular-prism-volume') throw new Error('Expected the integer fixture branch.');
+    return data;
 };
 const visible = (markup: string) => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 

@@ -22,21 +22,6 @@ import type {
 
 
 
-const fractionalPrismVolumeImplementation = defineImplementationPackage({
-    id: 'fractional-prism-volume',
-    description:
-        'Use unit-fraction cube packing and prism-volume formulas, and explain why packing agrees with ' +
-        'multiplying edge lengths.',
-    generators: [
-        {module: 'volume-rectangular-prism', strategy: 'expand'}
-    ],
-    views: [
-        {module: 'volume-fractional-packing-count', strategy: 'new'},
-        {module: 'volume-packing-product-explanation', strategy: 'expand'},
-        {module: 'volume-formula-execution', strategy: 'expand'},
-        {module: 'volume-formula-story', strategy: 'expand'}
-    ]
-});
 
 const polyhedralNetsImplementation = defineImplementationPackage({
     id: 'polyhedral-nets',
@@ -1227,40 +1212,16 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.EE.C.9-model-dependent-quantity', modelDependentQuantityBuilder),
     ...toTargets('6.EE.C.9-relate-equation-table-graph', relateEquationTableGraphBuilder),
     ...toTargets('6.EE.C.9-tabulate-and-graph-covariation', tabulateAndGraphCovariationBuilder),
-    ...toTargets('6.G.A.1-polygon-area-dissection', polygonAreaDissectionBuilder)
+    ...toTargets('6.G.A.1-polygon-area-dissection', polygonAreaDissectionBuilder),
+    ...toTargets('6.G.A.2-fractional-cube-packing', fractionalCubePackingBuilder),
+    ...toTargets('6.G.A.2-fractional-packing-product-connection', fractionalPackingProductConnectionBuilder),
+    ...toTargets('6.G.A.2-fractional-prism-formulas', fractionalPrismFormulasBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
 
     // Geometry (6.G)
-    ...toImplementationTodos(
-        '6.G.A.2-fractional-cube-packing',
-        fractionalCubePackingBuilder,
-        fractionalPrismVolumeImplementation,
-        'Fractional edge lengths, a stated unit-fraction cube edge, and visible layer/row information ' +
-        'establish exact packing. Cube count is multiplied by cube volume in the original cubic unit. A ' +
-        'cube with edge 1/n has volume 1/n^3. Fractional edge lengths alone do not identify the required ' +
-        'cube scale.'
-    ),
-    ...toImplementationTodos(
-        '6.G.A.2-fractional-packing-product-connection',
-        fractionalPackingProductConnectionBuilder,
-        fractionalPrismVolumeImplementation,
-        'A packing model at the fractional unit scale and a written explanation/equation connect cube ' +
-        'count times cube volume to l*w*h. The request explicitly elicits the equation and explanation; ' +
-        'printing an incidental equals sign is not Equation knowledge.'
-    ),
-    ...toImplementationTodos(
-        '6.G.A.2-fractional-prism-formulas',
-        fractionalPrismFormulasBuilder,
-        fractionalPrismVolumeImplementation,
-        'Fractional edge lengths or base area/height are supplied. The learner writes the corresponding ' +
-        'formula/substitution and computes exact volume with cubic units. Story text determines requested ' +
-        'quantities. Retain l*w*h / B*h operand variants. Existing volume-product-model is an additional ' +
-        'affected consumer to adopt if the common payload broadens, not an owner of this requested ' +
-        'competency.'
-    ),
     ...toImplementationTodos(
         '6.G.A.4-construct-solid-net',
         constructSolidNetBuilder,

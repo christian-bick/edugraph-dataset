@@ -2112,7 +2112,7 @@ export type RectangularPrismCellGroup = Readonly<{
  * All counts, dimensions, and products are positive safe integers. The payload
  * contains no prompt, unknown, or solution wording; views choose the task.
  */
-export type RectangularPrismVolumeProblem = Readonly<{
+export type IntegerRectangularPrismVolumeProblem = Readonly<{
     kind: 'rectangular-prism-volume';
     unitId: 'generic';
     unitCubeEdgeLength: 1;
@@ -2141,6 +2141,124 @@ export type RectangularPrismVolumeProblem = Readonly<{
         columnSlices: readonly RectangularPrismCellGroup[];
     }>;
 }>;
+
+/** Physical positive exact lengths/areas in ORIGINAL u/u², never small-cube counts.
+ * At least one supplied quantity is genuinely NONINTEGRAL in the selected branch.
+ * Thus the B×h branch cannot hide its only fractional edges behind integer B and h.
+ */
+export type FractionalRectangularPrismMeasuredInput =
+    | Readonly<{kind: 'three-edges'; lengthUnits: AlgebraicScalar;
+        widthUnits: AlgebraicScalar; heightUnits: AlgebraicScalar}>
+    | Readonly<{kind: 'base-area-height'; baseAreaSquareUnits: AlgebraicScalar;
+        heightUnits: AlgebraicScalar}>;
+
+/** Integer INDEX extents. All positive safe integers; C·R and C·R·H are safe.
+ * Generic guards do not inherit a sampler-only 4×3×3 budget. Before any iteration or
+ * allocation, check safe products and supplied complete array lengths/density.
+ */
+export type FractionalPrismPackingBounds = Readonly<{
+    columns: number; rows: number; layers: number;
+}>;
+
+/** Extra Equation-bearing proof, materially absent from bare packing-count output.
+ * Count×cube-edge products link each index extent to its ORIGINAL-u edge. The two
+ * different per-layer calculations prove the same physical layer volume; their
+ * multiplication by H links all layers to the same complete-prism V.
+ * Work operands/results are exact provided scalar values, not rendered prose/tasks.
+ */
+export type FractionalPrismPackingEquivalence = Readonly<{
+    /** Ordered C·c=l, R·c=w, H·c=h products. */
+    edgeScaleProducts: readonly [ExactCoefficientArithmetic,
+        ExactCoefficientArithmetic, ExactCoefficientArithmetic];
+    layerVolumeCubicUnits: AlgebraicScalar;
+    /** (C·R) small cubes × c³ = physical one-layer volume. */
+    countedLayerVolumeProduct: ExactCoefficientArithmetic;
+    /** Physical base area B × physical layer thickness c = SAME one-layer volume. */
+    measuredLayerVolumeProduct: ExactCoefficientArithmetic;
+    /** H × physical layer volume = SAME complete-prism V. */
+    completeLayerVolumeProduct: ExactCoefficientArithmetic;
+}>;
+
+/** A side-c=1/n packing in the original reference unit u; n>=2, n³ safe.
+ * Every AlgebraicScalar is canonical/reduced, safe-storage and strictly positive.
+ * This type does NOT reinterpret legacy numeric dimensions as count extents.
+ *
+ * Complete indexed geometry:
+ * occupiedCells is every integer coordinate [0,C)×[0,R)×[0,H), once, in
+ * layer-row-column order. heightLayers partitions exactly those cells by layer,
+ * ascending; every layer has C·R cells. Cells have physical side c, disjoint
+ * interiors and complete union equal to the rectangular prism.
+ *
+ * Exact physical invariants:
+ * l=C/n,w=R/n,h=H/n; B=l·w=C·R/n²; N=C·R·H; V=B·h=N/n³.
+ * cube face area=c²; cube volume=c³=1/n³. Integer counts N/C/R/H are NEVER
+ * physical u/u²/u³ quantities. Measured inputs repeat their physical canonical
+ * fields and satisfy the nonintegral-given rule above. An integer result V is fine.
+ *
+ * countedPackingEquivalence and modeledTripleProduct are mutually exclusive;
+ * either requires three-edge measuredInput. associativeRegrouping requires
+ * modeledTripleProduct and supplies C whole column slices of R·H cells each.
+ * Its widthHeightProduct is PHYSICAL w·h, not the number R·H of cubes per slice.
+ * countingTrace, when present, bijectively enumerates occupiedCells in their
+ * canonical order with safe positive integer ordinals 1..N. The fractional bare
+ * count profile supplies it; the packing-equivalence profile supplies it AND
+ * its additional edge/layer equivalence certificate. Formula/triple profiles
+ * omit this selected counting proof while retaining the common count values.
+ * No prompt, unknown, given/answer selector, Ability, task flag or label string.
+ */
+export type FractionalRectangularPrismVolumeProblem = Readonly<{
+    kind: 'fractional-rectangular-prism-volume';
+    unitId: 'generic';
+    partitionDenominator: number;
+    unitCubeEdgeLength: AlgebraicScalar;
+    unitCubeFaceAreaSquareUnits: AlgebraicScalar;
+    unitCubeVolumeCubicUnits: AlgebraicScalar;
+    /** c×c=c², then c²×c=c³. No reciprocal-power calculation in the view. */
+    unitCubeProducts: Readonly<{
+        faceArea: ExactCoefficientArithmetic; volume: ExactCoefficientArithmetic;
+    }>;
+    packingBounds: FractionalPrismPackingBounds;
+    occupiedCells: readonly Readonly<UnitCubeCell>[];
+    /** Optional genuine counting relation, same semantics as UnitCubeVolumeProblem.
+     * Ordinals count cubes; an ordinal is NOT physical cubic-unit volume. */
+    countingTrace?: readonly Readonly<{cell: Readonly<UnitCubeCell>; ordinal: number}>[];
+    heightLayers: readonly RectangularPrismCellGroup[];
+    cubesPerLayer: number;
+    cubeCount: number;
+    /** C×R=cubesPerLayer, then cubesPerLayer×H=N. Counts converted to d=1 scalars. */
+    countProducts: Readonly<{
+        layerCount: ExactCoefficientArithmetic; totalCount: ExactCoefficientArithmetic;
+    }>;
+    dimensions: Readonly<{length: AlgebraicScalar; width: AlgebraicScalar;
+        height: AlgebraicScalar}>;
+    baseAreaSquareUnits: AlgebraicScalar;
+    volumeCubicUnits: AlgebraicScalar;
+    /** l×w=B and B×h=V. Supplies both formula/input variants without view arithmetic. */
+    physicalProducts: Readonly<{
+        baseArea: ExactCoefficientArithmetic; volume: ExactCoefficientArithmetic;
+    }>;
+    /** N×c³=V. This is the basic count-to-physical-volume calculation, distinct
+     * from the optional complete layer/edge-scale equation equivalence proof. */
+    packingVolumeProduct: ExactCoefficientArithmetic;
+    measuredInput: FractionalRectangularPrismMeasuredInput;
+    countedPackingEquivalence?: FractionalPrismPackingEquivalence;
+    modeledTripleProduct?: Readonly<{
+        factors: readonly [AlgebraicScalar, AlgebraicScalar, AlgebraicScalar];
+        cubesPerLayer: number; layerCount: number; product: AlgebraicScalar;
+    }>;
+    associativeRegrouping?: Readonly<{
+        widthHeightProduct: AlgebraicScalar;
+        widthHeightArithmetic: ExactCoefficientArithmetic;
+        /** l×(w×h)=V; first grouping is physicalProducts.volume. */
+        alternativeVolumeProduct: ExactCoefficientArithmetic;
+        columnSlices: readonly RectangularPrismCellGroup[];
+    }>;
+}>;
+
+/** Integer side-one and exact fractional-scale packings share the same consumer contract. */
+export type RectangularPrismVolumeProblem =
+    | IntegerRectangularPrismVolumeProblem
+    | FractionalRectangularPrismVolumeProblem;
 
 export type CompositePrismPart = Readonly<{
     id: 'left' | 'right';
@@ -5457,6 +5575,7 @@ export interface ViewTypeMap {
     'volume-packing-interpretation': UnitCubeVolumeProblem;
     'volume-unit-cube-count': UnitCubeVolumeProblem;
     'volume-packing-product-explanation': RectangularPrismVolumeProblem;
+    'volume-fractional-packing-count': RectangularPrismVolumeProblem;
     'volume-product-model': RectangularPrismVolumeProblem;
     'volume-formula-execution': RectangularPrismVolumeProblem;
     'volume-formula-story': RectangularPrismVolumeProblem;

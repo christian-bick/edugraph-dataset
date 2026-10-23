@@ -1,2 +1,2 @@
-- **Identity:** A dimensioned prism and fully visible unit-cube layers support an explanation of why counting cubes equals both the three-edge product and base-area-times-height product.
-- **Modes:** Question Mode leaves the explanation and equations unfinished. Solution Mode connects the gap-free layer packing to both equal products and a cubic-unit volume.
+- **Identity:** A dimensioned prism, its small-cube edge and visible layers support an explanation of why cube count times cube volume agrees with both physical volume products.
+- **Modes:** Question Mode leaves the explanation and equations unfinished. Solution Mode connects the gap-free packing to both equal products and the volume in the original cubic unit.
