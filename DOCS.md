@@ -112,6 +112,11 @@ dot, bin or quartile geometry and show the corresponding construction evidence.
 Observation-count and attribute-description views retain the individual records,
 including equal values, and the study's supplied measurement method and units.
 Their solutions enumerate observations or describe the original recorded attribute.
+Contextual summary views calculate and interpret one center or spread measure from
+the same complete numerical-data family. Questions retain the study and observations
+while leaving the requested result and work unknown. Solutions project the supplied
+mean/median, every-record MAD or half-median IQR calculation and its contextual meaning.
+They reuse the existing study, plot and single-summary presentation helpers.
 
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within

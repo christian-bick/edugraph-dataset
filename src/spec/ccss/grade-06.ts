@@ -30,18 +30,7 @@ import type {
 
 
 
-const numericalDataSummariesImplementation = defineImplementationPackage({
-    id: 'numerical-data-summaries',
-    description:
-        'Calculate and interpret contextual mean, median, interquartile range and mean absolute deviation.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'contextual-center-summary', strategy: 'new'},
-        {module: 'contextual-variation-summary', strategy: 'new'}
-    ]
-});
+
 
 const statisticalSummarySelectionImplementation = defineImplementationPackage({
     id: 'statistical-summary-selection',
@@ -1150,7 +1139,9 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.SP.A.3-interpret-variation-summary', interpretVariationSummaryBuilder),
     ...toTargets('6.SP.B.4-construct-numerical-distribution-plot', constructNumericalDistributionPlotBuilder),
     ...toTargets('6.SP.B.5a-observation-count', observationCountBuilder),
-    ...toTargets('6.SP.B.5b-data-attribute-description', dataAttributeDescriptionBuilder)
+    ...toTargets('6.SP.B.5b-data-attribute-description', dataAttributeDescriptionBuilder),
+    ...toTargets('6.SP.B.5c-compute-contextual-center', computeContextualCenterBuilder),
+    ...toTargets('6.SP.B.5c-compute-contextual-variation', computeContextualVariationBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1159,24 +1150,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.B.5c-compute-contextual-center',
-        computeContextualCenterBuilder,
-        numericalDataSummariesImplementation,
-        'A contextual numerical data set is supplied. The learner computes the requested mean or median ' +
-        'and states its meaning in the recorded attribute units, with a sorted-data or sum/count witness ' +
-        'in the solution. Retain both odd and even observation counts for median; the central pair must be ' +
-        'averaged for even counts. Contextual meaning is a required output, not a decorative story.'
-    ),
-    ...toImplementationTodos(
-        '6.SP.B.5c-compute-contextual-variation',
-        computeContextualVariationBuilder,
-        numericalDataSummariesImplementation,
-        'The learner computes the requested variability measure and explains its meaning in the data ' +
-        'context and units. IQR uses stated consistent quartile conventions; MAD uses deviations from the ' +
-        'arithmetic mean and retains multiplicity. Do not replace MAD by the mean signed deviation or ' +
-        'deviations from the median. Do not require a 1.5-IQR outlier rule.'
-    ),
     ...toImplementationTodos(
         '6.SP.B.5d-select-contextual-summaries',
         selectContextualSummariesBuilder,

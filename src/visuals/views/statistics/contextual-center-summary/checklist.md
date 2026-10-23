@@ -1,0 +1,2 @@
+- **Identity:** Calculate the requested mean or median and interpret the resulting center in the recorded characteristic's context and units.
+- **Modes:** Question Mode gives the original observations without the requested result, completed calculation or interpretation. Solution Mode shows the sum/count or complete sorted-middle procedure and explains the actual center in context.
