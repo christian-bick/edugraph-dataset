@@ -1,0 +1,2 @@
+- **Identity:** Interpret a given MAD or IQR as a single spread summary of the contextual observations in their original units.
+- **Modes:** Question Mode shows the records and the given variation value but withholds its interpretation. Solution Mode explains the actual average absolute distance from the mean or middle-half quartile span, with the stated quartile convention.

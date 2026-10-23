@@ -1,0 +1,2 @@
+- **Identity:** Interpret a given mean or median as a single center summary of the contextual observations, distinguishing its meaning from observation count and spread.
+- **Modes:** Question Mode shows the records and the given center but withholds the interpretation. Solution Mode explains that actual center in the original units using the average or ordered middle, rather than only calculating it.

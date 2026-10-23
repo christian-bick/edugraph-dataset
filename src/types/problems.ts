@@ -5691,6 +5691,8 @@ export interface ViewTypeMap {
     'statistical-question-classification': StatisticalQuestionsProblem;
     'distribution-description': NumericalDataProblem;
     'distribution-patterns-context': NumericalDataProblem;
+    'center-summary-interpretation': NumericalDataProblem;
+    'variation-summary-interpretation': NumericalDataProblem;
 }
 
 
