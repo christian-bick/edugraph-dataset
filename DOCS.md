@@ -1,13 +1,13 @@
 # EduGraph Content: Technical Documentation
 
-This document provides a comprehensive technical overview of the EduGraph Content ML Dataset Generator. It is designed to guide developers and AI agents in understanding the system architecture, script orchestration, and the process for adding new educational content modules.
+This document describes the shared architecture, pipeline orchestration, and development workflows of the EduGraph Content ML Dataset Generator. Content-specific contracts and implementation details belong with their modules; authoring rules belong in the reference library.
 
 > **Authoring rules live in [`docs/`](docs/README.md)** — the reference library covering generator/view specifications and implementations, the visual checklist contract for views, and competency target specs. This document covers architecture, scripts and workflows, and links into that library rather than restating it.
 
 ## 1. Architecture Overview
 
 ### Label-Driven Generation
-The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels (derived from the EduGraph ontology, e.g., `Scope.IntegersWithZero`, `Area.Addition`) strictly dictate the mathematical properties and cognitive task represented by each artifact. The system does not generate a problem and *then* label it; it receives label constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier.
+The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels derived from the EduGraph ontology strictly dictate the mathematical properties and cognitive task represented by each artifact. The system does not generate a problem and *then* label it; it receives label constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier.
 
 ### The Three Pillars
 The architecture is divided into three distinct layers:
@@ -32,7 +32,7 @@ The data contract passed from the Playwright orchestrator into the browser's `wi
 *   `preparedView`: The admitted configuration, plan/variant identities, resolved view labels, and PRNG continuation. `withConfig` requires it and never repeats schema resolution in the browser.
 
 To ensure end-to-end type safety between problem generators (which run in Node.js) and the React views (which run in the browser headlessly), the system utilizes:
-1. **`ViewTypeMap`** (defined in [problems.ts](src/types/problems.ts)): A central contract mapping visual view identifiers to their expected mathematical data structure. A shared view may accept a small structurally distinguishable union: `operations-vertical` and `operations-boxes` use `ArithmeticPairProblem | ArithmeticTripleProblem`, then narrow through the presence of `num3` and validate the corresponding fields.
+1. **`ViewTypeMap`** (defined in [problems.ts](src/types/problems.ts)): A central contract mapping visual view identifiers to their expected mathematical data structure. A shared view may accept an explicit union of structurally distinguishable payload types, narrowing to the appropriate member before rendering.
 2. **`ViewRenderPayload<TViewId>`** (defined in [ml-engine.ts](src/types/ml-engine.ts)): A utility type that automatically resolves to the correct type-safe `RenderPayload` for a specific view ID, eliminating the need for manual type assertions (`as ...`) within the view components.
 
 **Environment Separation & Mapping:**
@@ -50,246 +50,40 @@ creates the canonical mathematical payload, and the view projects it into an obs
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
-The producer/view contract migration is recorded in
-[explicit-producer-view-contracts.md](docs/history/explicit-producer-view-contracts.md).
-Specialized consumers use precise entries in `ViewTypeMap`; shared renderers may still use
-explicit wider unions. For example, mass and liquid volume have separate producers, while
-the general strategy view accepts the named strategy union. Target requirements remain
-independent learner-task participation policies.
+Generators own canonical mathematical payloads and their invariants. Views own presentation
+and the learner action requested from that payload. Shared types carry the mathematical evidence
+needed by consumers without encoding a particular layout or task projection. Specialized views
+use precise entries in `ViewTypeMap`; shared renderers use explicit unions of supported contracts.
+Target requirements remain independent learner-task participation policies. Schema resolution
+translates ontology-backed capabilities into typed configuration for the owning role before
+generation or rendering.
 
-Shape composition uses `ShapeAssemblyProblem`, which extends the semantic composition tree
-with geometric regions witnessing each component, intermediate, and whole. The construction
-view projects those supplied regions and requests an arrangement; the existing selection view
-continues to accept the narrower tree contract. Their Abilities are `SpatialGeneration` and
-`SpatialImagination`, respectively. Geometric partitions are producer data; diagram projection,
-piece trays, drawing spaces and solution colors belong to the views.
-
-Polygon area dissection uses an exact metric point registry, source triangle partitions,
-measured and derived lengths, complete internal cuts, and rigid copy placements. Geometry
-helpers under `src/generators/shape/` check containment, disjoint interiors and independent
-whole areas; the model helper links these to length dependencies, square units and copy
-normalization. Four fixed composition/decomposition views retain the original region and
-project either plain dimension premises or necessary contextual prose.
-
-Rectangular prism volume shares a named union of side-one integer packings and exact
-fractional-scale packings. The fractional model separates integer cell indices and counts
-from physical lengths, areas and volumes in the original unit, with supplied count, scale,
-layer and product witnesses. Its helper lives under `src/generators/measurement/`.
-Five prism consumers under `src/visuals/views/measure/` project that shared contract;
-the fractional renderer branches before the existing integer layout.
-
-Polyhedral nets use a complete solid-face incidence model, exact planar face copies,
-and proper rigid fold maps that close every shared edge. Geometry and validation
-helpers under `src/generators/shape/` check the original convex solid, the nonoverlapping
-sheet, triangle face altitudes and signed base offsets, and complete surface-area work.
-Four fixed views under `src/visuals/views/shape/` project net construction or surface
-area, each with a plain and a necessary-text variant. Construction questions show
-detached source faces and adjacency while withholding the assembled solution net.
-
-Statistical-question investigations store the relevant unit-by-occasion observation
-set, a complete response domain grounded in the source rule, and checked evidence
-for one observation, a constant response, or anticipated variation. The statistics
-helper constructs this evidence before any data collection. A fixed classification
-view phrases the source investigations, permutes their presentation from the render
-seed, and reveals the classifications and contextual reasons in Solution Mode.
-The required variation configuration selects either a collection containing
-anticipated variation or one containing only single-observation and constant-rule cases.
-
-Numerical-data studies retain individual observation identities, measurement methods
-and precision, exact summaries, frequency memberships and complete dot/bin/box
-geometry. Separate selected theorem objects witness the configured statistical
-relations. Finite shape evidence uses actual frequency reflections and support gaps;
-contextual departures require a given routine band, an observed majority and a
-checked nearest-record separation. Counterfactual summaries change one recorded
-value under its original attribute constraints. Fixed interpretation views project
-these supplied facts without selecting a learner task inside the producer.
-Single-summary interpretation leaves give one center or spread value and explain
-it in the study's original units. Their plans select the corresponding single
-statistical claim, while both renderers accept the complete shared data family.
-The numerical distribution construction view supplies records and blank scaled
-axes for a line plot, histogram or box plot. Solutions project the producer's
-dot, bin or quartile geometry and show the corresponding construction evidence.
-Observation-count and attribute-description views retain the individual records,
-including equal values, and the study's supplied measurement method and units.
-Their solutions enumerate observations or describe the original recorded attribute.
-Contextual summary views calculate and interpret one center or spread measure from
-the same complete numerical-data family. Questions retain the study and observations
-while leaving the requested result and work unknown. Solutions project the supplied
-mean/median, every-record MAD or half-median IQR calculation and its contextual meaning.
-They reuse the existing study, plot and single-summary presentation helpers.
-The summary-selection view presents the study purpose and neutral center/spread
-candidates, with a documented replacement and supplied counterfactual summaries
-when present. Its solution explains one suitable choice and alternatives, retaining
-the original units and any supplied finite sensitivity comparisons.
-
-Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
-the requested count and the available collection size. The generator chooses that size within
-the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting
-views retain `counting-basic` and `CountingProblem`, so supply sampling does not alter their data.
-
-Ratio and percentage tasks use discriminated payloads: ordered quantity pairs, exact rational unit rates
-with scaled-equivalence witnesses, whole-number ratio tables with coordinate scales, and paired
-tables normalized to a common consequent, and exact per-hundred quantity relations. Sibling views
-project these into written interpretation, contextual rate problems, plotting, table construction,
-completion, comparison, percentage calculation, and recovering a whole from its part and percent.
-Their shared renderers live under `src/visuals/views/ratio/`; mathematical helpers live under
-`src/generators/ratio/`.
-
-Measurement-ratio relations retain symmetric exact unit and quantity equalities, including
-across-system conversions, with reciprocal conversion factors. Unit-dimension relations carry
-exact dimensioned operands and results, expanded unit factors, and indexed cancellation
-witnesses. Their generators live under `src/generators/measurement/`; the consuming views under
-`src/visuals/views/measure/` select the conversion direction or present unit composition and
-ask for an explanation alongside the calculation.
-
-Algebra expression tasks use one symbolic tree, complete symbol domains and bindings, its exact
-numeric substitution, structural proofs and a parameter or quantitative context. Helpers under
-`src/generators/algebra/` validate the linked mathematics; the six leaves under
-`src/visuals/views/operations/` project it into prescribed expression writing, component
-classification, grouped-operand interpretation, direct or contextual evaluation, and quantity
-modeling. The generic exact numeric calculation engine under `src/generators/arithmetic/`
-also serves numerical power expressions through their existing power-required contract.
-
-Affine equivalence uses the same symbolic syntax with a common domain of independent rational
-variables. Each subtree has an exact coefficient-map induction proof; local rewrite witnesses
-record distribution, collection, regrouping or reordering. One valid source rewrite is retained
-alongside an equivalent or non-equivalent comparison candidate. A counterexample supplies full
-numeric calculations on both sides. Separate views request a valid rewrite or judge universal
-equivalence, so one substituted value is never presented as proof of an identity.
-
-Elementary equations and strict inequalities share exact assignment calculations and explicit
-rational or finite ambient domains. Their finite candidate truth tables, restricted candidate
-solutions and complete ambient solution certificates are distinct mathematical objects. Inverse
-steps, zero-coefficient cases, strict interval intersections and cardinality evidence are supplied
-by the producers. Six fixed views project candidate checking, solution meaning, equation
-modeling and solving, inequality graphs, infinite sets or contextual strict constraints.
-
-Variable-role models retain the letter's named rational, integer or nonnegative domain separately
-from the unrestricted rational domain used for affine proofs. A particular condition supplies a
-unique admissible value and its exact verification; a generalized claim supplies an identity valid
-for every member of the named domain. One interpretation view explains these roles from the same
-original relation and quantity meaning.
-
-Covariation models retain named quantities, physical units and real or integer input domains
-with one exact affine output equation. Original-tree normalization proves the law beyond the
-sampled table, while exact substitutions locate every supplied row and the complete visible
-graph. Count inputs produce isolated points; real intervals produce a justified segment with
-explicit window cuts. Selected quantity-role and quantitative-origin proofs add checked
-incidences and source-fact links. Three fixed views model, interpret or tabulate and graph
-the same complete payload.
-
-General fraction division carries original operand forms, exact reciprocal and inverse witnesses,
-and a common-tick numerical grouping model. Typed contexts give sharing, measured-group, or
-rectangle quantity roles without selecting a task. Five division views accept a union of this
-contract and the earlier unit-fraction quotient model; a separate model-construction view accepts
-the general contract. Parent renderers preserve the earlier producer's task presentations; execution
-also shows a separate unit-partition reference for a zero dividend and any selected multiplication check.
-
-Whole-number standard division uses `StandardDivisionProblem`: original digits, positional quotient
-digits, and a complete sequence of partial dividends, products, remainders and bring-down witnesses.
-The standard-algorithm view places these supplied steps in conventional long-division columns,
-including internal zero quotient digits and divisors with three digits.
-
-Decimal standard algorithms use exact coefficient/scale/numeral values, preserving supplied trailing
-zeros. Their payloads retain common-scale add/subtract columns, complete unscaled multiplication
-rows with decimal placement, or scale-equivalent long division with original and appended digits.
-The three decimal standard-algorithm views consume these traces directly; the earlier decimal
-method and whole-number algorithm families retain their own contracts.
-
-Common-factor relations supply complete positive common divisors and coprime cofactors. The paired
-GCD/LCM model retains both relations, including undefined GCD at (0,0) and the explicit zero LCM
-convention; its two views select their fixed task. Full common-factor extraction has a separate
-sum/distribution model with the greatest factor and coprime residual addends. These three leaves
-share rendering and validation helpers across the operations and numbers categories.
-
-Signed rational contexts use reduced signed values with typed datum and unit metadata, plus
-observation signs and magnitudes. Their zero and directed-quantity configurations share one
-payload. Opposite relations carry an exact scaled axis, two successive negations, a zero fixed
-point, a true opposite pair and an unequal pair with unlike signs. These values are separate
-from the nonnegative ratio contract; six fixed views project their contextual or positional meaning.
-
-Rational coordinate payloads retain exact values, their integer/fraction/decimal notation and
-locations on independently scaled axes. Point configurations distinguish nonnegative and signed
-frames, with optional complete quadrant evidence. Reflection relations supply connected before/
-after points, the preserved and negated components, and equal distances to each mirror axis.
-Four fixed coordinate views project plotting, reading, quadrant meaning and reflection meaning.
-
-Rational number-line values reuse exact coordinate scalars, notation and axis locations on a
-single complete scale. Positioning and reading have separate views: the former leaves the line
-unmarked, while the latter withholds the marked tick's numeral and retains the other scale
-anchors. Both views use the render seed to choose horizontal or vertical presentation.
-
-Rational order models retain nominal first/second values and their strict inequality. Absolute
-magnitude models retain exact zero-to-point distances or paired contextual observations with
-both signed and magnitude comparisons. Six fixed views project line interpretation, contextual
-order explanation and writing, absolute-value distance and meaning, and classification of the
-two comparison concepts. Contextual magnitude questions retain the given signed inequality
-while withholding the requested absolute values and comparison.
-
-Coordinate problem models carry aligned endpoint separations, prescribed routes with exact leg
-and cumulative lengths, or complete simple polygon boundaries with every aligned side relation.
-Polygon configurations can add indexed side-subtraction proofs while retaining one shared geometry
-contract for construction and length tasks. Eight views provide mathematical and contextual versions;
-their metric diagrams use one pixel scale per coordinate unit across both axes.
-
-Numerical power expressions retain immutable numeric syntax, exact values for every occurrence,
-power facts and successive reduction snapshots in conventional written order. Two fixed views
-evaluate the supplied expression or translate a prescribed calculation into exponent notation.
-The numeric grammar stays separate from expressions containing variables.
-
-Property tasks use `arithmetic-property-relations` and the required `ArithmeticPropertyProblem`
-union. The completion and explanation views share that mathematical payload and parent-level
-rendering, while declaring `ProcedureExecution` and `ProcedureUnderstanding` respectively.
-The general triples producer retains its existing property support for box and vertical formats.
-Hundreds-bundle completion and explanation likewise share `PlaceValueHundredsBundlesProblem`;
-their separate views distinguish reading the represented number from explaining the counting method.
-
-Statistical quantity scales 2, 5 and 10 use `EvenNumbers`, `MultiplesOf5` and `MultiplesOf10`.
-Without a divisibility constraint the generator resolves scale 1 explicitly. Bar-graph views
-own the corresponding `StepsOf1/2/5/10` axis capabilities and validate that the selected axis
-agrees with the supplied scale. Scaled bar targets request both quantity and axis constraints;
-unit picture targets need no additional numeric label. Five-minute clock values use
-`MultiplesOf5`, sampling 05, 15, 25, 35, 45 and 55 minutes to distinguish these examples from
-ten-minute values. The canonical time and graph payloads are unchanged.
-
-Label compatibility is implemented through the design recorded in
-[label-variant-matching.md](docs/history/label-variant-matching.md). After type and positive-capability
-matching, the planner admits only valid joint schema-label selections. Every tuple carries a
-versioned plan. Generation selects from it without increasing sample counts; rendering, retry,
+After type and positive-capability matching, the planner admits only valid joint schema-label
+selections. Every tuple carries a versioned plan. Generation selects from it without increasing
+sample counts; rendering, retry,
 replay, target associations, and VQA preserve the actual selection. Generator configuration
 dependencies and original-target policies share this evaluator. Matching never inspects payloads.
 
 Plans include the complete matching input identity, including local spec imports and declared
 ontology reads. Matching indexes persist plans rather than bare successful-pair references.
-Manifest schema 9, dependency graph schema 5, planner epoch 6, and the
-`label-variant-generation-v1` pipeline identity deliberately invalidate old artifacts. Rebuild
-the full dataset before scoped reuse. Existing artifacts remain published until the replacement
-transaction passes validation. Variant sampling uses a separate deterministic entropy stream;
-this migration can change fallback choices and images while structural sample keys remain stable.
-
-### Ontology Scale Resolution
-Concrete distance presentation is resolved at the view boundary. `resolveDistanceScale` in
-`src/lib/ontology.ts` maps the concrete centimeter, meter, inch, foot, or abstract segment
-label to both its scale and its metric, imperial, or abstract ontology family. A compatible
-generator can therefore emit scale-neutral mathematical choices while the consuming view
-owns unit text, reference objects, and display proportions. Family-only labels remain
-ambiguous and are not silently converted into a concrete unit.
+Versioned manifest, dependency-graph, planner, and pipeline identities prevent reuse of incompatible
+artifacts. Existing artifacts remain published until the replacement transaction passes validation.
+Variant sampling uses a separate deterministic entropy stream, preserving structural sample keys.
 
 ### Specs and the Union Dataset
 
-A **spec module** (`src/spec/<module>/`) is one education standard's competency targets — `ccss` today, further standards later. Standards overlap heavily, so each one added contributes an increasingly small delta.
+A **spec module** (`src/spec/<module>/`) contains one education standard's competency targets. Standards can overlap; the union dataset deduplicates their generated tasks.
 
-The [Grade 6 file](src/spec/ccss/grade-06.ts) exports implemented competency builders
-through `spec`. Remaining reviewed builders stay in `implementationTodos`, grouped into
-authored generator/view packages, and appear in the coverage backlog without entering generation.
-Partial matches to earlier-grade modules remain diagnostic until a complete competency is
-implemented; the authoring rules are in [target-spec.md](docs/target-spec.md).
+Target files export supported competency builders through `spec`. Reviewed targets awaiting
+module implementation stay in `implementationTodos`; targets awaiting ontology support stay in
+`ontologyTodos`. These backlogs remain visible in coverage without entering generation. Export
+contracts and target lifecycle rules live in [target-spec.md](docs/target-spec.md).
 
-*   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=ccss` canonically writes to `out/dataset-ccss/`, with its VQA cache in `cache/vqa-validation/dataset-ccss/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
+*   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=<spec_module>` canonically writes to `out/dataset-<spec_module>/`, with its VQA cache in `cache/vqa-validation/dataset-<spec_module>/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
 *   **Every generated standard has a complete dependency manifest.** `manifest.json` persists a versioned, planner-epoch-bound graph from matching and validation policy, target/generator/view capabilities, compatible module pairs, and successful match tuples through generator/view generation pairs, shards, images, VQA records, asset-index records, and coverage records. Capability nodes depend on the relevant ontology entities and ancestor relations; module implementation nodes remain separate so an output-only code edit does not cause rematching. Each generation-pair entry separates render nodes (pair, image, shard) from validation nodes (VQA), alongside its effective input hash, aggregate content/task hash, sample counts, and renderer identity. A definition-only ontology change can therefore invalidate VQA without scheduling pixel generation. Direct edges explain every invalidation; image nodes record byte digests and sizes, and each VQA node's input hash is the exact expected cache key. `checklist.md` and the dedicated VQA validation policy participate only in VQA-node dependencies, while the canonical standards tree, generated explorer files, favicons, and unrelated public files are absent from dataset dependencies. Shared render code and the public icon library remain explicit inputs. The icon library is indexed once as individual asset records: a literal `/icons/...` reference creates one source edge, while a template reference creates conservative edges to all matching records. Runtime asset choice stays in the view, but changing one icon reaches only views whose literal or template collection can select it. A request-local source index discovers and digests overlapping generator/view dependencies once.
 *   **Dependency changes are planned before scoped rendering.** The planner compares content hashes and direct edges, then follows reverse edges from both the previous and current graph so removals and rewiring cannot strand stale dependents. It emits an affected-only topological schedule, reusable content-addressed outputs, compact causal predecessor links, and structured linear-work counts. A planner-epoch change is a clean miss. If an explicit generator/view scope omits an affected pair, generation stops before Chromium starts and reports the first causal path instead of silently widening the operation or publishing stale siblings.
 *   **Development no-op detection is an acceleration index, not cache identity.** The manifest stores the Git base, dirty paths, hashes of graph-relevant files, renderer identity, and exact ontology provenance. The host generation wrapper checks an unscoped `--affected` request before starting Docker; live validation performs the same check before loading catalogs. Both reuse the persisted graph when candidate bytes and these explicit identities are unchanged. The canonical container runs only read-only Git observation commands through the existing workspace mount so its final manifest can record this observation. When reconstruction proves that only the observation changed, generation transactionally publishes that metadata without rendering; the next run can therefore be a true no-op even after an output-neutral edit or commit. Git commits never enter artifact keys. New module/spec/checklist/asset files, relevant ignored files, unavailable history, or any ambiguous observation force normal graph reconstruction. Strict release audit never uses this shortcut.
-*   **Ontology semantics are record-addressed in the dependency graph.** The exact installed `edugraph-ts` package is the current ontology source; there is no second accepted semantic snapshot. A change to its locked provenance authoritatively reconstructs the complete graph. Targets, generators, and views depend on the transitive `partOf` and `specializes` closures of only their labels; matching uses only `specializes` for capability substitution, while `partOf` remains structural provenance. VQA records additionally depend on definitions of the labels they claim. Comparing those newly built entity, relation, and definition nodes with the previous graph keeps downstream execution semantic and local: an unrelated ontology record is reusable, while a definition-only change can reach VQA without reaching pixels. Persisted rows with labels removed from the installed ontology retain their image and shard records, but receive no current VQA key. Explicit missing-label dependencies invalidate those images and require their owning pairs to regenerate; planning does not rewrite their metadata or invent replacement definitions. Unversioned package mutations are not development inputs; canonical work uses the exact lock provenance. CCSS membership is authored in `src/spec/ccss/`; the canonical standards tree under `public/coverage/` documents that coverage in the explorer and is not a dataset-generation input.
+*   **Ontology semantics are record-addressed in the dependency graph.** The exact installed `edugraph-ts` package is the current ontology source; there is no second accepted semantic snapshot. A change to its locked provenance authoritatively reconstructs the complete graph. Targets, generators, and views depend on the transitive `partOf` and `specializes` closures of only their labels; matching uses only `specializes` for capability substitution, while `partOf` remains structural provenance. VQA records additionally depend on definitions of the labels they claim. Comparing those newly built entity, relation, and definition nodes with the previous graph keeps downstream execution semantic and local: an unrelated ontology record is reusable, while a definition-only change can reach VQA without reaching pixels. Persisted rows with labels removed from the installed ontology retain their image and shard records, but receive no current VQA key. Explicit missing-label dependencies invalidate those images and require their owning pairs to regenerate; planning does not rewrite their metadata or invent replacement definitions. Unversioned package mutations are not development inputs; canonical work uses the exact lock provenance. Standard membership is authored in `src/spec/<module>/`; canonical standards trees under `public/coverage/` document that coverage in the explorer and are not dataset-generation inputs.
 *   **The union dataset (`out/dataset/`) is derived**, built by `npm run merge:dataset` from every non-isolated standard in precedence order. It is the released artifact; treat it as a build output, never as a source of truth — the merge replaces it wholesale. Its public rows are compact projections containing only `file_name`, `labels`, and `solution`; operational identity remains in the source standard datasets.
 *   **The merge deduplicates identical tasks across standards.** The first standard in merge order keeps the exercise and later ones report it as duplicate overlap. Same-split dedup is scoped per view by `task_fingerprint`, the hash of problem data plus the deterministically resolved view configuration. The validation split separately excludes any `content_fingerprint` already in train, even when its configured task differs, so mathematical payloads cannot leak across the split boundary. Generation applies the same two rules within a standard (scoped per module, since a view has only one generator). Question and solution are independent draws of one exercise, so exercises are kept or dropped whole. Operational target associations from a dropped exercise transfer only to a retained sample with the same task fingerprint whose actual selected labels are admitted by the associated target plan; a data-only validation collision is excluded but cannot represent the other task. The public row and image remain singular, while the asset index can expose a reused sample under every exact target label set it actually evidences.
 *   **Union membership follows module metadata.** A module can declare `isolated = true` in `_module.ts` to exclude its samples from the union. Files prefixed with `_` describe the module rather than contributing targets, so target loaders skip them.
@@ -304,7 +98,7 @@ merge precedence.
 **Known limitation — equivalent competencies are only collapsed within a spec module.** Target-level deduplication before generation (`deduplicateTargetPermutations` via `normalizeAndValidateSpec`) reduces identical label sets to one representative only within that standard. Separate standards still generate independently; the union sees their rendered tasks rather than their target equivalence and removes only exercises whose task fingerprints actually coincide. Cross-standard competency equivalence would therefore require a separate union-level target normalization design.
 
 ### Sample Identity & Determinism
-Within one spec dataset, every sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (e.g. `1.NBT.B.3-place-value-comparison~d14c2ba1#comparison#numbers-place-value-comparison#train#solution#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
+Within one spec dataset, every sample has a **structural identity**: the tuple `(target.id, generatorId, viewId, split, mode, instanceIdx)`, canonicalized as a *sample key* (`<target-id>~<label-hash>#<generator-id>#<view-id>#train#solution#inst:0`). Everything entropy-related is a pure function of this identity, implemented in `src/lib/generation.ts`:
 
 *   **Generation seed**: `computeSampleSeed(sampleKey, attempt)`. The `attempt` counter is a retry salt — when a generator returns `null` or produces a duplicate task (or validation-leaking content), the pipeline retries with the next attempt, which deterministically yields a different draw. The *winning* attempt is recorded in metadata and the VQA cache, so any sample can be replayed in isolation.
 *   **Render seed**: passed to the browser as `payload.seed`. The orchestrator resolves view config once under the admitted selection and records the resulting PRNG continuation. `withConfig` restores that continuation and consumes the prepared config.
@@ -326,7 +120,7 @@ VQA records carry the same recipe. The public merged metadata stays compact.
 ## 3. Script Reference
 
 ### Standards Explorer
-`src/index.html` is the root Vite entry for the Common Core coverage explorer.
+`src/index.html` is the root Vite entry for the standards coverage explorer.
 `src/standards-explorer.html` is a compatible direct URL, and `src/modules.html` hosts the
 renderer/view directory. The React application
 lives under `src/standards-explorer/`, uses Zustand for
@@ -507,7 +301,7 @@ Playwright image, so changing the host runtime does not change the renderer iden
   specific than the requested claim), and on-disk image presence. With `--spec`, it additionally
   requires exact asset evidence for every normalized production target permutation. Defaults
   to the local public index and `out/dataset`; release passes its temporary index with
-  `--spec=ccss` so a target cannot remain `Ready` after publication.
+  `--spec=<spec_module>` so a target cannot remain `Ready` after publication.
 
 #### `src/scripts/generate-dataset.ts`
 The container-internal pipeline orchestrator.
@@ -516,7 +310,7 @@ The container-internal pipeline orchestrator.
 *   **Capture bounds**: Playwright screenshots the shared `#view` mount point. Its common stylesheet shrink-wraps ordinary content with `width: fit-content` and caps it at the canonical viewport with `max-width: 100vw`; only views whose outermost element explicitly requests viewport width retain a full-width canvas. See `IMPL-V10` in `docs/implementation-view.md`.
 *   **Renderer preflight and failure collection**: Before opening an output transaction, the pipeline visits only the views matched by the selected scope, verifies a successful document response and the `window.renderView` hook, and rejects page errors or genuine local-resource failures. Preflight uses at most four workers; rendering uses a bounded worker pool (8 by default, configurable with `--concurrency`). A sample-level render or `ViewValidationError` is recorded while sibling samples and modules continue, then the run reports every failed sample, exits non-zero, and rolls back the staged transaction. Diagnostic error cards are never accepted as dataset artifacts.
 *   **Splits**: Train samples are generated for every tuple; validation samples for the ~25% of tuples selected by `isValTuple`. Both use the same identity-based seeding with the split as a key component. Audit the result with `report:splits` — a tuple whose content space is too small to yield a draw disjoint from train produces no validation sample, which that report surfaces.
-*   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `npm run generate:dataset -- --spec=ccss` followed by `npm run generate:dataset -- --spec=ccss --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
+*   **Split dependency direction (invariant)**: **train generation never depends on validation generation; validation always depends on train.** Train is generated first into its own fingerprint index, and the val pass only reads that index. The asymmetry is required, not incidental: train is the primary artifact and must be reproducible on its own, while validation cannot be disjoint from train without being constrained by it. Verify with `npm run generate:dataset -- --spec=<spec_module>` followed by `npm run generate:dataset -- --spec=<spec_module> --training-only` — the train split must come out byte-identical. The practical consequence is that a generator change shifts train content, which can change which validation draws survive dedup; `report:churn` classifies that as an *attempt shift* and it is expected, not a determinism regression.
 *   **Dedup**: Task fingerprints per (module, split, view), covering **both modes** — a question never repeats a solution's configured task or vice versa. Validation additionally rejects every mathematical content fingerprint already in train. A collision triggers a deterministic retry on the next attempt; the winning attempt is recorded. If every question attempt collides, the target is associated only with an existing physical sample carrying the same task fingerprint; a train content collision with a different task can exclude a validation draw but cannot represent it. A solution that exhausts its retries falls back to the question's task shown solved. The module scope keeps `--generator=X` reproducing exactly what a full run produces for that module, and costs nothing because no view is rendered by more than one generator.
 *   **Metadata**: Each standard image row records its operational identity: `sample_key`, `spec`, `target_id`, optional additional `target_associations`, `generator`, `view`, `mode`, `instance`, `attempt`, `seed`, `content_fingerprint`, `task_fingerprint`, plus `labels`. The association list preserves exact competency provenance when several targets share one physical task. The problem data supplies the content fingerprint; prepared view configuration and the complete plan/replay receipt are retained in operational metadata for exact reproduction. Generators do not author a separate descriptive id or ontology annotations; structural sample identity remains separate from content and task equivalence.
 *   **`--training-only` Flag**: If specified, skips validation sample generation, rendering, and metadata writing.
@@ -550,7 +344,7 @@ changes invalidate judgments without changing image identity. After adopting thi
 rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-graph` before VQA.
 
 *   **Execution**: live mode: `npm run validate:dataset -- --spec=<spec_module> [--generator=X] [--view=Y] [--rebuild-graph] [--force|--retry-failed] [--concurrency=<positive_integer>] [--log-prompts] [--report-only] [--report=<path>]`; strict audit: `npm run audit:dataset -- --spec=<spec_module>`
-*   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=ccss` → `out/dataset-ccss/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
+*   **Dataset selection**: every script that reads a dataset takes `--spec=<module>` and nothing else, resolved by `resolveDatasetDir` in `src/lib/dataset-paths.ts` (`--spec=<module>` → `out/dataset-<module>/`). The reserved `--spec=union` addresses the merged `out/dataset/`, and is accepted only by `report:coverage` — validation and churn are per standard, and reject it with an explanation. `--spec` is required; there is no default.
 *   **Function**: An automated Visual QA pipeline. Normal mode uses the Gemini API via `src/lib/vqa-evaluator.ts` to analyze canonical Q/A image pairs against exactly two visual contracts: the central view checklist and the selected leaf view's required checklist. The evaluator role is authored in `src/validation/vqa/system-instruction.md`; response-schema and pass/fail semantics live in `src/lib/vqa-policy.ts`. The user content contains only the mode, ontology labels, a generic `## View-specific checklist` heading with the heading-free leaf criteria, and the global checklist under its own H2. Validation runs against the selected standard. Normal mode rejects native renderer identities so a Windows or host-specific render cannot enter the committed cache.
 *   **Freshness gate**: Before inspecting or spending API calls on VQA, validation verifies the selected pair entries, metadata counts, content/task fingerprints, authored source and ontology inputs, direct edges, immutable shard image identities, and graph-owned VQA cache keys. A proven-clean unscoped development run reuses the persisted graph through the file-to-node observation; otherwise validation reconstructs the unified graph with canonical renderer identity and fails with the first causal affected path when it is stale. A missing manifest, incomplete graph, old schema, old planner epoch, or ambiguous observation is a fail-closed graph-rebuild miss. Strict audit and explicit `--rebuild-graph` always reconstruct the complete graph, then the audit separately reads every live image once and verifies its stored byte digest.
 *   **Splits**: **Both `train` and `validation` are validated.** Validation images ship in the released dataset and are subject to the same checklists, so exempting them would let unchecked images reach consumers. Images are located by reading the split back out of the `sample_key` (`SPLIT_DIRS` in `src/lib/generation.ts`) — `file_name` is relative to its split root and does not encode the split, so **the same tuple's train and validation images share a filename**; every human-facing path is qualified with its split. The report breaks results down per split.
@@ -561,7 +355,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 *   **Request concurrency**: Live validation uses up to three concurrent samples by default, with each sample's LOW and HIGH requests sequential. `--concurrency=<positive_integer>` lowers or raises that bound to fit provider rate limits. `--log-prompts` always uses one sample at a time so the diagnostic output stays readable. Neither setting affects cache keys or evaluator behavior.
 *   **Prompt diagnostics**: `--log-prompts` prints the system instruction, user prompt, and image path immediately before every live request. The flag does not affect cache keys or evaluator behavior.
 *   **Gate semantics**: Normal validation updates cache records and reports; it exits non-zero for failing or uncached selected samples. Strict `--audit` is full-dataset-only, read-only, and never calls Gemini: it requires both splits, canonical renderer identities, exact metadata/image correspondence, and an exact set of passing cache keys. Missing, failing, stale, duplicate, malformed, orphaned, or obsolete-module records fail the audit. `--report-only` is the explicit diagnostic escape hatch.
-*   **Report paths**: Every normal validation writes a new immutable report under `temp/validation-reports/dataset-<spec>/`. Names contain an ISO timestamp and the scope, such as `2026-08-16T12-34-56-789Z__full.md` or `2026-08-16T12-34-56-789Z__generator=writing__view=numbers-write-standard.md`. Reports survive dataset regeneration because they are outside transactional `out/`; the command prints the exact path. `--report=<path>` remains an explicit override. Strict audit writes no report.
+*   **Report paths**: Every normal validation writes a new immutable report under `temp/validation-reports/dataset-<spec>/`. Names contain an ISO timestamp and the scope, such as `<timestamp>__full.md` or `<timestamp>__generator=<generator-id>__view=<view-id>.md`. Reports survive dataset regeneration because they are outside transactional `out/`; the command prints the exact path. `--report=<path>` remains an explicit override. Strict audit writes no report.
 *   **Pruning**: Normal validation auto-prunes stale entries and obsolete module files only when the run covers the whole dataset. A run narrowed by `--generator`/`--view`, or one against a dataset generated with `--training-only`, skips pruning and says so. Strict audit never prunes; stale state is a release-blocking finding.
 
 ### `src/scripts/audit-dataset-images.ts`
@@ -582,7 +376,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/test-target.ts`
 *   **Execution**: `npm run test:target -- --target=<target.id_or_prefix> --spec=<spec_module> [--raw] [--render] [--validate]`
-*   **Function**: Inspects one production-normalized competency target end to end: supports full or prefix target IDs (e.g. `--target=1.NBT.B.3-place-value-comparison`), which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — native debug images in `out/target-test/`. Pass `--raw` to select from source definitions before overlap deduplication. Cache-producing VQA uses canonical scoped generation plus `validate:dataset`, not the native `--validate` path.
+*   **Function**: Inspects one production-normalized competency target end to end: supports full or prefix target IDs, which `(generator, view)` tuples it matches (with reasons for rejected pairs), the exact samples the pipeline would produce (keys, seeds, attempts, fingerprints, data), how they relate to the committed VQA cache, and — with `--render` — native debug images in `out/target-test/`. Pass `--raw` to select from source definitions before overlap deduplication. Cache-producing VQA uses canonical scoped generation plus `validate:dataset`, not the native `--validate` path.
 
 ### `src/scripts/show-matching-stats.ts`
 *   **Execution**: `npm run show:matching -- --spec=<spec_module> [--raw]`
@@ -668,7 +462,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
     including when the child itself is unused. Rebuild the generation graph once after adopting this
     machinery change. Resolved draws are checked before rendering and duplicate-target association;
     annotation contract failures abort generation instead of being swallowed as retry failures.
-*   **Function**: Validates one or more competency target standard specs using one shared generator/view catalog. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, definition distinctness, and inverse matching coverage — every normalized active target must have at least one semantically compatible generator/view path. No two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (related standards across grades); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors.
+*   **Function**: Validates one or more competency target standard specs using one shared generator/view catalog. All checks always run: target ID uniqueness (the sole gatekeeper — `loadTargets` itself is permissive), label set normalization, intra-target permutation uniqueness, definition distinctness, and inverse matching coverage — every normalized active target must have at least one semantically compatible generator/view path. No two target definitions may define an identical *set* of permutations, since such definitions are indistinguishable by the ontology. Definitions that merely *overlap* in some permutations are legitimate (overlapping competency claims); overlapping permutations are deduplicated to one representative target and reported as warnings, not errors.
 
 ### Type Checking (`npm run check:types`)
 *   **Execution**: `npm run check:types` (or `npx tsc --noEmit`)
@@ -678,9 +472,9 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 Adding content means creating two interconnected directories: a **Generator** (abstract
 math, `src/generators/`) and a **View** (visual renderer, `src/visuals/views/`). Both are
-organized into a 1-level category sub-directory structure — e.g.
-`src/generators/arithmetic/arithmetic-ops-pairs` and
-`src/visuals/views/operations/operations-vertical`.
+organized into a 1-level category sub-directory structure:
+`src/generators/<category>/<generator>` and
+`src/visuals/views/<category>/<view>`.
 
 The rules for authoring each file live in the reference library under
 [`docs/`](docs/README.md), which is their single source of truth. Every rule carries a
@@ -700,12 +494,12 @@ Competency target specs under `src/spec/` follow [target-spec.md](docs/target-sp
 To add a new mathematical concept or visual style to the dataset, follow this step-by-step workflow:
 
 ### Step 1: Define the Pedagogy
-Declare the target specifications in the appropriate grade level file in `src/spec/ccss/` (like `kindergarten.ts` or `grade-01.ts`), building permutations with the `DatasetPermutationBuilder`. See `src/spec/ccss/kindergarten.ts` for worked examples.
+Declare target specifications in the appropriate target file under `src/spec/<module>/`, building permutations with `DatasetPermutationBuilder`.
 
 The export contract, content-hash id semantics, gap dispositions, rule against stretching labels, and requirement that every active label have observable classification evidence (`TSPEC-13`) are specified in [docs/target-spec.md](docs/target-spec.md).
 
 ### Step 2: Analyze Matchings
-Run `npm run show:matching -- --spec=ccss` to inspect the complete matched-pair set. Confirm both that the intended path exists and that every additional pair is a genuine realization. Use `--raw` only when tracing an overlapping source definition that production deduplicates.
+Run `npm run show:matching -- --spec=<spec_module>` to inspect the complete matched-pair set. Confirm both that the intended path exists and that every additional pair is a genuine realization. Use `--raw` only when tracing an overlapping source definition that production deduplicates.
 
 ### Step 3: Decide Next Steps
 - **Case A: Both Match (100% Match):** If the intended generator-view path matches and every additional match is genuine, the dataset pipeline can generate the target without a new module.
@@ -745,17 +539,17 @@ a failure. The operational gates then run from static contracts to the released 
 
 1. **Source and static truth:** run `npm run check` (or its focused type, generator/view-spec,
    label, and standards-spec checks).
-2. **Composition truth:** run `npm run show:matching -- --spec=ccss` and confirm every matched
+2. **Composition truth:** run `npm run show:matching -- --spec=<spec_module>` and confirm every matched
    generator/view pair is semantically valid. Use `--raw` only for source-definition diagnosis.
 3. **Rendered truth:** canonically regenerate and validate the affected real-standard scope.
    Generation proves render totality; VQA proves that the final artifact observably supports
    the complete matched conjunction:
    ```bash
-   npm run generate:dataset -- --spec=ccss --generator=X --view=Y
-   npm run validate:dataset -- --spec=ccss --generator=X --view=Y
+   npm run generate:dataset -- --spec=<spec_module> --generator=X --view=Y
+   npm run validate:dataset -- --spec=<spec_module> --generator=X --view=Y
    ```
-4. **Dataset integrity:** run `npm run report:churn -- --spec=ccss` and
-   `npm run report:splits -- --spec=ccss`. Determinism and split integrity are independent of
+4. **Dataset integrity:** run `npm run report:churn -- --spec=<spec_module>` and
+   `npm run report:splits -- --spec=<spec_module>`. Determinism and split integrity are independent of
    whether individual images look correct.
 5. **Complete gate:** before publishing, run full canonical generation and any required live
    validation, then require `audit:dataset`, `report:splits`, and `check` to pass. Build the
@@ -769,7 +563,7 @@ The pipeline is built so that a code change only invalidates the samples it actu
 
 ### Debugging one target (new targets, matching issues, cache questions)
 ```bash
-npm run test:target -- --target=K.CC.B.5-how-many~<hash> --spec=ccss --render
+npm run test:target -- --target=<target-id>~<label-hash> --spec=<spec_module> --render
 ```
 Shows the matched tuples, why near-miss pairs were rejected (`unsupported-label` / `rejected-label` with the offending label), the exact sample keys/seeds/data the pipeline would produce, their status in the VQA cache, and (with `--render` and `npm run dev` running) the rendered images in `out/target-test/`.
 
@@ -782,13 +576,13 @@ Use this native replay to inspect the exact image and payload and compare its ha
 
 ### Checking cache health after a regeneration
 ```bash
-npm run report:churn -- --spec=ccss        # compares working tree vs HEAD
+npm run report:churn -- --spec=<spec_module>        # compares working tree vs HEAD
 ```
 The report joins old and new cache entries on `sample_key` and flags identities whose image changed. Expected: churn only in the modules/views you touched. **Churn in unrelated samples is a determinism regression** — the classification (render change vs. attempt shift vs. seed scheme change) tells you where to look.
 
 ### Checking split integrity after a regeneration
 ```bash
-npm run report:splits -- --spec=ccss
+npm run report:splits -- --spec=<spec_module>
 ```
 Churn tells you whether the *images* moved; this tells you whether the *split* is still sound. Cross-split leakage and within-split redundancy fail the run — they make validation metrics optimistic. Coverage warnings are informational: a view whose content space is too small to yield a second distinct problem legitimately has no validation sample. Also runs as step 6 of `npm run check` for every spec that has a generated dataset.
 
@@ -810,7 +604,7 @@ normative text.
 
 | Command | Workflow |
 | --- | --- |
-| `/create-spec-from-standard {standardId\|gradeFile}` | Create a reviewed two-pass target plan, then implement the approved standard spec. |
+| `/create-spec-from-standard {standardId\|targetFile}` | Create a reviewed two-pass target plan, then implement the approved standard spec. |
 | `/implement-spec [{specModule}]` | Resolve reviewed `implementationTodos` through contract-first module work and production verification. |
 | `/update-ontology [{specModule}]` | Turn authored `ontologyTodos` into formal ontology-repository issues. |
 | `/fix-spec [{specModule}] [--generator=X] [--view=Y]` | Triage and repair matching, generation, rendering, VQA, and determinism failures for existing matches. |
