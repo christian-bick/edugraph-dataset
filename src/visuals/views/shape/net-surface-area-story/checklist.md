@@ -1,0 +1,2 @@
+- **Identity:** Read the necessary dimensions and closed-solid context, then find total surface area from the complete net, counting every external face once.
+- **Modes:** Question Mode gives a coded net and numerical dimensions in the story, withholding face areas, calculations and total. Solution Mode shows exact face calculations and the complete total in matching square units, in green.

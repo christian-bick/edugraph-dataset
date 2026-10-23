@@ -1,0 +1,2 @@
+- **Identity:** Draw a connected net for the depicted closed solid using its detached face shapes, dimensions and shared-edge correspondences.
+- **Modes:** Question Mode shows the solid and independent face references, with no assembled net or chosen fold tree. Solution Mode shows a complete connected net in green, preserving every face and matching edge.

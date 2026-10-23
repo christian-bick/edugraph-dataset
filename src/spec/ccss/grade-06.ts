@@ -23,20 +23,6 @@ import type {
 
 
 
-const polyhedralNetsImplementation = defineImplementationPackage({
-    id: 'polyhedral-nets',
-    description:
-        'Construct valid rectangle-and-triangle nets and calculate the surface area of their solids.',
-    generators: [
-        {module: 'polyhedral-nets', strategy: 'new'}
-    ],
-    views: [
-        {module: 'solid-net-construction', strategy: 'new'},
-        {module: 'solid-net-construction-story', strategy: 'new'},
-        {module: 'net-surface-area', strategy: 'new'},
-        {module: 'net-surface-area-story', strategy: 'new'}
-    ]
-});
 
 const statisticalQuestionRecognitionImplementation = defineImplementationPackage({
     id: 'statistical-question-recognition',
@@ -1215,35 +1201,15 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.G.A.1-polygon-area-dissection', polygonAreaDissectionBuilder),
     ...toTargets('6.G.A.2-fractional-cube-packing', fractionalCubePackingBuilder),
     ...toTargets('6.G.A.2-fractional-packing-product-connection', fractionalPackingProductConnectionBuilder),
-    ...toTargets('6.G.A.2-fractional-prism-formulas', fractionalPrismFormulasBuilder)
+    ...toTargets('6.G.A.2-fractional-prism-formulas', fractionalPrismFormulasBuilder),
+    ...toTargets('6.G.A.4-construct-solid-net', constructSolidNetBuilder),
+    ...toTargets('6.G.A.4-net-surface-area', netSurfaceAreaBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
     // Expressions and Equations (6.EE)
 
     // Geometry (6.G)
-    ...toImplementationTodos(
-        '6.G.A.4-construct-solid-net',
-        constructSolidNetBuilder,
-        polyhedralNetsImplementation,
-        'A depicted solid, its face dimensions and adjacency information let the learner draw a connected ' +
-        'planar net. The solution preserves each face and shared edge and folds to the specified solid ' +
-        'without face overlap. Contextual variants use necessary task text. Rectangular prisms, triangular ' +
-        'prisms and pyramids with triangle/rectangle faces supply the profiles. The Prism+Triangle profile ' +
-        'specifically constrains triangular bases and rectangular lateral faces; the Pyramid profile ' +
-        'constrains triangular or rectangular bases. GeometricNet is a Scope; no physical folding or ' +
-        'cutting is required in the image task.'
-    ),
-    ...toImplementationTodos(
-        '6.G.A.4-net-surface-area',
-        netSurfaceAreaBuilder,
-        polyhedralNetsImplementation,
-        'A complete rectangle/triangle net exposes every face and enough dimensions for its area. The ' +
-        'learner counts every external face exactly once and reports total square-unit area; story text is ' +
-        'needed in contextual versions. Retain the same solid profiles as net construction. Triangle ' +
-        'heights, not merely side lengths, must be supplied when necessary. Do not use Foldable as a ' +
-        'substitute for the net representation.'
-    ),
 
     // Statistics and Probability (6.SP)
     ...toImplementationTodos(
