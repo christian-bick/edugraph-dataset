@@ -28,19 +28,7 @@ import type {
 
 
 
-const numericalDataContextSummaryImplementation = defineImplementationPackage({
-    id: 'numerical-data-context-summary',
-    description:
-        'Report observation counts and describe the recorded attribute, measurement method and units of a ' +
-        'numerical data set.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'data-observation-count', strategy: 'new'},
-        {module: 'data-attribute-description', strategy: 'new'}
-    ]
-});
+
 
 const numericalDataSummariesImplementation = defineImplementationPackage({
     id: 'numerical-data-summaries',
@@ -1160,7 +1148,9 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.SP.B.5c-describe-contextual-patterns', describeContextualPatternsBuilder),
     ...toTargets('6.SP.A.3-interpret-center-summary', interpretCenterSummaryBuilder),
     ...toTargets('6.SP.A.3-interpret-variation-summary', interpretVariationSummaryBuilder),
-    ...toTargets('6.SP.B.4-construct-numerical-distribution-plot', constructNumericalDistributionPlotBuilder)
+    ...toTargets('6.SP.B.4-construct-numerical-distribution-plot', constructNumericalDistributionPlotBuilder),
+    ...toTargets('6.SP.B.5a-observation-count', observationCountBuilder),
+    ...toTargets('6.SP.B.5b-data-attribute-description', dataAttributeDescriptionBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1169,25 +1159,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.B.5a-observation-count',
-        observationCountBuilder,
-        numericalDataContextSummaryImplementation,
-        'Individual observation records are visible, including repeated equal values. The learner reports ' +
-        'record count, not distinct-value count or the sum of observed values. StatisticalSample replaces ' +
-        'organizational Statistics; collection membership and observation multiplicity must be visible. ' +
-        'QuantityMeasurement refers to counting observations, not their measured values.'
-    ),
-    ...toImplementationTodos(
-        '6.SP.B.5b-data-attribute-description',
-        dataAttributeDescriptionBuilder,
-        numericalDataContextSummaryImplementation,
-        'A study description and data table identify the observational units, recorded characteristic, how ' +
-        'it was measured, and its measurement units. The learner describes those supplied facts. Do not ' +
-        'add MeasurementScale merely for naming centimetres: that Area concerns ' +
-        'nominal/ordinal/interval/ratio scales. UnitDimensionality likewise requires dimensional ' +
-        'composition, not incidental unit names.'
-    ),
     ...toImplementationTodos(
         '6.SP.B.5c-compute-contextual-center',
         computeContextualCenterBuilder,

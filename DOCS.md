@@ -109,6 +109,9 @@ statistical claim, while both renderers accept the complete shared data family.
 The numerical distribution construction view supplies records and blank scaled
 axes for a line plot, histogram or box plot. Solutions project the producer's
 dot, bin or quartile geometry and show the corresponding construction evidence.
+Observation-count and attribute-description views retain the individual records,
+including equal values, and the study's supplied measurement method and units.
+Their solutions enumerate observations or describe the original recorded attribute.
 
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within

@@ -1,0 +1,2 @@
+- **Identity:** Count the individual recorded observations, including repeated equal values.
+- **Modes:** Question Mode shows every observation and leaves the total blank. Solution Mode counts the entries once each and reveals the total number of observations in green.
