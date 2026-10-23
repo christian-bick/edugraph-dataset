@@ -103,6 +103,9 @@ contextual departures require a given routine band, an observed majority and a
 checked nearest-record separation. Counterfactual summaries change one recorded
 value under its original attribute constraints. Fixed interpretation views project
 these supplied facts without selecting a learner task inside the producer.
+Single-summary interpretation leaves give one center or spread value and explain
+it in the study's original units. Their plans select the corresponding single
+statistical claim, while both renderers accept the complete shared data family.
 
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within

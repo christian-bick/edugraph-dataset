@@ -26,19 +26,6 @@ import type {
 
 
 
-const statisticalSummaryMeaningImplementation = defineImplementationPackage({
-    id: 'statistical-summary-meaning',
-    description:
-        'Explain the distinct meanings of center and variation measures as single-number summaries of ' +
-        'data.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'center-summary-interpretation', strategy: 'new'},
-        {module: 'variation-summary-interpretation', strategy: 'new'}
-    ]
-});
 
 const numericalDistributionPlotsImplementation = defineImplementationPackage({
     id: 'numerical-distribution-plots',
@@ -1182,7 +1169,9 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.G.A.4-net-surface-area', netSurfaceAreaBuilder),
     ...toTargets('6.SP.A.1-classify-statistical-questions', classifyStatisticalQuestionsBuilder),
     ...toTargets('6.SP.A.2-describe-distribution', describeDistributionBuilder),
-    ...toTargets('6.SP.B.5c-describe-contextual-patterns', describeContextualPatternsBuilder)
+    ...toTargets('6.SP.B.5c-describe-contextual-patterns', describeContextualPatternsBuilder),
+    ...toTargets('6.SP.A.3-interpret-center-summary', interpretCenterSummaryBuilder),
+    ...toTargets('6.SP.A.3-interpret-variation-summary', interpretVariationSummaryBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1191,24 +1180,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.A.3-interpret-center-summary',
-        interpretCenterSummaryBuilder,
-        statisticalSummaryMeaningImplementation,
-        'A data set and its mean or median are shown. The learner explains how the single center value ' +
-        'summarizes the set, distinguishing a typical/central value from the number of observations and ' +
-        'from spread. Use conceptual comparisons such as data sets sharing a center but differing in ' +
-        'spread. Merely calculating a mean or median does not meet this task.'
-    ),
-    ...toImplementationTodos(
-        '6.SP.A.3-interpret-variation-summary',
-        interpretVariationSummaryBuilder,
-        statisticalSummaryMeaningImplementation,
-        'Data with a supplied IQR or MAD let the learner explain what that one number says about ' +
-        'variability, contrasting sets with the same center but different spread where useful. IQR and MAD ' +
-        'have different meanings and must be explained accurately; the prompt must elicit interpretation ' +
-        'rather than only calculation.'
-    ),
     ...toImplementationTodos(
         '6.SP.B.4-construct-numerical-distribution-plot',
         constructNumericalDistributionPlotBuilder,
