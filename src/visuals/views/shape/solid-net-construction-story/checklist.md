@@ -1,0 +1,2 @@
+- **Identity:** Read the necessary face dimensions and closed-solid context, then draw a connected net for the depicted solid.
+- **Modes:** Question Mode gives numerical dimensions in the story and coded detached face references, with no assembled net or chosen fold tree. Solution Mode shows a complete connected net in green with every face and matching edge preserved.

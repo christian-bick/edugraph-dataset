@@ -78,6 +78,14 @@ layer and product witnesses. Its helper lives under `src/generators/measurement/
 Five prism consumers under `src/visuals/views/measure/` project that shared contract;
 the fractional renderer branches before the existing integer layout.
 
+Polyhedral nets use a complete solid-face incidence model, exact planar face copies,
+and proper rigid fold maps that close every shared edge. Geometry and validation
+helpers under `src/generators/shape/` check the original convex solid, the nonoverlapping
+sheet, triangle face altitudes and signed base offsets, and complete surface-area work.
+Four fixed views under `src/visuals/views/shape/` project net construction or surface
+area, each with a plain and a necessary-text variant. Construction questions show
+detached source faces and adjacency while withholding the assembled solution net.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting

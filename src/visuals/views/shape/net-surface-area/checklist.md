@@ -1,0 +1,2 @@
+- **Identity:** Find the total surface area from a complete rectangle-and-triangle net, counting each external face once and using perpendicular triangle face heights.
+- **Modes:** Question Mode gives the net and needed dimensions but withholds face areas, calculations and total. Solution Mode shows the face calculations and complete surface-area total in matching square units, in green.

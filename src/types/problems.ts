@@ -5684,4 +5684,118 @@ export interface ViewTypeMap {
     'shape-draw-linear-shape': ShapePolygonDefinitionProblem;
     'shape-draw-linear-rotation': ShapePolygonDefinitionProblem;
     'shape-draw-excluded-quadrilateral': ShapeExcludedQuadrilateralProblem;
+    'solid-net-construction': PolyhedralNetProblem;
+    'solid-net-construction-story': PolyhedralNetProblem;
+    'net-surface-area': PolyhedralNetProblem;
+    'net-surface-area-story': PolyhedralNetProblem;
 }
+
+
+export type NetScalar = Readonly<AlgebraicScalar>;
+
+export type NetPoint2 = Readonly<{x: NetScalar; y: NetScalar}>;
+
+export type NetPoint3 = Readonly<{x: NetScalar; y: NetScalar; z: NetScalar}>;
+
+export type NetProperRotation = readonly [readonly [NetScalar, NetScalar, NetScalar],
+    readonly [NetScalar, NetScalar, NetScalar], readonly [NetScalar, NetScalar, NetScalar]];
+
+export type NetFaceEdge = Readonly<{faceId: string; edgeIndex: number}>;
+
+export type NetSolidFace = Readonly<{faceId: string}> & (
+    | Readonly<{shape: 'triangle'; vertexIds: readonly [string, string, string]}>
+    | Readonly<{shape: 'rectangle'; vertexIds: readonly [string, string, string, string]}>
+);
+
+export type NetSolidEdge = Readonly<{
+    edgeId: string;
+    vertexIds: readonly [string, string];
+    /** Exact source edge table, two distinct outward face-cycle incidences. */
+    incidences: readonly [NetFaceEdge, NetFaceEdge];
+    lengthSquared: NetScalar;
+}>;
+
+export type NetFaceMeasure =
+    | Readonly<{
+        kind: 'rectangle'; baseEdgeIndex: number; adjacentEdgeIndex: number;
+        base: NetScalar; height: NetScalar;
+        areaProduct: ExactCoefficientArithmetic;
+        area: NetScalar;
+    }>
+    | Readonly<{
+        kind: 'triangle'; baseEdgeIndex: number; apexVertexIndex: number;
+        /** Supporting-line foot; extension feet are valid, not a hidden acute-only family. */
+        altitudeFoot: NetPoint2;
+        base: NetScalar; height: NetScalar;
+        /** SIGNED length along the directed selected base from its start to the foot.
+         * May be0, negative, or greater than base. Together with b/h and correspondence
+         * this is a congruence cue for construction, whereas b/h alone only fixes area.
+         * Verified exactly as dot(foot-baseStart, baseEnd-baseStart)/base.
+         */
+        baseOffset: NetScalar;
+        baseHeightProduct: ExactCoefficientArithmetic;
+        halfAreaProduct: ExactCoefficientArithmetic;
+        area: NetScalar;
+    }>;
+
+export type NetPlanarFace = Readonly<{
+    faceId: string;
+    /** One occurrence of each named source vertex, in the same outward source cycle
+     * up to cyclic rotation. These local copies can differ from copies on cut seams.
+     */
+    vertices: readonly [Readonly<{solidVertexId: string; point: NetPoint2}>,
+        Readonly<{solidVertexId: string; point: NetPoint2}>,
+        Readonly<{solidVertexId: string; point: NetPoint2}>,
+        ...Readonly<{solidVertexId: string; point: NetPoint2}>[]];
+    measure: NetFaceMeasure;
+}>;
+
+export type NetEdgePair = Readonly<{
+    solidEdgeId: string;
+    /** Same two source incidences; unordered pair, each face edge exact. */
+    incidences: readonly [NetFaceEdge, NetFaceEdge];
+}>;
+
+export type NetFaceFold = Readonly<{
+    faceId: string;
+    /** R*(u,v,0)+t is proper: R^T R=I and detR=+1, not merely |detR|=1.
+     * All named face vertices map exactly. Hinge endpoints agree and ALL cut seam
+     * endpoints close. One coherent sheet side is used across the connected tree.
+     */
+    rotation: NetProperRotation;
+    translation: NetPoint3;
+}>;
+
+export type NetSurfaceAddition = Readonly<{
+    faceId: string;
+    /** Addition operands are previous prefix and this exact original face area;
+     * either operand order is valid. Begins with0, visits every face once and ends
+     * at the common total. Prefix0 is the sole nonpositive area-work quantity.
+     */
+    arithmetic: ExactCoefficientArithmetic;
+}>;
+
+export type PolyhedralNetProblem = Readonly<{
+    kind: 'polyhedral-net-relations';
+    solidKind: 'rectangular-prism' | 'triangular-prism' | 'triangular-pyramid' | 'rectangular-pyramid';
+    unit: Readonly<{length: 'centimeters' | 'meters'; area: 'square-centimeters' | 'square-meters'}>;
+    context: Readonly<{kind: 'closed-carton' | 'closed-solid-model'; boundary: 'all-external-faces'}>;
+    solid: Readonly<{
+        vertices: readonly [Readonly<{vertexId: string; point: NetPoint3}>, ...Readonly<{vertexId: string; point: NetPoint3}>[]];
+        faces: readonly [NetSolidFace, ...NetSolidFace[]];
+        edges: readonly [NetSolidEdge, ...NetSolidEdge[]];
+    }>;
+    net: Readonly<{
+        faces: readonly [NetPlanarFace, ...NetPlanarFace[]];
+        /** Connected F−1 hinge tree. A different coherent cut tree is valid. */
+        hinges: readonly [NetEdgePair, ...NetEdgePair[]];
+        /** Complementary exact source edge incidence pairs; no missing/excess seam. */
+        cutSeams: readonly [NetEdgePair, ...NetEdgePair[]];
+        folds: readonly [NetFaceFold, ...NetFaceFold[]];
+    }>;
+    surfaceArea: NetScalar;
+    /** Empty incidence-only branch or complete additional all-external-face proof.
+     * Array presence/completeness is real selected evidence, not a copied profile flag.
+     */
+    surfaceAdditivity: readonly NetSurfaceAddition[];
+}>;
