@@ -5688,6 +5688,7 @@ export interface ViewTypeMap {
     'solid-net-construction-story': PolyhedralNetProblem;
     'net-surface-area': PolyhedralNetProblem;
     'net-surface-area-story': PolyhedralNetProblem;
+    'statistical-question-classification': StatisticalQuestionsProblem;
 }
 
 
@@ -5799,3 +5800,126 @@ export type PolyhedralNetProblem = Readonly<{
      */
     surfaceAdditivity: readonly NetSurfaceAddition[];
 }>;
+
+
+/**
+ * Statistical investigations preserve anticipated response variability before
+ * collection. All registries are dense with unique nonempty IDs; exact numeric
+ * values are canonical reduced SignedRational values with no IEEE -0.
+ * Source meanings and checked evidence carry no learner prompts or answer prose.
+ */
+export type StatisticalObservationUnit = {
+    id: string;
+    name: string;
+    kind: 'person' | 'die' | 'triangle' | 'rectangle' | 'sealed-pencil-box';
+};
+
+export type StatisticalObservationOccasion = {
+    id: string;
+    /** Semantic occasion name, e.g. Monday or trial 1; never answer prose. */
+    name: string;
+};
+
+export type StatisticalObservationIndex = {
+    id: string;
+    unitId: string;
+    occasionId: string;
+};
+
+/**
+ * Units x occasions is the actual relevant observation set, not a population
+ * count guessed from a noun. Every pair occurs exactly once in indices.
+ * A single person/die on several occasions therefore has several observations.
+ */
+export type StatisticalObservationPlan = {
+    populationName: string;
+    units: readonly [StatisticalObservationUnit, ...StatisticalObservationUnit[]];
+    occasions: readonly [StatisticalObservationOccasion, ...StatisticalObservationOccasion[]];
+    indices: readonly [StatisticalObservationIndex, ...StatisticalObservationIndex[]];
+    /** Positive safe integer, exactly units.length * occasions.length; no -0. */
+    observationCount: number;
+};
+
+export type StatisticalColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
+
+/**
+ * Concrete source semantics make the response domain independently checkable.
+ * These are mathematical investigation attributes/rules, not task selectors.
+ *
+ * upper-face-number: die units; exact possible labels 1..6.
+ * color-choice: person units; alternatives contains >=2 different colors;
+ *               each person selects one available color on each occasion.
+ * side-count: triangle/rectangle units matching shape; exact constant 3/4.
+ * sealed-pencil-count: sealed-pencil-box units; EVERY box obeys the stated
+ *                      packing rule, not merely an all-equal realized sample.
+ */
+export type StatisticalInvestigationAttribute =
+    | {kind: 'upper-face-number'; die: 'standard-six-sided'}
+    | {kind: 'color-choice'; alternatives: readonly [StatisticalColor, StatisticalColor, ...StatisticalColor[]]}
+    | {kind: 'side-count'; shape: 'triangle' | 'rectangle'}
+    | {
+        kind: 'sealed-pencil-count';
+        /** Nonnegative safe whole count, including zero; never IEEE -0. */
+        pencilsPerBox: number;
+    };
+
+/**
+ * Complete finite admissible response set for this admitted semantic family.
+ * Numeric values and categorical values are distinct. The
+ * order is not mathematically significant. The attribute fixes this set:
+ * 1..6, available menu colors, {3}/{4}, or {pencilsPerBox}, respectively.
+ */
+export type StatisticalResponseDomain =
+    | {kind: 'numeric'; values: readonly [SignedRational, ...SignedRational[]]}
+    | {kind: 'categorical'; values: readonly [StatisticalColor, ...StatisticalColor[]]};
+
+export type StatisticalResponse =
+    | {kind: 'numeric'; value: SignedRational}
+    | {kind: 'categorical'; value: StatisticalColor};
+
+export type StatisticalIndexedResponse = {
+    observationId: string;
+    response: StatisticalResponse;
+};
+
+/**
+ * These certify properties of the ORIGINAL relevant observation set and its
+ * admissible responses before collection. They are not requested answers.
+ *
+ * single-observation: observationCount=1, exact sole index supplied. There is
+ * no between-observation variation even if that one response was uncertain.
+ * constant-response: complete responseDomain has exactly one response, reused
+ * at every relevant index; may hold for one or many units/occasions.
+ * anticipated-variation: >=2 relevant indices; the two supplied index IDs and
+ * responses are distinct, admissible possibilities. The admitted variable
+ * attributes allow independently choosing these responses at those indices.
+ * It is not a promise that a future finite sample will contain both values.
+ *
+ * For a singleton index with a singleton domain, either fixed certificate is
+ * valid. Guards validate mathematics, not equality to builder serialization.
+ */
+export type StatisticalVariabilityEvidence =
+    | {kind: 'single-observation'; observationId: string}
+    | {kind: 'constant-response'; response: StatisticalResponse}
+    | {
+        kind: 'anticipated-variation';
+        possibilities: readonly [StatisticalIndexedResponse, StatisticalIndexedResponse];
+    };
+
+export type StatisticalInvestigation = {
+    id: string;
+    observationPlan: StatisticalObservationPlan;
+    attribute: StatisticalInvestigationAttribute;
+    responseDomain: StatisticalResponseDomain;
+    variability: StatisticalVariabilityEvidence;
+};
+
+export type StatisticalQuestionsProblem = {
+    kind: 'statistical-questions';
+    /**
+     * Broad uniform family: any coherent nonempty array, including repeated
+     * classes. Canonical sampling supplies at least one variable and one fixed
+     * investigation. Runtime consumers do not narrow to that sampler allocation.
+     */
+    investigations: readonly [StatisticalInvestigation, ...StatisticalInvestigation[]];
+};

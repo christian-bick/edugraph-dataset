@@ -86,6 +86,15 @@ Four fixed views under `src/visuals/views/shape/` project net construction or su
 area, each with a plain and a necessary-text variant. Construction questions show
 detached source faces and adjacency while withholding the assembled solution net.
 
+Statistical-question investigations store the relevant unit-by-occasion observation
+set, a complete response domain grounded in the source rule, and checked evidence
+for one observation, a constant response, or anticipated variation. The statistics
+helper constructs this evidence before any data collection. A fixed classification
+view phrases the source investigations, permutes their presentation from the render
+seed, and reveals the classifications and contextual reasons in Solution Mode.
+The required variation configuration selects either a collection containing
+anticipated variation or one containing only single-observation and constant-rule cases.
+
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
 the resolved numeric bounds; `counting-objects-count-out` renders it directly. Other counting

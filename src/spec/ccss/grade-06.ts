@@ -24,17 +24,6 @@ import type {
 
 
 
-const statisticalQuestionRecognitionImplementation = defineImplementationPackage({
-    id: 'statistical-question-recognition',
-    description:
-        'Recognize questions whose observations are expected to vary and explain the relevant variability.',
-    generators: [
-        {module: 'statistical-questions', strategy: 'new'}
-    ],
-    views: [
-        {module: 'statistical-question-classification', strategy: 'new'}
-    ]
-});
 
 const numericalDistributionInterpretationImplementation = defineImplementationPackage({
     id: 'numerical-distribution-interpretation',
@@ -1203,7 +1192,8 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.G.A.2-fractional-packing-product-connection', fractionalPackingProductConnectionBuilder),
     ...toTargets('6.G.A.2-fractional-prism-formulas', fractionalPrismFormulasBuilder),
     ...toTargets('6.G.A.4-construct-solid-net', constructSolidNetBuilder),
-    ...toTargets('6.G.A.4-net-surface-area', netSurfaceAreaBuilder)
+    ...toTargets('6.G.A.4-net-surface-area', netSurfaceAreaBuilder),
+    ...toTargets('6.SP.A.1-classify-statistical-questions', classifyStatisticalQuestionsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1212,16 +1202,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.A.1-classify-statistical-questions',
-        classifyStatisticalQuestionsBuilder,
-        statisticalQuestionRecognitionImplementation,
-        'Candidate questions contrast an individual fixed observation with a collection/process whose ' +
-        'answers vary. The learner classifies questions by anticipated variability; the solution states ' +
-        'the relevant observations and variability. A statistical question need not already have collected ' +
-        'data. The generator supplies structured investigation/candidate-question meaning, not the learner ' +
-        'instruction or requested answer.'
-    ),
     ...toImplementationTodos(
         '6.SP.A.2-describe-distribution',
         describeDistributionBuilder,

@@ -1,0 +1,2 @@
+- **Identity:** Classify investigation questions by whether variability is anticipated among their relevant observations.
+- **Modes:** Question Mode shows the investigations without completed classifications or reasons. Solution Mode gives each classification in green and identifies observations that may vary or explains their fixed nature.
