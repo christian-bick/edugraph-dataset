@@ -1,0 +1,2 @@
+- **Identity:** Interpret a numerical distribution's overall pattern and contextual departures under a stated routine-band and separation criterion.
+- **Modes:** Question Mode shows the data, neutral display and criterion without identifying departures or giving an interpretation. Solution Mode explains the actual pattern and any qualifying departures in green, using the ordinary observations, closest gaps and contextual units.

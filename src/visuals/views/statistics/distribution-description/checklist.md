@@ -1,0 +1,2 @@
+- **Identity:** Interpret the center, spread and empirical shape of a contextual numerical distribution.
+- **Modes:** Question Mode gives the data, display and relevant summary values while withholding their meanings and the shape description. Solution Mode explains these in green using the actual observations, units and distribution features.

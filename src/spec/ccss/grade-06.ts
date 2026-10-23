@@ -25,19 +25,6 @@ import type {
 
 
 
-const numericalDistributionInterpretationImplementation = defineImplementationPackage({
-    id: 'numerical-distribution-interpretation',
-    description:
-        'Interpret numerical distributions through center, spread, shape and contextual departures from ' +
-        'the overall pattern.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'distribution-description', strategy: 'new'},
-        {module: 'distribution-patterns-context', strategy: 'new'}
-    ]
-});
 
 const statisticalSummaryMeaningImplementation = defineImplementationPackage({
     id: 'statistical-summary-meaning',
@@ -1193,7 +1180,9 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.G.A.2-fractional-prism-formulas', fractionalPrismFormulasBuilder),
     ...toTargets('6.G.A.4-construct-solid-net', constructSolidNetBuilder),
     ...toTargets('6.G.A.4-net-surface-area', netSurfaceAreaBuilder),
-    ...toTargets('6.SP.A.1-classify-statistical-questions', classifyStatisticalQuestionsBuilder)
+    ...toTargets('6.SP.A.1-classify-statistical-questions', classifyStatisticalQuestionsBuilder),
+    ...toTargets('6.SP.A.2-describe-distribution', describeDistributionBuilder),
+    ...toTargets('6.SP.B.5c-describe-contextual-patterns', describeContextualPatternsBuilder)
 ];
 
 export const implementationTodos: ImplementationTodo[] = [
@@ -1202,17 +1191,6 @@ export const implementationTodos: ImplementationTodo[] = [
     // Geometry (6.G)
 
     // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.A.2-describe-distribution',
-        describeDistributionBuilder,
-        numericalDistributionInterpretationImplementation,
-        'A contextual numerical data collection and its display expose frequencies, overall shape, and ' +
-        'supplied or derivable center/spread summaries. The learner explains what the center and spread ' +
-        'say about the data and describes symmetry/skewness, peaks, gaps or clusters as appropriate. The ' +
-        'correlated mean/MAD and median/IQR profiles keep center and spread observable. This competency ' +
-        'concerns their joint interpretation; it does not require a new generic DistributionCenter or ' +
-        'StatisticalMeasureSelection Area.'
-    ),
     ...toImplementationTodos(
         '6.SP.A.3-interpret-center-summary',
         interpretCenterSummaryBuilder,
@@ -1278,15 +1256,6 @@ export const implementationTodos: ImplementationTodo[] = [
         'context and units. IQR uses stated consistent quartile conventions; MAD uses deviations from the ' +
         'arithmetic mean and retains multiplicity. Do not replace MAD by the mean signed deviation or ' +
         'deviations from the median. Do not require a 1.5-IQR outlier rule.'
-    ),
-    ...toImplementationTodos(
-        '6.SP.B.5c-describe-contextual-patterns',
-        describeContextualPatternsBuilder,
-        numericalDistributionInterpretationImplementation,
-        'A contextual data display has an overall pattern and a defensible striking deviation. The learner ' +
-        'describes both with reference to the recorded attribute and units; the solution explains why the ' +
-        'departure is striking in the given context. Use a contextual criterion for unusual observations. ' +
-        'The example in StatisticalOutlier mentioning an IQR fence does not make that rule compulsory.'
     ),
     ...toImplementationTodos(
         '6.SP.B.5d-select-contextual-summaries',
