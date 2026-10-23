@@ -5698,6 +5698,7 @@ export interface ViewTypeMap {
     'data-attribute-description': NumericalDataProblem;
     'contextual-center-summary': NumericalDataProblem;
     'contextual-variation-summary': NumericalDataProblem;
+    'statistical-summary-selection': NumericalDataProblem;
 }
 
 

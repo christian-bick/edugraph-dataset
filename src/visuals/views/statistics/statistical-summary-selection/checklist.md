@@ -1,0 +1,2 @@
+- **Identity:** Choose and justify suitable center and spread summaries for the stated investigation purpose, using the recorded distribution and available comparison evidence.
+- **Modes:** Question Mode supplies the data, purpose and candidate summaries while withholding the choice and reasons. Solution Mode gives a suitable justified choice in green, accurately relating the four summaries, actual shape and any stated replacement comparison to that purpose.
