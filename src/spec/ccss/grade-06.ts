@@ -1,8 +1,4 @@
-import DatasetPermutationBuilder, {
-    defineImplementationPackage,
-    toImplementationTodos,
-    toTargets
-} from '../../lib/dataset-permutation-builder.ts';
+import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import type {
     BeyondScopeEntry,
@@ -11,39 +7,6 @@ import type {
     OntologyTodo,
     TargetEquivalence
 } from '../../types/ml-engine.ts';
-
-// Grade 6 competencies are expressible in ontology v0.31.0. Keep each complete
-// competency in implementationTodos until its full generator/view contract exists;
-// an earlier-grade slice matching one permutation does not implement the whole task.
-
-// Shared implementation packages
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const statisticalSummarySelectionImplementation = defineImplementationPackage({
-    id: 'statistical-summary-selection',
-    description:
-        'Choose and justify center and variation measures with reference to distribution shape and ' +
-        'investigation context.',
-    generators: [
-        {module: 'numerical-data', strategy: 'new'}
-    ],
-    views: [
-        {module: 'statistical-summary-selection', strategy: 'new'}
-    ]
-});
 
 // Ratios and Proportional Relationships (6.RP)
 
@@ -1141,28 +1104,11 @@ export const spec: CompetencyTarget[] = [
     ...toTargets('6.SP.B.5a-observation-count', observationCountBuilder),
     ...toTargets('6.SP.B.5b-data-attribute-description', dataAttributeDescriptionBuilder),
     ...toTargets('6.SP.B.5c-compute-contextual-center', computeContextualCenterBuilder),
-    ...toTargets('6.SP.B.5c-compute-contextual-variation', computeContextualVariationBuilder)
+    ...toTargets('6.SP.B.5c-compute-contextual-variation', computeContextualVariationBuilder),
+    ...toTargets('6.SP.B.5d-select-contextual-summaries', selectContextualSummariesBuilder)
 ];
 
-export const implementationTodos: ImplementationTodo[] = [
-    // Expressions and Equations (6.EE)
-
-    // Geometry (6.G)
-
-    // Statistics and Probability (6.SP)
-    ...toImplementationTodos(
-        '6.SP.B.5d-select-contextual-summaries',
-        selectContextualSummariesBuilder,
-        statisticalSummarySelectionImplementation,
-        'A contextual distribution and candidate summaries permit the learner to choose and justify ' +
-        'appropriate center/spread measures using shape, sensitivity to unusual values, and the question ' +
-        'being answered. The artifact makes the compared measures available and elicits their suitability. ' +
-        'ProcedureApplicability expresses the suitability judgment. The joint statistical concepts change ' +
-        'meaning through the visible comparison, without inventing StatisticalMeasureSelection. Avoid ' +
-        'treating median/IQR as universally correct for every context or mean/MAD as forbidden when ' +
-        'skewed.'
-    )
-];
+export const implementationTodos: ImplementationTodo[] = [];
 
 export const ontologyTodos: OntologyTodo[] = [];
 

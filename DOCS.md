@@ -117,6 +117,10 @@ the same complete numerical-data family. Questions retain the study and observat
 while leaving the requested result and work unknown. Solutions project the supplied
 mean/median, every-record MAD or half-median IQR calculation and its contextual meaning.
 They reuse the existing study, plot and single-summary presentation helpers.
+The summary-selection view presents the study purpose and neutral center/spread
+candidates, with a documented replacement and supplied counterfactual summaries
+when present. Its solution explains one suitable choice and alternatives, retaining
+the original units and any supplied finite sensitivity comparisons.
 
 Count-out tasks use `counting-selection` and `CountingSelectionProblem`, which contain both
 the requested count and the available collection size. The generator chooses that size within
