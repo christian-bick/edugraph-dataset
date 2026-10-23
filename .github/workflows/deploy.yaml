@@ -114,7 +114,11 @@ jobs:
           token_format: access_token
 
       - name: Install Firebase CLI
-        run: npm install --global firebase-tools
+        # Avoid the Hosting Service Usage permission regression in 15.34.1.
+        # https://github.com/firebase/firebase-tools/issues/11335
+        run: |
+          npm install --global firebase-tools@15.34.0
+          firebase --version
 
       - name: Deploy to Firebase Hosting
         run: firebase deploy --only hosting:edugraph-coverage --project edugraph-438718 --non-interactive
