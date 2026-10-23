@@ -5696,6 +5696,8 @@ export interface ViewTypeMap {
     'numerical-distribution-plot': NumericalDataProblem;
     'data-observation-count': NumericalDataProblem;
     'data-attribute-description': NumericalDataProblem;
+    'contextual-center-summary': NumericalDataProblem;
+    'contextual-variation-summary': NumericalDataProblem;
 }
 
 

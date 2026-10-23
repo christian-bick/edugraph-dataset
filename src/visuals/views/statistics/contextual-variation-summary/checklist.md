@@ -1,0 +1,2 @@
+- **Identity:** Calculate the requested MAD or IQR and interpret the resulting spread in the recorded characteristic's context and units.
+- **Modes:** Question Mode gives the original observations and any necessary quartile convention without the result, completed work or interpretation. Solution Mode shows every mean-centred absolute distance and its average, or the ordered-half medians and their difference, and explains that actual spread in context.
