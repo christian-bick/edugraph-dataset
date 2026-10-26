@@ -4,6 +4,10 @@ Completed consolidation and migration documents are preserved unchanged in
 [`docs/history/`](../history/). Their deferred sections remain available through the links below.
 These items are not newly scheduled by the archive move.
 
+- **Local label dependencies:** the [dependency graph plan](label-dependency-graph.md)
+  defines a repo-local graph, the agreed Area allowlist, initial facet assessments, and a
+  report-first validation rollout. Range-policy redesign is excluded.
+
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO
   permutations in 28 packages. No ontology gaps remain; generator/view implementation is next.
