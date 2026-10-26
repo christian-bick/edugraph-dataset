@@ -21,7 +21,8 @@ export function completePlannedDrawLabels(draw: PlannedGenerationDraw, plan: Gen
     mode: 'question' | 'solution'): PlannedGenerationDraw {
     if (!draw.stub) return draw;
     const completed = completeRealizedLabels({generatorId: plan.identity.generatorId, viewId: plan.identity.viewId,
-        mode, data: draw.stub.data, plannedLabels: draw.realizedLabels?.plannedLabels ?? draw.labels});
+        mode, data: draw.stub.data, plannedLabels: draw.realizedLabels?.plannedLabels ?? draw.labels,
+        targetLabels: plan.targetLabels});
     return {...draw, labels: completed.labels, ...(completed.receipt ? {realizedLabels: completed.receipt} : {})};
 }
 

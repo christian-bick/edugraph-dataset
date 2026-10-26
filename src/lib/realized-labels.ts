@@ -1,6 +1,7 @@
 import {Scope} from 'edugraph-ts/generated';
 import type {RealizedLabelReceipt} from '../types/generation-plan.ts';
 import {digestIdentity} from './content-identity.ts';
+import {capabilitySatisfies} from './ontology.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
 import {assessLabelDependencyEvidence, hasLabelDependencyEvidenceAdapter,
     LABEL_DEPENDENCY_EVIDENCE_VERSION} from './label-dependency-evidence.ts';
@@ -32,28 +33,51 @@ const policyHash = digestIdentity({version: 2, dependencyPolicy: evaluator.polic
     evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, facets: ['operandDigits', 'zero'],
     zeroCompletion: {generator: 'arithmetic-ops-pairs', label: Scope.NumbersWithoutZero, mode: 'add-only'}});
 
+const parityPolicyHash = digestIdentity({version: 1, dependencyPolicy: evaluator.policyHash,
+    evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, projection: 'counting-objects-parity',
+    correction: {from: Scope.NumbersWithoutZero, to: Scope.NumbersWithZero, preserveExplicitTargets: true}});
+
+const parityPair = (generatorId: string, viewId: string) =>
+    generatorId === 'counting-basic' && viewId === 'counting-objects-parity';
+
 export function realizedLabelPolicyForPair(generatorId: string, viewId: string): string | null {
+    if (parityPair(generatorId, viewId)) return parityPolicyHash;
     return arithmeticGenerators.has(generatorId) && hasLabelDependencyEvidenceAdapter(generatorId, viewId)
         ? policyHash : null;
 }
 
-/** Adds supported operand facts and reviewed zero absence; planned claims, data, config and entropy survive intact. */
+/** Completes reviewed facts; parity alone may correct an inherited, non-target zero-absence claim. */
 export function completeRealizedLabels(input: {
     generatorId: string;
     viewId: string;
     mode: 'question' | 'solution';
     data: unknown;
     plannedLabels: readonly string[];
+    targetLabels?: readonly string[];
 }): {labels: string[]; receipt?: RealizedLabelReceipt} {
     const plannedLabels = ordered(input.plannedLabels);
     const policy = realizedLabelPolicyForPair(input.generatorId, input.viewId);
     if (!policy || evaluator.evaluate(plannedLabels).context.status !== 'eligible') return {labels: plannedLabels};
     const evidence = assessLabelDependencyEvidence(input);
     const evaluation = evaluator.evaluate(plannedLabels, evidence);
+    const zero = evaluation.assessments.find(item => item.facet === 'zero');
+    if (parityPair(input.generatorId, input.viewId)) {
+        // The positive source count does not describe a projection's empty group or remainder.
+        // Explicit target claims must never be silently rewritten by artifact completion.
+        if (!input.targetLabels || input.targetLabels.some(label => capabilitySatisfies(label, Scope.NumbersWithoutZero))
+            || !plannedLabels.includes(Scope.NumbersWithoutZero)
+            || !zero || !['missing', 'satisfied'].includes(zero.status)
+            || zero.expectedLabels.length !== 1 || zero.expectedLabels[0] !== Scope.NumbersWithZero) {
+            return {labels: plannedLabels};
+        }
+        const addedLabels = plannedLabels.includes(Scope.NumbersWithZero) ? [] : [Scope.NumbersWithZero];
+        return {labels: ordered([...plannedLabels.filter(label => label !== Scope.NumbersWithoutZero), ...addedLabels]),
+            receipt: {version: 1, policyHash: policy, mode: input.mode, plannedLabels, addedLabels,
+                evidence: [{facet: 'zero', labels: zero.expectedLabels, references: zero.references}]}};
+    }
     const assessment = evaluation.assessments.find(item => item.facet === 'operandDigits');
     const supported = assessment && (assessment.status === 'missing' || assessment.status === 'satisfied');
     const addedLabels = supported ? assessment.expectedLabels.filter(label => !plannedLabels.includes(label)) : [];
-    const zero = evaluation.assessments.find(item => item.facet === 'zero');
     const addZeroAbsence = input.generatorId === 'arithmetic-ops-pairs'
         && !plannedLabels.includes(Scope.NumbersWithoutZero) && !plannedLabels.includes(Scope.NumbersWithZero)
         && zero && (zero.status === 'missing' || zero.status === 'satisfied')

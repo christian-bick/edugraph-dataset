@@ -220,3 +220,58 @@ describe('narrowly reviewed zero-absence completion', () => {
         expect(result.receipt?.evidence.map(item => item.facet)).toEqual(['zero']);
     });
 });
+
+describe('parity projection zero correction', () => {
+    const labels = [Area.NumerationWithIntegers, Scope.IntegerNumbers, Scope.ArabicNumerals,
+        Scope.NumbersWithoutZero, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20,
+        Ability.ConceptClassification];
+    const targetLabels = [Area.NumerationWithIntegers, Ability.ConceptClassification];
+    const parity = (numObjects: number, extra: Partial<CompletionInput> = {}) => completeRealizedLabels({
+        generatorId: 'counting-basic', viewId: 'counting-objects-parity', mode: 'question',
+        data: {numObjects, simpleAnswer: numObjects, parity: numObjects % 2 === 0 ? 'even' : 'odd'},
+        plannedLabels: labels, targetLabels, ...extra
+    });
+
+    it.each(['question', 'solution'] as const)('corrects the inherited absence claim in %s mode', mode => {
+        const inputLabels = Object.freeze([...labels]);
+        const data = Object.freeze({numObjects: 8, simpleAnswer: 8, parity: 'even'});
+        setRandomState(12345);
+        const state = getRandomState();
+        const result = parity(8, {mode, plannedLabels: inputLabels, data});
+        expect(result.labels).toEqual([...labels.filter(label => label !== Scope.NumbersWithoutZero),
+            Scope.NumbersWithZero].sort());
+        expect(result.receipt).toMatchObject({mode, plannedLabels: [...labels].sort(),
+            addedLabels: [Scope.NumbersWithZero], evidence: [{facet: 'zero', labels: [Scope.NumbersWithZero]}]});
+        expect(inputLabels).toEqual(labels);
+        expect(data).toEqual({numObjects: 8, simpleAnswer: 8, parity: 'even'});
+        expect(getRandomState()).toBe(state);
+    });
+
+    it.each(Array.from({length: 20}, (_, index) => index + 1))('follows the complete grouping evidence for %i objects', count => {
+        const result = parity(count);
+        const zeroInProjection = count === 1 || count % 2 === 0;
+        expect(result.labels).toContain(zeroInProjection ? Scope.NumbersWithZero : Scope.NumbersWithoutZero);
+        expect(result.labels).not.toContain(zeroInProjection ? Scope.NumbersWithoutZero : Scope.NumbersWithZero);
+    });
+
+    it('never rewrites an explicit target claim or an unknown target provenance', () => {
+        expect(parity(8, {targetLabels: [...targetLabels, Scope.NumbersWithoutZero]})).toEqual({labels: [...labels].sort()});
+        expect(parity(8, {targetLabels: undefined})).toEqual({labels: [...labels].sort()});
+    });
+
+    it('keeps invalid, outside-policy, and unrelated projections unchanged', () => {
+        const outside = [...labels, Area.EquationSolving];
+        expect(parity(8, {plannedLabels: outside})).toEqual({labels: [...outside].sort()});
+        expect(parity(8, {data: {numObjects: 8, simpleAnswer: 8, parity: 'odd'}})).toEqual({labels: [...labels].sort()});
+        expect(parity(8, {viewId: 'counting-objects-simple'})).toEqual({labels: [...labels].sort()});
+        expect(parity(8, {generatorId: 'counting-selection'})).toEqual({labels: [...labels].sort()});
+    });
+
+    it('preserves a correct presence claim without duplicates and is idempotent', () => {
+        const result = parity(8, {plannedLabels: [...labels, Scope.NumbersWithZero]});
+        expect(result.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(result.receipt?.addedLabels).toEqual([]);
+        expect(result.labels.filter(label => label === Scope.NumbersWithZero)).toHaveLength(1);
+        expect(parity(8, {plannedLabels: result.labels})).toEqual({labels: result.labels});
+    });
+});

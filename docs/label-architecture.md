@@ -185,8 +185,13 @@ Completion is additive: a false planned claim cannot be repaired by appending it
 Zero-absence completion is limited to reviewed arithmetic-pairs projections, with no existing
 zero claim and evidence for `NumbersWithoutZero`. It does not add `NumbersWithZero`.
 The generator's nonzero payload alone cannot describe a number-line view's zero origin.
-The even-parity projection's zero-leftover conflict remains a separate reviewed issue; the
-current completion policy does not add a contradictory zero label or alter its targets.
+The separately approved parity correction replaces an inherited `NumbersWithoutZero` with
+`NumbersWithZero` only for the reviewed `counting-basic` / `counting-objects-parity` pair
+when established projection evidence includes an empty group or remainder. It never rewrites
+an explicit target claim, requires known target provenance, and preserves the original
+planned label set in the evidence receipt. The final annotation and original receipt make
+the replacement inspectable. Other counting views and the additive arithmetic policy are
+unchanged; targets, configuration, sampled data, random state, and rendering are unaffected.
 
 ## Four different identities
 

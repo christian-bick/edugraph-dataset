@@ -469,3 +469,25 @@ The cache checkpoint replaces only the 184 repaired samples' records, preserving
 pre-existing ontology-adoption changes outside these feature commits. The dependency audit
 remains report-only; passing VQA and dataset audits do not dismiss the two reviewed parity
 conflicts or claim complete evidence coverage.
+
+## Parity zero correction follow-up
+
+After review, replacement of the inherited zero-absence claim was explicitly approved for
+the parity projection. The artifact annotation step now replaces `NumbersWithoutZero` with
+`NumbersWithZero` only for `counting-basic` / `counting-objects-parity` when the existing
+reviewed evidence establishes a zero-valued group or remainder. It preserves all other
+labels, requires known target labels, and never rewrites an explicit zero-absence target
+claim. The original planned labels and supporting zero evidence remain in the versioned
+receipt. Matching declarations, targets, the Area allowlist, range policy, payloads,
+configuration, and rendering remain unchanged.
+
+Focused tests pass: 79 tests across the helper, planned generation, and parity spec; the
+helper's 66 tests achieve 100% statement, branch, function, and line coverage. Type checking
+passes. Deterministic replay of all four stored parity artifacts changes exactly the two
+even artifacts (12 objects in the question and 16 in the solution). Both odd artifacts
+retain their existing labels. All four zero assessments are satisfied, with unchanged
+content/task fingerprints and replay origins. Reports are in `temp/parity-zero-fix/`.
+
+This follow-up changes source and tests only. The immutable generated snapshot and VQA
+caches have not been regenerated; the historical audit results above remain the results
+for that stored snapshot until canonical regeneration and validation run.
