@@ -7,7 +7,7 @@ This document describes the shared architecture, pipeline orchestration, and dev
 ## 1. Architecture Overview
 
 ### Label-Driven Generation
-The core philosophy of this system is **Label-Driven Generation**. Pedagogical labels derived from the EduGraph ontology strictly dictate the mathematical properties and cognitive task represented by each artifact. The system does not generate a problem and *then* label it; it receives label constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier.
+The core philosophy of this system is **Label-Driven Generation**. Configured pedagogical labels derived from the EduGraph ontology constrain the mathematical properties and cognitive task represented by each artifact. The system receives these constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier. Shared orchestration may then append independently evidenced descriptive labels within reviewed coverage, without changing target matching, selected configuration, or sampling.
 
 ### The Three Pillars
 The architecture is divided into three distinct layers:

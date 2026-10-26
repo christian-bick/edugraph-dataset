@@ -1,7 +1,8 @@
 # Local label dependency graph
 
-Status: graph, evaluator, initial evidence adapters, and report-only audit implemented.
-Further evidence coverage and strict integration remain planned. Consolidated on 2026-10-26.
+Status: graph, evaluator, initial evidence adapters, report-only audit, and reviewed additive
+repairs implemented. Further evidence coverage and strict integration remain planned.
+Consolidated on 2026-10-26.
 
 Add a small graph of labeling obligations to `edugraph-content` so related facets are
 assessed consistently across generators and views. An edge means that an applicable facet
@@ -39,9 +40,10 @@ existing semantics. This initiative does not choose strongest bounds, compute re
 ranges, change thresholds or endpoint semantics, rewrite range annotations, or introduce
 new range evidence extractors. Existing correctness checks continue unchanged.
 
-Automatic relabeling, an exhaustive ontology-wide annotation engine, and a redesign of the
-VQA response contract are also outside the initial implementation. Instance-dependent
-findings can be reported without feeding new labels back into generation configuration.
+An exhaustive ontology-wide annotation engine, automatic correction or removal of existing
+claims, and a redesign of the VQA response contract remain outside this implementation.
+The reviewed additive repair below permits narrow post-draw operand-digit and zero-absence completion;
+its labels never feed back into matching or generation configuration.
 
 ## Agreed Area allowlist
 
@@ -273,6 +275,67 @@ Dependency audits run independently of VQA. Keep the existing public
 labels or evidence-bearing presentation use the established regeneration and VQA workflow;
 do not assume the existing supplied-label VQA response can discover omitted labels.
 
+## Implemented additive repairs
+
+Checkpoints `1cea4ec4`, `a28130a0`, and `d507fd41` implement the reviewed omissions without editing or
+removing targets, changing the Area allowlist, or introducing range-policy work. The
+report-only audit remains independent; these repairs do not enable strict dependency gates.
+
+The declaration repairs add `Ability.TextualArticulation` to `counting-objects-simple`
+because its question requests a written explanation and its solution supplies one, and
+`Scope.ArabicNumerals` to `counting-objects-parity` for its reviewed numeral projection.
+The four supported zero omissions in equal-addends samples use the reviewed post-draw
+completion below. The arithmetic-pairs `requireZero` resolver retains its existing absence
+branch: a generator-level fallback would also label number-line projections that visibly
+include a zero origin. A nonzero mathematical payload alone does not prove absence of zero
+from every view. The selected configuration and generated values remain unchanged.
+
+The operand-digit repair uses the pure helper
+[`src/lib/realized-labels.ts`](../../src/lib/realized-labels.ts), called after the ordinary
+planned draw has produced mathematical data. Its supported boundary is
+`arithmetic-ops-pairs`, `arithmetic-ops-triples`, and `arithmetic-ops-four` with the reviewed
+`operations-boxes`, `operations-boxes-inversion`, `operations-vertical`, and
+`operations-vertical-inversion` projections. It applies the unchanged complete Area gate
+before using the existing typed evidence adapter and shared evaluator. It adds only
+supported smallest/largest operand and applicable dividend/divisor digit descriptors.
+Results cannot substitute for operands. For arithmetic pairs only, it also adds
+`NumbersWithoutZero` when neither zero claim was planned and the reviewed zero assessment
+establishes exactly that absence. It never adds `NumbersWithZero` or an opposing zero claim.
+No other facet is completed by this helper; unsupported projections remain outside it.
+
+The completion preserves every planned claim, the selected plan and schema bindings,
+generator and view configuration, data, seeds, attempts, and random state. It does not
+create target permutations or broaden matching and deduplication admission. Signed operand
+profiles, property-law witnesses, malformed equations, and underdetermined question
+projections stay unresolved without speculative additions. A reused question draw is
+assessed again for the actual solution mode without drawing new data or changing its
+recorded origin; direct reproduction and audit replay also pass the actual artifact mode.
+
+Operational metadata records a versioned `realized_labels` receipt containing the policy
+hash, actual mode, original `plannedLabels`, `addedLabels`, and operand/zero evidence labels and
+references. Completion can therefore be repeated from the planned claims instead of
+treating earlier additions as configuration. Audit replay checks a stored receipt against the
+current evidence policy. Published metadata retains the existing three-field shape and
+uses the final labels; VQA evaluates those final supplied claims through its existing
+contract.
+
+Supported generation-pair identities explicitly depend on the completion and integration
+sources, the effective graph/evidence policy, candidate ontology descriptors even before
+they appear in output, and all Area records and ancestry used by the context gate. Final
+labels and the receipt participate in supported pairs' content and image identities, so
+unchanged pixels cannot hide changed annotations. VQA keys include the final labels;
+receipt-only provenance changes do not require a different visual judgment. Unrelated
+pairs retain their existing identity inputs. First adoption requires rebuilding the
+dependency graph before incremental reuse.
+
+The zero review confirms two even-parity projection conflicts. The task describes the
+empty leftover group as "None", so the grouping quantities and zero remainder are valid
+evidence under the current ontology semantics, while the inherited labels claim
+`NumbersWithoutZero`. Adding `NumbersWithZero` alongside that claim would leave a
+contradiction. A later projection-specific correction must replace the false absence claim;
+weakening the evidence would hide the defect. This additive repair leaves both findings
+explicit, appends no contradictory zero label, and removes neither claims nor targets.
+
 ## Rollout and validation steps
 
 The first increment provides `audit:label-dependencies`, the six-rule graph, the pure
@@ -294,9 +357,12 @@ enabled yet. Operational usage is documented in [DOCS.md](../../DOCS.md).
 3. **Review and repair findings.** Expand adapters to the initial dependency table, verify
    candidate omissions against current definitions and rendered tasks, and repair the
    owning declarations/resolvers where they can truthfully supply the missing claims.
-   Preserve partial targets and generation configuration. Instance-dependent findings that
-   require a separate annotation design stay explicit; do not force new target permutations
-   or automatically append sampled facts. Range findings report missing presence only.
+   Preserve partial targets, existing planned claims, generation configuration, seeds, and
+   sampling. The reviewed post-draw operand-digit and zero-absence completion above may add supported
+   observable facts within its declared producer/view boundary, with an actual-mode
+   evidence receipt and explicit source/candidate identity. Other instance-dependent
+   findings stay explicit until their annotation design is reviewed; do not force new
+   target permutations. Range findings report missing presence only.
 4. **Enable strict validation for reviewed coverage.** Add `--strict` to the audit, fail
    missing dependencies and unresolved applicable assessments within the declared supported
    coverage, and retain explicit outside-policy/uncovered totals. Wire the shared evaluator
@@ -368,3 +434,38 @@ retain explicit unresolved evidence. Across selection and sample assessments it 
 unresolved triggers. These are facet-assessment counts for review, not confirmed sample
 defect counts or a claim of complete annotation coverage. Reports remain under
 `temp/label-dependencies/ccss/`; no gold labels or generated artifacts were changed.
+
+## Additive repair verification
+
+The following checks passed for the additive repair checkpoints. The first-increment
+results above remain the historical audit baseline, not results for regenerated repairs.
+
+| Check | Result |
+|---|---|
+| Complete test and generator-coverage gate | 835 files / 6,114 tests pass; all generator minimum thresholds pass. |
+| Realized-label helper tests and coverage | 41 tests pass; 100% coverage. |
+| `npm run check -- --spec=ccss` | All six repository gates pass. |
+| Integration suite | 9 files / 26 tests pass. |
+| `npm run check:docs` | Pass; five external-document fetch warnings in the restricted network environment. |
+| Canonical snapshot comparison | All 1,013 targets, 1,180 matching tuples, and 2,808 sample keys preserved. Seeds, attempts, replay origins, content/task fingerprints, target associations, and every PNG hash unchanged. Exactly 184 samples gained labels; none were added or removed and no existing label was removed. |
+| Image and split audits | 2,808 images; zero duplicate groups, errors, or warnings. No train/validation leakage or configured-task redundancy. |
+| Canonical VQA | 2,808/2,808 passing samples: 176 evaluated in the final run and 2,632 matching passes reused. |
+| Strict dataset audit | Exact 2,808/2,808 passing cache coverage; zero structure, renderer, duplicate, failing, malformed, missing, stale, or obsolete-module issues. Freshness matches the final snapshot. |
+| Repeated post-repair dependency audit | JSON and Markdown byte-identical across two runs. Operand-digit omissions 166→0; articulation 14→0; numeral system 4→0; zero 6→2. No provenance issues, evaluator contract errors, invalid contexts, or incomplete tuples. |
+
+The final repair adds 374 labels across 184 samples: 352 operand-digit descriptors, 14
+`TextualArticulation`, four `ArabicNumerals`, and four `NumbersWithoutZero`. The two
+even-parity conflicts deliberately remain flagged. Range-presence findings remain exactly
+346 admitted selections and 808 samples; no range annotation or policy changed. The Area
+gate and evidence-coverage boundary are unchanged, including 222 verified sample replays
+and 2,586 unsupported adapters with explicit unresolved evidence.
+
+The snapshot comparison uses the captured pre-repair working-tree dataset, rather than
+attributing pre-existing ontology-adoption changes to this repair. Baseline generation:
+`c785a210b0c3563a2c3be699b1419d2595dfb083aa260c6a38fda635f56bb564`; repaired generation:
+`c4a377012fd532a789ca4b4c08cf77c2332cbe66e1afd3207052a840d0a89045`.
+Local verification reports and comparisons are retained under `temp/label-omission-repairs/`.
+The cache checkpoint replaces only the 184 repaired samples' records, preserving unrelated
+pre-existing ontology-adoption changes outside these feature commits. The dependency audit
+remains report-only; passing VQA and dataset audits do not dismiss the two reviewed parity
+conflicts or claim complete evidence coverage.
