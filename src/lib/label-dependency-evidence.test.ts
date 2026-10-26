@@ -17,7 +17,7 @@ const counting = (viewId = 'counting-objects-simple', data: unknown = {numObject
 
 describe('label dependency evidence registry', () => {
     it('registers only explicitly reviewed producer/view combinations', () => {
-        expect(LABEL_DEPENDENCY_EVIDENCE_VERSION).toBe(1);
+        expect(LABEL_DEPENDENCY_EVIDENCE_VERSION).toBe(2);
         for (const producer of ['arithmetic-ops-pairs', 'arithmetic-ops-triples', 'arithmetic-ops-four']) {
             for (const view of ['operations-boxes', 'operations-boxes-inversion', 'operations-vertical', 'operations-vertical-inversion']) {
                 expect(hasLabelDependencyEvidenceAdapter(producer, view)).toBe(true);
@@ -115,17 +115,6 @@ describe('integer arithmetic evidence', () => {
         ]));
     });
 
-    it.each(['question', 'solution'] as const)('does not assert property-witness value domains in %s mode', mode => {
-        const result = arithmetic({num1: 2, num2: 3, num3: 4, answer: 14, operation: 'multiplication',
-            propertyLaw: 'distributive', combinedFactor: 7, partialProducts: [6, 8]},
-        {generatorId: 'arithmetic-ops-triples', mode});
-        expect(result.triggers.numericTask?.status).toBe('present');
-        expect(result.facets.base.expectedLabels).toEqual([Scope.Base10]);
-        for (const facet of ['numberKind', 'sign', 'zero', 'operandCount', 'operandDigits']) {
-            expect(result.facets[facet].status).toBe('unresolved');
-        }
-    });
-
     it('does not use an arbitrary hidden value to resolve an underdetermined inversion', () => {
         const data = {num1: 0, num2: 12, answer: 0, operation: 'multiplication'};
         const question = arithmetic(data, {viewId: 'operations-boxes-inversion'});
@@ -149,6 +138,121 @@ describe('integer arithmetic evidence', () => {
         const result = arithmetic(data);
         expect(result.triggers.numericTask?.status).toBe('unresolved');
         expect(result.facets.numberKind.status).toBe('unresolved');
+    });
+});
+
+describe('property-law expression evidence', () => {
+    const laws = [
+        {num1: 2, num2: 3, num3: 4, answer: 9, operation: 'addition', propertyLaw: 'commutative'},
+        {num1: 2, num2: 3, num3: 4, answer: 24, operation: 'multiplication', propertyLaw: 'commutative'},
+        {num1: 2, num2: 3, num3: 4, answer: 9, operation: 'addition', propertyLaw: 'associative'},
+        {num1: 2, num2: 3, num3: 4, answer: 24, operation: 'multiplication', propertyLaw: 'associative'},
+        {num1: 2, num2: 3, num3: 4, answer: 14, operation: 'multiplication', propertyLaw: 'distributive',
+            combinedFactor: 7, partialProducts: [6, 8]}
+    ];
+    const witness = (data: unknown, extra: Partial<LabelDependencyEvidenceInput> = {}) =>
+        arithmetic(data, {generatorId: 'arithmetic-ops-triples', ...extra});
+
+    it.each(laws.flatMap(data => ['question', 'solution'].flatMap(mode =>
+        ['operations-boxes', 'operations-vertical', 'operations-boxes-inversion', 'operations-vertical-inversion']
+            .map(viewId => ({data, mode: mode as 'question' | 'solution', viewId})))))(
+        'assesses $data.propertyLaw $data.operation in $viewId / $mode', ({data, mode, viewId}) => {
+            const result = witness(data, {mode, viewId});
+            expect(result.facets.numberKind.expectedLabels).toEqual([Scope.IntegerNumbers]);
+            expect(result.facets.sign.expectedLabels).toEqual([Scope.NumbersWithoutNegatives]);
+            expect(result.facets.zero.expectedLabels).toEqual([Scope.NumbersWithoutZero]);
+            expect(result.facets.operandCount.expectedLabels).toEqual(data.propertyLaw === 'distributive'
+                ? [Scope.TwoOperands, Scope.ThreeOperands, Scope.FourOperands] : [Scope.ThreeOperands]);
+            expect(result.facets.operandDigits.expectedLabels).toEqual([
+                Scope.SingleDigitLargestOperand, Scope.SingleDigitSmallestOperand]);
+            expect(result.triggers.fractionValues?.status).toBe('absent');
+            expect(result.triggers.decimalRepresentation?.status).toBe('absent');
+            expect(result.triggers.writtenExplanation?.status).toBe('absent');
+            expect(result.facets).not.toHaveProperty('range');
+        });
+
+    it('uses the distributive sum and partial products instead of a left-associated triple product', () => {
+        const result = witness({num1: 4, num2: 8, num3: 9, answer: 68, operation: 'multiplication',
+            propertyLaw: 'distributive', combinedFactor: 17, partialProducts: [32, 36]});
+        expect(result.facets.operandDigits.expectedLabels).toEqual([
+            Scope.SingleDigitLargestOperand, Scope.SingleDigitSmallestOperand,
+            Scope.TwoDigitLargestOperand, Scope.TwoDigitSmallestOperand]);
+        expect(result.facets.numberKind.references).toEqual([
+            'data.num1', 'data.num2', 'data.num3', 'data.combinedFactor',
+            'data.partialProducts[0]', 'data.partialProducts[1]', 'data.answer']);
+        expect(result.facets.operandDigits.references).toContain('data.partialProducts[0]');
+    });
+
+    it('includes both associative group results without treating them as extra explicit operands', () => {
+        const result = witness({num1: 1, num2: -1, num3: 2, answer: 2,
+            operation: 'addition', propertyLaw: 'associative'});
+        expect(result.facets.zero.expectedLabels).toEqual([Scope.NumbersWithZero]);
+        expect(result.facets.sign.expectedLabels).toEqual([Scope.NumbersWithNegatives]);
+        expect(result.facets.operandDigits.status).toBe('unresolved');
+        expect(result.facets.operandCount.expectedLabels).toEqual([Scope.ThreeOperands]);
+    });
+
+    it('does not invent an unshown commutative grouping or use answer digits as operand digits', () => {
+        const result = witness({num1: 0, num2: Number.MAX_SAFE_INTEGER, num3: Number.MAX_SAFE_INTEGER,
+            answer: 0, operation: 'multiplication', propertyLaw: 'commutative'}, {mode: 'solution'});
+        expect(result.facets.numberKind.expectedLabels).toEqual([Scope.IntegerNumbers]);
+        expect(result.facets.zero.expectedLabels).toEqual([Scope.NumbersWithZero]);
+        expect(result.facets.operandDigits.expectedLabels).toEqual([
+            Scope.MultipleDigitLargestOperand, Scope.SingleDigitSmallestOperand]);
+        const addition = witness({num1: 8, num2: 8, num3: 8, answer: 24,
+            operation: 'addition', propertyLaw: 'associative'});
+        expect(addition.facets.operandDigits.expectedLabels).not.toContain(Scope.TwoDigitLargestOperand);
+    });
+
+    it.each([
+        {num1: 0, num2: 12, num3: 3, answer: 0, operation: 'multiplication', propertyLaw: 'commutative'},
+        {num1: 3, num2: 12, num3: 0, answer: 0, operation: 'multiplication', propertyLaw: 'associative'},
+        {num1: 0, num2: 12, num3: 3, answer: 0, operation: 'multiplication', propertyLaw: 'distributive',
+            combinedFactor: 15, partialProducts: [0, 0]}
+    ])('preserves mode-specific observability for an underdetermined $propertyLaw inversion', data => {
+        const question = witness(data, {viewId: 'operations-boxes-inversion'});
+        for (const facet of ['numberKind', 'sign', 'zero', 'operandDigits']) {
+            expect(question.facets[facet].status).toBe('unresolved');
+        }
+        expect(question.facets.operandCount.status).toBe('applicable');
+        const solution = witness(data, {viewId: 'operations-boxes-inversion', mode: 'solution'});
+        expect(solution.facets.operandDigits.status).toBe('applicable');
+        expect(solution.facets.zero.expectedLabels).toEqual([Scope.NumbersWithZero]);
+    });
+
+    it('can determine a blank distributive addend even when the other addend is zero', () => {
+        const result = witness({num1: 2, num2: 7, num3: 0, answer: 14, operation: 'multiplication',
+            propertyLaw: 'distributive', combinedFactor: 7, partialProducts: [14, 0]},
+        {viewId: 'operations-vertical-inversion'});
+        expect(result.facets.zero.expectedLabels).toEqual([Scope.NumbersWithZero]);
+        expect(result.facets.operandDigits.status).toBe('applicable');
+    });
+
+    it.each([
+        {...laws[0], propertyLaw: 'unrecognized'}, {...laws[0], propertyLaw: {toString: (): string => 'commutative'}},
+        {...laws[0], operation: 'subtraction'}, {...laws[0], operation: 'division'},
+        {...laws[0], answer: 10}, {...laws[0], combinedFactor: 7}, {...laws[0], partialProducts: [6, 8]},
+        {...laws[4], operation: 'addition'}, {...laws[4], combinedFactor: undefined},
+        {...laws[4], combinedFactor: 8}, {...laws[4], partialProducts: undefined},
+        {...laws[4], partialProducts: '6,8'}, {...laws[4], partialProducts: [6]},
+        {...laws[4], partialProducts: [7, 7]}, {...laws[4], answer: 24},
+        {...laws[4], num2: Number.MAX_SAFE_INTEGER, num3: Number.MAX_SAFE_INTEGER},
+        {...laws[4], num1: Number.MAX_SAFE_INTEGER, num2: 2, num3: 3,
+            combinedFactor: 5, partialProducts: [Number.MAX_SAFE_INTEGER * 2, Number.MAX_SAFE_INTEGER * 3],
+            answer: Number.MAX_SAFE_INTEGER * 5},
+        {num1: 0, num2: Number.MAX_SAFE_INTEGER, num3: Number.MAX_SAFE_INTEGER,
+            answer: 0, operation: 'multiplication', propertyLaw: 'associative'}
+    ])('leaves malformed, unsupported or unsafe witnesses unresolved: %j', data => {
+        const result = witness(data);
+        expect(result.triggers.numericTask?.status).toBe('unresolved');
+        expect(result.facets.operandCount.status).toBe('unresolved');
+    });
+
+    it('does not mutate a property witness or its partial-product array', () => {
+        const products = Object.freeze([6, 8]);
+        const data = Object.freeze({...laws[4], partialProducts: products});
+        expect(witness(data)).toEqual(witness(data));
+        expect(products).toEqual([6, 8]);
     });
 });
 

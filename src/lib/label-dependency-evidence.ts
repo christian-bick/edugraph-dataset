@@ -1,5 +1,5 @@
 import {Ability, Scope} from 'edugraph-ts/generated';
-import type {ArithmeticProblem, CountingProblem, CountingSelectionProblem} from '../types/problems.ts';
+import type {ArithmeticProblem, ArithmeticTripleProblem, CountingProblem, CountingSelectionProblem} from '../types/problems.ts';
 import {
     dependencyEvidenceIds,
     type DependencyFacetEvidence,
@@ -7,7 +7,7 @@ import {
     type LabelDependencyEvidence
 } from '../types/label-dependencies.ts';
 
-export const LABEL_DEPENDENCY_EVIDENCE_VERSION = 1;
+export const LABEL_DEPENDENCY_EVIDENCE_VERSION = 2;
 
 export interface LabelDependencyEvidenceInput {
     generatorId: string;
@@ -74,7 +74,8 @@ function arithmeticPayload(value: unknown, arity: number): value is ArithmeticPr
         if (index <= arity ? !integer(value[`num${index}`]) : value[`num${index}`] !== undefined) return false;
     }
     if (value.propertyLaw !== undefined) {
-        return arity === 3 && ['commutative', 'associative', 'distributive'].includes(String(value.propertyLaw));
+        return arity === 3 && typeof value.propertyLaw === 'string'
+            && ['commutative', 'associative', 'distributive'].includes(value.propertyLaw);
     }
     return value.combinedFactor === undefined && value.partialProducts === undefined;
 }
@@ -100,6 +101,42 @@ function arithmeticValues(data: ArithmeticProblem, operands: readonly number[]):
         values.push(current);
     }
     return current === data.answer ? values : undefined;
+}
+
+interface PropertyWitnessDomain {
+    values: number[];
+    references: string[];
+    operandExpressions: {operands: readonly number[]; references: readonly string[]}[];
+    operandCounts: string[];
+}
+
+/** Review both displayed expressions, including their necessary grouped values and explicit partial-product sum. */
+function propertyWitnessDomain(data: ArithmeticTripleProblem, references: readonly string[]): PropertyWitnessDomain | undefined {
+    if (data.operation !== 'addition' && data.operation !== 'multiplication') return undefined;
+    const operands = [data.num1, data.num2, data.num3];
+    if (data.propertyLaw === 'distributive') {
+        const combined = data.num2 + data.num3;
+        const products = [data.num1 * data.num2, data.num1 * data.num3];
+        const values = [...operands, combined, ...products, data.answer];
+        if (data.operation !== 'multiplication' || !values.every(Number.isSafeInteger)
+            || data.combinedFactor !== combined || !Array.isArray(data.partialProducts)
+            || data.partialProducts.length !== 2 || !data.partialProducts.every((value, index) => value === products[index])
+            || data.answer !== data.num1 * combined || data.answer !== products[0] + products[1]) return undefined;
+        const productReferences = ['data.partialProducts[0]', 'data.partialProducts[1]'];
+        return {values, references: [...references, 'data.combinedFactor', ...productReferences, 'data.answer'],
+            operandExpressions: [{operands, references}, {operands: products, references: productReferences}],
+            // a × (b + c), a × b + a × c, and p + q are three separate displayed expressions.
+            operandCounts: [Scope.TwoOperands, Scope.ThreeOperands, Scope.FourOperands]};
+    }
+    if (data.combinedFactor !== undefined || data.partialProducts !== undefined) return undefined;
+    const combine = (left: number, right: number) => data.operation === 'addition' ? left + right : left * right;
+    const firstGroup = combine(data.num1, data.num2);
+    const secondGroup = combine(data.num2, data.num3);
+    const values = [...operands, firstGroup, ...(data.propertyLaw === 'associative' ? [secondGroup] : []), data.answer];
+    if (!values.every(Number.isSafeInteger) || data.answer !== combine(firstGroup, data.num3)
+        || data.propertyLaw === 'associative' && data.answer !== combine(data.num1, secondGroup)) return undefined;
+    return {values, references: [...references, 'data.answer', 'property-law grouped results'],
+        operandExpressions: [{operands, references}], operandCounts: [Scope.ThreeOperands]};
 }
 
 function numericFacets(values: readonly number[], references: readonly string[]): Record<string, DependencyFacetEvidence> {
@@ -145,6 +182,16 @@ function operandDigits(data: ArithmeticProblem, operands: readonly number[], ref
     return applicable([...new Set(labels)].sort(), 'Digit profiles describe the source operands in their mathematical roles.', references);
 }
 
+function propertyOperandDigits(data: ArithmeticProblem, domain: PropertyWitnessDomain): DependencyFacetEvidence {
+    const profiles = domain.operandExpressions.map(expression => operandDigits(data, expression.operands, expression.references));
+    const references = [...new Set(domain.operandExpressions.flatMap(expression => expression.references))];
+    if (profiles.some(profile => profile.status === 'unresolved')) {
+        return unresolved('Signed smallest/largest operand digit profiles are not covered by this adapter.', references);
+    }
+    return applicable([...new Set(profiles.flatMap(profile => profile.expectedLabels ?? []))].sort(),
+        'Each displayed property-law expression contributes its explicit operand digit profile; results count only when reused as operands.', references);
+}
+
 function arithmeticEvidence(input: LabelDependencyEvidenceInput, adapter: string): LabelDependencyEvidence {
     const arity = arithmeticArities.get(input.generatorId)!;
     const data = input.data;
@@ -158,27 +205,27 @@ function arithmeticEvidence(input: LabelDependencyEvidenceInput, adapter: string
         numericTask: trigger('present', 'The typed task is a numerical arithmetic equation.', [...references, 'data.answer']),
         arithmeticOperands: trigger('present', 'The reviewed equation contains explicit operand occurrences.', references)};
     const facets = {...result.facets, ...numeralFacets(reference)};
-    if (data.propertyLaw !== undefined) {
-        const reason = 'Property-law witness expressions require a separate reviewed operand and value domain.';
-        for (const facet of ['numberKind', 'sign', 'zero', 'operandCount', 'operandDigits']) facets[facet] = unresolved(reason, [reference]);
-        return {...result, triggers, facets};
-    }
-    const values = arithmeticValues(data, operands);
+    const witness = data.propertyLaw !== undefined ? propertyWitnessDomain(data, references) : undefined;
+    if (data.propertyLaw !== undefined && !witness) return unavailable(adapter, 'Property-law witnesses do not satisfy the reviewed integer expression contract.');
+    const values = witness?.values ?? arithmeticValues(data, operands);
     if (!values) return unavailable(adapter, 'Arithmetic results or intermediates do not satisfy the reviewed integer equation contract.');
     triggers.fractionValues = trigger('absent', 'This equation uses integer digit numerals, not fractions.', [reference]);
     triggers.decimalRepresentation = trigger('absent', 'The view renders integers without decimal fractional places.', [reference]);
     triggers.writtenExplanation = trigger('absent', 'The reviewed equation requests a missing value, not a written explanation.', [reference]);
-    facets.operandCount = applicable([operandCounts[arity - 2]], 'Count source operand occurrences, including repeated values.', references);
+    facets.operandCount = applicable(witness?.operandCounts ?? [operandCounts[arity - 2]],
+        witness ? 'Count explicit operand occurrences separately in each displayed primary and witness expression.'
+            : 'Count source operand occurrences, including repeated values.', references);
     const underdetermined = input.mode === 'question' && input.viewId.endsWith('-inversion')
-        && ((data.operation === 'multiplication' && operands.filter((_, index) => index !== 1).includes(0))
+        && ((data.operation === 'multiplication' && (data.propertyLaw === 'distributive'
+            ? data.num1 === 0 : operands.filter((_, index) => index !== 1).includes(0)))
             || data.operation === 'division' && data.num1 === 0);
     if (underdetermined) {
         for (const facet of ['numberKind', 'sign', 'zero', 'operandDigits']) {
             facets[facet] = unresolved('The blank operand is underdetermined; its hidden sampled value is not observable evidence.', [reference]);
         }
     } else {
-        Object.assign(facets, numericFacets(values, [...references, 'data.answer', 'prescribed arithmetic intermediates']));
-        facets.operandDigits = operandDigits(data, operands, references);
+        Object.assign(facets, numericFacets(values, witness?.references ?? [...references, 'data.answer', 'prescribed arithmetic intermediates']));
+        facets.operandDigits = witness ? propertyOperandDigits(data, witness) : operandDigits(data, operands, references);
     }
     return {...result, triggers, facets};
 }
