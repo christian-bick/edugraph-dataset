@@ -146,6 +146,7 @@ describe('stored sample evidence provenance', () => {
         expect(run({currentPlan: undefined}).issues[0]).toContain('stale');
         expect(run({generator: undefined}).issues[0]).toContain('unavailable');
         expect(run({viewSchema: undefined}).status).toBe('unresolved');
+        expect(run({row: {...stored, realized_labels: {version: 1, policyHash: 'stale'}}}).issues[0]).toContain('realized-label receipt');
         expect(run({row: {...stored, target_id: 'other'}}).issues[0]).toContain('identity');
         expect(run({generator: {...generator, generate: () => null}}).issues[0]).toContain('no mathematical payload');
         expect(run({generator: {...generator, generate: () => {random(); throw 'failed';}}}).issues[0]).toBe('failed');

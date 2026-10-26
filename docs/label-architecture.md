@@ -29,6 +29,9 @@ bound generator config -> canonical mathematical payload
 prepared view config + PRNG continuation -> one observable task projection
         |
         v
+supported realized facts + planned capabilities -> artifact annotations + evidence receipt
+        |
+        v
 question / solution artifacts -> VQA of the complete conjunction
 ```
 
@@ -63,6 +66,7 @@ applies the ontology's content-evidence rule to this repository.
 | `requireTargetLabels` | An explicit target precondition for view participation | No | No |
 | `rejectTargetLabels` | A stable, complete invalid domain for a view | No | No |
 | Selected-label compatibility predicate | A valid relation among candidate capabilities | No | Restricts admitted configurations before resolution |
+| Realized descriptive label | An independently evidenced fact about the actual draw and projection | Does not supply a matching capability | Adds artifact annotations after configuration is fixed |
 
 All label-bearing constructs are dimension-neutral mechanisms. Target labels, `generalLabels`,
 schema-supported labels, `requireTargetLabels`, and `rejectTargetLabels` use ordinary ontology labels and
@@ -167,6 +171,19 @@ labels; target labels record what the standard requested, not the complete descr
 pair produced. See [IMPL-G3](implementation-generator.md#impl-g3--ontology-labels-are-resolved-outside-the-generator)
 for the generator boundary and [SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
 for resolved schema capabilities, including fallback choices.
+
+The reviewed operand-digit completion policy adds supported descriptive labels after the
+mathematical draw. Its `realized_labels` receipt preserves the planned label set, added
+claims, evidence references, policy hash, and actual question/solution mode. The configuration,
+generation selection, payload, and random continuation remain unchanged. A solution reusing
+a question draw is assessed in solution mode; the original draw origin stays in replay
+metadata. Completion applies only when every involved Area is in the Arithmetic, Intuitive
+Mathematics, or Formal Mathematics subtree. Unsupported or underdetermined evidence does
+not cause speculative additions. Range labels are never computed or changed here.
+
+Completion is additive: a false planned claim cannot be repaired by appending its opposite.
+The even-parity projection's zero-leftover conflict remains a separate reviewed issue; the
+current completion policy does not add a contradictory zero label or alter its targets.
 
 ## Four different identities
 

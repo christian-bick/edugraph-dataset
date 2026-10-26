@@ -16,7 +16,7 @@ import type {WorkCounters} from './work-counters.ts';
 import {radixSortUtf8} from './content-identity.ts';
 import {loadTargets} from './spec-catalog.ts';
 import type {GenerationPlan} from '../types/compatibility.ts';
-import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
+import type {GenerationReplay, PreparedViewConfiguration, RealizedLabelReceipt} from '../types/generation-plan.ts';
 import {generatePlannedDraw, type PlannedGenerationDraw} from './planned-generation.ts';
 import {CompatibilityContractError, validateGenerationPlan} from './compatibility.ts';
 import {
@@ -298,6 +298,7 @@ export interface GenerateSampleByKeyResult {
     preparedView: PreparedViewConfiguration;
     replay: GenerationReplay;
     labels: string[];
+    realizedLabels?: RealizedLabelReceipt;
 }
 
 /**
@@ -349,9 +350,10 @@ export async function generateSampleByKey({
     const originAttempt = replay?.attempt ?? attempt;
     const seed = computeSampleSeed(originKey, originAttempt);
     const draw = generatePlannedDraw({generator: entry.generator, viewSchema: view.schema, plan: tuple.plan,
-        sampleKey: originKey, attempt: originAttempt, seed, replay});
+        sampleKey: originKey, attempt: originAttempt, seed, replay, artifactMode: identity.mode});
     return {identity, target, targetLabels, seed, stub: draw.stub, plan: tuple.plan,
-        preparedView: draw.view, replay: draw.replay, labels: draw.labels};
+        preparedView: draw.view, replay: draw.replay, labels: draw.labels,
+        ...(draw.realizedLabels ? {realizedLabels: draw.realizedLabels} : {})};
 }
 
 export interface TargetSample {

@@ -63,6 +63,9 @@ describe('label dependency audit with real generation contracts', () => {
         expect(result.assessments.find(assessment => assessment.facet === 'base')).toMatchObject({
             status: 'missing', missingLabels: [Scope.Base10]
         });
+        expect(result.assessments.find(assessment => assessment.facet === 'operandDigits')?.status).toBe('satisfied');
+        expect(draw.realizedLabels?.plannedLabels).not.toContain(Scope.SingleDigitSmallestOperand);
+        expect(draw.realizedLabels?.addedLabels.length).toBeGreaterThan(0);
         const report = buildLabelDependencyAudit({spec: 'integration', policyHash: evaluator.policyHash, ontology: {},
             dataset: {status: 'available', generationId: 'fixture'}, selectionCoverage: [], evaluate: evaluator.evaluate,
             subjects: [{kind: 'sample', id: sampleKey, targetId: tuple.target.id, generatorId: tuple.generatorId,

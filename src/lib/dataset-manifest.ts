@@ -69,6 +69,8 @@ import {
     type DevelopmentInputObservation
 } from './development-observation.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
+import {realizedLabelPolicyForPair, REALIZED_LABEL_SOURCE_PATHS, REALIZED_LABEL_ONTOLOGY_LABELS} from './realized-labels.ts';
+import type {RealizedLabelReceipt} from '../types/generation-plan.ts';
 
 export const DATASET_MANIFEST_SCHEMA_VERSION = 9;
 const GENERATION_PIPELINE_VERSION = 'label-variant-generation-v1';
@@ -153,6 +155,7 @@ interface DatasetManifestRow {
     generation_plan_hash?: string;
     generation_replay?: unknown;
     prepared_view?: unknown;
+    realized_labels?: RealizedLabelReceipt;
     labels?: string[];
     target_associations?: Array<{spec: string; target_id: string}>;
     _split: SampleSplit;
@@ -581,6 +584,23 @@ export function buildDatasetManifest(options: {
         if (includeDefinitions) dependencies.push(...labels.map(ontologyDefinitionNode));
         return radixSortUtf8([...new Set(dependencies)]);
     };
+    let realizedLabelSources: {ids: string[]; hash: string} | undefined;
+    let realizedLabelOntology: string[] | undefined;
+    const realizedLabelInputs = (generatorId: string, viewId: string) => {
+        const policy = realizedLabelPolicyForPair(generatorId, viewId);
+        if (!policy) return null;
+        realizedLabelSources ??= sourceDependencies(nodes, sourceIndex,
+            REALIZED_LABEL_SOURCE_PATHS.map(path => resolve(projectRoot, path)));
+        // A candidate can become relevant before it appears in any emitted row.
+        // Every Area's ancestry participates in the universal context gate.
+        realizedLabelOntology ??= ontologyDependencies([
+            ...REALIZED_LABEL_ONTOLOGY_LABELS,
+            ...bundledContext.descriptors().filter(descriptor =>
+                descriptor.dimensions.includes('http://edugraph.io/edu#Area')).map(descriptor => descriptor.iri)
+        ], true);
+        return {policy, sources: realizedLabelSources.hash,
+            dependencies: [...realizedLabelSources.ids, ...realizedLabelOntology]};
+    };
     for (const target of targets) {
         const capabilityId = targetCapabilityNodeId(specName, target.id);
         const targetId = nodeId('target', `${specName}:${target.id}`);
@@ -754,6 +774,7 @@ export function buildDatasetManifest(options: {
         const view = viewById.get(viewId);
         if (!generator || !view) continue;
         const pairTargets = targetsByPair.get(key)!;
+        const realizedLabels = realizedLabelInputs(generatorId, viewId);
         const pairNodeId = nodeId('pair', key);
         const pairMatchNodeIds = radixSortUtf8(pairTargets
             .map(target => matchNodeByTargetAndPair.get(`${target.id}\u0000${key}`))
@@ -764,12 +785,14 @@ export function buildDatasetManifest(options: {
             input_hash: digestIdentity({
                 pipeline: GENERATION_PIPELINE_VERSION,
                 renderer: rendererEnvironment,
-                pair: key
+                pair: key,
+                ...(realizedLabels ? {realized_labels: {policy: realizedLabels.policy, sources: realizedLabels.sources}} : {})
             }),
             dependencies: [
                 generatorNodeIds.get(generatorId)!,
                 viewNodeIds.get(viewId)!,
-                ...pairMatchNodeIds
+                ...pairMatchNodeIds,
+                ...(realizedLabels?.dependencies ?? [])
             ]
         });
         const executionNodes = new Set([pairNodeId]);
@@ -785,7 +808,8 @@ export function buildDatasetManifest(options: {
             task_fingerprint: row.task_fingerprint,
             generation_plan_hash: row.generation_plan_hash,
             generation_replay: row.generation_replay,
-            prepared_view: row.prepared_view
+            prepared_view: row.prepared_view,
+            ...(realizedLabels ? {labels: radixSortUtf8([...(row.labels ?? [])]), realized_labels: row.realized_labels} : {})
         }));
         const targetSignature = radixSortUtf8(pairTargets.map(target => target.id)).map(targetId => {
             const target = targetById.get(targetId)!;
@@ -806,7 +830,8 @@ export function buildDatasetManifest(options: {
                 renderer: rendererEnvironment,
                 generator: generatorHashes.get(generatorId),
                 view: viewHashes.get(viewId),
-                targets: targetSignature
+                targets: targetSignature,
+                ...(realizedLabels ? {realized_labels: {policy: realizedLabels.policy, sources: realizedLabels.sources}} : {})
             })),
             content_hash: hash(JSON.stringify(contentSignature)),
             sample_counts: sampleCounts,
@@ -820,6 +845,7 @@ export function buildDatasetManifest(options: {
     const rowsByShard = new Map<string, DatasetManifestRow[]>();
     for (const row of rows) {
         const key = modulePairKey(row.generator, row.view);
+        const realizedLabels = realizedLabelPolicyForPair(row.generator, row.view);
         const pairNodeId = nodeId('pair', key);
         const executionNodes = executionNodesByPair.get(key);
         if (!nodes.has(pairNodeId) || !executionNodes) continue;
@@ -838,7 +864,17 @@ export function buildDatasetManifest(options: {
         addNode(nodes, {
             id: imageId,
             kind: 'image',
-            input_hash: reusableImage?.input_hash ?? digestIdentity({
+            input_hash: realizedLabels ? digestIdentity({
+                sample_key: row.sample_key,
+                content_fingerprint: row.content_fingerprint,
+                task_fingerprint: row.task_fingerprint,
+                generation_plan_hash: row.generation_plan_hash,
+                generation_replay: row.generation_replay,
+                prepared_view: row.prepared_view,
+                image_sha256: imageDigest.sha256,
+                labels: radixSortUtf8([...(row.labels ?? [])]),
+                realized_labels: row.realized_labels
+            }) : reusableImage?.input_hash ?? digestIdentity({
                 sample_key: row.sample_key,
                 content_fingerprint: row.content_fingerprint,
                 task_fingerprint: row.task_fingerprint,

@@ -142,11 +142,15 @@ export function replayDependencyAuditRow(input: {
         if (!input.generator || !input.viewSchema) throw new Error('Replay implementation is unavailable.');
         const draw = generatePlannedDraw({generator: input.generator, viewSchema: input.viewSchema,
             plan: input.currentPlan, sampleKey: recorded.replay.sampleKey, attempt: recorded.attempt,
-            seed: recorded.replay.seed, replay: recorded.replay});
+            seed: recorded.replay.seed, replay: recorded.replay, artifactMode: identity.mode});
         if (!draw.stub) throw new Error('Recorded draw returned no mathematical payload.');
         if (computeContentFingerprint(draw.stub.data) !== input.row.content_fingerprint
             || computeTaskFingerprint(draw.stub.data, draw.view.config) !== input.row.task_fingerprint) {
             throw new Error('Replayed content/task fingerprint disagrees with the stored artifact.');
+        }
+        if (input.row.realized_labels !== undefined
+            && digestIdentity(input.row.realized_labels) !== digestIdentity(draw.realizedLabels)) {
+            throw new Error('Stored realized-label receipt disagrees with the current evidence policy.');
         }
         return {evidence: assessLabelDependencyEvidence({generatorId: identity.generatorId,
             viewId: identity.viewId, mode: identity.mode, data: draw.stub.data}), issues: [], status: 'verified'};

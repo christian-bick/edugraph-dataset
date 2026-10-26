@@ -49,6 +49,14 @@ instead of `31 + 7` for the same configured addition range — it remains ordina
 variation and does not need an ontology label or an `ontologyNeutral` schema field. The resulting
 `problem.data` already makes the choice visible to content and task fingerprinting.
 
+Shared orchestration can append independently evidenced descriptive facts after the draw
+without turning them into sampling constraints. Preserve the original selected labels and
+configuration in the generation receipt, and record the added labels, evidence, policy
+identity, and actual artifact mode separately. These additions must retain every planned
+claim, consume no randomness, and never enter generator configuration or capability matching.
+The initial completion policy covers operand-digit facts in reviewed arithmetic projections
+within the agreed Area allowlist; generators still return only mathematical data.
+
 ### IMPL-G4 — The math must prove the labels
 
 The properties of the generated problem must strictly adhere to the requested labels. If a

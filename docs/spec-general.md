@@ -228,6 +228,12 @@ value. Shared code does not make those labels a conjunction. When each label ind
 the value, let the exact resolver complete directly so the resolved dataset labels contain only the
 capability actually requested or deliberately selected.
 
+An independently observed instance fact need not become another schema dimension. Shared
+post-draw completion can append descriptive labels with a separate evidence receipt while
+retaining every selected claim and leaving configuration, sampling, target matching, and
+schema ownership unchanged. It cannot repair an unsupported explicit target or replace a
+selected label; competency-changing choices still belong in the owning schema.
+
 **Verified by:** `npm run check:generator-view-specs`.
 
 ### SPEC-7 — Zero overlap between schema parameter labels and `generalLabels`

@@ -24,7 +24,7 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
-*   `problem`: The `AbstractProblem`; `problem.labels` is the complete observable capability set resolved from the matched generator/view pair.
+*   `problem`: The `AbstractProblem`; `problem.labels` combines selected generator/view capabilities with supported realized descriptive labels.
 *   `viewId`: The string identifier of the view.
 *   `targetLabels`: Original standard target claims retained as provenance, not emitted as artifact labels and not inspected by the pure view.
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
@@ -49,6 +49,15 @@ Operationally, matching resolves a target against a compatible generator/view pa
 creates the canonical mathematical payload, and the view projects it into an observable task. Use
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
+
+After a mathematical draw, shared orchestration appends supported operand-digit facts for
+reviewed arithmetic projections within the label-dependency Area allowlist. This changes
+artifact annotations without changing sampling constraints or target matching. Operational
+metadata retains a `realized_labels` receipt with planned labels, additions, evidence,
+policy identity, and actual artifact mode. Explicit policy-source and ontology dependencies
+invalidate supported pairs when completion changes; the first adoption requires
+`generate:dataset -- --spec=ccss --rebuild-graph`. Range labels remain unchanged. The
+contract is documented in [label architecture](docs/label-architecture.md).
 
 Generators own canonical mathematical payloads and their invariants. Views own presentation
 and the learner action requested from that payload. Shared types carry the mathematical evidence

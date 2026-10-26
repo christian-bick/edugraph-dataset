@@ -1,7 +1,8 @@
 import type {GenerationPlan, GenerationSelectionReceipt} from '../types/compatibility.ts';
 import type {ConfigSchema} from '../types/schema.ts';
 import type {ProblemGenerator, ResolvedProblemStub} from '../types/ml-engine.ts';
-import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
+import type {GenerationReplay, PreparedViewConfiguration, RealizedLabelReceipt} from '../types/generation-plan.ts';
+import {completeRealizedLabels} from './realized-labels.ts';
 import {CompatibilityContractError, createGenerationSelectionReceipt, sampleGenerationPlan, validateGenerationPlan,
     validateGenerationSelectionReceipt} from './compatibility.ts';
 import {resolveSchemaChoices, type SchemaChoiceSelection} from './schema-choices.ts';
@@ -12,6 +13,16 @@ export interface PlannedGenerationDraw {
     view: PreparedViewConfiguration;
     replay: GenerationReplay;
     labels: string[];
+    realizedLabels?: RealizedLabelReceipt;
+}
+
+/** Re-project annotations for an artifact mode, independently of a reused draw's origin. */
+export function completePlannedDrawLabels(draw: PlannedGenerationDraw, plan: GenerationPlan,
+    mode: 'question' | 'solution'): PlannedGenerationDraw {
+    if (!draw.stub) return draw;
+    const completed = completeRealizedLabels({generatorId: plan.identity.generatorId, viewId: plan.identity.viewId,
+        mode, data: draw.stub.data, plannedLabels: draw.realizedLabels?.plannedLabels ?? draw.labels});
+    return {...draw, labels: completed.labels, ...(completed.receipt ? {realizedLabels: completed.receipt} : {})};
 }
 
 /** Converts a checked joint receipt to private, owner-local field bindings. */
@@ -85,12 +96,14 @@ export function generatePlannedDraw(input: {
     attempt: number;
     seed: number;
     replay?: GenerationReplay;
+    artifactMode?: 'question' | 'solution';
 }): PlannedGenerationDraw {
     const resolved = resolvePlannedConfigurations({...input, generatorSchema: input.generator.schema});
     setRandomState(resolved.generatorRandomState);
     const stub = input.generator.generate(resolved.generatorConfig);
-    return {stub: stub ? {...stub, labels: resolved.generatorLabels} : null,
-        view: resolved.view, labels: resolved.labels, replay: resolved.replay};
+    return completePlannedDrawLabels({stub: stub ? {...stub, labels: resolved.generatorLabels} : null,
+        view: resolved.view, labels: resolved.labels, replay: resolved.replay}, input.plan,
+        input.artifactMode ?? (input.sampleKey.split('#')[4] === 'solution' ? 'solution' : 'question'));
 }
 
 /** A deduplicated artifact may represent another target only with the same realized bindings. */

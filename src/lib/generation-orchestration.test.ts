@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {generateModuleSamples} from './generation-orchestration.ts';
 import {ResolvedLabelContractError} from './label-contracts.ts';
 import type {GeneratorCatalogEntry, ViewCatalogEntry} from './generation.ts';
@@ -61,5 +61,34 @@ describe('module sample orchestration', () => {
         } finally {
             warning.mockRestore();
         }
+    });
+
+    it('completes a reused question draw for the actual solved mode without changing its origin or payload', () => {
+        const base = fixture([], () => ({data: {value: 1}}));
+        const entry: GeneratorCatalogEntry = {...base.entry, generatorId: 'arithmetic-ops-pairs',
+            generator: {type: 'arithmetic', schema: {}, generate: () => ({data: {
+                num1: 0, num2: 3, operation: 'multiplication', answer: 0
+            }})}, generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero],
+            labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero],
+            spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero]}};
+        const view: ViewCatalogEntry = {...base.view, viewId: 'operations-boxes-inversion',
+            generalLabels: [Ability.ProcedureInversion], supportedLabels: [Ability.ProcedureInversion],
+            spec: {viewId: 'operations-boxes-inversion', generalLabels: [Ability.ProcedureInversion]}};
+        const targets = [{id: 'zero-inversion', labels: [Area.Multiplication, Ability.ProcedureInversion]}];
+        const tuples = matchTargets(targets, [entry], [view]).tuples;
+        const samples = generateModuleSamples(entry, new Map([[view.viewId, view]]), tuples, 'train', new Map(), new Map());
+        expect(samples).toHaveLength(2);
+        const [question, solution] = samples;
+        expect(question.problem.labels).not.toContain(Scope.SingleDigitSmallestOperand);
+        expect(solution.problem.labels).toContain(Scope.SingleDigitSmallestOperand);
+        expect(solution.problem.labels).toContain(Scope.SingleDigitLargestOperand);
+        expect(solution.realizedLabels?.mode).toBe('solution');
+        expect(question.realizedLabels?.mode).toBe('question');
+        expect(solution.problem.data).toEqual(question.problem.data);
+        expect(solution.contentFingerprint).toBe(question.contentFingerprint);
+        expect(solution.taskFingerprint).toBe(question.taskFingerprint);
+        expect(solution.replay.sampleKey).toBe(question.sampleKey);
+        expect(solution.seed).toBe(question.seed);
+        expect(solution.preparedView).toEqual(question.preparedView);
     });
 });
