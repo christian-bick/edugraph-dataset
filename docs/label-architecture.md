@@ -193,6 +193,20 @@ planned label set in the evidence receipt. The final annotation and original rec
 the replacement inspectable. Other counting views and the additive arithmetic policy are
 unchanged; targets, configuration, sampled data, random state, and rendering are unaffected.
 
+The scoped dependency gate is declared in `src/validation/label-dependency-coverage.ts`.
+Its versioned producer/view/payload-variant/facet coverage is independent of adapter presence:
+an unavailable adapter cannot erase an enforcement obligation. Covered omissions, unresolved
+applicable evidence, and contradictory zero/sign claims fail. Signed digit profiles and
+underdetermined inversion quantities have explicit deferred coverage; other unsupported
+families remain visible. Every resolved Area still must belong to the agreed allowlist.
+Range remains report-only. Matching never evaluates a payload.
+
+Property-law evidence checks both rendered sides, grouped intermediates, and distributive
+partial products. A distributive witness exposes three-, four-, and two-operand expressions;
+each establishes its own count and digit descriptors. Shared completion appends those
+supported facts and zero absence while preserving configuration, target matching, entropy,
+and mathematical content. Malformed witnesses fail closed.
+
 ## Four different identities
 
 | Identity | Defined by | Purpose |

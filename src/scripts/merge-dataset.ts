@@ -19,6 +19,8 @@ import {
 } from '../lib/dataset-merge.ts';
 import {readDatasetSnapshot, type DatasetSnapshot} from '../lib/dataset-store.ts';
 import {auditPublishedImages, formatDatasetImageAudit} from '../lib/dataset-image-audit.ts';
+import {inspectLabelDependencies} from '../lib/label-dependency-inspection.ts';
+import {summarizeLabelDependencyCoverage} from '../lib/label-dependency-coverage.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -58,6 +60,7 @@ function mergeSplit(
     splitDirName: string,
     unionSpecs: string[],
     unionDir: string,
+    snapshots: ReadonlyMap<string, DatasetSnapshot>,
     trainContentIndex?: FingerprintIndex
 ): {
     rows: MetadataRow[];
@@ -71,8 +74,7 @@ function mergeSplit(
     const contributions: SpecContribution[] = [];
 
     for (const specName of unionSpecs) {
-        const specDir = datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName));
-        const snapshot = readDatasetSnapshot(specDir);
+        const snapshot = snapshots.get(specName)!;
         const exercises = groupIntoExercises(readSpecSplit(snapshot, splitDirName));
         const { kept, dropped } = selectUnionExercises(exercises, taskIndex, trainContentIndex);
 
@@ -119,6 +121,17 @@ async function main(): Promise<void> {
         process.exit(1);
     }
 
+    // Validate one immutable snapshot per source before replacing an existing union.
+    const snapshots = new Map<string, DatasetSnapshot>();
+    for (const specName of unionSpecs) {
+        const snapshot = readDatasetSnapshot(datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)));
+        const coverage = summarizeLabelDependencyCoverage(await inspectLabelDependencies({
+            projectRoot: PROJECT_ROOT, spec: specName, snapshot}));
+        if (coverage.failures.length) throw new Error(`Source ${specName} failed scoped label dependencies:\n` +
+            coverage.failures.map(failure => `${failure.subject}: ${failure.message}`).join('\n'));
+        snapshots.set(specName, snapshot);
+    }
+
     // The union is fully derived, so replacing it wholesale is safe — unlike
     // the per-spec folders, which are the source of truth.
     const unionDir = datasetOutDir(PROJECT_ROOT, UNION_DATASET_DIR);
@@ -129,8 +142,8 @@ async function main(): Promise<void> {
 
     // Train is merged first so validation can exclude content already in it,
     // mirroring the generation-time rule across standards.
-    const train = mergeSplit('train', unionSpecs, unionDir);
-    const validation = mergeSplit('validation', unionSpecs, unionDir, train.contentIndex);
+    const train = mergeSplit('train', unionSpecs, unionDir, snapshots);
+    const validation = mergeSplit('validation', unionSpecs, unionDir, snapshots, train.contentIndex);
     const imageAudit = auditPublishedImages(unionDir);
     console.log(formatDatasetImageAudit(imageAudit));
     if (imageAudit.issues.length > 0) {

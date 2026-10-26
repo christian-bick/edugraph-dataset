@@ -1,7 +1,7 @@
 # Local label dependency graph
 
-Status: graph, evaluator, initial evidence adapters, report-only audit, and reviewed additive
-repairs implemented. Further evidence coverage and strict integration remain planned.
+Status: graph, evaluator, initial evidence adapters, report-only audit, reviewed repairs,
+property-law evidence, and scoped strict integration implemented. Further evidence coverage remains planned.
 Consolidated on 2026-10-26.
 
 Add a small graph of labeling obligations to `edugraph-content` so related facets are
@@ -488,6 +488,66 @@ even artifacts (12 objects in the question and 16 in the solution). Both odd art
 retain their existing labels. All four zero assessments are satisfied, with unchanged
 content/task fingerprints and replay origins. Reports are in `temp/parity-zero-fix/`.
 
-This follow-up changes source and tests only. The immutable generated snapshot and VQA
+At source checkpoint `7fb9bf10`, this follow-up changed source and tests only. The immutable generated snapshot and VQA
 caches have not been regenerated; the historical audit results above remain the results
 for that stored snapshot until canonical regeneration and validation run.
+
+## Scoped strict coverage and property-law evidence
+
+The next increment preserves the Area allowlist and excludes range-policy work. The
+versioned registry in `src/validation/label-dependency-coverage.ts` declares producer/view,
+payload variant, and facet coverage independently of adapter registration. Nonnegative
+integer equations and commutative, associative, and distributive witnesses cover number
+kind, numeral system, base, sign, zero, operand count, and operand digits. Reviewed counting
+and count-out projections cover their numeric facets; explicit written explanation is
+covered for `counting-objects-simple`.
+
+Signed operand-digit profiles and quantities hidden by underdetermined inversion questions
+remain named deferrals. Unsupported producers, views, rules, and facets remain visible in
+the reports. Range is always report-only, including its existing presence checks. These
+coverage declarations do not alter Area eligibility or silently convert unknown evidence
+into not-applicable assessments.
+
+The shared gate fails covered omissions and unresolved applicable evidence, contradictory
+zero/sign claims, invalid contexts, provenance or evaluator contract errors, incomplete
+selection enumeration, and unavailable/empty stored snapshots. A registered coverage
+obligation survives removal of its evidence adapter. Invalid payloads fail closed.
+`audit:label-dependencies -- --spec=ccss --strict` adds a versioned strict summary and a
+failing exit status for those errors. The default audit remains report-only.
+
+Integration points are:
+
+- Completed draws, including actual-mode solution fallback, before retries or deduplicated
+  target reuse can hide an annotation contract failure.
+- Shared standards checks over complete bounded selections; payload obligations remain
+  deferred until a draw exists and never filter matching.
+- Repository checks over generated snapshots.
+- Dataset validation before either cached or live VQA, bound to its immutable snapshot.
+- Union source validation before replacement, reusing the same validated snapshots for both
+  splits and preserving their labels in the public projection.
+
+Property-law evidence version 2 validates both rendered sides and necessary intermediate
+values. Distributive witnesses include the factorized three-operand expression, expanded
+four-operand expression, and two-operand partial sum. Each expression establishes its own
+operand count and digit profiles. Completion appends supported count/digit facts and zero
+absence for those reviewed witnesses, records their evidence, and preserves all target
+claims, configuration, data, entropy, and matching. The parity correction remains the sole
+bounded replacement of an inherited non-target claim.
+
+Deterministic preflight replay verifies all 222 supported stored draws under the new runtime
+gate. Exactly 18 artifacts change annotation: two even-parity zero replacements and 16
+property-law completions. The latter comprise six commutative, four associative, and six
+distributive samples. They gain 64 labels: 16 `NumbersWithoutZero`, 36 operand-digit
+descriptors, and 12 operand-count labels. Content and task fingerprints are unchanged.
+
+| Check | Result |
+|---|---|
+| Parity checkpoint regressions | 79 tests pass. |
+| Property-law evidence tests | 112 pass; 100% lines/statements/functions, 99.35% branches. |
+| Strict coverage engine | 69 tests pass; 100% statements, branches, functions, and lines. |
+| Shared snapshot inspection | 26 tests pass; 100% statements, branches, functions, and lines. |
+| Integration suite | 9 files / 26 tests pass. |
+| Full test/coverage and repository checks | Pending final runs. |
+| Canonical snapshot, VQA, and strict audit | Pending final runs. |
+
+Reports for this increment are retained under `temp/label-dependency-strict/`.

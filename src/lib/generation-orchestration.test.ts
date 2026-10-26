@@ -5,6 +5,7 @@ import {ResolvedLabelContractError} from './label-contracts.ts';
 import type {GeneratorCatalogEntry, ViewCatalogEntry} from './generation.ts';
 import {matchTargets} from './matching.ts';
 import {CompatibilityContractError} from './compatibility.ts';
+import {LabelDependencyCoverageError} from './label-dependency-coverage.ts';
 
 function fixture(targets: readonly {id: string; labels: string[]}[],
     generate: () => {data: {value: number}}) {
@@ -25,6 +26,22 @@ function fixture(targets: readonly {id: string; labels: string[]}[],
 }
 
 describe('module sample orchestration', () => {
+    it('fails a covered omission before retries, solution fallback or duplicate reuse', () => {
+        const base = fixture([], () => ({data: {value: 1}}));
+        const generate = vi.fn(() => ({data: {operation: 'addition', num1: 2, num2: 3, answer: 5}}));
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutZero,
+            Scope.NumbersWithoutNegatives, Scope.TwoOperands];
+        const entry = {...base.entry, generatorId: 'arithmetic-ops-pairs', generalLabels: labels, labels,
+            generator: {type: 'arithmetic', schema: {}, generate}, spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: labels}} as GeneratorCatalogEntry;
+        const viewLabels = [Ability.ProcedureExecution, Scope.ArabicNumerals];
+        const view = {...base.view, viewId: 'operations-boxes', generalLabels: viewLabels, supportedLabels: viewLabels,
+            spec: {viewId: 'operations-boxes', generalLabels: viewLabels}} as ViewCatalogEntry;
+        const tuples = matchTargets([{id: 'missing-base', labels: [Area.Addition, Ability.ProcedureExecution]}], [entry], [view]).tuples;
+        expect(() => generateModuleSamples(entry, new Map([[view.viewId, view]]), tuples,
+            'train', new Map(), new Map())).toThrow(LabelDependencyCoverageError);
+        expect(generate).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects stale matched capabilities before invoking generation', () => {
         const generate = vi.fn(() => ({data: {value: 1}}));
         const {entry, run} = fixture([{id: 'question', labels: [Area.Addition]}], generate);
@@ -68,12 +85,15 @@ describe('module sample orchestration', () => {
         const entry: GeneratorCatalogEntry = {...base.entry, generatorId: 'arithmetic-ops-pairs',
             generator: {type: 'arithmetic', schema: {}, generate: () => ({data: {
                 num1: 0, num2: 3, operation: 'multiplication', answer: 0
-            }})}, generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero],
-            labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero],
-            spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero]}};
+            }})}, generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero, Scope.Base10,
+                Scope.NumbersWithoutNegatives, Scope.TwoOperands],
+            labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero, Scope.Base10,
+                Scope.NumbersWithoutNegatives, Scope.TwoOperands],
+            spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: [Area.Multiplication, Scope.IntegerNumbers,
+                Scope.NumbersWithZero, Scope.Base10, Scope.NumbersWithoutNegatives, Scope.TwoOperands]}};
         const view: ViewCatalogEntry = {...base.view, viewId: 'operations-boxes-inversion',
-            generalLabels: [Ability.ProcedureInversion], supportedLabels: [Ability.ProcedureInversion],
-            spec: {viewId: 'operations-boxes-inversion', generalLabels: [Ability.ProcedureInversion]}};
+            generalLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals], supportedLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals],
+            spec: {viewId: 'operations-boxes-inversion', generalLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals]}};
         const targets = [{id: 'zero-inversion', labels: [Area.Multiplication, Ability.ProcedureInversion]}];
         const tuples = matchTargets(targets, [entry], [view]).tuples;
         const samples = generateModuleSamples(entry, new Map([[view.viewId, view]]), tuples, 'train', new Map(), new Map());

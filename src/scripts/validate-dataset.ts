@@ -52,6 +52,8 @@ import {resolveGraphExecutionMode} from '../lib/graph-execution-mode.ts';
 import {DEPENDENCY_PLANNER_EPOCH, DEPENDENCY_GRAPH_SCHEMA_VERSION} from '../lib/dependency-planner.ts';
 import {readSampleReplayRecord} from '../lib/sample-replay.ts';
 import {auditSnapshotImages} from '../lib/dataset-image-audit.ts';
+import {inspectLabelDependencies} from '../lib/label-dependency-inspection.ts';
+import {summarizeLabelDependencyCoverage} from '../lib/label-dependency-coverage.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -452,6 +454,15 @@ async function main() {
             `Live VQA requires canonical container renders:\n${rendererIssues.map(issue => `- ${issue}`).join('\n')}\n` +
             'Regenerate the selected scope with npm run generate:dataset before validation.'
         );
+    }
+
+    const dependencyCoverage = summarizeLabelDependencyCoverage(await inspectLabelDependencies({
+        projectRoot: PROJECT_ROOT, spec: specName, snapshot: DATASET_SNAPSHOT}));
+    console.log(`Scoped label dependency gate: ${dependencyCoverage.failures.length} failure(s).`);
+    if (dependencyCoverage.failures.length) {
+        const details = dependencyCoverage.failures.map(failure => `${failure.subject}: ${failure.message}`).join('\n');
+        if (!reportOnly) throw new Error(`Scoped label dependency validation failed:\n${details}`);
+        console.error(details);
     }
 
     const validationContextResolver = createVqaValidationContextResolver(counters);

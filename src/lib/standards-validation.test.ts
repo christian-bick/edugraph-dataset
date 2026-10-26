@@ -5,6 +5,7 @@ import {loadSpecTodos} from './spec-catalog.ts';
 import {validateStandardContracts, readStandardsMatchingGraph} from './standards-validation.ts';
 import {readDatasetManifest, datasetOntologyProvenanceHash} from './dataset-manifest.ts';
 import {createDependencyGraphSnapshot} from './dependency-planner.ts';
+import * as dependencyAudit from './label-dependency-audit.ts';
 import {buildDependencyMatchingIndex, generatorCapabilityInputHash, generatorCapabilityNodeId,
     viewCapabilityInputHash, viewCapabilityNodeId, targetCapabilityInputHash, targetCapabilityNodeId,
     matchingPolicyInputHash, matchingPolicyNodeId, modulePairNodeId, matchTargets} from './matching.ts';
@@ -31,6 +32,32 @@ describe('shared standards checks', () => {
             ontologyTodos: [{standardId: 'new-ontology'}], beyondScope: [{standardId: 'outside'}]} as never);
         expect((await validateStandardContracts('ccss', [], [])).errors).toEqual([]);
         expect(loadSpecTodos).toHaveBeenCalled();
+    });
+    it.each([new Error('invalid plan'), 'invalid plan'])('reports selection inspection errors without dropping the target: %s', async issue => {
+        const result = await normalizeAndValidateSpec('fixture');
+        result.targets = [{id: 'active', labels: [Area.Addition, Ability.ProcedureExecution]}];
+        const spy = vi.spyOn(dependencyAudit, 'enumerateDependencyAuditSelections').mockImplementationOnce(() => {throw issue;});
+        try {
+            const inspected = await validateStandardContracts('fixture', [{generatorId: 'math', labels: [Area.Addition],
+                problemType: 'ArithmeticPairProblem'}] as never, [{viewId: 'question',
+                supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem'}] as never);
+            expect(inspected.errors).toContain('Label dependencies: invalid plan');
+            expect(inspected.targets).toHaveLength(1);
+        } finally {spy.mockRestore();}
+    });
+
+    it('rejects incomplete admitted-selection enumeration', async () => {
+        const result = await normalizeAndValidateSpec('fixture');
+        result.targets = [{id: 'active', labels: [Area.Addition, Ability.ProcedureExecution]}];
+        const spy = vi.spyOn(dependencyAudit, 'enumerateDependencyAuditSelections').mockReturnValueOnce({
+            status: 'limit_exceeded', total: '8192', selections: []});
+        try {
+            const inspected = await validateStandardContracts('fixture', [{generatorId: 'math', labels: [Area.Addition],
+                problemType: 'ArithmeticPairProblem'}] as never, [{viewId: 'question',
+                supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem'}] as never);
+            expect(inspected.errors.join()).toContain('exceed the dependency audit bound');
+            expect(inspected.targets).toHaveLength(1);
+        } finally {spy.mockRestore();}
     });
     it('enforces label/cardinality errors before matching', async () => {
         const result = await normalizeAndValidateSpec('ccss');

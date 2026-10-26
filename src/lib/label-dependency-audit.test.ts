@@ -28,7 +28,11 @@ function plan(fields: LabelChoiceDomain[] = [], correlated = false): GenerationP
 }
 
 function row() {
-    const currentPlan = plan();
+    const checked = planCompatibility({identity: {targetId: 'fixture', generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes'},
+        targetLabels: [Area.Addition], generatorLabels: [Area.Addition, Scope.IntegerNumbers, Scope.Base10,
+            Scope.TwoOperands, Scope.NumbersWithoutNegatives], viewLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals], fields: []});
+    if (!checked.supported) throw new Error('Complete fixture plan did not match.');
+    const currentPlan = checked.plan;
     const sampleKey = computeSampleKey({...currentPlan.identity, split: 'train', mode: 'question', instanceIdx: 0});
     const seed = computeSampleSeed(sampleKey, 1);
     const draw = generatePlannedDraw({generator, viewSchema: {}, plan: currentPlan, sampleKey, attempt: 1, seed});

@@ -14,6 +14,7 @@ const ordered = (labels: readonly string[]) => [...new Set(labels)].sort();
 export const REALIZED_LABEL_SOURCE_PATHS = [
     'src/lib/realized-labels.ts', 'src/lib/label-dependency-evidence.ts', 'src/lib/label-dependencies.ts',
     'src/validation/label-dependencies.ts', 'src/types/label-dependencies.ts',
+    'src/lib/label-dependency-coverage.ts', 'src/validation/label-dependency-coverage.ts',
     'src/types/generation-plan.ts', 'src/lib/planned-generation.ts',
     'src/lib/generation-orchestration.ts', 'src/lib/generation.ts', 'src/scripts/generate-dataset.ts'
 ] as const;
@@ -26,12 +27,14 @@ export const REALIZED_LABEL_ONTOLOGY_LABELS = [
     Scope.SingleDigitDividend, Scope.TwoDigitDividend, Scope.ThreeDigitDividend,
     Scope.FourDigitDividend, Scope.MultipleDigitDividend,
     Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor, Scope.MultipleDigitDivisor,
-    Scope.NumericZero, Scope.NumbersWithoutZero, Scope.NumbersWithZero
+    Scope.NumericZero, Scope.NumbersWithoutZero, Scope.NumbersWithZero,
+    Scope.OperandCardinality, Scope.TwoOperands, Scope.ThreeOperands, Scope.FourOperands
 ] as const;
 
-const policyHash = digestIdentity({version: 2, dependencyPolicy: evaluator.policyHash,
-    evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, facets: ['operandDigits', 'zero'],
-    zeroCompletion: {generator: 'arithmetic-ops-pairs', label: Scope.NumbersWithoutZero, mode: 'add-only'}});
+const policyHash = digestIdentity({version: 3, dependencyPolicy: evaluator.policyHash,
+    evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, facets: ['operandDigits', 'operandCount', 'zero'],
+    zeroCompletion: {generators: ['arithmetic-ops-pairs', 'reviewed-property-triples'],
+        label: Scope.NumbersWithoutZero, mode: 'add-only'}});
 
 const parityPolicyHash = digestIdentity({version: 1, dependencyPolicy: evaluator.policyHash,
     evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, projection: 'counting-objects-parity',
@@ -78,7 +81,12 @@ export function completeRealizedLabels(input: {
     const assessment = evaluation.assessments.find(item => item.facet === 'operandDigits');
     const supported = assessment && (assessment.status === 'missing' || assessment.status === 'satisfied');
     const addedLabels = supported ? assessment.expectedLabels.filter(label => !plannedLabels.includes(label)) : [];
-    const addZeroAbsence = input.generatorId === 'arithmetic-ops-pairs'
+    const count = evaluation.assessments.find(item => item.facet === 'operandCount');
+    const propertyCount = input.generatorId === 'arithmetic-ops-triples' && typeof input.data === 'object'
+        && input.data !== null && 'propertyLaw' in input.data
+        && count && (count.status === 'missing' || count.status === 'satisfied');
+    if (propertyCount) addedLabels.push(...count.expectedLabels.filter(label => !plannedLabels.includes(label)));
+    const addZeroAbsence = (input.generatorId === 'arithmetic-ops-pairs' || propertyCount)
         && !plannedLabels.includes(Scope.NumbersWithoutZero) && !plannedLabels.includes(Scope.NumbersWithZero)
         && zero && (zero.status === 'missing' || zero.status === 'satisfied')
         && zero.expectedLabels.length === 1 && zero.expectedLabels[0] === Scope.NumbersWithoutZero;
@@ -86,6 +94,7 @@ export function completeRealizedLabels(input: {
     const receipt: RealizedLabelReceipt = {version: 1, policyHash: policy, mode: input.mode,
         plannedLabels, addedLabels: ordered(addedLabels), evidence: [
             ...(supported ? [{facet: 'operandDigits' as const, labels: assessment.expectedLabels, references: assessment.references}] : []),
+            ...(propertyCount ? [{facet: 'operandCount' as const, labels: count.expectedLabels, references: count.references}] : []),
             ...(addZeroAbsence ? [{facet: 'zero' as const, labels: [Scope.NumbersWithoutZero], references: zero.references}] : [])
         ]};
     return {labels: ordered([...plannedLabels, ...addedLabels]), receipt};

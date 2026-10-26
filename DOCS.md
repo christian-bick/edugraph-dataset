@@ -50,7 +50,7 @@ creates the canonical mathematical payload, and the view projects it into an obs
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
-After a mathematical draw, shared orchestration appends supported operand-digit facts and
+After a mathematical draw, shared orchestration appends supported operand-digit and property-witness operand-count facts and
 zero-absence omissions for reviewed arithmetic projections within the label-dependency Area
 allowlist. This changes
 artifact annotations without changing sampling constraints or target matching. Operational
@@ -459,7 +459,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/audit-label-dependencies.ts`
 
-* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
+* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--strict] [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
 * **Function**: Writes deterministic `audit.json` and `audit.md` under
   `temp/label-dependencies/<module>/`. The repo-local graph in `src/validation/label-dependencies.ts`
   declares facet obligations. Its pure evaluator applies the shared Area context only when
@@ -477,11 +477,19 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
   fingerprints must reproduce before payload evidence is trusted. Actual stored annotations stay
   separate from authoritative resolved Areas used by the gate. Reports preserve deduplicated
   target associations and bind policy identity to the graph, evaluator/adapters, and ontology.
-* **Report semantics**: Findings do not fail the command, edit annotations, update caches, or
-  change matching/generation behavior. Invalid CLI inputs or unreadable/corrupt infrastructure
-  still fail. The command performs no rendering or VQA calls and writes only its reports under
-  `temp/`. Strict enforcement and further adapter coverage remain in the
-  [dependency graph plan](docs/plan/label-dependency-graph.md).
+* **Enforcement**: The default command remains report-only. `--strict` uses the versioned
+  `src/validation/label-dependency-coverage.ts` registry and adds a coverage summary to both
+  reports. Covered omissions, unresolved applicable evidence, zero/sign contradictions,
+  invalid contexts, provenance/contract failures, missing snapshots, and incomplete selection
+  enumeration fail. Signed digit profiles and underdetermined inversion quantities are named
+  deferrals. Unsupported producers/views/facets remain visible; range is always report-only.
+* **Shared gates**: Generation checks completed annotations before retries, fallback, or
+  deduplicated reuse can hide a contract failure. Shared standards checks enumerate selections
+  without inspecting payloads. Repository checks audit generated snapshots. Dataset validation
+  applies the gate before cached or live VQA, using the same immutable snapshot. Union merge
+  validates every source snapshot before replacing the existing union and retains those same
+  snapshots through publication. Reports write only under `temp/`; the audit performs no
+  rendering or VQA calls. Further coverage remains in the [plan](docs/plan/label-dependency-graph.md).
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<module>[,<module>...]`

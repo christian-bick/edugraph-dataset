@@ -54,7 +54,10 @@ without turning them into sampling constraints. Preserve the original selected l
 configuration in the generation receipt, and record the added labels, evidence, policy
 identity, and actual artifact mode separately. These additions must retain every planned
 claim, consume no randomness, and never enter generator configuration or capability matching.
-The initial completion policy covers operand-digit facts and supported zero-absence
+A separately reviewed projection correction may replace an inherited non-target claim,
+preserving its original receipt and explicit target requirements; the parity zero policy is
+the current bounded example. Ordinary completion remains additive.
+The initial completion policy covers operand-digit and property-witness operand-count facts and supported zero-absence
 omissions in reviewed arithmetic projections within the agreed Area allowlist; generators
 still return only mathematical data. A nonzero payload alone cannot establish absence of
 zero in a projection that adds a zero origin or another zero-valued task quantity.

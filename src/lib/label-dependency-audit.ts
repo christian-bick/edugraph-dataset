@@ -12,6 +12,7 @@ import {generatePlannedDraw} from './planned-generation.ts';
 import {readSampleReplayRecord} from './sample-replay.ts';
 import {getRandomState, setRandomState} from './random.ts';
 import {assessLabelDependencyEvidence} from './label-dependency-evidence.ts';
+import {classifyLabelDependencyVariant, type LabelDependencyVariant} from './label-dependency-coverage.ts';
 
 export const MAX_DEPENDENCY_AUDIT_SELECTIONS = 4096;
 const ordered = (values: readonly string[]) => [...new Set(values)].sort();
@@ -122,7 +123,7 @@ export function replayDependencyAuditRow(input: {
     generator?: ProblemGenerator;
     viewSchema?: ConfigSchema;
     sourceIssues: readonly string[];
-}): {evidence: LabelDependencyEvidence; issues: string[]; status: 'verified' | 'unresolved'} {
+}): {evidence: LabelDependencyEvidence; issues: string[]; status: 'verified' | 'unresolved'; coverageVariant?: LabelDependencyVariant} {
     const fallback = () => assessLabelDependencyEvidence({generatorId: input.row.generator,
         viewId: input.row.view, mode: input.row.mode === 'solution' ? 'solution' : 'question'});
     const issues = [...input.sourceIssues];
@@ -153,7 +154,9 @@ export function replayDependencyAuditRow(input: {
             throw new Error('Stored realized-label receipt disagrees with the current evidence policy.');
         }
         return {evidence: assessLabelDependencyEvidence({generatorId: identity.generatorId,
-            viewId: identity.viewId, mode: identity.mode, data: draw.stub.data}), issues: [], status: 'verified'};
+            viewId: identity.viewId, mode: identity.mode, data: draw.stub.data}), issues: [], status: 'verified',
+            coverageVariant: classifyLabelDependencyVariant({generatorId: identity.generatorId,
+                viewId: identity.viewId, mode: identity.mode, data: draw.stub.data})};
     } catch (error) {
         issues.push(message(error));
         return {evidence: fallback(), issues: ordered(issues), status: 'unresolved'};
@@ -178,6 +181,7 @@ export interface DependencyAuditSubject {
     targetAssociations?: unknown;
     evidence: LabelDependencyEvidence;
     replay?: 'verified' | 'unresolved' | 'unsupported';
+    coverageVariant?: LabelDependencyVariant;
     issues?: readonly string[];
 }
 

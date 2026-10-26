@@ -136,7 +136,7 @@ describe('additive realization boundaries', () => {
     it.each([
         {generatorId: 'arithmetic-ops-pairs', data: {operation: 'addition', num1: -12, num2: 7, answer: -5}},
         {generatorId: 'arithmetic-ops-triples', data: {operation: 'multiplication', num1: 2, num2: 3,
-            num3: 4, answer: 14, propertyLaw: 'distributive', combinedFactor: 7, partialProducts: [6, 8]}},
+            num3: 4, answer: 15, propertyLaw: 'distributive', combinedFactor: 7, partialProducts: [6, 8]}},
         {generatorId: 'arithmetic-ops-pairs', data: {operation: 'addition', num1: 6, num2: 2, answer: 99}},
         {generatorId: 'arithmetic-ops-pairs', data: undefined}
     ])('retains unresolved or unsupported operand profiles without speculative labels: %s', extra => {
@@ -152,6 +152,33 @@ describe('additive realization boundaries', () => {
         expect(REALIZED_LABEL_SOURCE_PATHS).toContain('src/lib/planned-generation.ts');
         expect(REALIZED_LABEL_ONTOLOGY_LABELS).toContain(Scope.TwoDigitDivisor);
         expect(REALIZED_LABEL_ONTOLOGY_LABELS.some(label => /Numbers(?:Smaller|Larger)/.test(label))).toBe(false);
+    });
+});
+
+describe('reviewed property-law completion', () => {
+    it('adds counts for the factorized, expanded and partial-sum witness expressions', () => {
+        const labels = plannedLabels.filter(label => label !== Area.Addition).concat(Area.Multiplication, Scope.ThreeOperands);
+        const result = complete({generatorId: 'arithmetic-ops-triples', plannedLabels: labels,
+            data: {operation: 'multiplication', num1: 2, num2: 3, num3: 4, answer: 14,
+                propertyLaw: 'distributive', combinedFactor: 7, partialProducts: [6, 8]}});
+        expect(result.labels).toEqual(expect.arrayContaining([...labels, Scope.TwoOperands, Scope.FourOperands]));
+        expect(result.receipt?.evidence).toContainEqual({facet: 'operandCount',
+            labels: expect.arrayContaining([Scope.TwoOperands, Scope.ThreeOperands, Scope.FourOperands]),
+            references: expect.any(Array)});
+        expect(result.receipt?.addedLabels).not.toContain(Scope.ThreeOperands);
+    });
+
+    it.each(['commutative', 'associative'] as const)('completes supported %s witness facts without configuring them', propertyLaw => {
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.Base10, Scope.NumbersSmaller100,
+            Scope.NumbersWithoutNegatives, Scope.ThreeOperands];
+        const data = Object.freeze({operation: 'addition', num1: 2, num2: 3, num3: 4, answer: 9, propertyLaw});
+        const result = complete({generatorId: 'arithmetic-ops-triples', plannedLabels: labels, data});
+        expect(result.labels).toEqual(expect.arrayContaining([...labels, Scope.NumbersWithoutZero,
+            Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]));
+        expect(result.labels).not.toContain(Scope.TwoOperands);
+        expect(result.labels).not.toContain(Scope.FourOperands);
+        expect(result.receipt?.plannedLabels).toEqual([...labels].sort());
+        expect(data).toEqual({operation: 'addition', num1: 2, num2: 3, num3: 4, answer: 9, propertyLaw});
     });
 });
 

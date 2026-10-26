@@ -233,6 +233,10 @@ post-draw completion can append descriptive labels with a separate evidence rece
 retaining every selected claim and leaving configuration, sampling, target matching, and
 schema ownership unchanged. It cannot repair an unsupported explicit target or replace a
 selected label; competency-changing choices still belong in the owning schema.
+A separately reviewed artifact-projection correction may replace an inherited non-target
+claim while retaining the original selected labels in its evidence receipt. It must preserve
+explicit target claims and cannot change matching, configuration, or sampling. The bounded
+parity zero correction is documented in [label architecture](label-architecture.md).
 
 **Verified by:** `npm run check:generator-view-specs`.
 

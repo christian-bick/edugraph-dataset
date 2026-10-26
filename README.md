@@ -178,11 +178,14 @@ stored samples, within the agreed Arithmetic, Intuitive Mathematics, and Formal 
 Area allowlist:
 ```bash
 npm run audit:label-dependencies -- --spec=ccss
+npm run audit:label-dependencies -- --spec=ccss --strict
 ```
 The audit writes deterministic Markdown and JSON under `temp/label-dependencies/ccss/`.
-It reports findings without changing labels or blocking generation. Initial evidence adapters
-cover reviewed arithmetic and counting views; uncovered evidence stays unresolved. Range
-checks assess presence only. See the [implementation plan](docs/plan/label-dependency-graph.md).
+The default command reports findings without failing for them. `--strict` enforces the
+versioned reviewed coverage by producer, view, payload variant, and facet. Runtime generation,
+dataset validation, repository checks, and union-source validation use the same gate.
+Uncovered and deliberately deferred evidence remains visible. Range findings stay report-only;
+the agreed Area allowlist is unchanged. See the [implementation plan](docs/plan/label-dependency-graph.md).
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
