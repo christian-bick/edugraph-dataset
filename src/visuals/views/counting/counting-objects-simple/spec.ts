@@ -9,7 +9,8 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals,
         Scope.Base10,
         Ability.ProcedureExecution,
-        Ability.ProcedureUnderstanding
+        Ability.ProcedureUnderstanding,
+        Ability.TextualArticulation
     ]
 };
 

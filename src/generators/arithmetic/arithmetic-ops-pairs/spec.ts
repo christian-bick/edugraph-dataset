@@ -30,7 +30,8 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        hasLabel(Scope.NumbersWithZero)
+        hasLabel(Scope.NumbersWithZero),
+        [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
     ],
     requireMultipleOf10: [
         [Scope.MultiplesOf10],

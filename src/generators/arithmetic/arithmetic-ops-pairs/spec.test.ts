@@ -1,7 +1,8 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
+import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
 import {ArithmeticOpsPairsGeneratorSchema, spec} from './spec.ts';
 
@@ -13,6 +14,51 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
     it('declares its invariant binary operand cardinality and single-step complexity', () => {
         expect(spec.generalLabels).toContain(Scope.TwoOperands);
         expect(spec.generalLabels).toContain(Scope.SingleStep);
+    });
+
+    it.each(operations)('completes an absent zero claim truthfully without changing %s samples', operation => {
+        const labels = [operation, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20];
+        const legacySchema = {
+            ...ArithmeticOpsPairsGeneratorSchema,
+            requireZero: [ArithmeticOpsPairsGeneratorSchema.requireZero[0], ArithmeticOpsPairsGeneratorSchema.requireZero[1]] as const
+        };
+        const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
+            .find(domain => domain.field === 'requireZero');
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithoutZero]]);
+
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const before = extractConfig(legacySchema, labels);
+            const original = generator.generate(before.config);
+            setSeed(seed);
+            const after = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
+            const updated = generator.generate(after.config);
+
+            expect(after.config.requireZero).toBe(false);
+            expect(after.config).toEqual(before.config);
+            expect(after.resolvedLabels).toEqual(expect.arrayContaining(before.resolvedLabels));
+            expect(after.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+            expect(after.resolvedLabels).not.toContain(Scope.NumbersWithZero);
+            expect(updated).not.toBeNull();
+            expect(updated?.data).toEqual(original?.data);
+            expect([updated!.data.num1, updated!.data.num2, updated!.data.answer]).not.toContain(0);
+        }
+    });
+
+    it.each(operations)('preserves the explicitly requested zero branch for %s', operation => {
+        const labels = [operation, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20];
+        const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
+            .find(domain => domain.field === 'requireZero');
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithZero]]);
+
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, labels);
+            expect(stub).not.toBeNull();
+            expect(stub!.labels).toContain(Scope.NumbersWithZero);
+            expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
+            expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]).toContain(0);
+        }
     });
 
     it('resolves nonzero and nonnegative labels into universally valid samples', () => {
@@ -107,6 +153,8 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             expect(stub!.data.num1).toBe(stub!.data.num2);
             expect(stub!.data.answer % 2).toBe(0);
             expect(stub!.data.answer).toBeLessThanOrEqual(20);
+            expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
+            expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]).not.toContain(0);
         }
     });
 
