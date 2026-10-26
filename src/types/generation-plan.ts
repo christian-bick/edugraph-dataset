@@ -7,7 +7,7 @@ export interface RealizedLabelReceipt {
     readonly mode: 'question' | 'solution';
     readonly plannedLabels: readonly string[];
     readonly addedLabels: readonly string[];
-    readonly evidence: readonly {readonly facet: 'operandDigits'; readonly labels: readonly string[];
+    readonly evidence: readonly {readonly facet: 'operandDigits' | 'zero'; readonly labels: readonly string[];
         readonly references: readonly string[]}[];
 }
 

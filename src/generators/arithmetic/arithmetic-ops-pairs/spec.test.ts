@@ -16,19 +16,15 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(spec.generalLabels).toContain(Scope.SingleStep);
     });
 
-    it.each(operations)('completes an absent zero claim truthfully without changing %s samples', operation => {
+    it.each(operations)('keeps an absent zero claim unannotated without changing %s samples', operation => {
         const labels = [operation, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20];
-        const legacySchema = {
-            ...ArithmeticOpsPairsGeneratorSchema,
-            requireZero: [ArithmeticOpsPairsGeneratorSchema.requireZero[0], ArithmeticOpsPairsGeneratorSchema.requireZero[1]] as const
-        };
         const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
             .find(domain => domain.field === 'requireZero');
-        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithoutZero]]);
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[]]);
 
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const before = extractConfig(legacySchema, labels);
+            const before = extractConfig(ArithmeticOpsPairsGeneratorSchema, [...labels, Scope.NumbersWithoutZero]);
             const original = generator.generate(before.config);
             setSeed(seed);
             const after = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
@@ -36,8 +32,8 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
 
             expect(after.config.requireZero).toBe(false);
             expect(after.config).toEqual(before.config);
-            expect(after.resolvedLabels).toEqual(expect.arrayContaining(before.resolvedLabels));
-            expect(after.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+            expect(before.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+            expect(after.resolvedLabels).not.toContain(Scope.NumbersWithoutZero);
             expect(after.resolvedLabels).not.toContain(Scope.NumbersWithZero);
             expect(updated).not.toBeNull();
             expect(updated?.data).toEqual(original?.data);
@@ -153,7 +149,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             expect(stub!.data.num1).toBe(stub!.data.num2);
             expect(stub!.data.answer % 2).toBe(0);
             expect(stub!.data.answer).toBeLessThanOrEqual(20);
-            expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
+            expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
             expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]).not.toContain(0);
         }
     });

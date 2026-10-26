@@ -95,7 +95,8 @@ describe('additive realization boundaries', () => {
         [Area.Addition, Area.AlgebraicExpression]
     ])('accepts the agreed allowed Area context %s', (...areas) => {
         const result = complete({plannedLabels: areas});
-        expect(result.receipt?.addedLabels).toEqual([Scope.SingleDigitLargestOperand, Scope.SingleDigitSmallestOperand]);
+        expect(result.receipt?.addedLabels).toEqual([Scope.NumbersWithoutZero,
+            Scope.SingleDigitLargestOperand, Scope.SingleDigitSmallestOperand]);
     });
 
     it.each([
@@ -151,5 +152,71 @@ describe('additive realization boundaries', () => {
         expect(REALIZED_LABEL_SOURCE_PATHS).toContain('src/lib/planned-generation.ts');
         expect(REALIZED_LABEL_ONTOLOGY_LABELS).toContain(Scope.TwoDigitDivisor);
         expect(REALIZED_LABEL_ONTOLOGY_LABELS.some(label => /Numbers(?:Smaller|Larger)/.test(label))).toBe(false);
+    });
+});
+
+describe('narrowly reviewed zero-absence completion', () => {
+    const withoutZeroClaim = plannedLabels.filter(label => label !== Scope.NumbersWithoutZero);
+
+    it('adds zero absence only after the supported pair projection proves it', () => {
+        const result = complete({plannedLabels: withoutZeroClaim});
+        expect(result.labels).toEqual(expect.arrayContaining([...withoutZeroClaim, Scope.NumbersWithoutZero]));
+        expect(result.receipt?.evidence).toContainEqual({facet: 'zero', labels: [Scope.NumbersWithoutZero],
+            references: expect.arrayContaining(['data.num1', 'data.num2', 'data.answer'])});
+        expect(result.receipt?.addedLabels).toContain(Scope.NumbersWithoutZero);
+        expect(complete({plannedLabels: result.labels}).receipt?.evidence.some(item => item.facet === 'zero')).toBe(false);
+    });
+
+    it('preserves an existing contradictory zero claim without adding its complement', () => {
+        const labels = [...withoutZeroClaim, Scope.NumbersWithZero];
+        const result = complete({plannedLabels: labels});
+        expect(result.labels).toEqual(expect.arrayContaining(labels));
+        expect(result.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(result.receipt?.evidence.some(item => item.facet === 'zero')).toBe(false);
+    });
+
+    it('never adds a positive zero-presence claim or removes planned claims', () => {
+        const result = complete({plannedLabels: withoutZeroClaim,
+            data: {operation: 'subtraction', num1: 10, num2: 10, answer: 0}});
+        expect(result.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(result.labels).not.toContain(Scope.NumbersWithZero);
+        expect(result.labels).toEqual(expect.arrayContaining(withoutZeroClaim));
+        expect(result.receipt?.evidence.some(item => item.facet === 'zero')).toBe(false);
+    });
+
+    it.each(['operations-number-line-arithmetic', 'operations-word-problem'])('keeps unreviewed %s projections unchanged', viewId => {
+        expect(complete({plannedLabels: withoutZeroClaim, viewId})).toEqual({labels: [...withoutZeroClaim].sort()});
+    });
+
+    it.each([
+        ['arithmetic-ops-triples', {operation: 'addition', num1: 10, num2: 20, num3: 30, answer: 60}],
+        ['arithmetic-ops-four', {operation: 'addition', num1: 10, num2: 20, num3: 30, num4: 40, answer: 100}]
+    ] as const)('does not widen zero completion to %s', (generatorId, data) => {
+        const result = complete({plannedLabels: withoutZeroClaim, generatorId, data});
+        expect(result.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(result.receipt?.evidence.some(item => item.facet === 'zero')).toBe(false);
+    });
+
+    it('preserves the full Area gate for zero completion', () => {
+        const labels = [...withoutZeroClaim, Area.EquationSolving];
+        expect(complete({plannedLabels: labels})).toEqual({labels: [...labels].sort()});
+    });
+
+    it('leaves zero absence unresolved for an underdetermined question and a zero-valued solution', () => {
+        const input = {plannedLabels: withoutZeroClaim, viewId: 'operations-boxes-inversion',
+            data: {operation: 'multiplication', num1: 0, num2: 12, answer: 0}};
+        for (const mode of ['question', 'solution'] as const) {
+            const result = complete({...input, mode});
+            expect(result.labels).not.toContain(Scope.NumbersWithoutZero);
+            expect(result.labels).not.toContain(Scope.NumbersWithZero);
+            expect(result.receipt?.evidence.some(item => item.facet === 'zero')).toBe(false);
+        }
+    });
+
+    it('can append verified zero absence without inferring unsupported signed operand digits', () => {
+        const result = complete({plannedLabels: withoutZeroClaim,
+            data: {operation: 'addition', num1: -12, num2: 7, answer: -5}});
+        expect(result.receipt?.addedLabels).toEqual([Scope.NumbersWithoutZero]);
+        expect(result.receipt?.evidence.map(item => item.facet)).toEqual(['zero']);
     });
 });

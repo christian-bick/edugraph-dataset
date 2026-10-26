@@ -172,8 +172,8 @@ pair produced. See [IMPL-G3](implementation-generator.md#impl-g3--ontology-label
 for the generator boundary and [SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
 for resolved schema capabilities, including fallback choices.
 
-The reviewed operand-digit completion policy adds supported descriptive labels after the
-mathematical draw. Its `realized_labels` receipt preserves the planned label set, added
+The reviewed completion policy adds operand-digit facts and supported zero-absence omissions
+after the mathematical draw. Its `realized_labels` receipt preserves the planned label set, added
 claims, evidence references, policy hash, and actual question/solution mode. The configuration,
 generation selection, payload, and random continuation remain unchanged. A solution reusing
 a question draw is assessed in solution mode; the original draw origin stays in replay
@@ -182,6 +182,9 @@ Mathematics, or Formal Mathematics subtree. Unsupported or underdetermined evide
 not cause speculative additions. Range labels are never computed or changed here.
 
 Completion is additive: a false planned claim cannot be repaired by appending its opposite.
+Zero-absence completion is limited to reviewed arithmetic-pairs projections, with no existing
+zero claim and evidence for `NumbersWithoutZero`. It does not add `NumbersWithZero`.
+The generator's nonzero payload alone cannot describe a number-line view's zero origin.
 The even-parity projection's zero-leftover conflict remains a separate reviewed issue; the
 current completion policy does not add a contradictory zero label or alter its targets.
 

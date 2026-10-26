@@ -50,8 +50,9 @@ creates the canonical mathematical payload, and the view projects it into an obs
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
-After a mathematical draw, shared orchestration appends supported operand-digit facts for
-reviewed arithmetic projections within the label-dependency Area allowlist. This changes
+After a mathematical draw, shared orchestration appends supported operand-digit facts and
+zero-absence omissions for reviewed arithmetic projections within the label-dependency Area
+allowlist. This changes
 artifact annotations without changing sampling constraints or target matching. Operational
 metadata retains a `realized_labels` receipt with planned labels, additions, evidence,
 policy identity, and actual artifact mode. Explicit policy-source and ontology dependencies

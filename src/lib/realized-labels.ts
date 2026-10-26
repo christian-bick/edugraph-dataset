@@ -24,18 +24,20 @@ export const REALIZED_LABEL_ONTOLOGY_LABELS = [
     Scope.FourDigitLargestOperand, Scope.MultipleDigitLargestOperand,
     Scope.SingleDigitDividend, Scope.TwoDigitDividend, Scope.ThreeDigitDividend,
     Scope.FourDigitDividend, Scope.MultipleDigitDividend,
-    Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor, Scope.MultipleDigitDivisor
+    Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor, Scope.MultipleDigitDivisor,
+    Scope.NumericZero, Scope.NumbersWithoutZero, Scope.NumbersWithZero
 ] as const;
 
-const policyHash = digestIdentity({version: 1, dependencyPolicy: evaluator.policyHash,
-    evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, facets: ['operandDigits']});
+const policyHash = digestIdentity({version: 2, dependencyPolicy: evaluator.policyHash,
+    evidenceVersion: LABEL_DEPENDENCY_EVIDENCE_VERSION, facets: ['operandDigits', 'zero'],
+    zeroCompletion: {generator: 'arithmetic-ops-pairs', label: Scope.NumbersWithoutZero, mode: 'add-only'}});
 
 export function realizedLabelPolicyForPair(generatorId: string, viewId: string): string | null {
     return arithmeticGenerators.has(generatorId) && hasLabelDependencyEvidenceAdapter(generatorId, viewId)
         ? policyHash : null;
 }
 
-/** Adds only supported observable operand facts; planned claims, data, config and entropy survive intact. */
+/** Adds supported operand facts and reviewed zero absence; planned claims, data, config and entropy survive intact. */
 export function completeRealizedLabels(input: {
     generatorId: string;
     viewId: string;
@@ -51,8 +53,16 @@ export function completeRealizedLabels(input: {
     const assessment = evaluation.assessments.find(item => item.facet === 'operandDigits');
     const supported = assessment && (assessment.status === 'missing' || assessment.status === 'satisfied');
     const addedLabels = supported ? assessment.expectedLabels.filter(label => !plannedLabels.includes(label)) : [];
+    const zero = evaluation.assessments.find(item => item.facet === 'zero');
+    const addZeroAbsence = input.generatorId === 'arithmetic-ops-pairs'
+        && !plannedLabels.includes(Scope.NumbersWithoutZero) && !plannedLabels.includes(Scope.NumbersWithZero)
+        && zero && (zero.status === 'missing' || zero.status === 'satisfied')
+        && zero.expectedLabels.length === 1 && zero.expectedLabels[0] === Scope.NumbersWithoutZero;
+    if (addZeroAbsence) addedLabels.push(Scope.NumbersWithoutZero);
     const receipt: RealizedLabelReceipt = {version: 1, policyHash: policy, mode: input.mode,
-        plannedLabels, addedLabels: ordered(addedLabels), evidence: supported
-            ? [{facet: 'operandDigits', labels: assessment.expectedLabels, references: assessment.references}] : []};
+        plannedLabels, addedLabels: ordered(addedLabels), evidence: [
+            ...(supported ? [{facet: 'operandDigits' as const, labels: assessment.expectedLabels, references: assessment.references}] : []),
+            ...(addZeroAbsence ? [{facet: 'zero' as const, labels: [Scope.NumbersWithoutZero], references: zero.references}] : [])
+        ]};
     return {labels: ordered([...plannedLabels, ...addedLabels]), receipt};
 }
