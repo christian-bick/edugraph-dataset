@@ -337,3 +337,34 @@ when implementation repairs affect their inputs.
 On implementation, document approved authoring obligations in the reference library and
 commands/workflows in `DOCS.md`; link them from the existing indexes. This plan records the
 design and sequence, rather than introducing new normative authoring rules by itself.
+
+## First increment verification
+
+Implemented on `codex/label-dependency-audit` with separate plan, evaluator, evidence-adapter,
+and report/CLI checkpoints. Existing working-tree ontology-adoption changes were preserved
+and excluded from those feature commits. The verification below uses the current pinned
+ontology and dataset snapshot in that working tree.
+
+| Check | Result |
+|---|---|
+| Focused graph, evidence, and audit unit tests | 118 pass. |
+| Coverage of the three new library modules | 99.73% lines, 99.59% statements, 98.32% branches; evaluator and evidence adapters each have 100% line coverage. |
+| Integration suite, including the real matched arithmetic/replay omission tests | 9 files / 26 tests pass. |
+| Complete test and generator-coverage gate | 833 files / 6,058 tests pass; all generator minimum thresholds pass. |
+| `npm run check -- --spec=ccss` | All six repository gates pass. |
+| `npm run check:docs` | Pass; five external-document fetch warnings in the restricted network environment. |
+| Repeated CCSS dependency audit | Both JSON and Markdown are byte-identical across two runs. |
+
+The default coverage invocation encountered sandbox temporary-file rename errors, followed
+by test timeouts under the default worker setup. The complete gate passed using
+`VITEST_MAX_WORKERS=2`, `npx vitest run --coverage --pool=threads --testTimeout=30000`, and
+the unchanged `check-generator-coverage.ts` gate.
+
+The CCSS report inspects all 1,212 admitted selections and 2,808 stored samples, with zero
+incomplete tuples, invalid contexts, evidence-provenance issues, or evaluator contract
+errors. It verifies replay for 222 samples; the other 2,586 have unsupported adapters and
+retain explicit unresolved evidence. Across selection and sample assessments it reports
+2,323 satisfied, 1,344 missing, 12 not-applicable, and 11,599 unresolved results, plus 12,338
+unresolved triggers. These are facet-assessment counts for review, not confirmed sample
+defect counts or a claim of complete annotation coverage. Reports remain under
+`temp/label-dependencies/ccss/`; no gold labels or generated artifacts were changed.
