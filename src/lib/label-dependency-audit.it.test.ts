@@ -7,6 +7,7 @@ import {matchTargets, type MatchTuple} from './matching.ts';
 import {computeContentFingerprint, computeSampleKey, computeSampleSeed, computeTaskFingerprint, loadGeneratorCatalog} from './generation.ts';
 import {generatePlannedDraw} from './planned-generation.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
+import {summarizeLabelDependencyCoverage} from './label-dependency-coverage.ts';
 import {buildLabelDependencyAudit, enumerateDependencyAuditSelections, replayDependencyAuditRow} from './label-dependency-audit.ts';
 import type {ProblemGenerator} from '../types/ml-engine.ts';
 import type {ConfigSchema} from '../types/schema.ts';
@@ -70,8 +71,12 @@ describe('label dependency audit with real generation contracts', () => {
             dataset: {status: 'available', generationId: 'fixture'}, selectionCoverage: [], evaluate: evaluator.evaluate,
             subjects: [{kind: 'sample', id: sampleKey, targetId: tuple.target.id, generatorId: tuple.generatorId,
                 viewId: tuple.viewId, labels: row.labels, evidence: replayed.evidence, replay: replayed.status,
+                coverageVariant: replayed.coverageVariant,
                 targetAssociations: [{spec: 'integration', target_id: 'alias'}]}]});
         expect(report.findings.some(finding => finding.facet === 'base' && finding.status === 'missing')).toBe(true);
         expect(report.subjects[0].targetAssociations).toEqual([{spec: 'integration', target_id: 'alias'}]);
+        const strict = summarizeLabelDependencyCoverage(report);
+        expect(strict.counts.failures).toBe(1);
+        expect(strict.failures[0]).toMatchObject({code: 'missing', facet: 'base'});
     });
 });

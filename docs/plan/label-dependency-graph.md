@@ -547,7 +547,30 @@ descriptors, and 12 operand-count labels. Content and task fingerprints are unch
 | Strict coverage engine | 69 tests pass; 100% statements, branches, functions, and lines. |
 | Shared snapshot inspection | 26 tests pass; 100% statements, branches, functions, and lines. |
 | Integration suite | 9 files / 26 tests pass. |
-| Full test/coverage and repository checks | Pending final runs. |
-| Canonical snapshot, VQA, and strict audit | Pending final runs. |
+| Full test/coverage | 837 files / 6,305 tests pass; all generator minimum coverage thresholds pass. |
+| Completion and selection gate coverage | 100% statements, branches, functions, and lines. Runtime omission regression aborts after one draw. |
+| Repository checks | All seven gates pass against the regenerated snapshot; documentation and standards checks pass. |
+| Canonical snapshot | 1,013 targets, 1,180 matching tuples, and 2,808 samples preserved; all PNGs, content/task fingerprints, seeds, attempts, replay origins, and target associations unchanged. Exactly the 18 preflight annotation changes occur. |
+| Parity VQA | All four parity samples pass; two corrected samples evaluated and two unchanged passes reused. |
+| Full VQA | 2,808/2,808 pass; 16 property-law samples evaluated and 2,792 passes reused. |
+| Scoped strict dependency audit | Zero failures across 222 covered samples / 1,488 covered facets. All five formerly unresolved property-law facets are satisfied for each of the 16 samples. |
+| Audit determinism | Strict JSON and Markdown reports are byte-identical across two runs. |
+| Strict dataset/cache audit | Exact 2,808/2,808 passing cache coverage; zero dependency, freshness, structure, renderer, duplicate, malformed, missing, stale, obsolete-module, or failing-cache issues. |
 
 Reports for this increment are retained under `temp/label-dependency-strict/`.
+The real matched-artifact regression removes `Base10` and verifies exactly one strict
+missing-base failure, independently of supplied-label VQA. Live VQA honors its generator/view
+scope; strict dataset audit always checks the full snapshot.
+
+The former two parity conflicts and all other non-range missing findings are now absent.
+The 346 selection and 808 sample range-presence findings are unchanged and remain
+report-only. Unsupported adapters (2,586 samples), 90 deferred selections, and all named
+facet deferrals remain visible; the gate does not claim exhaustive annotation coverage.
+No targets or generation constraints were changed.
+
+Verification compares baseline generation
+`c4a377012fd532a789ca4b4c08cf77c2332cbe66e1afd3207052a840d0a89045` with final generation
+`cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2` in the current pinned
+ontology-adoption working tree. Those pre-existing changes remain outside the feature
+commits. Source checkpoints are `7fb9bf10` (parity), `f4f351ba` (property evidence),
+`841a25fe` (strict coverage), and `9d48ad55` (live-validation scope preservation).

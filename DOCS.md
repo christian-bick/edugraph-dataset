@@ -415,7 +415,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/check-all.ts`
 *   **Execution**: `npm run check [-- --spec=<spec_module>]`
-*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), competency standard spec validations (`normalizeAndValidateSpec`), and dataset split integrity (`report-splits.ts`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available standard modules. Split integrity runs only for specs whose dataset has been generated, so a fresh clone still passes every static check.
+*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), competency standard spec validations (`normalizeAndValidateSpec`), dataset split integrity (`report-splits.ts`), and the scoped label-dependency audit (`audit-label-dependencies.ts --strict`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available standard modules. Snapshot split and dependency audits run only for specs whose dataset has been generated, so a fresh clone still passes every static check.
 
 ### `src/scripts/check-affected.ts`
 *   **Execution**: `npm run check:affected [-- --base=<git-ref>] [--files=<comma-separated-paths>] [--plan-only]`; use `--full` to delegate explicitly to `npm run check`.
