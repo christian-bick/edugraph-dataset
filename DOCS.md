@@ -447,6 +447,32 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
     rather than comparing every generator with every view. A matching-policy epoch change
     invalidates persisted matching; rebuild the generation graph after adopting this machinery.
 
+### `src/scripts/audit-label-dependencies.ts`
+
+* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
+* **Function**: Writes deterministic `audit.json` and `audit.md` under
+  `temp/label-dependencies/<module>/`. The repo-local graph in `src/validation/label-dependencies.ts`
+  declares facet obligations. Its pure evaluator applies the shared Area context only when
+  every involved resolved Area belongs to Arithmetic, Intuitive Mathematics, or Formal Mathematics.
+  Individual family/evidence triggers then activate assessments. Missing, satisfied,
+  not-applicable, unresolved, invalid-context, and outside-policy results remain distinct.
+* **Coverage**: Fresh matching supplies authoritative generation plans. The audit enumerates
+  complete assignments from retained correlated groups and independent domains, bounded per
+  tuple; an oversized space is explicitly uninspected. Stored rows are read through the logical
+  dataset snapshot in both splits. Initial typed evidence adapters cover reviewed arithmetic
+  pair/triple/four-operand equation views, basic counting, and count-out. Other projections and
+  unavailable payload evidence remain unresolved. Range checks assess label presence only.
+* **Evidence identity**: Supported samples replay the recorded selection and actual draw origin
+  only when the current plan and stored generator/view source identities agree. Content and task
+  fingerprints must reproduce before payload evidence is trusted. Actual stored annotations stay
+  separate from authoritative resolved Areas used by the gate. Reports preserve deduplicated
+  target associations and bind policy identity to the graph, evaluator/adapters, and ontology.
+* **Report semantics**: Findings do not fail the command, edit annotations, update caches, or
+  change matching/generation behavior. Invalid CLI inputs or unreadable/corrupt infrastructure
+  still fail. The command performs no rendering or VQA calls and writes only its reports under
+  `temp/`. Strict enforcement and further adapter coverage remain in the
+  [dependency graph plan](docs/plan/label-dependency-graph.md).
+
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<module>[,<module>...]`
 *   **Shared contracts**: `standards-validation.ts` is called by dedicated, full and affected checks,

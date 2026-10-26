@@ -172,6 +172,18 @@ classified architecture violations fail the command. When the generated dataset'
 dependency graph exactly matches current capabilities, the audit reuses its successful tuples
 instead of repeating target matching.
 
+**2e. Audit Label Dependencies**
+Report missing and unresolved label facets across admitted generator/view selections and
+stored samples, within the agreed Arithmetic, Intuitive Mathematics, and Formal Mathematics
+Area allowlist:
+```bash
+npm run audit:label-dependencies -- --spec=ccss
+```
+The audit writes deterministic Markdown and JSON under `temp/label-dependencies/ccss/`.
+It reports findings without changing labels or blocking generation. Initial evidence adapters
+cover reviewed arithmetic and counting views; uncovered evidence stays unresolved. Range
+checks assess presence only. See the [implementation plan](docs/plan/label-dependency-graph.md).
+
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
 ```bash

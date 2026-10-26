@@ -277,6 +277,11 @@ describe('ontology-bound evaluation identity', () => {
                 objectKind: 'Literal'}
         ]));
         expect(after.policyHash).not.toBe(before.policyHash);
+        const clarified = createLabelDependencyEvaluator(fixtureGraph, createOntologyContext([...base,
+            {...statement(iri('mixed'), 'http://www.w3.org/2000/01/rdf-schema#comment', 'Supporting evidence boundary.'),
+                objectKind: 'Literal'}
+        ]));
+        expect(clarified.policyHash).not.toBe(before.policyHash);
         const changed = createLabelDependencyEvaluator({...fixtureGraph,
             context: {allAreasWithin: [iri('outside')], requireArea: true}}, createOntologyContext(base));
         expect(changed.policyHash).not.toBe(before.policyHash);

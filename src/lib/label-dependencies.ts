@@ -124,6 +124,7 @@ export function createLabelDependencyEvaluator(
         },
         ontology: ordered([...relevant]).map(label => ({
             descriptor: context.lookupDescriptor(label),
+            assertions: [...context.authoredAssertions(label)].sort((left, right) => compare(JSON.stringify(left), JSON.stringify(right))),
             eligibility: context.inspectLabel(label),
             ancestry: ordered([...ancestry.get(label)!]),
             capabilities: ordered([...capabilityAncestors.get(label)!])

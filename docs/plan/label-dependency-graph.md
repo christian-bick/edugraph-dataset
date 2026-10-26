@@ -1,6 +1,7 @@
 # Local label dependency graph
 
-Status: planned, not implemented. Consolidated on 2026-10-26.
+Status: graph, evaluator, initial evidence adapters, and report-only audit implemented.
+Further evidence coverage and strict integration remain planned. Consolidated on 2026-10-26.
 
 Add a small graph of labeling obligations to `edugraph-content` so related facets are
 assessed consistently across generators and views. An edge means that an applicable facet
@@ -94,7 +95,7 @@ exception. This plan does not authorize or require an ontology migration.
 
 Proposed authored location: `src/validation/label-dependencies.ts`. Keep it a declarative
 object containing the context gate, named facets, and rules with stable diagnostic IDs.
-The following markup defines the initial shape; the API and command do not exist yet.
+The following markup defines the implemented initial shape.
 
 ```ts
 import {Ability, Area, Scope} from 'edugraph-ts/generated';
@@ -274,11 +275,18 @@ do not assume the existing supplied-label VQA response can discover omitted labe
 
 ## Rollout and validation steps
 
+The first increment provides `audit:label-dependencies`, the six-rule graph, the pure
+evaluator, and reviewed arithmetic/counting adapters. It enumerates bounded admitted
+selections and inspects every available stored row, with verified replay for supported
+producer/view contracts. Fraction, decimal-precision, reference-frame, and other uncovered
+evidence stays unresolved. No strict matching, generation, dataset-audit, or merge gate is
+enabled yet. Operational usage is documented in [DOCS.md](../../DOCS.md).
+
 1. **Inventory and implement the contract.** Validate the markup against the exact ontology,
    freeze the Area-gate examples, and implement graph/evaluator unit tests. Register the
    initial facets and evidence interfaces. Start with arithmetic and counting adapters;
    record uncovered fraction, precision, frame, and explanation assessments explicitly.
-2. **Run a report-only audit.** Add the proposed command
+2. **Run a report-only audit.** Use the implemented command
    `npm run audit:label-dependencies -- --spec=ccss`. Write deterministic `audit.json` and
    `audit.md` under `temp/label-dependencies/ccss/`. Inspect admitted selections and all
    available dataset rows, with assessed/unresolved coverage clearly separated. This pass
