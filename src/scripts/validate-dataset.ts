@@ -456,8 +456,13 @@ async function main() {
         );
     }
 
-    const dependencyCoverage = summarizeLabelDependencyCoverage(await inspectLabelDependencies({
-        projectRoot: PROJECT_ROOT, spec: specName, snapshot: DATASET_SNAPSHOT}));
+    const dependencyInspection = await inspectLabelDependencies({
+        projectRoot: PROJECT_ROOT, spec: specName, snapshot: DATASET_SNAPSHOT});
+    const inDependencyScope = (subject: {generatorId: string; viewId: string}) =>
+        generatorIds.has(subject.generatorId) && viewIds.has(subject.viewId);
+    const dependencyCoverage = summarizeLabelDependencyCoverage({...dependencyInspection,
+        subjects: dependencyInspection.subjects.filter(inDependencyScope),
+        selection_coverage: dependencyInspection.selection_coverage.filter(inDependencyScope)});
     console.log(`Scoped label dependency gate: ${dependencyCoverage.failures.length} failure(s).`);
     if (dependencyCoverage.failures.length) {
         const details = dependencyCoverage.failures.map(failure => `${failure.subject}: ${failure.message}`).join('\n');
