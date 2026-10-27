@@ -304,3 +304,31 @@ passes **837 files / 6,149 tests**. Coverage is 98.46% statements, 96.96% branch
 functions and 99.51% lines; every checked generator meets its coverage thresholds. Evidence is under
 `temp/measurement-declarations/`, including `baseline.json`, `comparison.json`,
 `new-matches-and-scope.json` and `impact-report.md`.
+
+## Broader regeneration attempt
+
+The 352-pair freshness delta compares the complete working tree with the stored dataset;
+the measurement declarations do not themselves introduce dependencies on 350 other pairs.
+Earlier cleanup commit `acc3f3bb` removed the obsolete `RealizedLabelReceipt` interface from
+`src/types/generation-plan.ts`. The source index follows type-only imports and hashes their
+source text, so that shared source change alone reaches all 352 persisted pairs. Comparing
+the stored and current plans finds 1,044 existing plans whose content hashes are unchanged
+and whose only changed field is the input-provenance hash. Other pending changes include
+the counting/parity declarations and the measurement batch. Local causal evidence is in
+`temp/measurement-declarations/refresh-causes.json`.
+
+After approval to regenerate the complete affected scope, the canonical command
+`npm run generate:dataset -- --spec=ccss --rebuild-graph` selected all 352 affected pairs
+and passed preflight for all 330 renderer views. Generation then stopped on
+`6.EE.A.2a-write-letter-expressions~c3d1497f`, using `algebra-expressions` and
+`algebra-expression-write`: its first train question lacks the `LD-NUM-01` base,
+number-kind, sign and zero annotation groups. This is within the agreed Area allowlist;
+the boundary continues to follow the ontology's Formal Mathematics membership.
+
+The ordinary annotation gate threw before this family's rendering, and the transaction
+rolled back the preceding staged work. The immutable dataset pointer and its digest remain
+unchanged, so the stored audit still has its known findings. No source repair, target change,
+gate exception, adapter, completion, cache update or Gemini evaluation was performed.
+The complete execution log is `temp/measurement-declarations/regenerate-affected.txt`.
+Regeneration remains blocked on the remaining declaration gaps, independently of approval
+for its broader execution scope.
