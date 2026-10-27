@@ -29,6 +29,7 @@ const operationCases = [
 ] as const;
 
 const numberSchema = {numberKind: MeasurementWordProblemsGeneratorSchema.numberKind};
+const operationSchema = {operation: MeasurementWordProblemsGeneratorSchema.operation};
 const fractionLabels = [Scope.FractionNumbers, Scope.ProperFractions];
 
 describe('MeasurementWordProblemsGenerator spec integration', () => {
@@ -67,10 +68,45 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                     expect(stub!.labels).not.toContain(Area.MeasuringWithUnits);
                     expect(stub!.labels).not.toContain(Ability.TextualReception);
                     expect(stub!.labels.includes(Scope.ProperFractions)).toBe(numberKind === 'fraction');
+                    expect(stub!.labels.includes(Scope.SingleDigitDivisor)).toBe(operation === 'division');
                 }
             }
         }
     });
+
+    it('retains exactly four operation choices and attaches divisor width only to division', () => {
+        expect(spec.generalLabels).not.toContain(Scope.SingleDigitDivisor);
+        expect(findSchemaFallbackContractIssues(operationSchema)).toEqual([]);
+        const [domain] = normalizeSchemaChoices(operationSchema, [], 'generator');
+        expect(domain.alternatives).toHaveLength(4);
+        const configurations = domain.alternatives.map(alternative =>
+            resolveSchemaChoices(operationSchema, [], {operation: alternative.labels}));
+        expect(configurations).toEqual([
+            {config: {operation: Area.Addition}, resolvedLabels: [Area.Addition]},
+            {config: {operation: Area.Division}, resolvedLabels: [Area.Division, Scope.SingleDigitDivisor]},
+            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication]},
+            {config: {operation: Area.Subtraction}, resolvedLabels: [Area.Subtraction]}
+        ]);
+    });
+
+    it.each([
+        ['partial division request', [Area.Division]],
+        ['explicit divisor-width request', [Scope.SingleDigitDivisor]],
+        ['complete division request', [Area.Division, Scope.SingleDigitDivisor]]
+    ])('admits a %s as the existing division configuration', (_, requestedLabels) => {
+        const labels = requestedLabels as string[];
+        const [domain] = normalizeSchemaChoices(operationSchema, labels, 'generator');
+        expect(domain.alternatives).toHaveLength(1);
+        expect(resolveSchemaChoices(operationSchema, labels, {operation: domain.alternatives[0].labels}))
+            .toEqual({config: {operation: Area.Division}, resolvedLabels: [Area.Division, Scope.SingleDigitDivisor]});
+    });
+
+    it.each([Area.Addition, Area.Subtraction, Area.Multiplication])(
+        'does not rewrite %s to accommodate an explicit division descriptor', operation => {
+            const [domain] = normalizeSchemaChoices(operationSchema, [operation, Scope.SingleDigitDivisor], 'generator');
+            expect(domain.alternatives).toEqual([]);
+        }
+    );
 
     it('keeps exactly three number configurations with proper magnitude owned by the fraction choice', () => {
         expect(spec.generalLabels).not.toContain(Scope.ProperFractions);

@@ -6,8 +6,9 @@ rendered images are outside this initiative.
 
 Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
-[second measurement batch](#second-measurement-batch), including M2b, is implemented; the
-[latest checkpoint](#m2b-implementation-checkpoint-2026-10-27) records the remaining gaps.
+[second measurement batch](#second-measurement-batch), including M2b, is implemented.
+[M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) continue the repair
+in separate division and multiplication checkpoints.
 
 ## Scope
 
@@ -889,3 +890,58 @@ Local evidence is under `temp/measurement-m2b/`: `baseline.json`, `comparison.js
 ```bash
 npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m2b/audit
 ```
+
+## M3 operand-digit declarations (2026-10-27)
+
+The reviewed follow-up covers 30 of the 60 operand-digit findings without changing the
+mathematical sampling domains. Division always has a one-digit whole-number divisor.
+Integer multiplication always has a one-digit smallest operand; fraction and decimal
+multiplication always have a one-digit largest operand, the whole-number group count.
+These are statements about the specified operand role, not a complete digit profile for
+both operands. The existing graph checks family presence and remains unchanged.
+
+### Checkpoint 1 — Division declarations
+
+The existing division choice now declares `[Division, SingleDigitDivisor]`. A local
+`operation-labels.ts` helper validates the authored bundle with the shared exact set-map,
+then delegates to the existing operation resolver once. This preserves mathematical entropy
+for every valid planned binding without changing the shared resolver or its metadata.
+Incomplete or conflicting bindings consume no entropy. No payload is inspected and no
+annotation is inferred after generation.
+
+Verification preserves all **1,013 targets and 1,182 semantic matches**, with no additions
+or removals. Exactly 15 family selections gain the divisor label. All **140 stored-origin
+source replays** preserve configurations, payloads, prepared random states, PRNG continuation
+and content/task fingerprints; exactly 34 division replays gain the label and none lose labels.
+Source findings fall **60 → 45** per selection and **140 → 106** per replay. The fresh full
+audit reports **1,493 raw / 1,475 distinct non-range source gaps across 601 selections**,
+with no conflicts, invalid contexts, incomplete enumeration or row/contract errors.
+
+All 2,560 actual planned fallback probes across 40 partial-request shapes preserve selected
+configurations, data and randomness, and all admitted configuration sets remain unchanged.
+The separate legacy `extractConfig` / `generateWithLabels` helper probes fallback resolvers:
+1,280 formerly unsupported-operation cases now resolve; 960 specified addition/subtraction/
+multiplication probes consume different mathematical entropy, changing 760 payloads. Division
+probes remain identical. This is a legacy helper behavior change, not the production planned
+path or stored-origin replay result. The shared helper is not modified.
+
+Focused verification passes **95 tests across four files**, including the 60-target,
+720-draw integration suite. Scoped coverage is **100%** for both the generator and the new
+operation-label helper in statements, branches, functions and lines. Type and ownership/spec
+checks pass. Full repository coverage is run after the multiplication checkpoint, which
+retains these division regressions.
+
+Targets, the Area allowlist, range-policy exclusion, mathematical generator and renderer
+remain unchanged. The dataset snapshot and its 4,318 known stored strict findings remain
+unchanged; regeneration awaits the agreed readiness checkpoint. Local evidence is under
+`temp/measurement-m3/before/`, `division/`, `division-audit/` and `division-coverage/`.
+
+### Checkpoint 2 — Multiplication declarations
+
+Next: add `SingleDigitSmallestOperand` to the integer multiplication choice and
+`SingleDigitLargestOperand` to its fraction/decimal counterpart. A normal generator
+compatibility rule will correlate the existing operation and number-kind declarations.
+This leaves the ten integer and twenty fraction/decimal addition/subtraction findings open.
+Check actual matching and planned draws, including requests that omit operation or number
+kind; a newly correlated choice group may change seeded choices for underspecified requests
+even while its admitted mathematical configurations remain the same.

@@ -2,7 +2,7 @@ import {Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {arithmeticOperations, resolveDeclaredOperation} from '../../arithmetic/helpers.ts';
+import {measurementWordProblemOperationChoices, resolveMeasurementWordProblemOperation} from './operation-labels.ts';
 
 export const measurementWordProblemKinds = [
     Scope.MeterScale,
@@ -68,7 +68,11 @@ export const MeasurementWordProblemsGeneratorSchema = {
             [Scope.DecimalNumbers]
         ]
     ],
-    operation: [arithmeticOperations, resolveDeclaredOperation]
+    operation: [
+        [...new Set(measurementWordProblemOperationChoices.flat())],
+        resolveMeasurementWordProblemOperation,
+        measurementWordProblemOperationChoices
+    ]
 } as const;
 
 export type MeasurementWordProblemsGeneratorConfig = ConfigFromSchema<

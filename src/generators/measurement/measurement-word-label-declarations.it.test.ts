@@ -1,6 +1,6 @@
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {fileURLToPath} from 'node:url';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../../lib/model-catalog.ts';
 import {matchTarget} from '../../lib/matching.ts';
 import {computeSampleKey, computeSampleSeed} from '../../lib/generation.ts';
@@ -19,6 +19,7 @@ const viewId = 'measurement-word-problem-grade4';
 const targets = grade4Targets.filter(target => target.id.startsWith('4.MD.A.2-measurement-word-problems~'));
 const quantityLabels = [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
 const notationLabels = [Scope.ArabicNumerals, Scope.Base10];
+const expectedMissingFacets = (labels: readonly string[]) => labels.includes(Area.Division) ? [] : ['operandDigits'];
 let generator: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>[number];
 let view: Awaited<ReturnType<typeof loadViewModelCatalog>>[number];
 
@@ -70,6 +71,13 @@ const expectPositiveQuantityPresentation = (data: MeasurementWordProblemGrade4, 
             if (operand.role === 'group-count') expect(operand.count).toBeGreaterThan(1);
         }
     }
+    if (data.operation === 'division') {
+        expect(data.operands[1].role).toBe('group-count');
+        const divisor = quantities[1];
+        expect(divisor.denominator).toBe(1);
+        expect(divisor.numerator).toBeGreaterThan(1);
+        expect(divisor.numerator).toBeLessThan(10);
+    }
     const [left, right] = quantities;
     const answer = data.operation === 'addition' || data.operation === 'subtraction'
         ? {numerator: left.numerator * right.denominator
@@ -108,7 +116,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('leaves only the 60 non-range operand-digit source assessments unresolved', () => {
+    it('leaves only the 45 non-range operand-digit source assessments unresolved', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         for (const target of targets) {
@@ -123,13 +131,13 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
                 const missing = evaluation.assessments.filter(item => item.status === 'missing' && item.facet !== 'range');
-                expect(missing.map(item => item.facet)).toEqual(['operandDigits']);
+                expect(missing.map(item => item.facet)).toEqual(expectedMissingFacets(target.labels));
                 for (const assessment of missing) {
                     missingCounts.set(assessment.facet, (missingCounts.get(assessment.facet) ?? 0) + 1);
                 }
             }
         }
-        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 60});
+        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 45});
     });
 
     it.each(targets)('emits truthful declarations for $id without changing its claims', target => {
@@ -151,10 +159,11 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
             expect(draw.labels).toEqual(expect.arrayContaining([...quantityLabels, ...notationLabels]));
             expect(draw.labels).not.toContain(Scope.NumbersWithZero);
             expect(draw.labels.includes(Scope.ProperFractions)).toBe(target.labels.includes(Scope.FractionNumbers));
+            expect(draw.labels.includes(Scope.SingleDigitDivisor)).toBe(target.labels.includes(Area.Division));
             const coverage = assessLabelDependencyCoverage({generatorId, viewId, kind: 'sample', labels: draw.labels});
             expect(coverage.status).toBe('checked');
             expect(coverage.failures.every(failure => failure.code === 'missing')).toBe(true);
-            expect(coverage.failures.map(failure => failure.facet)).toEqual(['operandDigits']);
+            expect(coverage.failures.map(failure => failure.facet)).toEqual(expectedMissingFacets(target.labels));
             expectPositiveQuantityPresentation(draw.stub!.data as unknown as MeasurementWordProblemGrade4, mode);
         };
         for (const mode of ['question', 'solution'] as const) {
