@@ -192,6 +192,13 @@ data, rewrite selected claims, or maintain a second annotation receipt. Concrete
 belong in reviewed declarations and schema resolution. VQA independently assesses whether the
 rendered exercise supports the supplied claims.
 
+For example, `counting-basic` supplies a positive collection but does not declare whole-task
+zero absence: its parity projection can expose empty groups or a zero remainder. The simple,
+one-to-one, cardinality and conservation projections declare `NumbersWithoutZero` and enforce
+positive integer counts at their payload boundary. The separate selection producer retains its
+nonzero subset/available-count declaration. Parity declares neither zero descriptor, because
+neither holds across all supported counts; its missing zero classification remains a finding.
+
 Dependency rules must respect the ontology selectors' actual coverage. `UnitFractions`
 and `NonUnitFractions` do not exhaust fraction values, and the cataloged decimal precisions
 do not exhaust `DecimalNumbers`. Their absence alone is therefore not a generic completeness

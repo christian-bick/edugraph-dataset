@@ -164,10 +164,16 @@ Changing the generation machinery requires an authoritative graph rebuild before
 incremental generation.
 
 One earlier repair depended on a special parity zero replacement. The stored even-parity
-samples retain their corrected labels, but the inherited zero-absence declaration must be
-reviewed through ordinary source labelling before those samples are regenerated. The
-annotation-only validator cannot prove that a lone supplied zero claim is false. Removing
-that special case does not authorize inventing another conditional repair mechanism.
+samples retain their corrected labels. Source checkpoint `3993827f` now removes the inherited
+zero-absence declaration through ordinary ownership: common counting quantities are zero-neutral,
+the selection producer explicitly retains its nonzero count claim, and the four positive-count
+basic projections declare zero absence with corresponding payload guards.
+
+Parity declares neither zero descriptor. Even counts expose an empty remainder, one object
+exposes empty groups, and larger odd counts expose positive groups and remainder one. Neither
+claim is an invariant, so future parity annotations report missing zero classification rather
+than inferring a replacement. No schema field, adapter or post-draw completion is introduced.
+The existing parity targets and every other production target continue to match unchanged.
 
 ## Current findings and next work
 
@@ -222,3 +228,33 @@ Code checkpoint `acc3f3bb` removes the misunderstood-scope machinery. Verificati
 Local verification records are under `temp/annotation-scope-cleanup/`. Earlier scoped passes
 did not establish annotation completeness for the entire dataset. The strict repository gate
 continues to report the known missing requirements until ordinary label repairs address them.
+
+## Parity declaration verification
+
+Checkpoint `3993827f` fixes the inherited zero-absence declaration without changing schema
+choices or mathematical generation. `NumbersWithoutZero` belongs to the four nonempty basic
+projections, with ordinary positive-count payload validation; the selection producer retains
+its previous claim explicitly. Parity advertises neither zero descriptor and does not match
+an explicit request for either one. Its unresolved zero group is an annotation finding,
+not an inferred replacement claim.
+
+| Check | Result |
+|---|---|
+| Full test suite | 836 files / 6,120 tests pass; every generator meets its coverage thresholds. |
+| Focused counting/parity regressions | 85 tests pass across nine files. |
+| Positive-count payload guard | 22 cases; 100% statements, branches, functions and lines. |
+| Target preservation | All 1,013 normalized CCSS target conjunctions unchanged. |
+| Matching preservation | All 1,180 semantic tuples unchanged; zero added or removed. |
+| Counting-plan comparison | All 14 plans checked; only the two parity selections lose zero absence. |
+| Determinism | All 40 stored counting origins reproduce their data, configurations, prepared PRNG state, random continuation and content/task fingerprints. |
+| Other counting annotations | Unchanged for 26 nonparity basic and 10 selection samples. |
+| Future parity annotations | Four compared draws omit zero absence and infer no replacement; empty groups/remainders remain represented by the unchanged view. |
+| Source contracts | Type, ownership/spec, label, documentation and standards checks pass. |
+| Dependency audit | Existing snapshot retains 4,318 strict findings; two additional source-selection zero omissions remain advisory. No conflicts or incomplete tuples. |
+| Scope preservation | Area allowlist, range schema/policy, targets, sampler and pipeline unchanged; no adapters, automatic completion, dataset regeneration, cache edits or Gemini calls. |
+
+Comparison records and test logs are under `temp/parity-declaration/`; positive-count coverage
+is under `temp/parity-declaration-fix/positive-count-coverage/`. The immutable dataset pointer
+remains the snapshot recorded above. Canonical regeneration of parity still requires an
+explicitly reviewed zero-classification declaration strategy; this fix removes the false
+invariant without hiding that remaining dependency.
