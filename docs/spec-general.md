@@ -228,21 +228,11 @@ value. Shared code does not make those labels a conjunction. When each label ind
 the value, let the exact resolver complete directly so the resolved dataset labels contain only the
 capability actually requested or deliberately selected.
 
-An independently observed instance fact need not become another schema dimension. Shared
-post-draw completion can append descriptive labels with a separate evidence receipt while
-retaining every selected claim and leaving configuration, sampling, target matching, and
-schema ownership unchanged. It cannot repair an unsupported explicit target or replace a
-selected label; competency-changing choices still belong in the owning schema.
-A separately reviewed artifact-projection correction may replace an inherited non-target
-claim while retaining the original selected labels in its evidence receipt. It must preserve
-explicit target claims and cannot change matching, configuration, or sampling. The bounded
-parity zero correction is documented in [label architecture](label-architecture.md).
-
 Dependency completeness is a separate annotation contract. The shared repo-local graph checks
-the complete finalized generator/view label set, without requiring a payload evidence adapter.
+the complete finalized generator/view label set using annotations and ontology membership.
 It reports a required label group as missing without choosing or inventing its correct member.
 Do not add a schema dimension or target requirement solely to make that diagnostic disappear;
-repair the owning declaration or use supported descriptive completion when the claim is justified.
+repair the owning declaration when the claim is justified.
 Targets remain partial requests, and pre-draw selection omissions remain review findings until
 finalized annotations are available. See [label architecture](label-architecture.md).
 

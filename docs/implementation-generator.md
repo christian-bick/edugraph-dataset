@@ -49,24 +49,11 @@ instead of `31 + 7` for the same configured addition range — it remains ordina
 variation and does not need an ontology label or an `ontologyNeutral` schema field. The resulting
 `problem.data` already makes the choice visible to content and task fingerprinting.
 
-Shared orchestration can append independently evidenced descriptive facts after the draw
-without turning them into sampling constraints. Preserve the original selected labels and
-configuration in the generation receipt, and record the added labels, evidence, policy
-identity, and actual artifact mode separately. These additions must retain every planned
-claim, consume no randomness, and never enter generator configuration or capability matching.
-A separately reviewed projection correction may replace an inherited non-target claim,
-preserving its original receipt and explicit target requirements; the parity zero policy is
-the current bounded example. Ordinary completion remains additive.
-The initial completion policy covers operand-digit and property-witness operand-count facts and supported zero-absence
-omissions in reviewed arithmetic projections within the agreed Area allowlist; generators
-still return only mathematical data. A nonzero payload alone cannot establish absence of
-zero in a projection that adds a zero origin or another zero-valued task quantity.
-
-The shared annotation-dependency gate checks every eligible finalized label set after this
-completion step, whether or not a typed evidence adapter supports the generator/view pair.
-Required-group presence and declared conflicts are label-only checks. Evidence adapters can
-justify a concrete addition, but their absence cannot exempt annotations from completeness
-validation or establish an opposing claim. Generators still return only mathematical data.
+The shared annotation-dependency gate checks every eligible finalized label set. Required-group
+presence and declared conflicts use annotations and ontology membership only. Orchestration
+does not infer additional labels from the generated payload or rewrite selected claims.
+Missing annotations remain findings to repair in the owning declarations; they do not trigger
+automatic label completion. Generators still return only mathematical data.
 
 ### IMPL-G4 — The math must prove the labels
 

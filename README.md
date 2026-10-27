@@ -179,17 +179,15 @@ Area allowlist:
 ```bash
 npm run audit:label-dependencies -- --spec=ccss
 npm run audit:label-dependencies -- --spec=ccss --strict
-# Optional payload evidence diagnostics through reviewed adapters
-npm run audit:label-dependencies -- --spec=ccss --with-evidence
 ```
 The audit writes deterministic Markdown and JSON under `temp/label-dependencies/ccss/`.
 The default command reports findings without failing for them. `--strict` rejects missing
 non-range dependencies and declared annotation conflicts for every eligible finalized sample,
-independently of generator, view, or evidence-adapter coverage. Runtime generation, dataset
+independently of generator, view, or payload. Runtime generation, dataset
 validation, repository checks, and union-source validation use the same gate. Pre-draw
-selection omissions and range-presence findings stay report-only. Default audits do not replay
-generators. `--with-evidence` adds supplementary diagnostics without changing annotation
-completeness or strict-gate results. See the [implementation plan](docs/plan/label-dependency-graph.md).
+selection omissions and range-presence findings stay report-only. The audit reads annotations
+and ontology membership without running generators or changing labels. See the
+[implementation plan](docs/plan/label-dependency-graph.md).
 
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.

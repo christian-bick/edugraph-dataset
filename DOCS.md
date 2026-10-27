@@ -7,7 +7,7 @@ This document describes the shared architecture, pipeline orchestration, and dev
 ## 1. Architecture Overview
 
 ### Label-Driven Generation
-The core philosophy of this system is **Label-Driven Generation**. Configured pedagogical labels derived from the EduGraph ontology constrain the mathematical properties and cognitive task represented by each artifact. The system receives these constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier. Shared orchestration may then append independently evidenced descriptive labels within reviewed coverage, without changing target matching, selected configuration, or sampling.
+The core philosophy of this system is **Label-Driven Generation**. Configured pedagogical labels derived from the EduGraph ontology constrain the mathematical properties and cognitive task represented by each artifact. The system receives these constraints and produces a task whose mathematics satisfies them and whose visible or necessary textual clues make them reasonably defendable to a classifier.
 
 ### The Three Pillars
 The architecture is divided into three distinct layers:
@@ -24,7 +24,7 @@ Defined in `src/types/ml-engine.ts`, these types represent the JSON structure of
 
 ### `RenderPayload` & `ViewTypeMap`
 The data contract passed from the Playwright orchestrator into the browser's `window.renderView(payload)`. It contains:
-*   `problem`: The `AbstractProblem`; `problem.labels` combines selected generator/view capabilities with supported realized descriptive labels.
+*   `problem`: The `AbstractProblem`; `problem.labels` combines selected generator/view capabilities.
 *   `viewId`: The string identifier of the view.
 *   `targetLabels`: Original standard target claims retained as provenance, not emitted as artifact labels and not inspected by the pure view.
 *   `isSolutionView`: A boolean instructing the renderer to display the problem with or without the solution filled in.
@@ -50,15 +50,10 @@ creates the canonical mathematical payload, and the view projects it into an obs
 the architecture document's review order whenever a match, payload, or rendered artifact appears
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
-After a mathematical draw, shared orchestration appends supported operand-digit and property-witness operand-count facts and
-zero-absence omissions for reviewed arithmetic projections within the label-dependency Area
-allowlist. This changes
-artifact annotations without changing sampling constraints or target matching. Operational
-metadata retains a `realized_labels` receipt with planned labels, additions, evidence,
-policy identity, and actual artifact mode. Explicit policy-source and ontology dependencies
-invalidate supported pairs when completion changes; the first adoption requires
-`generate:dataset -- --spec=ccss --rebuild-graph`. Range labels remain unchanged. The
-contract is documented in [label architecture](docs/label-architecture.md).
+Shared annotation validation reports missing label groups and conflicting claims within the
+label-dependency Area allowlist. Labels come from the matched declarations and resolved schema
+choices. Generation does not append or replace labels based on sampled data. The contract is
+documented in [label architecture](docs/label-architecture.md).
 
 Generators own canonical mathematical payloads and their invariants. Views own presentation
 and the learner action requested from that payload. Shared types carry the mathematical evidence
@@ -459,39 +454,31 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/audit-label-dependencies.ts`
 
-* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--strict] [--with-evidence] [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
+* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--strict] [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
 * **Function**: Writes deterministic `audit.json` and `audit.md` under
   `temp/label-dependencies/<module>/`. The repo-local graph in `src/validation/label-dependencies.ts`
   declares facet obligations. Its pure evaluator applies the shared Area context only when
   every involved resolved Area belongs to Arithmetic, Intuitive Mathematics, or Formal Mathematics.
   Label-family triggers then check required annotation groups, and declared incompatible claims
-  produce conflicts. Missing groups and conflicts are checked independently of payloads and
-  evidence-adapter availability. The evaluator keeps supplementary evidence results separate.
+  produce conflicts. Missing groups and conflicts use annotations and ontology membership only.
 * **Subjects**: Fresh matching supplies authoritative generation plans. The audit enumerates
   complete assignments from retained correlated groups and independent domains, bounded per
   tuple; an oversized space is explicitly uninspected. Stored rows are read through the logical
-  dataset snapshot in both splits. Every eligible stored annotation set is checked, including
-  producer/view combinations with no evidence adapter. Targets remain partial requests.
+  dataset snapshot in both splits. Every eligible stored annotation set is checked. Targets remain partial requests.
   Range checks assess label presence only and never calculate replacement bounds.
-* **Supplementary evidence**: Optional typed adapters cover reviewed arithmetic equation views,
-  basic counting, and count-out. Default audits do not load runtime generators or replay payloads;
-  `--with-evidence` enables this diagnostic path. Supported samples replay the recorded selection and actual draw origin
-  only when the current plan and stored generator/view source identities agree. Content and task
-  fingerprints must reproduce before payload evidence is trusted. Actual stored annotations stay
-  separate from authoritative resolved Areas used by the gate. Reports preserve deduplicated
-  target associations and bind policy identity to the graph, evaluator/adapters, and ontology.
-  Missing adapters, unavailable replay, and unresolved proof remain diagnostic; they do not
-  suppress annotation findings or narrow enforcement to reviewed projections.
-  Nonexhaustive subtype selectors, such as unit/nonunit fractions and the currently cataloged
-  decimal precisions, remain evidence-dependent rather than unconditional annotation requirements.
+* **Provenance**: The audit checks row/sample-key identity and recovers the complete resolved
+  Area conjunction from the recorded generation selection. It never reconstructs mathematical
+  payloads or executes generators. Reports retain target associations and bind policy identity
+  to the graph, evaluator, and ontology. Nonexhaustive subtype selectors, such as unit/nonunit
+  fractions and the currently cataloged decimal precisions, are outside the graph's requirements.
 * **Enforcement**: The default command remains report-only. `--strict` uses the versioned
   annotation policy and adds an enforcement summary to both reports. Missing non-range
   dependencies and declared annotation conflicts fail for every eligible finalized sample,
   as do invalid contexts, structural row/contract failures, missing snapshots, and incomplete
-  selection enumeration. Pre-draw selection omissions remain report-only because supported
-  completion can append labels after the draw; selection conflicts and invalid contexts fail.
-  Evidence results do not determine strict annotation success. Range is always report-only.
-* **Shared gates**: Generation checks completed annotations before retries, fallback, or
+  selection enumeration. Admitted-selection omissions remain advisory in the static report;
+  strict completeness applies to actual artifact annotations. Selection conflicts and invalid
+  contexts fail. Range is always report-only.
+* **Shared gates**: Generation checks resolved annotations before retries, fallback, or
   deduplicated reuse can hide a contract failure. Shared standards checks enumerate selections
   without inspecting payloads. Repository checks audit generated snapshots. Dataset validation
   applies the gate before cached or live VQA, using the same immutable snapshot. Union merge
