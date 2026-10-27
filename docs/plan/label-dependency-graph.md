@@ -4,9 +4,10 @@ Status: implemented as annotation-only validation. The repository contains one s
 a pure ontology-aware evaluator, and a shared strict gate and audit. Generator payloads and
 rendered images are outside this initiative.
 
-Next work: [repair rollout and consolidated backlog](#repair-rollout-plan),
-[algebra/parity decisions](#algebra-and-parity-decision-note), and the
-[proposed second measurement batch](#proposed-second-measurement-batch).
+Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
+[algebra/parity decisions](#algebra-and-parity-decision-note). The
+[second measurement batch](#second-measurement-batch) is implemented; its
+[verification checkpoint](#m2-implementation-checkpoint-2026-10-27) records the remaining gaps.
 
 ## Scope
 
@@ -339,8 +340,9 @@ for its broader execution scope.
 
 ## Repair rollout plan
 
-Status: proposed on 2026-10-27, following checkpoint `af69020e`. This update records the
-backlog and proposed decisions; it does not implement additional label or model changes.
+Status: planned on 2026-10-27, following checkpoint `af69020e`; M2 is now implemented.
+The inventory below retains the pre-M2 baseline. The M2 verification checkpoint records
+the updated totals; the other proposed decisions remain open.
 The agreed Area allowlist and range-policy exclusion above remain fixed, as do the 1,013
 normalized target conjunctions. The existing 1,182 semantic matches are the comparison
 baseline. Truthful capability additions may admit further matches; review them explicitly
@@ -415,7 +417,7 @@ aggregation checks. They are verification artifacts, not runtime dependencies.
 
 ### Consolidated declaration backlog (2026-10-27)
 
-The current audit enumerates all **1,222 admitted selections**, including **807 eligible selections**.
+This pre-M2 baseline audit enumerates all **1,222 admitted selections**, including **807 eligible selections**.
 **616 selections across 81 generators and 171 generator/view pairs** have missing non-range groups.
 They contain **1,750 distinct selection/facet gaps** and **1,788 raw rule/facet assessments**;
 the 38 additional assessments are repeated base checks under numeric and decimal rules.
@@ -648,16 +650,16 @@ This model work requires a separate agreed implementation scope. Until then, kee
 zero omissions visible. Do not restore inherited zero absence, label all odd counts zero-free,
 discard the singleton case, change range policy or weaken the gate to close the report.
 
-## Proposed second measurement batch
+## Second measurement batch
 
 ### M2 — Invariant declarations for Grade 4 measurement word problems
 
-Recommendation: implement one small, partial batch for `measurement-word-problems` and
+Implemented on 2026-10-27 as one small, partial batch for `measurement-word-problems` and
 its sole consumer `measurement-word-problem-grade4`. The production scope is exactly two
 `spec.ts` files, plus regression tests and verification notes. The two first-batch families
 remain complete for non-range source-selection requirements and are not included again.
 
-| Owner | Proposed addition to `generalLabels` | Source evidence |
+| Owner | Addition to `generalLabels` | Source evidence |
 |---|---|---|
 | [Word-problem generator spec](../../src/generators/measurement/measurement-word-problems/spec.ts) | `NumbersWithoutNegatives`, `NumbersWithoutZero` | All operands, group counts and answers are strictly positive. Subtraction constructs the first value from a positive answer plus the second value. |
 | [Grade 4 story view spec](../../src/visuals/views/measurement/measurement-word-problem-grade4/spec.ts) | `ArabicNumerals`, `Base10` | Both modes format values with decimal digit strings, fraction notation or decimal notation. |
@@ -667,10 +669,10 @@ The integer, fraction and decimal branches in the
 establish these quantity invariants. The existing
 [view helpers](../../src/visuals/views/measurement/measurement-word-problem-grade4/helpers.ts)
 validate positive exact values and implement the notation. The named payload
-`MeasurementWordProblemGrade4` has one producer and one registered consumer. The proposal
+`MeasurementWordProblemGrade4` has one producer and one registered consumer. The change
 preserves schemas, resolver behavior, configuration values, mathematical sampling and rendering.
 
-An annotation-only counterfactual over the current 60 assignments gives:
+The pre-implementation annotation-only counterfactual over the 60 assignments predicted:
 
 | Measure | Before | After M2 | Reduction |
 |---|---:|---:|---:|
@@ -686,9 +688,9 @@ raw/distinct difference. **All 60 family assignments still lack operand-digit an
 20 fraction assignments additionally lack fraction magnitude.** This is a partial repair,
 not a claim that the family or dataset is ready for generation.
 
-These projections do not include a fresh capability rematch and are not stored-row changes.
-The implementation must recompute matching and review any new assignments before reporting
-its actual result. Local evidence is in
+These projections did not include a fresh capability rematch and are not stored-row changes.
+The implementation checkpoint below confirms them after a complete rematch and replay.
+The original counterfactual evidence is in
 `temp/measurement-declarations/second-batch-counterfactual.ts` and `.json`.
 
 ### Follow-up M2b — Existing proper-fraction choice
@@ -752,3 +754,65 @@ a later batch. This is why M2 is intentionally limited to the word-story pair.
   report the full audit with the remaining 80 family assessments clearly identified.
 - Commit M2 independently, followed by any separately accepted M2b or model decisions.
   The broader regeneration remains authorized and waits for the readiness checkpoint above.
+
+### M2 implementation checkpoint (2026-10-27)
+
+Implementation and regression tests are committed in `f300781a`.
+M2 adds the four declarations at the owners listed above. The generator guarantees strictly
+positive operands, group counts and results; the view uses Arabic digits and base-10 notation.
+A zero digit in a positive decimal such as `$1.20` does not represent a zero-valued quantity.
+The implementation leaves targets, schemas, resolvers, mathematical sampling, rendering,
+the Area allowlist and range-policy exclusion unchanged. M2b and operand-digit decisions
+remain separate follow-ups; no adapters or automatic completion were introduced.
+
+The complete post-change report-only audit confirms:
+
+| Measure | Before M2 | After M2 |
+|---|---:|---:|
+| Family raw non-range assessments | 340 | 80 |
+| Family distinct selection/facet gaps | 320 | 80 |
+| Global raw non-range assessments | 1,788 | 1,528 |
+| Global distinct selection/facet gaps | 1,750 | 1,510 |
+| Global selections still containing a gap | 616 | 616 |
+
+All 1,222 selections were enumerated, including 807 eligible selections. There are no
+conflicts, invalid contexts, incomplete enumerations or row/label-contract errors. The
+remaining backlog still spans 81 generators and 171 pairs. The 80 family assessments are
+exactly **60 operand-digit and 20 fraction-magnitude findings**; M2 activates no new missing
+requirements. These are source-selection results, not changes to stored dataset rows.
+
+Fresh matching preserves all **1,013 normalized target label sets and 1,182 semantic
+matches**, with no added or removed matches. All 60 family plans retain the same choices.
+Replaying all **140 stored family origins** preserves generator/view configurations,
+prepared random state, PRNG continuation, payloads and content/task fingerprints. Each
+replay adds exactly the four intended annotations and removes none. Raw non-range findings
+on these source replays fall from 794 to 186: 140 operand-digit and 46 fraction-magnitude
+findings remain. The actual stored family annotations still contain their original 794
+findings. Captured schema serializations and implementation/policy hashes are unchanged.
+
+The focused tests pass **65 cases**, including 720 planned draws across the 60 targets,
+both modes, ordinary seeds and sampler boundaries. They check positive exact arithmetic,
+numeral presentation, declaration ownership, unchanged target claims and the intentionally
+remaining dependency findings. Mode checks use planned draws and presentation helpers;
+rendering code is unchanged.
+
+The full coverage run passes **838 files / 6,211 tests**. Aggregate generator coverage is
+98.46% statements, 96.96% branches, 100% functions and 99.51% lines. The measurement
+word-problem generator has 100% coverage in all four categories, and every checked
+generator meets the repository thresholds. This runs the two `test:coverage` stages
+(Vitest coverage and the generator coverage checker) with two workers and a 30-second
+test timeout; coverage output is retained under `temp/measurement-m2/full-coverage/`.
+
+`npm run check -- --spec=ccss` passes type, ownership/spec, label, documentation, standards
+and split-integrity checks. Its final strict annotation gate still reports the known
+**4,318 failures across 1,332 stored samples**, so the aggregate check is not green.
+The dataset snapshot pointer is unchanged. Regeneration and VQA wait for the agreed
+source-readiness checkpoint; this partial batch does not bypass it.
+
+Verification artifacts are under `temp/measurement-m2/`: `baseline.json`, `comparison.json`,
+`impact-report.md`, `audit/audit.json`, `check.txt`, `full-coverage.txt` and
+`generator-coverage.txt`. Reproduce the selection audit with:
+
+```bash
+npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m2/audit
+```
