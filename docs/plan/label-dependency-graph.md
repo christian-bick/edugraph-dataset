@@ -6,8 +6,8 @@ rendered images are outside this initiative.
 
 Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
-[second measurement batch](#second-measurement-batch) is implemented; its
-[verification checkpoint](#m2-implementation-checkpoint-2026-10-27) records the remaining gaps.
+[second measurement batch](#second-measurement-batch), including M2b, is implemented; the
+[latest checkpoint](#m2b-implementation-checkpoint-2026-10-27) records the remaining gaps.
 
 ## Scope
 
@@ -340,8 +340,8 @@ for its broader execution scope.
 
 ## Repair rollout plan
 
-Status: planned on 2026-10-27, following checkpoint `af69020e`; M2 is now implemented.
-The inventory below retains the pre-M2 baseline. The M2 verification checkpoint records
+Status: planned on 2026-10-27, following checkpoint `af69020e`; M2 and M2b are now implemented.
+The inventory below retains the pre-M2 baseline. The M2b verification checkpoint records
 the updated totals; the other proposed decisions remain open.
 The agreed Area allowlist and range-policy exclusion above remain fixed, as do the 1,013
 normalized target conjunctions. The existing 1,182 semantic matches are the comparison
@@ -693,15 +693,18 @@ The implementation checkpoint below confirms them after a complete rematch and r
 The original counterfactual evidence is in
 `temp/measurement-declarations/second-batch-counterfactual.ts` and `.json`.
 
-### Follow-up M2b — Existing proper-fraction choice
+### M2b — Existing proper-fraction choice
 
 The current fraction branch always produces proper measured fractions, and the view validator
 requires numerator < denominator. Additive numerators total at most 7 over 8; multiplication
-and division totals reach at most 6 over 8. A subsequent declaration-choice change can attach
-`ProperFractions` to the existing fraction alternative while retaining the same `'fraction'`
-configuration. Review resolver specificity, fallback bindings and replay equivalence separately
-from M2. On retained assignments it closes another 20 assessments, leaving 60 operand-digit
-assessments in this family.
+and division totals reach at most 6 over 8. Implemented on 2026-10-27: the existing fraction
+alternative now declares `[FractionNumbers, ProperFractions]` and retains the same `'fraction'`
+configuration. The shared `selectExactLabelSetMap` resolver and three explicit fallback bundles
+preserve the integer/fraction/decimal choices. Both a broad `FractionNumbers` request and an
+explicit `ProperFractions` request select the same fraction bundle; no extra mathematical
+configuration or runtime labelling step is introduced. The checkpoint below records resolver,
+fallback and replay verification. This closes 20 further assessments and leaves 60 operand-digit
+assessments in the family.
 
 Operand digits need a separate review. Integer addition admits operands from 2 through 20,
 and integer multiplication combines counts from 2 through 6 with measured values from 2
@@ -757,13 +760,14 @@ a later batch. This is why M2 is intentionally limited to the word-story pair.
 
 ### M2 implementation checkpoint (2026-10-27)
 
-Implementation and regression tests are committed in `f300781a`.
+Implementation and regression tests are committed in `f300781a`. This is the pre-M2b baseline.
 M2 adds the four declarations at the owners listed above. The generator guarantees strictly
 positive operands, group counts and results; the view uses Arabic digits and base-10 notation.
 A zero digit in a positive decimal such as `$1.20` does not represent a zero-valued quantity.
 The implementation leaves targets, schemas, resolvers, mathematical sampling, rendering,
-the Area allowlist and range-policy exclusion unchanged. M2b and operand-digit decisions
-remain separate follow-ups; no adapters or automatic completion were introduced.
+the Area allowlist and range-policy exclusion unchanged. M2b was deferred to the separate
+checkpoint below; operand-digit decisions remain open. No adapters or automatic completion
+were introduced.
 
 The complete post-change report-only audit confirms:
 
@@ -815,4 +819,73 @@ Verification artifacts are under `temp/measurement-m2/`: `baseline.json`, `compa
 
 ```bash
 npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m2/audit
+```
+
+### M2b implementation checkpoint (2026-10-27)
+
+Implementation and regression tests are committed in `b5f1fb7a`. The production change is
+confined to the generator's existing `numberKind` declaration. It adds `ProperFractions`
+to the fraction bundle without removing `FractionNumbers`; integer and decimal alternatives
+remain unchanged. Every measured fraction and answer is proper. Whole-number group counts
+are separate operands, so they are not classified as improper fractions.
+
+The post-change audit enumerates the same 1,222 selections, including 807 eligible selections:
+
+| Measure | After M2 | After M2b |
+|---|---:|---:|
+| Family raw non-range assessments / distinct selection-facet gaps | 80 | 60 |
+| Global raw non-range assessments | 1,528 | 1,508 |
+| Global distinct selection/facet gaps | 1,510 | 1,490 |
+| Global selections still containing a gap | 616 | 616 |
+
+Exactly 20 fraction-magnitude findings close. The family remainder is **60 operand-digit
+findings**. There are no newly missing requirements, conflicts, invalid contexts, incomplete
+enumerations or row/label-contract errors. The remaining source backlog still spans 81
+generators and 171 pairs.
+
+All **1,013 normalized targets and 1,182 semantic matches** are unchanged, with no added or
+removed matches. Twenty fraction selections gain the new label; the other 40 selections
+retain their annotations. All 140 stored-origin source replays preserve generator/view
+configurations, payloads, prepared random states, PRNG continuation and content/task
+fingerprints. Exactly 46 fractional replays gain `ProperFractions`, with no label removals.
+Across all 140 replays, non-range findings fall from 186 to 140, all operand-digit findings.
+All 60 plan hashes change with the declaration contract, and 20 fraction alternative IDs
+change. Diagnostic selection receipts are refreshed accordingly, while the original sample
+keys, seeds and attempts remain unchanged. No stored receipts or dataset rows are rewritten.
+
+Comparison also covers 256 ordinary schema resolutions across omitted, integer, fraction
+and decimal requests, plus 64 generated draws with number kind unspecified. Configuration
+values, fallback sampling, random-state progression and
+payloads remain unchanged. There are still exactly three number-kind alternatives. Partial
+fraction requests and explicit proper-fraction requests resolve to the same bundle; competing
+kind requests remain rejected. Other generator fields, the view schema, implementation and
+policy hashes, targets, Area allowlist and range-policy exclusion are unchanged.
+
+The focused regression run passes **73 tests**. It covers all 60 existing targets through
+720 planned draws, both modes and sampler boundaries, plus choice ownership, partial and
+explicit requests, conflicting requests and seeded fallback equivalence. Properness is
+checked on measured fractions and answers, with group counts checked separately.
+
+The full coverage run passes **838 files / 6,219 tests**. Aggregate generator coverage remains
+98.46% statements, 96.96% branches, 100% functions and 99.51% lines. The measurement
+word-problem generator has 100% in all four categories, and every checked generator meets
+the repository thresholds. Both `test:coverage` stages ran with two workers and a 30-second
+test timeout, retaining coverage under `temp/measurement-m2b/full-coverage/`.
+
+`npm run check -- --spec=ccss` passes type, ownership/spec, label, documentation, standards
+and split-integrity checks. The final strict annotation gate still fails on the known stored
+findings, so the aggregate check is not green. Documentation references pass with external
+link-fetch warnings.
+
+The immutable dataset snapshot remains unchanged and retains **4,318 strict findings**,
+including 794 in the stored word-problem family. M2b is a source declaration repair, not a
+stored dataset refresh. Regeneration and VQA remain deferred until the agreed readiness
+checkpoint; the 60 remaining family requirements are not bypassed.
+
+Local evidence is under `temp/measurement-m2b/`: `baseline.json`, `comparison.json`,
+`impact-report.md`, `audit/audit.json`, `check.txt`, `full-coverage.txt` and
+`generator-coverage.txt`. Reproduce the selection audit with:
+
+```bash
+npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m2b/audit
 ```
