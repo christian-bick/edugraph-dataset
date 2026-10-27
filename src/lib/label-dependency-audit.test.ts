@@ -38,7 +38,8 @@ function row() {
     const draw = generatePlannedDraw({generator, viewSchema: {}, plan: currentPlan, sampleKey, attempt: 1, seed});
     return {file_name: 'fixture.png', sample_key: sampleKey, spec: 'fixture', target_id: 'fixture',
         generator: 'arithmetic-ops-pairs', view: 'operations-boxes', mode: 'question',
-        labels: ['Addition'], generation_plan: currentPlan, generation_plan_hash: currentPlan.hash,
+        labels: ['Addition'], realized_labels: draw.realizedLabels,
+        generation_plan: currentPlan, generation_plan_hash: currentPlan.hash,
         generation_replay: draw.replay, seed, attempt: 1,
         content_fingerprint: computeContentFingerprint(data), task_fingerprint: computeTaskFingerprint(data, draw.view.config)};
 }
@@ -150,7 +151,10 @@ describe('stored sample evidence provenance', () => {
         expect(run({currentPlan: undefined}).issues[0]).toContain('stale');
         expect(run({generator: undefined}).issues[0]).toContain('unavailable');
         expect(run({viewSchema: undefined}).status).toBe('unresolved');
-        expect(run({row: {...stored, realized_labels: {version: 1, policyHash: 'stale'}}}).issues[0]).toContain('realized-label receipt');
+        const staleReceipt = run({row: {...stored, realized_labels: {version: 1, policyHash: 'stale'}}});
+        expect(staleReceipt.issues[0]).toContain('realized-label receipt');
+        expect(staleReceipt.status).toBe('verified');
+        expect(staleReceipt.evidence.triggers.numericTask?.status).toBe('present');
         expect(run({row: {...stored, target_id: 'other'}}).issues[0]).toContain('identity');
         expect(run({generator: {...generator, generate: () => null}}).issues[0]).toContain('no mathematical payload');
         expect(run({generator: {...generator, generate: () => {random(); throw 'failed';}}}).issues[0]).toBe('failed');
@@ -160,7 +164,7 @@ describe('stored sample evidence provenance', () => {
 describe('deterministic report-only dependency audit', () => {
     const evidence = assessLabelDependencyEvidence({generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes', mode: 'question', data});
     const subject = (id: string): DependencyAuditSubject => ({id, kind: 'sample', targetId: 'fixture',
-        generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes', labels: [Area.Addition], evidence, replay: 'verified'});
+        generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes', labels: [Area.Addition, Scope.IntegerNumbers], evidence, replay: 'verified'});
     const build = (subjects: DependencyAuditSubject[]) => buildLabelDependencyAudit({spec: 'fixture', policyHash: 'policy',
         ontology: {version: 'fixture'}, dataset: {status: 'available', generationId: 'same'},
         selectionCoverage: [{targetId: 'limited', generatorId: 'g', viewId: 'v', status: 'limit_exceeded', total: '8192', checked: 0}],
@@ -177,7 +181,7 @@ describe('deterministic report-only dependency audit', () => {
         expect(report.findings.find(finding => finding.facet === 'range')?.subjects).toEqual(['sample:a', 'sample:b']);
         expect(report.subjects[1].targetAssociations).toEqual(second.targetAssociations);
         const markdown = formatLabelDependencyAudit(report);
-        expect(markdown).toContain('Range checks assess presence only');
+        expect(markdown).toContain('Range presence remains report-only');
         expect(markdown).toContain('limit_exceeded');
         expect(markdown).toContain('integer-arithmetic-v1');
         expect(markdown).toBe(formatLabelDependencyAudit(build([first, second])));
@@ -202,7 +206,7 @@ describe('deterministic report-only dependency audit', () => {
         const report = buildLabelDependencyAudit({spec: 'fixture', policyHash: 'p', ontology: {},
             dataset: {status: 'unavailable', generationId: null}, selectionCoverage: [], subjects: [], evaluate: evaluator.evaluate});
         expect(report.summary.samples).toBe(0);
-        expect(formatLabelDependencyAudit(report)).toContain('No activated missing/unresolved assessments; inspect trigger coverage');
+        expect(formatLabelDependencyAudit(report)).toContain('No activated annotation dependencies are missing');
         expect(formatLabelDependencyAudit(report)).toContain('generation `none`');
     });
 });

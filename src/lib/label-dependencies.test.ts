@@ -174,7 +174,7 @@ describe('label dependency assessments', () => {
             articulation: applicable([Ability.TextualArticulation]), referenceFrames: applicable([Scope.SingleFrameOfReference]),
             operandCount: applicable([Scope.TwoOperands]), operandDigits: applicable([Scope.SingleDigitLargestOperand])
         });
-        for (const id of ['arithmeticOperands', 'quantityReferenceFrames', 'writtenExplanation'] as const) {
+        for (const id of ['arithmeticOperands', 'fractionValues', 'decimalRepresentation', 'quantityReferenceFrames', 'writtenExplanation'] as const) {
             proof.triggers[id] = {status: 'present', reason: 'Observed task feature.', references: ['view.task']};
         }
         const result = evaluator.evaluate([Area.Addition, Scope.ProperFractions, Scope.DecimalNumbers], proof);
@@ -246,6 +246,45 @@ describe('annotation-only dependency validation', () => {
         const result = core([]);
         expect(result.assessments).toEqual([]);
         expect(result.triggers.every(item => item.status === 'absent')).toBe(true);
+    });
+
+    it.each([
+        ['0/5', Scope.ProperFractions, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives],
+        ['-1/2', Scope.ProperFractions, Scope.NumbersWithoutZero, Scope.NumbersWithNegatives],
+        ['3/2', Scope.ImproperFractions, Scope.NumbersWithoutZero, Scope.NumbersWithoutNegatives]
+    ])('does not require a nonexhaustive unit classification for %s annotations', (_example, magnitude, zero, sign) => {
+        const result = core([magnitude, zero, sign]);
+        expect(result.assessments.some(item => item.facet === 'fractionUnit')).toBe(false);
+        expect(result.triggers.find(item => item.ruleId === 'LD-FRACTION-UNIT-01')!.status).toBe('absent');
+        expect(result.assessments.find(item => item.facet === 'fractionMagnitude')!.status).toBe('satisfied');
+    });
+
+    it('still requires an exhaustive magnitude classification for a generic fraction annotation', () => {
+        expect(core([Scope.FractionNumbers]).assessments.find(item => item.facet === 'fractionMagnitude')!.status).toBe('missing');
+    });
+
+    it('does not require a precision catalog label that cannot describe a four-place decimal', () => {
+        // DecimalNumbers can describe 0.1234; all current precision labels stop at <=3 places.
+        const result = core([Scope.DecimalNumbers]);
+        expect(result.assessments.some(item => item.facet === 'decimalPrecision')).toBe(false);
+        expect(result.triggers.find(item => item.ruleId === 'LD-DECIMAL-PRECISION-01')!.status).toBe('absent');
+        expect(result.assessments.find(item => item.facet === 'base')!.status).toBe('missing');
+        expect(core([Scope.DecimalNumbers, Scope.Base10]).assessments.filter(item => item.facet === 'base')
+            .every(item => item.status === 'satisfied')).toBe(true);
+    });
+
+    it('retains evidence-backed unit and precision assessments outside the annotation core', () => {
+        const proof = evidence({fractionUnit: applicable([Scope.NonUnitFractions]), decimalPrecision: applicable([Scope.HundredthDecimals])});
+        proof.triggers.fractionValues = {status: 'present', reason: 'A positive nonunit proper fraction is displayed.', references: ['view']};
+        proof.triggers.decimalRepresentation = {status: 'present', reason: 'Hundredths precision is displayed.', references: ['view']};
+        const result = evaluator.evaluate([Area.Addition, Scope.FractionNumbers, Scope.DecimalNumbers], proof);
+        expect(result.assessments.some(item => ['fractionUnit', 'decimalPrecision'].includes(item.facet))).toBe(false);
+        expect(result.evidenceAssessments!.find(item => item.facet === 'fractionUnit')).toMatchObject({
+            ruleId: 'LD-FRACTION-UNIT-01', status: 'missing', missingLabels: [Scope.NonUnitFractions]
+        });
+        expect(result.evidenceAssessments!.find(item => item.facet === 'decimalPrecision')).toMatchObject({
+            ruleId: 'LD-DECIMAL-PRECISION-01', status: 'missing', missingLabels: [Scope.HundredthDecimals]
+        });
     });
 
     it('keeps annotation completeness independent of applicable, absent and malformed evidence', () => {

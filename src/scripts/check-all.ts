@@ -129,13 +129,13 @@ async function main() {
         }
     }
 
-    console.log(`\n--- [7/7] Scoped Label Dependencies ---`);
+    console.log(`\n--- [7/7] Annotation Label Dependencies ---`);
     for (const specName of generatedSpecs) {
         try {
             execSync(`npx vite-node src/scripts/audit-label-dependencies.ts --spec=${specName} --strict`,
                 {cwd: PROJECT_ROOT, stdio: 'inherit'});
         } catch {
-            console.error(`❌ Scoped label dependency gate failed for "${specName}".`);
+            console.error(`❌ Annotation dependency gate failed for "${specName}".`);
             hasError = true;
         }
     }

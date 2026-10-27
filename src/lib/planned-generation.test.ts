@@ -1,4 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
+import {Area, Scope} from 'edugraph-ts/generated';
 import {planCompatibility, createGenerationSelectionReceipt, sampleGenerationPlan} from './compatibility.ts';
 import {normalizeSchemaChoices} from './schema-choices.ts';
 import {generatePlannedDraw, resolvePlannedConfigurations, selectionAdmittedByPlan} from './planned-generation.ts';
@@ -86,6 +87,21 @@ describe('planned generation handover', () => {
         const generate = vi.fn(() => {throw new Error('generator assertion');});
         expect(() => generatePlannedSampleWithRetry({generator: {...generator, generate}, viewSchema,
             plan: plan(), sampleKey})).toThrow('generator assertion');
+        expect(generate).toHaveBeenCalledOnce();
+    });
+
+    it('keeps incomplete annotations inspectable in a diagnostic draw', () => {
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.ArabicNumerals,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
+        const result = planCompatibility({identity: {targetId: 't', generatorId: 'new-producer', viewId: 'new-view'},
+            targetLabels: [], generatorLabels: labels, viewLabels: [], fields: []});
+        if (!result.supported) throw new Error(result.reason);
+        const generate = vi.fn(() => ({data: {arbitrary: 'available for diagnosis'}}));
+        const draw = generatePlannedDraw({generator: {type: 'statistics', schema: {}, generate},
+            viewSchema: {}, plan: result.plan, sampleKey: 't#new-producer#new-view#train#question#inst:0',
+            attempt: 1, seed: 1});
+        expect(draw.labels).toEqual([...labels].sort());
+        expect(draw.labels).not.toContain(Scope.Base10);
         expect(generate).toHaveBeenCalledOnce();
     });
 

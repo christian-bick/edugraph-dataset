@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {Area, Ability} from 'edugraph-ts';
+import {Area, Ability, Scope} from 'edugraph-ts';
 import {normalizeAndValidateSpec} from './spec-validator.ts';
 import {loadSpecTodos} from './spec-catalog.ts';
 import {validateStandardContracts, readStandardsMatchingGraph} from './standards-validation.ts';
@@ -58,6 +58,18 @@ describe('shared standards checks', () => {
             expect(inspected.errors.join()).toContain('exceed the dependency audit bound');
             expect(inspected.targets).toHaveLength(1);
         } finally {spy.mockRestore();}
+    });
+    it('leaves pre-draw completeness report-only but rejects annotation conflicts', async () => {
+        const result = await normalizeAndValidateSpec('fixture');
+        result.targets = [{id: 'active', labels: [Area.Addition, Ability.ProcedureExecution]}];
+        const generator = {generatorId: 'new-producer', labels: [Area.Addition, Scope.IntegerNumbers],
+            problemType: 'ArithmeticPairProblem'};
+        const view = {viewId: 'new-view', supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem'};
+        expect((await validateStandardContracts('fixture', [generator] as never, [view] as never)).errors).toEqual([]);
+        const conflict = {...generator, labels: [...generator.labels, Scope.NumbersWithZero, Scope.NumbersWithoutZero]};
+        expect((await validateStandardContracts('fixture', [conflict] as never, [view] as never)).errors.join())
+            .toContain('LD-ZERO-CONFLICT-01/zero');
+        expect(result.targets).toHaveLength(1);
     });
     it('enforces label/cardinality errors before matching', async () => {
         const result = await normalizeAndValidateSpec('ccss');

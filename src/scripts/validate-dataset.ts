@@ -463,10 +463,10 @@ async function main() {
     const dependencyCoverage = summarizeLabelDependencyCoverage({...dependencyInspection,
         subjects: dependencyInspection.subjects.filter(inDependencyScope),
         selection_coverage: dependencyInspection.selection_coverage.filter(inDependencyScope)});
-    console.log(`Scoped label dependency gate: ${dependencyCoverage.failures.length} failure(s).`);
+    console.log(`Annotation dependency gate: ${dependencyCoverage.failures.length} failure(s).`);
     if (dependencyCoverage.failures.length) {
         const details = dependencyCoverage.failures.map(failure => `${failure.subject}: ${failure.message}`).join('\n');
-        if (!reportOnly) throw new Error(`Scoped label dependency validation failed:\n${details}`);
+        if (!reportOnly) throw new Error(`Annotation dependency validation failed:\n${details}`);
         console.error(details);
     }
 

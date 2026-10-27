@@ -62,7 +62,7 @@ describe('label dependency audit with real generation contracts', () => {
         const evaluator = createLabelDependencyEvaluator();
         const result = evaluator.evaluate(row.labels, replayed.evidence);
         expect(result.assessments.find(assessment => assessment.facet === 'base')).toMatchObject({
-            status: 'missing', missingLabels: [Scope.Base10]
+            status: 'missing', missingLabels: []
         });
         expect(result.assessments.find(assessment => assessment.facet === 'operandDigits')?.status).toBe('satisfied');
         expect(draw.realizedLabels?.plannedLabels).not.toContain(Scope.SingleDigitSmallestOperand);
@@ -71,7 +71,6 @@ describe('label dependency audit with real generation contracts', () => {
             dataset: {status: 'available', generationId: 'fixture'}, selectionCoverage: [], evaluate: evaluator.evaluate,
             subjects: [{kind: 'sample', id: sampleKey, targetId: tuple.target.id, generatorId: tuple.generatorId,
                 viewId: tuple.viewId, labels: row.labels, evidence: replayed.evidence, replay: replayed.status,
-                coverageVariant: replayed.coverageVariant,
                 targetAssociations: [{spec: 'integration', target_id: 'alias'}]}]});
         expect(report.findings.some(finding => finding.facet === 'base' && finding.status === 'missing')).toBe(true);
         expect(report.subjects[0].targetAssociations).toEqual([{spec: 'integration', target_id: 'alias'}]);

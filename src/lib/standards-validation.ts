@@ -7,7 +7,6 @@ import {readDatasetManifest, datasetOntologyProvenanceHash} from './dataset-mani
 import {datasetDirForSpec, datasetOutDir} from './dataset-paths.ts';
 import {DEPENDENCY_GRAPH_SCHEMA_VERSION, DEPENDENCY_PLANNER_EPOCH} from './dependency-planner.ts';
 import {enumerateDependencyAuditSelections} from './label-dependency-audit.ts';
-import {assessLabelDependencyEvidence} from './label-dependency-evidence.ts';
 import {assertLabelDependencyCoverage} from './label-dependency-coverage.ts';
 
 export function readStandardsMatchingGraph(projectRoot: string, specName: string) {
@@ -44,8 +43,7 @@ export async function validateStandardContracts(specName: string,
             const selections = enumerateDependencyAuditSelections(tuple.plan);
             if (selections.status !== 'complete') throw new Error('Admitted label selections exceed the dependency audit bound.');
             for (const selection of selections.selections) assertLabelDependencyCoverage({kind: 'selection',
-                generatorId: tuple.generatorId, viewId: tuple.viewId, labels: selection.labels,
-                evidence: assessLabelDependencyEvidence({...tuple, mode: 'question'})},
+                generatorId: tuple.generatorId, viewId: tuple.viewId, labels: selection.labels},
                 `${specName}:${tuple.target.id}:${tuple.generatorId}/${tuple.viewId}`);
         } catch (error) {
             result.errors.push(`Label dependencies: ${error instanceof Error ? error.message : String(error)}`);

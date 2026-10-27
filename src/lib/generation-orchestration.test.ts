@@ -26,16 +26,16 @@ function fixture(targets: readonly {id: string; labels: string[]}[],
 }
 
 describe('module sample orchestration', () => {
-    it('fails a covered omission before retries, solution fallback or duplicate reuse', () => {
+    it('fails an unreviewed producer annotation omission before retries, solution fallback or duplicate reuse', () => {
         const base = fixture([], () => ({data: {value: 1}}));
         const generate = vi.fn(() => ({data: {operation: 'addition', num1: 2, num2: 3, answer: 5}}));
         const labels = [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutZero,
-            Scope.NumbersWithoutNegatives, Scope.TwoOperands];
-        const entry = {...base.entry, generatorId: 'arithmetic-ops-pairs', generalLabels: labels, labels,
-            generator: {type: 'arithmetic', schema: {}, generate}, spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: labels}} as GeneratorCatalogEntry;
+            Scope.NumbersWithoutNegatives, Scope.TwoOperands, Scope.SingleDigitLargestOperand];
+        const entry = {...base.entry, generalLabels: labels, labels,
+            generator: {type: 'arithmetic', schema: {}, generate}, spec: {generatorId: base.entry.generatorId, generalLabels: labels}} as GeneratorCatalogEntry;
         const viewLabels = [Ability.ProcedureExecution, Scope.ArabicNumerals];
-        const view = {...base.view, viewId: 'operations-boxes', generalLabels: viewLabels, supportedLabels: viewLabels,
-            spec: {viewId: 'operations-boxes', generalLabels: viewLabels}} as ViewCatalogEntry;
+        const view = {...base.view, generalLabels: viewLabels, supportedLabels: viewLabels,
+            spec: {viewId: base.view.viewId, generalLabels: viewLabels}} as ViewCatalogEntry;
         const tuples = matchTargets([{id: 'missing-base', labels: [Area.Addition, Ability.ProcedureExecution]}], [entry], [view]).tuples;
         expect(() => generateModuleSamples(entry, new Map([[view.viewId, view]]), tuples,
             'train', new Map(), new Map())).toThrow(LabelDependencyCoverageError);
@@ -86,11 +86,12 @@ describe('module sample orchestration', () => {
             generator: {type: 'arithmetic', schema: {}, generate: () => ({data: {
                 num1: 0, num2: 3, operation: 'multiplication', answer: 0
             }})}, generalLabels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero, Scope.Base10,
-                Scope.NumbersWithoutNegatives, Scope.TwoOperands],
+                Scope.NumbersWithoutNegatives, Scope.TwoOperands, Scope.SingleDigitLargestOperand],
             labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.NumbersWithZero, Scope.Base10,
-                Scope.NumbersWithoutNegatives, Scope.TwoOperands],
+                Scope.NumbersWithoutNegatives, Scope.TwoOperands, Scope.SingleDigitLargestOperand],
             spec: {generatorId: 'arithmetic-ops-pairs', generalLabels: [Area.Multiplication, Scope.IntegerNumbers,
-                Scope.NumbersWithZero, Scope.Base10, Scope.NumbersWithoutNegatives, Scope.TwoOperands]}};
+                Scope.NumbersWithZero, Scope.Base10, Scope.NumbersWithoutNegatives, Scope.TwoOperands,
+                Scope.SingleDigitLargestOperand]}};
         const view: ViewCatalogEntry = {...base.view, viewId: 'operations-boxes-inversion',
             generalLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals], supportedLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals],
             spec: {viewId: 'operations-boxes-inversion', generalLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals]}};

@@ -12,14 +12,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
     for (const arg of args) {
-        if (arg !== '--strict' && !/^--(?:spec|output-dir|max-selections)=.+$/.test(arg)) {
+        if (arg !== '--strict' && arg !== '--with-evidence' && !/^--(?:spec|output-dir|max-selections)=.+$/.test(arg)) {
             throw new Error(`Unsupported dependency audit option: ${arg}`);
         }
     }
     const strict = args.includes('--strict');
     const spec = getCliOption(args, 'spec');
     if (!spec || !/^[a-zA-Z0-9_-]+$/.test(spec)) {
-        throw new Error('Usage: npm run audit:label-dependencies -- --spec=<module> [--strict] [--max-selections=4096] [--output-dir=temp/…]');
+        throw new Error('Usage: npm run audit:label-dependencies -- --spec=<module> [--strict] [--with-evidence] [--max-selections=4096] [--output-dir=temp/…]');
     }
     const outputDir = resolve(PROJECT_ROOT, getCliOption(args, 'output-dir') ?? `temp/label-dependencies/${spec}`);
     const outputRelative = relative(resolve(PROJECT_ROOT, 'temp'), outputDir);
@@ -27,27 +27,27 @@ async function main(): Promise<void> {
         throw new Error('Audit reports must be written to a subdirectory of temp/.');
     }
     const limitArg = getCliOption(args, 'max-selections');
-    const report = await inspectLabelDependencies({projectRoot: PROJECT_ROOT, spec,
+    const report = await inspectLabelDependencies({projectRoot: PROJECT_ROOT, spec, includeEvidence: args.includes('--with-evidence'),
         maxSelections: limitArg === undefined ? undefined : Number(limitArg)});
     const enforcement = strict ? summarizeLabelDependencyCoverage(report) : undefined;
     const output = enforcement ? {...report, mode: 'strict', strict: enforcement} : report;
     const strictMarkdown = enforcement ? [
-        '', '## Reviewed strict coverage', '',
+        '', '## Strict annotation validation', '',
         `- Coverage policy: \`${enforcement.coverage_hash}\``,
-        '- Range remains report-only. Named unsupported/deferred variants remain visible.',
-        `- Subjects: ${enforcement.counts.covered} covered, ${enforcement.counts.deferred} deferred selections, ${enforcement.counts.uncovered} uncovered, ${enforcement.counts.outside_policy_scope} outside policy scope, ${enforcement.counts.invalid_context} invalid contexts`,
+        '- Range presence and pre-draw missing facets remain report-only. All eligible finalized annotations are checked independently of adapters.',
+        `- Subjects: ${enforcement.counts.samples_checked} samples checked, ${enforcement.counts.selections_checked} selections checked, ${enforcement.counts.outside_policy_scope} outside policy scope, ${enforcement.counts.invalid_context} invalid contexts`,
         `- Strict failures: ${enforcement.counts.failures}`, '',
         ...enforcement.failures.map(failure => `- \`${failure.subject}\` [${failure.code}]: ${failure.message}`), ''
     ].join('\n') : '';
     mkdirSync(outputDir, {recursive: true});
     writeFileSync(resolve(outputDir, 'audit.json'), `${JSON.stringify(output, null, 2)}\n`);
     const markdown = formatLabelDependencyAudit(report);
-    writeFileSync(resolve(outputDir, 'audit.md'), (strict ? markdown.replace('Report only.', 'Enforcement of reviewed strict coverage.') : markdown) + strictMarkdown);
-    console.log(`=== Label Dependency Audit (${strict ? 'reviewed strict coverage' : 'report only'}) ===`);
+    writeFileSync(resolve(outputDir, 'audit.md'), (strict ? markdown.replace('Report only.', 'Strict annotation validation.') : markdown) + strictMarkdown);
+    console.log(`=== Label Dependency Audit (${strict ? 'strict annotations' : 'report only'}) ===`);
     console.log(`Spec: ${spec}; selections: ${report.summary.selections}; samples: ${report.summary.samples}`);
-    console.log(`Missing: ${report.summary.assessments.missing}; unresolved: ${report.summary.assessments.unresolved}; incomplete tuples: ${report.summary.incomplete_tuples}`);
+    console.log(`Missing annotation facets: ${report.summary.assessments.missing}; conflicts: ${report.summary.conflicts}; incomplete tuples: ${report.summary.incomplete_tuples}`);
     if (enforcement) {
-        console.log(`Strict failures: ${enforcement.counts.failures}; covered subjects: ${enforcement.counts.covered}; uncovered subjects: ${enforcement.counts.uncovered}`);
+        console.log(`Strict failures: ${enforcement.counts.failures}; eligible stored samples checked: ${enforcement.counts.samples_checked}`);
         if (enforcement.counts.failures) process.exitCode = 1;
     }
     console.log(`JSON: ${resolve(outputDir, 'audit.json')}`);

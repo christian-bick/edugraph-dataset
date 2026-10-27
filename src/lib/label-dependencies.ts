@@ -142,7 +142,7 @@ export function createLabelDependencyEvaluator(
             facets: Object.keys(graph.facets).sort().map(name => {
                 const facet = graph.facets[name];
                 return {name, selector: 'root' in facet ? {root: facet.root} : {labels: ordered(facet.labels)},
-                    check: facet.check ?? 'evidence'};
+                    check: facet.check ?? 'annotation-presence'};
             }),
             rules: rules.map(rule => ({id: rule.id, when: normalizeTrigger(rule.when), assess: ordered(rule.assess)})),
             conflicts: conflictRules.map(rule => ({id: rule.id, facet: rule.facet, labels: ordered(rule.labels)}))

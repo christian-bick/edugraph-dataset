@@ -1,5 +1,6 @@
 import {AbstractProblem} from '../types/ml-engine.ts';
 import {assertResolvedTargetCoverage} from './label-contracts.ts';
+import {assertLabelDependencyCoverage} from './label-dependency-coverage.ts';
 import {
     computeSampleKey, computeSampleFilename, computeContentFingerprint,
     computeTaskFingerprint, generatePlannedSampleWithRetry, isValTuple,
@@ -104,6 +105,8 @@ export function generateModuleSamples(
 
         const fingerprintDraw = (inputDraw: PlannedGenerationDraw, mode?: SampleMode) => {
             const draw = mode ? completePlannedDrawLabels(inputDraw, tuple.plan, mode) : inputDraw;
+            assertLabelDependencyCoverage({generatorId: moduleName, viewId: tuple.viewId,
+                labels: draw.labels}, draw.replay.sampleKey);
             assertResolvedTargetCoverage(draw.labels, targetLabels, `${target.id}/${moduleName}/${tuple.viewId}`);
             const problem = buildProblem({
                 stub: draw.stub!,
@@ -158,6 +161,8 @@ export function generateModuleSamples(
         if (!question.stub) {
             const representedBy = representingSamples[0];
             if (representedBy) {
+                assertLabelDependencyCoverage({generatorId: representedBy.identity.generatorId,
+                    viewId: representedBy.identity.viewId, labels: representedBy.problem.labels}, representedBy.sampleKey);
                 assertResolvedTargetCoverage(representedBy.problem.labels, targetLabels, representedBy.sampleKey);
                 representedBy.associatedTargetIds.add(target.id);
                 representedBy.associatedSelections.set(target.id, associationReceipts.get(representedBy)!);

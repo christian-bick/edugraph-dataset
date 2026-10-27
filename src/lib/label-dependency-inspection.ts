@@ -18,9 +18,9 @@ import {buildLabelDependencyAudit, dependencyAuditResolvedAreas, dependencyAudit
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
 const tupleKey = (target: string, generator: string, view: string) => JSON.stringify([target, generator, view]);
 
-/** Read one immutable snapshot; CLI, cache audit and merge share the same evidence/provenance checks. */
+/** Check every stored annotation set; payload reconstruction is an optional diagnostic. */
 export async function inspectLabelDependencies(input: {
-    projectRoot: string; spec: string; maxSelections?: number; snapshot?: DatasetSnapshot;
+    projectRoot: string; spec: string; maxSelections?: number; snapshot?: DatasetSnapshot; includeEvidence?: boolean;
 }) {
     const {projectRoot: PROJECT_ROOT, spec, maxSelections: limit} = input;
     if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_DEPENDENCY_AUDIT_SELECTIONS)) {
@@ -53,7 +53,8 @@ export async function inspectLabelDependencies(input: {
             for (const selection of selections.selections) subjects.push({...ref, kind: 'selection',
                 id: `selection:${tupleKey(ref.targetId, ref.generatorId, ref.viewId)}:${selection.variantHash}`,
                 labels: selection.labels, planHash: tuple.plan.hash, variantHash: selection.variantHash,
-                evidence: assessLabelDependencyEvidence({...ref, mode: 'question'})});
+                evidence: input.includeEvidence ? assessLabelDependencyEvidence({...ref, mode: 'question'})
+                    : {adapter: 'not-requested', triggers: {}, facets: {}}});
         } catch (error) {
             coverage.push({...ref, status: 'invalid_plan', total: 'unknown', checked: 0, reason: errorMessage(error)});
         }
@@ -63,7 +64,7 @@ export async function inspectLabelDependencies(input: {
     // Keep rows and their source graph bound to this single immutable generation.
     const manifest = snapshot.buildManifest as DatasetManifest | null;
     const samples = (['train', 'val'] as SampleSplit[]).flatMap(split => snapshot.rows(split).map(row => ({row, split})));
-    const neededGenerators = new Set(samples.filter(({row}) => hasLabelDependencyEvidenceAdapter(row.generator, row.view))
+    const neededGenerators = new Set(samples.filter(({row}) => input.includeEvidence && hasLabelDependencyEvidenceAdapter(row.generator, row.view))
         .map(({row}) => row.generator));
     const runtime = neededGenerators.size ? await loadGeneratorCatalog(undefined, undefined,
         new Map(generators.filter(generator => neededGenerators.has(generator.generatorId))
@@ -92,12 +93,12 @@ export async function inspectLabelDependencies(input: {
             if (!labels.includes(area)) issues.push(`Stored annotations omit a resolved Area: ${area}.`);
         }
         if (row.spec !== spec) issues.push('Stored row belongs to a different spec.');
-        let evidence = assessLabelDependencyEvidence({generatorId: row.generator, viewId: row.view,
-            mode: row.mode === 'solution' ? 'solution' : 'question'});
-        let replay: DependencyAuditSubject['replay'] = 'unsupported';
-        let coverageVariant: DependencyAuditSubject['coverageVariant'];
+        let evidence = input.includeEvidence ? assessLabelDependencyEvidence({generatorId: row.generator, viewId: row.view,
+            mode: row.mode === 'solution' ? 'solution' : 'question'}) : {adapter: 'not-requested', triggers: {}, facets: {}};
+        let replay: DependencyAuditSubject['replay'] = input.includeEvidence ? 'unsupported' : 'not_requested';
+        const evidenceIssues: string[] = [];
         const current = tuplesByKey.get(tupleKey(String(row.target_id), row.generator, row.view));
-        if (hasLabelDependencyEvidenceAdapter(row.generator, row.view)) {
+        if (input.includeEvidence && hasLabelDependencyEvidenceAdapter(row.generator, row.view)) {
             const key = JSON.stringify([row.generator, row.view]);
             let sourceIssues = issuesByPair.get(key);
             if (!sourceIssues) {
@@ -109,13 +110,12 @@ export async function inspectLabelDependencies(input: {
                 generator: runtimeById.get(row.generator), viewSchema: viewsById.get(row.view)?.schema, sourceIssues});
             evidence = result.evidence;
             replay = result.status;
-            coverageVariant = result.coverageVariant;
-            issues.push(...result.issues);
+            evidenceIssues.push(...result.issues);
         }
         subjects.push({kind: 'sample', id: `sample:${split}:${row.sample_key}`, targetId: String(row.target_id ?? ''),
             generatorId: row.generator, viewId: row.view, labels, resolvedAreas: resolved.areas, planHash: current?.plan.hash,
             split, mode: String(row.mode ?? ''), fileName: row.file_name,
-            targetAssociations: row.target_associations ?? [], evidence, replay, coverageVariant, issues});
+            targetAssociations: row.target_associations ?? [], evidence, replay, issues, evidenceIssues});
     }
     const report = buildLabelDependencyAudit({spec, policyHash, ontology,
         dataset: {status: snapshot.generationId ? 'available' : 'unavailable', generationId: snapshot.generationId},

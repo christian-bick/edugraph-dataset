@@ -3,8 +3,6 @@ import type {ConfigSchema} from '../types/schema.ts';
 import type {ProblemGenerator, ResolvedProblemStub} from '../types/ml-engine.ts';
 import type {GenerationReplay, PreparedViewConfiguration, RealizedLabelReceipt} from '../types/generation-plan.ts';
 import {completeRealizedLabels} from './realized-labels.ts';
-import {assertLabelDependencyCoverage, hasLabelDependencyCoverage} from './label-dependency-coverage.ts';
-import {assessLabelDependencyEvidence} from './label-dependency-evidence.ts';
 import {CompatibilityContractError, createGenerationSelectionReceipt, sampleGenerationPlan, validateGenerationPlan,
     validateGenerationSelectionReceipt} from './compatibility.ts';
 import {resolveSchemaChoices, type SchemaChoiceSelection} from './schema-choices.ts';
@@ -25,10 +23,6 @@ export function completePlannedDrawLabels(draw: PlannedGenerationDraw, plan: Gen
     const completed = completeRealizedLabels({generatorId: plan.identity.generatorId, viewId: plan.identity.viewId,
         mode, data: draw.stub.data, plannedLabels: draw.realizedLabels?.plannedLabels ?? draw.labels,
         targetLabels: plan.targetLabels});
-    if (hasLabelDependencyCoverage(plan.identity.generatorId, plan.identity.viewId)) assertLabelDependencyCoverage({generatorId: plan.identity.generatorId, viewId: plan.identity.viewId,
-        mode, data: draw.stub.data, labels: completed.labels,
-        evidence: assessLabelDependencyEvidence({generatorId: plan.identity.generatorId,
-            viewId: plan.identity.viewId, mode, data: draw.stub.data})}, draw.replay.sampleKey);
     return {...draw, labels: completed.labels, ...(completed.receipt ? {realizedLabels: completed.receipt} : {})};
 }
 

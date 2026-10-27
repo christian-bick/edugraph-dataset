@@ -127,7 +127,7 @@ async function main(): Promise<void> {
         const snapshot = readDatasetSnapshot(datasetOutDir(PROJECT_ROOT, datasetDirForSpec(specName)));
         const coverage = summarizeLabelDependencyCoverage(await inspectLabelDependencies({
             projectRoot: PROJECT_ROOT, spec: specName, snapshot}));
-        if (coverage.failures.length) throw new Error(`Source ${specName} failed scoped label dependencies:\n` +
+        if (coverage.failures.length) throw new Error(`Source ${specName} failed annotation dependencies:\n` +
             coverage.failures.map(failure => `${failure.subject}: ${failure.message}`).join('\n'));
         snapshots.set(specName, snapshot);
     }
