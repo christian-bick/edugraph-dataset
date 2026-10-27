@@ -5,7 +5,7 @@ import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {MeasurementWordProblemsGenerator} from './generator.ts';
-import {MeasurementWordProblemsGeneratorSchema, spec} from './spec.ts';
+import {MeasurementWordProblemsGeneratorConfig, MeasurementWordProblemsGeneratorSchema, spec} from './spec.ts';
 
 const measurementCases = [
     [[Scope.MeterScale], [Scope.MeterScale], 'length'],
@@ -30,6 +30,7 @@ const operationCases = [
 
 const numberSchema = {numberKind: MeasurementWordProblemsGeneratorSchema.numberKind};
 const operationSchema = {operation: MeasurementWordProblemsGeneratorSchema.operation};
+const operandDigitSchema = {operandDigits: MeasurementWordProblemsGeneratorSchema.operandDigits};
 const fractionLabels = [Scope.FractionNumbers, Scope.ProperFractions];
 
 describe('MeasurementWordProblemsGenerator spec integration', () => {
@@ -44,72 +45,91 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         ]);
     });
 
-    it('resolves all 60 corrected Grade 4 label permutations', () => {
+    it('resolves all measurement and number fields with complete supported operation bindings', () => {
         for (const [measurementLabels, resolvedMeasurementLabels, measurementKind] of measurementCases) {
             for (const [numberLabel, numberKind] of numberCases) {
                 for (const [operationLabel, operation] of operationCases) {
-                    const labels = [
-                        Scope.SingleStep,
-                        Scope.TwoOperands,
-                        Ability.TextualReception,
-                        ...measurementLabels,
-                        numberLabel,
-                        operationLabel
-                    ];
-                    setSeed(`${measurementKind}-${numberKind}-${operation}`);
-                    const stub = generateWithLabels(generator, labels);
-                    expect(stub).not.toBeNull();
-                    expect(stub!.data).toMatchObject({measurementKind, numberKind, operation});
-                    expect(stub!.labels).toEqual(expect.arrayContaining([
-                        ...resolvedMeasurementLabels,
-                        numberLabel,
-                        operationLabel
-                    ]));
-                    expect(stub!.labels).not.toContain(Area.MeasuringWithUnits);
-                    expect(stub!.labels).not.toContain(Ability.TextualReception);
-                    expect(stub!.labels.includes(Scope.ProperFractions)).toBe(numberKind === 'fraction');
-                    expect(stub!.labels.includes(Scope.SingleDigitDivisor)).toBe(operation === 'division');
+                    const operandDigitBindings = operationLabel === Area.Addition && numberKind === 'integer'
+                        ? [[Scope.SingleDigitLargestOperand], [Scope.TwoDigitLargestOperand]]
+                        : operationLabel === Area.Multiplication
+                            ? [[numberKind === 'integer'
+                                ? Scope.SingleDigitSmallestOperand : Scope.SingleDigitLargestOperand]]
+                            : operationLabel === Area.Division ? [[Scope.SingleDigitDivisor]] : [[]];
+                    for (const operandDigitBinding of operandDigitBindings) {
+                        const labels = [
+                            Scope.SingleStep,
+                            Scope.TwoOperands,
+                            Ability.TextualReception,
+                            ...measurementLabels,
+                            numberLabel,
+                            operationLabel
+                        ];
+                        setSeed(`${measurementKind}-${numberKind}-${operation}`);
+                        const resolved = resolveSchemaChoices(MeasurementWordProblemsGeneratorSchema, labels, {
+                            measurementKind: [...resolvedMeasurementLabels],
+                            numberKind: numberKind === 'fraction' ? fractionLabels : [numberLabel],
+                            operation: [operationLabel],
+                            operandDigits: operandDigitBinding
+                        });
+                        const stub = generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig);
+                        expect(stub.data).toMatchObject({measurementKind, numberKind, operation});
+                        expect(resolved.resolvedLabels).toEqual(expect.arrayContaining([
+                            ...resolvedMeasurementLabels,
+                            numberLabel,
+                            operationLabel
+                        ]));
+                        expect(resolved.resolvedLabels).not.toContain(Area.MeasuringWithUnits);
+                        expect(resolved.resolvedLabels).not.toContain(Ability.TextualReception);
+                        expect(resolved.resolvedLabels.includes(Scope.ProperFractions)).toBe(numberKind === 'fraction');
+                        expect(resolved.resolvedLabels.includes(Scope.SingleDigitDivisor)).toBe(operation === 'division');
+                    }
                 }
             }
         }
     });
 
-    it('retains four operation values with alternative multiplication bundles for joint planning', () => {
-        for (const label of [Scope.SingleDigitDivisor, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]) {
+    it('declares operand-digit profiles independently of the four operations for joint planning', () => {
+        for (const label of [Scope.SingleDigitDivisor, Scope.SingleDigitSmallestOperand,
+            Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand]) {
             expect(spec.generalLabels).not.toContain(label);
         }
         expect(findSchemaFallbackContractIssues(operationSchema)).toEqual([]);
+        expect(findSchemaFallbackContractIssues(operandDigitSchema)).toEqual([]);
         const [domain] = normalizeSchemaChoices(operationSchema, [], 'generator');
-        expect(domain.alternatives).toHaveLength(5);
+        expect(domain.alternatives).toHaveLength(4);
         const configurations = domain.alternatives.map(alternative =>
             resolveSchemaChoices(operationSchema, [], {operation: alternative.labels}));
         expect(configurations).toEqual([
             {config: {operation: Area.Addition}, resolvedLabels: [Area.Addition]},
-            {config: {operation: Area.Division}, resolvedLabels: [Area.Division, Scope.SingleDigitDivisor]},
-            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication, Scope.SingleDigitLargestOperand]},
-            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication, Scope.SingleDigitSmallestOperand]},
+            {config: {operation: Area.Division}, resolvedLabels: [Area.Division]},
+            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication]},
             {config: {operation: Area.Subtraction}, resolvedLabels: [Area.Subtraction]}
         ]);
+        const [digitDomain] = normalizeSchemaChoices(operandDigitSchema, [], 'generator');
+        expect(digitDomain.alternatives).toHaveLength(5);
+        expect(digitDomain.alternatives.map(alternative =>
+            resolveSchemaChoices(operandDigitSchema, [], {operandDigits: alternative.labels})))
+            .toEqual([
+                {config: {operandDigits: {role: 'divisor', digits: 1}}, resolvedLabels: [Scope.SingleDigitDivisor]},
+                {config: {operandDigits: {role: 'largest', digits: 1}}, resolvedLabels: [Scope.SingleDigitLargestOperand]},
+                {config: {operandDigits: {role: 'smallest', digits: 1}}, resolvedLabels: [Scope.SingleDigitSmallestOperand]},
+                {config: {operandDigits: {role: 'largest', digits: 2}}, resolvedLabels: [Scope.TwoDigitLargestOperand]},
+                {config: {operandDigits: false}, resolvedLabels: []}
+            ]);
     });
 
     it.each([
-        ['partial division request', [Area.Division]],
-        ['explicit divisor-width request', [Scope.SingleDigitDivisor]],
-        ['complete division request', [Area.Division, Scope.SingleDigitDivisor]]
-    ])('admits a %s as the existing division configuration', (_, requestedLabels) => {
+        [Scope.SingleDigitDivisor, {role: 'divisor', digits: 1}],
+        [Scope.SingleDigitLargestOperand, {role: 'largest', digits: 1}],
+        [Scope.TwoDigitLargestOperand, {role: 'largest', digits: 2}]
+    ])('resolves an explicit %s descriptor to its profile', (label, profile) => {
+        const requestedLabels = [label];
         const labels = requestedLabels as string[];
-        const [domain] = normalizeSchemaChoices(operationSchema, labels, 'generator');
+        const [domain] = normalizeSchemaChoices(operandDigitSchema, labels, 'generator');
         expect(domain.alternatives).toHaveLength(1);
-        expect(resolveSchemaChoices(operationSchema, labels, {operation: domain.alternatives[0].labels}))
-            .toEqual({config: {operation: Area.Division}, resolvedLabels: [Area.Division, Scope.SingleDigitDivisor]});
+        expect(resolveSchemaChoices(operandDigitSchema, labels, {operandDigits: domain.alternatives[0].labels}))
+            .toEqual({config: {operandDigits: profile}, resolvedLabels: labels});
     });
-
-    it.each([Area.Addition, Area.Subtraction, Area.Multiplication])(
-        'does not rewrite %s to accommodate an explicit division descriptor', operation => {
-            const [domain] = normalizeSchemaChoices(operationSchema, [operation, Scope.SingleDigitDivisor], 'generator');
-            expect(domain.alternatives).toEqual([]);
-        }
-    );
 
     it('keeps exactly three number configurations with proper magnitude owned by the fraction choice', () => {
         expect(spec.generalLabels).not.toContain(Scope.ProperFractions);
@@ -143,10 +163,18 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
             .toEqual({config: {numberKind: 'fraction'}, resolvedLabels: fractionLabels});
 
         const fixedLabels = [Scope.MeterScale, Area.Multiplication];
+        const generateFraction = (requested: string[]) => {
+            const resolved = resolveSchemaChoices(MeasurementWordProblemsGeneratorSchema, [...fixedLabels, ...requested], {
+                measurementKind: [Scope.MeterScale], numberKind: fractionLabels,
+                operation: [Area.Multiplication], operandDigits: [Scope.SingleDigitLargestOperand]
+            });
+            return {data: generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig).data,
+                labels: resolved.resolvedLabels};
+        };
         setSeed('proper-fraction-declaration');
-        const original = generateWithLabels(generator, [...fixedLabels, Scope.FractionNumbers]);
+        const original = generateFraction([Scope.FractionNumbers]);
         setSeed('proper-fraction-declaration');
-        const explicit = generateWithLabels(generator, [...fixedLabels, ...labels]);
+        const explicit = generateFraction(labels);
         expect(explicit!.data).toEqual(original!.data);
         expect(explicit!.data.numberKind).toBe('fraction');
         expect(explicit!.labels).toEqual(expect.arrayContaining(fractionLabels));
@@ -196,6 +224,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
             Scope.Dollar,
             Scope.FractionNumbers,
             Area.Division,
+            Scope.SingleDigitDivisor,
             Ability.TextualReception
         ]);
         expect(stub).not.toBeNull();

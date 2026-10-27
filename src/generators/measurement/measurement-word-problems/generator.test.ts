@@ -1,5 +1,6 @@
 import {Area} from 'edugraph-ts';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
+import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {
     MeasurementWordProblemGrade4,
@@ -131,16 +132,77 @@ describe('MeasurementWordProblemsGenerator', () => {
         expect(generator.generate(config)).toEqual(first);
     });
 
+    it.each([
+        ['unprofiled integer addition', 'integer', Area.Addition, undefined],
+        ['fractional addition profile', 'fraction', Area.Addition, {role: 'largest', digits: 1}],
+        ['decimal addition profile', 'decimal', Area.Addition, {role: 'largest', digits: 2}],
+        ['subtraction profile', 'integer', Area.Subtraction, {role: 'largest', digits: 1}],
+        ['integer multiplication with largest profile', 'integer', Area.Multiplication, {role: 'largest', digits: 1}],
+        ['division with largest profile', 'integer', Area.Division, {role: 'largest', digits: 1}],
+        ['addition with smallest profile', 'integer', Area.Addition, {role: 'smallest', digits: 1}],
+        ['addition with divisor profile', 'integer', Area.Addition, {role: 'divisor', digits: 1}],
+        ['missing profile width', 'integer', Area.Addition, {role: 'largest'}],
+        ['zero profile width', 'integer', Area.Addition, {role: 'largest', digits: 0}],
+        ['unsupported profile width', 'integer', Area.Addition, {role: 'largest', digits: 3}],
+        ['noninteger profile width', 'integer', Area.Addition, {role: 'largest', digits: 1.5}],
+        ['string profile width', 'integer', Area.Addition, {role: 'largest', digits: '1'}],
+        ['null profile', 'integer', Area.Addition, null]
+    ])('rejects %s before sampling', (_, numberKind, operation, operandDigits) => {
+        const random = vi.spyOn(randomSource, 'random');
+        try {
+            expect(() => generator.generate({measurementKind: 'length', numberKind, operation, operandDigits} as never)).toThrow();
+            expect(random).not.toHaveBeenCalled();
+        } finally {
+            random.mockRestore();
+        }
+    });
+
+    it.each(measurementKinds)('partitions all original integer addition pairs by operand width for %s', measurementKind => {
+        const seen = new Set<string>();
+        const random = vi.spyOn(randomSource, 'random');
+        try {
+            for (const [largestOperandDigits, count] of [[1, 64], [2, 297]] as const) {
+                const profilePairs = new Set<string>();
+                for (let index = 0; index < count; index++) {
+                    random.mockReturnValue((index + 0.5) / count);
+                    const stub = generator.generate({measurementKind, numberKind: 'integer',
+                        operation: Area.Addition, operandDigits: {role: 'largest', digits: largestOperandDigits}});
+                    expectConsistent(stub.data, measurementKind, 'integer', 'addition');
+                    if (stub.data.operation !== 'addition') throw new Error('Expected addition operands.');
+                    const values = stub.data.operands.map(operand => operand.value.numerator);
+                    expect(String(Math.max(...values)).length).toBe(largestOperandDigits);
+                    const pair = values.join('+');
+                    expect(seen.has(pair)).toBe(false);
+                    seen.add(pair);
+                    profilePairs.add(pair);
+                }
+                expect(profilePairs.size).toBe(count);
+            }
+            const expected = new Set<string>();
+            for (let first = 2; first <= 20; first++) {
+                for (let second = 2; second <= 20; second++) expected.add(`${first}+${second}`);
+            }
+            expect(seen).toEqual(expected);
+            // The one-digit profile includes 9 + 9, although its answer has two digits.
+            expect(seen.has('9+9')).toBe(true);
+        } finally {
+            random.mockRestore();
+        }
+    });
+
     it('covers every measurement, number, and operation permutation with exact one-step math', () => {
         for (const measurementKind of measurementKinds) {
             for (const numberKind of numberKinds) {
                 for (const operationLabel of operations) {
-                    for (let seed = 0; seed < 40; seed++) {
+                    const profiles = numberKind === 'integer' && operationLabel === Area.Addition
+                        ? ([1, 2] as const).map(digits => ({role: 'largest', digits} as const)) : [undefined];
+                    for (const operandDigits of profiles) for (let seed = 0; seed < 40; seed++) {
                         setSeed(`${measurementKind}-${numberKind}-${operationLabel}-${seed}`);
                         const stub = generator.generate({
                             measurementKind,
                             numberKind,
-                            operation: operationLabel
+                            operation: operationLabel,
+                            operandDigits
                         });
                         expectConsistent(
                             stub.data,
@@ -160,7 +222,8 @@ describe('MeasurementWordProblemsGenerator', () => {
             const stub = generator.generate({
                 measurementKind,
                 numberKind: 'integer',
-                operation: Area.Addition
+                operation: Area.Addition,
+                operandDigits: {role: 'largest', digits: 1}
             });
             expect(Object.keys(stub)).toEqual(['data']);
         }

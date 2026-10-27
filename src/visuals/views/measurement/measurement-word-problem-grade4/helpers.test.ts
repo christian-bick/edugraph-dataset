@@ -39,7 +39,9 @@ const generate = (
     return generator.generate({
         measurementKind,
         numberKind,
-        operation: operationArea
+        operation: operationArea,
+        operandDigits: numberKind === 'integer' && operation === 'addition'
+            ? {role: 'largest', digits: 1} : undefined
     }).data;
 };
 

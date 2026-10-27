@@ -60,6 +60,17 @@ const pick = <T>(values: readonly T[]): T => values[Math.floor(random() * values
 const randomInteger = (min: number, max: number): number =>
     min + Math.floor(random() * (max - min + 1));
 
+const integerAdditionPairs = Array.from({length: 19}, (_, first) =>
+    Array.from({length: 19}, (_, second) => [first + 2, second + 2] as const)
+).flat();
+
+// Partition the existing finite support before sampling. Answer width does not
+// participate: for example, 9 + 9 still has a one-digit largest operand.
+const integerAdditionPairsByWidth = {
+    1: integerAdditionPairs.filter(([first, second]) => Math.max(first, second) < 10),
+    2: integerAdditionPairs.filter(([first, second]) => Math.max(first, second) >= 10)
+};
+
 const gcd = (a: number, b: number): number => {
     let first = Math.abs(a);
     let second = Math.abs(b);
@@ -79,10 +90,12 @@ const decimalValue = (tenths: number, measurementKind: MeasurementWordProblemKin
         ? {numerator: tenths * 10, denominator: 100}
         : {numerator: tenths, denominator: 10};
 
-const sampleInteger = (operation: ArithmeticOperation): MathSample => {
+const sampleInteger = (operation: ArithmeticOperation, largestOperandDigits?: 1 | 2): MathSample => {
     if (operation === 'addition') {
-        const first = randomInteger(2, 20);
-        const second = randomInteger(2, 20);
+        if (largestOperandDigits === undefined) {
+            throw new GeneratorValidationError('measurement-word-problems', 'Integer addition requires a largest-operand digit choice.');
+        }
+        const [first, second] = pick(integerAdditionPairsByWidth[largestOperandDigits]);
         return {operation, first: integer(first), second: integer(second), answer: integer(first + second)};
     }
     if (operation === 'subtraction') {
@@ -180,9 +193,10 @@ const sampleDecimal = (
 const sampleMath = (
     numberKind: MeasurementWordProblemNumberKind,
     operation: ArithmeticOperation,
-    measurementKind: MeasurementWordProblemKind
+    measurementKind: MeasurementWordProblemKind,
+    largestOperandDigits?: 1 | 2
 ): MathSample => {
-    if (numberKind === 'integer') return sampleInteger(operation);
+    if (numberKind === 'integer') return sampleInteger(operation, largestOperandDigits);
     if (numberKind === 'fraction') return sampleFraction(operation);
     return sampleDecimal(operation, measurementKind);
 };
@@ -264,8 +278,20 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
 
         const measurementKind = config.measurementKind as MeasurementWordProblemKind;
         const numberKind = config.numberKind as MeasurementWordProblemNumberKind;
+        const operandDigits = config.operandDigits;
+        if (operandDigits !== undefined && operandDigits !== false) {
+            const valid = operandDigits !== null && (
+                (numberKind === 'integer' && operation === 'addition'
+                    && operandDigits.role === 'largest' && [1, 2].includes(operandDigits.digits))
+                || (operation === 'multiplication' && operandDigits.digits === 1
+                    && operandDigits.role === (numberKind === 'integer' ? 'smallest' : 'largest'))
+                || (operation === 'division' && operandDigits.role === 'divisor' && operandDigits.digits === 1)
+            );
+            if (!valid) throw new GeneratorValidationError('measurement-word-problems', 'Unsupported operand digit choice.');
+        }
         const data = buildProblem(
-            sampleMath(numberKind, operation, measurementKind),
+            sampleMath(numberKind, operation, measurementKind,
+                operandDigits && operandDigits.role === 'largest' ? operandDigits.digits : undefined),
             measurementKind,
             numberKind
         );

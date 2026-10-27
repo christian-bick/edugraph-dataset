@@ -10,7 +10,9 @@ Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 [M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) are implemented
 in separate division and multiplication checkpoints. The
 [integer-only operand-digit gate](#integer-only-operand-digit-gate-2026-10-28) narrows the
-remaining measurement obligation to ten integer addition/subtraction selections.
+remaining measurement obligation to ten integer addition/subtraction selections. The
+[M4 width choices](#m4-integer-additive-width-choices-2026-10-28) repair these through
+explicitly selected generator configurations and a separately approved sampling change.
 
 ## Scope
 
@@ -25,7 +27,9 @@ pinned ontology. There is no runtime dependency on a sibling repo or graph datab
 
 Targets remain partial competency requests. Validate complete resolved generator/view
 annotation sets and actual stored annotations. Do not alter targets, matching policy,
-configuration, random draws, or images to make a dependency report pass.
+configuration, random draws, or images inside dependency validation. The separately
+approved M4 generator work below adds explicit width choices before sampling; validation
+still only checks annotations and never derives or completes them from generated values.
 
 **Range-policy work is excluded.** The existing range-presence check remains report-only.
 Do not recompute bounds, change thresholds or endpoint semantics, choose stronger ranges,
@@ -1181,3 +1185,82 @@ operand-digit selector keeps the organizational groups from satisfying this face
 label eligibility still follows the exact installed ontology. Adoption of the corrected
 package should run the normal eligibility, matching and dependency audits, without rewriting
 targets or inferring replacement labels.
+
+## M4 integer additive width choices (2026-10-28)
+
+The user approved splitting integer addition and subtraction into one- and two-digit
+largest-operand choices, including the resulting sampling change. Each operation is a
+separate implementation and commit checkpoint. All five measurement contexts keep their
+existing targets. Fraction and decimal addition/subtraction remain outside the integer-only
+digit requirement; organizational role groups are not added as labels.
+
+### Local declarations and sampling
+
+The `operation` field retains the four operation values and its existing single resolver
+entropy draw. A separate `operandDigits` field owns every configurable width label in this
+generator. It carries the existing multiplication and division declarations unchanged in
+meaning, plus `SingleDigitLargestOperand` and `TwoDigitLargestOperand` for integer addition
+and, at the second checkpoint, integer subtraction. Compatibility admits only the correct
+operation/number-kind/width combinations. Empty width bindings resolve to `false`; they
+are available only where no width is declared.
+
+This field separation is necessary because an exact plain addition request otherwise
+selects the plain operation alternative before considering width-specific alternatives.
+Different width configurations are not declared equivalent. The width resolver deliberately
+has no default empty choice, so compatibility can inspect all declared alternatives.
+The shared planner, resolvers and annotation evaluator are unchanged.
+
+The generator samples uniformly from the finite set permitted by the selected width.
+This preserves the complete previous mathematical support:
+
+| Operation | Existing support retained | One-digit largest | Two-digit largest |
+|---|---|---:|---:|
+| Integer addition | Each operand independently 2–20 | 64 pairs | 297 pairs |
+| Integer subtraction | Subtrahend 2–10, positive answer 1–15, minuend their sum | 28 pairs | 107 pairs |
+
+Widths classify the operands, not the answer. Thus `9 + 9 = 18` belongs to the one-digit
+choice. The two-digit choice may include a one-digit smaller operand. Neither branch
+silently narrows the set to equal-width operands.
+
+The existing planner selects the two compatible widths equally for each fixed integer
+operation/context target. This changes the one-digit proportion from 64/361 (17.7%) for
+addition and 28/135 (20.7%) for subtraction to 50% each. Conditional sampling is uniform
+within the chosen width. Broad requests that leave the operation or number kind open may
+also redistribute across the larger set of admitted assignments. No weighting feature,
+adapter, payload inference or automatic annotation completion is introduced.
+
+The canonical payload and renderer contract remain unchanged. Runtime guards reject
+missing integer additive widths and supplied profiles inconsistent with the operation
+or number kind. The source declarations select the labels before generation; tests prove
+that the generated operands satisfy those declarations.
+
+### Addition checkpoint
+
+The first checkpoint enables both integer addition widths in all five measurement
+contexts. Integer subtraction retains its original sampler and five outstanding source
+findings until the second checkpoint. Target matching and sample allocations are retained;
+new plan receipts are derived from the changed schema rather than replaying stale receipts.
+
+Verification preserves **1,013 targets, 1,182 matches and all 60 family assignments**.
+Family source selections increase from 60 to 65, while missing operand-digit assessments
+fall from 10 to 5. Global raw non-range source gaps fall from 1,425 to 1,420 (1,407 to
+1,402 distinct) across 1,227 source selections. Each integer addition target admits both
+widths equally. All 6,860 checked draws satisfy their selected width declarations.
+
+Fresh generation at the 140 stored-origin keys changes exactly the 12 integer addition
+payloads and fingerprints. The other 128 retain their content, annotations, semantic
+configuration and mathematical/view random states. Their resolved configuration now records
+the explicit digit field, and all family plan hashes change because the schema changed.
+Targets, shared planner/resolvers, policy, view implementation and the dataset pointer are
+unchanged; only the consuming view's direct test fixture needs the new addition profile.
+
+The five focused test files pass **214 tests**. Both changed generator implementation files
+have **100% statements, branches, functions and lines covered**. Type checking and the full
+generator/view specification audit pass. Evidence is under
+`temp/measurement-width-choices/addition/`, `addition-audit/`, `addition-coverage/` and the
+corresponding command logs.
+
+The stored dataset remains unchanged at **4,146 non-range strict findings**. Its 140
+measurement rows still contain 700 raw findings, including 46 stored operand-digit gaps.
+Canonical regeneration and VQA remain at the agreed readiness checkpoint; source repair
+does not waive the strict gate or imply that stored annotations were repaired.

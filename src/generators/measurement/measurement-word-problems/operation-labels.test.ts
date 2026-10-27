@@ -3,48 +3,34 @@ import {describe, expect, it} from 'vitest';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../../arithmetic/helpers.ts';
-import {resolveMeasurementWordProblemOperation} from './operation-labels.ts';
+import {
+    resolveMeasurementWordProblemOperandDigits,
+    resolveMeasurementWordProblemOperation
+} from './operation-labels.ts';
 
 describe('measurement word-problem operation label resolver', () => {
-    it.each([
-        [Area.Addition, [Area.Addition]],
-        [Area.Subtraction, [Area.Subtraction]],
-        [Area.Multiplication, [Area.Multiplication, Scope.SingleDigitSmallestOperand]],
-        [Area.Multiplication, [Area.Multiplication, Scope.SingleDigitLargestOperand]],
-        [Area.Division, [Area.Division, Scope.SingleDigitDivisor]]
-    ])('preserves the existing %s configuration and one-draw entropy consumption', (operation, requestedLabels) => {
-        setSeed(`operation-declaration-${operation}`);
-        const preceding = resolveDeclaredOperation([operation as string]);
-        const precedingRandomState = getRandomState();
-        setSeed(`operation-declaration-${operation}`);
-        expect(resolveMeasurementWordProblemOperation(requestedLabels as string[])).toBe(preceding);
-        expect(getRandomState()).toEqual(precedingRandomState);
-    });
+    it.each([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division])(
+        'preserves the existing %s configuration and one-draw entropy consumption', operation => {
+            setSeed(`operation-declaration-${operation}`);
+            const preceding = resolveDeclaredOperation([operation]);
+            const precedingRandomState = getRandomState();
+            setSeed(`operation-declaration-${operation}`);
+            expect(resolveMeasurementWordProblemOperation([operation])).toBe(preceding);
+            expect(getRandomState()).toEqual(precedingRandomState);
+        }
+    );
 
-    it.each([
-        ['empty', []],
-        ['division only', [Area.Division]],
-        ['divisor width only', [Scope.SingleDigitDivisor]],
-        ['multiplication only', [Area.Multiplication]],
-        ['smallest-operand width only', [Scope.SingleDigitSmallestOperand]],
-        ['largest-operand width only', [Scope.SingleDigitLargestOperand]]
-    ])('leaves an incomplete %s binding unresolved without consuming entropy', (_, requestedLabels) => {
-        setSeed('incomplete-operation-binding');
+    it('leaves an empty operation binding unresolved without consuming entropy', () => {
+        setSeed('empty-operation-binding');
         const before = getRandomState();
-        expect(resolveMeasurementWordProblemOperation(requestedLabels as string[])).toBeUndefined();
+        expect(resolveMeasurementWordProblemOperation([])).toBeUndefined();
         expect(getRandomState()).toEqual(before);
     });
 
-    it.each([
-        ['competing operations', [Area.Addition, Area.Subtraction]],
-        ['non-division with divisor width', [Area.Addition, Scope.SingleDigitDivisor]],
-        ['division with a competing operation', [Area.Division, Area.Multiplication, Scope.SingleDigitDivisor]],
-        ['competing multiplication bundles', [Area.Multiplication, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]],
-        ['addition with multiplication width', [Area.Addition, Scope.SingleDigitSmallestOperand]]
-    ])('rejects %s without consuming entropy', (_, requestedLabels) => {
+    it('rejects competing operations without consuming entropy', () => {
         setSeed('conflicting-operation-binding');
         const before = getRandomState();
-        expect(() => resolveMeasurementWordProblemOperation(requestedLabels as string[])).toThrow();
+        expect(() => resolveMeasurementWordProblemOperation([Area.Addition, Area.Subtraction])).toThrow();
         expect(getRandomState()).toEqual(before);
     });
 
@@ -53,5 +39,31 @@ describe('measurement word-problem operation label resolver', () => {
         expect(domain.alternatives.map(alternative => alternative.labels)).toEqual([
             [Area.Addition], [Area.Division], [Area.Multiplication], [Area.Subtraction]
         ]);
+    });
+});
+
+describe('measurement word-problem operand-digit label resolver', () => {
+    it.each([
+        [[], false],
+        [[Scope.SingleDigitLargestOperand], {role: 'largest', digits: 1}],
+        [[Scope.TwoDigitLargestOperand], {role: 'largest', digits: 2}],
+        [[Scope.SingleDigitSmallestOperand], {role: 'smallest', digits: 1}],
+        [[Scope.SingleDigitDivisor], {role: 'divisor', digits: 1}]
+    ])('resolves the explicit %s profile without consuming entropy', (labels, profile) => {
+        setSeed('operand-width-declaration');
+        const before = getRandomState();
+        expect(resolveMeasurementWordProblemOperandDigits(labels as string[])).toEqual(profile);
+        expect(getRandomState()).toEqual(before);
+    });
+
+    it.each([
+        [Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand],
+        [Scope.SingleDigitLargestOperand, Scope.SingleDigitSmallestOperand],
+        [Scope.SingleDigitDivisor, Scope.SingleDigitSmallestOperand]
+    ])('rejects conflicting digit claims %s + %s without consuming entropy', (...labels) => {
+        setSeed('conflicting-width-binding');
+        const before = getRandomState();
+        expect(() => resolveMeasurementWordProblemOperandDigits(labels)).toThrow();
+        expect(getRandomState()).toEqual(before);
     });
 });

@@ -3,7 +3,12 @@ import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
-import {measurementWordProblemOperationChoices, resolveMeasurementWordProblemOperation} from './operation-labels.ts';
+import {
+    measurementWordProblemOperandDigitChoices,
+    measurementWordProblemOperationChoices,
+    resolveMeasurementWordProblemOperandDigits,
+    resolveMeasurementWordProblemOperation
+} from './operation-labels.ts';
 
 export const measurementWordProblemKinds = [
     Scope.MeterScale,
@@ -28,17 +33,31 @@ export const spec: GeneratorSpec = {
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
     ],
-    compatibility: [generatorLabelRule('measurement-multiplication-operand-digits', [
+    compatibility: [generatorLabelRule('measurement-operand-digits', [
+        Area.Addition,
+        Area.Subtraction,
         Area.Multiplication,
+        Area.Division,
         Scope.IntegerNumbers,
         Scope.FractionNumbers,
         Scope.DecimalNumbers,
         Scope.SingleDigitSmallestOperand,
-        Scope.SingleDigitLargestOperand
-    ], selected => !selected(Area.Multiplication)
-        || (selected(Scope.IntegerNumbers) && selected(Scope.SingleDigitSmallestOperand))
-        || ((selected(Scope.FractionNumbers) || selected(Scope.DecimalNumbers))
-            && selected(Scope.SingleDigitLargestOperand)))]
+        Scope.SingleDigitLargestOperand,
+        Scope.TwoDigitLargestOperand,
+        Scope.SingleDigitDivisor
+    ], selected => {
+        if (selected(Area.Division)) return selected(Scope.SingleDigitDivisor);
+        if (selected(Area.Multiplication)) return selected(Scope.IntegerNumbers)
+            ? selected(Scope.SingleDigitSmallestOperand)
+            : selected(Scope.SingleDigitLargestOperand);
+        if (selected(Area.Addition) && selected(Scope.IntegerNumbers)) return (
+            selected(Scope.SingleDigitLargestOperand) || selected(Scope.TwoDigitLargestOperand)
+        );
+        return !selected(Scope.SingleDigitSmallestOperand)
+            && !selected(Scope.SingleDigitLargestOperand)
+            && !selected(Scope.TwoDigitLargestOperand)
+            && !selected(Scope.SingleDigitDivisor);
+    })]
 };
 
 export const MeasurementWordProblemsGeneratorSchema = {
@@ -84,6 +103,11 @@ export const MeasurementWordProblemsGeneratorSchema = {
         [...new Set(measurementWordProblemOperationChoices.flat())],
         resolveMeasurementWordProblemOperation,
         measurementWordProblemOperationChoices
+    ],
+    operandDigits: [
+        [...new Set(measurementWordProblemOperandDigitChoices.flat())],
+        resolveMeasurementWordProblemOperandDigits,
+        measurementWordProblemOperandDigitChoices
     ]
 } as const;
 
