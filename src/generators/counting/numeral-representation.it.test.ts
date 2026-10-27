@@ -53,6 +53,10 @@ describe('counting numeral representation ownership', () => {
             const labels = [...quantityLabels, ability];
 
             expect(matchesTarget(labels, generator, view)).toEqual({matched: true});
+            if (generatorId === 'counting-basic') {
+                expect(generator.generalLabels).not.toContain(Scope.NumbersWithoutZero);
+                expect(view.generalLabels).toContain(Scope.NumbersWithoutZero);
+            }
             for (const representation of [Scope.Base10, Scope.ArabicNumerals]) {
                 expect(matchesTarget([...labels, representation], generator, view)).toEqual({
                     matched: false,
@@ -71,7 +75,8 @@ describe('counting numeral representation ownership', () => {
             const result = matchTarget({
                 id: `numeral-response-${viewId}`,
                 labels: [
-                    ...quantityLabels, ability, Scope.Base10,
+                    ...quantityLabels.filter(label => viewId !== 'counting-objects-parity' || label !== Scope.NumbersWithoutZero),
+                    ability, Scope.Base10,
                     ...(viewId === 'sorting-classify-order' ? [Area.NumericOrder] : [])
                 ]
             }, generator, view);
@@ -80,7 +85,19 @@ describe('counting numeral representation ownership', () => {
             if (!result.matched) return;
             expect(result.plan.generatorLabels).not.toContain(Scope.Base10);
             expect(result.plan.viewLabels).toContain(Scope.Base10);
+            if (generatorId === 'counting-basic') {
+                expect(result.plan.generatorLabels).not.toContain(Scope.NumbersWithoutZero);
+                expect(result.plan.viewLabels.includes(Scope.NumbersWithoutZero))
+                    .toBe(viewId !== 'counting-objects-parity');
+            }
         }
     );
+
+    it('does not advertise zero absence for parity classification', () => {
+        const generator = generators.find(entry => entry.generatorId === 'counting-basic')!;
+        const view = views.find(entry => entry.viewId === 'counting-objects-parity')!;
+        expect(matchesTarget([...quantityLabels, Ability.ConceptClassification], generator, view))
+            .toEqual({matched: false, reason: 'unsupported-label', label: Scope.NumbersWithoutZero});
+    });
 
 });

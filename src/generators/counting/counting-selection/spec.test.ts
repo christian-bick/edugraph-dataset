@@ -9,8 +9,9 @@ import {CountingSelectionGeneratorSchema, spec} from './spec.ts';
 describe('counting-selection spec', () => {
     const generator = new CountingSelectionGenerator();
 
-    it('preserves the basic counting capabilities without selecting a learner action', () => {
-        expect(spec.generalLabels).toEqual(basicSpec.generalLabels);
+    it('retains positive subset counts without giving every basic projection a zero-absence claim', () => {
+        expect(spec.generalLabels).toEqual(expect.arrayContaining([...basicSpec.generalLabels, Scope.NumbersWithoutZero]));
+        expect(basicSpec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
         expect(extractSchemaLabels(CountingSelectionGeneratorSchema))
             .toEqual(extractSchemaLabels(CountingBasicGeneratorSchema));
         expect(Object.keys(CountingSelectionGeneratorSchema).sort()).toEqual(['parity', 'range']);

@@ -5,7 +5,7 @@ import { generatePositions } from '../../../helpers/counting-helpers.ts';
 import { CountingObjectsCardinalityViewConfig, CountingObjectsCardinalityViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { Scope } from 'edugraph-ts';
-import { validateProblemData } from '../../../helpers/validation.ts';
+import {validatePositiveCountingData} from '../positive-count.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -19,9 +19,7 @@ const CountingObjectsCardinalityCore = ({ config, payload }: CoreProps) => {
     const { problem, isSolutionView } = payload;
     const seed = payload.seed;
 
-    validateProblemData('counting-objects-cardinality', problem.data, ['numObjects']);
-
-    const { numObjects } = problem.data;
+    const numObjects = validatePositiveCountingData('counting-objects-cardinality', problem.data);
 
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
     if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';

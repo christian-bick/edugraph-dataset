@@ -5,21 +5,24 @@ import {matchTarget} from '../../../../lib/matching.ts';
 import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../../lib/planned-generation.ts';
 import {CountingBasicGenerator} from '../../../../generators/counting/counting-basic/generator.ts';
 import {extractSchemaLabels} from '../../../../lib/utils.ts';
+import {createLabelDependencyEvaluator} from '../../../../lib/label-dependencies.ts';
 import {CountingObjectsParityViewSchema, spec} from './spec.ts';
 
 describe('counting-objects-parity capabilities', () => {
     it.each([Scope.EvenNumbers, Scope.OddNumbers])('preserves an existing %s target while annotating visible numerals', parity => {
         const target = {id: `parity-${parity.split('/').pop()}`, labels: [Area.NumerationWithIntegers,
             Scope.NumbersSmaller20, parity, Ability.ConceptClassification]};
-        const matched = matchTarget(target, {
+        const generator = {
             generatorId: generatorSpec.generatorId, spec: generatorSpec, schema: CountingBasicGeneratorSchema,
             generalLabels: generatorSpec.generalLabels,
             labels: [...generatorSpec.generalLabels, ...extractSchemaLabels(CountingBasicGeneratorSchema)],
             problemType: 'CountingProblem'
-        }, {
+        };
+        const view = {
             viewId: spec.viewId, spec, schema: CountingObjectsParityViewSchema, generalLabels: spec.generalLabels,
             supportedLabels: [...spec.generalLabels], problemType: 'CountingProblem'
-        });
+        };
+        const matched = matchTarget(target, generator, view);
         expect(matched.matched).toBe(true);
         if (!matched.matched) throw new Error('Existing parity target stopped matching.');
         const resolved = resolvePlannedConfigurations({generatorSchema: CountingBasicGeneratorSchema,
@@ -31,6 +34,15 @@ describe('counting-objects-parity capabilities', () => {
         expect(resolved.labels).toEqual(expect.arrayContaining([...target.labels, Scope.ArabicNumerals,
             Scope.Base10, Scope.PhysicalNumbers]));
         expect(resolved.view.config).toEqual({});
+        expect(generatorSpec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
+        for (const zero of [Scope.NumbersWithoutZero, Scope.NumbersWithZero]) {
+            expect(resolved.labels).not.toContain(zero);
+            expect(matchTarget({...target, labels: [...target.labels, zero]}, generator, view))
+                .toMatchObject({matched: false, reason: 'unsupported-label', label: zero});
+        }
+        const assessment = createLabelDependencyEvaluator().evaluate(resolved.labels)
+            .assessments.find(item => item.facet === 'zero');
+        expect(assessment?.status).toBe('missing');
 
         for (const mode of ['question', 'solution'] as const) {
             const draw = generatePlannedDraw({generator: new CountingBasicGenerator(), viewSchema: CountingObjectsParityViewSchema,

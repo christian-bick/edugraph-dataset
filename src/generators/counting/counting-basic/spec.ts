@@ -4,6 +4,7 @@ import {countingQuantityLabels, countingQuantitySchema} from '../counting-quanti
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-basic',
+    // A positive collection can produce zero-valued groups or remainders in a view.
     generalLabels: countingQuantityLabels
 };
 

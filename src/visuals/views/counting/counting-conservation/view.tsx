@@ -3,7 +3,7 @@ import {useMemo} from 'react';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {CountingConservationViewConfig, CountingConservationViewSchema} from './spec.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {validateProblemData} from '../../../helpers/validation.ts';
+import {validatePositiveCountingData} from '../positive-count.ts';
 import {CONSERVATION_ROW_WIDTH, getConservationLayout} from './helpers.ts';
 import '../../../../tailwind.css';
 
@@ -55,9 +55,7 @@ const CountingConservationCore = ({ config: _config, payload }: CoreProps) => {
     const seed = payload.seed;
     const data = problem.data;
 
-    validateProblemData('counting-conservation', data, ['numObjects']);
-
-    const number = data.numObjects;
+    const number = validatePositiveCountingData('counting-conservation', data);
     const layout = getConservationLayout(number);
 
     const icon = useMemo(() => {

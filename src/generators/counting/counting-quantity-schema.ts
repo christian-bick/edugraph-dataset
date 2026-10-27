@@ -5,7 +5,6 @@ import {resolveParityConstraint} from './helpers.ts';
 export const countingQuantityLabels = [
     Area.NumerationWithIntegers,
     Scope.IntegerNumbers,
-    Scope.NumbersWithoutZero,
     Scope.NumbersWithoutNegatives,
     Scope.AdditiveCount
 ] as const;

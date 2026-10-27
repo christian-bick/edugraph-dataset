@@ -13,7 +13,8 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.NumericIdentity,
         Ability.DirectUnderstanding,
-        Scope.PhysicalNumbers
+        Scope.PhysicalNumbers,
+        Scope.NumbersWithoutZero
     ],
 };
 

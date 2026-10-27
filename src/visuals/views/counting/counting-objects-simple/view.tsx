@@ -5,7 +5,8 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { generatePositions } from '../../../helpers/counting-helpers.ts';
 import { CountingObjectsSimpleViewConfig, CountingObjectsSimpleViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import { validateProblemData, ViewValidationError } from '../../../helpers/validation.ts';
+import { ViewValidationError } from '../../../helpers/validation.ts';
+import {validatePositiveCountingData} from '../positive-count.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -20,9 +21,7 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     const seed = payload.seed;
     const data = problem.data;
 
-    validateProblemData('counting-objects-simple', data, ['numObjects']);
-
-    const { numObjects } = data;
+    const numObjects = validatePositiveCountingData('counting-objects-simple', data);
     
     let arrangement: 'line' | 'circle' | 'scattered' | 'array';
     if (config.arrangement === Scope.BoxArrangement) arrangement = 'array';
@@ -77,14 +76,10 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
                 </div>
                 <p className={`mt-4 text-base leading-relaxed text-center ${isSolutionView ? 'text-green-700' : 'text-slate-700'}`}>
                     {isSolutionView ? (
-                        numObjects === 0 ? (
-                            <>There are no objects to count, so the total is {numObjects}.</>
-                        ) : (
-                            <>
-                                Count in order from one, matching each counting number to a different object.
-                                The last number gives the total because no object was skipped or counted twice.
-                            </>
-                        )
+                        <>
+                            Count in order from one, matching each counting number to a different object.
+                            The last number gives the total because no object was skipped or counted twice.
+                        </>
                     ) : (
                         <>Write the total in digits. Explain how you counted and why your count gives the total.</>
                     )}
