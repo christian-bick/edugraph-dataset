@@ -4,6 +4,10 @@ Status: implemented as annotation-only validation. The repository contains one s
 a pure ontology-aware evaluator, and a shared strict gate and audit. Generator payloads and
 rendered images are outside this initiative.
 
+Next work: [repair rollout and consolidated backlog](#repair-rollout-plan),
+[algebra/parity decisions](#algebra-and-parity-decision-note), and the
+[proposed second measurement batch](#proposed-second-measurement-batch).
+
 ## Scope
 
 Use declarative TypeScript data and the exact installed `edugraph-ts` ontology. Dependency
@@ -332,3 +336,419 @@ gate exception, adapter, completion, cache update or Gemini evaluation was perfo
 The complete execution log is `temp/measurement-declarations/regenerate-affected.txt`.
 Regeneration remains blocked on the remaining declaration gaps, independently of approval
 for its broader execution scope.
+
+## Repair rollout plan
+
+Status: proposed on 2026-10-27, following checkpoint `af69020e`. This update records the
+backlog and proposed decisions; it does not implement additional label or model changes.
+The agreed Area allowlist and range-policy exclusion above remain fixed, as do the 1,013
+normalized target conjunctions. The existing 1,182 semantic matches are the comparison
+baseline. Truthful capability additions may admit further matches; review them explicitly
+and retain the existing target coverage.
+
+Use the current admitted annotation selections as the working backlog. Their values come
+from ordinary invariant declarations and selected schema alternatives. The existing audit
+enumerates these assignments without inspecting payloads or rendering images. Source review
+and focused tests establish which labels are true; the graph continues to validate annotations
+only. No adapter, post-draw completion or producer-specific validator is part of this rollout.
+
+Classify a proposed repair before implementing it:
+
+| Repair class | Required evidence | Action |
+|---|---|---|
+| Invariant | True for every supported configuration and compatible projection owned by the module | Add an ordinary `generalLabels` declaration at the correct owner. |
+| Existing choice | The current schema choice already determines the distinction | Add the truthful label to that existing alternative; prove identical resolved values, admissible configurations and mathematical draws. |
+| Decision | The distinction varies within a configuration, depends on the task projection, or lacks a justified ontology meaning | Record concrete examples and a recommendation; agree a normal model/schema or semantic change before implementation. |
+
+Do not treat a missing family as evidence for a particular member. In particular, an
+unrequired zero or negative value does not establish its absence. Follow
+[SPEC-6](../spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references) for
+choice/default semantics and [SPEC-8](../spec-general.md#spec-8--no-duplicate-parameterization-across-the-generatorview-pair)
+for ownership. Existing configuration distinctions can be annotated without introducing
+new sampling behavior; introducing a new mathematical distinction is a separate decision.
+
+### Working checkpoints
+
+1. Review the algebra/parity decisions early, in parallel with the narrowly scoped second
+   measurement batch. Prioritize shared, proven omissions rather than the alphabetical
+   order in which generation first encounters a failure.
+2. Implement small related batches from the inventory below. Before each batch, identify
+   all compatible producers/consumers, the declaration owner, and any newly activated
+   dependency rules. Report remaining gaps explicitly when a batch is intentionally partial.
+3. Verify each batch with ownership/type/spec checks and relevant regression tests. Compare
+   targets, matches, schema selections and representative stored-origin replays. For an
+   annotation-only change, preserve resolved configurations, mathematical data, random
+   continuation and content/task fingerprints of existing samples. Inspect every added
+   match. Run the full required coverage gate for implementation checkpoints.
+4. Re-run the complete selection audit after each batch. Record distinct selection/facet
+   gaps, raw assessments and selections with gaps, together with closed and newly introduced
+   findings. Commit each coherent repair and its verification notes on this branch. A
+   partial batch can reduce facet gaps while leaving the number of incomplete selections
+   unchanged; report both metrics.
+5. Use zero non-range missing requirements, conflicts, invalid contexts and incomplete
+   enumerations across current admitted selections as the readiness checkpoint for another
+   full canonical run. This is a project work criterion, not a change to the report-only
+   treatment of pre-draw omissions in the shared validator.
+6. At readiness, run the already authorized full affected regeneration with an authoritative
+   graph rebuild. Audit the resulting stored annotations, exact target coverage, image
+   integrity and train/validation separation; inspect churn and newly admitted matches.
+   Refresh VQA only for records needing it, reusing exact passing cache entries, then run
+   the strict dataset audit. The stored snapshot is replaced only by a successful transaction.
+
+The agent handles routine source review, implementation, verification and commits. User
+checkpoints concern concrete semantic ambiguity or a proposed change beyond declarations;
+each decision should include examples, affected labels, a recommended option and its impact.
+Broad regeneration is already authorized. A failing label contract remains actionable work,
+and this plan proposes no bypass of the shared gate.
+
+The reproducible audit command for this checkpoint is:
+
+```bash
+npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/label-dependency-next-plan/audit
+```
+
+Its policy hash is `f80dac1bb77b364ca754903051efb979d2ab9f62ff2a5da1ba57eb01dcc4f505`.
+The stored generation is `cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`.
+The committed inventory below is the durable checkpoint; local `backlog.json` and
+`build-backlog.mjs` under `temp/label-dependency-next-plan/` retain pair-level detail and
+aggregation checks. They are verification artifacts, not runtime dependencies.
+
+### Consolidated declaration backlog (2026-10-27)
+
+The current audit enumerates all **1,222 admitted selections**, including **807 eligible selections**.
+**616 selections across 81 generators and 171 generator/view pairs** have missing non-range groups.
+They contain **1,750 distinct selection/facet gaps** and **1,788 raw rule/facet assessments**;
+the 38 additional assessments are repeated base checks under numeric and decimal rules.
+There are no conflicts, invalid contexts, incomplete tuple enumerations or row/label-contract errors.
+The existing snapshot still contains 4,318 strict findings across 1,332 stored samples. Source selection
+counts are the repair progress measure; stored findings change only after successful regeneration.
+
+A selection is one admitted label assignment for a target and compatible generator/view pair.
+It is not an image, a distinct implementation edit, or proof that the missing label has a particular value.
+The table groups work by producing generator; the label owner must still be determined for each consuming view.
+Wave grouping is an investigation order, not a claim that every listed gap is already proven fixable by declarations.
+
+| Investigation wave | Generators | Pairs | Selections with gaps | Distinct selection/facet gaps | Raw assessments |
+|---|---:|---:|---:|---:|---:|
+| D | 3 | 9 | 25 | 100 | 100 |
+| M | 9 | 14 | 129 | 604 | 631 |
+| A | 36 | 75 | 290 | 427 | 427 |
+| F | 33 | 73 | 172 | 619 | 630 |
+| **Total** | **81** | **171** | **616** | **1750** | **1788** |
+
+- **D — Expression decisions:** algebra, numerical expressions and powers; review semantics early in parallel with routine batches.
+- **M — Measurement contexts:** measurement, currency, time and unit dimensions; implement the narrowly reviewed second batch first.
+- **A — Arithmetic and counting:** shared operation, digit/count and place-value choices. The parity decision is reviewed early; its counts remain in A.
+- **F — Fractions, decimals and rational/ratio contexts:** fraction magnitude, sign/zero and representation distinctions.
+
+Apply source review within every wave to classify each proposed repair as a guaranteed invariant,
+a fact already determined by an existing schema choice, or a variable/ambiguous fact requiring a decision.
+No broad generator-level label additions are implied by this inventory.
+
+| Missing facet | Distinct selection/facet gaps | Raw assessments |
+|---|---:|---:|
+| numberKind | 93 | 93 |
+| numeralSystem | 328 | 328 |
+| base | 312 | 350 |
+| sign | 226 | 226 |
+| zero | 444 | 444 |
+| operandCount | 13 | 13 |
+| operandDigits | 279 | 279 |
+| fractionMagnitude | 55 | 55 |
+
+The complete generator inventory follows. **P** counts affected generator/view pairs, **S** counts
+admitted selections with at least one gap, and **G** counts distinct selection/facet gaps. Facet codes:
+**K** number kind, **N** numeral system, **B** base, **Sg** sign, **Z** zero, **O** operand count,
+**Dg** operand digits, **F** fraction magnitude. Range is excluded from every count below.
+
+| Generator | Wave | P | S | G | Missing facets |
+|---|---|---:|---:|---:|---|
+| `algebra-expressions` | D | 3 | 14 | 56 | K, B, Sg, Z |
+| `arithmetic-equation-judgment` | A | 1 | 2 | 2 | Z |
+| `arithmetic-estimation` | A | 1 | 4 | 4 | Z |
+| `arithmetic-known-fact-derivation` | A | 2 | 9 | 9 | Dg |
+| `arithmetic-numerical-expressions` | D | 4 | 6 | 24 | K, B, Sg, Z |
+| `arithmetic-operation-table` | A | 1 | 2 | 2 | Z |
+| `arithmetic-ops-four` | A | 4 | 4 | 4 | Dg |
+| `arithmetic-ops-pairs` | A | 11 | 118 | 168 | N, Z, Dg |
+| `arithmetic-ops-triples` | A | 6 | 12 | 20 | Z, Dg |
+| `arithmetic-paired-patterns` | A | 3 | 3 | 12 | K, B, Sg, Z |
+| `arithmetic-patterns` | A | 5 | 16 | 16 | Z |
+| `arithmetic-property-relations` | A | 2 | 6 | 12 | Z, Dg |
+| `arithmetic-word-problems-rounding` | A | 1 | 8 | 8 | N |
+| `comparison` | A | 2 | 6 | 12 | N, B |
+| `counting-basic` | A | 2 | 4 | 6 | N, B, Z |
+| `counting-classify-sort` | A | 1 | 2 | 4 | N, B |
+| `counting-hundred-offset` | A | 1 | 2 | 2 | O |
+| `counting-ten-offset` | A | 1 | 4 | 4 | O |
+| `currency-arithmetic` | M | 1 | 18 | 108 | K, N, B, Sg, Z, Dg |
+| `decimal-addition-subtraction` | F | 1 | 2 | 4 | Z, Dg |
+| `decimal-comparison` | F | 1 | 3 | 12 | N, B, Sg, Z |
+| `decimal-division-model` | F | 1 | 1 | 2 | Z, Dg |
+| `decimal-multiplication-model` | F | 1 | 1 | 2 | Z, Dg |
+| `decimal-notation` | F | 4 | 4 | 19 | N, B, Sg, Z, F |
+| `decimal-place-comparison` | F | 1 | 3 | 6 | Z, Dg |
+| `decimal-place-value-expanded` | F | 1 | 1 | 1 | Z |
+| `decimal-place-value-scaling` | F | 1 | 1 | 3 | N, Sg, Z |
+| `decimal-power-ten-scaling` | F | 1 | 2 | 2 | Z |
+| `decimal-rounding` | F | 1 | 1 | 1 | Z |
+| `decimal-writing` | F | 3 | 3 | 4 | N, Z |
+| `equal-groups-collection` | A | 1 | 3 | 6 | K, Dg |
+| `fraction-arithmetic` | F | 4 | 24 | 113 | N, B, Sg, Z, F |
+| `fraction-benchmark-arithmetic` | F | 2 | 4 | 20 | N, B, Sg, Z, F |
+| `fraction-comparison` | F | 2 | 7 | 28 | N, B, Sg, Z |
+| `fraction-division-relations` | F | 6 | 18 | 72 | K, N, B, Z |
+| `fraction-equivalence` | F | 5 | 7 | 28 | N, B, Sg, Z |
+| `fraction-number-line` | F | 1 | 3 | 12 | N, B, Sg, Z |
+| `fraction-products` | F | 3 | 4 | 20 | N, B, Sg, Z, F |
+| `fraction-quotient-model` | F | 6 | 34 | 105 | K, N, B, Sg, Z, F |
+| `fraction-scaling` | F | 2 | 5 | 20 | N, B, Sg, Z |
+| `fraction-tenths-equivalence` | F | 2 | 2 | 10 | N, B, Sg, Z, F |
+| `fraction-whole-equivalence` | F | 3 | 3 | 11 | N, B, Sg, Z |
+| `integer-add-subtract-strategies` | A | 1 | 8 | 8 | Dg |
+| `integer-addition-counting-on` | A | 2 | 4 | 4 | Dg |
+| `integer-rounding` | A | 1 | 7 | 7 | Z |
+| `integer-subtraction-counting-back` | A | 1 | 2 | 2 | Dg |
+| `measurement-conversion` | M | 2 | 21 | 84 | K, N, B, Sg, Z |
+| `measurement-length` | M | 2 | 10 | 10 | Z |
+| `measurement-ratio-relations` | M | 1 | 1 | 4 | N, B, Sg, Z |
+| `measurement-word-problems` | M | 1 | 60 | 320 | N, B, Sg, Z, Dg, F |
+| `multi-digit-division` | A | 1 | 3 | 3 | Z |
+| `multiplicative-comparison` | A | 2 | 3 | 3 | Dg |
+| `number-array` | A | 3 | 7 | 12 | K, Dg |
+| `numerical-power-expressions` | D | 2 | 5 | 20 | K, B, Sg, Z |
+| `percent-quantity-relations` | F | 2 | 2 | 6 | N, B, Z |
+| `place-value-arithmetic` | A | 3 | 21 | 48 | N, Z, Dg |
+| `place-value-expanded` | A | 1 | 4 | 12 | Sg, Z, Dg |
+| `place-value-scaling` | A | 1 | 1 | 2 | N, Z |
+| `powers-of-ten` | A | 1 | 1 | 1 | Z |
+| `ratio-table-comparisons` | F | 1 | 3 | 9 | N, B, Z |
+| `ratio-tables` | F | 2 | 2 | 6 | N, B, Z |
+| `rational-magnitude-contexts` | F | 2 | 3 | 9 | N, B, Z |
+| `rational-magnitude-relations` | F | 1 | 2 | 6 | N, B, Z |
+| `rational-numberline-values` | F | 2 | 12 | 40 | N, B, Z, F |
+| `rational-opposite-relations` | F | 3 | 3 | 6 | N, B |
+| `rational-order-contexts` | F | 2 | 4 | 16 | N, B, Sg, Z |
+| `rational-order-relations` | F | 1 | 2 | 8 | N, B, Sg, Z |
+| `signed-rational-contexts` | F | 3 | 3 | 9 | N, B, Sg, Z |
+| `standard-algorithm-add-subtract` | A | 1 | 4 | 4 | Dg |
+| `standard-algorithm-decimal-add-subtract` | A | 1 | 2 | 4 | Z, O |
+| `standard-algorithm-decimal-division` | A | 1 | 1 | 2 | Z, O |
+| `standard-algorithm-decimal-multiplication` | A | 1 | 1 | 2 | Z, O |
+| `standard-algorithm-division` | A | 1 | 3 | 6 | Z, O |
+| `standard-algorithm-multiplication` | A | 1 | 1 | 1 | Z |
+| `time` | M | 4 | 11 | 46 | K, N, B, Sg, Z |
+| `time-elapsed` | M | 1 | 2 | 8 | N, B, Sg, Z |
+| `time-interval-arithmetic` | M | 1 | 4 | 16 | N, B, Sg, Z |
+| `unit-dimension-relations` | M | 1 | 2 | 8 | N, B, Sg, Z |
+| `unit-rate-relations` | F | 2 | 3 | 9 | N, B, Z |
+| `whole-number-power-ten-scaling` | A | 1 | 1 | 1 | Z |
+| `writing` | A | 6 | 11 | 14 | N, Z |
+| **Total** | | **171** | **616** | **1750** | |
+
+The first measurement batch (`measurement-number-line` and `measurement-conversion-problems`) has no
+remaining non-range source-selection gaps and therefore is absent from this outstanding-work inventory.
+Their historic stored-row findings remain until regeneration publishes the changed annotations.
+
+## Algebra and parity decision note
+
+Status: recommendations for review; no semantic policy, schema or generator change has been
+implemented by this note. The current algebra-expression work comprises 14 eligible
+assignments and 56 missing assessments. Parity adds two assignments missing zero classification;
+these are included in the `counting-basic` inventory row, which also contains another view.
+
+The pinned ontology `0.31.0-pre.58.9231304124e9` describes zero presence as zero being an
+involved numerical value, zero absence as no such occurrence, negative presence as at least
+one negative number, and negative absence as none of the involved numbers being negative.
+`RationalNumbers` describes a numerical domain; `FractionNumbers` additionally describes
+numerator/denominator representation. Hidden payload values alone do not establish an
+observable claim. These distinctions follow the evidence and ownership review in
+[label architecture](../label-architecture.md#canonical-payload-and-observable-projection)
+and the ontology-backed eligibility rule in [SPEC-3](../spec-general.md#spec-3--most-specific-does-not-mean-leaf).
+
+### Algebra: establish the numerical context of each projection
+
+| Current projection | Eligible assignments | Observable mathematical context | Repair implication |
+|---|---:|---|---|
+| `algebra-expression-write` | 1 | Operation prose, a positive integer constant, an explicit rational variable domain and any nonzero restrictions; the solution writes the expression. The sampled binding and calculated result stay hidden. | A hidden negative, zero or fractional binding does not justify its label. Domain statements and restrictions need their own interpretation. |
+| `algebra-expression-parts` | 11 | Symbolic alternatives show a symbolic frame; numeric alternatives show the substituted frame. Coefficient tasks expose negative, zero or positive coefficients. | Distinguish each relation/projection; blanket generator-level sign or zero labels are false. |
+| `algebra-subexpression-interpretation` | 2 | Either a symbolic or a substituted numeric grouped frame. | Only the numeric alternative exposes the sampled binding; review the two alternatives independently. |
+
+Seven other assignments across evaluation, formula and modelling views already fall outside
+the exact Area allowlist through `NumericSubstitution` or `AlgebraicModeling`. They are not
+new blockers for this initiative. This is the existing ontology boundary, not an algebra exclusion.
+
+The [generator](../../src/generators/algebra/algebra-expressions/generator.ts) samples signed
+rational bindings and, in its coefficient relation, coefficients from `[-3, -1, 0, 1, 2, 5]`.
+The [structural model](../../src/generators/algebra/algebra-expression-helpers.ts) chooses
+symbolic versus substituted expressions. The actual [task projections](../../src/visuals/views/operations/algebra-expression-view.tsx)
+and [domain formatting](../../src/visuals/views/operations/algebra-expression-format.tsx)
+determine which evidence is exposed. Existing [renderer tests](../../src/visuals/views/operations/algebra-expression-view.test.tsx)
+cover hidden bindings and negative/zero/implicit-unit coefficients.
+
+**Straightforward candidate:** add view-owned `Base10` to the three eligible leaves after
+their normal ownership/matching review. Their digit formatting is already decimal. On the
+current assignments this closes 14 of the 56 assessments, leaving 42. This note does not
+implement that change or assume that new matches have already been reviewed.
+
+**Decision A1 — Does a permitted value count as an involved value?** A statement such as
+"x is a rational number" supplies domain evidence, but the zero/sign definitions do not
+explicitly say that every permitted value thereby occurs in the exercise. For example,
+writing `3 + x` and writing `3 / x` can both state a rational domain, while the second
+also requires `x` to be nonzero. The generator's single `plain` choice can produce either
+operation. A blanket zero claim cannot be justified just by reading the domain's name.
+
+Recommendation: use explicit domains as evidence for number-kind review, keep hidden
+bindings out of symbolic-view annotation reasoning, and settle the occurrence-versus-domain
+interpretation with these examples before adding sign/zero claims. If existing ontology
+definitions do not resolve it, prepare a precise ontology clarification for user review.
+No ontology issue or ontology change is authorized by this documentation checkpoint.
+Do not infer `FractionNumbers` from the mere existence of a rational binding.
+
+**Decision A2 — Represent genuinely varying visible facts before drawing.** Numeric frames
+and coefficient tasks expose sign/zero distinctions that vary inside existing assignments.
+Once A1 is settled, propose ordinary mathematical schema alternatives that guarantee the
+selected distinctions, with correlated choices where needed. This would be model work
+beyond invariant additions: document effects on distributions, payloads, existing matches
+and question/solution evidence before implementation. Preserve targets and their coverage;
+do not add sampled-payload classification to the validator or generation pipeline.
+
+### Parity: retain singleton, even and larger-odd cases
+
+The [parity view](../../src/visuals/views/counting/counting-objects-parity/view.tsx) displays
+two groups and a remainder in both modes. Its [solution wording](../../src/visuals/views/counting/counting-objects-parity/helpers.ts)
+makes the same quantities explicit:
+
+| Count | Group size / remainder | Zero participation |
+|---|---|---|
+| 2 | 1 / 0 | The remainder is zero, shown as "None". |
+| 1 | 0 / 1 | Both groups are empty. |
+| 3 | 1 / 1 | The group sizes and remainder are nonzero. |
+
+The existing [positive-count sampler](../../src/generators/counting/counting-quantity.ts)
+and [parity choices](../../src/generators/counting/counting-quantity-schema.ts) admit these
+cases. Evenness determines a zero remainder, but oddness alone does not distinguish a
+singleton from a larger odd collection. Neither zero descriptor is an invariant of the view.
+
+**Decision P1 — Make the grouping distinction an ordinary mathematical choice.** Recommended
+direction: design pre-draw cases for even counts, singleton odd counts and larger odd counts,
+with the group quantities and remainder guaranteed by the selected mathematical model.
+Then the appropriate declaration is known before generation. Preserve every current count
+case and both parity target conjunctions.
+
+First assess a surgical extension of the existing model under
+[IMPL-G7](../implementation-generator.md#impl-g7--extend-capabilities-within-a-stable-payload-contract).
+Its zero declarations must not leak into unrelated counting views that expose only the
+positive collection. If the necessary grouping contract cannot be expressed cleanly within
+the existing producer/consumer boundary, review a dedicated grouping producer and explicit
+parity consumer contract. That alternative requires a match-migration and coverage comparison;
+it is not a proposed adapter or automatic completion step.
+
+This model work requires a separate agreed implementation scope. Until then, keep the two
+zero omissions visible. Do not restore inherited zero absence, label all odd counts zero-free,
+discard the singleton case, change range policy or weaken the gate to close the report.
+
+## Proposed second measurement batch
+
+### M2 — Invariant declarations for Grade 4 measurement word problems
+
+Recommendation: implement one small, partial batch for `measurement-word-problems` and
+its sole consumer `measurement-word-problem-grade4`. The production scope is exactly two
+`spec.ts` files, plus regression tests and verification notes. The two first-batch families
+remain complete for non-range source-selection requirements and are not included again.
+
+| Owner | Proposed addition to `generalLabels` | Source evidence |
+|---|---|---|
+| [Word-problem generator spec](../../src/generators/measurement/measurement-word-problems/spec.ts) | `NumbersWithoutNegatives`, `NumbersWithoutZero` | All operands, group counts and answers are strictly positive. Subtraction constructs the first value from a positive answer plus the second value. |
+| [Grade 4 story view spec](../../src/visuals/views/measurement/measurement-word-problem-grade4/spec.ts) | `ArabicNumerals`, `Base10` | Both modes format values with decimal digit strings, fraction notation or decimal notation. |
+
+The integer, fraction and decimal branches in the
+[generator](../../src/generators/measurement/measurement-word-problems/generator.ts)
+establish these quantity invariants. The existing
+[view helpers](../../src/visuals/views/measurement/measurement-word-problem-grade4/helpers.ts)
+validate positive exact values and implement the notation. The named payload
+`MeasurementWordProblemGrade4` has one producer and one registered consumer. The proposal
+preserves schemas, resolver behavior, configuration values, mathematical sampling and rendering.
+
+An annotation-only counterfactual over the current 60 assignments gives:
+
+| Measure | Before | After M2 | Reduction |
+|---|---:|---:|---:|
+| Family raw non-range assessments | 340 | 80 | 260 |
+| Family distinct selection/facet gaps | 320 | 80 | 240 |
+| Global raw non-range assessments | 1,788 | 1,528 | 260 |
+| Global distinct selection/facet gaps | 1,750 | 1,510 | 240 |
+| Global selections still containing a gap | 616 | 616 | 0 |
+
+The counterfactual opens no new requirements and creates no conflicts on the retained
+assignments. Twenty decimal assignments have a duplicated base obligation, explaining the
+raw/distinct difference. **All 60 family assignments still lack operand-digit annotations;
+20 fraction assignments additionally lack fraction magnitude.** This is a partial repair,
+not a claim that the family or dataset is ready for generation.
+
+These projections do not include a fresh capability rematch and are not stored-row changes.
+The implementation must recompute matching and review any new assignments before reporting
+its actual result. Local evidence is in
+`temp/measurement-declarations/second-batch-counterfactual.ts` and `.json`.
+
+### Follow-up M2b — Existing proper-fraction choice
+
+The current fraction branch always produces proper measured fractions, and the view validator
+requires numerator < denominator. Additive numerators total at most 7 over 8; multiplication
+and division totals reach at most 6 over 8. A subsequent declaration-choice change can attach
+`ProperFractions` to the existing fraction alternative while retaining the same `'fraction'`
+configuration. Review resolver specificity, fallback bindings and replay equivalence separately
+from M2. On retained assignments it closes another 20 assessments, leaving 60 operand-digit
+assessments in this family.
+
+Operand digits need a separate review. Integer addition admits operands from 2 through 20,
+and integer multiplication combines counts from 2 through 6 with measured values from 2
+through 12. One fixed digit-profile label would therefore be false. Fractional/decimal digit
+semantics also need review before proposing ordinary configuration distinctions.
+
+### Deferred conversion decision — Cover legacy profiles and shared consumers
+
+Keep `measurement-conversion` outside M2. Its
+[numeric-profile schema](../../src/generators/measurement/measurement-conversion/spec.ts)
+has `[] -> legacy`, `IntegerNumbers -> integer` and `DecimalNumbers -> decimal` choices.
+Legacy and explicit-integer profiles both involve whole quantities but produce different
+payload/task branches. Simply assigning the same exact choice label to both needs a design
+review; a blanket generator kind also overlaps the existing schema ownership.
+
+The current 35 assignments comprise seven legacy executions, seven legacy derivations,
+seven legacy tables and 14 explicit integer/decimal executions. Only 21 currently contain
+non-range gaps. Consumer review must cover:
+
+- `measurement-conversion` supplying `measure-conversion-execution`,
+  `measure-conversion-derivation` and `measure-conversion-table`.
+- `measurement-unit-scale` also supplying `measure-conversion-derivation` through the shared
+  `MeasurementConversionProblem` union, and supplying `measure-unit-scale-relation`.
+
+Adding numeral/base declarations to all three conversion views and positive/nonzero
+declarations to the conversion generator would have the following retained-assignment effect:
+
+| Pair | Current raw assessments | After those additions |
+|---|---:|---:|
+| conversion / execution | 63 | 7 number-kind gaps |
+| conversion / derivation | 0 | 7 newly triggered number-kind gaps |
+| conversion / table | 28 | 7 existing number-kind gaps |
+| unit-scale / conversion derivation | 0 | 3 newly triggered kind/sign/zero gaps |
+| **Total across 36 assignments** | **91** | **24** |
+
+That proposal would close 84 old assessments but open 17 new ones. Resolve the legacy
+number-kind representation and both producers' projection contracts before making conversion
+a later batch. This is why M2 is intentionally limited to the word-story pair.
+
+### M2 acceptance and handoff
+
+- Verify all 60 current measurement-kind × number-kind × operation assignments and both
+  question/solution modes, including positive-value boundaries and subtraction results.
+- Preserve the 1,013 normalized target conjunctions and existing target coverage. Review
+  all new matches and re-enumerate the complete catalog after declaration additions.
+- Compare existing configurations, prepared PRNG state/continuation, mathematical payloads
+  and task/content fingerprints. Test the claims against generator and rendering contracts;
+  declarations alone are not proof.
+- Pass the relevant type, ownership/spec and regression checks, run required coverage, and
+  report the full audit with the remaining 80 family assessments clearly identified.
+- Commit M2 independently, followed by any separately accepted M2b or model decisions.
+  The broader regeneration remains authorized and waits for the readiness checkpoint above.
