@@ -258,3 +258,49 @@ is under `temp/parity-declaration-fix/positive-count-coverage/`. The immutable d
 remains the snapshot recorded above. Canonical regeneration of parity still requires an
 explicitly reviewed zero-classification declaration strategy; this fix removes the false
 invariant without hiding that remaining dependency.
+
+## First measurement declaration batch
+
+Checkpoint `e0b128e5` adds only invariant declarations to the two reviewed families:
+
+| Owner | Added labels | Reason |
+|---|---|---|
+| `measurement-number-line` generator | `NumbersWithZero`, `NumbersWithoutNegatives` | Every exact tick lattice starts at zero and progresses through nonnegative values. |
+| `measurement-number-line` view | `ArabicNumerals`, `Base10` | Both modes label the zero endpoint and render values using decimal digits, fractions or decimal notation. |
+| `measurement-conversion-problems` generator | `NumbersWithoutZero`, `NumbersWithoutNegatives` | Source quantities, conversion factors, converted values, additional amounts and totals are strictly positive. |
+| `measure-conversion-problems` view | `ArabicNumerals`, `Base10` | Stories, equivalences and solution equations use decimal digits. A unit conversion factor such as 60 is not a numeral base. |
+
+No schemas, resolvers, sampling, rendering, pipeline code, target declarations, Area roots
+or range rules change. A zero digit in a positive amount such as `0.25` is not a separate
+zero-valued quantity. There are no adapters or post-generation additions.
+
+The exact comparison of all 24 existing family plans and 70 stored draw origins preserves
+selected choices, typed configurations, prepared PRNG state, random continuation, payloads
+and content/task fingerprints. Future emission adds exactly four labels per existing sample.
+Reevaluating those label sets closes 128 number-line and 190 conversion-story non-range
+assessments: **318 → 0**, with no newly missing groups or conflicts. The 280 new annotations
+resolve 318 rule/facet assessments because decimal base is checked by two rules.
+
+All 1,013 normalized target conjunctions remain unchanged. Positive capability expansion
+retains every existing match and adds two supported matches, bringing the semantic tuple
+count from 1,180 to 1,182. These use the existing Grade 6 nonnegative fraction and decimal
+rational-positioning targets, `6.NS.C.6c-rational-numberline-positioning~936ac89c` and
+`6.NS.C.6c-rational-numberline-positioning~3046c66c`. Their requested point lies on the
+unchanged nonnegative number line. All five unit fallbacks, both modes and four draws per
+selection pass mathematical validation and the non-range gate (80 draws). They introduce
+four train slots before deduplication; this does not promise four additional physical rows.
+
+Stored annotations are not rewritten. A read-only manifest build with the persisted canonical
+renderer identity requires 352 affected pairs, including 350 outside the requested two-family
+scope. The scope guard rejects a narrow refresh, so this declaration-only batch does not
+regenerate the broader dataset, bypass checks, change caches or call Gemini. The stored
+snapshot audit consequently retains its 4,318 known strict findings; the source replay proves
+the intended 318-finding reduction for these families when the declarations are emitted.
+
+The 29 real-target integration regressions cover the 24 existing Grade 4/5 alternatives and
+the two new Grade 6 matches. The seven existing scoped generator/view test files pass
+(70 tests), and ownership, type, label, documentation and standards checks pass. The full suite
+passes **837 files / 6,149 tests**. Coverage is 98.46% statements, 96.96% branches, 100%
+functions and 99.51% lines; every checked generator meets its coverage thresholds. Evidence is under
+`temp/measurement-declarations/`, including `baseline.json`, `comparison.json`,
+`new-matches-and-scope.json` and `impact-report.md`.
