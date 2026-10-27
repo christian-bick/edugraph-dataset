@@ -10,7 +10,9 @@ export const spec: GeneratorSpec = {
         Area.Equation,
         Area.UnitScaleRelation,
         Area.Addition,
-        Scope.MultiStep
+        Scope.MultiStep,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 

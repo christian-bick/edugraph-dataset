@@ -23,7 +23,9 @@ describe('MeasurementConversionProblemsGenerator spec integration', () => {
             Area.Equation,
             Area.UnitScaleRelation,
             Area.Addition,
-            Scope.MultiStep
+            Scope.MultiStep,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero
         ]));
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
         expect(spec.generalLabels).not.toContain(Ability.TextualReception);

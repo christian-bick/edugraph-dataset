@@ -22,7 +22,7 @@ describe('MeasurementNumberLineGenerator spec integration', () => {
     const generator = new MeasurementNumberLineGenerator();
 
     it('keeps numeration in the number-kind schema and units in the measurement schema', () => {
-        expect(spec.generalLabels).toEqual([]);
+        expect(spec.generalLabels).toEqual([Scope.NumbersWithoutNegatives, Scope.NumbersWithZero]);
         expect(measurementNumberLineNumberKinds).toEqual([
             Scope.ProperFractions,
             Scope.DecimalNumbers

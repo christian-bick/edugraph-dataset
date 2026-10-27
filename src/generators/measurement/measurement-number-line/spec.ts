@@ -18,7 +18,7 @@ export const measurementNumberLineNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-number-line',
-    generalLabels: []
+    generalLabels: [Scope.NumbersWithoutNegatives, Scope.NumbersWithZero]
 };
 
 export const MeasurementNumberLineGeneratorSchema = {
