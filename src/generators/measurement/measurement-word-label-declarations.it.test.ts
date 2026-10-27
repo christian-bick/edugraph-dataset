@@ -1,10 +1,14 @@
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {fileURLToPath} from 'node:url';
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../../lib/model-catalog.ts';
 import {matchTarget} from '../../lib/matching.ts';
 import {computeSampleKey, computeSampleSeed} from '../../lib/generation.ts';
-import {generatePlannedDraw} from '../../lib/planned-generation.ts';
+import {bindingsForSelection, generatePlannedDraw} from '../../lib/planned-generation.ts';
+import {createGenerationSelectionReceipt} from '../../lib/compatibility.ts';
+import {resolveSchemaChoices} from '../../lib/schema-choices.ts';
+import {extractSchemaLabels} from '../../lib/utils.ts';
+import {arithmeticOperations, resolveDeclaredOperation} from '../arithmetic/helpers.ts';
 import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-audit.ts';
 import {createLabelDependencyEvaluator} from '../../lib/label-dependencies.ts';
 import {assessLabelDependencyCoverage} from '../../lib/label-dependency-coverage.ts';
@@ -19,7 +23,8 @@ const viewId = 'measurement-word-problem-grade4';
 const targets = grade4Targets.filter(target => target.id.startsWith('4.MD.A.2-measurement-word-problems~'));
 const quantityLabels = [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
 const notationLabels = [Scope.ArabicNumerals, Scope.Base10];
-const expectedMissingFacets = (labels: readonly string[]) => labels.includes(Area.Division) ? [] : ['operandDigits'];
+const expectedMissingFacets = (labels: readonly string[]) => labels.includes(Area.Division) || labels.includes(Area.Multiplication)
+    ? [] : ['operandDigits'];
 let generator: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>[number];
 let view: Awaited<ReturnType<typeof loadViewModelCatalog>>[number];
 
@@ -78,6 +83,17 @@ const expectPositiveQuantityPresentation = (data: MeasurementWordProblemGrade4, 
         expect(divisor.numerator).toBeGreaterThan(1);
         expect(divisor.numerator).toBeLessThan(10);
     }
+    if (data.operation === 'multiplication') {
+        expect(data.operands[0].role).toBe('group-count');
+        if (data.numberKind === 'integer') {
+            expect(Math.min(...quantities.map(value => value.numerator))).toBeLessThan(10);
+        } else {
+            const [groups, measured] = quantities;
+            expect(groups.denominator).toBe(1);
+            expect(groups.numerator).toBeLessThan(10);
+            expect(groups.numerator * measured.denominator).toBeGreaterThan(measured.numerator);
+        }
+    }
     const [left, right] = quantities;
     const answer = data.operation === 'addition' || data.operation === 'subtraction'
         ? {numerator: left.numerator * right.denominator
@@ -105,6 +121,36 @@ const expectPositiveQuantityPresentation = (data: MeasurementWordProblemGrade4, 
     }
 };
 
+const partialTarget = (labels: readonly string[]) => ({
+    ...targets[0],
+    id: 'measurement-word-declaration-probe',
+    labels: [Scope.MeterScale, Scope.SingleStep, Scope.TwoOperands, Ability.TextualReception, ...labels]
+});
+
+const admittedConfigurations = (labels: readonly string[], producer = generator) => {
+    const target = partialTarget(labels);
+    const matched = matchTarget(target, producer, view);
+    expect(matched.matched).toBe(true);
+    if (!matched.matched) throw new Error(`Partial target stopped matching: ${matched.reason}`);
+    const selections = enumerateDependencyAuditSelections(matched.plan);
+    expect(selections.status).toBe('complete');
+    const configurations = selections.selections.map(selection => {
+        const receipt = createGenerationSelectionReceipt(matched.plan, selection.choices);
+        const bindings = bindingsForSelection(matched.plan, receipt);
+        const resolved = resolveSchemaChoices(producer.schema!, target.labels, bindings.generator);
+        return {selection, receipt, config: resolved.config};
+    });
+    return {target, plan: matched.plan, configurations};
+};
+
+const expectOperationRoles = (labels: readonly string[], config: Record<string, unknown>) => {
+    expect(labels.includes(Scope.SingleDigitDivisor)).toBe(config.operation === Area.Division);
+    expect(labels.includes(Scope.SingleDigitSmallestOperand))
+        .toBe(config.operation === Area.Multiplication && config.numberKind === 'integer');
+    expect(labels.includes(Scope.SingleDigitLargestOperand))
+        .toBe(config.operation === Area.Multiplication && config.numberKind !== 'integer');
+};
+
 describe('measurement word-problem declarations on existing Grade 4 targets', () => {
     it('assigns positive quantities to the generator and decimal digit notation to the view', () => {
         expect(targets).toHaveLength(60);
@@ -116,7 +162,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('leaves only the 45 non-range operand-digit source assessments unresolved', () => {
+    it('leaves only the 30 non-range operand-digit source assessments unresolved', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         for (const target of targets) {
@@ -137,7 +183,75 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 }
             }
         }
-        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 45});
+        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 30});
+    });
+
+    it.each([
+        {name: 'number kind and operation omitted', labels: [], count: 12},
+        {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 3},
+        {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 4},
+        {name: 'fraction kind with operation omitted', labels: [Scope.FractionNumbers], count: 4},
+        {name: 'decimal kind with operation omitted', labels: [Scope.DecimalNumbers], count: 4}
+    ])('preserves the complete semantic configuration set for $name', ({labels, count}) => {
+        const precedingSchema = {...generator.schema!, operation: [arithmeticOperations, resolveDeclaredOperation] as const};
+        const precedingGenerator = {...generator, schema: precedingSchema,
+            labels: [...generator.generalLabels, ...extractSchemaLabels(precedingSchema)], compatibility: [],
+            spec: {...generator.spec, compatibility: []}};
+        const preceding = admittedConfigurations(labels, precedingGenerator);
+        const current = admittedConfigurations(labels);
+        const keys = (entries: typeof current.configurations) => entries.map(entry => JSON.stringify(entry.config)).sort();
+        expect(current.configurations).toHaveLength(count);
+        expect(new Set(keys(current.configurations)).size).toBe(count);
+        expect(keys(current.configurations)).toEqual(keys(preceding.configurations));
+        expect(current.target.labels).toEqual(partialTarget(labels).labels);
+
+        for (const [instanceIdx, entry] of current.configurations.entries()) {
+            expectOperationRoles(entry.selection.labels, entry.config);
+            for (const mode of ['question', 'solution'] as const) {
+                const sampleKey = computeSampleKey({...current.plan.identity, split: 'train', mode, instanceIdx});
+                const seed = computeSampleSeed(sampleKey, 1);
+                const draw = generatePlannedDraw({generator: new MeasurementWordProblemsGenerator(), viewSchema: view.schema,
+                    plan: current.plan, sampleKey, attempt: 1, seed,
+                    replay: {version: 1, sampleKey, attempt: 1, seed, selection: entry.receipt}});
+                expect(draw.stub).not.toBeNull();
+                expect(draw.labels).toEqual(entry.selection.labels);
+                const data = draw.stub!.data as unknown as MeasurementWordProblemGrade4;
+                expect(data.numberKind).toBe(entry.config.numberKind);
+                expectPositiveQuantityPresentation(data, mode);
+            }
+        }
+    });
+
+    it.each([
+        {name: 'integer multiplication', labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.SingleDigitSmallestOperand], kinds: ['integer']},
+        {name: 'fraction multiplication', labels: [Area.Multiplication, Scope.FractionNumbers, Scope.SingleDigitLargestOperand], kinds: ['fraction']},
+        {name: 'decimal multiplication', labels: [Area.Multiplication, Scope.DecimalNumbers, Scope.SingleDigitLargestOperand], kinds: ['decimal']},
+        {name: 'smallest width with omitted kind', labels: [Area.Multiplication, Scope.SingleDigitSmallestOperand], kinds: ['integer']},
+        {name: 'largest width with omitted kind', labels: [Area.Multiplication, Scope.SingleDigitLargestOperand], kinds: ['decimal', 'fraction']},
+        {name: 'smallest width with omitted kind and operation', labels: [Scope.SingleDigitSmallestOperand], kinds: ['integer']},
+        {name: 'largest width with omitted kind and operation', labels: [Scope.SingleDigitLargestOperand], kinds: ['decimal', 'fraction']}
+    ])('admits the supported explicit role for $name', ({labels, kinds}) => {
+        const current = admittedConfigurations(labels);
+        expect(current.configurations.map(entry => entry.config.numberKind).sort()).toEqual(kinds);
+        for (const entry of current.configurations) {
+            expect(entry.config.operation).toBe(Area.Multiplication);
+            expect(entry.selection.labels).toEqual(expect.arrayContaining(labels));
+            expectOperationRoles(entry.selection.labels, entry.config);
+        }
+    });
+
+    it.each([
+        {name: 'integer multiplication with largest width', labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.SingleDigitLargestOperand]},
+        {name: 'fraction multiplication with smallest width', labels: [Area.Multiplication, Scope.FractionNumbers, Scope.SingleDigitSmallestOperand]},
+        {name: 'decimal multiplication with smallest width', labels: [Area.Multiplication, Scope.DecimalNumbers, Scope.SingleDigitSmallestOperand]},
+        {name: 'both multiplication bundles', labels: [Area.Multiplication, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]},
+        {name: 'addition with multiplication width', labels: [Area.Addition, Scope.SingleDigitSmallestOperand]},
+        {name: 'division with multiplication width', labels: [Area.Division, Scope.SingleDigitLargestOperand]}
+    ])('rejects unsupported explicit claims for $name without rewriting the target', ({labels}) => {
+        const target = partialTarget(labels);
+        const originalLabels = [...target.labels];
+        expect(matchTarget(target, generator, view).matched).toBe(false);
+        expect(target.labels).toEqual(originalLabels);
     });
 
     it.each(targets)('emits truthful declarations for $id without changing its claims', target => {
@@ -160,6 +274,10 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
             expect(draw.labels).not.toContain(Scope.NumbersWithZero);
             expect(draw.labels.includes(Scope.ProperFractions)).toBe(target.labels.includes(Scope.FractionNumbers));
             expect(draw.labels.includes(Scope.SingleDigitDivisor)).toBe(target.labels.includes(Area.Division));
+            expect(draw.labels.includes(Scope.SingleDigitSmallestOperand))
+                .toBe(target.labels.includes(Area.Multiplication) && target.labels.includes(Scope.IntegerNumbers));
+            expect(draw.labels.includes(Scope.SingleDigitLargestOperand))
+                .toBe(target.labels.includes(Area.Multiplication) && !target.labels.includes(Scope.IntegerNumbers));
             const coverage = assessLabelDependencyCoverage({generatorId, viewId, kind: 'sample', labels: draw.labels});
             expect(coverage.status).toBe('checked');
             expect(coverage.failures.every(failure => failure.code === 'missing')).toBe(true);

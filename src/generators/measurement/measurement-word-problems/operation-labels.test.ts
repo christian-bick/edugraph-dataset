@@ -9,7 +9,8 @@ describe('measurement word-problem operation label resolver', () => {
     it.each([
         [Area.Addition, [Area.Addition]],
         [Area.Subtraction, [Area.Subtraction]],
-        [Area.Multiplication, [Area.Multiplication]],
+        [Area.Multiplication, [Area.Multiplication, Scope.SingleDigitSmallestOperand]],
+        [Area.Multiplication, [Area.Multiplication, Scope.SingleDigitLargestOperand]],
         [Area.Division, [Area.Division, Scope.SingleDigitDivisor]]
     ])('preserves the existing %s configuration and one-draw entropy consumption', (operation, requestedLabels) => {
         setSeed(`operation-declaration-${operation}`);
@@ -23,7 +24,10 @@ describe('measurement word-problem operation label resolver', () => {
     it.each([
         ['empty', []],
         ['division only', [Area.Division]],
-        ['divisor width only', [Scope.SingleDigitDivisor]]
+        ['divisor width only', [Scope.SingleDigitDivisor]],
+        ['multiplication only', [Area.Multiplication]],
+        ['smallest-operand width only', [Scope.SingleDigitSmallestOperand]],
+        ['largest-operand width only', [Scope.SingleDigitLargestOperand]]
     ])('leaves an incomplete %s binding unresolved without consuming entropy', (_, requestedLabels) => {
         setSeed('incomplete-operation-binding');
         const before = getRandomState();
@@ -34,7 +38,9 @@ describe('measurement word-problem operation label resolver', () => {
     it.each([
         ['competing operations', [Area.Addition, Area.Subtraction]],
         ['non-division with divisor width', [Area.Addition, Scope.SingleDigitDivisor]],
-        ['division with a competing operation', [Area.Division, Area.Multiplication, Scope.SingleDigitDivisor]]
+        ['division with a competing operation', [Area.Division, Area.Multiplication, Scope.SingleDigitDivisor]],
+        ['competing multiplication bundles', [Area.Multiplication, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]],
+        ['addition with multiplication width', [Area.Addition, Scope.SingleDigitSmallestOperand]]
     ])('rejects %s without consuming entropy', (_, requestedLabels) => {
         setSeed('conflicting-operation-binding');
         const before = getRandomState();

@@ -74,17 +74,20 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         }
     });
 
-    it('retains exactly four operation choices and attaches divisor width only to division', () => {
-        expect(spec.generalLabels).not.toContain(Scope.SingleDigitDivisor);
+    it('retains four operation values with alternative multiplication bundles for joint planning', () => {
+        for (const label of [Scope.SingleDigitDivisor, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]) {
+            expect(spec.generalLabels).not.toContain(label);
+        }
         expect(findSchemaFallbackContractIssues(operationSchema)).toEqual([]);
         const [domain] = normalizeSchemaChoices(operationSchema, [], 'generator');
-        expect(domain.alternatives).toHaveLength(4);
+        expect(domain.alternatives).toHaveLength(5);
         const configurations = domain.alternatives.map(alternative =>
             resolveSchemaChoices(operationSchema, [], {operation: alternative.labels}));
         expect(configurations).toEqual([
             {config: {operation: Area.Addition}, resolvedLabels: [Area.Addition]},
             {config: {operation: Area.Division}, resolvedLabels: [Area.Division, Scope.SingleDigitDivisor]},
-            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication]},
+            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication, Scope.SingleDigitLargestOperand]},
+            {config: {operation: Area.Multiplication}, resolvedLabels: [Area.Multiplication, Scope.SingleDigitSmallestOperand]},
             {config: {operation: Area.Subtraction}, resolvedLabels: [Area.Subtraction]}
         ]);
     });

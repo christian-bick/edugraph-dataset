@@ -1,7 +1,8 @@
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 import {measurementWordProblemOperationChoices, resolveMeasurementWordProblemOperation} from './operation-labels.ts';
 
 export const measurementWordProblemKinds = [
@@ -26,7 +27,18 @@ export const spec: GeneratorSpec = {
         Scope.TwoOperands,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
-    ]
+    ],
+    compatibility: [generatorLabelRule('measurement-multiplication-operand-digits', [
+        Area.Multiplication,
+        Scope.IntegerNumbers,
+        Scope.FractionNumbers,
+        Scope.DecimalNumbers,
+        Scope.SingleDigitSmallestOperand,
+        Scope.SingleDigitLargestOperand
+    ], selected => !selected(Area.Multiplication)
+        || (selected(Scope.IntegerNumbers) && selected(Scope.SingleDigitSmallestOperand))
+        || ((selected(Scope.FractionNumbers) || selected(Scope.DecimalNumbers))
+            && selected(Scope.SingleDigitLargestOperand)))]
 };
 
 export const MeasurementWordProblemsGeneratorSchema = {

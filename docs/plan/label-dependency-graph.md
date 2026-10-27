@@ -7,8 +7,8 @@ rendered images are outside this initiative.
 Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
 [second measurement batch](#second-measurement-batch), including M2b, is implemented.
-[M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) continue the repair
-in separate division and multiplication checkpoints.
+[M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) are implemented
+in separate division and multiplication checkpoints; 30 addition/subtraction findings remain.
 
 ## Scope
 
@@ -902,6 +902,8 @@ both operands. The existing graph checks family presence and remains unchanged.
 
 ### Checkpoint 1 — Division declarations
 
+Committed as `c1cb43d8` (`fix: declare single-digit divisors for measurement stories`).
+
 The existing division choice now declares `[Division, SingleDigitDivisor]`. A local
 `operation-labels.ts` helper validates the authored bundle with the shared exact set-map,
 then delegates to the existing operation resolver once. This preserves mathematical entropy
@@ -938,10 +940,78 @@ unchanged; regeneration awaits the agreed readiness checkpoint. Local evidence i
 
 ### Checkpoint 2 — Multiplication declarations
 
-Next: add `SingleDigitSmallestOperand` to the integer multiplication choice and
-`SingleDigitLargestOperand` to its fraction/decimal counterpart. A normal generator
-compatibility rule will correlate the existing operation and number-kind declarations.
-This leaves the ten integer and twenty fraction/decimal addition/subtraction findings open.
-Check actual matching and planned draws, including requests that omit operation or number
-kind; a newly correlated choice group may change seeded choices for underspecified requests
-even while its admitted mathematical configurations remain the same.
+The multiplication choice now has two authored bundles:
+
+- `[Multiplication, SingleDigitSmallestOperand]` for the five integer selections.
+- `[Multiplication, SingleDigitLargestOperand]` for the ten fraction/decimal selections.
+
+The normal generator compatibility rule `measurement-multiplication-operand-digits`
+correlates these bundles with the existing number-kind choice. Both bundles resolve to the
+same multiplication configuration and preserve the existing resolver's entropy consumption.
+No payload inspection, adapters or automatic annotation completion are involved.
+
+All **1,013 targets, 1,182 semantic matches and 60 family configurations** remain unchanged.
+This checkpoint adds labels to **15 selections and 38 stored-origin source replays**; across
+both checkpoints, **30 selections and 72 replays** gain a label, with no removals. All 140
+replays preserve configurations, payloads, prepared random states, PRNG continuation and
+content/task fingerprints. Plan hashes change with the declaration contract; original
+sample keys, seeds and attempts remain unchanged. No stored receipts or rows are rewritten.
+
+| Source assessment | Before M3 | After division | After multiplication |
+|---|---:|---:|---:|
+| Family selections missing operand digits | 60 | 45 | 30 |
+| Family source replays missing operand digits | 140 | 106 | 68 |
+| Global raw non-range source gaps | 1,508 | 1,493 | 1,478 |
+| Global distinct selection/facet gaps | 1,490 | 1,475 | 1,460 |
+| Global selections still containing a gap | 616 | 601 | 586 |
+
+The audit reports no conflicts, invalid contexts, incomplete enumeration or row/contract
+errors. The remaining **30 family findings** are the ten integer and twenty fraction/decimal
+addition/subtraction selections. These remain open: integer digit profiles vary, and the
+fraction/decimal counting convention still needs a separate decision.
+
+Partial-request verification compares 40 admitted configuration sets and 2,560 planned
+draws. The configuration sets and their uniform probabilities are unchanged; every planned
+selection and draw has the truthful role label. When both operation and number kind are
+omitted, the planner samples twelve joint assignments instead of independent choices.
+Consequently **231 of 320** such probes choose a different operation for the same seed;
+the other **2,240** planned probes remain unchanged. Number kind, measurement kind and
+mathematical PRNG states remain unchanged in every probe. Existing targets specify both
+fields, so their replays are unaffected.
+
+The legacy `extractConfig` / `generateWithLabels` test primitive does not apply generator
+compatibility rules. In a separate 2,560-probe comparison, **545** direct resolutions select
+a multiplication role bundle inconsistent with the number kind. This primitive therefore
+cannot validate the new joint declaration; production and routed debugging already use
+matched planned generation. The shared primitive is unchanged, and the regression tests
+use the planner for role-label truth and reject unsupported explicit claims there.
+
+Focused verification passes **115 tests across three files**, including 720 draws across
+all 60 existing targets, both modes and sampler boundaries. It also covers partial requests,
+explicit role claims, contradictory requests, complete semantic configuration sets and
+resolver entropy.
+
+The full coverage run passes **839 files / 6,261 tests**. Coverage includes every generator
+and the new operation-label helper: aggregate coverage is 98.46% statements, 96.96% branches,
+100% functions and 99.51% lines. This family's generator and operation-label helper each
+have **100%** in all four categories. Every checked generator meets the repository coverage
+thresholds. Both `test:coverage` stages ran with two workers and a 30-second test timeout,
+retaining the coverage report under `temp/measurement-m3/full-coverage/`.
+
+`npm run check -- --spec=ccss` passes type, ownership/spec, label, documentation, standards
+and split-integrity checks. The final annotation gate still fails on the 4,318 known stored
+findings, so the aggregate check is not green. Documentation references pass with external
+link-fetch warnings.
+
+Targets, the Area allowlist, range-policy exclusion, mathematical generator and renderer
+remain unchanged. The immutable dataset snapshot retains **4,318 strict findings**, including
+794 in this family; regeneration and VQA remain deferred until the agreed readiness
+checkpoint. The source repair does not bypass the remaining requirements.
+
+Local evidence is in `temp/measurement-m3/impact-report.md`, `multiplication/`,
+`multiplication-audit/`, `full-coverage/`, `check.txt` and `generator-coverage.txt`. Reproduce
+the report-only audit with:
+
+```bash
+npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m3/multiplication-audit
+```

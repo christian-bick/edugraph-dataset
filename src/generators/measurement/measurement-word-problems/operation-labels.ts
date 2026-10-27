@@ -6,7 +6,8 @@ import {resolveDeclaredOperation} from '../../arithmetic/helpers.ts';
 const operationMappings = [
     [[Area.Addition], Area.Addition],
     [[Area.Subtraction], Area.Subtraction],
-    [[Area.Multiplication], Area.Multiplication],
+    [[Area.Multiplication, Scope.SingleDigitSmallestOperand], Area.Multiplication],
+    [[Area.Multiplication, Scope.SingleDigitLargestOperand], Area.Multiplication],
     [[Area.Division, Scope.SingleDigitDivisor], Area.Division]
 ] as const;
 
