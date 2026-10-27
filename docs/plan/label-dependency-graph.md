@@ -1,279 +1,358 @@
 # Local label dependency graph
 
-Status: graph, evaluator, initial evidence adapters, report-only audit, reviewed repairs,
-property-law evidence, and scoped strict integration implemented. Further evidence coverage remains planned.
-Consolidated on 2026-10-26.
+Status: annotation-only dependency validation is the core contract. Evidence adapters and
+reviewed completion policies remain supplementary. The earlier evidence-scoped implementation
+and its verification results are retained below as historical records.
+Scope clarified on 2026-10-27.
 
-Add a small graph of labeling obligations to `edugraph-content` so related facets are
-assessed consistently across generators and views. An edge means that an applicable facet
-must be determined; it does not automatically append a label. Start with a report-only
-audit, then enforce reviewed dependencies through the existing validation pipeline.
+Add a small repo-local graph of annotation obligations to `edugraph-content`. An edge means
+that a label family requires another annotation group; it does not choose or append a label.
+Apply the same graph to every eligible finalized sample, independently of generator, view,
+payload, or evidence-adapter coverage.
 
-## Scope and evidence
+## Scope and source material
 
-The graph and evaluator belong only to this repository. Use typed TypeScript data and the
-installed `edugraph-ts` ontology; no graph database, new ontology relation, or sibling-repo
-runtime dependency is needed.
+Use declarative TypeScript data and the installed `edugraph-ts` ontology. No graph database,
+new ontology relation, or runtime dependency on a sibling repository is needed.
 
-The motivating analysis is in the `docs` directory of the sibling checkout
-`../edugraph-classify/`:
+The motivating analysis is in `../edugraph-classify/docs/`:
 
 - `UPSTREAM-LABEL-COMPLETENESS-20261003.md` identifies inconsistent operand-digit,
-  fraction-subtype, reference-frame, and explanation-Ability coverage. It distinguishes
-  checking supplied labels from finding omitted labels.
-- `UPSTREAM-ANNOTATION-HANDOFF-20261003.md` recommends evidence-backed assessments,
-  a report-only rollout, and preservation of generation and target provenance.
+  fraction-subtype, reference-frame, and explanation-Ability coverage.
+- `UPSTREAM-ANNOTATION-HANDOFF-20261003.md` recommends a report-only rollout and
+  preservation of generation and target provenance.
 
-Those reports examined dataset v0.30.0-03 and older ontology snapshots. Treat their examples
-as regression candidates, not assertions about current failures. Implementation must
-resolve labels and definitions against this repo's exact pinned ontology. At planning time,
-the pin is `0.31.0-pre.58.9231304124e9`.
+Those reports examined dataset v0.30.0-03 and older ontology snapshots. Resolve current
+labels and definitions against this repo's exact pinned ontology rather than treating
+historical examples as present defects.
 
-Existing contracts remain in [label architecture](../label-architecture.md),
-[general spec rules](../spec-general.md), and [target rules](../target-spec.md). Targets
-remain partial competency requests; the combined resolved generator/view labels describe
-the produced task. The graph adds completeness obligations without changing positive
-capability matching, label eligibility, or ownership (`SPEC-1`, `SPEC-3`, `SPEC-5`, `SPEC-11`).
+Existing ownership, matching, and annotation contracts remain in
+[label architecture](../label-architecture.md), [general spec rules](../spec-general.md),
+and [target rules](../target-spec.md). Targets remain partial competency requests; the
+complete resolved generator/view labels and supported realized additions describe the
+produced task. Dependency checks do not change positive matching, label eligibility,
+module ownership, generation configuration, or sampling.
 
-**Range-policy work is excluded.** Retain only range-facet presence/applicability under
-existing semantics. This initiative does not choose strongest bounds, compute replacement
-ranges, change thresholds or endpoint semantics, rewrite range annotations, or introduce
-new range evidence extractors. Existing correctness checks continue unchanged.
-
-An exhaustive ontology-wide annotation engine, automatic correction or removal of existing
-claims, and a redesign of the VQA response contract remain outside this implementation.
-The reviewed additive repair below permits narrow post-draw operand-digit and zero-absence completion;
-its labels never feed back into matching or generation configuration.
+**Range-policy work is excluded.** Retain the existing range-presence report only. Do not
+calculate replacement bounds, choose strongest bounds, change thresholds or endpoint
+semantics, rewrite range annotations, or add range evidence extractors. Range findings
+never fail this dependency gate.
 
 ## Agreed Area allowlist
 
-Apply these dependency rules only when at least one Area is present, and **every involved
-Area is a transitive descendant of at least one of**:
+Apply the dependency policy only when at least one Area is present and **every involved
+Area is a transitive structural descendant of at least one of**:
 
 - `Area.Arithmetic`
 - `Area.IntuitiveMathematics`
 - `Area.FormalMathematics`
 
-Evaluate the complete resolved Area set from both generator and view, including invariant
-and selected schema labels. Do not use only target labels, choose a primary Area, or union
-mutually exclusive schema alternatives.
-
-For the resolved Area set `A` and allowed roots `R`, the context condition is:
+Use the complete resolved Area conjunction from generator and view, including invariant
+and selected schema labels. Do not use only target Areas, choose a primary Area, or union
+mutually exclusive schema alternatives. For Areas `A` and allowed roots `R`:
 
 ```text
 A is nonempty AND
 for every a in A, there exists r in R such that a is a transitive structural descendant of r
 ```
 
-Use the pinned ontology's structural traversal, as exposed by the existing ontology
-helpers. An Area with membership in an allowed subtree satisfies this condition even if
-it also has another ancestry path. No additional Arithmetic anchor or explicit algebra
-exclusion is required. The roots are policy selectors, never emitted labels or module
-matching guards; ordinary eligibility validation rejects organizational labels first.
+An Area with an allowed ancestry path satisfies this membership condition even when it has
+other ancestors. There is no additional Arithmetic anchor or explicit algebra exclusion.
+The roots are selectors, never emitted labels or matching guards. Organizational labels
+remain ineligible annotations under the existing ontology contract.
 
-An Area outside the allowed union puts the whole sample outside this policy's scope.
-An empty Area set cannot pass vacuously; report it as an invalid context. Unknown or
-ineligible labels remain contract errors, not an exemption from validation.
+An outside Area puts the entire sample outside this dependency policy. Empty Area sets,
+unknown labels, and ineligible labels are contract errors, not successful empty checks.
 
-Passing the context gate does not itself activate any facet. Each dependency still needs
-its own label-family or task-evidence trigger. Existing label-correctness checks apply
-inside and outside this policy's scope.
-
-| Resolved Area context | Policy context result |
+| Resolved Areas | Context result |
 |---|---|
-| `Addition` | Eligible; individual dependency triggers decide what to assess. |
-| `Addition` and `Equation` | Eligible; an equation is also a valid arithmetic representation. |
-| `AlgebraicExpression` and `Addition` | Eligible: this is an intended positive example because the expression belongs to Formal Mathematics and addition to Arithmetic. |
-| The preceding set plus `EquationSolving` or `AlgebraicModeling` | Outside policy scope because an involved Area lies outside the allowed union. |
-| Only allowed formal Areas, with no numeric content or other dependency trigger | Eligible context with no numeric obligations. |
-| No Area | Invalid context, not a successful empty check. |
+| `Addition` | Eligible; annotation-family triggers select the obligations. |
+| `Addition` and `Equation` | Eligible. |
+| `AlgebraicExpression` and `Addition` | Eligible; this is the intended boundary. |
+| The preceding set plus `EquationSolving` or `AlgebraicModeling` | Outside the allowed union. |
+| Only allowed formal Areas, with no triggering annotations | Eligible, without numeric obligations. |
+| No Area | Invalid context. |
 
-Ontology membership is authoritative for this boundary. If a future case behaves
-unexpectedly, review the task's labels and ontology placement first. A genuine structural
-mismatch may warrant an ontology correction; it should not automatically become a local
-exception. This plan does not authorize or require an ontology migration.
+Ontology membership is authoritative. Unexpected examples should prompt review of task
+labels and ontology placement before adding local exceptions. This work does not authorize
+an ontology migration.
+
+## Annotation consistency and supplementary evidence
+
+These are separate questions:
+
+| Question | Core annotation check | Needs exercise evidence |
+|---|---|---|
+| Does a triggered required label group have an annotation? | Yes | No |
+| Do explicitly incompatible annotations coexist? | Yes | No |
+| Is `Base10`, a digit profile, or a zero claim supported by this exercise? | No | Yes |
+| Which correct label should be added to a missing group? | No | Usually |
+
+The core evaluator reads annotations and ontology membership. A missing required group is
+reported immediately even when no adapter can identify its correct member. It does not
+infer an opposing claim from absence, append parent labels, or invent values.
+
+Typed evidence adapters may assess actual mathematical data and view projections. They
+can diagnose a finding, discover a content-dependent obligation that annotations cannot
+express, or justify an additive repair. Their results live in a separate supplementary
+channel. Missing adapters, unavailable replay, `not_applicable` evidence, and unresolved
+payload variants cannot suppress an annotation finding or exempt a sample from the core.
+
+Deleting all relevant annotations can remove an annotation-only trigger; this is an
+inherent boundary of label-only validation. Supplementary evidence and existing VQA can
+investigate content correctness, but neither is a prerequisite for dependency completeness.
+An annotation-contract failure identifies a policy violation; the correct content repair
+or a justified policy refinement still requires review.
 
 ## Graph markup
 
-Proposed authored location: `src/validation/label-dependencies.ts`. Keep it a declarative
-object containing the context gate, named facets, and rules with stable diagnostic IDs.
-The following markup defines the implemented initial shape.
+The authored graph is `src/validation/label-dependencies.ts`. It contains the unchanged
+Area gate, named families/facets, stable rule IDs, and explicit conflict groups:
 
 ```ts
 import {Ability, Area, Scope} from 'edugraph-ts/generated';
+import type {LabelDependencyGraph} from '../types/label-dependencies.ts';
 
+/** Repo-local assessment obligations. Grouping roots never become annotations. */
 export const labelDependencies = {
-  version: 1,
-  context: {
-    allAreasWithin: [
-      Area.Arithmetic,
-      Area.IntuitiveMathematics,
-      Area.FormalMathematics,
+    version: 1,
+    context: {
+        allAreasWithin: [Area.Arithmetic, Area.IntuitiveMathematics, Area.FormalMathematics],
+        requireArea: true
+    },
+    facets: {
+        numeric: {root: Scope.NumericAbstraction},
+        numberKind: {root: Scope.NumericSpace},
+        numeralSystem: {root: Scope.Numerals},
+        base: {root: Scope.NumericBase},
+        range: {root: Scope.NumericRange, check: 'presence-only'},
+        sign: {root: Scope.NumericSign},
+        zero: {root: Scope.NumericZero},
+        operandCount: {root: Scope.OperandCardinality},
+        operandDigits: {root: Scope.OperandDigitCount},
+        fraction: {root: Scope.FractionNumbers},
+        fractionMagnitude: {labels: [Scope.ProperFractions, Scope.ImproperFractions]},
+        fractionUnit: {labels: [Scope.UnitFractions, Scope.NonUnitFractions]},
+        decimal: {root: Scope.DecimalNumbers},
+        decimalPrecision: {labels: [Scope.TenthDecimals, Scope.HundredthDecimals, Scope.ThousandthDecimals]},
+        referenceFrames: {root: Scope.ReferenceFrameComplexity},
+        articulation: {labels: [Ability.TextualArticulation]}
+    },
+    rules: [
+        {id: 'LD-NUM-01', when: {any: [{family: 'numeric'}, {family: 'numeralSystem'},
+            {family: 'operandCount'}, {family: 'operandDigits'}, {evidence: 'numericTask'}]},
+            assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
+        {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'},
+            {evidence: 'arithmeticOperands'}]}, assess: ['operandCount', 'operandDigits']},
+        {id: 'LD-FRACTION-01', when: {any: [{family: 'fraction'}, {evidence: 'fractionValues'}]},
+            assess: ['fractionMagnitude']},
+        // Unit/nonunit labels do not cover zero, negative, or all improper fractions.
+        {id: 'LD-FRACTION-UNIT-01', when: {evidence: 'fractionValues'}, assess: ['fractionUnit']},
+        {id: 'LD-DECIMAL-01', when: {any: [{family: 'decimal'}, {evidence: 'decimalRepresentation'}]},
+            assess: ['base']},
+        // The current precision catalog stops at thousandths; DecimalNumbers does not.
+        {id: 'LD-DECIMAL-PRECISION-01', when: {evidence: 'decimalRepresentation'}, assess: ['decimalPrecision']},
+        {id: 'LD-FRAME-01', when: {evidence: 'quantityReferenceFrames'}, assess: ['referenceFrames']},
+        {id: 'LD-EXPLAIN-01', when: {evidence: 'writtenExplanation'}, assess: ['articulation']}
     ],
-    requireArea: true,
-  },
-  facets: {
-    numeric:       {root: Scope.NumericAbstraction},
-    numberKind:    {root: Scope.NumericSpace},
-    numeralSystem: {root: Scope.Numerals},
-    base:          {root: Scope.NumericBase},
-    range:         {root: Scope.NumericRange, check: 'presence-only'},
-    sign:          {root: Scope.NumericSign},
-    zero:          {root: Scope.NumericZero},
-    operandCount:  {root: Scope.OperandCardinality},
-    operandDigits: {root: Scope.OperandDigitCount},
-    fraction:      {root: Scope.FractionNumbers},
-    fractionMagnitude: {labels: [Scope.ProperFractions, Scope.ImproperFractions]},
-    fractionUnit:      {labels: [Scope.UnitFractions, Scope.NonUnitFractions]},
-    decimal:           {root: Scope.DecimalNumbers},
-    decimalPrecision:  {
-      labels: [Scope.TenthDecimals, Scope.HundredthDecimals, Scope.ThousandthDecimals],
-    },
-    referenceFrames: {root: Scope.ReferenceFrameComplexity},
-    articulation:    {labels: [Ability.TextualArticulation]},
-  },
-  rules: [
-    {
-      id: 'LD-NUM-01',
-      when: {any: [{family: 'numeric'}, {evidence: 'numericTask'}]},
-      assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero'],
-    },
-    {
-      id: 'LD-OPERANDS-01',
-      when: {evidence: 'arithmeticOperands'},
-      assess: ['operandCount', 'operandDigits'],
-    },
-    {
-      id: 'LD-FRACTION-01',
-      when: {any: [{family: 'fraction'}, {evidence: 'fractionValues'}]},
-      assess: ['fractionMagnitude', 'fractionUnit'],
-    },
-    {
-      id: 'LD-DECIMAL-01',
-      when: {any: [{family: 'decimal'}, {evidence: 'decimalRepresentation'}]},
-      assess: ['base', 'decimalPrecision'],
-    },
-    {
-      id: 'LD-FRAME-01',
-      when: {evidence: 'quantityReferenceFrames'},
-      assess: ['referenceFrames'],
-    },
-    {
-      id: 'LD-EXPLAIN-01',
-      when: {evidence: 'writtenExplanation'},
-      assess: ['articulation'],
-    },
-  ],
-} as const;
+    conflicts: [
+        {id: 'LD-ZERO-CONFLICT-01', facet: 'zero', labels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero]},
+        {id: 'LD-SIGN-CONFLICT-01', facet: 'sign', labels: [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives]},
+        {id: 'LD-FRAME-CONFLICT-01', facet: 'referenceFrames',
+            labels: [Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]}
+    ]
+} as const satisfies LabelDependencyGraph;
 ```
 
-`root` selects a reviewed family through structural membership, including the root itself
-only when it is an eligible descriptor. `labels` names an explicit candidate set; it does
-not imply exclusivity or automatic emission. Evidence identifiers refer to a small typed
-adapter registry, not arbitrary functions embedded in the graph. Only evidence established
-for the actual task activates an evidence trigger; unavailable evidence remains unresolved.
+`root` selects eligible descriptors through structural membership. `labels` names an
+explicit candidate family, including eligible specializations; it does not declare an
+exactly-one constraint. `any` activates a rule when any annotation family is present.
+The core treats evidence-only branches as inactive; the supplementary evaluator can use
+them to assess a content-dependent obligation.
 
-Rules form adjacency lists from triggers to required facet assessments. Evaluate each
-activated rule/facet once, with deterministic ordering. Requiring a facet does not create
-a label or establish evidence for another trigger. Family and context membership do not
-turn `partOf`, `integrates`, `expands`, or other relations into annotation implications.
+For an activated annotation rule, require at least one supplied member of each `assess`
+facet. Do not add omitted values or use evidence's expected values as annotation requirements.
+Rules inspect the original supplied label set: an obligation never creates labels or
+recursively activates another rule. Deterministic ordering makes repeated reports identical.
 
-Avoid a general expression language. The initial evaluator needs family/evidence predicates
-and `any` composition, plus the shared Area gate. Add operators only when a reviewed rule
-needs them.
+Only declared conflict groups impose incompatibility. Zero-presence/absence, sign-presence/
+absence, and single/multiple reference-frame claims are the initial groups. Different
+operand counts, digit profiles, number forms, fraction subtypes, numeral systems, or range
+bounds are not globally exclusive; mixed tasks and property witnesses can justify multiple
+annotations (`TSPEC-14`).
 
-## Initial dependencies and evidence boundaries
+## Initial annotation dependencies
 
-All rows inherit the Area allowlist. A task outside it stays outside even when a dependency
-would otherwise be relevant; there is no measurement, algebra, or per-module bypass.
+All rows inherit the complete Area allowlist.
 
-| Rule | Trigger and required assessment | Evidence boundary |
+| Rule | Annotation trigger | Required groups |
 |---|---|---|
-| `LD-NUM-01` | Numeric Scopes or independently established numeric content require number kind, numeral system, base, range, sign, and zero assessments. | Object quantities can have number-kind and range labels while numeral system/base are inapplicable. Written or explicitly requested numeral answers can establish notation evidence. Range checks remain presence-only. |
-| `LD-OPERANDS-01` | Arithmetic operands require operand cardinality and applicable digit profiles. | Count operand occurrences, including repeated values. Distinguish smallest/largest operand and dividend/divisor roles where applicable. A result's digits cannot substitute for operand digits. |
-| `LD-FRACTION-01` | Fraction values require proper/improper and unit/nonunit assessments. | Use the actual values and exposed representation. Mixed fraction types may require multiple independent labels. |
-| `LD-DECIMAL-01` | Decimal representation requires base and precision assessments. | Follow the representation and current definitions, not an internal storage format. An unsupported precision is unresolved, not silently rounded to a catalog label. |
-| `LD-FRAME-01` | Relevant quantity representations require reference-frame assessment. | Several diagrams can share one frame. Missing frame evidence is unresolved; diagram count alone is insufficient. |
-| `LD-EXPLAIN-01` | A requested or demonstrated written explanation requires articulation assessment. | Assess the observable learner action in each mode. Mere text presence does not establish an Ability, and the new assessment does not replace existing understanding claims. |
+| `LD-NUM-01` | Numeric Scope, numeral-system annotation, operand count, or operand-digit annotation | Number kind, numeral system, base, sign, zero, plus report-only range presence |
+| `LD-OPERANDS-01` | Operand count or operand-digit annotation | Operand count and operand digits |
+| `LD-FRACTION-01` | Fraction-family annotation | Fraction magnitude |
+| `LD-DECIMAL-01` | Decimal-family annotation | Numeric base |
 
-The [numeral-system ownership correction](numeral-system-ownership.md) is a required
-regression reference: object-only counting does not acquire `ArabicNumerals` or `Base10`,
-while an explicitly requested answer in digits can support numeral labels even when the
-answer box is empty. Arabic digit symbols alone do not universally establish base 10.
+`LD-FRACTION-UNIT-01` and `LD-DECIMAL-PRECISION-01` remain supplementary evidence rules.
+Their candidate groups do not cover every value permitted by their triggering annotation
+families. Under the pinned ontology, `NonUnitFractions` means proper fractions with an
+integer numerator greater than one; it is not the complement of `UnitFractions`. Values
+such as `0/5`, `-1/2`, and `3/2` need not fit either candidate. Likewise, `DecimalNumbers`
+permits `0.1234`, while the current precision selector lists only tenths, hundredths, and
+thousandths. Do not create an impossible completeness requirement by treating those
+selectors as exhaustive. Fraction magnitude and numeric base remain generic requirements.
 
-Do not apply one numeric-field scan to every facet. Sign, zero, operand digits, fraction
-forms, and representation facts have distinct evidence domains. Adapters inspect typed
-mathematical data and the view's task projection, without adding label reads or annotation
-logic to pure generators/renderers. Validate both question and solution modes.
+`LD-FRAME-01` and `LD-EXPLAIN-01` also remain supplementary until a sound,
+non-tautological annotation trigger is defined. The graph does not infer written explanation
+from arbitrary text, or reference-frame obligations from panel count. Existing annotation
+conflicts are still checked even when no dependency trigger activates.
 
-No global exactly-one constraint applies to a facet. Mixed representations and number
-forms can be valid conjunctions (`TSPEC-14`); lower and upper range labels can coexist.
-Presence establishes only the structural part of satisfaction. Evidence-dependent
-assessments must also establish that the relevant distinctions are accounted for.
+These are explicit repo-local completeness requirements, not new ontology implication
+relations. A numeral label alone does not prove its base; a missing base produces a required-
+group finding without selecting `Base10`. Likewise, arithmetic Area membership alone does
+not establish an operand structure or trigger numeric labels in a formal task.
 
-## Assessment results and diagnostics
+## Results and diagnostics
 
-Record the context outcome separately as `eligible`, `outside_policy_scope`, or
-`invalid_context`. For each activated facet use:
+Report context separately as `eligible`, `outside_policy_scope`, or `invalid_context`.
+Core annotation assessments are `satisfied` when a required group is present and `missing`
+when absent. Explicit conflicts have their own stable IDs and involved labels. Unknown or
+ineligible supplied descriptors remain contract errors.
 
-| Status | Meaning |
+Supplementary evidence retains `satisfied`, `missing`, `not_applicable`, and `unresolved`
+results, including concrete expected/missing labels and evidence references when available.
+Its errors and trigger states remain separate from the annotation result. A core presence
+pass is not a proof that the chosen label is correct for the exercise.
+
+Every report retains rule ID, triggering annotations, facet, supplied labels, context,
+and target/generator/view/sample/split/mode provenance where available. Summaries count
+eligible checked samples, outside-policy subjects, invalid contexts, annotation omissions,
+and conflicts separately from evidence availability and proof outcomes. Sample counts
+measure dataset impact; adapters support producer/view contracts, not individual samples.
+
+## Strict gate and integration
+
+The strict gate applies to all eligible finalized annotation sets, without an adapter,
+producer/view allowlist, payload variant registry, or named evidence deferral. It fails:
+
+- Missing non-range groups activated by annotations.
+- Declared conflicting annotation claims.
+- Invalid contexts and annotation/structural row contract errors.
+- Missing or empty stored snapshots and incomplete selection enumeration where a complete
+  dataset audit is required.
+
+Pre-draw selections receive the same annotation report. Their completeness omissions stay
+report-only because reviewed completion may add descriptive labels after the draw. Their
+conflicts and invalid contexts still fail. This does not filter selections out of matching
+or demand complete artifact annotations from partial targets.
+
+| Surface | Behavior |
 |---|---|
-| `satisfied` | Applicable supported labels are present and the required evidence check succeeds. For range this establishes presence under the existing contract, not a new numeric proof. |
-| `missing` | Evidence establishes an applicable label or distinction that the resolved labels omit. |
-| `not_applicable` | Evidence establishes that this facet does not apply, with a specific reason. |
-| `unresolved` | Applicability, evidence, or a suitable ontology label cannot yet be determined. Missing adapters and unsupported catalog cases belong here. |
+| Graph integrity | Validate version, unique rule/conflict IDs, selectors, eligible explicit candidates, family/facet references, and evidence identifiers. |
+| Resolved selections | Enumerate complete admitted generator/view assignments within the existing bound; report completeness and reject conflicts/invalid contexts. |
+| Runtime | Check every completed annotation set before rendering, retry/fallback, or deduplicated association can hide a failure. Annotation failures are fatal contract failures. |
+| Stored datasets | Evaluate actual labels for every row in both splits using authoritative resolved Areas; no replay or adapter is required for the core. |
+| Dataset VQA | Run annotation validation before cached or live VQA against the same immutable snapshot. Passing cached judgments cannot bypass omissions. |
+| Union merge | Validate source snapshots before replacing the union, then retain those snapshots through publication. Keep the public metadata shape unchanged. |
+| Repository checks | Use the shared selection checks and strict snapshot audit; fresh clones without generated snapshots still run static checks. |
 
-Contradictory or unsupported existing claims remain correctness errors. Do not hide them
-behind a completeness status. Unknown and ineligible descriptors also fail existing checks.
+Canonical orchestration enforces the gate before accepting a candidate for deduplication or
+rendering, and rechecks actual-mode solution fallback and retained target associations.
+Pure draw/completion helpers remain available to inspect incomplete annotations; they do
+not publish dataset artifacts or substitute for the canonical gate.
 
-Each finding should contain the rule ID, context decision, triggering labels/evidence,
-facet, assessment status, current labels, evidence references/reason, and target,
-generator, view, sample, split, and mode provenance where available. Group repeated findings
-by owning declaration while retaining sample references. Include counts of unresolved and
-outside-policy cases so a small passing subset cannot be presented as full coverage.
+The default `audit:label-dependencies` command remains report-only and does not load runtime
+generators or replay payloads. `--with-evidence` enables supplementary reconstruction and
+diagnostics without changing the core annotation findings or strict outcome. `--strict` adds an
+annotation enforcement summary and a failing exit status for the conditions above. Keep
+range and supplementary evidence findings visible without making them strict failures.
+Reports write only to `temp/`; auditing does not mutate labels, render images, call VQA,
+or change caches, targets, or generated datasets.
 
-Evidence independent of existing labels is necessary: deleting every numeric trigger label
-must not make a known numeric task silently pass. Begin with typed arithmetic and counting
-adapters. Record which producer/view contracts are covered; an unreviewed adapter boundary
-cannot be treated as proof that no trigger exists.
+Version graph/evaluator/report semantics and bind the policy identity to the graph and
+relevant ontology records, including absent candidate labels and Area ancestry. Retain
+separate evidence identity for optional replay and reviewed completion. Changes to report
+wording alone should not invalidate images. Matching never executes payload adapters.
 
-## Implementation and integration
+## Implementation and verification sequence
 
-Keep one evaluator in a proposed `src/lib/label-dependencies.ts`, with adjacent
-`label-dependencies.test.ts`. Separate pure graph evaluation from the small typed evidence
-adapters. The authored graph is the single source of dependency definitions; callers do
-not copy rules into individual module specs.
+1. Separate pure annotation evaluation from supplementary evidence results. Add direct
+   annotation-family triggers and declarative conflicts while preserving the Area gate.
+2. Replace evidence-scoped strict enforcement with the generic finalized-annotation gate.
+   Preserve report-only selection omissions and range findings.
+3. Update runtime, audit, dataset, merge, and repository entry points to share that gate.
+   Keep existing supported completion behavior separate; do not expand adapters merely to
+   increase completeness coverage.
+4. Run unit and integration regressions, full coverage, type/static/documentation checks,
+   and two deterministic audits. Inspect every newly exposed omission and distinguish
+   annotation-policy findings from incorrect mathematical labels.
+5. Record real remaining findings explicitly. Repair declarations or add supported labels
+   in a separately reviewed content increment; do not invent labels, alter targets, or
+   weaken the allowlist to force a passing audit.
 
-| Surface | Integration |
-|---|---|
-| Graph integrity | Check version, unique IDs, known ontology selectors, eligible explicit label candidates, facet references, and registered evidence identifiers. Organizational roots remain valid selectors only. |
-| Resolved selections | Inspect complete admitted generator/view selections. Reuse existing planner enumeration/factorization, with its bounds; do not flatten alternatives or treat one sampled selection as exhaustive. Evidence-dependent checks remain unresolved until a draw exists. |
-| Runtime | Extend the boundary around [resolved-label validation](../../src/lib/label-contracts.ts) and [generation orchestration](../../src/lib/generation-orchestration.ts) to check actual draws before rendering and target-association reuse. Annotation contract failures bypass ordinary generation retries. |
-| Stored datasets | Apply the same evaluator to every row in strict [dataset validation](../../src/scripts/validate-dataset.ts), using validated operational evidence or deterministic replay. A passing VQA cache entry cannot bypass missing dependencies. |
-| Union publication | Validate source rows before replacement and the final public label projection in [merge-dataset](../../src/scripts/merge-dataset.ts). Keep richer evidence in operational metadata/sidecars. |
-| Repository checks | Wire graph integrity and selection checks through [shared standards validation](../../src/lib/standards-validation.ts), full checks, and affected checks. Do not demand complete artifact labels from each target. |
+Regression tests cover all Area cases above; generic unknown producer/view combinations;
+annotation omissions without adapters; evidence that cannot suppress a core omission;
+exclusive conflicts without a numeric trigger; legitimate mixed counts/digits/forms;
+structural descendants; deterministic hashes/diagnostics; pre-draw versus finalized checks;
+nonexhaustive fraction-unit and decimal-precision selectors that must not become blanket obligations;
+report-only range findings; immutable snapshots; cached VQA bypass prevention; and existing
+completion receipts and question/solution behavior.
 
-The existing [scope-completeness inventory](../../src/lib/scope-completeness.ts) is useful
-for candidate discovery and reporting conventions, but it inspects one deterministic
-selection per tuple and treats co-resolution as a review signal. It is not the enforcement
-engine or an observability proof.
+No dataset regeneration or Gemini requests are needed solely to change the label-only
+validator. Actual label or presentation repairs still use the established canonical
+generation, churn/split/image checks, and VQA workflow.
 
-Keep the first pass report-only. Later, label-only rules that are sound before generation
-can participate in existing planner constraints, with explicit diagnostics for removed
-selections and lost matches. Do not silently filter defective selections to hide an
-annotation failure, and never run payload evidence adapters during matching.
+## Annotation-only implementation verification (2026-10-27)
 
-Version the graph, evaluator/evidence contract, and deterministic reports. Validation
-identity must include the effective graph, adapter policy, and relevant ontology records,
-including candidate labels absent from existing annotations. The complete Area set and
-ancestry used by the gate are dependencies too. If rules affect planner admission, include
-their semantic hash in [matching policy identity](../../src/lib/matching.ts) and rebuild
-persisted plans. Changes to report wording alone should not invalidate images.
+Checkpoints `f9faeefa` and `508d6170` separate annotation requirements from payload evidence
+and replace the adapter-scoped gate. Completion reads only supplementary proof assessments,
+and its reviewed producer/view opt-in is explicit rather than implied by adapter registration.
+No targets, declarations, generated rows, images, or VQA cache records changed in this increment.
 
-Dependency audits run independently of VQA. Keep the existing public
-`file_name`/`labels`/`solution` shape and existing VQA support contract. Changes to actual
-labels or evidence-bearing presentation use the established regeneration and VQA workflow;
-do not assume the existing supplied-label VQA response can discover omitted labels.
+The unchanged snapshot is
+`cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`:
+
+- All 2,808 stored samples are inspected; 1,884 satisfy the unchanged Area allowlist and
+  924 are outside it. All 1,212 pre-draw selections are enumerated, with 797 eligible.
+- Core annotation results contain zero unresolved assessments, conflicts, invalid contexts,
+  row integrity errors, or incomplete tuples. Adapter availability is not a completeness status.
+- There are 4,318 missing non-range rule/facet assessments across 1,332 stored samples.
+  Some rules require the same facet, so assessment counts are not distinct missing labels.
+- Strict mode intentionally exits nonzero for those omissions. Repository checks pass the
+  other six gates and fail the annotation dependency gate; these content findings remain
+  visible rather than being deferred by producer or payload variant.
+- Range presence remains report-only (944 sample and 402 selection assessments). The wider
+  annotation triggers expose more existing omissions without calculating or changing ranges.
+- Optional `--with-evidence` produces identical core annotation findings and strict failures.
+  Payload replay and receipt-policy diagnostics remain supplementary.
+
+| Missing facet | Distinct stored samples |
+|---|---:|
+| Zero participation | 1,082 |
+| Numeral system | 830 |
+| Numeric base | 788 |
+| Sign | 616 |
+| Operand digit group | 490 |
+| Number kind | 222 |
+| Fraction magnitude | 130 |
+| Operand count | 26 |
+
+These counts overlap. They identify missing annotation families, not the correct replacement
+values. The next content increment should review declaration omissions and justified additive
+labels without changing targets or treating label absence as an opposing claim.
+
+Focused regressions pass (9 files / 259 tests), and final type checking passes. Evaluator
+coverage is 100% for statements, branches, functions, and lines. Documentation validation
+passes with the five existing external-fetch warnings. Two final strict audits produce
+byte-identical JSON and Markdown; core findings and strict results also match exactly with
+and without optional evidence. Full-suite coverage is recorded after completion. Local reports are under
+`temp/annotation-dependencies/`.
+
+## Historical evidence-scoped rollout
+
+The following sections record earlier commits and their original verification scope.
+Their passing counts do **not** establish annotation completeness for every eligible sample.
+The 2026-10-27 annotation-only design above supersedes the former adapter-scoped gate and
+any implication that further adapter coverage is required to check missing dependencies.
 
 ## Implemented additive repairs
 
@@ -335,74 +414,6 @@ evidence under the current ontology semantics, while the inherited labels claim
 contradiction. A later projection-specific correction must replace the false absence claim;
 weakening the evidence would hide the defect. This additive repair leaves both findings
 explicit, appends no contradictory zero label, and removes neither claims nor targets.
-
-## Rollout and validation steps
-
-The first increment provides `audit:label-dependencies`, the six-rule graph, the pure
-evaluator, and reviewed arithmetic/counting adapters. It enumerates bounded admitted
-selections and inspects every available stored row, with verified replay for supported
-producer/view contracts. Fraction, decimal-precision, reference-frame, and other uncovered
-evidence stays unresolved. No strict matching, generation, dataset-audit, or merge gate is
-enabled yet. Operational usage is documented in [DOCS.md](../../DOCS.md).
-
-1. **Inventory and implement the contract.** Validate the markup against the exact ontology,
-   freeze the Area-gate examples, and implement graph/evaluator unit tests. Register the
-   initial facets and evidence interfaces. Start with arithmetic and counting adapters;
-   record uncovered fraction, precision, frame, and explanation assessments explicitly.
-2. **Run a report-only audit.** Use the implemented command
-   `npm run audit:label-dependencies -- --spec=ccss`. Write deterministic `audit.json` and
-   `audit.md` under `temp/label-dependencies/ccss/`. Inspect admitted selections and all
-   available dataset rows, with assessed/unresolved coverage clearly separated. This pass
-   changes no labels, targets, caches, or generated artifacts.
-3. **Review and repair findings.** Expand adapters to the initial dependency table, verify
-   candidate omissions against current definitions and rendered tasks, and repair the
-   owning declarations/resolvers where they can truthfully supply the missing claims.
-   Preserve partial targets, existing planned claims, generation configuration, seeds, and
-   sampling. The reviewed post-draw operand-digit and zero-absence completion above may add supported
-   observable facts within its declared producer/view boundary, with an actual-mode
-   evidence receipt and explicit source/candidate identity. Other instance-dependent
-   findings stay explicit until their annotation design is reviewed; do not force new
-   target permutations. Range findings report missing presence only.
-4. **Enable strict validation for reviewed coverage.** Add `--strict` to the audit, fail
-   missing dependencies and unresolved applicable assessments within the declared supported
-   coverage, and retain explicit outside-policy/uncovered totals. Wire the shared evaluator
-   into runtime, dataset, merge, and repository checks. A completeness claim for the full
-   initial rule set requires resolving its uncovered adapters; do not shrink the Area gate
-   to obtain a passing run.
-5. **Verify affected artifacts.** For actual declaration or rendering repairs, run scoped
-   canonical generation and VQA, then label diffs, image-conflict checks, split checks,
-   target-association validation, and churn review. Preserve independently correct labels.
-   Dataset publication remains a separate release workflow.
-
-The regression matrix must cover:
-
-- Every allowed root, transitive descendants, an Area with multiple ancestry paths, an
-  outside Area added to an otherwise allowed set, and an empty/unknown/ineligible Area.
-- The intended `AlgebraicExpression + Addition` positive case, its extension with
-  `EquationSolving` or `AlgebraicModeling`, and arithmetic equations that stay eligible.
-- An eligible context without any trigger; targets whose extra facets come from the
-  resolved pair; correlated choices where only one selection is incomplete.
-- Seeded omissions of a required label and of every numeric trigger label; incorrect
-  additions; deterministic diagnostics; and missing adapters producing unresolved findings.
-- Object-only counting versus an explicit numeral response; mixed representations; and
-  applicable positional bases without assuming every numeral is decimal.
-- Operand/result digit distinctions, repeated operands, zero and negative values, proper
-  and unit fractions, decimal precision, shared frames, and written explanation evidence.
-- Range-facet presence with lower/upper compositions and missing-presence diagnostics,
-  without calculating or asserting tighter replacement bounds.
-- Both image modes, stale policy receipts, cached VQA passes with missing dependencies,
-  deduplicated target associations, and source/final union row checks.
-
-Implementation checks include adjacent unit tests for all new library code, integration
-tests for selection/runtime/stored-row gates, `npm run test:coverage`,
-`npm run test:integration`, `npm run check -- --spec=ccss`, and `npm run check:docs`.
-Run the new audit twice to verify deterministic output. Use scoped canonical generation,
-`validate:dataset`, `audit:dataset`, `audit:images`, `report:splits`, and `report:churn` only
-when implementation repairs affect their inputs.
-
-On implementation, document approved authoring obligations in the reference library and
-commands/workflows in `DOCS.md`; link them from the existing indexes. This plan records the
-design and sequence, rather than introducing new normative authoring rules by itself.
 
 ## First increment verification
 

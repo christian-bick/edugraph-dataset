@@ -182,8 +182,9 @@ Mathematics, or Formal Mathematics subtree. Unsupported or underdetermined evide
 not cause speculative additions. Range labels are never computed or changed here.
 
 Completion is additive: a false planned claim cannot be repaired by appending its opposite.
-Zero-absence completion is limited to reviewed arithmetic-pairs projections, with no existing
-zero claim and evidence for `NumbersWithoutZero`. It does not add `NumbersWithZero`.
+Zero-absence completion is limited to reviewed arithmetic-pairs and property-law witness
+projections, with no existing zero claim and evidence for `NumbersWithoutZero`.
+It does not add `NumbersWithZero`.
 The generator's nonzero payload alone cannot describe a number-line view's zero origin.
 The separately approved parity correction replaces an inherited `NumbersWithoutZero` with
 `NumbersWithZero` only for the reviewed `counting-basic` / `counting-objects-parity` pair
@@ -193,15 +194,31 @@ planned label set in the evidence receipt. The final annotation and original rec
 the replacement inspectable. Other counting views and the additive arithmetic policy are
 unchanged; targets, configuration, sampled data, random state, and rendering are unaffected.
 
-The scoped dependency gate is declared in `src/validation/label-dependency-coverage.ts`.
-Its versioned producer/view/payload-variant/facet coverage is independent of adapter presence:
-an unavailable adapter cannot erase an enforcement obligation. Covered omissions, unresolved
-applicable evidence, and contradictory zero/sign claims fail. Signed digit profiles and
-underdetermined inversion quantities have explicit deferred coverage; other unsupported
-families remain visible. Every resolved Area still must belong to the agreed allowlist.
-Range remains report-only. Matching never evaluates a payload.
+Annotation completeness is checked by the repo-local graph in
+`src/validation/label-dependencies.ts`. The same pure evaluator checks every finalized sample's
+annotations, independently of its generator, view, payload, or evidence adapter. Label-family
+triggers require at least one eligible member of each declared facet; explicitly declared
+incompatible claims produce separate conflicts. These checks establish annotation consistency,
+not whether the exercise supports a particular label value. Missing labels are findings even
+when no adapter can determine the correct addition. Absence of a label never proves its opposite.
 
-Property-law evidence checks both rendered sides, grouped intermediates, and distributive
+The strict annotation gate rejects non-range omissions and conflicts in every eligible
+finalized annotation set. It uses the complete resolved Area conjunction: at least one Area
+must be present, and every involved Area must be a structural descendant of Arithmetic,
+Intuitive Mathematics, or Formal Mathematics. Pre-draw selection omissions remain report-only
+because supported completion can append labels after generation; selection conflicts and invalid
+contexts still fail. Targets remain partial requests, and matching never evaluates a payload.
+Range-presence findings remain report-only; range policy is unchanged.
+
+Typed evidence adapters are supplementary diagnostics and support the separately reviewed
+completion policies. Their availability, unsupported payload variants, or unresolved evidence
+cannot suppress a required annotation group or limit the strict annotation gate's scope.
+Dependency rules must also respect the ontology selectors' actual coverage. `UnitFractions`
+and `NonUnitFractions` do not exhaust fraction values, and the cataloged decimal precisions
+do not exhaust `DecimalNumbers`. Their absence alone is therefore not a generic completeness
+failure; those distinctions remain supplementary evidence assessments.
+
+Supplementary property-law evidence checks both rendered sides, grouped intermediates, and distributive
 partial products. A distributive witness exposes three-, four-, and two-operand expressions;
 each establishes its own count and digit descriptors. Shared completion appends those
 supported facts and zero absence while preserving configuration, target matching, entropy,

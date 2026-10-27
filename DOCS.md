@@ -415,7 +415,7 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/check-all.ts`
 *   **Execution**: `npm run check [-- --spec=<spec_module>]`
-*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), competency standard spec validations (`normalizeAndValidateSpec`), dataset split integrity (`report-splits.ts`), and the scoped label-dependency audit (`audit-label-dependencies.ts --strict`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available standard modules. Snapshot split and dependency audits run only for specs whose dataset has been generated, so a fresh clone still passes every static check.
+*   **Function**: The unified repository check script. Orchestrates TypeScript type checking (`tsc --noEmit`), generator/view spec audits (`validate-generator-view-specs.ts`), label usage audits (`check-labels.ts`), documentation reference validation (`validate-docs.ts`), competency standard spec validations (`normalizeAndValidateSpec`), dataset split integrity (`report-splits.ts`), and the annotation-dependency audit (`audit-label-dependencies.ts --strict`). If `--spec` is specified, restricts target spec validation to that module; otherwise validates all available standard modules. Snapshot split and dependency audits run only for specs whose dataset has been generated, so a fresh clone still passes every static check.
 
 ### `src/scripts/check-affected.ts`
 *   **Execution**: `npm run check:affected [-- --base=<git-ref>] [--files=<comma-separated-paths>] [--plan-only]`; use `--full` to delegate explicitly to `npm run check`.
@@ -459,37 +459,45 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
 
 ### `src/scripts/audit-label-dependencies.ts`
 
-* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--strict] [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
+* **Execution**: `npm run audit:label-dependencies -- --spec=<module> [--strict] [--with-evidence] [--max-selections=<1..4096>] [--output-dir=temp/<directory>]`.
 * **Function**: Writes deterministic `audit.json` and `audit.md` under
   `temp/label-dependencies/<module>/`. The repo-local graph in `src/validation/label-dependencies.ts`
   declares facet obligations. Its pure evaluator applies the shared Area context only when
   every involved resolved Area belongs to Arithmetic, Intuitive Mathematics, or Formal Mathematics.
-  Individual family/evidence triggers then activate assessments. Missing, satisfied,
-  not-applicable, unresolved, invalid-context, and outside-policy results remain distinct.
-* **Coverage**: Fresh matching supplies authoritative generation plans. The audit enumerates
+  Label-family triggers then check required annotation groups, and declared incompatible claims
+  produce conflicts. Missing groups and conflicts are checked independently of payloads and
+  evidence-adapter availability. The evaluator keeps supplementary evidence results separate.
+* **Subjects**: Fresh matching supplies authoritative generation plans. The audit enumerates
   complete assignments from retained correlated groups and independent domains, bounded per
   tuple; an oversized space is explicitly uninspected. Stored rows are read through the logical
-  dataset snapshot in both splits. Initial typed evidence adapters cover reviewed arithmetic
-  pair/triple/four-operand equation views, basic counting, and count-out. Other projections and
-  unavailable payload evidence remain unresolved. Range checks assess label presence only.
-* **Evidence identity**: Supported samples replay the recorded selection and actual draw origin
+  dataset snapshot in both splits. Every eligible stored annotation set is checked, including
+  producer/view combinations with no evidence adapter. Targets remain partial requests.
+  Range checks assess label presence only and never calculate replacement bounds.
+* **Supplementary evidence**: Optional typed adapters cover reviewed arithmetic equation views,
+  basic counting, and count-out. Default audits do not load runtime generators or replay payloads;
+  `--with-evidence` enables this diagnostic path. Supported samples replay the recorded selection and actual draw origin
   only when the current plan and stored generator/view source identities agree. Content and task
   fingerprints must reproduce before payload evidence is trusted. Actual stored annotations stay
   separate from authoritative resolved Areas used by the gate. Reports preserve deduplicated
   target associations and bind policy identity to the graph, evaluator/adapters, and ontology.
+  Missing adapters, unavailable replay, and unresolved proof remain diagnostic; they do not
+  suppress annotation findings or narrow enforcement to reviewed projections.
+  Nonexhaustive subtype selectors, such as unit/nonunit fractions and the currently cataloged
+  decimal precisions, remain evidence-dependent rather than unconditional annotation requirements.
 * **Enforcement**: The default command remains report-only. `--strict` uses the versioned
-  `src/validation/label-dependency-coverage.ts` registry and adds a coverage summary to both
-  reports. Covered omissions, unresolved applicable evidence, zero/sign contradictions,
-  invalid contexts, provenance/contract failures, missing snapshots, and incomplete selection
-  enumeration fail. Signed digit profiles and underdetermined inversion quantities are named
-  deferrals. Unsupported producers/views/facets remain visible; range is always report-only.
+  annotation policy and adds an enforcement summary to both reports. Missing non-range
+  dependencies and declared annotation conflicts fail for every eligible finalized sample,
+  as do invalid contexts, structural row/contract failures, missing snapshots, and incomplete
+  selection enumeration. Pre-draw selection omissions remain report-only because supported
+  completion can append labels after the draw; selection conflicts and invalid contexts fail.
+  Evidence results do not determine strict annotation success. Range is always report-only.
 * **Shared gates**: Generation checks completed annotations before retries, fallback, or
   deduplicated reuse can hide a contract failure. Shared standards checks enumerate selections
   without inspecting payloads. Repository checks audit generated snapshots. Dataset validation
   applies the gate before cached or live VQA, using the same immutable snapshot. Union merge
   validates every source snapshot before replacing the existing union and retains those same
   snapshots through publication. Reports write only under `temp/`; the audit performs no
-  rendering or VQA calls. Further coverage remains in the [plan](docs/plan/label-dependency-graph.md).
+  rendering or VQA calls. The design and verification record are in the [plan](docs/plan/label-dependency-graph.md).
 
 ### `src/scripts/validate-standards-spec.ts`
 *   **Execution**: `npm run check:standards-spec -- --spec=<module>[,<module>...]`

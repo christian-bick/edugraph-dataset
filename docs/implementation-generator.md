@@ -62,6 +62,12 @@ omissions in reviewed arithmetic projections within the agreed Area allowlist; g
 still return only mathematical data. A nonzero payload alone cannot establish absence of
 zero in a projection that adds a zero origin or another zero-valued task quantity.
 
+The shared annotation-dependency gate checks every eligible finalized label set after this
+completion step, whether or not a typed evidence adapter supports the generator/view pair.
+Required-group presence and declared conflicts are label-only checks. Evidence adapters can
+justify a concrete addition, but their absence cannot exempt annotations from completeness
+validation or establish an opposing claim. Generators still return only mathematical data.
+
 ### IMPL-G4 — The math must prove the labels
 
 The properties of the generated problem must strictly adhere to the requested labels. If a

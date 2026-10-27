@@ -238,6 +238,14 @@ claim while retaining the original selected labels in its evidence receipt. It m
 explicit target claims and cannot change matching, configuration, or sampling. The bounded
 parity zero correction is documented in [label architecture](label-architecture.md).
 
+Dependency completeness is a separate annotation contract. The shared repo-local graph checks
+the complete finalized generator/view label set, without requiring a payload evidence adapter.
+It reports a required label group as missing without choosing or inventing its correct member.
+Do not add a schema dimension or target requirement solely to make that diagnostic disappear;
+repair the owning declaration or use supported descriptive completion when the claim is justified.
+Targets remain partial requests, and pre-draw selection omissions remain review findings until
+finalized annotations are available. See [label architecture](label-architecture.md).
+
 **Verified by:** `npm run check:generator-view-specs`.
 
 ### SPEC-7 — Zero overlap between schema parameter labels and `generalLabels`
