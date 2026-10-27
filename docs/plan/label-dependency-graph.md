@@ -344,8 +344,23 @@ Focused regressions pass (9 files / 259 tests), and final type checking passes. 
 coverage is 100% for statements, branches, functions, and lines. Documentation validation
 passes with the five existing external-fetch warnings. Two final strict audits produce
 byte-identical JSON and Markdown; core findings and strict results also match exactly with
-and without optional evidence. Full-suite coverage is recorded after completion. Local reports are under
-`temp/annotation-dependencies/`.
+and without optional evidence.
+
+| Final verification | Result |
+|---|---|
+| Complete test suite | 837 files / 6,304 tests pass. |
+| Generator coverage gate | Every generator meets the existing statement/branch thresholds. |
+| Changed libraries | 257 tests pass; 98.99% lines, 98.46% statements, 95.93% branches, 99.41% functions across validation, completion, and orchestration. |
+| Generic evaluator | 100% lines, statements, branches, and functions. |
+| Generic strict gate | 100% lines, statements, and functions; 97.05% branches. |
+| Type and documentation checks | Pass; only the five existing external-fetch documentation warnings. |
+| Repository check | Six gates pass; annotation dependency gate fails for the 4,318 known missing assessments. |
+| Strict audit determinism | JSON and Markdown byte-identical across two runs. |
+| Evidence independence | Core subject results and the complete strict output match with and without `--with-evidence`. |
+| Artifact preservation | Same immutable snapshot pointer; no regeneration, image/metadata edits, cache writes, or Gemini calls. |
+
+Local reports are under `temp/annotation-dependencies/`, including `final-plain/`,
+`final-repeat/`, `final-evidence/`, `full-coverage-final.txt`, and `library-coverage/`.
 
 ## Historical evidence-scoped rollout
 
