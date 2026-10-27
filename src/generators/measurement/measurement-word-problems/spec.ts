@@ -1,5 +1,5 @@
 import {Scope} from 'edugraph-ts';
-import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../../arithmetic/helpers.ts';
@@ -15,6 +15,7 @@ export const measurementWordProblemKinds = [
 export const measurementWordProblemNumberKinds = [
     Scope.IntegerNumbers,
     Scope.FractionNumbers,
+    Scope.ProperFractions,
     Scope.DecimalNumbers
 ] as const;
 
@@ -56,11 +57,16 @@ export const MeasurementWordProblemsGeneratorSchema = {
     ],
     numberKind: [
         measurementWordProblemNumberKinds,
-        selectExactLabelMap([
-            [Scope.IntegerNumbers, 'integer'],
-            [Scope.FractionNumbers, 'fraction'],
-            [Scope.DecimalNumbers, 'decimal']
-        ])
+        selectExactLabelSetMap([
+            [[Scope.IntegerNumbers], 'integer'],
+            [[Scope.FractionNumbers, Scope.ProperFractions], 'fraction'],
+            [[Scope.DecimalNumbers], 'decimal']
+        ]),
+        [
+            [Scope.IntegerNumbers],
+            [Scope.FractionNumbers, Scope.ProperFractions],
+            [Scope.DecimalNumbers]
+        ]
     ],
     operation: [arithmeticOperations, resolveDeclaredOperation]
 } as const;

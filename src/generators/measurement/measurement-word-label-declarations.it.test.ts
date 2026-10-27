@@ -35,9 +35,6 @@ beforeAll(async () => {
     view = views.find(entry => entry.viewId === viewId)!;
 });
 
-const expectedMissingFacets = (labels: readonly string[]) => labels.includes(Scope.FractionNumbers)
-    ? ['fractionMagnitude', 'operandDigits'] : ['operandDigits'];
-
 const exactDisplay = (text: string): MeasurementWordProblemValue => {
     const token = text.match(/\d+(?:[./]\d+)?/)?.[0];
     expect(token).toBeDefined();
@@ -63,6 +60,15 @@ const expectPositiveQuantityPresentation = (data: MeasurementWordProblemGrade4, 
         expect(Number.isSafeInteger(value.denominator)).toBe(true);
         expect(value.numerator).toBeGreaterThan(0);
         expect(value.denominator).toBeGreaterThan(0);
+    }
+    if (data.numberKind === 'fraction') {
+        const measuredValues = data.operands.flatMap(operand => operand.role === 'measured' ? [operand.value] : []);
+        for (const value of [...measuredValues, data.answer]) {
+            expect(value.numerator).toBeLessThan(value.denominator);
+        }
+        for (const operand of data.operands) {
+            if (operand.role === 'group-count') expect(operand.count).toBeGreaterThan(1);
+        }
     }
     const [left, right] = quantities;
     const answer = data.operation === 'addition' || data.operation === 'subtraction'
@@ -102,7 +108,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('leaves the 60 operand-digit and 20 fraction-magnitude source assessments unresolved', () => {
+    it('leaves only the 60 non-range operand-digit source assessments unresolved', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         for (const target of targets) {
@@ -117,13 +123,13 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
                 const missing = evaluation.assessments.filter(item => item.status === 'missing' && item.facet !== 'range');
-                expect(missing.map(item => item.facet).sort()).toEqual(expectedMissingFacets(target.labels));
+                expect(missing.map(item => item.facet)).toEqual(['operandDigits']);
                 for (const assessment of missing) {
                     missingCounts.set(assessment.facet, (missingCounts.get(assessment.facet) ?? 0) + 1);
                 }
             }
         }
-        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 60, fractionMagnitude: 20});
+        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 60});
     });
 
     it.each(targets)('emits truthful declarations for $id without changing its claims', target => {
@@ -144,11 +150,11 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
             expect(draw.labels).toEqual(selections.selections[0].labels);
             expect(draw.labels).toEqual(expect.arrayContaining([...quantityLabels, ...notationLabels]));
             expect(draw.labels).not.toContain(Scope.NumbersWithZero);
-            expect(draw.labels).not.toContain(Scope.ProperFractions);
+            expect(draw.labels.includes(Scope.ProperFractions)).toBe(target.labels.includes(Scope.FractionNumbers));
             const coverage = assessLabelDependencyCoverage({generatorId, viewId, kind: 'sample', labels: draw.labels});
             expect(coverage.status).toBe('checked');
             expect(coverage.failures.every(failure => failure.code === 'missing')).toBe(true);
-            expect(coverage.failures.map(failure => failure.facet).sort()).toEqual(expectedMissingFacets(target.labels));
+            expect(coverage.failures.map(failure => failure.facet)).toEqual(['operandDigits']);
             expectPositiveQuantityPresentation(draw.stub!.data as unknown as MeasurementWordProblemGrade4, mode);
         };
         for (const mode of ['question', 'solution'] as const) {
