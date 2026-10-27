@@ -23,7 +23,8 @@ const viewId = 'measurement-word-problem-grade4';
 const targets = grade4Targets.filter(target => target.id.startsWith('4.MD.A.2-measurement-word-problems~'));
 const quantityLabels = [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
 const notationLabels = [Scope.ArabicNumerals, Scope.Base10];
-const expectedMissingFacets = (labels: readonly string[]) => labels.includes(Area.Division) || labels.includes(Area.Multiplication)
+const expectedMissingFacets = (labels: readonly string[]) => !labels.includes(Scope.IntegerNumbers)
+    || labels.includes(Area.Division) || labels.includes(Area.Multiplication)
     ? [] : ['operandDigits'];
 let generator: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>[number];
 let view: Awaited<ReturnType<typeof loadViewModelCatalog>>[number];
@@ -162,7 +163,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('leaves only the 30 non-range operand-digit source assessments unresolved', () => {
+    it('leaves only the ten integer addition/subtraction operand-digit source assessments unresolved', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         for (const target of targets) {
@@ -183,7 +184,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 }
             }
         }
-        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 30});
+        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 10});
     });
 
     it.each([

@@ -47,6 +47,31 @@ describe('universal annotation dependency enforcement', () => {
         expect(noDigitLabels.failures).toEqual([expect.objectContaining({code: 'missing', facet: 'operandDigits'})]);
     });
 
+    it.each([
+        ['fraction', [Scope.FractionNumbers, Scope.ProperFractions]],
+        ['decimal', [Scope.DecimalNumbers]],
+        ['mixed integer/decimal', [Scope.IntegerNumbers, Scope.DecimalNumbers]]
+    ])('does not enforce operand digits on finalized %s annotations', (_name, kinds) => {
+        const annotations = [...labels.filter(label => label !== Scope.IntegerNumbers
+            && label !== Scope.SingleDigitSmallestOperand && label !== Scope.SingleDigitLargestOperand), ...kinds];
+        const original = [...annotations];
+        const result = assess({labels: annotations});
+        expect(result.status).toBe('checked');
+        expect(result.completenessEnforced).toBe(true);
+        expect(result.failures).toEqual([]);
+        expect(result.checkedFacets).toContain('LD-OPERANDS-01/operandCount');
+        expect(result.checkedFacets.some(facet => facet.endsWith('/operandDigits'))).toBe(false);
+        expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        expect(annotations).toEqual(original);
+    });
+
+    it('does not accept a broad operand role group as the missing width value', () => {
+        const annotations = labels.filter(label => label !== Scope.SingleDigitSmallestOperand
+            && label !== Scope.SingleDigitLargestOperand).concat(Scope.LargestOperandDigitCount);
+        expect(assess({labels: annotations}).failures)
+            .toEqual([expect.objectContaining({ruleId: 'LD-OPERANDS-02', code: 'missing', facet: 'operandDigits'})]);
+    });
+
     it('enforces new producer/view combinations identically to existing reviewed projections', () => {
         const omitted = {labels: labels.filter(label => label !== Scope.Base10)};
         expect(assess(omitted).failures).toEqual(assess({...omitted,

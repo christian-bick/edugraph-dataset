@@ -8,7 +8,7 @@ import type {
 import {digestIdentity} from './content-identity.ts';
 
 const AREA_DIMENSION = 'http://edugraph.io/edu#Area';
-const EVALUATOR_VERSION = 3;
+const EVALUATOR_VERSION = 4;
 const ordered = (values: readonly string[]): string[] => [...new Set(values)].sort();
 const fail = (message: string): never => {throw new Error(`Label dependency graph: ${message}`);};
 const nonempty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
@@ -56,12 +56,27 @@ export function validateLabelDependencyGraph(graph: LabelDependencyGraph, contex
         if (path.has(trigger)) fail('cyclic trigger expression.');
         path.add(trigger);
         const keys = Object.keys(trigger);
-        if (keys.length !== 1) fail('trigger needs exactly one family or any selector.');
+        if (keys.length !== 1) fail('trigger needs exactly one selector.');
         if ('family' in trigger) {
             if (!nonempty(trigger.family) || !Object.hasOwn(graph.facets, trigger.family)) fail(`unknown trigger family '${trigger.family}'.`);
-        } else if ('any' in trigger) {
-            if (!Array.isArray(trigger.any) || !trigger.any.length) fail('any trigger needs nonempty alternatives.');
-            for (const child of trigger.any) validateTrigger(child);
+        } else if ('any' in trigger || 'all' in trigger) {
+            const selector = 'any' in trigger ? 'any' : 'all';
+            const children = 'any' in trigger ? trigger.any : trigger.all;
+            if (!Array.isArray(children) || !children.length) fail(`${selector} trigger needs nonempty alternatives.`);
+            for (const child of children) validateTrigger(child);
+        } else if ('areaWithin' in trigger) {
+            validateDescriptor(trigger.areaWithin, 'trigger Area root', false);
+            if (!context.lookupDescriptor(trigger.areaWithin)!.dimensions.includes(AREA_DIMENSION)) {
+                fail(`trigger root '${trigger.areaWithin}' is not an Area.`);
+            }
+        } else if ('familyWithin' in trigger) {
+            const within = trigger.familyWithin;
+            if (!object(within)) fail('familyWithin trigger needs a family and root.');
+            knownKeys(within, ['family', 'root'], 'familyWithin trigger');
+            if (!nonempty(within.family) || !Object.hasOwn(graph.facets, within.family)) {
+                fail(`unknown trigger family '${within.family}'.`);
+            }
+            validateDescriptor(within.root, 'familyWithin root', false);
         } else fail(`unknown trigger selector '${keys[0]}'.`);
         path.delete(trigger);
     };
@@ -125,12 +140,24 @@ export function createLabelDependencyEvaluator(
     const rules = [...graph.rules].sort((left, right) => compare(left.id, right.id));
     const conflictRules = [...graph.conflicts ?? []].map(rule => ({...rule, labels: ordered(rule.labels)}))
         .sort((left, right) => compare(left.id, right.id));
-    const normalizeTrigger = (trigger: DependencyTrigger): unknown => 'any' in trigger
-        ? {any: trigger.any.map(normalizeTrigger).sort((left, right) => compare(JSON.stringify(left), JSON.stringify(right)))}
-        : trigger;
+    const normalizeTrigger = (trigger: DependencyTrigger): unknown => {
+        if ('any' in trigger || 'all' in trigger) {
+            const selector = 'any' in trigger ? 'any' : 'all';
+            const children = 'any' in trigger ? trigger.any : trigger.all;
+            return {[selector]: children.map(normalizeTrigger)
+                .sort((left, right) => compare(JSON.stringify(left), JSON.stringify(right)))};
+        }
+        if ('familyWithin' in trigger) return {familyWithin: {family: trigger.familyWithin.family, root: trigger.familyWithin.root}};
+        return trigger;
+    };
+    const triggerRoots = (trigger: DependencyTrigger): string[] => 'areaWithin' in trigger ? [trigger.areaWithin]
+        : 'familyWithin' in trigger ? [trigger.familyWithin.root]
+            : 'any' in trigger ? trigger.any.flatMap(triggerRoots)
+                : 'all' in trigger ? trigger.all.flatMap(triggerRoots) : [];
     const relevant = new Set([...areaLabels, ...graph.context.allAreasWithin,
         ...[...families.values()].flatMap(labels => [...labels]),
-        ...Object.values(graph.facets).flatMap(facet => 'root' in facet ? [facet.root] : [...facet.labels])]);
+        ...Object.values(graph.facets).flatMap(facet => 'root' in facet ? [facet.root] : [...facet.labels]),
+        ...rules.flatMap(rule => triggerRoots(rule.when))]);
     const policyHash = digestIdentity({
         evaluatorVersion: EVALUATOR_VERSION,
         graph: {
@@ -174,9 +201,20 @@ export function createLabelDependencyEvaluator(
                 const found = selected.get(trigger.family)!;
                 return {status: found.length ? 'present' : 'absent', labels: found};
             }
-            const children = trigger.any.map(triggerResult);
+            if ('areaWithin' in trigger) {
+                const found = areas.filter(area => ancestry.get(area)!.has(trigger.areaWithin));
+                return {status: found.length ? 'present' : 'absent', labels: found};
+            }
+            if ('familyWithin' in trigger) {
+                const {family, root} = trigger.familyWithin;
+                const found = selected.get(family)!;
+                return {status: found.length && found.every(label => ancestry.get(label)!.has(root)) ? 'present' : 'absent',
+                    labels: found};
+            }
+            const children = ('any' in trigger ? trigger.any : trigger.all).map(triggerResult);
             return {
-                status: children.some(child => child.status === 'present') ? 'present' : 'absent',
+                status: ('any' in trigger ? children.some(child => child.status === 'present')
+                    : children.every(child => child.status === 'present')) ? 'present' : 'absent',
                 labels: ordered(children.flatMap(child => child.labels))
             };
         };

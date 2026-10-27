@@ -17,7 +17,11 @@ export const labelDependencies = {
         sign: {root: Scope.NumericSign},
         zero: {root: Scope.NumericZero},
         operandCount: {root: Scope.OperandCardinality},
-        operandDigits: {root: Scope.OperandDigitCount},
+        // Role-group nodes are organizational; only actual width descriptors satisfy this facet.
+        operandDigits: {labels: [Scope.SingleDigitSmallestOperand, Scope.MultipleDigitSmallestOperand,
+            Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand,
+            Scope.SingleDigitDividend, Scope.MultipleDigitDividend,
+            Scope.SingleDigitDivisor, Scope.MultipleDigitDivisor]},
         fraction: {root: Scope.FractionNumbers},
         fractionMagnitude: {labels: [Scope.ProperFractions, Scope.ImproperFractions]},
         decimal: {root: Scope.DecimalNumbers},
@@ -28,7 +32,12 @@ export const labelDependencies = {
             {family: 'operandCount'}, {family: 'operandDigits'}]},
             assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
         {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'}]},
-            assess: ['operandCount', 'operandDigits']},
+            assess: ['operandCount']},
+        {id: 'LD-OPERANDS-02', when: {all: [
+            {any: [{areaWithin: Area.ArithmeticOperations}, {areaWithin: Area.IntegerArithmetic}]},
+            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers}},
+            {any: [{family: 'operandCount'}, {family: 'operandDigits'}]}
+        ]}, assess: ['operandDigits']},
         {id: 'LD-FRACTION-01', when: {family: 'fraction'}, assess: ['fractionMagnitude']},
         {id: 'LD-DECIMAL-01', when: {family: 'decimal'}, assess: ['base']}
     ],

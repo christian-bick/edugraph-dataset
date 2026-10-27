@@ -1,5 +1,10 @@
 /** Declarative annotation obligations; these never contribute generation capabilities. */
-export type DependencyTrigger = {readonly family: string} | {readonly any: readonly DependencyTrigger[]};
+export type DependencyTrigger = {readonly family: string}
+    | {readonly any: readonly DependencyTrigger[]}
+    | {readonly all: readonly DependencyTrigger[]}
+    | {readonly areaWithin: string}
+    /** Requires at least one selected family member, with every member beneath this structural root. */
+    | {readonly familyWithin: {readonly family: string; readonly root: string}};
 
 export type DependencyFacet = ({readonly root: string} | {readonly labels: readonly string[]})
     & {readonly check?: 'presence-only'};

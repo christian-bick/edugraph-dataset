@@ -8,7 +8,9 @@ Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
 [second measurement batch](#second-measurement-batch), including M2b, is implemented.
 [M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) are implemented
-in separate division and multiplication checkpoints; 30 addition/subtraction findings remain.
+in separate division and multiplication checkpoints. The
+[integer-only operand-digit gate](#integer-only-operand-digit-gate-2026-10-28) narrows the
+remaining measurement obligation to ten integer addition/subtraction selections.
 
 ## Scope
 
@@ -47,6 +49,36 @@ Organizational roots are selectors, never emitted annotations.
 `AlgebraicModeling` puts the conjunction outside the allowed union. Empty Area sets,
 unknown labels and ineligible labels are contract errors.
 
+## Integer operand-digit qualification
+
+The global Area allowlist above is unchanged. Within it, only the operand-digit obligation
+has an additional qualification. It requires all three of:
+
+- at least one complete resolved Area structurally within `Area.ArithmeticOperations` or
+  `Area.IntegerArithmetic`;
+- a nonempty set of declared number-kind labels, all structurally within `Scope.IntegerNumbers`;
+- an operand-count or actual operand-digit descriptor.
+
+This is a positive integer-context check. Fractional, decimal, mixed integer/noninteger, and
+missing-number-kind annotations do not trigger a digit requirement. A missing number kind
+still produces the existing numeric dependency finding; it is not inferred from an Area or
+payload. Integer annotations outside the two arithmetic branches likewise do not trigger
+operand-digit enforcement. Operand-count, numeric, fraction, decimal and conflict checks
+keep their own existing triggers.
+
+Both Area and number-kind qualification are necessary with the installed ontology. Generic
+`Addition` and `Subtraction` belong to `ArithmeticOperations`, not `IntegerArithmetic`.
+Conversely, integer-branch standard-algorithm Areas are also used by the decimal
+addition/subtraction generator. Area membership alone would either omit the measurement
+integer cases or enforce digit counts on decimal contexts.
+
+The digit facet accepts value-bearing width descriptors: single/multiple-digit smallest
+operand, largest operand, dividend and divisor, including their capability specializations.
+It does not accept the four role-group nodes as completed classifications. An existing
+truthful integer-role descriptor on a fractional or decimal task is retained; absence of
+such a descriptor is simply outside the integer-only digit obligation. No label is added,
+removed or inferred by this qualification.
+
 ## Graph markup
 
 The graph is authored in `src/validation/label-dependencies.ts`:
@@ -71,7 +103,12 @@ export const labelDependencies = {
         sign: {root: Scope.NumericSign},
         zero: {root: Scope.NumericZero},
         operandCount: {root: Scope.OperandCardinality},
-        operandDigits: {root: Scope.OperandDigitCount},
+        operandDigits: {labels: [
+            Scope.SingleDigitSmallestOperand, Scope.MultipleDigitSmallestOperand,
+            Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand,
+            Scope.SingleDigitDividend, Scope.MultipleDigitDividend,
+            Scope.SingleDigitDivisor, Scope.MultipleDigitDivisor
+        ]},
         fraction: {root: Scope.FractionNumbers},
         fractionMagnitude: {labels: [Scope.ProperFractions, Scope.ImproperFractions]},
         decimal: {root: Scope.DecimalNumbers},
@@ -82,7 +119,12 @@ export const labelDependencies = {
             {family: 'operandCount'}, {family: 'operandDigits'}]},
             assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
         {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'}]},
-            assess: ['operandCount', 'operandDigits']},
+            assess: ['operandCount']},
+        {id: 'LD-OPERANDS-02', when: {all: [
+            {any: [{areaWithin: Area.ArithmeticOperations}, {areaWithin: Area.IntegerArithmetic}]},
+            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers}},
+            {any: [{family: 'operandCount'}, {family: 'operandDigits'}]}
+        ]}, assess: ['operandDigits']},
         {id: 'LD-FRACTION-01', when: {family: 'fraction'}, assess: ['fractionMagnitude']},
         {id: 'LD-DECIMAL-01', when: {family: 'decimal'}, assess: ['base']}
     ],
@@ -98,12 +140,20 @@ export const labelDependencies = {
 Family roots select eligible structural descendants. Explicit label groups also accept
 capability specializations. Neither mechanism emits grouping roots as annotations.
 
-The four obligations are:
+`any` and `all` combine annotation conditions. `areaWithin` checks the complete resolved
+Area conjunction for a descendant of its named root, including that root structurally;
+it does not add the root as a label or replace the global all-Area gate. `familyWithin`
+requires a nonempty selected family whose every member is structurally within its named
+root. It cannot succeed vacuously when the family is absent. These selectors use only
+annotations and ontology relations.
+
+The five obligations are:
 
 | Rule | Annotation trigger | Required groups |
 |---|---|---|
 | `LD-NUM-01` | Numeric Scope, numeral system, operand count, or operand digits | Number kind, numeral system, base, sign, zero, plus report-only range presence |
-| `LD-OPERANDS-01` | Operand count or operand digits | Operand count and operand digits |
+| `LD-OPERANDS-01` | Operand count or operand digits | Operand count |
+| `LD-OPERANDS-02` | Operand count or operand digits, an arithmetic-operation/integer-arithmetic Area, and exclusively integer number-kind annotations | Operand digits |
 | `LD-FRACTION-01` | Fraction annotations | Proper/improper magnitude |
 | `LD-DECIMAL-01` | Decimal annotations | Numeric base |
 
@@ -1015,3 +1065,119 @@ the report-only audit with:
 ```bash
 npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/measurement-m3/multiplication-audit
 ```
+
+## Integer-only operand-digit gate (2026-10-28)
+
+This checkpoint changes annotation-policy applicability and keeps the M3 declarations,
+generator sampling, renderer, targets and stored dataset intact. The former combined
+operand rule is split: `LD-OPERANDS-01` still assesses operand count; `LD-OPERANDS-02`
+assesses width only in the positive integer arithmetic context documented above.
+
+The twenty measurement fraction/decimal addition/subtraction findings are outside the
+digit obligation. The ten integer addition/subtraction findings remain unresolved. Their
+existing samplers cross one- and two-digit boundaries, so no new invariant width label is
+declared and no generic role-group annotation is substituted for the missing classification.
+The prior division and multiplication labels remain truthful authored declarations,
+including whole-number group counts in fractional and decimal stories.
+
+No graph condition reads payloads or producer identities. Evaluation and policy hashing
+cover the authored conjunction, Area selector and complete number-kind qualifier. The
+global Area allowlist, range-presence behavior, strict conflict handling and distinction
+between advisory selections and enforced finalized annotations remain unchanged.
+
+### Audit and preservation
+
+Before/after comparison preserves all **1,013 target label sets, 1,182 semantic matches and
+4,030 audited subjects**. Every subject's annotations, provenance and global Area context
+are unchanged. The protected source inputs and immutable dataset snapshot are unchanged.
+Only operand-digit applicability changes: **257 assessments** no longer apply, comprising
+225 formerly missing and 32 formerly satisfied assessments. No assessment of another facet
+changes, and no new assessment, conflict, invalid context, row/contract error or incomplete
+enumeration appears.
+
+Of the removed missing assessments, 27 source and 110 stored contexts declare noninteger
+number kinds. The other 26 source and 62 stored contexts lack a number-kind annotation;
+all 88 still report that missing number kind and do not become complete. No missing-digit
+assessment disappears solely because of the additional Area qualification.
+The noninteger reductions beyond measurement affect decimal place comparison, decimal
+addition/subtraction, decimal division models and decimal multiplication models. Missing-kind
+contexts belong to currency arithmetic, number arrays and equal-groups collections.
+
+| Non-range finding count | Before integer gate | After integer gate |
+|---|---:|---:|
+| Measurement source selections missing operand digits | 30 | 10 |
+| Global raw source gaps | 1,478 | 1,425 |
+| Global distinct source selection/facet gaps | 1,460 | 1,407 |
+| Global source selections containing a gap | 586 | 566 |
+| Stored raw gaps | 4,318 | 4,146 |
+| Stored distinct sample/facet gaps | 4,184 | 4,012 |
+| Stored samples containing a gap | 1,332 | 1,332 |
+| Stored measurement operand-digit gaps | 140 | 46 |
+
+These reductions reflect a narrower obligation, not repaired or regenerated annotations.
+The stored measurement family still has 700 raw non-range findings across all 140 rows,
+including its stored notation, sign and zero omissions. Regeneration and VQA remain
+deferred; the strict gate continues to reject the remaining stored findings.
+
+Local audit and preservation evidence is under `temp/measurement-integer-gate/`, including
+`comparison-summary.json`. Earlier checkpoint counts above describe their historical policy
+and are retained as such.
+
+Focused validation passes **261 tests across six files**, covering the evaluator, strict
+gate, audit and measurement integration. The log is
+`temp/integer-operand-digit-gate/focused-tests.txt`.
+
+The full coverage run passes **839 files / 6,303 tests**. The changed evaluator has **100%**
+coverage in all four categories: 226 statements, 209 branches, 59 functions and 162 lines.
+Aggregate generator-plus-evaluator coverage is 98.53% statements, 97.14% branches, 100%
+functions and 99.53% lines, and every checked generator meets its coverage thresholds.
+Both `test:coverage` stages ran with two workers and a 30-second test timeout. Evidence is
+in `temp/measurement-integer-gate/full-coverage.txt`, `full-coverage/coverage-summary.json`
+and `generator-coverage.txt` under that same directory.
+
+`npm run check -- --spec=ccss` passes type, ownership/spec, label, documentation, standards
+and split-integrity checks. Its final strict annotation stage still fails on the **4,146**
+remaining stored findings, so the aggregate check remains non-green. Separate final type
+and documentation checks also pass. The repository-check log is
+`temp/measurement-integer-gate/check.txt`.
+
+### Required ontology corrections
+
+The pinned ontology currently treats these organizational role groups as eligible labels:
+`SmallestOperandDigitCount`, `LargestOperandDigitCount`, `DividendDigitCount` and
+`DivisorDigitCount`. Each organizes possible width values but supplies no width value itself.
+Their existing `partOf OperandDigitCount` links are already appropriate; the incoming
+membership edges need correction.
+
+For each role, change the direct `SingleDigit*` and `MultipleDigit*` links to its
+`*DigitCount` group from `specializes` to `partOf`. For example:
+
+```turtle
+:SingleDigitLargestOperand edu:partOf :LargestOperandDigitCount.
+:MultipleDigitLargestOperand edu:partOf :LargestOperandDigitCount.
+:TwoDigitLargestOperand edu:specializes :MultipleDigitLargestOperand.
+```
+
+The first two edges make the grouping organizational and therefore ineligible under
+[SPEC-3](../spec-general.md#spec-3--most-specific-does-not-mean-leaf). The third is a genuine
+refinement and must remain `specializes`; apply the same distinction to the other roles
+and their more-specific widths. Review the definitions to state integer-operand width
+explicitly rather than imply an undefined fractional/decimal notation-counting convention.
+Regression checks in the ontology should establish that the four groups are ineligible,
+the concrete width descriptors remain eligible, structural family membership remains
+available, and actual width refinements retain capability substitution.
+
+The Area structure also needs review before any future Area-only integer qualification.
+Generic operation Areas must remain usable across number kinds. The standard-algorithm
+Areas used by decimal addition/subtraction currently descend from `IntegerArithmetic`;
+that placement must not be treated as proof of integer-only operands. Review their shared
+arithmetic placement or integer/decimal distinctions without adding organizational Areas
+to dataset annotations. The implemented number-kind qualification makes the present gate
+independent of that unresolved modeling issue.
+
+This repository does not edit the sibling ontology or mutate the installed package in this
+checkpoint. Until a corrected version is published and adopted, the explicit eight-root
+operand-digit selector keeps the organizational groups from satisfying this facet. Global
+label eligibility still follows the exact installed ontology. Adoption of the corrected
+package should run the normal eligibility, matching and dependency audits, without rewriting
+targets or inferring replacement labels.

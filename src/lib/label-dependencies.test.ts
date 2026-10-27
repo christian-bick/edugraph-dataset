@@ -80,7 +80,7 @@ describe('annotation dependency assessment', () => {
 
     it.each([[Scope.TwoOperands, 'operandDigits'], [Scope.SingleDigitLargestOperand, 'operandCount']])(
         'requires the complementary operand annotation family for %s', (label, missing) => {
-            expect(assessment([label], missing).status).toBe('missing');
+            expect(assessment([Scope.IntegerNumbers, label], missing).status).toBe('missing');
         });
 
     it('limits range checks to existing annotation presence without calculating replacement bounds', () => {
@@ -168,6 +168,99 @@ describe('annotation dependency assessment', () => {
             .toHaveLength(1);
     });
 });
+
+describe('integer-only operand-digit qualification', () => {
+    const digitAssessment = (labels: readonly string[], areas?: readonly string[]) =>
+        evaluator.evaluate(labels, areas).assessments.find(item => item.facet === 'operandDigits');
+
+    it.each([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division, Area.AdditionStandardAlgorithm])(
+        'requires a width value for integer arithmetic in %s', area => {
+            expect(digitAssessment([area, Scope.IntegerNumbers, Scope.TwoOperands]))
+                .toMatchObject({ruleId: 'LD-OPERANDS-02', status: 'missing', labels: []});
+        });
+
+    it.each([
+        ['fraction', [Scope.FractionNumbers]],
+        ['fraction specialization', [Scope.ProperFractions]],
+        ['decimal', [Scope.DecimalNumbers]],
+        ['mixed integer/fraction', [Scope.IntegerNumbers, Scope.FractionNumbers]],
+        ['mixed integer/decimal', [Scope.IntegerNumbers, Scope.DecimalNumbers]],
+        ['missing number kind', []]
+    ])('does not infer integer-only content for %s annotations', (_name, kinds) => {
+        const labels = [Area.Addition, ...kinds, Scope.TwoOperands];
+        const original = [...labels];
+        const result = evaluator.evaluate(labels);
+        expect(result.context.status).toBe('eligible');
+        expect(result.triggers.find(item => item.ruleId === 'LD-OPERANDS-02')!.status).toBe('absent');
+        expect(result.assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        expect(result.assessments.find(item => item.facet === 'operandCount')!.status).toBe('satisfied');
+        expect(labels).toEqual(original);
+    });
+
+    it('does not let integer-branch Area ancestry require digits for decimal algorithms', () => {
+        expect(digitAssessment([Area.AdditionStandardAlgorithm, Scope.DecimalNumbers, Scope.TwoOperands])).toBeUndefined();
+    });
+
+    it('requires an arithmetic Area and an operand annotation without narrowing the global allowlist', () => {
+        const result = evaluator.evaluate([Area.NumericOrder, Scope.IntegerNumbers, Scope.TwoOperands]);
+        expect(result.context.status).toBe('eligible');
+        expect(result.assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        expect(result.assessments.find(item => item.facet === 'operandCount')!.status).toBe('satisfied');
+        expect(digitAssessment([Area.Addition, Scope.IntegerNumbers])).toBeUndefined();
+        expect(digitAssessment([Area.AlgebraicExpression, Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands]))
+            .toMatchObject({status: 'missing'});
+        expect(digitAssessment([Area.EquationSolving, Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands])).toBeUndefined();
+    });
+
+    it('uses resolved arithmetic Areas for qualification without manufacturing annotation claims', () => {
+        const labels = [Area.Equation, Scope.IntegerNumbers, Scope.TwoOperands];
+        const original = [...labels];
+        expect(digitAssessment(labels)).toBeUndefined();
+        const result = evaluator.evaluate(labels, [Area.Addition]);
+        expect(result.triggers.find(item => item.ruleId === 'LD-OPERANDS-02'))
+            .toMatchObject({status: 'present', labels: expect.arrayContaining([Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands])});
+        expect(result.assessments.find(item => item.facet === 'operandDigits')).toMatchObject({status: 'missing', labels: []});
+        expect(labels).toEqual(original);
+    });
+
+    it.each([Scope.LargestOperandDigitCount, Scope.SmallestOperandDigitCount, Scope.DividendDigitCount, Scope.DivisorDigitCount])(
+        'does not treat organizational role group %s as a determined digit value', group => {
+            expect(digitAssessment([Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands, group]))
+                .toMatchObject({status: 'missing', labels: []});
+        });
+
+    it.each([Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.ThreeDigitDividend, Scope.TwoDigitDivisor])(
+        'accepts concrete width descriptor %s through its declared specialization family', width => {
+            expect(digitAssessment([Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands, width]))
+                .toMatchObject({status: 'satisfied', labels: [width]});
+        });
+
+    it('retains optional integer-role widths in noninteger tasks and their operand-count requirement', () => {
+        const labels = [Area.Division, Scope.FractionNumbers, Scope.SingleDigitDivisor];
+        const original = [...labels];
+        const result = evaluator.evaluate(labels);
+        expect(result.assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        expect(result.assessments.find(item => item.facet === 'operandCount'))
+            .toMatchObject({ruleId: 'LD-OPERANDS-01', status: 'missing'});
+        expect(result.conflicts).toEqual([]);
+        expect(labels).toEqual(original);
+    });
+
+    it('normalizes conjunction order and binds qualifier semantics to the policy identity', () => {
+        const value = graph();
+        const rule = value.rules.find(item => item.id === 'LD-OPERANDS-02')!;
+        const when = (rule as any).when;
+        when.all.reverse();
+        for (const child of when.all) if ('any' in child) child.any.reverse();
+        const reordered = createLabelDependencyEvaluator(value);
+        expect(reordered.policyHash).toBe(evaluator.policyHash);
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands];
+        expect(reordered.evaluate(labels)).toEqual(evaluator.evaluate(labels));
+        when.all.find((child: any) => 'familyWithin' in child).familyWithin.root = Scope.FractionNumbers;
+        expect(createLabelDependencyEvaluator(value).policyHash).not.toBe(evaluator.policyHash);
+    });
+});
+
 describe('graph integrity', () => {
     it('accepts organizational roots only as selectors and validates the authored graph', () => {
         expect(() => validateLabelDependencyGraph(labelDependencies)).not.toThrow();
@@ -203,9 +296,26 @@ describe('graph integrity', () => {
         ['multiple selectors', (value: any) => {value.rules[0].when = {family: 'numeric', evidence: 'numericTask'};}],
         ['unknown family', (value: any) => {value.rules[0].when = {family: 'unknown'};}],
         ['removed evidence selector', (value: any) => {value.rules[0].when = {evidence: 'unknown'};}],
-        ['unknown selector', (value: any) => {value.rules[0].when = {all: []};}],
+        ['unknown selector', (value: any) => {value.rules[0].when = {other: []};}],
         ['empty any', (value: any) => {value.rules[0].when = {any: []};}],
+        ['invalid any', (value: any) => {value.rules[0].when = {any: null};}],
+        ['empty all', (value: any) => {value.rules[0].when = {all: []};}],
+        ['invalid all', (value: any) => {value.rules[0].when = {all: null};}],
+        ['unknown Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: 'unknown'};}],
+        ['non-Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: Scope.IntegerNumbers};}],
+        ['empty Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: ''};}],
+        ['invalid family qualifier', (value: any) => {value.rules[0].when = {familyWithin: null};}],
+        ['unknown family qualifier fields', (value: any) => {
+            value.rules[0].when = {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers, other: true}};
+        }],
+        ['unknown qualified family', (value: any) => {
+            value.rules[0].when = {familyWithin: {family: 'unknown', root: Scope.IntegerNumbers}};
+        }],
+        ['missing qualified family', (value: any) => {value.rules[0].when = {familyWithin: {root: Scope.IntegerNumbers}};}],
+        ['unknown family qualifier root', (value: any) => {value.rules[0].when = {familyWithin: {family: 'numberKind', root: 'unknown'}};}],
+        ['missing family qualifier root', (value: any) => {value.rules[0].when = {familyWithin: {family: 'numberKind'}};}],
         ['cyclic expression', (value: any) => {const loop: any = {any: []}; loop.any.push(loop); value.rules[0].when = loop;}],
+        ['cyclic conjunction', (value: any) => {const loop: any = {all: []}; loop.all.push(loop); value.rules[0].when = loop;}],
         ['invalid conflicts', (value: any) => {value.conflicts = null;}],
         ['null conflict', (value: any) => {value.conflicts = [null];}],
         ['empty conflict id', (value: any) => {value.conflicts[0].id = '';}],
@@ -266,5 +376,26 @@ describe('ontology-bound evaluation identity', () => {
             context: {allAreasWithin: [iri('outside')], requireArea: true}}, createOntologyContext(base));
         expect(changed.policyHash).not.toBe(before.policyHash);
         expect(changed.evaluate([iri('allowed')]).context.status).toBe('outside_policy_scope');
+    });
+
+    it('binds a family qualifier root and follows its structural descendants', () => {
+        const kindRoot = iri('kindRoot'), kindLeaf = iri('kindLeaf');
+        const base = [...fixture(),
+            ...[kindRoot, kindLeaf].map(label => statement(label,
+                'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://edugraph.io/edu#Scope')),
+            statement(kindLeaf, RELATION_IRIS.partOf, kindRoot)];
+        const qualified: LabelDependencyGraph = {...fixtureGraph,
+            facets: {...fixtureGraph.facets, kind: {labels: [kindLeaf]}},
+            rules: [{id: 'qualified', when: {all: [
+                {areaWithin: iri('root')}, {familyWithin: {family: 'kind', root: kindRoot}}
+            ]}, assess: ['candidate']}]};
+        const before = createLabelDependencyEvaluator(qualified, createOntologyContext(base));
+        expect(before.evaluate([iri('allowed'), kindLeaf]).triggers)
+            .toEqual([{ruleId: 'qualified', status: 'present', labels: [iri('allowed'), kindLeaf].sort()}]);
+        const after = createLabelDependencyEvaluator(qualified, createOntologyContext([...base,
+            {...statement(kindRoot, 'http://www.w3.org/2000/01/rdf-schema#isDefinedBy', 'Clarified qualifying family.'),
+                objectKind: 'Literal'}]));
+        expect(after.policyHash).not.toBe(before.policyHash);
+        expect(after.evaluate([iri('allowed'), kindLeaf])).toEqual(before.evaluate([iri('allowed'), kindLeaf]));
     });
 });

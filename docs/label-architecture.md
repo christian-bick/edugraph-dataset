@@ -187,6 +187,23 @@ in static reports; strict completeness applies to actual artifact annotations. S
 and invalid contexts still fail. Targets remain partial requests, and matching never evaluates a payload.
 Range-presence findings remain report-only; range policy is unchanged.
 
+Operand-digit completeness has a narrower, rule-specific context: at least one resolved
+Area must be structurally within `ArithmeticOperations` or `IntegerArithmetic`, and the
+declared number-kind family must be nonempty and entirely within `IntegerNumbers`. Fraction,
+decimal, mixed and unspecified number-kind contexts do not acquire a digit obligation.
+Missing number-kind annotations remain findings under the numeric rule. Operand-count
+requirements remain independent of this qualification, and the global all-Area allowlist
+still applies to the complete annotation context.
+
+The digit facet accepts actual single/multiple-digit role descriptors and their
+specializations. The organizational `SmallestOperandDigitCount`, `LargestOperandDigitCount`,
+`DividendDigitCount` and `DivisorDigitCount` groups do not complete a width classification.
+The installed ontology still exposes these groups as eligible because of their current
+specialization edges; the graph's explicit descriptor selector prevents them from satisfying
+this facet while the [required upstream corrections](plan/label-dependency-graph.md#required-ontology-corrections)
+remain pending. This local selector does not change global ontology eligibility or mutate
+the dependency package.
+
 Generation preserves the resolved annotation set; it does not infer extra labels from mathematical
 data, rewrite selected claims, or maintain a second annotation receipt. Concrete label corrections
 belong in reviewed declarations and schema resolution. VQA independently assesses whether the
