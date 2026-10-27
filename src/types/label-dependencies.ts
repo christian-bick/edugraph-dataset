@@ -18,6 +18,12 @@ export interface LabelDependencyGraph {
         readonly when: DependencyTrigger;
         readonly assess: readonly string[];
     }[];
+    /** Only reviewed, mutually exclusive claims belong here; families are not exactly-one. */
+    readonly conflicts?: readonly {
+        readonly id: string;
+        readonly facet: string;
+        readonly labels: readonly string[];
+    }[];
 }
 
 /** Absent means an adapter established absence; an unavailable adapter is unresolved. */
@@ -59,6 +65,13 @@ export interface DependencyTriggerResult {
     readonly evidence: readonly DependencyEvidenceId[];
 }
 
+export interface DependencyConflict {
+    readonly ruleId: string;
+    readonly facet: string;
+    readonly labels: readonly string[];
+    readonly reason: string;
+}
+
 export interface LabelDependencyEvaluation {
     readonly context: {
         readonly status: 'eligible' | 'outside_policy_scope' | 'invalid_context';
@@ -68,4 +81,9 @@ export interface LabelDependencyEvaluation {
     readonly errors: readonly string[];
     readonly triggers: readonly DependencyTriggerResult[];
     readonly assessments: readonly DependencyAssessment[];
+    /** Separate diagnostics: evidence never suppresses annotation completeness findings. */
+    readonly evidenceTriggers?: readonly DependencyTriggerResult[];
+    readonly evidenceAssessments?: readonly DependencyAssessment[];
+    readonly evidenceErrors?: readonly string[];
+    readonly conflicts?: readonly DependencyConflict[];
 }

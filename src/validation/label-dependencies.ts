@@ -27,14 +27,22 @@ export const labelDependencies = {
         articulation: {labels: [Ability.TextualArticulation]}
     },
     rules: [
-        {id: 'LD-NUM-01', when: {any: [{family: 'numeric'}, {evidence: 'numericTask'}]},
+        {id: 'LD-NUM-01', when: {any: [{family: 'numeric'}, {family: 'numeralSystem'},
+            {family: 'operandCount'}, {family: 'operandDigits'}, {evidence: 'numericTask'}]},
             assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
-        {id: 'LD-OPERANDS-01', when: {evidence: 'arithmeticOperands'}, assess: ['operandCount', 'operandDigits']},
+        {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'},
+            {evidence: 'arithmeticOperands'}]}, assess: ['operandCount', 'operandDigits']},
         {id: 'LD-FRACTION-01', when: {any: [{family: 'fraction'}, {evidence: 'fractionValues'}]},
             assess: ['fractionMagnitude', 'fractionUnit']},
         {id: 'LD-DECIMAL-01', when: {any: [{family: 'decimal'}, {evidence: 'decimalRepresentation'}]},
             assess: ['base', 'decimalPrecision']},
         {id: 'LD-FRAME-01', when: {evidence: 'quantityReferenceFrames'}, assess: ['referenceFrames']},
         {id: 'LD-EXPLAIN-01', when: {evidence: 'writtenExplanation'}, assess: ['articulation']}
+    ],
+    conflicts: [
+        {id: 'LD-ZERO-CONFLICT-01', facet: 'zero', labels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero]},
+        {id: 'LD-SIGN-CONFLICT-01', facet: 'sign', labels: [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives]},
+        {id: 'LD-FRAME-CONFLICT-01', facet: 'referenceFrames',
+            labels: [Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]}
     ]
 } as const satisfies LabelDependencyGraph;

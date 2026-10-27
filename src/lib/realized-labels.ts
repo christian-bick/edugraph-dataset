@@ -3,10 +3,13 @@ import type {RealizedLabelReceipt} from '../types/generation-plan.ts';
 import {digestIdentity} from './content-identity.ts';
 import {capabilitySatisfies} from './ontology.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
-import {assessLabelDependencyEvidence, hasLabelDependencyEvidenceAdapter,
+import {assessLabelDependencyEvidence,
     LABEL_DEPENDENCY_EVIDENCE_VERSION} from './label-dependency-evidence.ts';
 
 const arithmeticGenerators = new Set(['arithmetic-ops-pairs', 'arithmetic-ops-triples', 'arithmetic-ops-four']);
+// Evidence registration alone must never opt a new projection into label completion.
+const arithmeticCompletionViews = new Set(['operations-boxes', 'operations-boxes-inversion',
+    'operations-vertical', 'operations-vertical-inversion']);
 const evaluator = createLabelDependencyEvaluator();
 const ordered = (labels: readonly string[]) => [...new Set(labels)].sort();
 
@@ -45,7 +48,7 @@ const parityPair = (generatorId: string, viewId: string) =>
 
 export function realizedLabelPolicyForPair(generatorId: string, viewId: string): string | null {
     if (parityPair(generatorId, viewId)) return parityPolicyHash;
-    return arithmeticGenerators.has(generatorId) && hasLabelDependencyEvidenceAdapter(generatorId, viewId)
+    return arithmeticGenerators.has(generatorId) && arithmeticCompletionViews.has(viewId)
         ? policyHash : null;
 }
 
@@ -63,7 +66,7 @@ export function completeRealizedLabels(input: {
     if (!policy || evaluator.evaluate(plannedLabels).context.status !== 'eligible') return {labels: plannedLabels};
     const evidence = assessLabelDependencyEvidence(input);
     const evaluation = evaluator.evaluate(plannedLabels, evidence);
-    const zero = evaluation.assessments.find(item => item.facet === 'zero');
+    const zero = evaluation.evidenceAssessments?.find(item => item.facet === 'zero');
     if (parityPair(input.generatorId, input.viewId)) {
         // The positive source count does not describe a projection's empty group or remainder.
         // Explicit target claims must never be silently rewritten by artifact completion.
@@ -78,10 +81,10 @@ export function completeRealizedLabels(input: {
             receipt: {version: 1, policyHash: policy, mode: input.mode, plannedLabels, addedLabels,
                 evidence: [{facet: 'zero', labels: zero.expectedLabels, references: zero.references}]}};
     }
-    const assessment = evaluation.assessments.find(item => item.facet === 'operandDigits');
+    const assessment = evaluation.evidenceAssessments?.find(item => item.facet === 'operandDigits');
     const supported = assessment && (assessment.status === 'missing' || assessment.status === 'satisfied');
     const addedLabels = supported ? assessment.expectedLabels.filter(label => !plannedLabels.includes(label)) : [];
-    const count = evaluation.assessments.find(item => item.facet === 'operandCount');
+    const count = evaluation.evidenceAssessments?.find(item => item.facet === 'operandCount');
     const propertyCount = input.generatorId === 'arithmetic-ops-triples' && typeof input.data === 'object'
         && input.data !== null && 'propertyLaw' in input.data
         && count && (count.status === 'missing' || count.status === 'satisfied');

@@ -9,7 +9,7 @@ import type {
 import {digestIdentity} from './content-identity.ts';
 
 const AREA_DIMENSION = 'http://edugraph.io/edu#Area';
-const EVALUATOR_VERSION = 1;
+const EVALUATOR_VERSION = 2;
 const ordered = (values: readonly string[]): string[] => [...new Set(values)].sort();
 const fail = (message: string): never => {throw new Error(`Label dependency graph: ${message}`);};
 const nonempty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
@@ -23,7 +23,7 @@ const knownKeys = (value: object, allowed: readonly string[], location: string):
 /** Reject malformed authored contracts before any sample is assessed. */
 export function validateLabelDependencyGraph(graph: LabelDependencyGraph, context: OntologyContext = bundledContext): void {
     if (!object(graph) || graph.version !== 1) fail('unsupported version.');
-    knownKeys(graph, ['version', 'context', 'facets', 'rules'], 'graph');
+    knownKeys(graph, ['version', 'context', 'facets', 'rules', 'conflicts'], 'graph');
     if (!object(graph.context) || graph.context.requireArea !== true
         || !Array.isArray(graph.context.allAreasWithin) || !graph.context.allAreasWithin.length) {
         fail('context requires nonempty Area roots and requireArea: true.');
@@ -81,6 +81,28 @@ export function validateLabelDependencyGraph(graph: LabelDependencyGraph, contex
             if (!Object.hasOwn(graph.facets, facet)) fail(`rule '${rule.id}' assesses unknown facet '${facet}'.`);
         }
     }
+    if (graph.conflicts !== undefined && !Array.isArray(graph.conflicts)) fail('conflicts must be an array.');
+    for (const conflict of graph.conflicts ?? []) {
+        if (!object(conflict) || !nonempty(conflict.id)) fail('conflicts need nonempty IDs.');
+        knownKeys(conflict, ['id', 'facet', 'labels'], `conflict '${conflict.id}'`);
+        if (ids.has(conflict.id)) fail(`duplicate rule '${conflict.id}'.`);
+        ids.add(conflict.id);
+        if (!nonempty(conflict.facet) || !Object.hasOwn(graph.facets, conflict.facet)) {
+            fail(`conflict '${conflict.id}' names an unknown facet.`);
+        }
+        if (!Array.isArray(conflict.labels) || ordered(conflict.labels).length < 2) {
+            fail(`conflict '${conflict.id}' needs at least two distinct labels.`);
+        }
+        for (const label of conflict.labels) validateDescriptor(label, `conflict '${conflict.id}' label`, true);
+        const facet = graph.facets[conflict.facet];
+        for (const label of conflict.labels) {
+            const ancestors = new Set([label, ...context.traverse(label, 'root' in facet
+                ? RELATION_IRIS.structures : RELATION_IRIS.specializes)]);
+            if ('root' in facet ? !ancestors.has(facet.root) : !facet.labels.some(candidate => ancestors.has(candidate))) {
+                fail(`conflict '${conflict.id}' label '${label}' does not belong to its facet.`);
+            }
+        }
+    }
 }
 
 /** One indexed, ontology-bound evaluator. It neither executes generators nor alters labels. */
@@ -104,6 +126,8 @@ export function createLabelDependencyEvaluator(
         new Set(descriptors.filter(record => facetContains(facet, record.iri)).map(record => record.iri))]));
     const compare = (left: string, right: string): number => left < right ? -1 : left > right ? 1 : 0;
     const rules = [...graph.rules].sort((left, right) => compare(left.id, right.id));
+    const conflictRules = [...graph.conflicts ?? []].map(rule => ({...rule, labels: ordered(rule.labels)}))
+        .sort((left, right) => compare(left.id, right.id));
     const normalizeTrigger = (trigger: DependencyTrigger): unknown => 'any' in trigger
         ? {any: trigger.any.map(normalizeTrigger).sort((left, right) => compare(JSON.stringify(left), JSON.stringify(right)))}
         : trigger;
@@ -120,7 +144,8 @@ export function createLabelDependencyEvaluator(
                 return {name, selector: 'root' in facet ? {root: facet.root} : {labels: ordered(facet.labels)},
                     check: facet.check ?? 'evidence'};
             }),
-            rules: rules.map(rule => ({id: rule.id, when: normalizeTrigger(rule.when), assess: ordered(rule.assess)}))
+            rules: rules.map(rule => ({id: rule.id, when: normalizeTrigger(rule.when), assess: ordered(rule.assess)})),
+            conflicts: conflictRules.map(rule => ({id: rule.id, facet: rule.facet, labels: ordered(rule.labels)}))
         },
         ontology: ordered([...relevant]).map(label => ({
             descriptor: context.lookupDescriptor(label),
@@ -145,20 +170,23 @@ export function createLabelDependencyEvaluator(
         if (!areas.length) errors.push('At least one resolved Area is required.');
         const status = errors.length ? 'invalid_context' : outsideAreas.length ? 'outside_policy_scope' : 'eligible';
         const resultContext = {status, areas, outsideAreas} as LabelDependencyEvaluation['context'];
-        if (status !== 'eligible') return {context: resultContext, errors: ordered(errors), triggers: [], assessments: []};
+        if (status !== 'eligible') return {context: resultContext, errors: ordered(errors), triggers: [], assessments: [],
+            evidenceTriggers: [], evidenceAssessments: [], evidenceErrors: [], conflicts: []};
         const selected = new Map([...families].map(([name, members]) => [name, labels.filter(label => members.has(label))]));
+        const evidenceErrors: string[] = [];
 
-        const triggerResult = (trigger: DependencyTrigger): Omit<DependencyTriggerResult, 'ruleId'> => {
+        const triggerResult = (trigger: DependencyTrigger, useEvidence: boolean): Omit<DependencyTriggerResult, 'ruleId'> => {
             if ('family' in trigger) {
                 const found = selected.get(trigger.family)!;
                 return {status: found.length ? 'present' : 'absent', labels: found, evidence: []};
             }
             if ('evidence' in trigger) {
+                if (!useEvidence) return {status: 'absent', labels: [], evidence: []};
                 const witness = evidence?.triggers[trigger.evidence];
                 return {status: witness && nonempty(witness.reason) && witness.references.length
                     ? witness.status : 'unresolved', labels: [], evidence: [trigger.evidence]};
             }
-            const children = trigger.any.map(triggerResult);
+            const children = trigger.any.map(child => triggerResult(child, useEvidence));
             return {
                 status: children.some(child => child.status === 'present') ? 'present'
                     : children.some(child => child.status === 'unresolved') ? 'unresolved' : 'absent',
@@ -167,7 +195,7 @@ export function createLabelDependencyEvaluator(
             };
         };
 
-        const assess = (ruleId: string, facet: string): DependencyAssessment => {
+        const assessEvidence = (ruleId: string, facet: string): DependencyAssessment => {
             const current = selected.get(facet)!;
             const definition = graph.facets[facet];
             const witness = evidence?.facets[facet];
@@ -178,7 +206,7 @@ export function createLabelDependencyEvaluator(
             if (witness?.status === 'not_applicable') {
                 if (!nonempty(witness.reason) || !witness.references.length) return unresolved('Inapplicability needs a reason and evidence references.');
                 if (current.length || expected.length) {
-                    errors.push(`${ruleId}/${facet}: inapplicability conflicts with supplied or expected labels.`);
+                    evidenceErrors.push(`${ruleId}/${facet}: inapplicability conflicts with supplied or expected labels.`);
                     return unresolved('Inapplicability conflicts with supplied or expected labels.');
                 }
                 return {...base, status: 'not_applicable', reason: witness.reason};
@@ -192,17 +220,38 @@ export function createLabelDependencyEvaluator(
             if (!nonempty(witness.reason) || !witness.references.length) return unresolved('Applicability needs a reason and evidence references.');
             const invalid = expected.filter(label => !facetContains(definition, label));
             if (invalid.length) {
-                errors.push(`${ruleId}/${facet}: expected labels are unknown, ineligible, or outside the facet: ${invalid.join(', ')}.`);
+                evidenceErrors.push(`${ruleId}/${facet}: expected labels are unknown, ineligible, or outside the facet: ${invalid.join(', ')}.`);
                 return unresolved('Expected labels do not belong to this facet.');
             }
             const missingLabels = expected.filter(expectedLabel => !current.some(label => capabilityAncestors.get(label)!.has(expectedLabel)));
             return {...base, missingLabels, status: missingLabels.length || !current.length ? 'missing' : 'satisfied', reason: witness.reason};
         };
 
-        const triggers = rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when)}));
+        const assessAnnotation = (ruleId: string, facet: string): DependencyAssessment => {
+            const current = selected.get(facet)!;
+            return {ruleId, facet, labels: current, expectedLabels: [], missingLabels: [], references: [],
+                status: current.length ? 'satisfied' : 'missing',
+                reason: graph.facets[facet].check === 'presence-only'
+                    ? current.length ? 'Range facet is present under existing semantics; no bounds were calculated.'
+                        : 'Missing range facet under existing semantics; no replacement bounds were calculated.'
+                    : current.length ? 'A label from the required annotation family is present.'
+                        : 'No label from the required annotation family is present.'};
+        };
+        const triggers = rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when, false)}));
         const assessments = triggers.flatMap((trigger, index) => trigger.status === 'present'
-            ? ordered(rules[index].assess).map(facet => assess(trigger.ruleId, facet)) : []);
-        return {context: resultContext, errors: ordered(errors), triggers, assessments};
+            ? ordered(rules[index].assess).map(facet => assessAnnotation(trigger.ruleId, facet)) : []);
+        const evidenceRequested = evidence !== undefined && evidence.adapter !== 'not-requested';
+        const evidenceTriggers = evidenceRequested ? rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when, true)})) : [];
+        const evidenceAssessments = evidenceTriggers.flatMap((trigger, index) => trigger.status === 'present'
+            ? ordered(rules[index].assess).map(facet => assessEvidence(trigger.ruleId, facet)) : []);
+        const conflicts = conflictRules.flatMap(rule => {
+            const choices = rule.labels.filter(candidate => selected.get(rule.facet)!.some(label => capabilityAncestors.get(label)!.has(candidate)));
+            return choices.length < 2 ? [] : [{ruleId: rule.id, facet: rule.facet,
+                labels: selected.get(rule.facet)!.filter(label => choices.some(candidate => capabilityAncestors.get(label)!.has(candidate))),
+                reason: 'Mutually exclusive annotation claims are present together.'}];
+        });
+        return {context: resultContext, errors: ordered(errors), triggers, assessments,
+            evidenceTriggers, evidenceAssessments, evidenceErrors: ordered(evidenceErrors), conflicts};
     };
     return {policyHash, evaluate};
 }

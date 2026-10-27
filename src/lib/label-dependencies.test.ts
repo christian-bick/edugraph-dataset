@@ -19,7 +19,8 @@ const evidence = (facets: LabelDependencyEvidence['facets'] = {}): MutableEviden
         {status: 'absent', reason: 'The task does not contain this feature.', references: ['fixture.task']}]))
 });
 const assessment = (labels: readonly string[], facet: string, proof?: LabelDependencyEvidence) =>
-    evaluator.evaluate(labels, proof).assessments.find(item => item.facet === facet)!;
+    evaluator.evaluate(labels, proof ?? {adapter: 'uncovered', triggers: {}, facets: {}})
+        .evidenceAssessments!.find(item => item.facet === facet)!;
 
 describe('label dependency context gate', () => {
     it.each([Area.Addition, Area.NumericOrder, Area.Equation])('admits descendants of each allowed root: %s', area => {
@@ -54,12 +55,13 @@ describe('label dependency context gate', () => {
     });
 
     it('records unknown evidence triggers as unresolved without fabricating activation', () => {
-        const result = evaluator.evaluate([Area.Equation]);
-        expect(result.triggers.every(trigger => trigger.status === 'unresolved')).toBe(true);
+        const result = evaluator.evaluate([Area.Equation], {adapter: 'uncovered', triggers: {}, facets: {}});
+        expect(result.triggers.every(trigger => trigger.status === 'absent')).toBe(true);
+        expect(result.evidenceTriggers!.every(trigger => trigger.status === 'unresolved')).toBe(true);
         expect(result.assessments).toEqual([]);
         const malformed = evidence();
         malformed.triggers.numericTask = {status: 'present', reason: '', references: []};
-        expect(evaluator.evaluate([Area.Equation], malformed).triggers.find(item => item.ruleId === 'LD-NUM-01')!.status)
+        expect(evaluator.evaluate([Area.Equation], malformed).evidenceTriggers!.find(item => item.ruleId === 'LD-NUM-01')!.status)
             .toBe('unresolved');
     });
 
@@ -82,7 +84,7 @@ describe('label dependency assessments', () => {
         const before = [...labels];
         const result = evaluator.evaluate(labels);
         expect(result.triggers.find(trigger => trigger.ruleId === 'LD-NUM-01')).toEqual({
-            ruleId: 'LD-NUM-01', status: 'present', labels: [Scope.IntegerNumbers], evidence: ['numericTask']
+            ruleId: 'LD-NUM-01', status: 'present', labels: [Scope.IntegerNumbers], evidence: []
         });
         expect(result.assessments).toHaveLength(6);
         expect(assessment(labels, 'base').status).toBe('unresolved');
@@ -140,16 +142,16 @@ describe('label dependency assessments', () => {
             .toBe('unresolved');
         const proof = evidence({base: {status: 'not_applicable', reason: 'No notation.', references: ['view.task']}});
         const result = evaluator.evaluate([...labels, Scope.Base10], proof);
-        expect(result.errors).toContain('LD-NUM-01/base: inapplicability conflicts with supplied or expected labels.');
-        expect(result.assessments.find(item => item.facet === 'base')!.status).toBe('unresolved');
-        expect(evaluator.evaluate(labels, evidence({base: {...proof.facets.base, expectedLabels: [Scope.Base10]}})).errors).toHaveLength(1);
+        expect(result.evidenceErrors).toContain('LD-NUM-01/base: inapplicability conflicts with supplied or expected labels.');
+        expect(result.evidenceAssessments!.find(item => item.facet === 'base')!.status).toBe('unresolved');
+        expect(evaluator.evaluate(labels, evidence({base: {...proof.facets.base, expectedLabels: [Scope.Base10]}})).evidenceErrors).toHaveLength(1);
     });
 
     it('reports invalid expected descriptors rather than accepting them as evidence', () => {
         for (const label of ['unknown', Area.Addition, Scope.NumericAbstraction]) {
             const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers], evidence({base: applicable([label])}));
-            expect(result.errors[0]).toContain('expected labels are unknown, ineligible, or outside the facet');
-            expect(result.assessments.find(item => item.facet === 'base')!.status).toBe('unresolved');
+            expect(result.evidenceErrors![0]).toContain('expected labels are unknown, ineligible, or outside the facet');
+            expect(result.evidenceAssessments!.find(item => item.facet === 'base')!.status).toBe('unresolved');
         }
     });
 
@@ -176,10 +178,10 @@ describe('label dependency assessments', () => {
             proof.triggers[id] = {status: 'present', reason: 'Observed task feature.', references: ['view.task']};
         }
         const result = evaluator.evaluate([Area.Addition, Scope.ProperFractions, Scope.DecimalNumbers], proof);
-        expect(result.triggers.every(trigger => trigger.status === 'present')).toBe(true);
-        expect(result.assessments.find(item => item.facet === 'fractionMagnitude')!.status).toBe('satisfied');
-        expect(result.assessments.find(item => item.facet === 'articulation')!.missingLabels).toEqual([Ability.TextualArticulation]);
-        expect(result.assessments.find(item => item.facet === 'referenceFrames')!.missingLabels).toEqual([Scope.SingleFrameOfReference]);
+        expect(result.evidenceTriggers!.every(trigger => trigger.status === 'present')).toBe(true);
+        expect(result.evidenceAssessments!.find(item => item.facet === 'fractionMagnitude')!.status).toBe('satisfied');
+        expect(result.evidenceAssessments!.find(item => item.facet === 'articulation')!.missingLabels).toEqual([Ability.TextualArticulation]);
+        expect(result.evidenceAssessments!.find(item => item.facet === 'referenceFrames')!.missingLabels).toEqual([Scope.SingleFrameOfReference]);
     });
 
     it('returns deterministic diagnostics for reordered/duplicated labels, facets, rules, and evidence', () => {
@@ -199,6 +201,121 @@ describe('label dependency assessments', () => {
         const bound = createLabelDependencyEvaluator(value);
         (value as any).context.allAreasWithin = [Area.Algebra];
         expect(bound.evaluate([Area.Addition]).context.status).toBe('eligible');
+    });
+});
+
+describe('annotation-only dependency validation', () => {
+    const core = (labels: readonly string[], proof?: LabelDependencyEvidence) => {
+        const result = evaluator.evaluate([Area.Addition, ...labels], proof);
+        return {triggers: result.triggers, assessments: result.assessments, errors: result.errors, conflicts: result.conflicts};
+    };
+
+    it('reports missing annotation families without an adapter or expected label value', () => {
+        const result = core([Scope.IntegerNumbers]);
+        expect(result.assessments.find(item => item.facet === 'base')).toMatchObject({
+            status: 'missing', labels: [], expectedLabels: [], missingLabels: [], references: []
+        });
+        expect(result.assessments.find(item => item.facet === 'numberKind')!.status).toBe('satisfied');
+        expect(result.assessments.every(item => ['missing', 'satisfied'].includes(item.status))).toBe(true);
+    });
+
+    it.each([undefined, {adapter: 'not-requested', triggers: {}, facets: {base: applicable([Scope.Base10])}}])(
+        'does not fabricate supplementary unresolved findings when evidence was not requested', proof => {
+            const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers], proof);
+            expect(result.evidenceTriggers).toEqual([]);
+            expect(result.evidenceAssessments).toEqual([]);
+            expect(result.evidenceErrors).toEqual([]);
+            expect(result.assessments.find(item => item.facet === 'base')!.status).toBe('missing');
+        });
+
+    it.each([Scope.ArabicNumerals, Scope.TwoOperands, Scope.SingleDigitLargestOperand])(
+        'recognizes numeric annotations outside the NumericAbstraction subtree: %s', label => {
+            const result = core([label]);
+            expect(result.triggers.find(item => item.ruleId === 'LD-NUM-01')!.status).toBe('present');
+            expect(result.assessments.find(item => item.facet === 'numberKind')!.status).toBe('missing');
+        });
+
+    it.each([
+        [Scope.TwoOperands, 'operandDigits'],
+        [Scope.SingleDigitLargestOperand, 'operandCount']
+    ])('requires the complementary operand annotation family for %s', (label, missing) => {
+        expect(core([label]).assessments.find(item => item.facet === missing)!.status).toBe('missing');
+    });
+
+    it('does not activate operand, frame or explanation obligations solely from allowed Areas', () => {
+        const result = core([]);
+        expect(result.assessments).toEqual([]);
+        expect(result.triggers.every(item => item.status === 'absent')).toBe(true);
+    });
+
+    it('keeps annotation completeness independent of applicable, absent and malformed evidence', () => {
+        const labels = [Scope.IntegerNumbers, Scope.TwoOperands];
+        const proofs = [undefined, evidence({base: applicable([Scope.Base10])}), evidence({base: {
+            status: 'not_applicable', reason: 'Object-only projection.', references: ['view']
+        }}), evidence({base: {status: 'unresolved', reason: 'Unsupported projection.', references: []}}),
+        evidence({base: applicable(['unknown'])})];
+        const expected = core(labels);
+        for (const proof of proofs) expect(core(labels, proof)).toEqual(expected);
+        expect(expected.errors).toEqual([]);
+    });
+
+    it('keeps evidence-only activation and omissions in the supplementary channel', () => {
+        const proof = evidence({articulation: applicable([Ability.TextualArticulation]), base: applicable([Scope.Base10])});
+        proof.triggers.writtenExplanation = {status: 'present', reason: 'A written justification is requested.', references: ['view']};
+        proof.triggers.numericTask = {status: 'present', reason: 'Actual numeric content.', references: ['data']};
+        const result = evaluator.evaluate([Area.Addition], proof);
+        expect(result.assessments).toEqual([]);
+        expect(result.evidenceAssessments!.find(item => item.facet === 'articulation')).toMatchObject({
+            status: 'missing', missingLabels: [Ability.TextualArticulation]
+        });
+        expect(result.evidenceAssessments!.find(item => item.facet === 'base')!.missingLabels).toEqual([Scope.Base10]);
+    });
+
+    it.each([
+        ['zero', Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        ['sign', Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives],
+        ['referenceFrames', Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]
+    ])('detects contradictory %s annotations without adapters', (facet, left, right) => {
+        expect(core([left, right, left]).conflicts).toEqual([expect.objectContaining({facet, labels: [left, right].sort()})]);
+        expect(core([left]).conflicts).toEqual([]);
+        expect(evaluator.evaluate([Area.EquationSolving, left, right]).conflicts).toEqual([]);
+    });
+
+    it('permits mixed labels that are not declared mutually exclusive', () => {
+        expect(core([Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.ArabicNumerals, Scope.RomanNumerals,
+            Scope.TwoOperands, Scope.FourOperands, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand,
+            Scope.ProperFractions, Scope.ImproperFractions, Scope.UnitFractions, Scope.NonUnitFractions]).conflicts).toEqual([]);
+    });
+
+    it('normalizes conflict declarations for deterministic diagnostics and policy identity', () => {
+        const reordered = graph();
+        (reordered as any).conflicts = [...reordered.conflicts!].reverse().map(rule => ({...rule, labels: [...rule.labels].reverse()}));
+        const other = createLabelDependencyEvaluator(reordered);
+        expect(other.policyHash).toBe(evaluator.policyHash);
+        expect(other.evaluate([Area.Addition, Scope.NumbersWithZero, Scope.NumbersWithoutZero]))
+            .toEqual(evaluator.evaluate([Area.Addition, Scope.NumbersWithZero, Scope.NumbersWithoutZero]));
+        (reordered as any).conflicts = [];
+        expect(createLabelDependencyEvaluator(reordered).policyHash).not.toBe(evaluator.policyHash);
+    });
+
+    it('accepts repeated trigger alternatives without duplicating a rule assessment', () => {
+        const value = graph();
+        (value as any).rules[0].when.any.push({family: 'numeric'});
+        expect(createLabelDependencyEvaluator(value).evaluate([Area.Addition, Scope.IntegerNumbers]).assessments)
+            .toEqual(evaluator.evaluate([Area.Addition, Scope.IntegerNumbers]).assessments);
+    });
+
+    it('does not turn duplicate conflict choices into false conflicts', () => {
+        const value = graph();
+        (value as any).conflicts[0].labels.push(value.conflicts![0].labels[0]);
+        expect(createLabelDependencyEvaluator(value).evaluate([Area.Addition, Scope.NumbersWithZero]).conflicts).toEqual([]);
+    });
+
+    it('supports explicit candidate-family conflict declarations without making all families exclusive', () => {
+        const value = graph();
+        (value as any).facets.zero = {labels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero]};
+        const custom = createLabelDependencyEvaluator(value);
+        expect(custom.evaluate([Area.Addition, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).conflicts).toHaveLength(1);
     });
 });
 
@@ -239,7 +356,21 @@ describe('graph integrity', () => {
         ['unknown evidence', (value: any) => {value.rules[0].when = {evidence: 'unknown'};}],
         ['unknown selector', (value: any) => {value.rules[0].when = {all: []};}],
         ['empty any', (value: any) => {value.rules[0].when = {any: []};}],
-        ['cyclic expression', (value: any) => {const loop: any = {any: []}; loop.any.push(loop); value.rules[0].when = loop;}]
+        ['cyclic expression', (value: any) => {const loop: any = {any: []}; loop.any.push(loop); value.rules[0].when = loop;}],
+        ['invalid conflicts', (value: any) => {value.conflicts = null;}],
+        ['null conflict', (value: any) => {value.conflicts = [null];}],
+        ['empty conflict id', (value: any) => {value.conflicts[0].id = '';}],
+        ['duplicate conflict id', (value: any) => {value.conflicts[0].id = value.rules[0].id;}],
+        ['unknown conflict fields', (value: any) => {value.conflicts[0].other = true;}],
+        ['unknown conflict facet', (value: any) => {value.conflicts[0].facet = 'unknown';}],
+        ['empty conflict facet', (value: any) => {value.conflicts[0].facet = '';}],
+        ['invalid conflict choices', (value: any) => {value.conflicts[0].labels = null;}],
+        ['single conflict choice', (value: any) => {value.conflicts[0].labels = [Scope.NumbersWithZero];}],
+        ['duplicate conflict choices', (value: any) => {value.conflicts[0].labels = [Scope.NumbersWithZero, Scope.NumbersWithZero];}],
+        ['unknown conflict descriptor', (value: any) => {value.conflicts[0].labels[0] = 'unknown';}],
+        ['ineligible conflict descriptor', (value: any) => {value.conflicts[0].labels[0] = Scope.NumericAbstraction;}],
+        ['conflict outside root family', (value: any) => {value.conflicts[0].labels[0] = Scope.Base10;}],
+        ['conflict outside explicit family', (value: any) => {value.conflicts[0].facet = 'fractionMagnitude';}]
     ])('rejects %s', (_name, mutate) => {
         const value = graph();
         mutate(value);
