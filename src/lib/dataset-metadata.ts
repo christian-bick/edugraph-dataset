@@ -1,5 +1,5 @@
 import type {GenerationPlan, GenerationSelectionReceipt} from '../types/compatibility.ts';
-import type {GenerationReplay, PreparedViewConfiguration, RealizedLabelReceipt} from '../types/generation-plan.ts';
+import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
 
 /** Serializable metadata shared by the dataset pipeline and the asset explorer. */
 export interface TargetAssociation {
@@ -31,7 +31,6 @@ export interface MetadataRow {
     generation_plan?: GenerationPlan;
     generation_replay?: GenerationReplay;
     prepared_view?: PreparedViewConfiguration;
-    realized_labels?: RealizedLabelReceipt;
     [key: string]: unknown;
 }
 

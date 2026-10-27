@@ -277,7 +277,6 @@ async function renderSamples(
                         generation_plan: sample.plan,
                         generation_replay: sample.replay,
                         prepared_view: sample.preparedView,
-                        ...(sample.realizedLabels ? {realized_labels: sample.realizedLabels} : {}),
                         seed: sample.seed,
                         content_fingerprint: sample.contentFingerprint,
                         task_fingerprint: sample.taskFingerprint,

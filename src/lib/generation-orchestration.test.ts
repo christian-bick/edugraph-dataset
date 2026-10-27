@@ -80,7 +80,7 @@ describe('module sample orchestration', () => {
         }
     });
 
-    it('completes a reused question draw for the actual solved mode without changing its origin or payload', () => {
+    it('reuses a question draw for the solution without changing its labels, origin or payload', () => {
         const base = fixture([], () => ({data: {value: 1}}));
         const entry: GeneratorCatalogEntry = {...base.entry, generatorId: 'arithmetic-ops-pairs',
             generator: {type: 'arithmetic', schema: {}, generate: () => ({data: {
@@ -101,10 +101,9 @@ describe('module sample orchestration', () => {
         expect(samples).toHaveLength(2);
         const [question, solution] = samples;
         expect(question.problem.labels).not.toContain(Scope.SingleDigitSmallestOperand);
-        expect(solution.problem.labels).toContain(Scope.SingleDigitSmallestOperand);
+        expect(solution.problem.labels).toEqual(question.problem.labels);
         expect(solution.problem.labels).toContain(Scope.SingleDigitLargestOperand);
-        expect(solution.realizedLabels?.mode).toBe('solution');
-        expect(question.realizedLabels?.mode).toBe('question');
+        expect(question.problem.labels).toEqual([...entry.generalLabels, ...view.generalLabels].sort());
         expect(solution.problem.data).toEqual(question.problem.data);
         expect(solution.contentFingerprint).toBe(question.contentFingerprint);
         expect(solution.taskFingerprint).toBe(question.taskFingerprint);

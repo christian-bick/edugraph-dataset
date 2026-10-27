@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts/generated';
 import {labelDependencyCoverage} from '../validation/label-dependency-coverage.ts';
-import {assessLabelDependencyEvidence} from './label-dependency-evidence.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
 import {ResolvedLabelContractError} from './label-contracts.ts';
 import {assessLabelDependencyCoverage, assertLabelDependencyCoverage, LABEL_DEPENDENCY_COVERAGE_HASH,
@@ -54,23 +53,6 @@ describe('universal annotation dependency enforcement', () => {
             generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes'}).failures);
     });
 
-    it('does not let optional evidence mark an annotation dependency inapplicable', () => {
-        const evidence = assessLabelDependencyEvidence({generatorId: 'counting-basic',
-            viewId: 'counting-conservation', mode: 'question', data: {numObjects: 3, simpleAnswer: 3}});
-        const reduced = labels.filter(label => label !== Scope.ArabicNumerals && label !== Scope.Base10);
-        const result = assess({labels: reduced, evidence});
-        expect(result.failures.map(failure => failure.facet)).toEqual(['base', 'numeralSystem']);
-        expect(result).toEqual(assess({labels: reduced}));
-    });
-
-    it('ignores unavailable or malformed supplementary evidence when annotations are complete', () => {
-        const unavailable = assessLabelDependencyEvidence({generatorId: 'unknown', viewId: 'unknown', mode: 'question'});
-        expect(assess({evidence: unavailable})).toEqual(assess());
-        const contradictory = {...unavailable, facets: {zero: {status: 'applicable' as const,
-            expectedLabels: [Scope.NumbersWithZero], reason: 'A payload-only diagnostic.', references: ['payload']}}};
-        expect(assess({evidence: contradictory})).toEqual(assess());
-    });
-
     it.each([
         [Scope.NumbersWithZero, 'zero'], [Scope.NumbersWithNegatives, 'sign']
     ])('rejects contradictory %s annotations for an unreviewed producer', (opposite, facet) => {
@@ -79,7 +61,7 @@ describe('universal annotation dependency enforcement', () => {
         ]);
     });
 
-    it('checks frame conflicts even without an active quantity-reference-frame trigger', () => {
+    it('checks frame conflicts without any numeric trigger', () => {
         expect(assess({labels: [Area.Addition, Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]}).failures)
             .toEqual([expect.objectContaining({code: 'contradiction', facet: 'referenceFrames'})]);
     });
@@ -89,7 +71,7 @@ describe('universal annotation dependency enforcement', () => {
             Scope.ProperFractions, Scope.ImproperFractions, Scope.UnitFractions, Scope.NonUnitFractions]}).failures).toEqual([]);
     });
 
-    it('enforces exhaustive fraction/decimal dependencies while leaving evidence-only refinements supplementary', () => {
+    it('enforces exhaustive fraction/decimal dependencies without unsupported refinements', () => {
         expect(assess({labels: [...labels, Scope.FractionNumbers]}).failures)
             .toEqual([expect.objectContaining({code: 'missing', facet: 'fractionMagnitude'})]);
         expect(assess({labels: [...labels, Scope.ProperFractions]}).failures).toEqual([]);
@@ -120,7 +102,7 @@ describe('universal annotation dependency enforcement', () => {
         expect(result.failures).toEqual([{code: 'annotation', message: 'invalid label row'}]);
     });
 
-    it('reports pre-draw completeness without enforcing omissions that completion can fill', () => {
+    it('reports pre-draw completeness while enforcing finalized artifacts', () => {
         const result = assess({kind: 'selection', labels: [Area.Addition, Scope.IntegerNumbers]});
         expect(result.status).toBe('checked');
         expect(result.completenessEnforced).toBe(false);
@@ -132,10 +114,10 @@ describe('universal annotation dependency enforcement', () => {
         expect(assess({kind: 'selection', labels: []}).status).toBe('invalid_context');
     });
 
-    it('cannot suppress completeness with a stale or evidence-bearing precomputed evaluation', () => {
+    it('cannot suppress completeness with a stale precomputed evaluation', () => {
         const annotations = labels.filter(label => label !== Scope.Base10);
         const stale = {...input({labels: annotations}), evaluation: {...evaluator.evaluate(labels),
-            assessments: [], evidenceErrors: ['Broken optional adapter.']}};
+            assessments: []}};
         expect(assessLabelDependencyCoverage(stale).failures)
             .toEqual([expect.objectContaining({code: 'missing', facet: 'base'})]);
     });
@@ -158,8 +140,7 @@ describe('strict annotation report summary', () => {
     const subject = (id: string, extra: Partial<LabelDependencyCoverageInput> = {}) => {
         const base = input(extra);
         return {...base, kind: base.kind ?? 'sample' as const, id, targetId: 'target',
-            evidence: base.evidence ?? {triggers: {}, facets: {}, adapter: 'uncovered'},
-            evaluation: evaluator.evaluate(base.labels, undefined, base.resolvedAreas)};
+            evaluation: evaluator.evaluate(base.labels, base.resolvedAreas)};
     };
     const dataset = {status: 'available', generationId: 'immutable-generation'};
 

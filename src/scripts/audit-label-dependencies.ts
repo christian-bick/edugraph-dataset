@@ -12,14 +12,14 @@ const errorMessage = (error: unknown) => error instanceof Error ? error.message 
 async function main(): Promise<void> {
     const args = process.argv.slice(2);
     for (const arg of args) {
-        if (arg !== '--strict' && arg !== '--with-evidence' && !/^--(?:spec|output-dir|max-selections)=.+$/.test(arg)) {
+        if (arg !== '--strict' && !/^--(?:spec|output-dir|max-selections)=.+$/.test(arg)) {
             throw new Error(`Unsupported dependency audit option: ${arg}`);
         }
     }
     const strict = args.includes('--strict');
     const spec = getCliOption(args, 'spec');
     if (!spec || !/^[a-zA-Z0-9_-]+$/.test(spec)) {
-        throw new Error('Usage: npm run audit:label-dependencies -- --spec=<module> [--strict] [--with-evidence] [--max-selections=4096] [--output-dir=temp/…]');
+        throw new Error('Usage: npm run audit:label-dependencies -- --spec=<module> [--strict] [--max-selections=4096] [--output-dir=temp/…]');
     }
     const outputDir = resolve(PROJECT_ROOT, getCliOption(args, 'output-dir') ?? `temp/label-dependencies/${spec}`);
     const outputRelative = relative(resolve(PROJECT_ROOT, 'temp'), outputDir);
@@ -27,14 +27,14 @@ async function main(): Promise<void> {
         throw new Error('Audit reports must be written to a subdirectory of temp/.');
     }
     const limitArg = getCliOption(args, 'max-selections');
-    const report = await inspectLabelDependencies({projectRoot: PROJECT_ROOT, spec, includeEvidence: args.includes('--with-evidence'),
+    const report = await inspectLabelDependencies({projectRoot: PROJECT_ROOT, spec,
         maxSelections: limitArg === undefined ? undefined : Number(limitArg)});
     const enforcement = strict ? summarizeLabelDependencyCoverage(report) : undefined;
     const output = enforcement ? {...report, mode: 'strict', strict: enforcement} : report;
     const strictMarkdown = enforcement ? [
         '', '## Strict annotation validation', '',
         `- Coverage policy: \`${enforcement.coverage_hash}\``,
-        '- Range presence and pre-draw missing facets remain report-only. All eligible finalized annotations are checked independently of adapters.',
+        '- Range presence and pre-draw missing facets remain report-only. All eligible finalized annotations are checked directly.',
         `- Subjects: ${enforcement.counts.samples_checked} samples checked, ${enforcement.counts.selections_checked} selections checked, ${enforcement.counts.outside_policy_scope} outside policy scope, ${enforcement.counts.invalid_context} invalid contexts`,
         `- Strict failures: ${enforcement.counts.failures}`, '',
         ...enforcement.failures.map(failure => `- \`${failure.subject}\` [${failure.code}]: ${failure.message}`), ''

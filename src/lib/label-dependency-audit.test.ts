@@ -1,24 +1,16 @@
 import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts/generated';
 import type {GenerationPlan, LabelChoiceDomain} from '../types/compatibility.ts';
-import type {ProblemGenerator} from '../types/ml-engine.ts';
-import type {DependencyGraphSnapshot} from './dependency-planner.ts';
 import {createGenerationSelectionReceipt, planCompatibility} from './compatibility.ts';
-import {computeContentFingerprint, computeSampleKey, computeSampleSeed, computeTaskFingerprint} from './generation.ts';
-import {generatePlannedDraw} from './planned-generation.ts';
-import {getRandomState, random, setRandomState} from './random.ts';
+import {computeSampleKey, computeSampleSeed} from './generation.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
-import {assessLabelDependencyEvidence} from './label-dependency-evidence.ts';
-import {buildLabelDependencyAudit, dependencyAuditResolvedAreas, dependencyAuditRowIssues, dependencyAuditSourceIssues,
-    enumerateDependencyAuditSelections, formatLabelDependencyAudit, replayDependencyAuditRow,
+import {buildLabelDependencyAudit, dependencyAuditResolvedAreas, dependencyAuditRowIssues,
+    enumerateDependencyAuditSelections, formatLabelDependencyAudit,
     type DependencyAuditSubject} from './label-dependency-audit.ts';
 
 const evaluator = createLabelDependencyEvaluator();
-const data = {operation: 'addition', num1: 6, num2: 2, answer: 8};
-const generator: ProblemGenerator = {type: 'arithmetic', schema: {}, generate: () => ({data})};
-
 function plan(fields: LabelChoiceDomain[] = [], correlated = false): GenerationPlan {
-    const result = planCompatibility({identity: {targetId: 'fixture', generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes'},
+    const result = planCompatibility({identity: {targetId: 'fixture', generatorId: 'g', viewId: 'v'},
         targetLabels: [Area.Addition], generatorLabels: [Area.Addition], viewLabels: [Ability.ProcedureExecution], fields,
         ...(correlated ? {viewRules: [{id: 'correlated', dependencies: fields.flatMap(field => field.alternatives.map(alternative =>
             ({scope: field.owner, label: alternative.labels[0]}))), predicate: labels =>
@@ -26,34 +18,24 @@ function plan(fields: LabelChoiceDomain[] = [], correlated = false): GenerationP
     if (!result.supported) throw new Error('Fixture plan did not match.');
     return result.plan;
 }
-
-function row() {
-    const checked = planCompatibility({identity: {targetId: 'fixture', generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes'},
-        targetLabels: [Area.Addition], generatorLabels: [Area.Addition, Scope.IntegerNumbers, Scope.Base10,
-            Scope.TwoOperands, Scope.NumbersWithoutNegatives], viewLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals], fields: []});
-    if (!checked.supported) throw new Error('Complete fixture plan did not match.');
-    const currentPlan = checked.plan;
+function row(currentPlan = plan()) {
     const sampleKey = computeSampleKey({...currentPlan.identity, split: 'train', mode: 'question', instanceIdx: 0});
     const seed = computeSampleSeed(sampleKey, 1);
-    const draw = generatePlannedDraw({generator, viewSchema: {}, plan: currentPlan, sampleKey, attempt: 1, seed});
+    const selection = createGenerationSelectionReceipt(currentPlan,
+        enumerateDependencyAuditSelections(currentPlan).selections[0].choices);
     return {file_name: 'fixture.png', sample_key: sampleKey, spec: 'fixture', target_id: 'fixture',
-        generator: 'arithmetic-ops-pairs', view: 'operations-boxes', mode: 'question',
-        labels: ['Addition'], realized_labels: draw.realizedLabels,
+        generator: 'g', view: 'v', mode: 'question', labels: ['Addition'],
         generation_plan: currentPlan, generation_plan_hash: currentPlan.hash,
-        generation_replay: draw.replay, seed, attempt: 1,
-        content_fingerprint: computeContentFingerprint(data), task_fingerprint: computeTaskFingerprint(data, draw.view.config)};
+        generation_replay: {version: 1, sampleKey, attempt: 1, seed, selection}, seed, attempt: 1};
 }
 
-describe('admitted dependency audit selections', () => {
-    it('includes one invariant-only selection, independently of target labels', () => {
-        const selections = enumerateDependencyAuditSelections(plan());
-        expect(selections.status).toBe('complete');
-        expect(selections.total).toBe('1');
-        expect(selections.selections[0].labels).toEqual([Ability.ProcedureExecution, Area.Addition].sort());
-        expect(selections.selections[0].choices).toEqual([]);
+describe('admitted annotation selections', () => {
+    it('includes an invariant-only selection independently of partial target labels', () => {
+        expect(enumerateDependencyAuditSelections(plan())).toEqual({status: 'complete', total: '1', selections: [
+            {labels: [Ability.ProcedureExecution, Area.Addition].sort(), choices: [], variantHash: expect.any(String)}
+        ]});
     });
-
-    it('preserves correlations and combines independent factors without unioning alternatives', () => {
+    it('preserves correlations and independent alternatives without unioning them', () => {
         const fields: LabelChoiceDomain[] = [
             {owner: 'generator', field: 'zero', alternatives: [{id: 'yes', labels: [Scope.NumbersWithZero]}, {id: 'no', labels: [Scope.NumbersWithoutZero]}]},
             {owner: 'view', field: 'notation', alternatives: [{id: 'arabic', labels: [Scope.ArabicNumerals]}, {id: 'roman', labels: [Scope.RomanNumerals]}]},
@@ -68,145 +50,97 @@ describe('admitted dependency audit selections', () => {
             expect(selection.choices).toHaveLength(3);
         }
     });
-
-    it('reports uninspected oversized spaces instead of sampling an apparently exhaustive subset', () => {
-        const fields: LabelChoiceDomain[] = [{owner: 'generator', field: 'notation', alternatives: [
+    it('reports oversized spaces without a sampled completeness claim', () => {
+        const fields: LabelChoiceDomain[] = [{owner: 'generator', field: 'base', alternatives: [
             {id: 'one', labels: [Scope.Base10]}, {id: 'two', labels: [Scope.Base2]}
         ]}];
         expect(enumerateDependencyAuditSelections(plan(fields), 1)).toEqual({status: 'limit_exceeded', total: '2', selections: []});
-        for (const limit of [0, -1, 1.5, 4097, NaN]) expect(() => enumerateDependencyAuditSelections(plan(), limit)).toThrow('Selection limit');
         expect(() => enumerateDependencyAuditSelections({...plan(), hash: 'corrupt'})).toThrow();
     });
+    it.each([0, -1, 1.5, 4097, NaN])('rejects invalid enumeration limit %s', limit => {
+        expect(() => enumerateDependencyAuditSelections(plan(), limit)).toThrow('Selection limit');
+    });
 });
 
-describe('stored sample evidence provenance', () => {
-    it('checks every row identity and split even when its adapter is unsupported', () => {
+describe('annotation provenance without mathematical replay', () => {
+    it('checks sample identity and split without any generator implementation', () => {
         const stored = row();
         expect(dependencyAuditRowIssues(stored, 'train')).toEqual([]);
-        expect(dependencyAuditRowIssues({...stored, generator: 'unknown', view: 'unknown', mode: 'solution', target_id: 'wrong'}, 'val')).toHaveLength(5);
+        expect(dependencyAuditRowIssues({...stored, generator: 'other', view: 'other', mode: 'solution', target_id: 'wrong'}, 'val')).toHaveLength(5);
         expect(dependencyAuditRowIssues({...stored, sample_key: 'invalid'}, 'train')[0]).toContain('Malformed sample key');
     });
-    it('recovers the complete resolved Areas independently of incomplete stored labels', () => {
-        const stored = row();
-        expect(dependencyAuditResolvedAreas(stored)).toEqual({areas: [Area.Addition], issues: []});
-        expect(dependencyAuditResolvedAreas({...stored, generation_replay: undefined}).issues).toHaveLength(1);
-        const fields: LabelChoiceDomain[] = [{owner: 'generator', field: 'area', alternatives: [
+    it('recovers invariant and selected Areas independently of incomplete stored labels', () => {
+        expect(dependencyAuditResolvedAreas(row())).toEqual({areas: [Area.Addition], issues: []});
+        const currentPlan = plan([{owner: 'generator', field: 'area', alternatives: [
             {id: 'algebra', labels: [Area.AlgebraicExpression]}
-        ]}];
-        const currentPlan = plan(fields);
-        const selection = createGenerationSelectionReceipt(currentPlan, enumerateDependencyAuditSelections(currentPlan).selections[0].choices);
-        expect(dependencyAuditResolvedAreas({...stored, generation_plan: currentPlan, generation_plan_hash: currentPlan.hash,
-            generation_replay: {...stored.generation_replay, selection}}).areas).toEqual([Area.Addition, Area.AlgebraicExpression].sort());
+        ]}]);
+        expect(dependencyAuditResolvedAreas(row(currentPlan))).toEqual({areas: [Area.Addition, Area.AlgebraicExpression].sort(), issues: []});
     });
-
-    it('checks full source closures and reports missing/stale source identities', () => {
-        const nodes = {
-            'generator:g': {id: 'generator:g', kind: 'generator-module', input_hash: 'g', dependencies: ['source:src/g.ts', 'generator-capability:g']},
-            'view:v': {id: 'view:v', kind: 'view-module', input_hash: 'v', dependencies: ['source:src/v.ts']},
-            'source:src/g.ts': {id: 'source:src/g.ts', kind: 'source-file', input_hash: 'g-hash', dependencies: []},
-            'source:src/v.ts': {id: 'source:src/v.ts', kind: 'source-file', input_hash: 'v-hash', dependencies: []}
-        } as DependencyGraphSnapshot['nodes'];
-        const graph: DependencyGraphSnapshot = {schema_version: 5, planner_epoch: 6, complete: true, nodes};
-        const input = {graph, generatorId: 'g', viewId: 'v', sourceHash: (path: string) => path.includes('g.ts') ? 'g-hash' : 'v-hash'};
-        expect(dependencyAuditSourceIssues(input)).toEqual([]);
-        expect(dependencyAuditSourceIssues({...input, sourceHash: () => undefined})).toHaveLength(2);
-        expect(dependencyAuditSourceIssues({...input, graph: undefined})).toHaveLength(2);
-        nodes['view:v'].dependencies = [];
-        expect(dependencyAuditSourceIssues(input)).toEqual(['No stored view source closure for v.']);
-    });
-
-    it('verifies content and task fingerprints and restores random state', () => {
+    it('retains invalid metadata as a structural contract finding', () => {
         const stored = row();
-        setRandomState(123);
-        const result = replayDependencyAuditRow({row: stored, currentPlan: stored.generation_plan, generator,
-            viewSchema: {}, sourceIssues: []});
-        expect(result.status).toBe('verified');
-        expect(result.evidence.triggers.numericTask?.status).toBe('present');
-        expect(getRandomState()).toBe(123);
-        expect(result.issues).toEqual([]);
-    });
-
-    it('allows solution reuse of the question origin while preserving actual mode', () => {
-        const stored = row();
-        const result = replayDependencyAuditRow({row: {...stored, sample_key: stored.sample_key.replace('#question#', '#solution#'), mode: 'solution'},
-            currentPlan: stored.generation_plan, generator, viewSchema: {}, sourceIssues: []});
-        expect(result.status).toBe('verified');
-        expect(result.evidence.facets.base.references).toContain('view:operations-boxes:solution');
-    });
-
-    it.each(['content_fingerprint', 'task_fingerprint'] as const)('does not trust mismatched %s', field => {
-        const stored = row();
-        const result = replayDependencyAuditRow({row: {...stored, [field]: 'wrong'}, currentPlan: stored.generation_plan,
-            generator, viewSchema: {}, sourceIssues: []});
-        expect(result.status).toBe('unresolved');
-        expect(result.issues[0]).toContain('fingerprint');
-        expect(result.evidence.triggers.numericTask?.status).toBe('unresolved');
-    });
-
-    it('keeps identity/plan/source failures explicit and never samples a replacement', () => {
-        const stored = row();
-        const run = (input: Partial<Parameters<typeof replayDependencyAuditRow>[0]>) => replayDependencyAuditRow({
-            row: stored, currentPlan: stored.generation_plan, generator, viewSchema: {}, sourceIssues: [], ...input});
-        expect(run({sourceIssues: ['view changed']}).issues).toEqual(['view changed']);
-        expect(run({currentPlan: undefined}).issues[0]).toContain('stale');
-        expect(run({generator: undefined}).issues[0]).toContain('unavailable');
-        expect(run({viewSchema: undefined}).status).toBe('unresolved');
-        const staleReceipt = run({row: {...stored, realized_labels: {version: 1, policyHash: 'stale'}}});
-        expect(staleReceipt.issues[0]).toContain('realized-label receipt');
-        expect(staleReceipt.status).toBe('verified');
-        expect(staleReceipt.evidence.triggers.numericTask?.status).toBe('present');
-        expect(run({row: {...stored, target_id: 'other'}}).issues[0]).toContain('identity');
-        expect(run({generator: {...generator, generate: () => null}}).issues[0]).toContain('no mathematical payload');
-        expect(run({generator: {...generator, generate: () => {random(); throw 'failed';}}}).issues[0]).toBe('failed');
+        expect(dependencyAuditResolvedAreas({...stored, generation_replay: undefined})).toMatchObject({areas: [], issues: [expect.stringContaining('no generation plan/receipt')]});
+        expect(dependencyAuditResolvedAreas({...stored, generation_plan_hash: 'stale'})).toMatchObject({areas: [], issues: [expect.stringContaining('hash mismatch')]});
     });
 });
 
-describe('deterministic report-only dependency audit', () => {
-    const evidence = assessLabelDependencyEvidence({generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes', mode: 'question', data});
+describe('deterministic annotation reports', () => {
     const subject = (id: string): DependencyAuditSubject => ({id, kind: 'sample', targetId: 'fixture',
-        generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes', labels: [Area.Addition, Scope.IntegerNumbers], evidence, replay: 'verified'});
+        generatorId: 'unknown-producer', viewId: 'unknown-view', labels: [Area.Addition, Scope.IntegerNumbers]});
     const build = (subjects: DependencyAuditSubject[]) => buildLabelDependencyAudit({spec: 'fixture', policyHash: 'policy',
         ontology: {version: 'fixture'}, dataset: {status: 'available', generationId: 'same'},
         selectionCoverage: [{targetId: 'limited', generatorId: 'g', viewId: 'v', status: 'limit_exceeded', total: '8192', checked: 0}],
         subjects, evaluate: evaluator.evaluate});
-
-    it('groups missing dependencies, retains sample provenance, and is independent of input order', () => {
+    it('groups omissions, preserves provenance, and is independent of input order', () => {
         const first = subject('sample:a');
         const second = {...subject('sample:b'), targetAssociations: [{spec: 'fixture', target_id: 'alias'}]};
         const report = build([second, first]);
         expect(report).toEqual(build([first, second]));
-        expect(report.mode).toBe('report-only');
-        expect(report.summary.assessments.missing).toBeGreaterThan(0);
-        expect(report.summary.incomplete_tuples).toBe(1);
+        expect(report).toMatchObject({schema_version: 3, mode: 'report-only', validation_basis: 'annotations'});
+        expect(report.summary).toMatchObject({samples: 2, selections: 0, samples_with_missing_dependencies: 2, incomplete_tuples: 1});
         expect(report.findings.find(finding => finding.facet === 'range')?.subjects).toEqual(['sample:a', 'sample:b']);
         expect(report.subjects[1].targetAssociations).toEqual(second.targetAssociations);
+        expect(first.labels).toEqual(subject('sample:a').labels);
         const markdown = formatLabelDependencyAudit(report);
         expect(markdown).toContain('Range presence remains report-only');
         expect(markdown).toContain('limit_exceeded');
-        expect(markdown).toContain('integer-arithmetic-v1');
+        expect(markdown).not.toMatch(/adapter|supplementary|replay|evidence/i);
         expect(markdown).toBe(formatLabelDependencyAudit(build([first, second])));
     });
-
-    it('uses all resolved Areas for scope and reports invalid contexts and evidence coverage', () => {
-        const unresolved = assessLabelDependencyEvidence({generatorId: 'uncovered', viewId: 'v', mode: 'question'});
+    it('uses all resolved Areas and retains invalid annotations and row issues', () => {
         const report = build([
-            {...subject('outside'), resolvedAreas: [Area.EquationSolving], replay: 'unsupported'},
-            {...subject('unknown'), labels: ['http://edugraph.io/edu/Missing'], issues: ['stale\nsource | missing'], replay: 'unresolved'},
-            {...subject('unresolved'), kind: 'selection', evidence: unresolved, replay: undefined}
+            {...subject('outside'), resolvedAreas: [Area.EquationSolving]},
+            {...subject('unknown'), labels: ['http://edugraph.io/edu/Missing'], issues: ['invalid\nrow | missing', 'invalid\nrow | missing']},
+            {...subject('selection'), kind: 'selection'}
         ]);
         expect(report.summary.contexts).toEqual({eligible: 1, outside_policy_scope: 1, invalid_context: 1});
-        expect(report.summary.unresolved_triggers).toBeGreaterThan(0);
+        expect(report.summary.row_issues).toBe(1);
         expect(report.summary.contract_errors).toBeGreaterThan(0);
-        const markdown = formatLabelDependencyAudit(report);
-        expect(markdown).toContain('trigger unresolved');
-        expect(markdown).toContain('stale source \\| missing');
+        expect(formatLabelDependencyAudit(report)).toContain('invalid row \\| missing');
     });
-
-    it('does not advertise completeness for an empty dataset or an eligible context with unresolved triggers', () => {
+    it('reports conflicts independently of missing groups', () => {
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.ArabicNumerals, Scope.Base10,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero, Scope.NumbersWithZero, Scope.NumbersSmaller10];
+        const report = build([{...subject('conflict'), labels}]);
+        expect(report.summary).toMatchObject({conflicts: 1, assessments: {missing: 0}, samples_with_missing_dependencies: 0});
+        expect(report.findings).toEqual([]);
+        expect(formatLabelDependencyAudit(report)).toContain('LD-ZERO-CONFLICT-01/zero');
+    });
+    it('orders tuple coverage independently and renders incomplete-plan reasons', () => {
+        const complete = {targetId: 'a', generatorId: 'g', viewId: 'v', status: 'complete' as const, total: '1', checked: 1};
+        const invalid = {targetId: 'z', generatorId: 'g', viewId: 'v', status: 'invalid_plan' as const,
+            total: 'unknown', checked: 0, reason: 'Invalid | assignment'};
+        const input = {spec: 'fixture', policyHash: 'p', ontology: {}, dataset: {status: 'available' as const, generationId: 'fixture'},
+            subjects: [subject('sample')], evaluate: evaluator.evaluate};
+        const report = buildLabelDependencyAudit({...input, selectionCoverage: [invalid, complete]});
+        expect(report).toEqual(buildLabelDependencyAudit({...input, selectionCoverage: [complete, invalid]}));
+        expect(report.selection_coverage).toEqual([complete, invalid]);
+        expect(formatLabelDependencyAudit(report)).toContain('Invalid \\| assignment');
+    });
+    it('keeps an unavailable empty snapshot explicit without inventing findings', () => {
         const report = buildLabelDependencyAudit({spec: 'fixture', policyHash: 'p', ontology: {},
             dataset: {status: 'unavailable', generationId: null}, selectionCoverage: [], subjects: [], evaluate: evaluator.evaluate});
         expect(report.summary.samples).toBe(0);
-        expect(formatLabelDependencyAudit(report)).toContain('No activated annotation dependencies are missing');
+        expect(formatLabelDependencyAudit(report)).toContain('No activated annotation dependencies are missing.');
         expect(formatLabelDependencyAudit(report)).toContain('generation `none`');
     });
 });

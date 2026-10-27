@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {CountingBasicGeneratorSchema, spec as generatorSpec} from '../../../../generators/counting/counting-basic/spec.ts';
 import {matchTarget} from '../../../../lib/matching.ts';
-import {completePlannedDrawLabels, generatePlannedDraw, resolvePlannedConfigurations} from '../../../../lib/planned-generation.ts';
+import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../../lib/planned-generation.ts';
 import {CountingBasicGenerator} from '../../../../generators/counting/counting-basic/generator.ts';
 import {extractSchemaLabels} from '../../../../lib/utils.ts';
 import {CountingObjectsParityViewSchema, spec} from './spec.ts';
@@ -37,12 +37,8 @@ describe('counting-objects-parity capabilities', () => {
                 plan: matched.plan, sampleKey: `${target.id}#counting-basic#counting-objects-parity#train#${mode}#inst:0`,
                 attempt: 1, seed: 42});
             expect(draw.stub).not.toBeNull();
-            const count = draw.stub!.data.numObjects as number;
-            const zero = count % 2 === 0 || count === 1;
-            expect(draw.labels).toContain(zero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero);
-            expect(draw.labels).not.toContain(zero ? Scope.NumbersWithoutZero : Scope.NumbersWithZero);
+            expect(draw.labels).toEqual(resolved.labels);
             expect(draw.view).toEqual(resolved.view);
-            expect(completePlannedDrawLabels(draw, matched.plan, mode)).toEqual(draw);
         }
     });
 });

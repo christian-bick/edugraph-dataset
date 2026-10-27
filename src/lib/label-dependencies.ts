@@ -1,15 +1,14 @@
 import {bundledContext} from 'edugraph-ts/generated';
 import {RELATION_IRIS, type OntologyContext} from 'edugraph-ts/core';
 import {labelDependencies} from '../validation/label-dependencies.ts';
-import {dependencyEvidenceIds} from '../types/label-dependencies.ts';
 import type {
     DependencyAssessment, DependencyFacet, DependencyTrigger, DependencyTriggerResult,
-    DependencyEvidenceId, LabelDependencyEvidence, LabelDependencyEvaluation, LabelDependencyGraph
+    LabelDependencyEvaluation, LabelDependencyGraph
 } from '../types/label-dependencies.ts';
 import {digestIdentity} from './content-identity.ts';
 
 const AREA_DIMENSION = 'http://edugraph.io/edu#Area';
-const EVALUATOR_VERSION = 2;
+const EVALUATOR_VERSION = 3;
 const ordered = (values: readonly string[]): string[] => [...new Set(values)].sort();
 const fail = (message: string): never => {throw new Error(`Label dependency graph: ${message}`);};
 const nonempty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
@@ -57,11 +56,9 @@ export function validateLabelDependencyGraph(graph: LabelDependencyGraph, contex
         if (path.has(trigger)) fail('cyclic trigger expression.');
         path.add(trigger);
         const keys = Object.keys(trigger);
-        if (keys.length !== 1) fail('trigger needs exactly one family, evidence, or any selector.');
+        if (keys.length !== 1) fail('trigger needs exactly one family or any selector.');
         if ('family' in trigger) {
             if (!nonempty(trigger.family) || !Object.hasOwn(graph.facets, trigger.family)) fail(`unknown trigger family '${trigger.family}'.`);
-        } else if ('evidence' in trigger) {
-            if (!dependencyEvidenceIds.includes(trigger.evidence)) fail(`unknown evidence identifier '${trigger.evidence}'.`);
         } else if ('any' in trigger) {
             if (!Array.isArray(trigger.any) || !trigger.any.length) fail('any trigger needs nonempty alternatives.');
             for (const child of trigger.any) validateTrigger(child);
@@ -156,8 +153,7 @@ export function createLabelDependencyEvaluator(
         }))
     });
 
-    const evaluate = (inputLabels: readonly string[], evidence?: LabelDependencyEvidence,
-        resolvedAreas: readonly string[] = []): LabelDependencyEvaluation => {
+    const evaluate = (inputLabels: readonly string[], resolvedAreas: readonly string[] = []): LabelDependencyEvaluation => {
         const labels = ordered(inputLabels);
         const contextLabels = ordered([...labels, ...resolvedAreas]);
         const errors = contextLabels.flatMap(label => !context.lookupDescriptor(label) ? [`Unknown descriptor '${label}'.`]
@@ -170,66 +166,24 @@ export function createLabelDependencyEvaluator(
         if (!areas.length) errors.push('At least one resolved Area is required.');
         const status = errors.length ? 'invalid_context' : outsideAreas.length ? 'outside_policy_scope' : 'eligible';
         const resultContext = {status, areas, outsideAreas} as LabelDependencyEvaluation['context'];
-        if (status !== 'eligible') return {context: resultContext, errors: ordered(errors), triggers: [], assessments: [],
-            evidenceTriggers: [], evidenceAssessments: [], evidenceErrors: [], conflicts: []};
+        if (status !== 'eligible') return {context: resultContext, errors: ordered(errors), triggers: [], assessments: [], conflicts: []};
         const selected = new Map([...families].map(([name, members]) => [name, labels.filter(label => members.has(label))]));
-        const evidenceErrors: string[] = [];
 
-        const triggerResult = (trigger: DependencyTrigger, useEvidence: boolean): Omit<DependencyTriggerResult, 'ruleId'> => {
+        const triggerResult = (trigger: DependencyTrigger): Omit<DependencyTriggerResult, 'ruleId'> => {
             if ('family' in trigger) {
                 const found = selected.get(trigger.family)!;
-                return {status: found.length ? 'present' : 'absent', labels: found, evidence: []};
+                return {status: found.length ? 'present' : 'absent', labels: found};
             }
-            if ('evidence' in trigger) {
-                if (!useEvidence) return {status: 'absent', labels: [], evidence: []};
-                const witness = evidence?.triggers[trigger.evidence];
-                return {status: witness && nonempty(witness.reason) && witness.references.length
-                    ? witness.status : 'unresolved', labels: [], evidence: [trigger.evidence]};
-            }
-            const children = trigger.any.map(child => triggerResult(child, useEvidence));
+            const children = trigger.any.map(triggerResult);
             return {
-                status: children.some(child => child.status === 'present') ? 'present'
-                    : children.some(child => child.status === 'unresolved') ? 'unresolved' : 'absent',
-                labels: ordered(children.flatMap(child => child.labels)),
-                evidence: ordered(children.flatMap(child => child.evidence)) as DependencyEvidenceId[]
+                status: children.some(child => child.status === 'present') ? 'present' : 'absent',
+                labels: ordered(children.flatMap(child => child.labels))
             };
-        };
-
-        const assessEvidence = (ruleId: string, facet: string): DependencyAssessment => {
-            const current = selected.get(facet)!;
-            const definition = graph.facets[facet];
-            const witness = evidence?.facets[facet];
-            const expected = ordered(witness?.expectedLabels ?? []);
-            const base = {ruleId, facet, labels: current, expectedLabels: expected, missingLabels: [] as string[],
-                references: ordered(witness?.references ?? [])};
-            const unresolved = (reason: string): DependencyAssessment => ({...base, status: 'unresolved', reason});
-            if (witness?.status === 'not_applicable') {
-                if (!nonempty(witness.reason) || !witness.references.length) return unresolved('Inapplicability needs a reason and evidence references.');
-                if (current.length || expected.length) {
-                    evidenceErrors.push(`${ruleId}/${facet}: inapplicability conflicts with supplied or expected labels.`);
-                    return unresolved('Inapplicability conflicts with supplied or expected labels.');
-                }
-                return {...base, status: 'not_applicable', reason: witness.reason};
-            }
-            if (definition.check === 'presence-only') return {...base, expectedLabels: [],
-                status: current.length ? 'satisfied' : 'missing',
-                reason: current.length ? 'Range facet is present under existing semantics; no bounds were calculated.'
-                    : 'Missing range facet under existing semantics; no replacement bounds were calculated.'};
-            if (!witness) return unresolved('No evidence adapter assessed this facet.');
-            if (witness.status === 'unresolved') return unresolved(witness.reason);
-            if (!nonempty(witness.reason) || !witness.references.length) return unresolved('Applicability needs a reason and evidence references.');
-            const invalid = expected.filter(label => !facetContains(definition, label));
-            if (invalid.length) {
-                evidenceErrors.push(`${ruleId}/${facet}: expected labels are unknown, ineligible, or outside the facet: ${invalid.join(', ')}.`);
-                return unresolved('Expected labels do not belong to this facet.');
-            }
-            const missingLabels = expected.filter(expectedLabel => !current.some(label => capabilityAncestors.get(label)!.has(expectedLabel)));
-            return {...base, missingLabels, status: missingLabels.length || !current.length ? 'missing' : 'satisfied', reason: witness.reason};
         };
 
         const assessAnnotation = (ruleId: string, facet: string): DependencyAssessment => {
             const current = selected.get(facet)!;
-            return {ruleId, facet, labels: current, expectedLabels: [], missingLabels: [], references: [],
+            return {ruleId, facet, labels: current,
                 status: current.length ? 'satisfied' : 'missing',
                 reason: graph.facets[facet].check === 'presence-only'
                     ? current.length ? 'Range facet is present under existing semantics; no bounds were calculated.'
@@ -237,21 +191,16 @@ export function createLabelDependencyEvaluator(
                     : current.length ? 'A label from the required annotation family is present.'
                         : 'No label from the required annotation family is present.'};
         };
-        const triggers = rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when, false)}));
+        const triggers = rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when)}));
         const assessments = triggers.flatMap((trigger, index) => trigger.status === 'present'
             ? ordered(rules[index].assess).map(facet => assessAnnotation(trigger.ruleId, facet)) : []);
-        const evidenceRequested = evidence !== undefined && evidence.adapter !== 'not-requested';
-        const evidenceTriggers = evidenceRequested ? rules.map(rule => ({ruleId: rule.id, ...triggerResult(rule.when, true)})) : [];
-        const evidenceAssessments = evidenceTriggers.flatMap((trigger, index) => trigger.status === 'present'
-            ? ordered(rules[index].assess).map(facet => assessEvidence(trigger.ruleId, facet)) : []);
         const conflicts = conflictRules.flatMap(rule => {
             const choices = rule.labels.filter(candidate => selected.get(rule.facet)!.some(label => capabilityAncestors.get(label)!.has(candidate)));
             return choices.length < 2 ? [] : [{ruleId: rule.id, facet: rule.facet,
                 labels: selected.get(rule.facet)!.filter(label => choices.some(candidate => capabilityAncestors.get(label)!.has(candidate))),
                 reason: 'Mutually exclusive annotation claims are present together.'}];
         });
-        return {context: resultContext, errors: ordered(errors), triggers, assessments,
-            evidenceTriggers, evidenceAssessments, evidenceErrors: ordered(evidenceErrors), conflicts};
+        return {context: resultContext, errors: ordered(errors), triggers, assessments, conflicts};
     };
     return {policyHash, evaluate};
 }

@@ -105,6 +105,23 @@ describe('planned generation handover', () => {
         expect(generate).toHaveBeenCalledOnce();
     });
 
+    it('preserves selected labels without inferring operand or zero descriptors from payloads', () => {
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.ArabicNumerals,
+            Scope.Base10, Scope.NumbersWithoutNegatives, Scope.TwoOperands];
+        const accepted = planCompatibility({identity: {targetId: 't', generatorId: 'arithmetic-ops-pairs', viewId: 'operations-boxes'},
+            targetLabels: [Area.Addition], generatorLabels: labels, viewLabels: [], fields: []});
+        if (!accepted.supported) throw new Error(accepted.reason);
+        const data = {operation: 'addition', num1: 2, num2: 3, answer: 5};
+        const draw = generatePlannedDraw({generator: {type: 'arithmetic', schema: {}, generate: () => ({data})},
+            viewSchema: {}, plan: accepted.plan, sampleKey: 't#arithmetic-ops-pairs#operations-boxes#train#question#inst:0',
+            attempt: 1, seed: 1});
+        expect(draw.labels).toEqual([...labels].sort());
+        expect(draw.stub?.data).toBe(data);
+        expect(draw.labels).not.toContain(Scope.SingleDigitSmallestOperand);
+        expect(draw.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(Object.keys(draw).sort()).toEqual(['labels', 'replay', 'stub', 'view']);
+    });
+
     it('associates only an actually realized assignment accepted by the second plan', () => {
         const source = plan('t', false);
         const destination = plan('another-target');

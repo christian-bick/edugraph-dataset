@@ -8,9 +8,9 @@ import {
     type ViewCatalogEntry, type SampleIdentity, type SampleMode, type SampleSplit
 } from './generation.ts';
 import {restorePersistedMatchTuple} from './matching.ts';
-import {completePlannedDrawLabels, selectionAdmittedByPlan, type PlannedGenerationDraw} from './planned-generation.ts';
+import {selectionAdmittedByPlan, type PlannedGenerationDraw} from './planned-generation.ts';
 import type {GenerationPlan, GenerationSelectionReceipt} from '../types/compatibility.ts';
-import type {GenerationReplay, PreparedViewConfiguration, RealizedLabelReceipt} from '../types/generation-plan.ts';
+import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
 
 const MAX_ATTEMPTS = 50;
 
@@ -37,7 +37,6 @@ export interface RenderSample {
     plan: GenerationPlan;
     replay: GenerationReplay;
     preparedView: PreparedViewConfiguration;
-    realizedLabels?: RealizedLabelReceipt;
 }
 
 export type SampleFingerprintIndex = Map<string, Map<string, RenderSample[]>>;
@@ -103,8 +102,7 @@ export function generateModuleSamples(
             instanceIdx
         });
 
-        const fingerprintDraw = (inputDraw: PlannedGenerationDraw, mode?: SampleMode) => {
-            const draw = mode ? completePlannedDrawLabels(inputDraw, tuple.plan, mode) : inputDraw;
+        const fingerprintDraw = (draw: PlannedGenerationDraw) => {
             assertLabelDependencyCoverage({generatorId: moduleName, viewId: tuple.viewId,
                 labels: draw.labels}, draw.replay.sampleKey);
             assertResolvedTargetCoverage(draw.labels, targetLabels, `${target.id}/${moduleName}/${tuple.viewId}`);
@@ -116,7 +114,6 @@ export function generateModuleSamples(
             const contentFingerprint = computeContentFingerprint(problem.data);
             return {
                 problem,
-                realizedLabels: draw.realizedLabels,
                 contentFingerprint,
                 taskFingerprint: computeTaskFingerprint(problem.data, draw.view.config)
             };
@@ -190,8 +187,7 @@ export function generateModuleSamples(
             associatedPlans: new Map(),
             plan: tuple.plan,
             replay: question.replay,
-            preparedView: question.view,
-            ...(questionResult.realizedLabels ? {realizedLabels: questionResult.realizedLabels} : {})
+            preparedView: question.view
         };
         samples.push(questionSample);
         claimSample(taskFingerprintsByView, questionSample, questionSample.taskFingerprint);
@@ -211,7 +207,7 @@ export function generateModuleSamples(
         // problem falls back to showing the question's content solved. That is
         // the same exercise in the same split — never a cross-split leak.
         const solutionDraw = solution.stub ? solution : question;
-        const solutionResult = fingerprintDraw(solutionDraw, 'solution');
+        const solutionResult = fingerprintDraw(solutionDraw);
         const solutionSample: RenderSample = {
             identity: solutionIdentity,
             targetLabels,
@@ -227,8 +223,7 @@ export function generateModuleSamples(
             associatedPlans: new Map(),
             plan: tuple.plan,
             replay: solutionDraw.replay,
-            preparedView: solutionDraw.view,
-            ...(solutionResult.realizedLabels ? {realizedLabels: solutionResult.realizedLabels} : {})
+            preparedView: solutionDraw.view
         };
         samples.push(solutionSample);
         claimSample(taskFingerprintsByView, solutionSample, solutionSample.taskFingerprint);

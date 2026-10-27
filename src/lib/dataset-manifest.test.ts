@@ -29,12 +29,8 @@ import {
 } from './dependency-planner.ts';
 import {buildVqaValidationContext} from './vqa-cache.ts';
 import {createWorkCounters} from './work-counters.ts';
-import {beginDatasetStoreTransaction, emptyDatasetSnapshot, readDatasetSnapshot} from './dataset-store.ts';
+import {beginDatasetStoreTransaction, readDatasetSnapshot} from './dataset-store.ts';
 import {buildDependencyMatchingIndex, matchTargets} from './matching.ts';
-import {realizedLabelPolicyForPair, REALIZED_LABEL_SOURCE_PATHS} from './realized-labels.ts';
-import {buildOntologySemanticSnapshot} from './external-semantics.ts';
-import {resolveOntologyProvenance} from './coverage-identity.ts';
-import type {RealizedLabelReceipt} from '../types/generation-plan.ts';
 
 const dependencyGraph = createDependencyGraphSnapshot([]);
 const cleanPlan = planDependencyDelta(null, dependencyGraph);
@@ -560,135 +556,6 @@ describe('updateDatasetManifest', () => {
 });
 
 describe('buildDatasetManifest', () => {
-    function realizedFixture() {
-        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-realized-label-manifest-'));
-        const datasetDir = resolve(projectRoot, 'out/dataset-ccss');
-        const dependency = 'https://example.test/realized-ontology.tgz';
-        const files: Record<string, string> = {
-            'package.json': JSON.stringify({dependencies: {'edugraph-ts': dependency}}),
-            'package-lock.json': JSON.stringify({packages: {'node_modules/edugraph-ts': {
-                version: '1.0.0', resolved: dependency, integrity: 'sha512-realized'
-            }}}),
-            'src/generators/arithmetic-ops-pairs/spec.ts': 'export const spec = {};',
-            'src/generators/arithmetic-ops-pairs/generator.ts': 'export const generate = 1;',
-            'src/generators/other/spec.ts': 'export const spec = {};',
-            'src/generators/other/generator.ts': 'export const generate = 1;',
-            'src/visuals/views/operations-boxes/spec.ts': 'export const spec = {};',
-            'src/visuals/views/operations-boxes/view.tsx': 'export const render = 1;',
-            'src/visuals/views/operations-boxes/checklist.md': 'leaf checklist',
-            'src/visuals/views/checklist.md': 'central checklist',
-            'src/validation/vqa/system-instruction.md': 'VQA policy',
-            ...Object.fromEntries(REALIZED_LABEL_SOURCE_PATHS.map(path => [path, `// explicit policy input ${path}\n`]))
-        };
-        for (const [path, content] of Object.entries(files)) {
-            const absolute = resolve(projectRoot, path);
-            mkdirSync(resolve(absolute, '..'), {recursive: true});
-            writeFileSync(absolute, content);
-        }
-        const generators = ['arithmetic-ops-pairs', 'other'].map(generatorId => ({
-            generatorId, generalLabels: [Area.Addition], labels: [Area.Addition], schema: {}, spec: {},
-            problemType: 'ArithmeticPairProblem', module: {id: generatorId, relativePath: generatorId,
-                absolutePath: resolve(projectRoot, 'src/generators', generatorId), category: null}
-        }));
-        const view = {viewId: 'operations-boxes', generalLabels: [Ability.ProcedureExecution],
-            supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem',
-            spec: {viewId: 'operations-boxes', generalLabels: [Ability.ProcedureExecution]}, schema: {},
-            module: {id: 'operations-boxes', relativePath: 'operations-boxes',
-                absolutePath: resolve(projectRoot, 'src/visuals/views/operations-boxes'), category: null}};
-        const rows = generators.map(({generatorId}) => ({file_name: `${generatorId}.png`,
-            sample_key: `target#${generatorId}#operations-boxes#train#question#inst:0`, generator: generatorId,
-            view: 'operations-boxes', target_id: 'target', content_fingerprint: `content:${generatorId}`,
-            task_fingerprint: `task:${generatorId}`, labels: [Area.Addition, Ability.ProcedureExecution]}));
-        const snapshot = {...emptyDatasetSnapshot(datasetDir), rows: (split: string) => split === 'train' ? rows : [],
-            imageIdentity: () => ({sha256: 'same-pixel-bytes', bytes: 16})};
-        const options: Parameters<typeof buildDatasetManifest>[0] = {projectRoot, datasetDir,
-            specName: 'ccss', generatedSplits: ['train'], rendererEnvironment: 'canonical',
-            targets: [{id: 'target', labels: [Area.Addition, Ability.ProcedureExecution]}],
-            generators, views: [view], datasetSnapshot: snapshot};
-        return {projectRoot, rows, snapshot, options,
-            cleanup: () => rmSync(projectRoot, {recursive: true, force: true})};
-    }
-
-    it('tracks realized-label policy sources only on supported pairs without altering matches', () => {
-        const fixture = realizedFixture();
-        try {
-            const before = buildDatasetManifest(fixture.options);
-            const supportedKey = 'arithmetic-ops-pairs#operations-boxes';
-            const unsupportedKey = 'other#operations-boxes';
-            const source = 'src/lib/realized-labels.ts';
-            expect(before.dependency_graph.nodes[`pair:${supportedKey}`].dependencies).toContain(`source:${source}`);
-            expect(before.dependency_graph.nodes[`pair:${unsupportedKey}`].dependencies).not.toContain(`source:${source}`);
-            writeFileSync(resolve(fixture.projectRoot, source), '// changed annotation completion policy\n');
-            const after = buildDatasetManifest(fixture.options);
-            const delta = planDependencyDelta(before.dependency_graph, after.dependency_graph);
-            expect(delta.affected_nodes).toContain(`pair:${supportedKey}`);
-            expect(delta.affected_nodes).not.toContain(`pair:${unsupportedKey}`);
-            expect(after.entries[supportedKey].input_hash).not.toBe(before.entries[supportedKey].input_hash);
-            expect(after.entries[unsupportedKey]).toEqual(before.entries[unsupportedKey]);
-            expect(after.dependency_graph.matching_index).toEqual(before.dependency_graph.matching_index);
-        } finally {
-            fixture.cleanup();
-        }
-    });
-
-    it('tracks absent operand candidates before any sample emits them', () => {
-        const fixture = realizedFixture();
-        try {
-            const ontology = buildOntologySemanticSnapshot({provenance: resolveOntologyProvenance(fixture.projectRoot)});
-            const before = buildDatasetManifest({...fixture.options, semanticSnapshots: {ontology}});
-            const supportedPair = 'pair:arithmetic-ops-pairs#operations-boxes';
-            expect(before.dependency_graph.nodes[supportedPair].dependencies).toContain('ontology:SingleDigitDivisor');
-            expect(before.dependency_graph.nodes[supportedPair].dependencies).toContain('ontology-definition:SingleDigitDivisor');
-            expect(before.dependency_graph.nodes[supportedPair].dependencies).toContain('ontology:EquationSolving');
-            const changed = structuredClone(ontology);
-            changed.entities[Scope.SingleDigitDivisor].definition_hash = 'clarified-candidate-definition';
-            const after = buildDatasetManifest({...fixture.options, semanticSnapshots: {ontology: changed}});
-            const delta = planDependencyDelta(before.dependency_graph, after.dependency_graph);
-            expect(delta.affected_nodes).toContain(supportedPair);
-            expect(delta.affected_nodes).not.toContain('pair:other#operations-boxes');
-        } finally {
-            fixture.cleanup();
-        }
-    });
-
-    it('binds final annotations and receipts even when image bytes and task fingerprints are identical', () => {
-        const fixture = realizedFixture();
-        try {
-            const key = 'arithmetic-ops-pairs#operations-boxes';
-            const sampleKey = fixture.rows[0].sample_key;
-            const before = buildDatasetManifest(fixture.options);
-            const receipt: RealizedLabelReceipt = {version: 1,
-                policyHash: realizedLabelPolicyForPair('arithmetic-ops-pairs', 'operations-boxes')!, mode: 'question',
-                plannedLabels: fixture.rows[0].labels, addedLabels: [Scope.SingleDigitLargestOperand],
-                evidence: [{facet: 'operandDigits', labels: [Scope.SingleDigitLargestOperand], references: ['data.num1']}]};
-            const changedRows = [{...fixture.rows[0], labels: [...fixture.rows[0].labels, Scope.SingleDigitLargestOperand],
-                realized_labels: receipt}, fixture.rows[1]];
-            const after = buildDatasetManifest({...fixture.options, reuseImageIdentityFrom: before.dependency_graph,
-                datasetSnapshot: {...fixture.snapshot, rows: split => split === 'train' ? changedRows : []}});
-            expect(after.entries[key].content_hash).not.toBe(before.entries[key].content_hash);
-            expect(after.entries[key].input_hash).toBe(before.entries[key].input_hash);
-            expect(after.dependency_graph.nodes[`image:${sampleKey}`].input_hash)
-                .not.toBe(before.dependency_graph.nodes[`image:${sampleKey}`].input_hash);
-            expect(after.dependency_graph.nodes[`image:${sampleKey}`].output)
-                .toEqual(before.dependency_graph.nodes[`image:${sampleKey}`].output);
-            expect(after.entries['other#operations-boxes']).toEqual(before.entries['other#operations-boxes']);
-            expect(dependencyGraphVqaCacheKey(after.dependency_graph, sampleKey))
-                .not.toBe(dependencyGraphVqaCacheKey(before.dependency_graph, sampleKey));
-
-            const receiptOnlyRows = [{...changedRows[0], realized_labels: {...receipt,
-                evidence: [{...receipt.evidence[0], references: ['data.num2']}]}}, changedRows[1]];
-            const receiptOnly = buildDatasetManifest({...fixture.options, reuseImageIdentityFrom: after.dependency_graph,
-                datasetSnapshot: {...fixture.snapshot, rows: split => split === 'train' ? receiptOnlyRows : []}});
-            expect(receiptOnly.entries[key].content_hash).not.toBe(after.entries[key].content_hash);
-            expect(receiptOnly.dependency_graph.nodes[`image:${sampleKey}`].input_hash)
-                .not.toBe(after.dependency_graph.nodes[`image:${sampleKey}`].input_hash);
-            expect(dependencyGraphVqaCacheKey(receiptOnly.dependency_graph, sampleKey))
-                .toBe(dependencyGraphVqaCacheKey(after.dependency_graph, sampleKey));
-        } finally {
-            fixture.cleanup();
-        }
-    });
-
     it('regenerates retired-label rows without hiding artifacts or invalidating valid sibling pairs', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-retired-labels-'));
         const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');

@@ -1,26 +1,22 @@
-import {existsSync} from 'node:fs';
-import {isAbsolute, relative, resolve} from 'node:path';
+import {resolve} from 'node:path';
 import {digestFile, digestIdentity} from './content-identity.ts';
 import {resolveOntologyProvenance} from './coverage-identity.ts';
 import {datasetDirForSpec, datasetOutDir} from './dataset-paths.ts';
-import type {DatasetManifest} from './dataset-manifest.ts';
 import {readDatasetSnapshot, type DatasetSnapshot} from './dataset-store.ts';
-import {loadGeneratorCatalog, type SampleSplit} from './generation.ts';
 import {buildCompatibleModulePairIndex, matchTargets} from './matching.ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
 import {loadMatchingTargets} from './spec-validator.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
-import {assessLabelDependencyEvidence, hasLabelDependencyEvidenceAdapter} from './label-dependency-evidence.ts';
 import {buildLabelDependencyAudit, dependencyAuditResolvedAreas, dependencyAuditRowIssues, MAX_DEPENDENCY_AUDIT_SELECTIONS,
-    dependencyAuditSourceIssues, enumerateDependencyAuditSelections, replayDependencyAuditRow,
+    enumerateDependencyAuditSelections,
     type DependencyAuditCoverage, type DependencyAuditSubject} from './label-dependency-audit.ts';
 
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
 const tupleKey = (target: string, generator: string, view: string) => JSON.stringify([target, generator, view]);
 
-/** Check every stored annotation set; payload reconstruction is an optional diagnostic. */
+/** Check one immutable dataset's annotations without executing generators or inspecting payloads. */
 export async function inspectLabelDependencies(input: {
-    projectRoot: string; spec: string; maxSelections?: number; snapshot?: DatasetSnapshot; includeEvidence?: boolean;
+    projectRoot: string; spec: string; maxSelections?: number; snapshot?: DatasetSnapshot;
 }) {
     const {projectRoot: PROJECT_ROOT, spec, maxSelections: limit} = input;
     if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_DEPENDENCY_AUDIT_SELECTIONS)) {
@@ -30,7 +26,7 @@ export async function inspectLabelDependencies(input: {
     const evaluator = createLabelDependencyEvaluator();
     const ontology = resolveOntologyProvenance(PROJECT_ROOT);
     const sources = ['src/types/label-dependencies.ts', 'src/validation/label-dependencies.ts',
-        'src/lib/label-dependencies.ts', 'src/lib/label-dependency-evidence.ts',
+        'src/lib/label-dependencies.ts',
         'src/lib/label-dependency-audit.ts', 'src/lib/label-dependency-inspection.ts',
         'src/lib/label-dependency-coverage.ts', 'src/validation/label-dependency-coverage.ts',
         'src/scripts/audit-label-dependencies.ts'];
@@ -52,36 +48,14 @@ export async function inspectLabelDependencies(input: {
                 ...(selections.status === 'limit_exceeded' ? {reason: 'Complete admitted space exceeds the audit bound; no representative sample is reported as exhaustive.'} : {})});
             for (const selection of selections.selections) subjects.push({...ref, kind: 'selection',
                 id: `selection:${tupleKey(ref.targetId, ref.generatorId, ref.viewId)}:${selection.variantHash}`,
-                labels: selection.labels, planHash: tuple.plan.hash, variantHash: selection.variantHash,
-                evidence: input.includeEvidence ? assessLabelDependencyEvidence({...ref, mode: 'question'})
-                    : {adapter: 'not-requested', triggers: {}, facets: {}}});
+                labels: selection.labels, planHash: tuple.plan.hash, variantHash: selection.variantHash});
         } catch (error) {
             coverage.push({...ref, status: 'invalid_plan', total: 'unknown', checked: 0, reason: errorMessage(error)});
         }
     }
 
     const snapshot = input.snapshot ?? readDatasetSnapshot(datasetDir);
-    // Keep rows and their source graph bound to this single immutable generation.
-    const manifest = snapshot.buildManifest as DatasetManifest | null;
-    const samples = (['train', 'val'] as SampleSplit[]).flatMap(split => snapshot.rows(split).map(row => ({row, split})));
-    const neededGenerators = new Set(samples.filter(({row}) => input.includeEvidence && hasLabelDependencyEvidenceAdapter(row.generator, row.view))
-        .map(({row}) => row.generator));
-    const runtime = neededGenerators.size ? await loadGeneratorCatalog(undefined, undefined,
-        new Map(generators.filter(generator => neededGenerators.has(generator.generatorId))
-            .map(generator => [generator.generatorId, resolve(generator.module.absolutePath, 'spec.ts')]))) : [];
-    const runtimeById = new Map(runtime.map(entry => [entry.generatorId, entry.generator]));
-    const viewsById = new Map(views.map(view => [view.viewId, view]));
-    const sourceHashes = new Map<string, string | undefined>();
-    const sourceHash = (path: string): string | undefined => {
-        if (sourceHashes.has(path)) return sourceHashes.get(path);
-        const absolute = resolve(PROJECT_ROOT, path);
-        const local = relative(PROJECT_ROOT, absolute);
-        const hash = local.startsWith('..') || isAbsolute(local) || !existsSync(absolute)
-            ? undefined : digestFile(absolute).sha256;
-        sourceHashes.set(path, hash);
-        return hash;
-    };
-    const issuesByPair = new Map<string, string[]>();
+    const samples = (['train', 'val'] as const).flatMap(split => snapshot.rows(split).map(row => ({row, split})));
     for (const {row, split} of samples) {
         const labels = Array.isArray(row.labels) && row.labels.every(label => typeof label === 'string')
             ? (row.labels as string[]).map(label => label.includes('://') ? label : `http://edugraph.io/edu/${label}`) : [];
@@ -93,29 +67,11 @@ export async function inspectLabelDependencies(input: {
             if (!labels.includes(area)) issues.push(`Stored annotations omit a resolved Area: ${area}.`);
         }
         if (row.spec !== spec) issues.push('Stored row belongs to a different spec.');
-        let evidence = input.includeEvidence ? assessLabelDependencyEvidence({generatorId: row.generator, viewId: row.view,
-            mode: row.mode === 'solution' ? 'solution' : 'question'}) : {adapter: 'not-requested', triggers: {}, facets: {}};
-        let replay: DependencyAuditSubject['replay'] = input.includeEvidence ? 'unsupported' : 'not_requested';
-        const evidenceIssues: string[] = [];
         const current = tuplesByKey.get(tupleKey(String(row.target_id), row.generator, row.view));
-        if (input.includeEvidence && hasLabelDependencyEvidenceAdapter(row.generator, row.view)) {
-            const key = JSON.stringify([row.generator, row.view]);
-            let sourceIssues = issuesByPair.get(key);
-            if (!sourceIssues) {
-                sourceIssues = dependencyAuditSourceIssues({graph: manifest?.dependency_graph,
-                    generatorId: row.generator, viewId: row.view, sourceHash});
-                issuesByPair.set(key, sourceIssues);
-            }
-            const result = replayDependencyAuditRow({row, currentPlan: current?.plan,
-                generator: runtimeById.get(row.generator), viewSchema: viewsById.get(row.view)?.schema, sourceIssues});
-            evidence = result.evidence;
-            replay = result.status;
-            evidenceIssues.push(...result.issues);
-        }
         subjects.push({kind: 'sample', id: `sample:${split}:${row.sample_key}`, targetId: String(row.target_id ?? ''),
             generatorId: row.generator, viewId: row.view, labels, resolvedAreas: resolved.areas, planHash: current?.plan.hash,
             split, mode: String(row.mode ?? ''), fileName: row.file_name,
-            targetAssociations: row.target_associations ?? [], evidence, replay, issues, evidenceIssues});
+            targetAssociations: row.target_associations ?? [], issues});
     }
     const report = buildLabelDependencyAudit({spec, policyHash, ontology,
         dataset: {status: snapshot.generationId ? 'available' : 'unavailable', generationId: snapshot.generationId},

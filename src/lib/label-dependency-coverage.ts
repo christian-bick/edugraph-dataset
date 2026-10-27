@@ -1,4 +1,4 @@
-import type {LabelDependencyEvidence, LabelDependencyEvaluation} from '../types/label-dependencies.ts';
+import type {LabelDependencyEvaluation} from '../types/label-dependencies.ts';
 import {labelDependencyCoverage} from '../validation/label-dependency-coverage.ts';
 import {digestIdentity} from './content-identity.ts';
 import {ResolvedLabelContractError} from './label-contracts.ts';
@@ -22,10 +22,8 @@ export interface LabelDependencyCoverageInput {
     kind?: 'sample' | 'selection';
     labels: readonly string[];
     resolvedAreas?: readonly string[];
-    /** Metadata/annotation integrity, separate from optional evidence replay diagnostics. */
+    /** Metadata/annotation integrity from the stored row and selected plan. */
     issues?: readonly string[];
-    /** Optional evidence is diagnostic; it never determines annotation gate coverage. */
-    evidence?: LabelDependencyEvidence;
 }
 
 export interface LabelDependencyCoverageResult {
@@ -42,9 +40,8 @@ const facetKey = (ruleId: string, facet: string) => `${ruleId}/${facet}`;
 
 /** Checks the same annotation rules for every eligible sample, without inspecting its payload. */
 export function assessLabelDependencyCoverage(input: LabelDependencyCoverageInput): LabelDependencyCoverageResult {
-    // Re-evaluate the actual annotations: optional audit/evidence objects are not an
-    // authority for policy scope, activated rules, or dependency completeness.
-    const evaluation = evaluator.evaluate(input.labels, undefined, input.resolvedAreas);
+    // Supplied audit objects cannot override policy scope or dependency completeness.
+    const evaluation = evaluator.evaluate(input.labels, input.resolvedAreas);
     const completenessEnforced = input.kind !== 'selection';
     const result: LabelDependencyCoverageResult = {version: 2, coverageHash: LABEL_DEPENDENCY_COVERAGE_HASH,
         status: 'checked', completenessEnforced, checkedFacets: [], reportOnlyFacets: [], failures: []};
@@ -61,7 +58,7 @@ export function assessLabelDependencyCoverage(input: LabelDependencyCoverageInpu
         result.status = 'outside_policy_scope';
         return result;
     }
-    for (const conflict of evaluation.conflicts ?? []) fail('contradiction',
+    for (const conflict of evaluation.conflicts) fail('contradiction',
         `${conflict.ruleId}/${conflict.facet}: ${conflict.reason}`, {ruleId: conflict.ruleId, facet: conflict.facet});
     for (const assessment of evaluation.assessments) {
         const key = facetKey(assessment.ruleId, assessment.facet);
