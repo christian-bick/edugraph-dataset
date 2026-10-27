@@ -20,7 +20,12 @@ export const measurementWordProblemNumberKinds = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-word-problems',
-    generalLabels: [Scope.SingleStep, Scope.TwoOperands]
+    generalLabels: [
+        Scope.SingleStep,
+        Scope.TwoOperands,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
+    ]
 };
 
 export const MeasurementWordProblemsGeneratorSchema = {

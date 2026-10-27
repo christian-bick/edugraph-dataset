@@ -29,10 +29,12 @@ const operationCases = [
 describe('MeasurementWordProblemsGenerator spec integration', () => {
     const generator = new MeasurementWordProblemsGenerator();
 
-    it('declares one-step and two-operand invariants generally', () => {
+    it('declares one-step, two-operand, and positive-quantity invariants generally', () => {
         expect(spec.generalLabels).toEqual([
             Scope.SingleStep,
-            Scope.TwoOperands
+            Scope.TwoOperands,
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero
         ]);
     });
 
