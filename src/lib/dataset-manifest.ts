@@ -71,7 +71,7 @@ import {
 import {ModelSourceIndex} from './model-source-index.ts';
 
 export const DATASET_MANIFEST_SCHEMA_VERSION = 9;
-const GENERATION_PIPELINE_VERSION = 'label-variant-generation-v1';
+const GENERATION_PIPELINE_VERSION = 'owner-config-inferred-labels-v2';
 
 export interface DatasetManifestEntry {
     generator: string;
@@ -633,7 +633,12 @@ export function buildDatasetManifest(options: {
         ]));
         const id = nodeId('generator', generator.generatorId);
         const capabilityId = generatorCapabilityNodeId(generator.generatorId);
-        generatorHashes.set(generator.generatorId, sources.hash);
+        const inferredOutputs = radixSortUtf8([...new Set<string>(
+            (generator.spec?.inferredLabels ?? []).flatMap((rule: {produces: readonly string[]}) => rule.produces)
+        )]);
+        const annotationIdentity = inferredOutputs.length ? {inferred_outputs: inferredOutputs} : {};
+        generatorHashes.set(generator.generatorId, inferredOutputs.length
+            ? digestIdentity({source: sources.hash, ...annotationIdentity}) : sources.hash);
         generatorNodeIds.set(generator.generatorId, id);
         generatorCapabilityNodeIds.set(generator.generatorId, capabilityId);
         addNode(nodes, {
@@ -645,10 +650,12 @@ export function buildDatasetManifest(options: {
         addNode(nodes, {
             id,
             kind: 'generator-module',
-            input_hash: digestIdentity({id: generator.generatorId}),
+            input_hash: digestIdentity({id: generator.generatorId, ...annotationIdentity}),
+            // Inferred outputs describe artifacts and never expand matching capabilities.
             dependencies: [
                 capabilityId,
-                ...sources.ids
+                ...sources.ids,
+                ...ontologyDependencies(inferredOutputs)
             ]
         });
     }
@@ -665,7 +672,12 @@ export function buildDatasetManifest(options: {
         ]));
         const id = nodeId('view', view.viewId);
         const capabilityId = viewCapabilityNodeId(view.viewId);
-        viewHashes.set(view.viewId, sources.hash);
+        const inferredOutputs = radixSortUtf8([...new Set<string>(
+            (view.spec.inferredLabels ?? []).flatMap(rule => rule.produces)
+        )]);
+        const annotationIdentity = inferredOutputs.length ? {inferred_outputs: inferredOutputs} : {};
+        viewHashes.set(view.viewId, inferredOutputs.length
+            ? digestIdentity({source: sources.hash, ...annotationIdentity}) : sources.hash);
         viewNodeIds.set(view.viewId, id);
         viewCapabilityNodeIds.set(view.viewId, capabilityId);
         addNode(nodes, {
@@ -680,8 +692,8 @@ export function buildDatasetManifest(options: {
         addNode(nodes, {
             id,
             kind: 'view-module',
-            input_hash: digestIdentity({id: view.viewId}),
-            dependencies: [capabilityId, ...sources.ids]
+            input_hash: digestIdentity({id: view.viewId, ...annotationIdentity}),
+            dependencies: [capabilityId, ...sources.ids, ...ontologyDependencies(inferredOutputs)]
         });
         const checklistPaths = [
             resolve(projectRoot, 'src', 'visuals', 'views', 'checklist.md'),

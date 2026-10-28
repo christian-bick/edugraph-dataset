@@ -94,6 +94,9 @@ export function summarizeLabelDependencyCoverage(input: {
     for (const coverage of [...input.selection_coverage].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))) {
         if (coverage.status !== 'complete') failures.push({subject: `selection:${JSON.stringify([coverage.targetId, coverage.generatorId, coverage.viewId])}`,
             code: 'enumeration', message: coverage.reason ?? `Selection enumeration is ${coverage.status}.`});
+        if (coverage.annotationResolution && coverage.annotationResolution.status !== 'complete') failures.push({
+            subject: `selection:${JSON.stringify([coverage.targetId, coverage.generatorId, coverage.viewId])}`,
+            code: 'enumeration', message: `Configuration inference coverage is ${coverage.annotationResolution.status}; potential outputs cannot establish source readiness.`});
     }
     const counts = {checked: 0, samples_checked: 0, selections_checked: 0, outside_policy_scope: 0, invalid_context: 0,
         checked_facets: 0, report_only_facets: 0, failures: failures.length};

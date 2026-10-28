@@ -1,6 +1,6 @@
 import type {CompetencyTarget} from '../types/ml-engine.ts';
-import type {GeneratorSpec} from '../types/generator-spec.ts';
-import type {ViewSpec} from '../types/view-spec.ts';
+import type {AnyGeneratorSpec} from '../types/generator-spec.ts';
+import type {AnyViewSpec} from '../types/view-spec.ts';
 import type {ConfigSchema} from '../types/schema.ts';
 import type {CompatibilityPlanningResult} from '../types/compatibility.ts';
 import {planCompatibility} from './compatibility.ts';
@@ -10,14 +10,14 @@ export interface GeneratorChoiceModel {
     generatorId: string;
     generalLabels: readonly string[];
     schema?: ConfigSchema;
-    spec: GeneratorSpec;
+    spec: AnyGeneratorSpec;
 }
 
 export interface ViewChoiceModel {
     viewId: string;
     generalLabels: readonly string[];
     schema: ConfigSchema;
-    spec: ViewSpec;
+    spec: AnyViewSpec;
 }
 
 /**

@@ -67,7 +67,7 @@ async function main() {
         }
 
         for (const [generatorId, viewIds] of viewsByGenerator.entries()) {
-            const generator = generatorCatalog.find(entry => entry.generatorId === generatorId)!.generator;
+            const generatorEntry = generatorCatalog.find(entry => entry.generatorId === generatorId)!;
             generatorStats[generatorId].targetMatches++;
             generatorStats[generatorId].viewPairs += viewIds.length;
 
@@ -85,8 +85,10 @@ async function main() {
                 try {
                     const tuple = tuples.find(tuple => tuple.generatorId === generatorId && tuple.viewId === viewId)!;
                     const { stub, attempt } = generatePlannedSampleWithRetry({
-                        generator,
+                        generator: generatorEntry.generator,
+                        generatorSpec: generatorEntry.spec,
                         viewSchema: viewCatalog.find(view => view.viewId === viewId)!.schema,
+                        viewSpec: viewCatalog.find(view => view.viewId === viewId)!.spec,
                         plan: tuple.plan,
                         sampleKey,
                         maxAttempts: 10

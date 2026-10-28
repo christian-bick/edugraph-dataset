@@ -2,6 +2,8 @@ import { ConfigSchema, ConfigFromSchema, ResolvedConfig } from '../types/schema.
 import { capabilitySatisfies } from './ontology.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
+import type {ModuleSpec, AnyModuleSpec} from '../types/module-spec.ts';
+import {resolveInferredLabels} from './inferred-labels.ts';
 export {extractSchemaLabels} from '../types/schema.ts';
 
 export type SchemaResolutionContractIssue = {
@@ -188,7 +190,8 @@ function assertSchemaResolutionContract(schema: ConfigSchema): void {
 
 export function extractConfig<T extends ConfigSchema>(
     schema: T,
-    competencyLabels: string[]
+    competencyLabels: string[],
+    inference?: {spec?: ModuleSpec<T>; owner: 'generator' | 'view'}
 ): ResolvedConfig<ConfigFromSchema<T>> {
     assertSchemaResolutionContract(schema);
     const config: any = {};
@@ -288,17 +291,20 @@ export function extractConfig<T extends ConfigSchema>(
         }
     }
 
-    return { config, resolvedLabels: Array.from(resolvedLabels) };
+    return {config, resolvedLabels: inference
+        ? resolveInferredLabels({schema, config, labels: Array.from(resolvedLabels), ...inference})
+        : Array.from(resolvedLabels)};
 }
 
 export function generateWithLabels<TData = any, TConfig = any>(
     generator: ProblemGenerator<TData, TConfig>,
-    labels: string[]
+    labels: string[],
+    spec: AnyModuleSpec | undefined = generator.spec
 ): ResolvedProblemStub<TData> | null {
     if (!generator.schema) {
         throw new Error('Generator is missing a schema!');
     }
-    const { config, resolvedLabels } = extractConfig(generator.schema, labels);
+    const { config, resolvedLabels } = extractConfig(generator.schema, labels, {spec, owner: 'generator'});
     const problem = generator.generate(config as TConfig);
     return problem ? {...problem, labels: Array.from(new Set(resolvedLabels))} : null;
 }

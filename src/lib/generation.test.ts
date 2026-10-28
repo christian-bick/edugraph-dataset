@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { Ability, Area, Scope } from 'edugraph-ts';
@@ -554,6 +554,19 @@ describe('computeContentFingerprint', () => {
 });
 
 describe('configured task identity', () => {
+    it('resolves typed view inference without changing configuration or continuation', () => {
+        const schema = {layout: ['row'] as const};
+        const spec = {viewId: 'inferred-view', generalLabels: [], inferredLabels: [{
+            produces: [Scope.ArabicNumerals], infer: (config: Readonly<{layout: 'row'}>) => {
+                expect(config.layout).toBe('row'); return [Scope.ArabicNumerals];
+            }
+        }]};
+        const plain = resolveViewConfigWithLabels(schema, [], 17);
+        const inferred = resolveViewConfigWithLabels(schema, [], 17, spec);
+        expect(inferred.config).toEqual(plain.config);
+        expect(inferred.resolvedLabels).toEqual([...plain.resolvedLabels, Scope.ArabicNumerals]);
+        expect(resolveViewConfig(schema, [], 17, spec)).toEqual(plain.config);
+    });
     it('distinguishes the same data rendered with different resolved configurations', () => {
         const data = { parts: [1, 2, 3] };
         expect(computeTaskFingerprint(data, { prompt: 'vocabulary' }))
@@ -589,6 +602,20 @@ describe('configured task identity', () => {
 });
 
 describe('resolved pair capabilities', () => {
+    it('retains already resolved generator inference and invokes only the view inference', () => {
+        const schema = {layout: ['row'] as const};
+        const generatorInfer = vi.fn(() => {throw new Error('generator inference must not repeat');});
+        const viewInfer = vi.fn(() => [Scope.ArabicNumerals]);
+        const result = resolvePairCapabilities({targetLabels: [], generatorGeneralLabels: [],
+            generatorResolvedLabels: [Scope.IntegerNumbers],
+            generatorSpec: {generalLabels: [], inferredLabels: [{produces: [Scope.IntegerNumbers], infer: generatorInfer}]},
+            viewGeneralLabels: [], viewSchema: schema,
+            viewSpec: {viewId: 'view', generalLabels: [], inferredLabels: [{produces: [Scope.ArabicNumerals], infer: viewInfer}]},
+            seed: 11});
+        expect(result.labels).toEqual([Scope.IntegerNumbers, Scope.ArabicNumerals, 'row'].sort());
+        expect(generatorInfer).not.toHaveBeenCalled();
+        expect(viewInfer).toHaveBeenCalledOnce();
+    });
     it('emits only invariant and resolved positive capabilities from both roles', () => {
         const result = resolvePairCapabilities({
             targetLabels: ['TargetOnly', 'ViewChoice'],

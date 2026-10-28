@@ -6,6 +6,7 @@ import type {GeneratorCatalogEntry, ViewCatalogEntry} from './generation.ts';
 import {matchTargets} from './matching.ts';
 import {CompatibilityContractError} from './compatibility.ts';
 import {LabelDependencyCoverageError} from './label-dependency-coverage.ts';
+import {InferredLabelContractError} from './inferred-labels.ts';
 
 function fixture(targets: readonly {id: string; labels: string[]}[],
     generate: () => {data: {value: number}}) {
@@ -26,6 +27,45 @@ function fixture(targets: readonly {id: string; labels: string[]}[],
 }
 
 describe('module sample orchestration', () => {
+    it('threads both catalog specs into finalized annotations and prepared views without promoting them into matching', () => {
+        const base = fixture([], () => ({data: {value: 1}}));
+        let count = 0;
+        const generatorLabels = [Area.Addition, Scope.NumbersWithoutZero, Scope.NumbersWithoutNegatives,
+            Scope.TwoOperands, Scope.SingleDigitLargestOperand];
+        const entry: GeneratorCatalogEntry = {...base.entry, generalLabels: generatorLabels, labels: generatorLabels,
+            generator: {type: 'arithmetic', schema: {}, generate: () => {
+                const num1 = ++count; return {data: {operation: 'addition', num1, num2: 3, answer: num1 + 3}};
+            }}, spec: {generatorId: base.entry.generatorId, generalLabels: generatorLabels, inferredLabels: [{
+                produces: [Scope.IntegerNumbers], infer: () => [Scope.IntegerNumbers]
+            }]}};
+        const view: ViewCatalogEntry = {...base.view, spec: {...base.view.spec, inferredLabels: [{
+            produces: [Scope.ArabicNumerals], infer: () => [Scope.ArabicNumerals]
+        }]}};
+        const target = {id: 'inferred', labels: [Area.Addition, Ability.ProcedureExecution]};
+        expect(matchTargets([{...target, labels: [...target.labels, Scope.IntegerNumbers]}], [entry], [view]).tuples).toEqual([]);
+        const tuples = matchTargets([target], [entry], [view]).tuples;
+        const samples = generateModuleSamples(entry, new Map([[view.viewId, view]]), tuples, 'train', new Map(), new Map());
+        expect(samples).toHaveLength(2);
+        for (const sample of samples) {
+            expect(sample.problem.labels).toEqual([...generatorLabels, Ability.ProcedureExecution,
+                Scope.IntegerNumbers, Scope.ArabicNumerals].sort());
+            expect(sample.preparedView.labels).toEqual([Scope.ArabicNumerals]);
+        }
+        expect(count).toBe(2);
+    });
+
+    it('does not retry or reach solution fallback after a view inference contract fails', () => {
+        const generate = vi.fn(() => ({data: {value: 1}}));
+        const base = fixture([], generate);
+        const infer = vi.fn(() => ['undeclared']);
+        const view = {...base.view, spec: {...base.view.spec, inferredLabels: [{produces: [Scope.ArabicNumerals], infer}]}};
+        const tuples = matchTargets([{id: 'broken-inference', labels: [Area.Addition]}], [base.entry], [view]).tuples;
+        expect(() => generateModuleSamples(base.entry, new Map([[view.viewId, view]]), tuples,
+            'train', new Map(), new Map())).toThrow(InferredLabelContractError);
+        expect(generate).not.toHaveBeenCalled();
+        expect(infer).toHaveBeenCalledOnce();
+    });
+
     it('fails an unreviewed producer annotation omission before retries, solution fallback or duplicate reuse', () => {
         const base = fixture([], () => ({data: {value: 1}}));
         const generate = vi.fn(() => ({data: {operation: 'addition', num1: 2, num2: 3, answer: 5}}));

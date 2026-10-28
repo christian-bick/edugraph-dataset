@@ -9,7 +9,7 @@ import {extractSchemaLabels} from './utils.ts';
 import {radixSortUtf8, SourceContentIndex} from './content-identity.ts';
 import {ModelSourceIndex} from './model-source-index.ts';
 import type {ConfigSchema} from '../types/schema.ts';
-import type {ViewSpec} from '../types/view-spec.ts';
+import type {AnyViewSpec} from '../types/view-spec.ts';
 import type {GeneratorMatchInfo, ViewMatchInfo} from './matching.ts';
 import type {WorkCounters} from './work-counters.ts';
 
@@ -40,7 +40,7 @@ export interface GeneratorModelDescriptor extends GeneratorMatchInfo, Partial<Ma
 
 export interface ViewModelDescriptor extends ViewMatchInfo, Partial<MatchingSourceIdentity> {
     module: LeafModule;
-    spec: ViewSpec;
+    spec: AnyViewSpec;
     schema: ConfigSchema;
     /** Invariant positive capabilities, kept separate from schema-supported alternatives. */
     generalLabels: string[];
@@ -179,7 +179,7 @@ export async function loadViewModelCatalog(
         const specPath = resolve(module.absolutePath, 'spec.ts');
         const matchingSources = sourceIdentity(specPath);
         const specModule = await import(pathToFileURL(specPath).href);
-        const spec: ViewSpec = specModule.spec;
+        const spec: AnyViewSpec = specModule.spec;
         const schemaName = moduleSchemaExportName(module.id, 'view');
         const schema: ConfigSchema = specModule[schemaName] ?? {};
         const generalLabels = [...new Set(spec.generalLabels || [])];

@@ -7,6 +7,8 @@ import {buildCompatibleModulePairIndex, matchTargets} from './matching.ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
 import {loadMatchingTargets} from './spec-validator.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
+import {Area} from 'edugraph-ts/generated';
+import {resolveDependencyAuditAnnotation} from './label-dependency-annotation-resolution.ts';
 import {buildLabelDependencyAudit, dependencyAuditResolvedAreas, dependencyAuditRowIssues, MAX_DEPENDENCY_AUDIT_SELECTIONS,
     enumerateDependencyAuditSelections,
     type DependencyAuditCoverage, type DependencyAuditSubject} from './label-dependency-audit.ts';
@@ -26,7 +28,11 @@ export async function inspectLabelDependencies(input: {
     const evaluator = createLabelDependencyEvaluator();
     const ontology = resolveOntologyProvenance(PROJECT_ROOT);
     const sources = ['src/types/label-dependencies.ts', 'src/validation/label-dependencies.ts',
-        'src/lib/label-dependencies.ts',
+        'src/lib/label-dependencies.ts', 'src/types/module-spec.ts', 'src/lib/inferred-labels.ts',
+        'src/lib/static-resolvers.ts', 'src/lib/static-schema-resolution.ts',
+        'src/lib/label-dependency-annotation-resolution.ts',
+        'src/lib/resolvers.ts', 'src/lib/ontology.ts', 'src/lib/schema-choices.ts', 'src/lib/random.ts',
+        'src/lib/label-contracts.ts', 'src/lib/spec-ownership.ts',
         'src/lib/label-dependency-audit.ts', 'src/lib/label-dependency-inspection.ts',
         'src/lib/label-dependency-coverage.ts', 'src/validation/label-dependency-coverage.ts',
         'src/scripts/audit-label-dependencies.ts'];
@@ -37,6 +43,8 @@ export async function inspectLabelDependencies(input: {
     ]);
     const pairIndex = buildCompatibleModulePairIndex(generators, views);
     const tuples = matchTargets(targets, generators, views, {pairIndex}).tuples;
+    const generatorsById = new Map(generators.map(model => [model.generatorId, model]));
+    const viewsById = new Map(views.map(model => [model.viewId, model]));
     const tuplesByKey = new Map(tuples.map(tuple => [tupleKey(tuple.target.id, tuple.generatorId, tuple.viewId), tuple]));
     const subjects: DependencyAuditSubject[] = [];
     const coverage: DependencyAuditCoverage[] = [];
@@ -44,11 +52,20 @@ export async function inspectLabelDependencies(input: {
         const ref = {targetId: tuple.target.id, generatorId: tuple.generatorId, viewId: tuple.viewId};
         try {
             const selections = enumerateDependencyAuditSelections(tuple.plan, limit);
+            const annotationCoverage = {status: 'complete' as 'complete' | 'pending' | 'invalid', exhaustive: 0, pending: 0, invalid: 0};
+            for (const selection of selections.selections) {
+                const id = `selection:${tupleKey(ref.targetId, ref.generatorId, ref.viewId)}:${selection.variantHash}`;
+                const annotation = resolveDependencyAuditAnnotation({id, plan: tuple.plan, selection,
+                    generator: generatorsById.get(ref.generatorId), view: viewsById.get(ref.viewId)});
+                const status = annotation.annotationResolution.status;
+                if (status !== 'not_required') annotationCoverage[status]++;
+                subjects.push({...ref, kind: 'selection', id, ...annotation,
+                    planHash: tuple.plan.hash, variantHash: selection.variantHash});
+            }
+            annotationCoverage.status = annotationCoverage.invalid ? 'invalid' : annotationCoverage.pending ? 'pending' : 'complete';
             coverage.push({...ref, status: selections.status, total: selections.total, checked: selections.selections.length,
+                annotationResolution: annotationCoverage,
                 ...(selections.status === 'limit_exceeded' ? {reason: 'Complete admitted space exceeds the audit bound; no representative sample is reported as exhaustive.'} : {})});
-            for (const selection of selections.selections) subjects.push({...ref, kind: 'selection',
-                id: `selection:${tupleKey(ref.targetId, ref.generatorId, ref.viewId)}:${selection.variantHash}`,
-                labels: selection.labels, planHash: tuple.plan.hash, variantHash: selection.variantHash});
         } catch (error) {
             coverage.push({...ref, status: 'invalid_plan', total: 'unknown', checked: 0, reason: errorMessage(error)});
         }
@@ -68,8 +85,9 @@ export async function inspectLabelDependencies(input: {
         }
         if (row.spec !== spec) issues.push('Stored row belongs to a different spec.');
         const current = tuplesByKey.get(tupleKey(String(row.target_id), row.generator, row.view));
+        const resolvedAreas = [...new Set([...resolved.areas, ...labels.filter(label => Object.values(Area).includes(label as Area))])].sort();
         subjects.push({kind: 'sample', id: `sample:${split}:${row.sample_key}`, targetId: String(row.target_id ?? ''),
-            generatorId: row.generator, viewId: row.view, labels, resolvedAreas: resolved.areas, planHash: current?.plan.hash,
+            generatorId: row.generator, viewId: row.view, labels, resolvedAreas, planHash: current?.plan.hash,
             split, mode: String(row.mode ?? ''), fileName: row.file_name,
             targetAssociations: row.target_associations ?? [], issues});
     }

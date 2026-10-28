@@ -643,6 +643,40 @@ restrictions remain enforced. An earlier full run overlapped guard corrections; 
 above passes. Evidence is in `temp/inferred-labels/` and `temp/label-inference-static/`.
 Unrelated working-tree content and the stored dataset remain unchanged.
 
+### Configuration inference checkpoint 2 — resolution, identity and audit (2026-10-29)
+
+Both planned owners resolve their full configurations before independent inference. Direct
+generator/view helpers, catalog-loaded instances, orchestration, diagnostics and public replay
+carry the owning specs. Cross-role declarations are checked before planned resolution; returned
+labels reach the existing combined annotation gate. Prepared browser configuration remains the
+rendering input. No inferred output supplies matching capability or participation.
+
+The audit separately records original declarations and `not_required`, `exhaustive`, `pending`
+or `invalid` annotation resolution. Only actual output from reviewed complete singleton outcomes
+can close a source finding. Unknown/custom resolver outcomes remain pending without speculative
+execution, and block readiness. Source/import changes and declared output ontology semantics
+invalidate owner artifacts. The pipeline epoch changes; at source readiness an authoritative
+`--rebuild-graph` remains required before regeneration/VQA acceptance.
+
+This machinery checkpoint adds no module inference declarations: **391 source gaps remain**.
+The full catalog comparison preserves **1,013 targets, 1,195 matches and 1,263 selections**.
+All **2,526 question/solution probes** and **2,808 stored-origin draws** have identical resolved
+configurations, mathematical payloads, labels, view configuration, fingerprints and random
+continuation. Stored annotations and the dataset pointer remain unchanged. The fresh audit
+preserves every previous subject evaluation, adding only explicit inference coverage metadata.
+
+Independent integration review found no unresolved runtime/audit issues. Focused tests cover
+pending versus exhaustive proof, public replay and question-to-solution reuse, source/helper
+identity invalidation, ontology output dependencies, ownership and no matching promotion.
+The complete coverage run passes **845 suites / 6,626 tests**, with generator thresholds met;
+type, spec ownership and documentation checks pass. A subsequent API review found and corrected
+strict-function-variance incompatibility at heterogeneous catalog/matching type boundaries.
+Authored specs retain owner-schema typing; the boundary aliases change no matching behavior.
+The boundary correction passes **5 focused suites / 48 tests** and type checking; its five
+production files transpile to unchanged JavaScript.
+Verification artifacts are in `temp/inferred-labels/`, `temp/label-inference-runtime/` and
+`temp/label-dependency-inference-preparation/`.
+
 ## Decision queue after autonomous declarations
 
 No declaration batch remains untriaged. Six cases now have explicit implementation authorization;

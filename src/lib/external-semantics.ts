@@ -167,6 +167,10 @@ export async function resolveOntologySemanticUsage(
     const labels = [
         ...generators.flatMap(generatorMatchingOntologyLabels),
         ...views.flatMap(viewMatchingOntologyLabels),
+        // Artifact-only declarations are semantic dependencies, not matching capabilities.
+        ...generators.flatMap(generator => (generator.spec?.inferredLabels ?? [])
+            .flatMap((rule: {produces: readonly string[]}) => rule.produces)),
+        ...views.flatMap(view => (view.spec.inferredLabels ?? []).flatMap(rule => rule.produces)),
         ...targets.flatMap(target => target.labels)
     ];
     const snapshot = withOntologySemanticUsage(

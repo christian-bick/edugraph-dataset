@@ -1,11 +1,13 @@
 import type {GenerationPlan, GenerationSelectionReceipt} from '../types/compatibility.ts';
 import type {ConfigSchema} from '../types/schema.ts';
+import type {AnyModuleSpec} from '../types/module-spec.ts';
 import type {ProblemGenerator, ResolvedProblemStub} from '../types/ml-engine.ts';
 import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
 import {CompatibilityContractError, createGenerationSelectionReceipt, sampleGenerationPlan, validateGenerationPlan,
     validateGenerationSelectionReceipt} from './compatibility.ts';
 import {resolveSchemaChoices, type SchemaChoiceSelection} from './schema-choices.ts';
 import {getRandomState, random, setRandomState, setSeed} from './random.ts';
+import {assertInferredPairOwnership, resolveInferredLabels} from './inferred-labels.ts';
 
 export interface PlannedGenerationDraw {
     stub: ResolvedProblemStub | null;
@@ -32,6 +34,8 @@ export function bindingsForSelection(plan: GenerationPlan, selection: Generation
 export function resolvePlannedConfigurations(input: {
     generatorSchema: ConfigSchema;
     viewSchema: ConfigSchema;
+    generatorSpec?: AnyModuleSpec;
+    viewSpec?: AnyModuleSpec;
     plan: GenerationPlan;
     sampleKey: string;
     attempt: number;
@@ -40,6 +44,9 @@ export function resolvePlannedConfigurations(input: {
 }) {
     const {generatorSchema, viewSchema, sampleKey, attempt, seed} = input;
     const plan = validateGenerationPlan(input.plan);
+    const generatorSpec = input.generatorSpec ?? {generalLabels: plan.generatorLabels};
+    const viewSpec = input.viewSpec ?? {generalLabels: plan.viewLabels};
+    assertInferredPairOwnership({generatorSpec, viewSpec, generatorSchema, viewSchema});
     const keyParts = sampleKey.split('#');
     if (keyParts.length !== 6 || keyParts[0] !== plan.identity.targetId
         || keyParts[1] !== plan.identity.generatorId || keyParts[2] !== plan.identity.viewId) {
@@ -60,19 +67,26 @@ export function resolvePlannedConfigurations(input: {
     const bindings = bindingsForSelection(plan, selection);
     setSeed(seed);
     const viewConfig = resolveSchemaChoices(viewSchema, plan.targetLabels, bindings.view);
-    const view: PreparedViewConfiguration = {
-        version: 1, viewId: plan.identity.viewId, planHash: plan.hash, variantHash: selection.variantHash,
-        config: viewConfig.config, labels: viewConfig.resolvedLabels, randomState: getRandomState()
-    };
+    const viewRandomState = getRandomState();
     setSeed(seed);
     const generatorConfig = resolveSchemaChoices(generatorSchema, plan.targetLabels, bindings.generator);
+    const generatorRandomState = getRandomState();
+    // Both complete configurations exist before either owner infers annotations.
+    const generatorLabels = resolveInferredLabels({spec: generatorSpec, schema: generatorSchema,
+        config: generatorConfig.config, labels: generatorConfig.resolvedLabels, owner: 'generator'});
+    const viewLabels = resolveInferredLabels({spec: viewSpec, schema: viewSchema,
+        config: viewConfig.config, labels: viewConfig.resolvedLabels, owner: 'view'});
+    const view: PreparedViewConfiguration = {
+        version: 1, viewId: plan.identity.viewId, planHash: plan.hash, variantHash: selection.variantHash,
+        config: viewConfig.config, labels: viewLabels, randomState: viewRandomState
+    };
     return {
         generatorConfig: generatorConfig.config,
-        generatorLabels: generatorConfig.resolvedLabels,
-        generatorRandomState: getRandomState(),
+        generatorLabels,
+        generatorRandomState,
         view,
-        labels: [...new Set([...plan.generatorLabels, ...generatorConfig.resolvedLabels,
-            ...plan.viewLabels, ...viewConfig.resolvedLabels])].sort(),
+        labels: [...new Set([...plan.generatorLabels, ...generatorLabels,
+            ...plan.viewLabels, ...viewLabels])].sort(),
         replay: {version: 1 as const, sampleKey, attempt, seed, selection}
     };
 }
@@ -80,13 +94,16 @@ export function resolvePlannedConfigurations(input: {
 export function generatePlannedDraw(input: {
     generator: ProblemGenerator;
     viewSchema: ConfigSchema;
+    generatorSpec?: AnyModuleSpec;
+    viewSpec?: AnyModuleSpec;
     plan: GenerationPlan;
     sampleKey: string;
     attempt: number;
     seed: number;
     replay?: GenerationReplay;
 }): PlannedGenerationDraw {
-    const resolved = resolvePlannedConfigurations({...input, generatorSchema: input.generator.schema});
+    const resolved = resolvePlannedConfigurations({...input, generatorSchema: input.generator.schema,
+        generatorSpec: input.generatorSpec ?? input.generator.spec});
     setRandomState(resolved.generatorRandomState);
     const stub = input.generator.generate(resolved.generatorConfig);
     return {stub: stub ? {...stub, labels: resolved.generatorLabels} : null,

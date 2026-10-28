@@ -13,6 +13,8 @@ import {createDependencyGraphSnapshot, planDependencyDelta} from './dependency-p
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {Area, Scope, Ability, bundledContext} from 'edugraph-ts/generated';
 import {computeLabelContextHash, resolveVqaLabelDefinitions} from './vqa-cache.ts';
+import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
+import {matchTargets} from './matching.ts';
 
 const schema = bundledContext.statements.filter(statement => statement.sourceKind === 'schema');
 const fact = (subject: string, predicate: string, object: string): OntologyStatement =>
@@ -30,6 +32,53 @@ const ontologyProvenance = (version: string): OntologyProvenance => ({
 });
 
 describe('external semantic deltas', () => {
+    it('discovers inference output ontology records without running inference or advertising capabilities', async () => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-semantic-inference-'));
+        const dependency = 'https://example.test/ontology-v1.tgz';
+        const files = {
+            'package.json': JSON.stringify({dependencies: {'edugraph-ts': dependency}}),
+            'package-lock.json': JSON.stringify({packages: {'node_modules/edugraph-ts': {
+                version: '1.0.0', resolved: dependency, integrity: 'sha512-v1'}}}),
+            'src/generators/demo/spec.ts': `
+                export const DemoGeneratorSchema = {};
+                export const spec = {generatorId: 'demo', generalLabels: [${JSON.stringify(Area.Addition)}], inferredLabels: [{
+                    produces: [${JSON.stringify(Scope.MultipleDigitLargestOperand)}],
+                    infer: () => {throw new Error('Inference must not run during ontology discovery');}
+                }]};
+            `,
+            'src/generators/demo/generator.ts': 'export class DemoGenerator implements ProblemGenerator<ArithmeticPairProblem> {}',
+            'src/visuals/views/demo-view/spec.ts': `
+                export const DemoViewViewSchema = {};
+                export const spec = {viewId: 'demo-view', generalLabels: [${JSON.stringify(Ability.ProcedureExecution)}], inferredLabels: [{
+                    produces: [${JSON.stringify(Scope.NumbersWithZero)}],
+                    infer: () => {throw new Error('Inference must not run during ontology discovery');}
+                }]};
+            `,
+            'src/visuals/views/demo-view/view.tsx': 'throw new Error("renderer must not be loaded");',
+            'src/spec/demo.ts': `export const spec = [{id: 'target', labels: [${JSON.stringify(Area.Addition)}, ${JSON.stringify(Ability.ProcedureExecution)}]}];`
+        };
+        try {
+            for (const [path, content] of Object.entries(files)) {
+                mkdirSync(dirname(resolve(projectRoot, path)), {recursive: true});
+                writeFileSync(resolve(projectRoot, path), content);
+            }
+            const {usage} = await resolveOntologySemanticUsage(projectRoot, 'demo');
+            expect(usage.roots).toEqual(expect.arrayContaining([Scope.MultipleDigitLargestOperand, Scope.NumbersWithZero]));
+            const generators = await loadGeneratorModelCatalog(resolve(projectRoot, 'src/generators'), undefined, undefined, {sourceRoot: projectRoot});
+            const loadedViews = await loadViewModelCatalog(resolve(projectRoot, 'src/visuals/views'), undefined, undefined, {sourceRoot: projectRoot});
+            const views = loadedViews.map(view => ({...view, problemType: generators[0].problemType}));
+            expect(generators[0].labels).not.toContain(Scope.MultipleDigitLargestOperand);
+            expect(views[0].supportedLabels).not.toContain(Scope.NumbersWithZero);
+            const target = {id: 'target', labels: [Area.Addition, Ability.ProcedureExecution]};
+            expect(matchTargets([target], generators, views).tuples).toHaveLength(1);
+            for (const label of [Scope.MultipleDigitLargestOperand, Scope.NumbersWithZero]) {
+                expect(matchTargets([{...target, labels: [...target.labels, label]}], generators, views).tuples).toEqual([]);
+            }
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
     it.each(['label', 'comment'])('invalidates VQA alone when an ontology %s changes', annotation => {
         const iri = 'http://edugraph.io/edu/Example';
         const context = (text: string) => createOntologyContext([

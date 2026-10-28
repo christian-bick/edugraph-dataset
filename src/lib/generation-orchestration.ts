@@ -149,7 +149,9 @@ export function generateModuleSamples(
 
         const question = generatePlannedSampleWithRetry({
                 generator: genEntry.generator,
+                generatorSpec: genEntry.spec,
                 viewSchema: viewEntry.schema,
+                viewSpec: viewEntry.spec,
                 plan: tuple.plan,
                 sampleKey: questionKey,
                 maxAttempts: MAX_ATTEMPTS,
@@ -197,7 +199,9 @@ export function generateModuleSamples(
         const solutionKey = computeSampleKey(solutionIdentity);
         const solution = generatePlannedSampleWithRetry({
                 generator: genEntry.generator,
+                generatorSpec: genEntry.spec,
                 viewSchema: viewEntry.schema,
+                viewSpec: viewEntry.spec,
                 plan: tuple.plan,
                 sampleKey: solutionKey,
                 maxAttempts: MAX_ATTEMPTS,

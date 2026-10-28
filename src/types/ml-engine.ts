@@ -83,6 +83,8 @@ export interface ProblemGenerator<TData = any, TConfig = any> {
     type: AbstractProblem['type'];
     /** The configuration schema exposed to the dataset orchestrator */
     schema: any;
+    /** Authored metadata, bound by catalogs without changing mathematical generation. */
+    readonly spec?: import('./module-spec.ts').AnyModuleSpec;
     /** 
      * Generates a single unique abstract problem based on the provided configuration.
      * Returns null if a valid problem could not be generated (triggers a retry).

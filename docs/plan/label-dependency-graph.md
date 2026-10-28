@@ -41,6 +41,33 @@ Checkpoint 1 introduces the contract and guards without adding module inference 
 or connecting them to production generation yet. Validation and subsequent checkpoint results
 are recorded in the progress ledger as they complete.
 
+Checkpoint 2 connects both planned and direct configuration resolution. Each owning callback
+runs before mathematical generation, using the same read-only snapshot as its sibling callbacks.
+The resulting annotations are checked by the existing shared contract and dependency gate.
+Replay resolves the same configuration and recomputes these annotations; the browser consumes
+the prepared configuration without rerunning inference.
+
+The static audit keeps the original `declaredLabels` alongside `annotationResolution`:
+
+| State | Dependency input and readiness meaning |
+|---|---|
+| `not_required` | No inference entries; assess ordinary declarations. |
+| `exhaustive` | A reviewed resolver contract establishes the complete configuration; assess the actual combined output and retain the parent selection ID. |
+| `pending` | Complete outcomes are unproven; retain declaration findings and block source readiness. |
+| `invalid` | Declaration, ownership or execution contract failed; retain declaration findings and report the error. |
+
+The first proof mechanism supports singleton outcomes from direct label arrays and the reviewed
+`selectExactMatch`, `selectExactLabelSetMap` and `resolveRangeFromLabels` factories. Arbitrary
+callbacks, copied resolver metadata and ontology-neutral functions do not establish exhaustive
+outcomes. No seeds are sampled to infer determinism. A later reviewed finite-outcome mechanism
+can extend this without treating potential `produces` labels as actual output.
+
+Module artifacts bind the inference source/import closure and declared output ontology semantics.
+These outputs do not enter matching capabilities. At source readiness, run the authoritative
+dataset graph rebuild (`--rebuild-graph`); existing no-op receipts alone do not establish freshness
+after the pipeline-version change. The current stored snapshot remains an audit of persisted
+labels, without retroactively applying source inference.
+
 Next work: the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
 [remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The

@@ -6,6 +6,7 @@ import {createGenerationSelectionReceipt, validateGenerationPlan} from './compat
 import {digestIdentity} from './content-identity.ts';
 import {parseSampleKey} from './generation.ts';
 import {readSampleReplayRecord} from './sample-replay.ts';
+import type {DependencyAuditAnnotationResolution} from './label-dependency-annotation-resolution.ts';
 
 export const MAX_DEPENDENCY_AUDIT_SELECTIONS = 4096;
 const ordered = (values: readonly string[]) => [...new Set(values)].sort();
@@ -89,6 +90,9 @@ export interface DependencyAuditSubject {
     generatorId: string;
     viewId: string;
     labels: readonly string[];
+    /** Pre-resolution declarations are retained when configuration inference participates. */
+    declaredLabels?: readonly string[];
+    annotationResolution?: DependencyAuditAnnotationResolution;
     resolvedAreas?: readonly string[];
     planHash?: string;
     variantHash?: string;
@@ -108,6 +112,8 @@ export interface DependencyAuditCoverage {
     total: string;
     checked: number;
     reason?: string;
+    /** Separate from exhaustive label-assignment enumeration. */
+    annotationResolution?: {status: 'complete' | 'pending' | 'invalid'; exhaustive: number; pending: number; invalid: number};
 }
 
 export interface DependencyAuditReportInput {
@@ -136,7 +142,10 @@ export function buildLabelDependencyAudit(input: DependencyAuditReportInput) {
         samples_with_missing_dependencies: 0,
         row_issues: 0,
         contract_errors: 0,
-        incomplete_tuples: selectionCoverage.filter(coverage => coverage.status !== 'complete').length
+        incomplete_tuples: selectionCoverage.filter(coverage => coverage.status !== 'complete').length,
+        pending_inference_selections: subjects.filter(subject => subject.annotationResolution?.status === 'pending').length,
+        invalid_inference_selections: subjects.filter(subject => subject.annotationResolution?.status === 'invalid').length,
+        exhaustive_inference_selections: subjects.filter(subject => subject.annotationResolution?.status === 'exhaustive').length
     };
     const groups = new Map<string, {kind: string; generatorId: string; viewId: string; ruleId: string;
         facet: string; status: string; reason: string; labels: readonly string[]; subjects: string[]}>();
@@ -161,7 +170,7 @@ export function buildLabelDependencyAudit(input: DependencyAuditReportInput) {
             groups.set(key, entry);
         }
     }
-    return {schema_version: 3, mode: 'report-only', validation_basis: 'annotations', spec: input.spec, policy_hash: input.policyHash,
+    return {schema_version: 4, mode: 'report-only', validation_basis: 'annotations', spec: input.spec, policy_hash: input.policyHash,
         ontology: input.ontology, dataset: input.dataset, summary, selection_coverage: selectionCoverage,
         findings: [...groups.entries()].sort(([a], [b]) => a < b ? -1 : 1).map(([, group]) => group), subjects};
 }
@@ -179,7 +188,8 @@ export function formatLabelDependencyAudit(report: ReturnType<typeof buildLabelD
         `- Contexts: ${summary.contexts.eligible} eligible, ${summary.contexts.outside_policy_scope} outside policy, ${summary.contexts.invalid_context} invalid`,
         `- Annotation assessments: ${summary.assessments.satisfied} satisfied, ${summary.assessments.missing} missing; conflicts: ${summary.conflicts}`,
         `- Stored samples with missing non-range dependencies: ${summary.samples_with_missing_dependencies}`,
-        `- Row issues: ${summary.row_issues}; label contract errors: ${summary.contract_errors}; incomplete tuples: ${summary.incomplete_tuples}`, '',
+        `- Row issues: ${summary.row_issues}; label contract errors: ${summary.contract_errors}; incomplete tuples: ${summary.incomplete_tuples}`,
+        `- Inference resolution: ${summary.exhaustive_inference_selections} exhaustive, ${summary.pending_inference_selections} pending, ${summary.invalid_inference_selections} invalid selections`, '',
         'Every eligible annotation set is checked directly. Strict mode enforces finalized samples; missing facets in pre-draw selections remain advisory. Range presence remains report-only; range-policy work is excluded.', '',
         '## Missing annotation dependencies', '',
         '| Source | Generator / view | Rule / facet | Present | Subjects | Reason |',
@@ -194,6 +204,12 @@ export function formatLabelDependencyAudit(report: ReturnType<typeof buildLabelD
     lines.push('', '## Selection coverage', '', '| Target | Generator / view | Status | Checked / admitted | Reason |', '|---|---|---|---:|---|');
     for (const coverage of report.selection_coverage.filter(item => item.status !== 'complete')) lines.push(
         `| ${cell(coverage.targetId)} | ${cell(coverage.generatorId)} / ${cell(coverage.viewId)} | ${coverage.status} | ${coverage.checked} / ${coverage.total} | ${cell(coverage.reason ?? '')} |`);
+    lines.push('', '## Configuration inference coverage', '',
+        'Only reviewed deterministic configuration outcomes are exhaustive. Potential outputs never satisfy a dependency. Pending inference keeps declared-only findings and blocks source readiness.', '');
+    for (const subject of subjectsWithPendingInference(report.subjects)) {
+        const resolution = subject.annotationResolution!;
+        if (resolution.status === 'pending') lines.push(`- \`${subject.id}\`: pending — ${resolution.owners.map(owner => `${owner.owner}: ${owner.reason}`).join(' ')}`);
+    }
     lines.push('', '## Annotation and row integrity issues', '');
     for (const subject of report.subjects) {
         for (const issue of [...subject.issues, ...subject.evaluation.errors]) lines.push(`- \`${subject.id}\`: ${cell(issue)}`);
@@ -201,3 +217,6 @@ export function formatLabelDependencyAudit(report: ReturnType<typeof buildLabelD
     lines.push('', 'The JSON report retains full labels, assessments, conflicts, and target/sample provenance for every subject.', '');
     return lines.join('\n');
 }
+
+const subjectsWithPendingInference = <T extends DependencyAuditSubject>(subjects: readonly T[]) =>
+    subjects.filter(subject => subject.annotationResolution?.status === 'pending');

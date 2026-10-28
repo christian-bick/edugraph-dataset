@@ -251,4 +251,14 @@ describe('strict annotation report summary', () => {
             {subject: 'dataset', code: 'dataset', message: 'No stored samples are available for dependency validation.'}
         ]);
     });
+
+    it.each(['pending', 'invalid'] as const)('keeps %s inference coverage blocking even with complete label enumeration and valid stored annotations', status => {
+        const result = summarizeLabelDependencyCoverage({dataset, subjects: [subject('valid')], selection_coverage: [{
+            targetId: 'target', generatorId: 'g', viewId: 'v', status: 'complete', total: '1', checked: 1,
+            annotationResolution: {status, exhaustive: 0, pending: status === 'pending' ? 1 : 0, invalid: status === 'invalid' ? 1 : 0}
+        }]});
+        expect(result.failures).toEqual([expect.objectContaining({code: 'enumeration',
+            message: expect.stringContaining(`Configuration inference coverage is ${status}`)})]);
+        expect(result.counts.samples_checked).toBe(1);
+    });
 });

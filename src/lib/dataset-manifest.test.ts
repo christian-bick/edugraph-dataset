@@ -556,6 +556,99 @@ describe('updateDatasetManifest', () => {
 });
 
 describe('buildDatasetManifest', () => {
+    it.each(['generator', 'view'] as const)('tracks %s inference source and output semantics without matching on outputs', role => {
+        const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-inference-identity-'));
+        const datasetDir = resolve(projectRoot, 'out/dataset-ccss');
+        const dependency = 'https://example.test/ontology-v1.tgz';
+        const write = (file: string, content: string) => {
+            const target = resolve(projectRoot, file);
+            mkdirSync(resolve(target, '..'), {recursive: true});
+            writeFileSync(target, content);
+        };
+        const generatorDir = resolve(projectRoot, 'src/generators/demo');
+        const viewDir = resolve(projectRoot, 'src/visuals/views/demo-view');
+        const output = Scope.MultipleDigitLargestOperand;
+        const replacement = Scope.SingleDigitLargestOperand;
+        const infer = () => {throw new Error('Identity discovery must not execute inference.');};
+        const target = {id: 'target', labels: [Area.Addition, Ability.ProcedureExecution]};
+        const generator = {
+            generatorId: 'demo', generalLabels: [Area.Addition], labels: [Area.Addition],
+            problemType: 'ArithmeticPairProblem', schema: {},
+            spec: {generatorId: 'demo', generalLabels: [Area.Addition],
+                ...(role === 'generator' ? {inferredLabels: [{produces: [output], infer}]} : {})},
+            module: {id: 'demo', relativePath: 'demo', absolutePath: generatorDir, category: null}
+        };
+        const view = {
+            viewId: 'demo-view', generalLabels: [Ability.ProcedureExecution],
+            supportedLabels: [Ability.ProcedureExecution], problemType: 'ArithmeticPairProblem', schema: {},
+            spec: {viewId: 'demo-view', generalLabels: [Ability.ProcedureExecution],
+                ...(role === 'view' ? {inferredLabels: [{produces: [output], infer}]} : {})},
+            module: {id: 'demo-view', relativePath: 'demo-view', absolutePath: viewDir, category: null}
+        };
+        const specPath = role === 'generator' ? 'src/generators/demo/spec.ts' : 'src/visuals/views/demo-view/spec.ts';
+        const helperImport = role === 'generator' ? '../../lib/inference-helper.ts' : '../../../lib/inference-helper.ts';
+        const ownerNode = role === 'generator' ? 'generator:demo' : 'view:demo-view';
+        const capabilityNode = role === 'generator' ? 'generator-capability:demo' : 'view-capability:demo-view';
+        const matchNode = 'match:ccss:target#demo#demo-view';
+        const options = {projectRoot, datasetDir, specName: 'ccss', targets: [target],
+            generators: [generator], views: [view], generatedSplits: ['train' as const], rendererEnvironment: 'canonical'};
+        const build = () => buildDatasetManifest(options);
+        try {
+            write('package.json', JSON.stringify({dependencies: {'edugraph-ts': dependency}}));
+            write('package-lock.json', JSON.stringify({packages: {'node_modules/edugraph-ts': {
+                version: '1.0.0', resolved: dependency, integrity: 'sha512-v1'}}}));
+            write('src/generators/demo/spec.ts', 'export const spec = {};');
+            write('src/generators/demo/generator.ts', 'export const generator = {};');
+            write('src/visuals/views/demo-view/spec.ts', 'export const spec = {};');
+            write('src/visuals/views/demo-view/view.tsx', 'export const view = {};');
+            write(specPath, `export const spec = {inferredLabels: [{produces: [${JSON.stringify(output)}], infer: () => []}]};`);
+            const initial = build();
+            const tuple = matchTargets([target], [generator], [view]).tuples[0];
+            expect(tuple).toBeDefined();
+            expect(matchTargets([{...target, labels: [...target.labels, output]}], [generator], [view]).tuples).toEqual([]);
+            expect(initial.dependency_graph.nodes[ownerNode].dependencies).toContain('ontology:MultipleDigitLargestOperand');
+            expect(initial.dependency_graph.nodes[capabilityNode].dependencies).not.toContain('ontology:MultipleDigitLargestOperand');
+            expect(tuple.plan.generatorLabels).not.toContain(output);
+            expect(tuple.plan.viewLabels).not.toContain(output);
+
+            write(specPath, `export const spec = {inferredLabels: [{produces: [${JSON.stringify(output)}], infer: () => [${JSON.stringify(output)}]}]};`);
+            const lambdaChanged = build();
+            expect(lambdaChanged.entries['demo#demo-view'].input_hash).not.toBe(initial.entries['demo#demo-view'].input_hash);
+            expect(planDependencyDelta(initial.dependency_graph, lambdaChanged.dependency_graph).affected_nodes).toContain('pair:demo#demo-view');
+            expect(lambdaChanged.dependency_graph.matching_index!.generation_plans_by_target)
+                .toEqual(initial.dependency_graph.matching_index!.generation_plans_by_target);
+
+            write('src/lib/inference-helper.ts', `export const infer = () => [];`);
+            write(specPath, `import {infer} from '${helperImport}'; export const spec = {inferredLabels: [{produces: [${JSON.stringify(output)}], infer}]};`);
+            const imported = build();
+            expect(imported.dependency_graph.nodes[ownerNode].dependencies).toContain('source:src/lib/inference-helper.ts');
+            write('src/lib/inference-helper.ts', `export const infer = () => [${JSON.stringify(output)}];`);
+            const helperChanged = build();
+            expect(helperChanged.entries['demo#demo-view'].input_hash).not.toBe(imported.entries['demo#demo-view'].input_hash);
+            expect(planDependencyDelta(imported.dependency_graph, helperChanged.dependency_graph).affected_nodes).toContain('pair:demo#demo-view');
+
+            const ontologyChanged = structuredClone(helperChanged.dependency_graph);
+            ontologyChanged.nodes['ontology:MultipleDigitLargestOperand'].input_hash = 'changed-output-eligibility';
+            const semanticDelta = planDependencyDelta(helperChanged.dependency_graph, ontologyChanged);
+            expect(semanticDelta.affected_nodes).toContain(ownerNode);
+            expect(semanticDelta.affected_nodes).toContain('pair:demo#demo-view');
+            expect(semanticDelta.affected_nodes).not.toContain(capabilityNode);
+            expect(semanticDelta.affected_nodes).not.toContain(matchNode);
+
+            const ownerSpec = role === 'generator' ? generator.spec : view.spec;
+            ownerSpec.inferredLabels = [{produces: [replacement], infer}];
+            const outputsChanged = build();
+            expect(outputsChanged.entries['demo#demo-view'].input_hash).not.toBe(helperChanged.entries['demo#demo-view'].input_hash);
+            expect(outputsChanged.dependency_graph.nodes[ownerNode].dependencies).toContain('ontology:SingleDigitLargestOperand');
+            expect(outputsChanged.dependency_graph.nodes[ownerNode].dependencies).not.toContain('ontology:MultipleDigitLargestOperand');
+            expect(outputsChanged.dependency_graph.nodes[capabilityNode]).toEqual(helperChanged.dependency_graph.nodes[capabilityNode]);
+            expect(outputsChanged.dependency_graph.matching_index!.generation_plans_by_target)
+                .toEqual(helperChanged.dependency_graph.matching_index!.generation_plans_by_target);
+        } finally {
+            rmSync(projectRoot, {recursive: true, force: true});
+        }
+    });
+
     it('regenerates retired-label rows without hiding artifacts or invalidating valid sibling pairs', () => {
         const projectRoot = mkdtempSync(resolve(tmpdir(), 'edugraph-retired-labels-'));
         const datasetDir = resolve(projectRoot, 'out', 'dataset-ccss');

@@ -1,6 +1,7 @@
 import {Scope, bundledContext} from 'edugraph-ts/generated';
 import {RELATION_IRIS} from 'edugraph-ts/core';
 import {compositionalResolver, exactResolver, withLabelChoices} from '../types/schema.ts';
+import {registerStaticResolver} from './static-resolvers.ts';
 
 export const DISTANCE_SCALE_LABELS = [
     Scope.CentimeterScale,
@@ -77,7 +78,7 @@ withLabelChoices(resolveDistanceScale, {kind: 'alternatives'});
 /**
  * Resolves the numeric range boundary from a list of ontological labels.
  */
-export const resolveRangeFromLabels = compositionalResolver((labels: string[]): { min: number; max: number } => {
+export const resolveRangeFromLabels = registerStaticResolver(compositionalResolver((labels: string[]): { min: number; max: number } => {
     let min = 0;
     let max = Number.MAX_SAFE_INTEGER;
 
@@ -125,7 +126,7 @@ export const resolveRangeFromLabels = compositionalResolver((labels: string[]): 
     }
 
     return { min, max };
-});
+}));
 withLabelChoices(resolveRangeFromLabels, {
     kind: 'target',
     relation: 'exact',

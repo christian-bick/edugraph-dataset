@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {matchTargets} from './matching.ts';
 import {buildScopeCompletenessInventory} from './scope-completeness.ts';
 import {withLabelChoices} from '../types/schema.ts';
@@ -63,5 +63,29 @@ describe('buildScopeCompletenessInventory', () => {
             label: Scope.MeterScale,
             tuple_count: 1
         });
+    });
+
+    it('includes actual owner inference in the realized inventory without making outputs matching capabilities', () => {
+        const generator = {generatorId: 'inferred-generator', generalLabels: [Area.Addition, Scope.IntegerNumbers,
+            Scope.NumbersWithoutNegatives], labels: [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives],
+            schema: {}, problemType: 'ArithmeticPairProblem', spec: {
+                generatorId: 'inferred-generator',
+                generalLabels: [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives],
+                inferredLabels: [{produces: [Scope.NumbersWithoutZero], infer: () => [Scope.NumbersWithoutZero]}]
+            }};
+        const view = {viewId: 'inferred-view', generalLabels: [], supportedLabels: [], schema: {},
+            problemType: 'ArithmeticPairProblem', spec: {viewId: 'inferred-view', generalLabels: [],
+                inferredLabels: [{produces: [Scope.ArabicNumerals], infer: () => [Scope.ArabicNumerals]}]}};
+        const targets = [{id: 'inference-inventory', labels: [Area.Addition]}];
+        const tuples = matchTargets(targets, [generator], [view]).tuples;
+        expect(tuples).toHaveLength(1);
+        expect(matchTargets([{id: 'not-supported', labels: [Area.Addition, Scope.NumbersWithoutZero]}],
+            [generator], [view]).tuples).toHaveLength(0);
+        const report = buildScopeCompletenessInventory({tuples, generators: [generator], views: [view]});
+        expect(report.additional_scopes).toEqual(expect.arrayContaining([
+            {label: Scope.NumbersWithoutZero, tuple_count: 1}, {label: Scope.ArabicNumerals, tuple_count: 1}
+        ]));
+        expect(generator.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(view.supportedLabels).toEqual([]);
     });
 });

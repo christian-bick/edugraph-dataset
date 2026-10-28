@@ -1,6 +1,7 @@
 import {Scope} from 'edugraph-ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 import type {ConfigSchema} from '../types/schema.ts';
+import type {AnyModuleSpec} from '../types/module-spec.ts';
 import {radixSortUtf8} from './content-identity.ts';
 import {
     computeSampleKey,
@@ -20,12 +21,14 @@ export interface ScopeInventoryGenerator {
     generatorId: string;
     generalLabels: readonly string[];
     schema?: ConfigSchema;
+    spec?: AnyModuleSpec;
 }
 
 export interface ScopeInventoryView {
     viewId: string;
     generalLabels: readonly string[];
     schema: ConfigSchema;
+    spec?: AnyModuleSpec;
 }
 
 export interface ScopeCompletenessTupleRef {
@@ -86,7 +89,7 @@ function targetScopes(target: CompetencyTarget): string[] {
 }
 
 /**
- * Resolves one deterministic configuration per active match tuple. The report
+ * Resolves one seeded configuration per active match tuple, not an exhaustive proof. The report
  * inventories unlabeled co-resolving Scope candidates and separately records
  * the additional/specialized Scopes already recovered by pair resolution.
  */
@@ -128,7 +131,8 @@ export function buildScopeCompletenessInventory(options: {
         });
         const seed = computeSampleSeed(sampleKey, 1);
         const resolved = resolvePlannedConfigurations({generatorSchema: generator.schema ?? {},
-            viewSchema: view.schema, plan: tuple.plan, sampleKey, attempt: 1, seed});
+            viewSchema: view.schema, generatorSpec: generator.spec, viewSpec: view.spec,
+            plan: tuple.plan, sampleKey, attempt: 1, seed});
         const pairLabels = resolved.labels;
         const resolvedScopes = scopeOnly(pairLabels);
         const requestedScopes = targetScopes(tuple.target);

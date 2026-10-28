@@ -14,8 +14,8 @@ import type {
 import type {WorkCounters} from './work-counters.ts';
 import type {CompetencyTarget} from '../types/ml-engine.ts';
 import type {ConfigSchema, ResolverFn} from '../types/schema.ts';
-import type {GeneratorSpec} from '../types/generator-spec.ts';
-import type {ViewSpec} from '../types/view-spec.ts';
+import type {AnyGeneratorSpec} from '../types/generator-spec.ts';
+import type {AnyViewSpec} from '../types/view-spec.ts';
 import type {CompatibilityRule, GenerationPlan, GeneratorCompatibilityRule, ViewCompatibilityRule} from '../types/compatibility.ts';
 import {CompatibilityContractError, validateGenerationPlan} from './compatibility.ts';
 import {planModelCompatibility} from './model-compatibility.ts';
@@ -30,7 +30,7 @@ export interface GeneratorMatchInfo {
     problemType?: string | null;
     schema?: ConfigSchema;
     generalLabels?: readonly string[];
-    spec?: GeneratorSpec;
+    spec?: AnyGeneratorSpec;
     compatibility?: readonly GeneratorCompatibilityRule[];
     matchingSourceHash?: string;
 }
@@ -42,7 +42,7 @@ export interface ViewMatchInfo {
     problemType?: string | null;
     schema?: ConfigSchema;
     generalLabels?: readonly string[];
-    spec?: ViewSpec;
+    spec?: AnyViewSpec;
     compatibility?: readonly ViewCompatibilityRule[];
     matchingSourceHash?: string;
 }

@@ -473,6 +473,15 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
   tuple; an oversized space is explicitly uninspected. Stored rows are read through the logical
   dataset snapshot in both splits. Every eligible stored annotation set is checked. Targets remain partial requests.
   Range checks assess label presence only and never calculate replacement bounds.
+* **Configuration inference**: Report schema version 4 retains `declaredLabels` and records
+  `annotationResolution` separately from label-assignment enumeration. Reviewed singleton
+  resolver contracts allow exhaustive evaluation of actual inferred outputs. Unknown complete
+  configurations remain pending, retain their declaration findings and block source readiness;
+  `produces` alone closes nothing. Runtime sampling and scope inventories are not exhaustive
+  proof. Stored rows are assessed as persisted, without applying current source inference.
+  Both planned and direct resolution run owner inference before generation; replay recomputes
+  outputs, and artifact identities include inference source and output ontology dependencies.
+  After this pipeline machinery changes, use `--rebuild-graph` at source readiness before VQA.
 * **Provenance**: The audit checks row/sample-key identity and recovers the complete resolved
   Area conjunction from the recorded generation selection. It never reconstructs mathematical
   payloads or executes generators. Reports retain target associations and bind policy identity

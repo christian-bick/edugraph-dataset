@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
     extractConfig,
     findSchemaCoResolutionGroups,
@@ -18,6 +18,52 @@ import {
 } from './resolvers.ts';
 import { ProblemGenerator } from '../types/ml-engine.ts';
 import {compositionalResolver} from '../types/schema.ts';
+import type {GeneratorSpec} from '../types/generator-spec.ts';
+import {getRandomState, random, setSeed} from './random.ts';
+import {InferredLabelContractError} from './inferred-labels.ts';
+
+describe('direct configuration inference', () => {
+    const schema = {operation: [[Area.Addition], selectExactMatch],
+        amount: ontologyNeutral(() => 1 + Math.floor(random() * 9))} as const;
+    const definition: GeneratorSpec<typeof schema> = {generatorId: 'inference', generalLabels: [], inferredLabels: [{
+        produces: [Scope.SingleDigitLargestOperand], infer: config => {
+            expect(config.operation).toBe(Area.Addition);
+            expect(config.amount).toBeGreaterThan(0);
+            return [Scope.SingleDigitLargestOperand];
+        }
+    }]};
+
+    it('adds actual inference after complete resolution without changing legacy values or entropy', () => {
+        setSeed(27);
+        const before = extractConfig(schema, [Area.Addition]);
+        const state = getRandomState();
+        setSeed(27);
+        const after = extractConfig(schema, [Area.Addition], {spec: definition, owner: 'generator'});
+        expect(after.config).toEqual(before.config);
+        expect(getRandomState()).toBe(state);
+        expect(after.resolvedLabels).toEqual([...before.resolvedLabels, Scope.SingleDigitLargestOperand]);
+        const generate = vi.fn(config => ({data: {config, value: random()}}));
+        const generator: ProblemGenerator = {type: 'arithmetic', schema, generate, spec: definition};
+        setSeed(27); const plain = generateWithLabels({...generator, spec: undefined}, [Area.Addition]);
+        const continuation = getRandomState();
+        setSeed(27); const inferred = generateWithLabels(generator, [Area.Addition]);
+        expect(inferred?.data).toEqual(plain?.data);
+        expect(inferred?.labels).toEqual([...plain!.labels, Scope.SingleDigitLargestOperand]);
+        expect(getRandomState()).toBe(continuation);
+    });
+
+    it('supports explicit metadata and fails a bad rule before generating mathematics', () => {
+        const generate = vi.fn(() => ({data: {value: 1}}));
+        const generator: ProblemGenerator = {type: 'arithmetic', schema, generate};
+        expect(generateWithLabels(generator, [Area.Addition], definition)?.labels)
+            .toContain(Scope.SingleDigitLargestOperand);
+        generate.mockClear();
+        expect(() => generateWithLabels(generator, [Area.Addition], {generalLabels: [], inferredLabels: [{
+            produces: [Scope.SingleDigitLargestOperand], infer: () => [Scope.NumbersWithoutZero]
+        }]})).toThrow(InferredLabelContractError);
+        expect(generate).not.toHaveBeenCalled();
+    });
+});
 
 describe('extractConfig & generateWithLabels', () => {
     const testSchema = {

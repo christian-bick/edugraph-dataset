@@ -101,7 +101,8 @@ describe('complete admitted selections', () => {
         expect(mocks.pairIndex).toHaveBeenCalledWith(models, viewModels);
         expect(mocks.matches).toHaveBeenCalledWith([tuple.target], models, viewModels, {pairIndex: {fixture: true}});
         expect(mocks.selections).toHaveBeenCalledWith(plan, 2);
-        expect(report.selection_coverage).toEqual([{targetId: 'target', generatorId, viewId, status: 'complete', total: '2', checked: 2}]);
+        expect(report.selection_coverage).toEqual([{targetId: 'target', generatorId, viewId, status: 'complete', total: '2', checked: 2,
+            annotationResolution: {status: 'complete', exhaustive: 0, pending: 0, invalid: 0}}]);
         expect(report.subjects.map(subject => subject.variantHash)).toEqual(['first', 'second']);
         expect(report.subjects.every(subject => subject.planHash === plan.hash)).toBe(true);
     });
@@ -153,6 +154,23 @@ describe('stored annotation integrity and policy identity', () => {
         const sample = report.subjects.find(subject => subject.kind === 'sample')!;
         expect(sample.evaluation.context.status).toBe('outside_policy_scope');
         expect(sample.issues).toEqual([`Stored annotations omit a resolved Area: ${Area.EquationSolving}.`]);
+    });
+    it('includes an actual inferred outside Area in the complete context without requiring it in the matching plan', async () => {
+        const row = stored({labels: [...labels, Area.EquationSolving]});
+        const report = await inspectLabelDependencies({projectRoot, spec: 'fixture', snapshot: snapshot([row])});
+        const sample = report.subjects.find(subject => subject.kind === 'sample')!;
+        expect(sample.resolvedAreas).toEqual([Area.Addition, Area.EquationSolving].sort());
+        expect(sample.evaluation.context.status).toBe('outside_policy_scope');
+        expect(sample.issues).toEqual([]);
+        expect(row.labels).toEqual([...labels, Area.EquationSolving]);
+    });
+    it('retains missing planned Area errors when another actual inferred Area is present', async () => {
+        const actual = labels.filter(label => label !== Area.Addition).concat(Area.Subtraction);
+        const report = await inspectLabelDependencies({projectRoot, spec: 'fixture', snapshot: snapshot([stored({labels: actual})])});
+        const sample = report.subjects.find(subject => subject.kind === 'sample')!;
+        expect(sample.resolvedAreas).toEqual([Area.Addition, Area.Subtraction].sort());
+        expect(sample.evaluation.context.status).toBe('eligible');
+        expect(sample.issues).toEqual([`Stored annotations omit a resolved Area: ${Area.Addition}.`]);
     });
     it('versions deterministic reports with current machinery and ontology only', async () => {
         const input = {projectRoot, spec: 'fixture', snapshot: snapshot([stored()])};

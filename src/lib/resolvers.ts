@@ -8,6 +8,7 @@ import {
 } from '../types/schema.ts';
 import { capabilitySatisfies } from './ontology.ts';
 import {schemaResolutionKey} from './utils.ts';
+import {registerStaticResolver} from './static-resolvers.ts';
 
 /** Mapping values are authored constants; discovering their equivalence never calls a resolver. */
 const mappingEquivalenceGroups = (mappings: readonly (readonly [readonly string[], unknown])[]) => {
@@ -51,13 +52,13 @@ export const matchAllCapabilities = (targetLabels: readonly string[]): ResolverF
         {kind: 'target', relation: 'capability', contextLabels: targetLabels});
 };
 
-export const selectExactMatch = withLabelChoices(exactResolver((labels: string[], supportedLabels?: readonly string[]): string | undefined => {
+export const selectExactMatch = registerStaticResolver(withLabelChoices(exactResolver((labels: string[], supportedLabels?: readonly string[]): string | undefined => {
     const matches = supportedLabels?.filter(label => labels.includes(label)) ?? [];
     if (matches.length > 1) {
         throw new Error(`Ambiguous exact label selection: ${matches.join(' + ')}`);
     }
     return matches[0];
-}), {kind: 'alternatives'});
+}), {kind: 'alternatives'}));
 
 export const matchAllExactLabels = withLabelChoices(aggregateResolver((labels: string[], supportedLabels?: readonly string[]): string[] => {
     if (!supportedLabels) return [];
@@ -101,7 +102,7 @@ export const selectExactLabelSetMap = <
     const mappingByKey = new Map(mappingKeys.map((key, index) => [key, mappings[index][1]]));
     const candidateSets = mappings.map(([labels]) => new Set(labels));
 
-    return withLabelChoices(exactResolver((labels: string[]) => {
+    return registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
         const inputLabels = new Set(labels);
         const presentLabels = mappedLabels.filter(label => inputLabels.has(label));
         const presentKey = exactLabelSetKey(presentLabels);
@@ -117,5 +118,5 @@ export const selectExactLabelSetMap = <
         alternatives: mappings.map(([labels]) => [...labels]),
         equivalenceGroups: mappingEquivalenceGroups(mappings),
         ...(mappings.some(([labels]) => labels.length === 0) ? {defaults: [{labels: []}]} : {})
-    });
+    }));
 };

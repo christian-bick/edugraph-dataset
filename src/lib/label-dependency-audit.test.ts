@@ -95,7 +95,7 @@ describe('deterministic annotation reports', () => {
         const second = {...subject('sample:b'), targetAssociations: [{spec: 'fixture', target_id: 'alias'}]};
         const report = build([second, first]);
         expect(report).toEqual(build([first, second]));
-        expect(report).toMatchObject({schema_version: 3, mode: 'report-only', validation_basis: 'annotations'});
+        expect(report).toMatchObject({schema_version: 4, mode: 'report-only', validation_basis: 'annotations'});
         expect(report.summary).toMatchObject({samples: 2, selections: 0, samples_with_missing_dependencies: 2, incomplete_tuples: 1});
         expect(report.findings.find(finding => finding.facet === 'range')?.subjects).toEqual(['sample:a', 'sample:b']);
         expect(report.subjects[1].targetAssociations).toEqual(second.targetAssociations);

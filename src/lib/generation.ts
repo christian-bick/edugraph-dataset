@@ -17,6 +17,9 @@ import {radixSortUtf8} from './content-identity.ts';
 import {loadTargets} from './spec-catalog.ts';
 import type {GenerationPlan} from '../types/compatibility.ts';
 import type {GenerationReplay, PreparedViewConfiguration} from '../types/generation-plan.ts';
+import type {AnyModuleSpec} from '../types/module-spec.ts';
+import type {ViewSpec} from '../types/view-spec.ts';
+import {assertInferredPairOwnership} from './inferred-labels.ts';
 import {generatePlannedDraw, type PlannedGenerationDraw} from './planned-generation.ts';
 import {CompatibilityContractError, validateGenerationPlan} from './compatibility.ts';
 import {
@@ -167,6 +170,8 @@ export async function loadGeneratorCatalog(
                 continue;
             }
             const generator: ProblemGenerator = new GeneratorClass();
+            Object.defineProperty(generator, 'spec', {value: descriptor.spec, enumerable: false,
+                configurable: true, writable: false});
             entries.push({...descriptor, generator});
         } catch (e) {
             console.warn(`Could not load generator module ${descriptor.generatorId}:`, e);
@@ -196,6 +201,7 @@ export function clearGenerationCatalogCaches(): void {
 
 export interface GenerateSampleInput {
     generator: ProblemGenerator;
+    generatorSpec?: AnyModuleSpec;
     labels: string[];
     seed: number;
 }
@@ -205,13 +211,14 @@ export interface GenerateSampleInput {
  * Routed production and debugging must use generatePlannedSampleWithRetry or
  * generateSampleByKey so both role selections stay inside the matched plan.
  */
-export function generateSample({ generator, labels, seed }: GenerateSampleInput): ResolvedProblemStub | null {
+export function generateSample({ generator, generatorSpec, labels, seed }: GenerateSampleInput): ResolvedProblemStub | null {
     setSeed(seed);
-    return generateWithLabels(generator, labels);
+    return generateWithLabels(generator, labels, generatorSpec ?? generator.spec);
 }
 
 export interface GenerateSampleWithRetryInput {
     generator: ProblemGenerator;
+    generatorSpec?: AnyModuleSpec;
     labels: string[];
     sampleKey: string;
     maxAttempts?: number;
@@ -230,6 +237,7 @@ export interface RetryResult {
 /** Standalone generator-test retry helper; never use for a routed generator/view pair. */
 export function generateSampleWithRetry({
     generator,
+    generatorSpec,
     labels,
     sampleKey,
     maxAttempts = 50,
@@ -240,7 +248,7 @@ export function generateSampleWithRetry({
     while (attempt < maxAttempts) {
         attempt++;
         seed = computeSampleSeed(sampleKey, attempt);
-        const stub = generateSample({ generator, labels, seed });
+        const stub = generateSample({ generator, generatorSpec, labels, seed });
         if (!stub) continue;
         if (isDuplicate && isDuplicate(stub, { attempt, seed })) continue;
         return { stub, attempt, seed };
@@ -257,6 +265,8 @@ export interface PlannedRetryResult extends PlannedGenerationDraw {
 export function generatePlannedSampleWithRetry(input: {
     generator: ProblemGenerator;
     viewSchema: ConfigSchema;
+    generatorSpec?: AnyModuleSpec;
+    viewSpec?: AnyModuleSpec;
     plan: GenerationPlan;
     sampleKey: string;
     maxAttempts?: number;
@@ -348,7 +358,8 @@ export async function generateSampleByKey({
     const originKey = replay?.sampleKey ?? sampleKey;
     const originAttempt = replay?.attempt ?? attempt;
     const seed = computeSampleSeed(originKey, originAttempt);
-    const draw = generatePlannedDraw({generator: entry.generator, viewSchema: view.schema, plan: tuple.plan,
+    const draw = generatePlannedDraw({generator: entry.generator, generatorSpec: entry.spec,
+        viewSchema: view.schema, viewSpec: view.spec, plan: tuple.plan,
         sampleKey: originKey, attempt: originAttempt, seed, replay});
     return {identity, target, targetLabels, seed, stub: draw.stub, plan: tuple.plan,
         preparedView: draw.view, replay: draw.replay, labels: draw.labels};
@@ -393,12 +404,12 @@ export function generateTargetSamples(
     const { instancesPerTuple = 1, valRatio = DEFAULT_VAL_RATIO, maxAttempts = 50 } = options;
     const { tuples } = matchTargets([target], generatorCatalog, viewCatalog);
     const modes: SampleMode[] = ['question', 'solution'];
-    const generatorsById = new Map(generatorCatalog.map(entry => [entry.generatorId, entry.generator]));
+    const generatorsById = new Map(generatorCatalog.map(entry => [entry.generatorId, entry]));
     const viewsById = new Map(viewCatalog.map(entry => [entry.viewId, entry]));
 
     const samples: TargetSample[] = [];
     for (const tuple of tuples) {
-        const generator = generatorsById.get(tuple.generatorId)!;
+        const entry = generatorsById.get(tuple.generatorId)!;
         const splits: SampleSplit[] = isValTuple(target.id, tuple.generatorId, tuple.viewId, valRatio)
             ? ['train', 'val']
             : ['train'];
@@ -421,8 +432,10 @@ export function generateTargetSamples(
                     let draw: PlannedRetryResult | undefined;
                     try {
                         draw = generatePlannedSampleWithRetry({
-                            generator,
+                            generator: entry.generator,
+                            generatorSpec: entry.spec,
                             viewSchema: viewsById.get(tuple.viewId)!.schema,
+                            viewSpec: viewsById.get(tuple.viewId)!.spec,
                             plan: tuple.plan,
                             sampleKey,
                             maxAttempts
@@ -479,27 +492,32 @@ export function computeContentFingerprint(data: any): string {
 export function resolveViewConfigWithLabels<T extends ConfigSchema>(
     schema: T,
     labels: string[],
-    seed: number
+    seed: number,
+    spec?: ViewSpec<T>
 ): ResolvedConfig<ConfigFromSchema<T>> {
     setSeed(seed);
-    return extractConfig(schema, labels);
+    return extractConfig(schema, labels, {spec, owner: 'view'});
 }
 
 /** Convenience projection for callers concerned only with configured task identity. */
 export function resolveViewConfig<T extends ConfigSchema>(
     schema: T,
     labels: string[],
-    seed: number
+    seed: number,
+    spec?: ViewSpec<T>
 ): ConfigFromSchema<T> {
-    return resolveViewConfigWithLabels(schema, labels, seed).config;
+    return resolveViewConfigWithLabels(schema, labels, seed, spec).config;
 }
 
 export interface ResolvePairCapabilitiesInput<T extends ConfigSchema> {
     targetLabels: readonly string[];
     generatorGeneralLabels: readonly string[];
     generatorResolvedLabels: readonly string[];
+    generatorSpec?: AnyModuleSpec;
+    generatorSchema?: ConfigSchema;
     viewGeneralLabels: readonly string[];
     viewSchema: T;
+    viewSpec?: ViewSpec<T>;
     seed: number;
 }
 
@@ -518,11 +536,19 @@ export function resolvePairCapabilities<T extends ConfigSchema>({
     targetLabels,
     generatorGeneralLabels,
     generatorResolvedLabels,
+    generatorSpec,
+    generatorSchema,
     viewGeneralLabels,
     viewSchema,
+    viewSpec,
     seed
 }: ResolvePairCapabilitiesInput<T>): ResolvedPairCapabilities<T> {
-    const viewResolution = resolveViewConfigWithLabels(viewSchema, [...targetLabels], seed);
+    // Generator annotations are already resolved; this operation never inspects a payload
+    // or reruns generator inference. Supply declaration metadata when it is available.
+    assertInferredPairOwnership({generatorSchema: generatorSchema ?? {}, viewSchema,
+        generatorSpec: generatorSpec ?? {generalLabels: [...generatorGeneralLabels, ...generatorResolvedLabels]},
+        viewSpec: viewSpec ?? {generalLabels: viewGeneralLabels}});
+    const viewResolution = resolveViewConfigWithLabels(viewSchema, [...targetLabels], seed, viewSpec);
     return {
         labels: radixSortUtf8([...new Set([
             ...generatorGeneralLabels,

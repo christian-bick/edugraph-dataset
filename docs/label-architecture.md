@@ -23,13 +23,16 @@ type-compatible generator + view pair
 versioned generation plan -> selected joint assignment + replay receipt
         |
         v
+complete generator + view configs -> independent inferred annotations
+        |
+        v
 bound generator config -> canonical mathematical payload
         |
         v
 prepared view config + PRNG continuation -> one observable task projection
         |
         v
-selected generator/view capabilities -> artifact annotations
+selected capabilities + validated inferred outputs -> artifact annotations
         |
         v
 question / solution artifacts -> VQA of the complete conjunction

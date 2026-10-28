@@ -1,4 +1,4 @@
-import type {ModuleSpec} from '../types/module-spec.ts';
+import type {ModuleSpec, AnyModuleSpec} from '../types/module-spec.ts';
 import type {ConfigFromSchema, ConfigSchema} from '../types/schema.ts';
 import {labelContractIndex, ResolvedLabelContractError, validateInferredLabelDeclarations} from './label-contracts.ts';
 import {withoutRandomness} from './random.ts';
@@ -6,6 +6,29 @@ import {inspectPositiveOwnership} from './spec-ownership.ts';
 
 /** Inference contract failures bypass mathematical retries and fallback publication. */
 export class InferredLabelContractError extends ResolvedLabelContractError {}
+
+/** Check actual role declarations before either owner's inference or value resolution. */
+export function assertInferredPairOwnership(input: {
+    generatorSpec?: AnyModuleSpec;
+    viewSpec?: AnyModuleSpec;
+    generatorSchema: ConfigSchema;
+    viewSchema: ConfigSchema;
+}): void {
+    const {generatorSpec, viewSpec, generatorSchema, viewSchema} = input;
+    const declarationErrors = [
+        ...validateInferredLabelDeclarations(generatorSpec?.inferredLabels, 'generator'),
+        ...validateInferredLabelDeclarations(viewSpec?.inferredLabels, 'view')
+    ];
+    if (declarationErrors.length) throw new InferredLabelContractError(declarationErrors.join('\n'));
+    if (!generatorSpec?.inferredLabels?.length && !viewSpec?.inferredLabels?.length) return;
+    const issues = inspectPositiveOwnership({modules: [
+        {role: 'generator', module_id: 'generator', generalLabels: generatorSpec?.generalLabels ?? [],
+            schema: generatorSchema, inferredLabels: generatorSpec?.inferredLabels},
+        {role: 'view', module_id: 'view', generalLabels: viewSpec?.generalLabels ?? [],
+            schema: viewSchema, inferredLabels: viewSpec?.inferredLabels}
+    ], pairs: [{generatorId: 'generator', viewId: 'view'}]});
+    if (issues.length) throw new InferredLabelContractError(issues.map(issue => issue.message).join('\n'));
+}
 
 /** Snapshot only plain configuration data, and detect attempted writes even when caught. */
 function readonlyConfiguration(value: unknown, violation: () => never, ancestors = new Set<object>()): unknown {

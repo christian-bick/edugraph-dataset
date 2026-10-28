@@ -8,6 +8,8 @@ import {getRandomState, random, setRandomState, setSeed} from './random.ts';
 import {ontologyNeutral} from './resolvers.ts';
 import type {GenerationPlan} from '../types/compatibility.ts';
 import type {ProblemGenerator} from '../types/ml-engine.ts';
+import type {AnyModuleSpec} from '../types/module-spec.ts';
+import {InferredLabelContractError} from './inferred-labels.ts';
 
 const generatorSchema = {kind: ['a', 'b']} as const;
 const viewSchema = {layout: ['grid', 'row'], decoration: ontologyNeutral(() => Math.floor(random() * 100))} as const;
@@ -25,6 +27,65 @@ const generator: ProblemGenerator = {type: 'statistics', schema: generatorSchema
     generate: config => ({data: {kind: config.kind, number: Math.floor(random() * 100)}})};
 
 describe('planned generation handover', () => {
+    it('merges both owners after complete resolution and replays without changing payloads or random continuation', () => {
+        const generatorInfer = vi.fn(config => {
+            expect(['a', 'b']).toContain(config.kind);
+            return [Scope.IntegerNumbers];
+        });
+        const viewInfer = vi.fn(config => {
+            expect(['grid', 'row']).toContain(config.layout);
+            expect(typeof config.decoration).toBe('number');
+            return [Scope.ArabicNumerals];
+        });
+        const generatorSpec: AnyModuleSpec = {generalLabels: [], inferredLabels: [{produces: [Scope.IntegerNumbers], infer: generatorInfer}]};
+        const viewSpec: AnyModuleSpec = {generalLabels: [], inferredLabels: [{produces: [Scope.ArabicNumerals], infer: viewInfer}]};
+        const accepted = plan();
+        const original = structuredClone(accepted);
+        for (const seed of [1, 7, 20]) {
+            const input = {generator, viewSchema, plan: accepted, sampleKey, attempt: 1, seed};
+            const plain = generatePlannedDraw(input);
+            const continuation = getRandomState();
+            const enriched = generatePlannedDraw({...input, generatorSpec, viewSpec});
+            expect(enriched.stub?.data).toEqual(plain.stub?.data);
+            expect(enriched.view.config).toEqual(plain.view.config);
+            expect(enriched.view.randomState).toBe(plain.view.randomState);
+            expect(getRandomState()).toBe(continuation);
+            expect(enriched.labels).toEqual([...plain.labels, Scope.IntegerNumbers, Scope.ArabicNumerals].sort());
+            expect(enriched.stub?.labels).toContain(Scope.IntegerNumbers);
+            expect(enriched.view.labels).toContain(Scope.ArabicNumerals);
+            expect(enriched.replay).toEqual(plain.replay);
+            expect(generatePlannedDraw({...input, generatorSpec, viewSpec, replay: enriched.replay})).toEqual(enriched);
+        }
+        expect(accepted).toEqual(original);
+        expect(generatorInfer).toHaveBeenCalledTimes(6);
+        expect(viewInfer).toHaveBeenCalledTimes(6);
+    });
+
+    it('uses generator metadata on direct instances and stops inference failures before retries or generation', () => {
+        const generate = vi.fn(generator.generate);
+        const infer = vi.fn(() => {throw new Error('inference failed');});
+        const withInference = {...generator, generate,
+            spec: {generalLabels: [], inferredLabels: [{produces: [Scope.IntegerNumbers], infer}]}};
+        expect(() => generatePlannedSampleWithRetry({generator: withInference, viewSchema,
+            plan: plan(), sampleKey, maxAttempts: 5})).toThrow(InferredLabelContractError);
+        expect(generate).not.toHaveBeenCalled();
+        expect(infer).toHaveBeenCalledOnce();
+    });
+
+    it('checks cross-role inference ownership before resolving either configuration', () => {
+        const resolveDecoration = vi.fn(() => 1);
+        const generate = vi.fn(generator.generate);
+        const infer = vi.fn(() => [Scope.IntegerNumbers]);
+        expect(() => generatePlannedDraw({generator: {...generator, generate},
+            generatorSpec: {generalLabels: [], inferredLabels: [{produces: [Scope.IntegerNumbers], infer}]},
+            viewSchema: {...viewSchema, decoration: ontologyNeutral(resolveDecoration)},
+            viewSpec: {generalLabels: [Scope.IntegerNumbers]},
+            plan: plan(), sampleKey, attempt: 1, seed: 10})).toThrow('SPEC-8/SPEC-11');
+        expect(resolveDecoration).not.toHaveBeenCalled();
+        expect(infer).not.toHaveBeenCalled();
+        expect(generate).not.toHaveBeenCalled();
+    });
+
     it('keeps generator/view choices correlated across seeds and independently replays exact draws', () => {
         const accepted = plan();
         const kinds = new Set();
