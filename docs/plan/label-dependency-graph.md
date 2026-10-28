@@ -1436,3 +1436,77 @@ aggregate generator coverage is 98.49% statements, 97.05% branches, 100% functio
 99.51% lines. The run uses two workers and normal permissions for Git/filesystem fixtures.
 Evidence is saved in `temp/currency-c1/full-coverage.txt` and
 `full-coverage-summary.json`; final documentation references also pass.
+
+## C2 — Currency number kinds, preserving the conversion competency
+
+C2 retains the existing cents/dollars transitions in questions and solutions. In
+particular, `$1 - 75¢`, `75¢ + 50¢ = $1.25` and `60¢ + 50¢ = $1.10` remain valid
+exercises; uniform-cents rendering is not an accepted repair.
+
+### C2a — Eight supported integer profiles
+
+The existing denomination choice now includes equivalent bundles carrying
+`IntegerNumbers` and a supported operand-width descriptor. A generator compatibility
+rule correlates those bundles with the existing banknote, coin and operation choices.
+Configuration fields and values, the mathematical implementation and the renderer do
+not change. No target, Area policy, range policy, adapter or automatic completion is added.
+
+| Existing profile | Selections | Added width, alongside `IntegerNumbers` |
+|---|---:|---|
+| Banknotes only, either operation | 2 | `SingleDigitLargestOperand` |
+| Pennies only, either operation | 2 | `SingleDigitLargestOperand` |
+| Nickels only, either operation | 2 | `TwoDigitLargestOperand` |
+| Dimes only, subtraction | 1 | `TwoDigitLargestOperand` |
+| Quarters only, subtraction | 1 | `TwoDigitSmallestOperand` |
+
+For quarter subtraction, compare operands as monetary quantities and count digits in
+the smaller operand's displayed unit. Its complete support has a smaller operand of
+25, 50 or 75 cents, including the `$1 - 75¢` case. The largest-operand descriptor would
+not hold across that support. Tests enumerate every initial count pair for all eight
+integer selections, including equal-count adjustment and subtraction order.
+
+The payload/ownership review is unchanged from C1: counts, denominations and operation
+are mathematical data, totals and answer are calculated evidence, and item kind is
+semantic context. The view retains its monetary-story learner action and all projection
+logic. The added bundles follow [SPEC-G3](../spec-generator.md#spec-g3--declare-the-area-and-scope-capabilities-the-math-produces)
+and [SPEC-6](../spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references).
+
+Preservation evidence is recorded under `temp/currency-c2/before/` and `integer/`:
+all **1,013 targets, 1,182 matches and 18 currency selections** remain. All **42
+stored-origin and 432 further planned draws** preserve configuration, random states,
+payloads and content/task fingerprints. The annotations gain only the intended integer
+and width descriptors. All 20 protected file hashes and the immutable dataset pointer
+remain unchanged.
+
+The fresh report-only audit reduces currency source findings **18 to 10**, global raw
+non-range findings **1,343 to 1,335**, distinct findings **1,325 to 1,317**, and failing
+source selections **556 to 548**. No new operand-digit omission, conflict, invalid context,
+contract/row error or incomplete enumeration appears. The stored snapshot remains at
+**4,146** global findings, including **210** currency findings; canonical regeneration
+and VQA remain deferred to the agreed readiness checkpoint.
+
+The C2a focused suite passes **80 tests across four files**, including 20 integration
+tests against the real Grade 2 targets. Currency generator coverage is **100%** in all
+four categories. Type checking, the generator/view specification audit and documentation
+references pass. Evidence is in `temp/currency-c2/focused-coverage.log`,
+`focused-coverage/`, `integer-types.log`, `integer-specs.log` and `docs.log`.
+
+### C2b — Representation ownership and validator decision
+
+The installed `DecimalNumbers` definition describes base-ten positional representation;
+it does not assert a fractional part. Consequently it is true across the currency view,
+including whole-number cents and dollars. The earlier proposal to declare it conditionally
+on ten profiles overlooked the invariant/declaration boundary in
+[SPEC-7](../spec-general.md#spec-7--zero-overlap-between-schema-parameter-labels-and-generallabels).
+The view has no existing schema field, and adding an unused field solely to attach the
+label would also conflict with SPEC-6. Introducing a formatter parameter would add
+complexity and change task fingerprints without resolving that invariant meaning.
+
+The integer checkpoint therefore leaves those ten findings explicit. A possible follow-up
+is an invariant view declaration together with a narrowly scoped dependency-selector
+correction: ignore decimal representation claims when deciding whether the remaining
+declared number kinds are exclusively integer. Decimal-only contexts would still not
+require digit widths; integer-plus-decimal representation would retain the obligation;
+fraction, rational and other declared kinds would retain their exclusions. That would
+change the shared validator beyond the authorized declaration-only batch, and requires a
+separate decision. The Area allowlist and range-policy exclusion remain unchanged.
