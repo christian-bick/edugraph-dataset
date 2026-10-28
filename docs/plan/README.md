@@ -9,7 +9,9 @@ These items are not newly scheduled by the archive move.
   with the agreed Area allowlist. The [refreshed backlog](label-dependency-graph.md#consolidated-declaration-backlog-2026-10-28)
   has 1,307 distinct source gaps after the measurement word-problem and currency repairs;
   the [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap) separates repairs,
-  semantic decisions and dataset refresh. Range-policy redesign remains excluded.
+  semantic decisions and dataset refresh. The [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
+  and [progress ledger](label-dependency-progress.md) prepare autonomous declaration repairs,
+  exact gap accounting and separate decision batches. Range-policy redesign remains excluded.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

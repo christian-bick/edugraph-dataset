@@ -476,6 +476,59 @@ each decision should include examples, affected labels, a recommended option and
 Broad regeneration is already authorized. A failing label contract remains actionable work,
 and this plan proposes no bypass of the shared gate.
 
+### Autonomous execution agreement (2026-10-28)
+
+The user approved autonomous processing of repairs that are provable within the agreed
+constraints. Technical difficulty alone is not a reason to defer a repair. Routine evidence
+review, declaration edits, validation and checkpoint commits do not need individual user
+approval. Preparation is complete; **execution of the remaining repair batches has not
+started**. The [progress and decision ledger](label-dependency-progress.md) records the fresh
+baseline, batch ownership and the next queued scope, **RB-A3**.
+
+The authorization covers truthful additive invariants and labels on existing choices whose
+resolved values and behavior remain unchanged. Preserve target conjunctions and existing
+coverage, rendering, supported configurations, sampling and random continuation. Review all
+consumers of a shared declaration and both question and solution evidence. Preserve the
+complete Area allowlist and the current integer-only digit qualification, including C2b's
+decimal-representation treatment. Range-policy work remains excluded. Do not add adapters,
+automatic completion, payload classification or weaker validation rules.
+
+A repair requiring a new semantic interpretation, ontology or evaluator change, mathematical
+schema distinction, or sampling/rendering change belongs in a decision batch. Previous
+specific approvals, such as M4 and C2b, do not authorize new changes of the same kind.
+Record concrete counterexamples, the affected projections and labels, options, a recommendation
+and its consequences before requesting that decision. Missing evidence is not permission to
+choose a convenient label. Continue independent provable work while a decision remains open.
+
+For each implementation checkpoint:
+
+1. Capture the current audit, matching/configuration baseline and touched-file state. Reconcile
+   intervening changes before editing; preserve unrelated work and stage only owned paths or
+   hunks. Review the full declaration ownership and impact scope, including currently gap-free
+   consumers and requirements that an added label activates.
+2. Establish the invariant or existing-choice proof, implement the additive repair, and run the
+   working-checkpoint checks above. A separate agent reviews the evidence, diff and validation
+   results before the checkpoint commit. Resolve actionable review findings before committing.
+3. Reconcile before/after selections using target, generator, view and preserved mathematical
+   configuration lineage. Label additions can change selection/variant hashes without changing
+   exercises; hash churn alone is neither a closed gap nor a new one. Retain explicit mappings
+   for ambiguous identities and inspect genuinely new matches.
+4. Update the ledger with raw and distinct findings, selections still affected, verified gaps
+   closed, newly introduced or reopened gaps, exact deferred subsets, evidence and review results.
+   Commit the coherent change and verification note on `codex/label-dependency-audit`.
+
+Split an unresolved subset into a named child, for example `RB-A3-D1`, only after identifying
+its actual selection/facet scope. Transfer ownership without counting the same gap in both
+parent and child or reporting a transfer as closure. Track an open decision topic separately
+from gaps assigned to it; the initial three known topics have not yet been fully triaged.
+If all remaining work needs decisions, present the consolidated decision queue to the user.
+
+Readiness to start autonomous repairs is distinct from dataset readiness. Deferred gaps remain
+part of the outstanding total. **All source gaps, including deferred gaps and newly activated
+requirements, must be resolved** before RB-V1; structural/contract errors and incomplete
+enumerations must also be zero. The existing full regeneration and selective Gemini VQA
+authorization then applies to RB-V1/RB-V2. No regeneration or VQA runs during this preparation.
+
 The reproducible audit command for this checkpoint is:
 
 ```bash
