@@ -5,9 +5,11 @@ Completed consolidation and migration documents are preserved unchanged in
 These items are not newly scheduled by the archive move.
 
 - **Local label dependencies:** the [dependency graph plan](label-dependency-graph.md)
-  records the implemented graph, evaluator, initial arithmetic/counting evidence, and
-  report-only audit with the agreed Area allowlist. Further coverage and strict integration
-  remain planned; range-policy redesign is excluded.
+  records the implemented graph, evaluator, strict annotation gate and report-only audit
+  with the agreed Area allowlist. The [refreshed backlog](label-dependency-graph.md#consolidated-declaration-backlog-2026-10-28)
+  has 1,307 distinct source gaps after the measurement word-problem and currency repairs;
+  the [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap) separates repairs,
+  semantic decisions and dataset refresh. Range-policy redesign remains excluded.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

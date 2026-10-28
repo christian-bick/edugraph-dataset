@@ -4,7 +4,8 @@ Status: implemented as annotation-only validation. The repository contains one s
 a pure ontology-aware evaluator, and a shared strict gate and audit. Generator payloads and
 rendered images are outside this initiative.
 
-Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
+Next work: the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
+[remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
 [second measurement batch](#second-measurement-batch), including M2b, is implemented.
 [M3 operand-digit declarations](#m3-operand-digit-declarations-2026-10-27) are implemented
@@ -15,6 +16,10 @@ remaining measurement obligation to ten integer addition/subtraction selections.
 explicitly selected generator configurations and a separately approved sampling change.
 The [C1 currency batch](#c1-currency-word-problem-declarations-2026-10-28) adds supported
 quantity and notation invariants in two separate checkpoints.
+The [C2 currency batch](#c2--currency-number-kinds-preserving-the-conversion-competency)
+closes all 18 remaining currency source findings and preserves the eight integer digit
+obligations. The current backlog contains **1,307 distinct non-range source gaps**;
+the stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
 
 ## Scope
 
@@ -245,9 +250,11 @@ claim is an invariant, so future parity annotations report missing zero classifi
 than inferring a replacement. No schema field, adapter or post-draw completion is introduced.
 The existing parity targets and every other production target continue to match unchanged.
 
-## Current findings and next work
+## Scope-cleanup audit baseline (2026-10-27)
 
-The current immutable snapshot is
+This section records the scope-cleanup checkpoint, not the current repair inventory.
+Use the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28) for present totals.
+The immutable snapshot at that checkpoint is
 `cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`.
 It contains 2,808 samples; 1,884 satisfy the Area allowlist. The label-only audit has
 4,318 non-range rule/facet failures across 1,332 samples, with zero conflicts, invalid
@@ -405,9 +412,10 @@ for its broader execution scope.
 
 ## Repair rollout plan
 
-Status: planned on 2026-10-27, following checkpoint `af69020e`; M2 and M2b are now implemented.
-The inventory below retains the pre-M2 baseline. The M2b verification checkpoint records
-the updated totals; the other proposed decisions remain open.
+Status: refreshed on 2026-10-28 after C2b (`62ff0736`). M2, M2b, M3, M4, C1 and C2
+are implemented; the current audit replaces the former pre-M2 inventory below. Earlier
+verification sections retain their historical counts and policies. Algebra, parity and
+legacy conversion decisions remain open.
 The agreed Area allowlist and range-policy exclusion above remain fixed, as do the 1,013
 normalized target conjunctions. The existing 1,182 semantic matches are the comparison
 baseline. Truthful capability additions may admit further matches; review them explicitly
@@ -436,8 +444,8 @@ new sampling behavior; introducing a new mathematical distinction is a separate 
 
 ### Working checkpoints
 
-1. Review the algebra/parity decisions early, in parallel with the narrowly scoped second
-   measurement batch. Prioritize shared, proven omissions rather than the alphabetical
+1. Review the algebra, parity and legacy conversion decisions early, in parallel with the
+   next supported declaration batches. Prioritize shared, proven omissions rather than the alphabetical
    order in which generation first encounters a failure.
 2. Implement small related batches from the inventory below. Before each batch, identify
    all compatible producers/consumers, the declaration owner, and any newly activated
@@ -471,151 +479,242 @@ and this plan proposes no bypass of the shared gate.
 The reproducible audit command for this checkpoint is:
 
 ```bash
-npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/label-dependency-next-plan/audit
+npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/label-backlog-refresh/audit
 ```
 
-Its policy hash is `f80dac1bb77b364ca754903051efb979d2ab9f62ff2a5da1ba57eb01dcc4f505`.
+Its policy hash is `01584d603f3c0b48a0c882f3a0350acc7b0dc511553560e50c390ed52b41122c`.
 The stored generation is `cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`.
 The committed inventory below is the durable checkpoint; local `backlog.json` and
-`build-backlog.mjs` under `temp/label-dependency-next-plan/` retain pair-level detail and
+`build-backlog.mjs` under `temp/label-backlog-refresh/` retain pair-level detail and
 aggregation checks. They are verification artifacts, not runtime dependencies.
 
-### Consolidated declaration backlog (2026-10-27)
+### Consolidated declaration backlog (2026-10-28)
 
-This pre-M2 baseline audit enumerates all **1,222 admitted selections**, including **807 eligible selections**.
-**616 selections across 81 generators and 171 generator/view pairs** have missing non-range groups.
-They contain **1,750 distinct selection/facet gaps** and **1,788 raw rule/facet assessments**;
-the 38 additional assessments are repeated base checks under numeric and decimal rules.
-There are no conflicts, invalid contexts, incomplete tuple enumerations or row/label-contract errors.
-The existing snapshot still contains 4,318 strict findings across 1,332 stored samples. Source selection
-counts are the repair progress measure; stored findings change only after successful regeneration.
+The fresh post-C2b audit enumerates **1,232 admitted selections**, including **817 eligible selections**.
+**538 selections across 79 generators and 169 generator/view pairs** still have non-range omissions.
+They contain **1,307 distinct selection/facet gaps** and **1,325 raw rule/facet findings**; the extra
+18 findings are repeated base checks. No conflicts, invalid contexts, incomplete enumerations or
+row/label-contract errors are present. These are missing annotation groups, not 1,307 independent
+code edits or proof that a particular label can be added.
 
-A selection is one admitted label assignment for a target and compatible generator/view pair.
-It is not an image, a distinct implementation edit, or proof that the missing label has a particular value.
-The table groups work by producing generator; the label owner must still be determined for each consuming view.
-Wave grouping is an investigation order, not a claim that every listed gap is already proven fixable by declarations.
+The stored snapshot remains at **4,146 raw / 4,012 distinct sample/facet findings across 1,332 samples**.
+That is a separate snapshot of the same repair effort, not an additional source backlog to add to
+1,307. Source declarations and stored rows are reconciled at the final regeneration checkpoints.
 
-| Investigation wave | Generators | Pairs | Selections with gaps | Distinct selection/facet gaps | Raw assessments |
+| Workstream | Generators | Pairs | Selections with gaps | Distinct gaps | Raw findings |
 |---|---:|---:|---:|---:|---:|
-| D | 3 | 9 | 25 | 100 | 100 |
-| M | 9 | 14 | 129 | 604 | 631 |
-| A | 36 | 75 | 290 | 427 | 427 |
-| F | 33 | 73 | 172 | 619 | 630 |
-| **Total** | **81** | **171** | **616** | **1750** | **1788** |
+| D — Algebra and numerical expressions | 3 | 9 | 25 | 100 | 100 |
+| M — Measurement conversion, time and units | 7 | 12 | 51 | 176 | 183 |
+| A — Arithmetic and counting | 36 | 75 | 290 | 419 | 419 |
+| F — Fractions, decimals, rationals and ratios | 33 | 73 | 172 | 612 | 623 |
+| **Total** | **79** | **169** | **538** | **1,307** | **1,325** |
 
-- **D — Expression decisions:** algebra, numerical expressions and powers; review semantics early in parallel with routine batches.
-- **M — Measurement contexts:** measurement, currency, time and unit dimensions; implement the narrowly reviewed second batch first.
-- **A — Arithmetic and counting:** shared operation, digit/count and place-value choices. The parity decision is reviewed early; its counts remain in A.
-- **F — Fractions, decimals and rational/ratio contexts:** fraction magnitude, sign/zero and representation distinctions.
-
-Apply source review within every wave to classify each proposed repair as a guaranteed invariant,
-a fact already determined by an existing schema choice, or a variable/ambiguous fact requiring a decision.
-No broad generator-level label additions are implied by this inventory.
-
-| Missing facet | Distinct selection/facet gaps | Raw assessments |
+| Missing facet | Distinct selection/facet gaps | Raw findings |
 |---|---:|---:|
-| numberKind | 93 | 93 |
-| numeralSystem | 328 | 328 |
-| base | 312 | 350 |
-| sign | 226 | 226 |
-| zero | 444 | 444 |
+| numberKind | 75 | 75 |
+| numeralSystem | 250 | 250 |
+| base | 234 | 252 |
+| sign | 148 | 148 |
+| zero | 366 | 366 |
 | operandCount | 13 | 13 |
-| operandDigits | 279 | 279 |
-| fractionMagnitude | 55 | 55 |
+| operandDigits | 186 | 186 |
+| fractionMagnitude | 35 | 35 |
 
-The complete generator inventory follows. **P** counts affected generator/view pairs, **S** counts
-admitted selections with at least one gap, and **G** counts distinct selection/facet gaps. Facet codes:
-**K** number kind, **N** numeral system, **B** base, **Sg** sign, **Z** zero, **O** operand count,
-**Dg** operand digits, **F** fraction magnitude. Range is excluded from every count below.
+### Remaining batch roadmap
 
-| Generator | Wave | P | S | G | Missing facets |
+**Baseline: 26 source-repair batches, followed by two dataset acceptance batches = 28 planned batches.**
+A source batch is one coherent review, repair and acceptance scope; it can contain several commits.
+It is not one label, one generator, one image, or a guarantee that declarations alone are sufficient.
+The 26 scopes below assign every current missing selection/facet to exactly one owner. Batches
+cover all current findings, but a completed batch must also resolve any new obligations it activates
+or explicitly create a follow-up batch before the source-readiness gate can pass.
+
+**Working planning allowance: 28–38 total batches.** The additional ten are a contingency of up to
+one split each for RB-A1, RB-A2, RB-A6, RB-A9, RB-F2, RB-F3, RB-F4, RB-F9, RB-M1 and RB-D1.
+Their width, zero, shared-consumer or visible/domain distinctions may separate a model decision
+from declaration work. This is an allowance based on the identified risks, not a statistical estimate
+or a hard upper bound. Clock, parity or another source review can reveal further work; a shared
+declaration can also close gaps in several scopes and reduce the eventual number of batches.
+
+| Workstream | Planned source batches | Current distinct gaps |
+|---|---:|---:|
+| Arithmetic and counting | 10 | 419 |
+| Fractions, decimals, rationals and ratios | 10 | 612 |
+| Measurement conversion, time and units | 4 | 176 |
+| Algebra and numerical expressions | 2 | 100 |
+| **Source total** | **26** | **1,307** |
+| Canonical dataset refresh and VQA/strict acceptance | **2** | Reconciles stored annotations |
+| **Baseline total** | **28** | |
+
+All source batches start with evidence/ownership review. The counts below are assigned backlog,
+not promised closure counts. Known decisions are part of their owning batch, not separately
+double-counted: algebra A1/A2 belongs to RB-D1, parity P1 to RB-A7, and legacy conversion to RB-M1.
+Other batches can still require a decision if an invariant or existing choice cannot express the fact.
+
+| Batch | Review and repair scope | Distinct gaps | Main uncertainty to resolve |
+|---|---|---:|---|
+| RB-A1 | Binary arithmetic operand widths | 118 | 118 selections span eleven projections. Width variation may need separately agreed pre-draw choices and multiple operation checkpoints; do not infer widths from sampled payloads. |
+| RB-A2 | Binary arithmetic zero participation | 28 | Whole-task zero occurrence depends on projection and optional zero support. Review guarantees before adding absence or introducing explicit cases. |
+| RB-A3 | Elementary numeral/base and number-view declarations | 64 | Most findings concern notation/base; writing also has zero omissions. Review each view owner, mode and plain-language/numeral projection; do not assume every representation is Arabic/Base10. |
+| RB-A4 | Three- and four-operand arithmetic | 24 | Coordinate width and zero guarantees across forward and inversion projections. Variable profiles may split the implementation into operation checkpoints. |
+| RB-A5 | Arithmetic strategies and property relations | 38 | Mainly operand widths; property relations also need zero classification across nested/transformed expressions. Shared helpers may help, but separate producers still require proof. |
+| RB-A6 | Patterns, estimation and equation-zero contexts | 36 | Mostly zero, with paired-pattern number-kind/base/sign gaps. Review visible sequence values, permitted values and nested relations; further pre-draw cases may be necessary. |
+| RB-A7 | Parity grouping and zero classification | 2 | Agree pre-draw even, singleton-odd and larger-odd grouping cases. Preserve all counts/targets; no inherited zero absence or post-draw completion. Producer boundary may need a dedicated model. |
+| RB-A8 | Counting offsets, equal groups and arrays | 16 | Operand counts and number kinds need support from the entire requested operation/model. Adding integer kinds can activate new digit obligations; include those in this batch review. |
+| RB-A9 | Place-value, rounding and powers-of-ten contexts | 71 | Notation plus sign/zero/width vary across place-value and rounding projections. Review representation of zero, regrouping and displayed intermediate values; split if these need different models. |
+| RB-A10 | Written algorithms and division models | 22 | Mainly operand count and zero, plus integer addition/subtraction widths. Review long-form algorithm steps and remainders without imposing digits on decimal-only contexts. |
+| RB-D1 | Symbolic and substituted algebra expressions | 56 | Base10 is a documented candidate for 14 gaps; the remaining 42 need per-projection kind/sign/zero reasoning. No blanket generator invariant. |
+| RB-D2 | Numerical expressions and powers | 44 | Same four missing facets across six views make one coherent expression review, but current gaps do not prove invariant number-kind/sign/zero values. |
+| RB-F1 | Decimal notation, comparison and transcription | 35 | Projection and mode review required: numeral-name tasks and fraction transcription cannot inherit one blanket notation or magnitude claim. |
+| RB-F2 | Decimal operations and place-value zero participation | 14 | A zero digit is not necessarily a numerical zero. Zero results, displayed intermediates and equality cases must be checked; varying claims may need an agreed mathematical choice. |
+| RB-F3 | Fraction arithmetic and benchmark estimation | 133 | Proper/improper magnitude and zero-result behavior may vary by existing operation/profile; do not infer a magnitude label from the missing group. |
+| RB-F4 | Fraction division and quotient projections | 177 | Highest shared-consumer risk: a common view declaration affects both producers and can activate new obligations. Separate checkpoints may be needed for invariant notation and mathematical kind/magnitude/zero choices. |
+| RB-F5 | Fraction equivalence and whole/tenths projections | 49 | Whole equivalents and line origins may change observable zero/magnitude participation; inspect all consumers before declaring invariants. |
+| RB-F6 | Fraction comparison and number-line placement | 40 | Line origins and comparison benchmarks are part of the visible task; their participation must be distinguished from the sampled fractions alone. |
+| RB-F7 | Fraction products and scaling | 40 | Magnitude can differ between input fractions and products; varying truthful values require existing-choice annotation or a separately agreed model distinction. |
+| RB-F8 | Rational number-line value representations | 40 | Representation alternatives and visible line zero must be assessed independently; the currently missing fraction magnitude is not automatically proper. |
+| RB-F9 | Signed rational contexts, order, magnitude and opposites | 54 | Different requested tasks expose different quantities; sign/zero declarations cannot be inherited from hidden payload values. Split contextual and line/magnitude repairs if their evidence contracts diverge. |
+| RB-F10 | Ratios, rates and percentages | 30 | Positive sampled quantities alone do not prove absence of zero in every table, prompt and solution; check all projections before adding the zero declaration. |
+| RB-M1 | Legacy conversion profiles and shared consumers | 84 | Known historical counterfactual closes 84 old assessments but opens 17 new ones; this is a joint profile/ownership repair, not a safe blanket label addition. |
+| RB-M2 | Clock reading and construction | 46 | Four views expose different clock evidence; number-kind, sign and zero guarantees must hold across each supported projection. |
+| RB-M3 | Elapsed time and interval arithmetic | 24 | Positive duration alone does not establish absence of every displayed zero. |
+| RB-M4 | Length measurement and unit relations | 22 | Small remaining clusters share measurement/unit context but must retain their distinct declaration owners. |
+| **Total** | | **1,307** | |
+
+#### Execution order and exit conditions
+
+1. Begin the lower-dependency declaration reviews with **RB-A3**, then **RB-F1, RB-F6 and RB-F10**.
+   Together these own 169 current distinct gaps. They are candidates for early work, not pre-approved
+   label values; their zero or representation edge cases still need evidence.
+2. Review **RB-D1, RB-A7 and RB-M1** early alongside routine work, using the existing decision notes.
+   Preserve every target and existing supported case. Agree any mathematical/schema, sampling or
+   other semantic change before implementing it; never classify sampled payloads to fill labels.
+3. Process the remaining scopes by shared producers/consumers, re-auditing after each batch. Assign
+   newly activated findings to the owning batch and update remaining counts. RB-M1 must also inspect
+   `measurement-unit-scale` and currently gap-free conversion derivation consumers; their absence
+   from the current 79-generator inventory does not exempt them from impact review.
+4. **RB-V1 — Source readiness and canonical refresh:** require zero non-range source omissions,
+   conflicts, invalid contexts and incomplete enumerations; run the already-authorized affected
+   canonical regeneration with authoritative graph rebuild. Check coverage, images, splits and churn.
+5. **RB-V2 — VQA and stored acceptance:** refresh only necessary VQA results, reuse exact passing
+   cache entries and pass strict stored annotation, image and coverage checks. Fix any newly exposed
+   defects and repeat affected validation. Merely scheduling V1/V2 is not proof that they will pass.
+
+The agreed Area allowlist and range-policy exclusion remain fixed. No adapter, automatic completion,
+new target requirement or gate weakening is authorized by this roadmap. Upstream digit-group and
+arithmetic-hierarchy corrections remain a parallel follow-up under the documented local safeguards;
+they are not counted as extra source-repair batches unless a particular ambiguity blocks a repair.
+
+#### Generator inventory and exact batch boundaries
+
+**P** = affected pairs, **S** = selections with gaps, **G** = distinct selection/facet gaps.
+Facet codes: **K** number kind, **N** numeral system, **B** base, **Sg** sign, **Z** zero,
+**O** operand count, **Dg** operand digits, **F** fraction magnitude. Range is excluded.
+
+| Generator | Batches | P | S | G | Missing facets |
 |---|---|---:|---:|---:|---|
-| `algebra-expressions` | D | 3 | 14 | 56 | K, B, Sg, Z |
-| `arithmetic-equation-judgment` | A | 1 | 2 | 2 | Z |
-| `arithmetic-estimation` | A | 1 | 4 | 4 | Z |
-| `arithmetic-known-fact-derivation` | A | 2 | 9 | 9 | Dg |
-| `arithmetic-numerical-expressions` | D | 4 | 6 | 24 | K, B, Sg, Z |
-| `arithmetic-operation-table` | A | 1 | 2 | 2 | Z |
-| `arithmetic-ops-four` | A | 4 | 4 | 4 | Dg |
-| `arithmetic-ops-pairs` | A | 11 | 118 | 168 | N, Z, Dg |
-| `arithmetic-ops-triples` | A | 6 | 12 | 20 | Z, Dg |
-| `arithmetic-paired-patterns` | A | 3 | 3 | 12 | K, B, Sg, Z |
-| `arithmetic-patterns` | A | 5 | 16 | 16 | Z |
-| `arithmetic-property-relations` | A | 2 | 6 | 12 | Z, Dg |
-| `arithmetic-word-problems-rounding` | A | 1 | 8 | 8 | N |
-| `comparison` | A | 2 | 6 | 12 | N, B |
-| `counting-basic` | A | 2 | 4 | 6 | N, B, Z |
-| `counting-classify-sort` | A | 1 | 2 | 4 | N, B |
-| `counting-hundred-offset` | A | 1 | 2 | 2 | O |
-| `counting-ten-offset` | A | 1 | 4 | 4 | O |
-| `currency-arithmetic` | M | 1 | 18 | 108 | K, N, B, Sg, Z, Dg |
-| `decimal-addition-subtraction` | F | 1 | 2 | 4 | Z, Dg |
-| `decimal-comparison` | F | 1 | 3 | 12 | N, B, Sg, Z |
-| `decimal-division-model` | F | 1 | 1 | 2 | Z, Dg |
-| `decimal-multiplication-model` | F | 1 | 1 | 2 | Z, Dg |
-| `decimal-notation` | F | 4 | 4 | 19 | N, B, Sg, Z, F |
-| `decimal-place-comparison` | F | 1 | 3 | 6 | Z, Dg |
-| `decimal-place-value-expanded` | F | 1 | 1 | 1 | Z |
-| `decimal-place-value-scaling` | F | 1 | 1 | 3 | N, Sg, Z |
-| `decimal-power-ten-scaling` | F | 1 | 2 | 2 | Z |
-| `decimal-rounding` | F | 1 | 1 | 1 | Z |
-| `decimal-writing` | F | 3 | 3 | 4 | N, Z |
-| `equal-groups-collection` | A | 1 | 3 | 6 | K, Dg |
-| `fraction-arithmetic` | F | 4 | 24 | 113 | N, B, Sg, Z, F |
-| `fraction-benchmark-arithmetic` | F | 2 | 4 | 20 | N, B, Sg, Z, F |
-| `fraction-comparison` | F | 2 | 7 | 28 | N, B, Sg, Z |
-| `fraction-division-relations` | F | 6 | 18 | 72 | K, N, B, Z |
-| `fraction-equivalence` | F | 5 | 7 | 28 | N, B, Sg, Z |
-| `fraction-number-line` | F | 1 | 3 | 12 | N, B, Sg, Z |
-| `fraction-products` | F | 3 | 4 | 20 | N, B, Sg, Z, F |
-| `fraction-quotient-model` | F | 6 | 34 | 105 | K, N, B, Sg, Z, F |
-| `fraction-scaling` | F | 2 | 5 | 20 | N, B, Sg, Z |
-| `fraction-tenths-equivalence` | F | 2 | 2 | 10 | N, B, Sg, Z, F |
-| `fraction-whole-equivalence` | F | 3 | 3 | 11 | N, B, Sg, Z |
-| `integer-add-subtract-strategies` | A | 1 | 8 | 8 | Dg |
-| `integer-addition-counting-on` | A | 2 | 4 | 4 | Dg |
-| `integer-rounding` | A | 1 | 7 | 7 | Z |
-| `integer-subtraction-counting-back` | A | 1 | 2 | 2 | Dg |
-| `measurement-conversion` | M | 2 | 21 | 84 | K, N, B, Sg, Z |
-| `measurement-length` | M | 2 | 10 | 10 | Z |
-| `measurement-ratio-relations` | M | 1 | 1 | 4 | N, B, Sg, Z |
-| `measurement-word-problems` | M | 1 | 60 | 320 | N, B, Sg, Z, Dg, F |
-| `multi-digit-division` | A | 1 | 3 | 3 | Z |
-| `multiplicative-comparison` | A | 2 | 3 | 3 | Dg |
-| `number-array` | A | 3 | 7 | 12 | K, Dg |
-| `numerical-power-expressions` | D | 2 | 5 | 20 | K, B, Sg, Z |
-| `percent-quantity-relations` | F | 2 | 2 | 6 | N, B, Z |
-| `place-value-arithmetic` | A | 3 | 21 | 48 | N, Z, Dg |
-| `place-value-expanded` | A | 1 | 4 | 12 | Sg, Z, Dg |
-| `place-value-scaling` | A | 1 | 1 | 2 | N, Z |
-| `powers-of-ten` | A | 1 | 1 | 1 | Z |
-| `ratio-table-comparisons` | F | 1 | 3 | 9 | N, B, Z |
-| `ratio-tables` | F | 2 | 2 | 6 | N, B, Z |
-| `rational-magnitude-contexts` | F | 2 | 3 | 9 | N, B, Z |
-| `rational-magnitude-relations` | F | 1 | 2 | 6 | N, B, Z |
-| `rational-numberline-values` | F | 2 | 12 | 40 | N, B, Z, F |
-| `rational-opposite-relations` | F | 3 | 3 | 6 | N, B |
-| `rational-order-contexts` | F | 2 | 4 | 16 | N, B, Sg, Z |
-| `rational-order-relations` | F | 1 | 2 | 8 | N, B, Sg, Z |
-| `signed-rational-contexts` | F | 3 | 3 | 9 | N, B, Sg, Z |
-| `standard-algorithm-add-subtract` | A | 1 | 4 | 4 | Dg |
-| `standard-algorithm-decimal-add-subtract` | A | 1 | 2 | 4 | Z, O |
-| `standard-algorithm-decimal-division` | A | 1 | 1 | 2 | Z, O |
-| `standard-algorithm-decimal-multiplication` | A | 1 | 1 | 2 | Z, O |
-| `standard-algorithm-division` | A | 1 | 3 | 6 | Z, O |
-| `standard-algorithm-multiplication` | A | 1 | 1 | 1 | Z |
-| `time` | M | 4 | 11 | 46 | K, N, B, Sg, Z |
-| `time-elapsed` | M | 1 | 2 | 8 | N, B, Sg, Z |
-| `time-interval-arithmetic` | M | 1 | 4 | 16 | N, B, Sg, Z |
-| `unit-dimension-relations` | M | 1 | 2 | 8 | N, B, Sg, Z |
-| `unit-rate-relations` | F | 2 | 3 | 9 | N, B, Z |
-| `whole-number-power-ten-scaling` | A | 1 | 1 | 1 | Z |
-| `writing` | A | 6 | 11 | 14 | N, Z |
-| **Total** | | **171** | **616** | **1750** | |
+| `algebra-expressions` | RB-D1 | 3 | 14 | 56 | K, B, Sg, Z |
+| `arithmetic-equation-judgment` | RB-A6 | 1 | 2 | 2 | Z |
+| `arithmetic-estimation` | RB-A6 | 1 | 4 | 4 | Z |
+| `arithmetic-known-fact-derivation` | RB-A5 | 2 | 9 | 9 | Dg |
+| `arithmetic-numerical-expressions` | RB-D2 | 4 | 6 | 24 | K, B, Sg, Z |
+| `arithmetic-operation-table` | RB-A6 | 1 | 2 | 2 | Z |
+| `arithmetic-ops-four` | RB-A4 | 4 | 4 | 4 | Dg |
+| `arithmetic-ops-pairs` | RB-A1, RB-A2, RB-A3 | 11 | 118 | 168 | N, Z, Dg |
+| `arithmetic-ops-triples` | RB-A4 | 6 | 12 | 20 | Z, Dg |
+| `arithmetic-paired-patterns` | RB-A6 | 3 | 3 | 12 | K, B, Sg, Z |
+| `arithmetic-patterns` | RB-A6 | 5 | 16 | 16 | Z |
+| `arithmetic-property-relations` | RB-A5 | 2 | 6 | 12 | Z, Dg |
+| `arithmetic-word-problems-rounding` | RB-A3 | 1 | 8 | 8 | N |
+| `comparison` | RB-A3 | 2 | 6 | 12 | N, B |
+| `counting-basic` | RB-A3, RB-A7 | 2 | 4 | 6 | N, B, Z |
+| `counting-classify-sort` | RB-A3 | 1 | 2 | 4 | N, B |
+| `counting-hundred-offset` | RB-A8 | 1 | 2 | 2 | O |
+| `counting-ten-offset` | RB-A8 | 1 | 4 | 4 | O |
+| `decimal-addition-subtraction` | RB-F2 | 1 | 2 | 2 | Z |
+| `decimal-comparison` | RB-F1 | 1 | 3 | 12 | N, B, Sg, Z |
+| `decimal-division-model` | RB-F2 | 1 | 1 | 1 | Z |
+| `decimal-multiplication-model` | RB-F2 | 1 | 1 | 1 | Z |
+| `decimal-notation` | RB-F1 | 4 | 4 | 19 | N, B, Sg, Z, F |
+| `decimal-place-comparison` | RB-F2 | 1 | 3 | 3 | Z |
+| `decimal-place-value-expanded` | RB-F2 | 1 | 1 | 1 | Z |
+| `decimal-place-value-scaling` | RB-F2 | 1 | 1 | 3 | N, Sg, Z |
+| `decimal-power-ten-scaling` | RB-F2 | 1 | 2 | 2 | Z |
+| `decimal-rounding` | RB-F2 | 1 | 1 | 1 | Z |
+| `decimal-writing` | RB-F1 | 3 | 3 | 4 | N, Z |
+| `equal-groups-collection` | RB-A8 | 1 | 3 | 3 | K |
+| `fraction-arithmetic` | RB-F3 | 4 | 24 | 113 | N, B, Sg, Z, F |
+| `fraction-benchmark-arithmetic` | RB-F3 | 2 | 4 | 20 | N, B, Sg, Z, F |
+| `fraction-comparison` | RB-F6 | 2 | 7 | 28 | N, B, Sg, Z |
+| `fraction-division-relations` | RB-F4 | 6 | 18 | 72 | K, N, B, Z |
+| `fraction-equivalence` | RB-F5 | 5 | 7 | 28 | N, B, Sg, Z |
+| `fraction-number-line` | RB-F6 | 1 | 3 | 12 | N, B, Sg, Z |
+| `fraction-products` | RB-F7 | 3 | 4 | 20 | N, B, Sg, Z, F |
+| `fraction-quotient-model` | RB-F4 | 6 | 34 | 105 | K, N, B, Sg, Z, F |
+| `fraction-scaling` | RB-F7 | 2 | 5 | 20 | N, B, Sg, Z |
+| `fraction-tenths-equivalence` | RB-F5 | 2 | 2 | 10 | N, B, Sg, Z, F |
+| `fraction-whole-equivalence` | RB-F5 | 3 | 3 | 11 | N, B, Sg, Z |
+| `integer-add-subtract-strategies` | RB-A5 | 1 | 8 | 8 | Dg |
+| `integer-addition-counting-on` | RB-A5 | 2 | 4 | 4 | Dg |
+| `integer-rounding` | RB-A9 | 1 | 7 | 7 | Z |
+| `integer-subtraction-counting-back` | RB-A5 | 1 | 2 | 2 | Dg |
+| `measurement-conversion` | RB-M1 | 2 | 21 | 84 | K, N, B, Sg, Z |
+| `measurement-length` | RB-M4 | 2 | 10 | 10 | Z |
+| `measurement-ratio-relations` | RB-M4 | 1 | 1 | 4 | N, B, Sg, Z |
+| `multi-digit-division` | RB-A10 | 1 | 3 | 3 | Z |
+| `multiplicative-comparison` | RB-A5 | 2 | 3 | 3 | Dg |
+| `number-array` | RB-A8 | 3 | 7 | 7 | K |
+| `numerical-power-expressions` | RB-D2 | 2 | 5 | 20 | K, B, Sg, Z |
+| `percent-quantity-relations` | RB-F10 | 2 | 2 | 6 | N, B, Z |
+| `place-value-arithmetic` | RB-A9 | 3 | 21 | 48 | N, Z, Dg |
+| `place-value-expanded` | RB-A9 | 1 | 4 | 12 | Sg, Z, Dg |
+| `place-value-scaling` | RB-A9 | 1 | 1 | 2 | N, Z |
+| `powers-of-ten` | RB-A9 | 1 | 1 | 1 | Z |
+| `ratio-table-comparisons` | RB-F10 | 1 | 3 | 9 | N, B, Z |
+| `ratio-tables` | RB-F10 | 2 | 2 | 6 | N, B, Z |
+| `rational-magnitude-contexts` | RB-F9 | 2 | 3 | 9 | N, B, Z |
+| `rational-magnitude-relations` | RB-F9 | 1 | 2 | 6 | N, B, Z |
+| `rational-numberline-values` | RB-F8 | 2 | 12 | 40 | N, B, Z, F |
+| `rational-opposite-relations` | RB-F9 | 3 | 3 | 6 | N, B |
+| `rational-order-contexts` | RB-F9 | 2 | 4 | 16 | N, B, Sg, Z |
+| `rational-order-relations` | RB-F9 | 1 | 2 | 8 | N, B, Sg, Z |
+| `signed-rational-contexts` | RB-F9 | 3 | 3 | 9 | N, B, Sg, Z |
+| `standard-algorithm-add-subtract` | RB-A10 | 1 | 4 | 4 | Dg |
+| `standard-algorithm-decimal-add-subtract` | RB-A10 | 1 | 2 | 4 | Z, O |
+| `standard-algorithm-decimal-division` | RB-A10 | 1 | 1 | 2 | Z, O |
+| `standard-algorithm-decimal-multiplication` | RB-A10 | 1 | 1 | 2 | Z, O |
+| `standard-algorithm-division` | RB-A10 | 1 | 3 | 6 | Z, O |
+| `standard-algorithm-multiplication` | RB-A10 | 1 | 1 | 1 | Z |
+| `time` | RB-M2 | 4 | 11 | 46 | K, N, B, Sg, Z |
+| `time-elapsed` | RB-M3 | 1 | 2 | 8 | N, B, Sg, Z |
+| `time-interval-arithmetic` | RB-M3 | 1 | 4 | 16 | N, B, Sg, Z |
+| `unit-dimension-relations` | RB-M4 | 1 | 2 | 8 | N, B, Sg, Z |
+| `unit-rate-relations` | RB-F10 | 2 | 3 | 9 | N, B, Z |
+| `whole-number-power-ten-scaling` | RB-A9 | 1 | 1 | 1 | Z |
+| `writing` | RB-A3 | 6 | 11 | 14 | N, Z |
+| **Total** | **26 source batches** | **169** | **538** | **1,307** | |
 
-The first measurement batch (`measurement-number-line` and `measurement-conversion-problems`) has no
-remaining non-range source-selection gaps and therefore is absent from this outstanding-work inventory.
-Their historic stored-row findings remain until regeneration publishes the changed annotations.
+Only two generators have split ownership in this inventory:
+
+- `arithmetic-ops-pairs`: RB-A1 owns operand digits (118), RB-A2 owns zero (28), and RB-A3
+  owns numeral system (22).
+- `counting-basic`: RB-A7 owns the parity view's two zero gaps; RB-A3 owns the conservation
+  view's four numeral/base gaps.
+
+All other generators belong wholly to the listed batch. Source-gap ownership is exclusive, but
+shared views and helpers may require coordinated implementation across batches. Reuse a shared
+fix rather than duplicate it, and credit every affected scope in the next audit.
+
+`measurement-number-line`, `measurement-conversion-problems`, `measurement-word-problems` and
+`currency-arithmetic` have no remaining non-range source gaps and are intentionally absent.
+Legacy conversion and other measurement/time/unit families remain open. Stored-row findings
+for the completed families remain until successful regeneration publishes the new annotations.
+
+The refresh is based on source checkpoint `62ff0736`. The audit SHA-256 is
+`d76c73c1e18cfbb96142fb4c066ad75bf5bb9e1f18abb16f957588d13ce16813`. `backlog.json`, `batches.json` and the builder/renderer scripts
+under `temp/label-backlog-refresh/` retain the reproducible aggregation and exact partition checks.
+The committed tables are the durable work inventory; these scratch artifacts are not runtime
+dependencies. Earlier implementation checkpoints below retain their historical verification counts.
 
 ## Algebra and parity decision note
 
@@ -1327,7 +1426,8 @@ fails on the 4,146 existing stored findings, so the aggregate check remains non-
 There are no annotation conflicts or incomplete enumerations. The command log is
 `temp/measurement-width-choices/check.txt`.
 
-This completes the measurement source-declaration backlog under the agreed scope. The
+This completes the measurement **word-problem** source-declaration backlog under the agreed scope;
+the separate legacy conversion, length, time and unit families remain in the consolidated inventory. The
 stored snapshot still has 4,146 non-range findings pending the agreed regeneration
 and VQA readiness checkpoint. The global Area allowlist and range-policy
 exclusion remain unchanged; no evidence adapter or automatic completion is present.
