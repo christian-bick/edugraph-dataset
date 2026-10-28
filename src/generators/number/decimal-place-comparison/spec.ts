@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
@@ -25,15 +25,20 @@ const resolveComparisonKind = selectExactLabelMap([
     [Area.NumericInequality, 'inequality']
 ] as const);
 
-const resolveRelation = selectExactLabelMap([
-    [Scope.Greater, 'greater'],
-    [Scope.Equal, 'equal'],
-    [Scope.Less, 'less']
+const resolveRelation = selectExactLabelSetMap([
+    [[Scope.Greater], 'greater'],
+    [[Scope.Equal], 'equal'],
+    [[Scope.Equal, Scope.NumbersWithZero], 'equal'],
+    [[Scope.Less], 'less']
 ] as const);
 
 export const DecimalPlaceComparisonGeneratorSchema = {
     comparisonKind: [[Area.NumericEquality, Area.NumericInequality], resolveComparisonKind],
-    relation: [[Scope.Greater, Scope.Equal, Scope.Less], resolveRelation]
+    relation: [
+        [Scope.Greater, Scope.Equal, Scope.Less, Scope.NumbersWithZero],
+        resolveRelation,
+        [[Scope.Greater], [Scope.Equal, Scope.NumbersWithZero], [Scope.Less]]
+    ]
 } as const;
 
 export type DecimalPlaceComparisonGeneratorConfig = ConfigFromSchema<

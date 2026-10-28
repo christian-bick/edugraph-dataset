@@ -6,7 +6,7 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
-No independent declaration repair remains queued. The 430 remaining requirements have exact
+No independent declaration repair remains queued. The 429 remaining requirements have exact
 ownership in 29 decision batches. Full dataset readiness still waits for those decisions. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
 currency repairs. The source still has gaps, so dataset regeneration is not ready.
@@ -33,10 +33,10 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 430 |
+| Outstanding source gaps | 429 |
 | Queued, in review or not yet triaged | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 430 |
-| Verified closed / introduced / reopened | 952 / 75 / 0 |
+| Assigned to deferred decision batches (subset of outstanding) | 429 |
+| Verified closed / introduced / reopened | 953 / 75 / 0 |
 | Active decision scopes | 29 |
 
 All remaining topics now have explicit child owners. Thirty child scopes have been created;
@@ -79,7 +79,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-F1 | Decimal notation, comparison and transcription | 35 | 0 | 0 | Complete; child below |
 | RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 3 | 3 | Partial; remaining deferred |
 | RB-F2 | Decimal operations and place-value zero | 14 | 0 | 0 | Complete; child below |
-| RB-F2-D1 | Decimal zero/component distinctions | 0 | 8 | 8 | Deferred |
+| RB-F2-D1 | Decimal zero/component distinctions | 0 | 7 | 7 | Partial; remaining deferred |
 | RB-F3 | Fraction arithmetic and benchmark estimation | 133 | 0 | 0 | Complete; child below |
 | RB-F3-D1 | Arithmetic/benchmark fraction magnitude | 0 | 21 | 21 | Deferred |
 | RB-F4 | Fraction division and quotient projections | 177 | 0 | 0 | Complete; children below |
@@ -106,7 +106,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **430** | **430** | |
+| **Total: 56 source batches** | | **1,307** | **429** | **429** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
@@ -141,7 +141,7 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-M2-01 | RB-M2-D1 | Twenty-seven clock requirements remain: ten analog-reading numeral/base findings and seventeen zero findings. Ten digital-construction notation findings are closed because the visible task necessarily requests positional decimal digits. | Analog reading's generic response does not require the same notation. Review the proposed representation contract and the existing one-sided zero selector separately; keep targets, precision and rendering. |
 | DEC-M3-01 | RB-M3-D1 | Six elapsed/interval zero findings remain. A positive question such as 1:31 to 2:05 has a solution introducing the reference 2:00. | Clarify component versus composite time occurrence and mode-specific evidence. A zero digit alone is not sufficient. |
 | DEC-D2-01 | RB-D2-D1 | Ten power sign/zero findings remain: the same exponent profile admits 2^2, (-2)^2 and 0^2; another admits exponent zero. | Review ordinary pre-draw distinctions preserving all supported bases, coefficients and exponents. PositiveExponent alone does not classify base sign or zero participation. |
-| DEC-F2-01 | RB-F2-D1 | Eight decimal zero findings concern component/decomposition evidence and values or results that vary inside existing choices. | Separate zero digits from involved zero values; review the concrete expanded, comparison, rounding and addition/subtraction projections. |
+| DEC-F2-01 | RB-F2-D1 | Seven decimal zero findings remain. Equality's guaranteed zero thousandths coefficient is now declared on its existing choice; inequality, expansion, scaling, rounding and arithmetic values still vary. | Preserve existing numeric choices and distinguish explicit coefficients from digit glyphs. Further blanket zero declarations are not justified. |
 | DEC-F3-01 | RB-F3-D1 | Twenty-one arithmetic/benchmark magnitude findings vary between proper, equal-whole and improper operands, results or benchmark candidates. | Determine participating quantities and ordinary pre-draw distinctions; a proper input alone does not classify a complete arithmetic task. |
 | DEC-F4-01 | RB-F4-D1 | Thirty-five division zero findings vary by model and projection. General models can display origin zero; shared union views also accept positive unit-part models without that origin. | Review model/projection ownership and question/solution evidence without blanket generator absence or union-view presence. |
 | DEC-F4-02 | RB-F4-D2 | Nineteen magnitude findings include eighteen exposed by truthful FractionNumbers declarations; dividends and quotients can be proper, equal-whole or improper. | Represent actual mathematical distinctions before drawing, preserving all original values and cases. |
@@ -155,7 +155,7 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-A5-01 | RB-A5-D1 | Two compensation contexts have small adjustments but variable primary widths; one inverse comparison can ask 24÷12 or 24÷2. | Classify primary operands, not adjustments or hidden relation roles; agree any new pre-draw distinction. |
 | DEC-A5-02 | RB-A5-D2 | Two near-doubles width claims are mathematically proved. The prototype preserves production plans but changes legacy extractConfig entropy in 32/128 probes; seed zero advances to 1831565813. | Decide whether to accept that concrete legacy-workflow difference or authorize API support beyond this initiative. Both cases remain open under the current preservation constraint. |
 | DEC-A6-01 | RB-A6-D1 | Six equation/estimation zero cases vary in generated quantities or displayed procedure evidence. | Review ordinary pre-draw cases and the exact participating values; do not choose absence from a positive sample. |
-| DEC-A9-01 | RB-A9-D1 | Twenty-nine place-value/rounding/power zero findings include place counts, regrouping/intermediate values, local origins and exponent zero; one comes from the newly admitted tens model. | Clarify zero-component evidence and genuine pre-draw distinctions. A zero glyph alone is not an involved zero quantity. |
+| DEC-A9-01 | RB-A9-D1 | Twenty-nine place-value/rounding/power zero findings remain. Four expanded-form cases are mathematically settled, but their metadata prototype changes legacy extraction entropy and can select a wrong zero alias outside planner compatibility. | The low branch has only positive summands; the high branch displays a necessarily zero place coefficient. These four require a safe context-qualified declaration mechanism, not a new zero convention. Other cases retain component/ownership distinctions; a zero glyph alone is insufficient. |
 | DEC-A9-02 | RB-A9-D2 | Six place-value widths vary under existing magnitude/range profiles. | Propose normal width choices with supported-case and sampling comparisons; keep existing range policy unchanged. |
 | DEC-A10-01 | RB-A10-D1 | Ten algorithm contexts have varying zero operands, partial products, quotient digits or remainders. | Review explicit mathematical cases and question/solution procedures. Hidden initialization zero and shifted zero glyphs do not establish invariant zero participation. |
 
@@ -435,7 +435,7 @@ transferring them does not count as closure.
 
 ### Necessary mathematical and notation evidence re-review
 
-Starting from `c0cd7a1d`, a fresh audit exactly reproduced the prior final report. Review of
+Committed as `37ac3001`, starting from `c0cd7a1d`; a fresh audit exactly reproduced the prior final report. Review of
 the installed ontology's content-evidence rules corrected an overly literal interpretation
 of evidence in three deferred children. Accessible necessary consequences are already
 accepted; a new semantic convention or evaluator change is not needed for these cases.
@@ -478,21 +478,58 @@ manifests and before copies, `zero-review.md`, `numeral-decision-review.md`, `co
 the comparison and complete lineage. Protected unrelated file hashes and the dataset pointer
 remain unchanged. No regeneration or VQA was run.
 
+### Decimal equality choice checkpoint
+
+Starting from `37ac3001`, `decimal-place-comparison` adds `NumbersWithZero` to its existing
+Equal relation. Every equality payload has a zero thousandths coefficient, and its only
+view displays all six named place coefficients in both modes. The old `[Equal]` request
+remains a legal same-value alias; three canonical fallbacks retain Greater/Equal/Less values.
+The existing exact-set resolver rejects unsupported Greater/Less plus zero requests. No
+generator mathematics, sampled profile, rendering, target or evaluator code changes.
+
+This closes **one RB-F2-D1 finding**, with no new findings: **430 - 1 = 429** distinct/raw,
+across 329 selections. Cumulative accounting is **1,307 + 75 - 953 = 429**; all 29 child scopes
+remain active. The full audit retains 1,263 selections, 848 eligible, 1,013 targets and 1,195
+matches, with zero conflicts, invalid contexts, contract errors or incomplete enumerations.
+All 1,263 prior configurations, 2,526 Q/S probes and 2,808 stored-origin draws remain identical
+apart from the additive label. The additional focused proof preserves 192 ordinary draws,
+192 target-based legacy extractions and 768 exhaustive checks over old extractable requests.
+
+The four expanded-form candidates stay within RB-A9-D1 and count as outstanding. Their
+zero facts follow from existing range/cardinality choices, but the scratch prototype changes
+legacy extraction entropy in 128/192 probes; that API also lacks the planner guard that would
+prevent an incorrect low/high zero alias. No prototype change was applied. This is a declaration
+mechanism/preservation decision, not permission to reinterpret zero or alter ranges.
+
+The source diff contains one generator spec and its existing tests. Focused tests pass three
+suites / 19 tests, including unsupported zero-claim regressions. Independent source review,
+type/ownership and whole-catalogue preservation pass. Full coverage passes 841 suites / 6,485
+tests at 98.49% statements, 97.05% branches, 100% functions and 99.51% lines; generator thresholds
+pass. Documentation passes with five existing external-fetch warnings and no errors. The
+`equality-coverage.log`, `equality-generator-coverage.log`, `equality-types.log`,
+`equality-specs.log` and `equality-docs.log` record these checks. Evidence: `secondary-owned.json`,
+`secondary-before-files/`, `zero-secondary-review.md`, `zero-secondary-proof.json`,
+`equality-verification.json` and `equality-deferred.json` under the decisions scratch directory.
+The latest audit, replay and comparison are in
+`temp/label-dependency-execution/decisions-equality/`, compared with `decisions-after/`.
+The representation proposal remains unapproved and contributes no closures. Stored data,
+policy and unrelated work are unchanged; regeneration/VQA still wait for source readiness.
+
 ## Decision queue after autonomous declarations
 
 No declaration batch remains untriaged. The 29 active child batches above account for every
-one of the 430 outstanding requirements. Their facet totals are:
+one of the 429 outstanding requirements. Their facet totals are:
 
 | Decision facet | Gaps |
 |---|---:|
-| Zero occurrence, components, model/projection ownership | 178 |
+| Zero occurrence, components, model/projection ownership | 177 |
 | Integer primary-operand widths (including two legacy-API cases) | 113 |
 | Fraction magnitude and mixed representations | 49 |
 | Numeral-system evidence/applicability | 23 |
 | Base evidence/applicability | 15 |
 | Number-kind/domain/profile ownership | 29 |
 | Sign occurrence/domain distinctions | 23 |
-| **Total** | **430** |
+| **Total** | **429** |
 
 Recommended review order: decide the concrete representation-completeness proposal first,
 then resolve remaining question/solution declaration ownership and ordinary width/model profiles;

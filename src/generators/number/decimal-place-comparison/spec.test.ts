@@ -44,10 +44,21 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe(relation);
-        expect(stub!.labels).toEqual([area, scope]);
+        expect(stub!.labels).toEqual(relation === 'equal'
+            ? [area, scope, Scope.NumbersWithZero] : [area, scope]);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
+        if (relation === 'equal') {
+            expect(stub!.data.left.fractionalDigits[2]).toBe(0);
+            expect(stub!.data.right.fractionalDigits[2]).toBe(0);
+        }
 
         setSeed(`decimal-place-comparison-labels-${relation}`);
         expect(generator.generate({comparisonKind, relation})?.data).toEqual(stub!.data);
+    });
+
+    it.each([Scope.Greater, Scope.Less])('does not claim zero for an unrestricted %s comparison', relation => {
+        expect(() => generateWithLabels(generator, [
+            ...commonLabels, Area.NumericInequality, relation, Scope.NumbersWithZero
+        ])).toThrow('Unsupported exact label combination');
     });
 });

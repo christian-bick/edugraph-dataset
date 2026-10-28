@@ -23,7 +23,7 @@ the [progress ledger](label-dependency-progress.md) tracks current counts and ch
 The stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
-source scopes: **952 requirements closed, 75 newly exposed, 430 remaining**. All remaining gaps have exact owners in **29 decision
+source scopes: **953 requirements closed, 75 newly exposed, 429 remaining**. All remaining gaps have exact owners in **29 decision
 batches**; no independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
 for the remaining source decisions and their implementations. The next concrete proposal is
@@ -35,7 +35,7 @@ for the remaining source decisions and their implementations. The next concrete 
 outside the declaration-only authorization. The current graph, evaluator, shared strict gate,
 Area allowlist, integer-digit qualification and range exclusion remain unchanged.
 
-The necessary-evidence re-review closes 22 findings without changing policy: twelve explicit
+The necessary-evidence re-review closes 23 findings without changing policy: thirteen explicit
 or necessarily required zero values and ten digital-construction numeral/base requirements.
 The visible request to build a digital time establishes its required notation even with blank
 digit slots. This follows the installed ontology's content-evidence rule; it does not require
@@ -88,7 +88,7 @@ omission detector. The current blanket rule catches that particular omission but
 false numeral claims for object-only tasks. A rule triggered only by an existing numeral label
 cannot detect its absence and is not a substitute for this explicit contract decision.
 
-A read-only simulation on the current annotations gives **430 → 407** distinct source gaps:
+A read-only simulation on the current annotations gives **429 → 406** distinct source gaps:
 
 | Owner | Current notation gaps removed | Replacement representation gaps | Net reduction |
 |---|---:|---:|---:|
