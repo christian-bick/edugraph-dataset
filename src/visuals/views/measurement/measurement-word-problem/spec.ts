@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'measurement-word-problem',
-    generalLabels: [Ability.TextualReception]
+    generalLabels: [Ability.TextualReception, Scope.ArabicNumerals]
 };
 
 export const MeasurementWordProblemViewSchema = {

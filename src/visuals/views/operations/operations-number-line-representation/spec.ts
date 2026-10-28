@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-number-line-representation',
-    generalLabels: [Scope.Numberline, Ability.VisualArticulation],
+    generalLabels: [Scope.Numberline, Scope.ArabicNumerals, Ability.VisualArticulation],
     compatibility: [
         rejectTargetLabels('number-line-domain', [
             Scope.NumbersWithoutZero,

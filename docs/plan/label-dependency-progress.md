@@ -5,8 +5,8 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 [autonomous execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
-**Ready for repair execution; no remaining repair batch has started.** RB-A3 is next, followed
-by RB-F1, RB-F6 and RB-F10, with early decision review for RB-D1, RB-A7 and RB-M1. Counts below
+**Execution started: RB-A3's supported declarations are implemented.** RB-F1 is next, followed
+by RB-F6 and RB-F10, with early decision review for RB-D1, RB-A7 and RB-M1. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
 currency repairs. The source still has gaps, so dataset regeneration is not ready.
 
@@ -32,27 +32,29 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 1,307 |
-| Queued or not yet triaged | 1,307 |
-| Assigned to deferred decision batches (subset of outstanding) | 0 |
-| Verified closed / introduced / reopened | 0 / 0 / 0 |
-| Known decision topics awaiting batch triage | 3 |
+| Outstanding source gaps | 1,306 |
+| Queued or not yet triaged | 1,267 |
+| Assigned to deferred decision batches (subset of outstanding) | 39 |
+| Verified closed / introduced / reopened | 25 / 24 / 0 |
+| Known decision topics | 6 |
 
-Zero assigned-deferred gaps means classification has not started. It does not mean all gaps
-can be fixed through declarations. The three known topics below remain open.
+The three original topics remain open; RB-A3 adds three concrete child scopes below.
+Deferred gaps remain included in the outstanding total.
 
 ## Source batch ledger
 
-Every baseline selection/facet gap has exactly one owner. All rows initially have zero
-closed, introduced, reopened and assigned-deferred gaps. Record those movements and evidence
+Every selection/facet gap has exactly one current owner. Record movements and evidence
 in the checkpoint log when a batch is processed; update current counts and row state here.
 The roadmap contains each scope's uncertainties and generator inventory.
 
 | Batch | Scope | Baseline gaps | Current gaps | Deferred subset | State |
 |---|---|---:|---:|---:|---|
-| RB-A1 | Binary arithmetic operand widths | 118 | 118 | 0 | Queued |
+| RB-A1 | Binary arithmetic operand widths | 118 | 142 | 0 | Queued |
 | RB-A2 | Binary arithmetic zero participation | 28 | 28 | 0 | Queued |
-| RB-A3 | Elementary numeral/base and number views | 64 | 64 | 0 | Queued — next |
+| RB-A3 | Elementary numeral/base and number views | 64 | 0 | 0 | Complete; children below |
+| RB-A3-D1 | Object-only numeral/base applicability | 0 | 20 | 20 | Deferred |
+| RB-A3-D2 | Writing zero declaration ownership | 0 | 11 | 11 | Deferred |
+| RB-A3-D3 | Rounding-reasoning match guarantees | 0 | 8 | 8 | Deferred |
 | RB-A4 | Three- and four-operand arithmetic | 24 | 24 | 0 | Queued |
 | RB-A5 | Arithmetic strategies and property relations | 38 | 38 | 0 | Queued |
 | RB-A6 | Patterns, estimation and equation-zero contexts | 36 | 36 | 0 | Queued |
@@ -62,7 +64,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A10 | Written algorithms and division models | 22 | 22 | 0 | Queued |
 | RB-D1 | Symbolic and substituted algebra expressions | 56 | 56 | 0 | Queued |
 | RB-D2 | Numerical expressions and powers | 44 | 44 | 0 | Queued |
-| RB-F1 | Decimal notation, comparison and transcription | 35 | 35 | 0 | Queued |
+| RB-F1 | Decimal notation, comparison and transcription | 35 | 35 | 0 | Queued — next |
 | RB-F2 | Decimal operations and place-value zero | 14 | 14 | 0 | Queued |
 | RB-F3 | Fraction arithmetic and benchmark estimation | 133 | 133 | 0 | Queued |
 | RB-F4 | Fraction division and quotient projections | 177 | 177 | 0 | Queued |
@@ -76,17 +78,18 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M2 | Clock reading and construction | 46 | 46 | 0 | Queued |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 24 | 0 | Queued |
 | RB-M4 | Length measurement and unit relations | 22 | 22 | 0 | Queued |
-| **Total: 26 source batches** | | **1,307** | **1,307** | **0** | |
+| **Total: 29 source batches** | | **1,307** | **1,306** | **39** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
 | RB-V1 — Source readiness and canonical refresh | Waiting for readiness | Zero non-range source gaps, including deferred/new obligations; no conflicts, invalid contexts, contract errors or incomplete enumerations. |
 | RB-V2 — VQA and stored acceptance | Waiting for refreshed dataset | Successful RB-V1, then necessary VQA refresh and strict stored annotation, image and coverage checks. |
 
-The baseline remains **28 batches including acceptance**. Splitting a scope can increase that
-number without increasing the gap count; verified closure is the primary progress measure.
+The original baseline remains **28 batches including acceptance**; three explicit child scopes
+bring the current inventory to **31**. Splitting does not close gaps. Verified closure and newly
+introduced requirements are the primary progress measures.
 
-## Decision topics awaiting triage
+## Decision topics
 
 These topics refer to existing batch ownership. They are not extra batches or duplicate gap
 counts. Create a deferred child only with an explicit affected selection/facet list and
@@ -97,6 +100,9 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-ALG-01 | RB-D1 | Explicit rational domains, hidden bindings and visible coefficients provide different evidence. `3 + x`, `3 / x` with a nonzero restriction, and a displayed zero or negative coefficient must not inherit one occurrence claim. | Review the [algebra decision note](label-dependency-graph.md#algebra-establish-the-numerical-context-of-each-projection). Base10 is a candidate for 14 of 56 gaps; classify the other 42 per projection before assigning a deferred count. Recommend any needed semantic clarification or pre-draw model distinction with its scope effects. |
 | DEC-PAR-01 | RB-A7 | Count 2 gives group size 1/remainder 0; count 1 gives 0/1; count 3 gives 1/1. Oddness alone cannot justify zero absence. | Review the [parity decision note](label-dependency-graph.md#parity-retain-singleton-even-and-larger-odd-cases). Compare explicit even/singleton-odd/larger-odd model cases and producer ownership while retaining all supported counts and targets. Both current gaps are in scope; record the concrete implementation decision before assigning the deferred child. |
 | DEC-CONV-01 | RB-M1 | Legacy and explicit integer profiles differ despite both involving whole quantities. Shared consumers can gain new requirements; the documented counterfactual closes 84 old assessments but introduces 17. | Review the [conversion decision note](label-dependency-graph.md#deferred-conversion-decision--cover-legacy-profiles-and-shared-consumers). Assess a truthful profile distinction and declaration ownership, including `measurement-unit-scale` and currently gap-free derivation consumers. Document schema/resolver and coverage effects before proposing a design. |
+| DEC-A3-01 | RB-A3-D1 | Twenty numeral/base requirements belong to object-only counting conservation, counting comparison/matching and sorting-extremum tasks. Neither mode shows count numerals; the ontology explicitly distinguishes numerals from object quantities. | Decide the dependency applicability or representation contract; ArabicNumerals/Base10 cannot be added from hidden counts. No gate or rendering change is made here. |
+| DEC-A3-02 | RB-A3-D2 | Eleven writing zero requirements span six projections. The producer owns `requireZero`; its positive branch feeds a number-line projection with visible origin zero. View-owned zero invariants overlap the producer schema under SPEC-8/SPEC-11. | Review a normal pre-draw declaration ownership contract that preserves positive/explicit-zero configurations and all projections. The attempted number-line zero additions were withdrawn after ownership validation; the two arithmetic zero gaps remain in RB-A2. |
+| DEC-A3-03 | RB-A3-D3 | Eight existing reasoning numeral gaps are deferred because declaring ArabicNumerals would also admit unsafe new matches. Generator seed 92 with Addition+Addition and range 0..100 produces 23+32+45=100; view seed 1 renders proposed answer 200. | Agree a repair for the existing projection/compatibility guarantee before enabling those matches. Preserve targets and range policy. The proposed reasoning declaration and test edit were fully withdrawn. |
 
 For each decision, record the concrete examples, affected declarations and projections,
 available options, recommended choice, and effects on targets, configuration, sampling,
@@ -147,6 +153,51 @@ Preservation checks confirmed all 3,295 baseline paths outside the two existing 
 documents, unrelated Git status and the dataset pointer are unchanged. The new ledger is
 the only added nonignored file. No runtime tests were needed for this documentation-only
 checkpoint. Regeneration and VQA remain pending the source-readiness gate.
+
+### RB-A3 — Supported numeral declarations
+
+Four view invariants add `ArabicNumerals`: `operations-number-line-arithmetic`,
+`operations-number-line-representation`, `measurement-word-problem` and `numbers-write-name`.
+Both modes display ordinary decimal digit numerals; the paired producers already declare
+Base10. Existing schemas, compatibility, mathematical generation and rendering are unchanged.
+Two existing exact declaration assertions are updated. No target or existing label is removed.
+
+The fresh audit closes **25 distinct/raw RB-A3 findings** and introduces **24 operand-digit
+requirements** from eight newly admitted measurement-word-problem matches, each with three
+unit alternatives. These matches were reviewed against their full target claims and both modes;
+their requirements belong to RB-A1. Global accounting is **1,307 + 24 - 25 = 1,306 distinct**,
+with **1,324 raw source findings across 562 selections**, 1,256 admitted selections and 841
+eligible selections. No conflicts, contract errors, invalid contexts or incomplete tuples occur.
+All 1,013 targets and 1,182 prior matches remain; the match count is now 1,190.
+
+The original 211 affected tuple/configuration lineages reconcile exactly. Their 422 question/
+solution probes and 522 stored-origin draws preserve configuration, prepared and generator
+random states, random continuation, payloads, content/task fingerprints and existing labels.
+Selection/plan hash changes are reconciled rather than counted as new findings. The stored
+snapshot and its 4,146 raw findings are unchanged.
+
+Transfer the remaining **39 RB-A3 gaps** to children: 20 object-only numeral/base findings,
+11 writing zero findings, and eight reasoning numeral findings. The children have baseline
+zero and explicit inherited current ownership; no transfer counts as closure. Exact baseline
+locators and before/after configuration lineage are retained in `a3-deferred-final.json`
+and the local evidence below.
+
+Source evidence and independent review: `a3-review.md`, `a3-new-match-review.md` and
+`a3-new-match-evidence.json` under `temp/label-dependency-execution/`. The latter captures the
+reproducible rounding counterexample. Final rematch, audit, replay and per-facet accounting
+are under `a3-accepted/` (including `comparison.json`), compared with `before/`. The original
+30-locator deferred draft is superseded by the 39-gap ownership described here and the final
+audit; it is not a second outstanding count.
+
+Validation: type and declaration ownership checks pass; 840 suites / 6,436 tests pass with
+98.49% statements, 97.05% branches, 100% functions and 99.51% lines in the configured coverage
+scope. Every checked generator clears its thresholds. The complete coverage gate used four
+workers after the sandbox blocked Vitest temporary-file renames and the unconstrained run
+encountered contention. Documentation checks pass with five external-fetch warnings. Evidence
+logs: `a3-types.log`, `a3-specs-final.log`, `a3-coverage-bounded.log`,
+`a3-generator-coverage.log`, `a3-docs.log` and `a3-preservation.json`. Only the nine owned source,
+test and documentation paths differ from the execution working-tree baseline. The checkpoint
+is the commit adding this section. Next queued batch: RB-F1.
 
 ## Baseline evidence and preservation
 

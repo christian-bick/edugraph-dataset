@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-number-line-arithmetic',
-    generalLabels: [Scope.Numberline, Ability.ProcedureExecution],
+    generalLabels: [Scope.Numberline, Scope.ArabicNumerals, Ability.ProcedureExecution],
     compatibility: [
         rejectTargetLabels('additive-number-line-domain', [
             Area.Multiplication,

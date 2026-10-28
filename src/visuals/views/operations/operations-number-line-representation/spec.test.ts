@@ -22,7 +22,9 @@ const actualTarget = (targets: readonly CompetencyTarget[], id: string): Compete
 
 describe('operations-number-line-representation view spec', () => {
     it('owns invariant visual articulation on a number line', () => {
-        expect(spec.generalLabels).toEqual([Scope.Numberline, Ability.VisualArticulation]);
+        expect(spec.generalLabels).toEqual([
+            Scope.Numberline, Scope.ArabicNumerals, Ability.VisualArticulation
+        ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Scope.NumbersSmaller100]);
         expect(OperationsNumberLineRepresentationViewSchema).toEqual({});
     });

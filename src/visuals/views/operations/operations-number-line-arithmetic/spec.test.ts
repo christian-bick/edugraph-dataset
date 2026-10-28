@@ -5,7 +5,9 @@ import {OperationsNumberLineArithmeticViewSchema, spec} from './spec.ts';
 
 describe('operations-number-line-arithmetic view spec', () => {
     it('owns invariant execution and excludes unsupported operations', () => {
-        expect(spec.generalLabels).toEqual([Scope.Numberline, Ability.ProcedureExecution]);
+        expect(spec.generalLabels).toEqual([
+            Scope.Numberline, Scope.ArabicNumerals, Ability.ProcedureExecution
+        ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual(expect.arrayContaining([
             Area.Multiplication,
             Area.Division,

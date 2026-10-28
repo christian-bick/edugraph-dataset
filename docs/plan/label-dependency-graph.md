@@ -18,7 +18,8 @@ The [C1 currency batch](#c1-currency-word-problem-declarations-2026-10-28) adds 
 quantity and notation invariants in two separate checkpoints.
 The [C2 currency batch](#c2--currency-number-kinds-preserving-the-conversion-competency)
 closes all 18 remaining currency source findings and preserves the eight integer digit
-obligations. The current backlog contains **1,307 distinct non-range source gaps**;
+obligations. Autonomous execution starts from **1,307 distinct non-range source gaps**;
+the [progress ledger](label-dependency-progress.md) tracks current counts and child decisions.
 the stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
 
 ## Scope
@@ -481,9 +482,9 @@ and this plan proposes no bypass of the shared gate.
 The user approved autonomous processing of repairs that are provable within the agreed
 constraints. Technical difficulty alone is not a reason to defer a repair. Routine evidence
 review, declaration edits, validation and checkpoint commits do not need individual user
-approval. Preparation is complete; **execution of the remaining repair batches has not
-started**. The [progress and decision ledger](label-dependency-progress.md) records the fresh
-baseline, batch ownership and the next queued scope, **RB-A3**.
+approval. Execution started with RB-A3. The
+[progress and decision ledger](label-dependency-progress.md) records the baseline, verified
+closures, newly admitted obligations, deferred child scopes and the next queued batch.
 
 The authorization covers truthful additive invariants and labels on existing choices whose
 resolved values and behavior remain unchanged. Preserve target conjunctions and existing
@@ -542,6 +543,10 @@ The committed inventory below is the durable checkpoint; local `backlog.json` an
 aggregation checks. They are verification artifacts, not runtime dependencies.
 
 ### Consolidated declaration backlog (2026-10-28)
+
+The inventory and roadmap below preserve the execution baseline at `d0beb699`. See the
+[progress ledger](label-dependency-progress.md) for subsequent closures, new requirements,
+split ownership and current counts.
 
 The fresh post-C2b audit enumerates **1,232 admitted selections**, including **817 eligible selections**.
 **538 selections across 79 generators and 169 generator/view pairs** still have non-range omissions.
