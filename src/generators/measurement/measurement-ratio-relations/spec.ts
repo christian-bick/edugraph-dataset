@@ -5,7 +5,8 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-ratio-relations',
-    generalLabels: [Area.UnitConversion, Area.RatioEquivalence, Scope.RationalNumbers]
+    generalLabels: [Area.UnitConversion, Area.RatioEquivalence, Scope.RationalNumbers,
+        Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
 };
 
 export const MeasurementRatioRelationsGeneratorSchema = {

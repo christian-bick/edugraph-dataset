@@ -1,11 +1,12 @@
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 import {resolveNumericalExpressionStructure} from './resolver.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-numerical-expressions',
-    generalLabels: [Area.ArithmeticExpression]
+    generalLabels: [Area.ArithmeticExpression, Scope.IntegerNumbers,
+        Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
 };
 
 export const ArithmeticNumericalExpressionsGeneratorSchema = {

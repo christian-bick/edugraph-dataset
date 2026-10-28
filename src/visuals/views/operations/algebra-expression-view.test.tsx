@@ -226,7 +226,8 @@ describe('six full-uniform leaf contracts and declarations', () => {
     it('preserves the exact fixed view capability matrix and empty schemas', () => {
         const abilities = [[Ability.Formalization, Ability.TextualReception], [Ability.ConceptClassification], [Ability.Interpretation], [Ability.ProcedureExecution], [Ability.ProcedureExecution, Ability.TextualReception], [Ability.Formalization, Ability.TextualReception]];
         definitions.forEach((module, index) => {
-            expect(module.spec.generalLabels).toEqual([Scope.ArabicNumerals, ...abilities[index]!]);
+            expect(module.spec.generalLabels).toEqual([Scope.ArabicNumerals,
+                ...(index < 3 ? [Scope.Base10] : []), ...abilities[index]!]);
             expect(Object.entries(module).find(([name]) => name.endsWith('ViewSchema'))![1]).toEqual({});
         });
     });

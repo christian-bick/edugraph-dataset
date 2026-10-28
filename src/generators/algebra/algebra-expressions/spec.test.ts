@@ -66,7 +66,12 @@ describe('algebra expression capability ownership and composition', () => {
                 for (let seed = 0; seed < 8; seed++) {
                     const draw = generatePlannedDraw({generator: new AlgebraExpressionsGenerator(), viewSchema: entry[1], plan: result.plan,
                         sampleKey: `${target.id}#${spec.generatorId}#${entry[0].viewId}#train#question#inst:0`, seed, attempt: 1});
-                    expect(new Set(draw.labels)).toEqual(new Set(target.labels));
+                    const supportedLabels: string[] = [write.viewId, parts.viewId, grouped.viewId].includes(intendedViewId)
+                        ? [Scope.Base10] : [];
+                    if (target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId) {
+                        supportedLabels.push(Scope.RationalNumbers);
+                    }
+                    expect(new Set(draw.labels)).toEqual(new Set([...target.labels, ...supportedLabels]));
                     const data = draw.stub!.data as AlgebraicExpressionProblem;
                     if (target.labels.includes(Area.AlgebraicModeling)) expect(data.context.kind).toBe('quantitative-system');
                     if (target.labels.includes(Area.OrderOfOperations)) expect(data.substitution.precedenceWitness).not.toBeNull();

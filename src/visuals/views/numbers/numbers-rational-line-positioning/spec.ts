@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-rational-line-positioning',
-    generalLabels: [Scope.Numberline, Ability.VisualArticulation],
+    generalLabels: [Scope.Numberline, Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10],
     compatibility: [requireTargetLabels('rational-line-positioning-task', [Ability.VisualArticulation])]
 };
 export const NumbersRationalLinePositioningViewSchema = {} as const;

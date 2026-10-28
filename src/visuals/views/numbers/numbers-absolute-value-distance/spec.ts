@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-absolute-value-distance',
-    generalLabels: [Scope.Numberline, Ability.Interpretation],
+    generalLabels: [Scope.Numberline, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10],
     compatibility: [requireTargetLabels('numbers-absolute-value-distance-task', [Area.AbsoluteNumberMagnitude])]
 };
 export const NumbersAbsoluteValueDistanceViewSchema = {} as const;

@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'algebra-subexpression-interpretation',
-    generalLabels: [Scope.ArabicNumerals, Ability.Interpretation],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Interpretation],
     compatibility: [
         requireTargetLabels('algebra-grouped-operand-task', [Area.GroupingSymbol, Area.Operand])
     ]

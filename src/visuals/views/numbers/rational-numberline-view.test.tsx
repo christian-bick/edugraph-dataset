@@ -111,8 +111,8 @@ describe('rational number-line learner tasks', () => {
     it('retains fixed empty schemas and sole ownership of the number-line presentation and learner action', () => {
         expect(NumbersRationalLinePositioningViewSchema).toEqual({});
         expect(NumbersRationalLineReadingViewSchema).toEqual({});
-        expect(positioningSpec.generalLabels).toEqual([Scope.Numberline, Ability.VisualArticulation]);
-        expect(readingSpec.generalLabels).toEqual([Scope.Numberline, Ability.VisualReception]);
+        expect(positioningSpec.generalLabels).toEqual([Scope.Numberline, Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10]);
+        expect(readingSpec.generalLabels).toEqual([Scope.Numberline, Ability.VisualReception, Scope.ArabicNumerals, Scope.Base10]);
     });
 });
 

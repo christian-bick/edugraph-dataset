@@ -13,7 +13,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.MeasuringTime,
         Area.Difference,
-        Scope.MinuteIntervals
+        Scope.MinuteIntervals,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

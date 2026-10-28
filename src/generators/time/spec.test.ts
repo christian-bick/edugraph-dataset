@@ -19,8 +19,8 @@ describe('TimeGenerator Spec Integration', () => {
         setSeed(42);
     });
 
-    it('declares only the invariant time-measurement capability', () => {
-        expect(spec.generalLabels).toEqual([Area.MeasuringTime]);
+    it('declares invariant integer, nonnegative time measurement', () => {
+        expect(spec.generalLabels).toEqual([Area.MeasuringTime, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives]);
     });
 
     it('should generate hour intervals when HourIntervals is targeted', () => {

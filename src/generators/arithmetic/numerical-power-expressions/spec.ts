@@ -8,7 +8,8 @@ const exponents = [[[], 'allow-zero'], [[Scope.PositiveExponent], 'positive']] a
 
 export const spec: GeneratorSpec = {
     generatorId: 'numerical-power-expressions',
-    generalLabels: [Area.ArithmeticExpression, Area.Exponentiation, Scope.IntegerExponent]
+    generalLabels: [Area.ArithmeticExpression, Area.Exponentiation, Scope.IntegerExponent,
+        Scope.RationalNumbers]
 };
 
 export const NumericalPowerExpressionsGeneratorSchema = {

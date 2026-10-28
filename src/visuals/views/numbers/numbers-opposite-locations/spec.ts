@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-opposite-locations',
-    generalLabels: [Ability.Interpretation, Scope.Numberline],
+    generalLabels: [Ability.Interpretation, Scope.Numberline, Scope.ArabicNumerals, Scope.Base10],
     compatibility: [requireTargetLabels('numbers-opposite-locations-task', [Scope.Numberline, Scope.NumbersWithNegatives])]
 };
 export const NumbersOppositeLocationsViewSchema = {} as const;

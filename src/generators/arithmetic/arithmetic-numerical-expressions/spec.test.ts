@@ -9,8 +9,9 @@ import {ArithmeticNumericalExpressionsGeneratorSchema, spec} from './spec.ts';
 const groupedLabels = [Area.GroupingSymbol, Area.OrderOfOperations].sort();
 
 describe('ArithmeticNumericalExpressionsGenerator schema', () => {
-    it('keeps only arithmetic-expression mathematics invariant', () => {
-        expect(spec.generalLabels).toEqual([Area.ArithmeticExpression]);
+    it('keeps positive integer arithmetic-expression mathematics invariant', () => {
+        expect(spec.generalLabels).toEqual([Area.ArithmeticExpression, Scope.IntegerNumbers,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
         expect(spec.generalLabels).not.toContain(Scope.ArabicNumerals);
     });
 

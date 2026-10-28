@@ -4,7 +4,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numerical-power-expression-evaluate',
-    generalLabels: [Scope.ArabicNumerals, Ability.ProcedureExecution]
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution]
 };
 export const NumericalPowerExpressionEvaluateViewSchema = {} as const;
 export type NumericalPowerExpressionEvaluateViewConfig = ConfigFromSchema<typeof NumericalPowerExpressionEvaluateViewSchema>;

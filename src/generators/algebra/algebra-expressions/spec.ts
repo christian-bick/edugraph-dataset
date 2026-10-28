@@ -4,19 +4,19 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const relations = [
-    [[Area.AlgebraicExpression], 'plain'],
-    [[Area.ArithmeticExpression, Area.Term], 'numeric-terms'],
+    [[Area.AlgebraicExpression, Scope.RationalNumbers], 'plain'],
+    [[Area.ArithmeticExpression, Area.Term, Scope.RationalNumbers], 'numeric-terms'],
     [[Area.AlgebraicExpression, Area.Term], 'symbolic-terms'],
-    [[Area.ArithmeticExpression, Area.Factor], 'numeric-factors'],
+    [[Area.ArithmeticExpression, Area.Factor, Scope.RationalNumbers], 'numeric-factors'],
     [[Area.AlgebraicExpression, Area.Factor], 'symbolic-factors'],
     [[Area.AlgebraicExpression, Area.Coefficient], 'symbolic-coefficient'],
-    [[Area.ArithmeticExpression, Area.Addition], 'numeric-sum'],
+    [[Area.ArithmeticExpression, Area.Addition, Scope.RationalNumbers], 'numeric-sum'],
     [[Area.AlgebraicExpression, Area.Addition], 'symbolic-sum'],
-    [[Area.ArithmeticExpression, Area.Multiplication], 'numeric-product'],
+    [[Area.ArithmeticExpression, Area.Multiplication, Scope.RationalNumbers], 'numeric-product'],
     [[Area.AlgebraicExpression, Area.Multiplication], 'symbolic-product'],
-    [[Area.ArithmeticExpression, Area.Division], 'numeric-quotient'],
+    [[Area.ArithmeticExpression, Area.Division, Scope.RationalNumbers], 'numeric-quotient'],
     [[Area.AlgebraicExpression, Area.Division], 'symbolic-quotient'],
-    [[Area.ArithmeticExpression, Area.GroupingSymbol, Area.Operand], 'numeric-grouped'],
+    [[Area.ArithmeticExpression, Area.GroupingSymbol, Area.Operand, Scope.RationalNumbers], 'numeric-grouped'],
     [[Area.AlgebraicExpression, Area.GroupingSymbol, Area.Operand], 'symbolic-grouped'],
     [[Area.AlgebraicExpression, Area.AlgebraicSubstitution, Area.OrderOfOperations], 'substitution'],
     [[Area.AlgebraicExpression, Area.AlgebraicModeling], 'modeling']
@@ -36,7 +36,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const AlgebraExpressionsGeneratorSchema = {
-    relation: [[...new Set(relations.flatMap(([labels]) => labels))], selectExactLabelSetMap(relations), relations.map(([labels]) => labels)],
+    relation: [[...new Set(relations.flatMap<string>(([labels]) => labels))], selectExactLabelSetMap(relations), relations.map(([labels]) => labels)],
     power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)]
 } as const;
 export type AlgebraExpressionsGeneratorConfig = ConfigFromSchema<typeof AlgebraExpressionsGeneratorSchema>;

@@ -9,7 +9,8 @@ const mathematicalLabels = [Area.UnitConversion, Area.RatioEquivalence, Scope.Ra
 
 describe('measurement-ratio-relations capabilities', () => {
     it('owns the reviewed conversion, ratio and rational mathematics', () => {
-        expect(spec.generalLabels).toEqual(mathematicalLabels);
+        expect(spec.generalLabels).toEqual([...mathematicalLabels,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
     });
 
     it('generates the real Grade6 target without an explicit magnitude label', () => {

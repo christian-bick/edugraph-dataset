@@ -16,8 +16,8 @@ const forms = [
 ];
 
 describe('numberline mathematical capabilities and complete correlated numeric forms', () => {
-    it('owns only selected numeration/form/sign claims, with complete exact fallback bundles', () => {
-        expect(spec.generalLabels).toEqual([]);
+    it('owns the zero-containing axis and selected numeration/form/sign claims with complete fallback bundles', () => {
+        expect(spec.generalLabels).toEqual([Scope.NumbersWithZero]);
         expect(Object.keys(RationalNumberlineValuesGeneratorSchema)).toEqual(['numberKind', 'signDomain']);
         expect(RationalNumberlineValuesGeneratorSchema.numberKind[2]).toEqual(forms);
         expect(findSchemaFallbackContractIssues(RationalNumberlineValuesGeneratorSchema)).toEqual([]);
@@ -61,7 +61,7 @@ describe('numberline mathematical capabilities and complete correlated numeric f
                 const draw = generatePlannedDraw({generator: new RationalNumberlineValuesGenerator(), viewSchema: {}, plan: result.plan,
                     sampleKey: `${target.id}#${spec.generatorId}#${viewId}#train#question#inst:0`, seed, attempt: 1});
                 expect(draw.stub!.data.kind).toBe('rational-numberline-values');
-                expect(new Set(draw.labels)).toEqual(new Set(target.labels));
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.NumbersWithZero]));
             }
         }
     });

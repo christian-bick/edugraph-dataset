@@ -7,7 +7,7 @@ const writingExtras = [Area.ArithmeticExpression, Area.Term, Area.Factor, Area.C
 
 export const spec: ViewSpec = {
     viewId: 'algebra-expression-write',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization, Ability.TextualReception],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Formalization, Ability.TextualReception],
     compatibility: [
         requireTargetLabels('algebra-expression-writing-task', [Area.AlgebraicExpression, Ability.TextualReception]),
         {

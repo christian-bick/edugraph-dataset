@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-numerical-expression-write',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization, Ability.TextualReception],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Formalization, Ability.TextualReception],
     compatibility: [
         requireTargetLabels('written-calculation-request', [Ability.TextualReception])
     ]

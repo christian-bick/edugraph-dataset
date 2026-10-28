@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-grouping-evaluate',
-    generalLabels: [Scope.ArabicNumerals, Ability.ProcedureExecution],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution],
     compatibility: [
         requireTargetLabels('grouped-expression-request', [Area.GroupingSymbol])
     ]

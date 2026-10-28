@@ -6,20 +6,22 @@ import {SignedRationalContextsGenerator} from './generator.ts';
 import {SignedRationalContextsGeneratorSchema, spec} from './spec.ts';
 
 const zeroBundle = [Area.ZeroConcept, Scope.NumbersWithZero];
+const resolvedZeroBundle = [...zeroBundle, Scope.NumbersWithoutNegatives];
 const signedBundle = [Area.SignNotation, Scope.NumbersWithNegatives];
 const resolveRelation = SignedRationalContextsGeneratorSchema.relation[1];
 
 describe('signed rational context capability ownership', () => {
     it('declares complete fallback conjunctions and resolves every fallback with the production audit', () => {
-        expect(SignedRationalContextsGeneratorSchema.relation[2]).toEqual([zeroBundle, signedBundle]);
+        expect(SignedRationalContextsGeneratorSchema.relation[2]).toEqual([resolvedZeroBundle, signedBundle]);
         expect(findSchemaFallbackContractIssues(SignedRationalContextsGeneratorSchema)).toEqual([]);
         const singletonFallbackSchema = {relation: [SignedRationalContextsGeneratorSchema.relation[0], resolveRelation] as const};
-        expect(findSchemaFallbackContractIssues(singletonFallbackSchema)).toHaveLength(4);
+        expect(findSchemaFallbackContractIssues(singletonFallbackSchema)).toHaveLength(5);
     });
 
     it('keeps RationalNumbers invariant and correlates exact Area/numeric-domain bundles', () => {
         expect(spec.generalLabels).toEqual([Scope.RationalNumbers]);
-        expect(resolveRelation(zeroBundle)).toBe('reference-zero');
+        expect(resolveRelation(resolvedZeroBundle)).toBe('reference-zero');
+        expect(resolveRelation(zeroBundle)).toBeUndefined();
         expect(resolveRelation(signedBundle)).toBe('directed-pair');
         expect(resolveRelation([])).toBeUndefined();
         expect(resolveRelation([Area.ZeroConcept])).toBeUndefined();
@@ -36,7 +38,7 @@ describe('signed rational context capability ownership', () => {
         for (let seed = 0; seed < 25; seed++) {
             setSeed(seed);
             const problem = generateWithLabels(new SignedRationalContextsGenerator(), [...bundle, Scope.RationalNumbers, ...abilities])!;
-            expect(problem.labels).toEqual([...bundle]);
+            expect(problem.labels).toEqual(relation === 'reference-zero' ? resolvedZeroBundle : [...bundle]);
             expect(problem.data.kind).toBe('signed-rational-contexts');
             if (relation === 'reference-zero') expect(problem.data.observations.map(({value}) => value.numerator)).toEqual([0]);
             else expect(problem.data.observations.map(({sign}) => sign).sort()).toEqual([-1, 1]);

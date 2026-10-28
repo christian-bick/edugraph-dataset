@@ -9,6 +9,7 @@ export const spec: GeneratorSpec = {
         Area.MeasuringTime,
         Scope.MinuteIntervals,
         Scope.IntegerNumbers,
+        Scope.NumbersWithoutNegatives,
         Scope.SingleStep
     ]
 };

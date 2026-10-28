@@ -135,10 +135,10 @@ describe('order and magnitude fixed learner-task projections', () => {
     it('keeps empty leaf schemas, independent ownership and fixed reviewed Ability conjunctions', () => {
         const specs = [lineSpec, explanationSpec, writingSpec, distanceSpec, absoluteSpec, classificationSpec];
         for (const spec of specs) expect(Object.values(spec).find(value => value && typeof value === 'object' && Object.keys(value).length === 0)).toEqual({});
-        expect(lineSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation]);
-        expect(distanceSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation]);
-        expect(absoluteSpec.spec.generalLabels).toEqual([Ability.Interpretation, Ability.Formalization]);
-        expect(classificationSpec.spec.generalLabels).toEqual([Ability.ConceptClassification]);
+        expect(lineSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10]);
+        expect(distanceSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10]);
+        expect(absoluteSpec.spec.generalLabels).toEqual([Ability.Interpretation, Ability.Formalization, Scope.ArabicNumerals, Scope.Base10]);
+        expect(classificationSpec.spec.generalLabels).toEqual([Ability.ConceptClassification, Scope.ArabicNumerals, Scope.Base10]);
     });
 });
 

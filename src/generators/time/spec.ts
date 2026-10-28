@@ -11,7 +11,7 @@ export const spec: GeneratorSpec = {
         Scope.AnteMeridiem, Scope.PostMeridiem, Scope.MultiplesOf5, Scope.MinuteIntervals
     ], selected => !(selected(Scope.AnteMeridiem) && selected(Scope.PostMeridiem))
         && (!selected(Scope.MultiplesOf5) || selected(Scope.MinuteIntervals)))],
-    generalLabels: [Area.MeasuringTime],
+    generalLabels: [Area.MeasuringTime, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives],
 };
 
 

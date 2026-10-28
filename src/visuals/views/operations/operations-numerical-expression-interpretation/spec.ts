@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-numerical-expression-interpretation',
-    generalLabels: [Scope.ArabicNumerals, Ability.Interpretation]
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Interpretation]
 };
 
 export const OperationsNumericalExpressionInterpretationViewSchema = {} as const;

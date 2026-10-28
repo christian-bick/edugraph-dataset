@@ -11,7 +11,7 @@ import {RationalMagnitudeRelationsGeneratorSchema, spec} from './spec.ts';
 
 describe('absolute magnitude schema and production planning', () => {
     it('owns absolute magnitude and rational math with real complete sign-domain alternatives', () => {
-        expect(spec.generalLabels).toEqual([Area.AbsoluteNumberMagnitude, Scope.RationalNumbers]);
+        expect(spec.generalLabels).toEqual([Area.AbsoluteNumberMagnitude, Scope.RationalNumbers, Scope.NumbersWithZero]);
         expect(Object.keys(RationalMagnitudeRelationsGeneratorSchema)).toEqual(['signDomain']);
         expect(RationalMagnitudeRelationsGeneratorSchema.signDomain[2]).toEqual([[Scope.NumbersWithoutNegatives], [Scope.NumbersWithNegatives]]);
         expect(findSchemaFallbackContractIssues(RationalMagnitudeRelationsGeneratorSchema)).toEqual([]);
@@ -40,7 +40,7 @@ describe('absolute magnitude schema and production planning', () => {
                 sampleKey: `${target.id}#rational-magnitude-relations#numbers-absolute-value-distance#train#question#inst:0`, seed, attempt: 1});
             const sign = draw.labels.includes(Scope.NumbersWithNegatives) ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives;
             seen.add(sign);
-            expect(new Set(draw.labels)).toEqual(new Set([...target.labels, sign]));
+            expect(new Set(draw.labels)).toEqual(new Set([...target.labels, sign, Scope.NumbersWithZero]));
             expect(draw.stub!.data.point.value.numerator < 0).toBe(sign === Scope.NumbersWithNegatives);
         }
         expect(seen).toEqual(new Set([Scope.NumbersWithoutNegatives, Scope.NumbersWithNegatives]));

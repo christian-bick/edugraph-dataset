@@ -6,7 +6,7 @@ const structuralRoles = [Area.Term, Area.Factor, Area.Coefficient, Area.Addition
 
 export const spec: ViewSpec = {
     viewId: 'algebra-expression-parts',
-    generalLabels: [Scope.ArabicNumerals, Ability.ConceptClassification],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.ConceptClassification],
     compatibility: [
         {
             id: 'algebra-expression-structural-task',

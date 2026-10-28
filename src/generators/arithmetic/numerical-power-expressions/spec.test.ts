@@ -14,7 +14,8 @@ import {NumericalPowerExpressionsGeneratorSchema, spec} from './spec.ts';
 
 describe('exact expression structure/exponent capability bundles', () => {
     it('owns precisely the reviewed invariants and two genuine mathematical choices', () => {
-        expect(spec.generalLabels).toEqual([Area.ArithmeticExpression, Area.Exponentiation, Scope.IntegerExponent]);
+        expect(spec.generalLabels).toEqual([Area.ArithmeticExpression, Area.Exponentiation,
+            Scope.IntegerExponent, Scope.RationalNumbers]);
         expect(Object.keys(NumericalPowerExpressionsGeneratorSchema)).toEqual(['structure', 'exponents']);
         expect(NumericalPowerExpressionsGeneratorSchema.structure[2]).toEqual([[], [Area.OrderOfOperations]]);
         expect(NumericalPowerExpressionsGeneratorSchema.exponents[2]).toEqual([[], [Scope.PositiveExponent]]);
@@ -50,7 +51,7 @@ describe('exact expression structure/exponent capability bundles', () => {
             for (let seed = 0; seed < 16; seed++) {
                 const draw = generatePlannedDraw({generator: new NumericalPowerExpressionsGenerator(), viewSchema, plan: result.plan,
                     sampleKey: `${target.id}#${spec.generatorId}#${view.viewId}#train#question#inst:0`, seed, attempt: 1});
-                expect(new Set(draw.labels)).toEqual(new Set(target.labels));
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.Base10]));
                 expect(draw.stub!.data.precedenceWitness === null).toBe(writing);
                 if (target.labels.includes(Scope.PositiveExponent)) expect(draw.stub!.data.powerFacts.every((fact: ExactPowerFact) => fact.exponent > 0)).toBe(true);
             }

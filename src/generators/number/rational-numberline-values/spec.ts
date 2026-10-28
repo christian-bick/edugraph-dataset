@@ -9,7 +9,7 @@ const numberKinds = [
     [[Area.NumerationWithDecimals, Scope.DecimalNumbers], 'decimal']
 ] as const;
 
-export const spec: GeneratorSpec = {generatorId: 'rational-numberline-values', generalLabels: []};
+export const spec: GeneratorSpec = {generatorId: 'rational-numberline-values', generalLabels: [Scope.NumbersWithZero]};
 
 export const RationalNumberlineValuesGeneratorSchema = {
     numberKind: [[Area.NumerationWithIntegers, Scope.IntegerNumbers, Area.NumerationWithFractions, Scope.FractionNumbers,

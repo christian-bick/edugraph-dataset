@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-grouping-write',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Formalization],
     compatibility: [
         requireTargetLabels('grouped-expression-request', [Area.GroupingSymbol])
     ]

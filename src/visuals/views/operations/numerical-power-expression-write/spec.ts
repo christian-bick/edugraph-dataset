@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numerical-power-expression-write',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization, Ability.TextualReception],
+    generalLabels: [Scope.ArabicNumerals, Scope.Base10, Ability.Formalization, Ability.TextualReception],
     compatibility: [
         requireTargetLabels('numerical-power-prescribed-prose', [Ability.TextualReception]),
         {

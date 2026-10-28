@@ -5,7 +5,7 @@ import {OperationsNumericalExpressionInterpretationViewSchema, spec} from './spe
 
 describe('operations-numerical-expression-interpretation view spec', () => {
     it('owns interpretation without imposing a grouping requirement', () => {
-        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Ability.Interpretation]);
+        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Ability.Interpretation]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(OperationsNumericalExpressionInterpretationViewSchema).toEqual({});

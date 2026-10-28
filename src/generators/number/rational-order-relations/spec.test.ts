@@ -10,8 +10,8 @@ import {RationalOrderRelationsGenerator} from './generator.ts';
 import {RationalOrderRelationsGeneratorSchema, spec} from './spec.ts';
 
 describe('strict-order schema and production plans', () => {
-    it('owns Inequality/RationalNumbers plus exactly the selected strict-order Scope', () => {
-        expect(spec.generalLabels).toEqual([Area.Inequality, Scope.RationalNumbers]);
+    it('owns the signed zero-containing axis and the selected strict-order Scope', () => {
+        expect(spec.generalLabels).toEqual([Area.Inequality, Scope.RationalNumbers, Scope.NumbersWithZero, Scope.NumbersWithNegatives]);
         expect(Object.keys(RationalOrderRelationsGeneratorSchema)).toEqual(['relation']);
         expect(findSchemaFallbackContractIssues(RationalOrderRelationsGeneratorSchema)).toEqual([]);
         expect(() => RationalOrderRelationsGeneratorSchema.relation[1]([Scope.Less, Scope.Greater])).toThrow();
@@ -35,7 +35,7 @@ describe('strict-order schema and production plans', () => {
             for (let seed = 0; seed < 10; seed++) {
                 const draw = generatePlannedDraw({generator: new RationalOrderRelationsGenerator(), viewSchema: {}, plan: result.plan,
                     sampleKey: `${target.id}#rational-order-relations#numbers-inequality-line-interpretation#train#question#inst:0`, seed, attempt: 1});
-                expect(new Set(draw.labels)).toEqual(new Set(target.labels));
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.NumbersWithZero, Scope.NumbersWithNegatives]));
                 expect(draw.stub!.data.relation).toBe(target.labels.includes(Scope.Less) ? 'less' : 'greater');
             }
         }

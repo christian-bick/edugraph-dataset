@@ -5,7 +5,7 @@ import {OperationsGroupingWriteViewSchema, spec} from './spec.ts';
 
 describe('operations-grouping-write view spec', () => {
     it('owns formalization and participates only in explicitly grouped targets', () => {
-        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Ability.Formalization]);
+        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Ability.Formalization]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Area.GroupingSymbol]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(OperationsGroupingWriteViewSchema).toEqual({});

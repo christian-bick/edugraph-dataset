@@ -1,11 +1,11 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import type {ConfigFromSchema} from '../../../../types/schema.ts';
 import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-signed-context-formalization',
-    generalLabels: [Ability.Formalization, Ability.TextualReception],
+    generalLabels: [Ability.Formalization, Ability.TextualReception, Scope.ArabicNumerals, Scope.Base10],
     compatibility: [requireTargetLabels('numbers-signed-context-formalization-task', [Area.SignNotation, Ability.Formalization, Ability.TextualReception])]
 };
 export const NumbersSignedContextFormalizationViewSchema = {} as const;

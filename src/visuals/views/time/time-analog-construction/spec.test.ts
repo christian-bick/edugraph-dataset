@@ -7,6 +7,7 @@ describe('time-analog-construction view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.AnalogClock,
             Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.VisualArticulation
         ]);
         expect(TimeAnalogConstructionViewSchema).toEqual({});

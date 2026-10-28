@@ -6,6 +6,8 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'time-interval-word-problem',
     generalLabels: [
+        Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.ProcedureExecution,
         Ability.TextualReception
     ]
