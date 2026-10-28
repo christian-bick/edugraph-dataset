@@ -50,7 +50,7 @@ export const spec: GeneratorSpec = {
         if (selected(Area.Multiplication)) return selected(Scope.IntegerNumbers)
             ? selected(Scope.SingleDigitSmallestOperand)
             : selected(Scope.SingleDigitLargestOperand);
-        if (selected(Area.Addition) && selected(Scope.IntegerNumbers)) return (
+        if ((selected(Area.Addition) || selected(Area.Subtraction)) && selected(Scope.IntegerNumbers)) return (
             selected(Scope.SingleDigitLargestOperand) || selected(Scope.TwoDigitLargestOperand)
         );
         return !selected(Scope.SingleDigitSmallestOperand)

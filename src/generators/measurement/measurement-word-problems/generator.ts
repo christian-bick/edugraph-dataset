@@ -71,6 +71,15 @@ const integerAdditionPairsByWidth = {
     2: integerAdditionPairs.filter(([first, second]) => Math.max(first, second) >= 10)
 };
 
+const integerSubtractionPairs = Array.from({length: 9}, (_, subtrahend) =>
+    Array.from({length: 15}, (_, answer) => [subtrahend + answer + 3, subtrahend + 2] as const)
+).flat();
+
+const integerSubtractionPairsByWidth = {
+    1: integerSubtractionPairs.filter(([minuend]) => minuend < 10),
+    2: integerSubtractionPairs.filter(([minuend]) => minuend >= 10)
+};
+
 const gcd = (a: number, b: number): number => {
     let first = Math.abs(a);
     let second = Math.abs(b);
@@ -91,17 +100,14 @@ const decimalValue = (tenths: number, measurementKind: MeasurementWordProblemKin
         : {numerator: tenths, denominator: 10};
 
 const sampleInteger = (operation: ArithmeticOperation, largestOperandDigits?: 1 | 2): MathSample => {
-    if (operation === 'addition') {
+    if (operation === 'addition' || operation === 'subtraction') {
         if (largestOperandDigits === undefined) {
-            throw new GeneratorValidationError('measurement-word-problems', 'Integer addition requires a largest-operand digit choice.');
+            throw new GeneratorValidationError('measurement-word-problems', `Integer ${operation} requires a largest-operand digit choice.`);
         }
-        const [first, second] = pick(integerAdditionPairsByWidth[largestOperandDigits]);
-        return {operation, first: integer(first), second: integer(second), answer: integer(first + second)};
-    }
-    if (operation === 'subtraction') {
-        const second = randomInteger(2, 10);
-        const answer = randomInteger(1, 15);
-        return {operation, first: integer(second + answer), second: integer(second), answer: integer(answer)};
+        const pairsByWidth = operation === 'addition' ? integerAdditionPairsByWidth : integerSubtractionPairsByWidth;
+        const [first, second] = pick(pairsByWidth[largestOperandDigits]);
+        return {operation, first: integer(first), second: integer(second),
+            answer: integer(operation === 'addition' ? first + second : first - second)};
     }
     if (operation === 'multiplication') {
         const groupCount = randomInteger(2, 6);
@@ -281,7 +287,7 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
         const operandDigits = config.operandDigits;
         if (operandDigits !== undefined && operandDigits !== false) {
             const valid = operandDigits !== null && (
-                (numberKind === 'integer' && operation === 'addition'
+                (numberKind === 'integer' && (operation === 'addition' || operation === 'subtraction')
                     && operandDigits.role === 'largest' && [1, 2].includes(operandDigits.digits))
                 || (operation === 'multiplication' && operandDigits.digits === 1
                     && operandDigits.role === (numberKind === 'integer' ? 'smallest' : 'largest'))

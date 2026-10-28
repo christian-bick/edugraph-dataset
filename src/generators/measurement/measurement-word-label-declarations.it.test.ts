@@ -23,9 +23,6 @@ const viewId = 'measurement-word-problem-grade4';
 const targets = grade4Targets.filter(target => target.id.startsWith('4.MD.A.2-measurement-word-problems~'));
 const quantityLabels = [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
 const notationLabels = [Scope.ArabicNumerals, Scope.Base10];
-const expectedMissingFacets = (labels: readonly string[]) => !labels.includes(Scope.IntegerNumbers)
-    || labels.includes(Area.Division) || labels.includes(Area.Multiplication) || labels.includes(Area.Addition)
-    ? [] : ['operandDigits'];
 let generator: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>[number];
 let view: Awaited<ReturnType<typeof loadViewModelCatalog>>[number];
 
@@ -160,8 +157,8 @@ const expectOperationRoles = (labels: readonly string[], config: Record<string, 
     expect(labels.includes(Scope.TwoDigitLargestOperand)).toBe(largestOperandDigits === 2);
 };
 
-const expectIntegerAdditionWidth = (labels: readonly string[], data: MeasurementWordProblemGrade4) => {
-    if (data.numberKind !== 'integer' || data.operation !== 'addition') return;
+const expectIntegerAdditiveWidth = (labels: readonly string[], data: MeasurementWordProblemGrade4) => {
+    if (data.numberKind !== 'integer' || (data.operation !== 'addition' && data.operation !== 'subtraction')) return;
     const largest = Math.max(...data.operands.map(operand => operand.value.numerator));
     expect(labels.includes(Scope.SingleDigitLargestOperand)).toBe(largest < 10);
     expect(labels.includes(Scope.TwoDigitLargestOperand)).toBe(largest >= 10);
@@ -178,7 +175,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('checks 65 source selections and leaves only five integer subtraction operand-digit assessments unresolved', () => {
+    it('checks 70 source selections without unresolved non-range dependency assessments', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         let selectionCount = 0;
@@ -187,7 +184,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
             if (!matched.matched) throw new Error(`Existing target stopped matching: ${target.id}: ${matched.reason}`);
             const selections = enumerateDependencyAuditSelections(matched.plan);
             expect(selections.status).toBe('complete');
-            expect(selections.selections).toHaveLength(target.labels.includes(Area.Addition)
+            expect(selections.selections).toHaveLength((target.labels.includes(Area.Addition) || target.labels.includes(Area.Subtraction))
                 && target.labels.includes(Scope.IntegerNumbers) ? 2 : 1);
             selectionCount += selections.selections.length;
             for (const selection of selections.selections) {
@@ -196,20 +193,20 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
                 const missing = evaluation.assessments.filter(item => item.status === 'missing' && item.facet !== 'range');
-                expect(missing.map(item => item.facet)).toEqual(expectedMissingFacets(target.labels));
+                expect(missing).toEqual([]);
                 for (const assessment of missing) {
                     missingCounts.set(assessment.facet, (missingCounts.get(assessment.facet) ?? 0) + 1);
                 }
             }
         }
-        expect(selectionCount).toBe(65);
-        expect(Object.fromEntries(missingCounts)).toEqual({operandDigits: 5});
+        expect(selectionCount).toBe(70);
+        expect(Object.fromEntries(missingCounts)).toEqual({});
     });
 
     it.each([
-        {name: 'number kind and operation omitted', labels: [], count: 13},
+        {name: 'number kind and operation omitted', labels: [], count: 14},
         {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 3},
-        {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 5},
+        {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 6},
         {name: 'fraction kind with operation omitted', labels: [Scope.FractionNumbers], count: 4},
         {name: 'decimal kind with operation omitted', labels: [Scope.DecimalNumbers], count: 4}
     ])('preserves the complete semantic configuration set for $name', ({labels, count}) => {
@@ -240,7 +237,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(draw.labels).toEqual(entry.selection.labels);
                 const data = draw.stub!.data as unknown as MeasurementWordProblemGrade4;
                 expect(data.numberKind).toBe(entry.config.numberKind);
-                expectIntegerAdditionWidth(draw.labels, data);
+                expectIntegerAdditiveWidth(draw.labels, data);
                 expectPositiveQuantityPresentation(data, mode);
             }
         }
@@ -264,26 +261,30 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
     });
 
     it.each([
-        {name: 'integer addition', labels: [Area.Addition, Scope.IntegerNumbers], widths: [1, 2]},
-        {name: 'explicit one-digit addition', labels: [Area.Addition, Scope.SingleDigitLargestOperand], widths: [1]},
-        {name: 'explicit two-digit addition', labels: [Area.Addition, Scope.TwoDigitLargestOperand], widths: [2]},
-        {name: 'integer one-digit width with operation omitted', labels: [Scope.IntegerNumbers, Scope.SingleDigitLargestOperand], widths: [1]},
-        {name: 'two-digit width with kind and operation omitted', labels: [Scope.TwoDigitLargestOperand], widths: [2]}
-    ])('admits exactly the supported addition profiles for $name', ({labels, widths}) => {
+        {name: 'integer addition', labels: [Area.Addition, Scope.IntegerNumbers], operations: [Area.Addition], widths: [1, 2]},
+        {name: 'explicit one-digit addition', labels: [Area.Addition, Scope.SingleDigitLargestOperand], operations: [Area.Addition], widths: [1]},
+        {name: 'explicit two-digit addition', labels: [Area.Addition, Scope.TwoDigitLargestOperand], operations: [Area.Addition], widths: [2]},
+        {name: 'integer subtraction', labels: [Area.Subtraction, Scope.IntegerNumbers], operations: [Area.Subtraction], widths: [1, 2]},
+        {name: 'explicit one-digit subtraction', labels: [Area.Subtraction, Scope.SingleDigitLargestOperand], operations: [Area.Subtraction], widths: [1]},
+        {name: 'explicit two-digit subtraction', labels: [Area.Subtraction, Scope.TwoDigitLargestOperand], operations: [Area.Subtraction], widths: [2]},
+        {name: 'integer one-digit width with operation omitted', labels: [Scope.IntegerNumbers, Scope.SingleDigitLargestOperand], operations: [Area.Addition, Area.Subtraction], widths: [1, 1]},
+        {name: 'two-digit width with kind and operation omitted', labels: [Scope.TwoDigitLargestOperand], operations: [Area.Addition, Area.Subtraction], widths: [2, 2]}
+    ])('admits exactly the supported integer additive profiles for $name', ({labels, operations, widths}) => {
         const current = admittedConfigurations(labels);
         expect(current.configurations.map(entry => operationValue(entry.config).largestOperandDigits).sort()).toEqual(widths);
+        expect([...new Set(current.configurations.map(entry => entry.config.operation))].sort()).toEqual(operations);
         for (const entry of current.configurations) {
             expect(entry.config.numberKind).toBe('integer');
-            expect(operationValue(entry.config).operation).toBe(Area.Addition);
             expect(entry.selection.labels).toEqual(expect.arrayContaining(labels));
             expectOperationRoles(entry.selection.labels, entry.config);
         }
     });
 
-    it('allows a partial largest-width request to select only integer addition or noninteger multiplication', () => {
+    it('allows a partial largest-width request to select only integer addition/subtraction or noninteger multiplication', () => {
         const current = admittedConfigurations([Scope.SingleDigitLargestOperand]);
         expect(current.configurations.map(entry => [operationValue(entry.config).operation, entry.config.numberKind]).sort())
-            .toEqual([[Area.Addition, 'integer'], [Area.Multiplication, 'decimal'], [Area.Multiplication, 'fraction']].sort());
+            .toEqual([[Area.Addition, 'integer'], [Area.Subtraction, 'integer'],
+                [Area.Multiplication, 'decimal'], [Area.Multiplication, 'fraction']].sort());
         for (const entry of current.configurations) expectOperationRoles(entry.selection.labels, entry.config);
     });
 
@@ -300,7 +301,10 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'fraction addition with one-digit width', labels: [Area.Addition, Scope.FractionNumbers, Scope.SingleDigitLargestOperand]},
         {name: 'decimal addition with two-digit width', labels: [Area.Addition, Scope.DecimalNumbers, Scope.TwoDigitLargestOperand]},
         {name: 'addition with competing widths', labels: [Area.Addition, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand]},
-        {name: 'subtraction with addition width', labels: [Area.Subtraction, Scope.TwoDigitLargestOperand]}
+        {name: 'fraction subtraction with one-digit width', labels: [Area.Subtraction, Scope.FractionNumbers, Scope.SingleDigitLargestOperand]},
+        {name: 'decimal subtraction with two-digit width', labels: [Area.Subtraction, Scope.DecimalNumbers, Scope.TwoDigitLargestOperand]},
+        {name: 'subtraction with competing widths', labels: [Area.Subtraction, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand]},
+        {name: 'subtraction with multiplication width', labels: [Area.Subtraction, Scope.SingleDigitSmallestOperand]}
     ])('rejects unsupported explicit claims for $name without rewriting the target', ({labels}) => {
         const target = partialTarget(labels);
         const originalLabels = [...target.labels];
@@ -316,7 +320,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(matched.plan.targetLabels).toEqual([...originalLabels].sort());
         const selections = enumerateDependencyAuditSelections(matched.plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength(target.labels.includes(Area.Addition)
+        expect(selections.selections).toHaveLength((target.labels.includes(Area.Addition) || target.labels.includes(Area.Subtraction))
             && target.labels.includes(Scope.IntegerNumbers) ? 2 : 1);
         const producer = new MeasurementWordProblemsGenerator();
         for (const selection of selections.selections) {
@@ -337,10 +341,9 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expectOperationRoles(draw.labels, config);
                 const coverage = assessLabelDependencyCoverage({generatorId, viewId, kind: 'sample', labels: draw.labels});
                 expect(coverage.status).toBe('checked');
-                expect(coverage.failures.every(failure => failure.code === 'missing')).toBe(true);
-                expect(coverage.failures.map(failure => failure.facet)).toEqual(expectedMissingFacets(target.labels));
+                expect(coverage.failures).toEqual([]);
                 const data = draw.stub!.data as unknown as MeasurementWordProblemGrade4;
-                expectIntegerAdditionWidth(draw.labels, data);
+                expectIntegerAdditiveWidth(draw.labels, data);
                 expectPositiveQuantityPresentation(data, mode);
             };
             for (const mode of ['question', 'solution'] as const) {

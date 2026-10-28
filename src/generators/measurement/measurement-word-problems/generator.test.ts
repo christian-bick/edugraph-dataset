@@ -136,7 +136,12 @@ describe('MeasurementWordProblemsGenerator', () => {
         ['unprofiled integer addition', 'integer', Area.Addition, undefined],
         ['fractional addition profile', 'fraction', Area.Addition, {role: 'largest', digits: 1}],
         ['decimal addition profile', 'decimal', Area.Addition, {role: 'largest', digits: 2}],
-        ['subtraction profile', 'integer', Area.Subtraction, {role: 'largest', digits: 1}],
+        ['unprofiled integer subtraction', 'integer', Area.Subtraction, undefined],
+        ['empty integer subtraction profile', 'integer', Area.Subtraction, false],
+        ['fractional subtraction profile', 'fraction', Area.Subtraction, {role: 'largest', digits: 1}],
+        ['decimal subtraction profile', 'decimal', Area.Subtraction, {role: 'largest', digits: 2}],
+        ['subtraction with smallest profile', 'integer', Area.Subtraction, {role: 'smallest', digits: 1}],
+        ['subtraction with divisor profile', 'integer', Area.Subtraction, {role: 'divisor', digits: 1}],
         ['integer multiplication with largest profile', 'integer', Area.Multiplication, {role: 'largest', digits: 1}],
         ['division with largest profile', 'integer', Area.Division, {role: 'largest', digits: 1}],
         ['addition with smallest profile', 'integer', Area.Addition, {role: 'smallest', digits: 1}],
@@ -190,11 +195,45 @@ describe('MeasurementWordProblemsGenerator', () => {
         }
     });
 
+    it.each(measurementKinds)('partitions all original positive integer subtraction pairs by operand width for %s', measurementKind => {
+        const seen = new Set<string>();
+        const random = vi.spyOn(randomSource, 'random');
+        try {
+            for (const [digits, count] of [[1, 28], [2, 107]] as const) {
+                const profilePairs = new Set<string>();
+                for (let index = 0; index < count; index++) {
+                    random.mockReturnValue((index + 0.5) / count);
+                    const stub = generator.generate({measurementKind, numberKind: 'integer',
+                        operation: Area.Subtraction, operandDigits: {role: 'largest', digits}});
+                    expectConsistent(stub.data, measurementKind, 'integer', 'subtraction');
+                    if (stub.data.operation !== 'subtraction') throw new Error('Expected subtraction operands.');
+                    const values = stub.data.operands.map(operand => operand.value.numerator);
+                    expect(String(Math.max(...values)).length).toBe(digits);
+                    const pair = values.join('-');
+                    expect(seen.has(pair)).toBe(false);
+                    seen.add(pair);
+                    profilePairs.add(pair);
+                }
+                expect(profilePairs.size).toBe(count);
+            }
+            const expected = new Set<string>();
+            for (let second = 2; second <= 10; second++) {
+                for (let answer = 1; answer <= 15; answer++) expected.add(`${second + answer}-${second}`);
+            }
+            expect(seen).toEqual(expected);
+            // Two-digit operands may still produce the one-digit answer 1.
+            expect(seen.has('11-10')).toBe(true);
+        } finally {
+            random.mockRestore();
+        }
+    });
+
     it('covers every measurement, number, and operation permutation with exact one-step math', () => {
         for (const measurementKind of measurementKinds) {
             for (const numberKind of numberKinds) {
                 for (const operationLabel of operations) {
-                    const profiles = numberKind === 'integer' && operationLabel === Area.Addition
+                    const profiles = numberKind === 'integer'
+                        && (operationLabel === Area.Addition || operationLabel === Area.Subtraction)
                         ? ([1, 2] as const).map(digits => ({role: 'largest', digits} as const)) : [undefined];
                     for (const operandDigits of profiles) for (let seed = 0; seed < 40; seed++) {
                         setSeed(`${measurementKind}-${numberKind}-${operationLabel}-${seed}`);

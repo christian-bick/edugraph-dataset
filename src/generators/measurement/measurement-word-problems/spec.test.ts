@@ -49,7 +49,8 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         for (const [measurementLabels, resolvedMeasurementLabels, measurementKind] of measurementCases) {
             for (const [numberLabel, numberKind] of numberCases) {
                 for (const [operationLabel, operation] of operationCases) {
-                    const operandDigitBindings = operationLabel === Area.Addition && numberKind === 'integer'
+                    const operandDigitBindings = numberKind === 'integer'
+                        && (operationLabel === Area.Addition || operationLabel === Area.Subtraction)
                         ? [[Scope.SingleDigitLargestOperand], [Scope.TwoDigitLargestOperand]]
                         : operationLabel === Area.Multiplication
                             ? [[numberKind === 'integer'

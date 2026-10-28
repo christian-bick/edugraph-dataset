@@ -40,7 +40,7 @@ const generate = (
         measurementKind,
         numberKind,
         operation: operationArea,
-        operandDigits: numberKind === 'integer' && operation === 'addition'
+        operandDigits: numberKind === 'integer' && (operation === 'addition' || operation === 'subtraction')
             ? {role: 'largest', digits: 1} : undefined
     }).data;
 };

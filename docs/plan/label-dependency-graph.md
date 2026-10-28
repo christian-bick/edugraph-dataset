@@ -11,7 +11,7 @@ Next work: [repair rollout and consolidated backlog](#repair-rollout-plan) and
 in separate division and multiplication checkpoints. The
 [integer-only operand-digit gate](#integer-only-operand-digit-gate-2026-10-28) narrows the
 remaining measurement obligation to ten integer addition/subtraction selections. The
-[M4 width choices](#m4-integer-additive-width-choices-2026-10-28) repair these through
+[M4 width choices](#m4-integer-additive-width-choices-2026-10-28) resolve all ten through
 explicitly selected generator configurations and a separately approved sampling change.
 
 ## Scope
@@ -1264,3 +1264,60 @@ The stored dataset remains unchanged at **4,146 non-range strict findings**. Its
 measurement rows still contain 700 raw findings, including 46 stored operand-digit gaps.
 Canonical regeneration and VQA remain at the agreed readiness checkpoint; source repair
 does not waive the strict gate or imply that stored annotations were repaired.
+
+### Subtraction checkpoint
+
+The second checkpoint enables the same two largest-operand choices for integer subtraction
+in all five measurement contexts. Its finite pair pool retains all 135 former pairs, with
+28 in the one-digit choice and 107 in the two-digit choice. The minuend is always the
+largest operand because the original sampler requires a positive answer and subtrahend.
+Addition's pair pools and the remaining operation/number-kind samplers are unchanged.
+
+All **70 family source selections now have zero non-range dependency findings**, compared
+with 60 selections and ten missing operand-digit assessments before M4. Globally there are
+1,232 source selections and **1,415 raw / 1,397 distinct non-range gaps**; the remaining
+backlog belongs to other families. Targets remain at 1,013, semantic matches at 1,182, and
+the family's 60 target assignments/sample allocations remain intact.
+
+Compared with the addition checkpoint, exactly ten integer subtraction draws change and
+the other 130 stored-origin draws retain their content and fingerprints. Against the
+pre-M4 baseline, 22 additive examples change and the remaining 118 preserve payloads,
+labels, semantic configurations and random states. All **7,180 final verification draws**
+satisfy their selected width declarations. Each of the ten integer additive target plans
+admits both widths equally. Protected target, policy, shared implementation and renderer
+hashes, plus the immutable dataset pointer, are unchanged.
+
+The five focused test files pass **230 tests** and TypeScript checking passes. Tests
+exhaust every original integer additive pair in all five measurement contexts, verify
+partial and explicit requests, reject contradictory width/number-kind claims, and check
+both question and solution modes. Local evidence is under
+`temp/measurement-width-choices/subtraction/` and `subtraction-audit/`.
+
+Four fresh native `test:target --render` runs cover money and time for both operations.
+All eight inspected images cover the two widths in both question and solution modes:
+`6 + 6`, `18 + 6 = 24`, `17 + 2`, `2 + 4 = 6`, `7 - 5`, `10 - 9 = 1`, `19 - 9`
+and `7 - 5 = 2`. Stories, operand cards, equations and answers remain coherent and
+unclipped. Images are local target-test artifacts; these checks do not publish or refresh
+the dataset, invoke VQA, or change its cache. Logs are the
+`{addition,subtraction}-render-{money,time}.log` files in the same evidence directory.
+
+The full coverage run passes **839 files / 6,345 tests**. The measurement generator and
+operand-digit/operation resolver each have **100% statements, branches, functions and
+lines covered**. Aggregate generator coverage is 98.47% statements, 96.98% branches,
+100% functions and 99.51% lines; every checked generator meets its thresholds. Both
+`test:coverage` stages ran with two workers and a 30-second test timeout. The initial
+sandboxed run encountered 26 filesystem/Git permission failures; the full rerun with
+normal fixture permissions passes without code changes. Evidence is in
+`verified-full-coverage.txt`, `verified-full-coverage/` and `generator-coverage.txt` under
+`temp/measurement-width-choices/`.
+
+`npm run check -- --spec=ccss` passes types, generator/view specifications, labels,
+documentation references, standards and split integrity. Its final annotation gate still
+fails on the 4,146 existing stored findings, so the aggregate check remains non-green.
+There are no annotation conflicts or incomplete enumerations. The command log is
+`temp/measurement-width-choices/check.txt`.
+
+This completes the measurement source-declaration backlog under the agreed scope. The
+stored snapshot still has 4,146 non-range findings pending the agreed regeneration
+and VQA readiness checkpoint. The global Area allowlist and range-policy
+exclusion remain unchanged; no evidence adapter or automatic completion is present.
