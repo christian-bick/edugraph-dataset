@@ -80,6 +80,17 @@ export type SchemaValue<T = any> =
 
 export type ConfigSchema = Record<string, SchemaValue>;
 
+/** Discover matching capabilities without resolving values or inference annotations. */
+export function extractSchemaLabels<T extends ConfigSchema>(schema?: T): string[] {
+  const labels = new Set<string>();
+  for (const value of Object.values(schema ?? {})) {
+    if (typeof value === 'function') continue;
+    const tuple = value.length >= 2 && typeof value[1] === 'function';
+    for (const label of (tuple ? value[0] : value) as readonly string[]) labels.add(label);
+  }
+  return [...labels];
+}
+
 export type ConfigFromSchema<T extends ConfigSchema> = {
   [K in keyof T]?: T[K] extends readonly string[]
     ? T[K][number]

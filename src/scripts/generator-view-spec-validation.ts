@@ -204,9 +204,11 @@ export async function validateSpecs(options: {generatorsDir?: string; viewsDir?:
     const ownershipIssues = inspectPositiveOwnership({
         modules: [
             ...generators.map(generator => ({role: 'generator' as const,
-                module_id: generator.generatorId, generalLabels: generator.generalLabels, schema: generator.schema})),
+                module_id: generator.generatorId, generalLabels: generator.generalLabels, schema: generator.schema,
+                inferredLabels: generator.spec?.inferredLabels})),
             ...views.map(view => ({role: 'view' as const,
-                module_id: view.viewId, generalLabels: view.generalLabels, schema: view.schema}))
+                module_id: view.viewId, generalLabels: view.generalLabels, schema: view.schema,
+                inferredLabels: view.spec.inferredLabels}))
         ],
         pairs: pairIndex.orderedPairs.map(pair => ({generatorId: pair.generator.generatorId, viewId: pair.view.viewId})),
         counters

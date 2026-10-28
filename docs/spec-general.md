@@ -325,6 +325,62 @@ required.
 
 ---
 
+### SPEC-12 — Inferred annotations are a fallback without matching capabilities
+
+Use optional `inferredLabels` only when an invariant or a sound schema declaration cannot
+express the additional claim without an inappropriate configuration or sampling change.
+Document why the matching-capable alternatives below are unsuitable for that module.
+This mechanism has a deliberate limitation: **an inferred label cannot satisfy a target,
+establish participation, admit a new match, or influence configuration selection**.
+
+Prefer these alternatives in order:
+
+| Mechanism | When to use it | Matching behavior |
+|---|---|---|
+| `generalLabels` | The claim holds for every supported configuration and projection. | Supplies an invariant capability. |
+| Label bundle on an existing schema choice | The claim follows from an already selected mathematical or presentation distinction; preserve its value, fallback semantics and sampling. | Supplies a capability through that choice. |
+| Explicit schema profile with compatibility rules | The label must be requestable and selects a real supported distinction. Review any sampling or coverage change before introducing it. | Supplies the capability; compatibility limits valid selections. |
+| Separate generator or view | The distinction needs a different mathematical contract or learner task; follow IMPL-7 and SPEC-V6. | Each module supplies its own capabilities. |
+| `inferredLabels` | A guaranteed annotation follows from the complete existing configuration, and the preceding alternatives are unsuitable. | Additional annotation only; absent from capability catalogs. |
+
+Compatibility and `requireTargetLabels` constrain participation; they do not themselves supply
+a missing capability. Do not add inference merely to hide a genuinely unsupported target.
+
+Both role specs extend `ModuleSpec<TSchema>`. Type the owning spec as
+`GeneratorSpec<typeof OwnGeneratorSchema>` or `ViewSpec<typeof OwnViewSchema>` when declaring
+inference. Each entry contains a nonempty, unique `produces` list and a synchronous pure
+`infer(config)` lambda returning applicable label IDs. The configuration is complete and deeply
+read-only, typed from the owning schema. Inline inference lambdas are permitted; they are not
+schema value resolvers under SPEC-6.
+
+Inference runs after all configuration attributes resolve and before mathematical generation.
+Every entry receives the same configuration snapshot; one entry's labels never become another's
+input. Returned labels are merged with invariants and selected schema labels, deduplicating IDs.
+Every returned claim must hold for all exercises supported by that configuration and its compatible
+projections. Inference cannot inspect a payload, image, target request, another owner's configuration
+or prior inference results; consume randomness; mutate configuration; or invoke the dependency graph
+to choose labels. The dependency evaluator only validates the final combined annotations.
+
+`produces` is an output inventory for eligibility, ownership and semantic dependency validation,
+never evidence that a callback emits a label. Its labels must be eligible and correctly owned,
+including the generator prohibition on Abilities. Ownership belongs to the module, so possible
+inference outputs may overlap that same owner's schema labels or other inference entries; repeated
+actual IDs are deduplicated. This preserves an existing matching-capable choice when a different
+configuration additionally establishes the same claim. Inferred outputs must not overlap the
+opposite role by equality or specialization. Existing invariant/schema ownership restrictions
+under SPEC-7 remain unchanged. Possible outputs within one entry may be alternatives; deduplication
+never waives cross-role ownership or conflicting-claim checks. Callbacks must return arrays
+containing only declared IDs.
+
+Source readiness distinguishes pre-resolution omissions, pending inference, and validated resolved
+annotations. Only exhaustive configuration-outcome validation can establish source closure;
+sampled executions are supplementary evidence. A `produces` entry alone never closes a gap.
+Preserve configuration values, supported cases, probabilities and random continuation, and bind
+inference source/output semantics into artifact/cache identity and replay verification.
+
+**Verified by:** `npm run check:generator-view-specs`, inference contract tests and resolved
+annotation/audit checks. Purity and the universal mathematical claim also require source review.
+
 ## Audit
 
 - [ ] **SPEC-1** — every target label is satisfied by the combined generator/view capabilities in the correct ontology direction, with every label-bearing construct interpreted dimension-neutrally and every Ability owned by a view.
@@ -339,3 +395,4 @@ required.
 - [ ] **SPEC-10** — `deductCompatible` appears only in schemas; `deductAdmitting` only in rejection lists.
 - [ ] **SPEC-11** — each Area changes the mathematical task or independently required body of knowledge; each Scope changes only the context, constraints, representation, range, or challenge within that task; notation Areas are not passive representation indicators; and no compatible generator/view pair shares equal or specialization-overlapping positive capabilities in any dimension or invariant/schema combination.
 - [ ] `npm run check:generator-view-specs` passes.
+- [ ] **SPEC-12** — inference is justified as a fallback, typed from its owning schema, pure and pre-generation; declared outputs satisfy eligibility/ownership while providing no matching capability; actual outputs, preservation and exhaustive-versus-pending audit accounting are validated.

@@ -1,12 +1,11 @@
-import type {ConfigSchema} from '../types/schema.ts';
+import {extractSchemaLabels, type ConfigSchema} from '../types/schema.ts';
 import {digestIdentity, radixSortUtf8} from './content-identity.ts';
 import {getCapabilityAncestors} from './ontology.ts';
 import {findAbilityLabels} from './spec-contracts.ts';
-import {extractSchemaLabels} from './utils.ts';
 import type {WorkCounters} from './work-counters.ts';
 
 export type CapabilityRole = 'generator' | 'view';
-export type CapabilityDeclaration = 'generalLabels' | 'schema';
+export type CapabilityDeclaration = 'generalLabels' | 'schema' | 'inferredLabels';
 
 export interface CapabilityProvider {
     role: CapabilityRole;
@@ -21,6 +20,7 @@ export interface OwnershipModule {
     module_id: string;
     generalLabels: readonly string[];
     schema?: ConfigSchema;
+    inferredLabels?: readonly {readonly produces: readonly string[]}[];
 }
 
 export interface OwnershipPair {
@@ -57,6 +57,24 @@ export function collectPositiveCapabilities(module: OwnershipModule): Capability
     return radixSortUtf8([...byKey.keys()]).map(key => byKey.get(key)!);
 }
 
+/** Ownership includes possible inferred outputs; matching capabilities deliberately do not. */
+export function collectOwnedLabelDeclarations(module: OwnershipModule): CapabilityProvider[] {
+    const declarations = collectPositiveCapabilities(module);
+    if (Array.isArray(module.inferredLabels)) {
+        for (const [entry, rule] of module.inferredLabels.entries()) {
+            // Malformed declarations receive diagnostics from the declaration contract gate.
+            if (!Array.isArray(rule?.produces)) continue;
+            const candidates: readonly unknown[] = rule.produces;
+            for (const capability of new Set(candidates.filter((label): label is string => typeof label === 'string'))) {
+                declarations.push({role: module.role, module_id: module.module_id,
+                    declaration: 'inferredLabels', parameter: String(entry), capability});
+            }
+        }
+    }
+    const byKey = new Map(declarations.map(declaration => [providerKey(declaration), declaration]));
+    return radixSortUtf8([...byKey.keys()]).map(key => byKey.get(key)!);
+}
+
 function ownershipIssue(code: OwnershipCode, declarations: CapabilityProvider[]): PositiveOwnershipIssue {
     const ruleIds: Record<OwnershipCode, string[]> = {
         'generator-ability': ['SPEC-G3', 'SPEC-V5'],
@@ -68,10 +86,12 @@ function ownershipIssue(code: OwnershipCode, declarations: CapabilityProvider[])
         'generator-ability': 'Abilities belong exclusively to views',
         'redundant-general-labels': 'Invariant labels redundantly declare a specialization ancestor',
         'schema-general-overlap': 'Schema capabilities overlap invariant labels',
-        'cross-role-positive-overlap': 'Compatible roles declare overlapping positive capabilities'
+        'cross-role-positive-overlap': 'Compatible roles declare overlapping labels'
     };
     const references = declarations.map(declaration => {
-        const field = declaration.declaration === 'schema' ? `schema.${declaration.parameter}` : 'generalLabels';
+        const field = declaration.declaration === 'schema' ? `schema.${declaration.parameter}`
+            : declaration.declaration === 'inferredLabels' ? `inferredLabels[${declaration.parameter}].produces`
+                : 'generalLabels';
         return `${declaration.role}:${declaration.module_id} ${field} '${declaration.capability}'`;
     });
     return {
@@ -148,7 +168,7 @@ export function inspectPositiveOwnership(options: {
     };
     const modules = new Map<string, {declarations: CapabilityProvider[]; index: CapabilityIndex}>();
     for (const module of options.modules) {
-        const declarations = collectPositiveCapabilities(module);
+        const declarations = collectOwnedLabelDeclarations(module);
         counters?.add('ownership.modules');
         counters?.add('ownership.declarations', declarations.length);
         const general = declarations.filter(entry => entry.declaration === 'generalLabels');

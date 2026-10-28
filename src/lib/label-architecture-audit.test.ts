@@ -1,5 +1,5 @@
 import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {
     buildLabelArchitectureAudit,
@@ -304,6 +304,39 @@ describe('label architecture audit', () => {
             expect(finding.files[0]).toBe(`unused/${finding.modules[0]}/spec.ts`);
             expect(finding.ownership?.rule_ids.length).toBeGreaterThan(0);
         }
+    });
+
+    it('reports inferred ownership across compatible roles without calling inference or adding positive providers', () => {
+        const infer = vi.fn(() => { throw new Error('a static audit must not execute inference'); });
+        const modifiedGenerator = {...generator, spec: {...generator.spec,
+            inferredLabels: [{produces: [Scope.ArabicNumerals], infer}]}};
+        const modifiedView = {...view, generalLabels: [...view.generalLabels, Scope.ArabicNumerals],
+            supportedLabels: [...view.supportedLabels, Scope.ArabicNumerals],
+            spec: {...view.spec, generalLabels: [...view.generalLabels, Scope.ArabicNumerals]}};
+        for (const graph of [null, currentGraph(modifiedGenerator, modifiedView)]) {
+            const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec', targets: [target],
+                generators: [modifiedGenerator], views: [modifiedView], graph, sourceSignals: []});
+            expect(report.matching.matched_tuples).toBe(1);
+            expect(report.findings.filter(finding => finding.ownership)).toMatchObject([{
+                category: 'cross-role-positive-overlap', affected_tuple_count: 1,
+                ownership: {declarations: [{declaration: 'inferredLabels'}, {declaration: 'generalLabels'}]}
+            }]);
+            expect(report.capability_provenance.flatMap(entry => entry.providers)
+                .some(provider => provider.declaration === 'inferredLabels')).toBe(false);
+        }
+        expect(infer).not.toHaveBeenCalled();
+    });
+
+    it('does not let an inferred output establish a target claim, while allowing repeated labels within one owner', () => {
+        const inferredGenerator = {...generator, spec: {...generator.spec,
+            inferredLabels: [{produces: [Scope.SingleDigitSmallestOperand], infer: () => [Scope.SingleDigitSmallestOperand]},
+                {produces: [Area.Addition], infer: () => [Area.Addition]}]}};
+        const report = buildLabelArchitectureAudit({projectRoot: '.', specName: 'test-spec',
+            targets: [{...target, labels: [...target.labels, Scope.SingleDigitSmallestOperand]}],
+            generators: [inferredGenerator], views: [view], graph: null, sourceSignals: []});
+        expect(report.matching.matched_tuples).toBe(0);
+        expect(report.capability_provenance).toEqual([]);
+        expect(report.findings.filter(finding => finding.ownership)).toEqual([]);
     });
 
     it('preserves identical applicability diagnostics across fresh matching and graph reuse', () => {

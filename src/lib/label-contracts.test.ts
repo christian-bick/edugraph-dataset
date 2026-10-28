@@ -1,9 +1,9 @@
 import {requireTargetLabels, rejectTargetLabels} from './compatibility.ts';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {Area, Ability, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {createLabelContractIndex, validateModuleLabelContract,
-    validateTargetLabelContract, assertResolvedTargetCoverage} from './label-contracts.ts';
+    validateTargetLabelContract, assertResolvedTargetCoverage, validateInferredLabelDeclarations} from './label-contracts.ts';
 import {withLabelChoices} from '../types/schema.ts';
 
 const iri = (name: string) => `https://fixture.example/${name}`;
@@ -55,6 +55,48 @@ describe('label contracts', () => {
                 'SPEC-V4 removed.requiredLabels: removed declaration; use compatibility target policies.',
                 'SPEC-V4 removed.rejectedLabels: removed declaration; use compatibility target policies.'
             ]);
+    });
+
+    it('validates inferred output eligibility without executing inference or requiring all outputs together', () => {
+        const infer = vi.fn(() => { throw new Error('static validation must not execute inference'); });
+        expect(validateModuleLabelContract({inferredLabels: [
+            {produces: [Scope.NumbersWithZero, Scope.NumbersWithoutZero], infer}
+        ]}, 'module')).toEqual([]);
+        const errors = validateModuleLabelContract({inferredLabels: [
+            {produces: ['unknown', Area.CircularShapes], infer}
+        ]}, 'module');
+        expect(errors).toEqual([
+            "SPEC-3 module.inferredLabels[0].produces: unknown descriptor 'unknown'.",
+            `SPEC-3 module.inferredLabels[0].produces: '${Area.CircularShapes}' has constituent children and is ineligible.`
+        ]);
+        expect(infer).not.toHaveBeenCalled();
+        expect(validateInferredLabelDeclarations(undefined, 'module')).toEqual([]);
+        expect(validateInferredLabelDeclarations([], 'module')).toEqual([]);
+    });
+
+    it.each([null, {}, 'invalid'].map(value => [value]))('rejects a malformed inferred-label collection: %s', value => {
+        expect(validateInferredLabelDeclarations(value, 'module'))
+            .toEqual(['SPEC-12 module.inferredLabels: expected an array.']);
+    });
+
+    it.each([null, [], 'invalid'].map(value => [value]))('rejects a malformed inferred-label entry: %s', value => {
+        expect(validateInferredLabelDeclarations([value], 'module'))
+            .toEqual(['SPEC-12 module.inferredLabels[0]: expected a declaration with produces and infer.']);
+    });
+
+    it.each([undefined, [], [''], [1], Array(1), Scope.IntegerNumbers].map(value => [value]))('rejects invalid produces bounds: %s', produces => {
+        expect(validateInferredLabelDeclarations([{produces, infer: () => []}], 'module'))
+            .toEqual(['SPEC-12 module.inferredLabels[0].produces: expected a nonempty array of descriptor strings.']);
+    });
+
+    it('rejects repeated output descriptors and missing callbacks', () => {
+        expect(validateInferredLabelDeclarations([{produces: [Scope.IntegerNumbers, Scope.IntegerNumbers]}], 'module'))
+            .toEqual([
+                'SPEC-12 module.inferredLabels[0].produces: descriptors must be unique.',
+                'SPEC-12 module.inferredLabels[0].infer: expected a function.'
+            ]);
+        expect(validateInferredLabelDeclarations(Array(1), 'module'))
+            .toEqual(['SPEC-12 module.inferredLabels[0]: expected a declaration with produces and infer.']);
     });
 
     it('requires Area and Ability without requiring Scope or limiting conjunctions', () => {

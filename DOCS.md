@@ -55,6 +55,13 @@ label-dependency Area allowlist. Labels come from the matched declarations and r
 choices. Generation does not append or replace labels based on sampled data. The contract is
 documented in [label architecture](docs/label-architecture.md).
 
+Optional `inferredLabels` on the common spec contract describes additional annotations from
+the complete owning configuration. It is a fallback with no matching capability: `produces`
+supports validation and semantic discovery, while only actual callback results become annotations.
+The [authoring alternatives and contract](docs/spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities)
+explain when invariants, existing schema choices or explicit profiles are preferable. Runtime and
+audit integration follows the [three-checkpoint plan](docs/plan/label-dependency-graph.md#configuration-inference-checkpoints-2026-10-29).
+
 Generators own canonical mathematical payloads and their invariants. Views own presentation
 and the learner action requested from that payload. Shared types carry the mathematical evidence
 needed by consumers without encoding a particular layout or task projection. Specialized views

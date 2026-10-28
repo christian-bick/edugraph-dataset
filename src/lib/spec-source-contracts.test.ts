@@ -97,6 +97,24 @@ describe('findGeneralLabelDeductionIssues', () => {
         ]);
     });
 
+    it('requires explicit inferred outputs but permits ordinary configuration callbacks', () => {
+        const source = `
+            import {deductCompatible, deductAdmitting, Scope} from 'edugraph-ts';
+            const expanded = deductCompatible([Scope.IntegerNumbers]);
+            export const spec = {inferredLabels: [
+                {produces: expanded, infer: config => [Scope.IntegerNumbers]},
+                {produces: deductAdmitting([Scope.NumbersWithoutZero]), infer: config => []}
+            ]};
+        `;
+        expect(inspectSpecSource(source).map(issue => [issue.rule, issue.field]))
+            .toEqual([['SPEC-12', 'inferredLabels'], ['SPEC-12', 'inferredLabels']]);
+        expect(inspectSpecSource(`
+            import {Scope} from 'edugraph-ts';
+            export const spec = {inferredLabels: [{produces: [Scope.IntegerNumbers],
+                infer: config => config.enabled ? [Scope.IntegerNumbers] : []}]};
+        `)).toEqual([]);
+    });
+
     it('allows rejection expansion through trusted helper aliases and namespace imports', () => {
         const source = `
             import {deductAdmitting as expand} from 'edugraph-ts/generated';

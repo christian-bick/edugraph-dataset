@@ -189,6 +189,10 @@ selection omissions and range-presence findings stay report-only. The audit read
 and ontology membership without running generators or changing labels. See the
 [implementation plan](docs/plan/label-dependency-graph.md).
 
+Configuration-based `inferredLabels` is an annotation fallback with no matching capability.
+Prefer invariant and schema declarations when labels must be requestable; see the alternatives
+and preservation requirements in [SPEC-12](docs/spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities).
+
 **3. Run Repository Checks**
 Run TypeScript type checks, generator/view spec audits, label usage checks, and target standard spec validations.
 ```bash

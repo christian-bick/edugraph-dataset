@@ -63,6 +63,7 @@ applies the ontology's content-evidence rule to this repository.
 | Target label | A claim the competency requires | n/a | n/a |
 | `generalLabels` | An invariant module capability | Yes | No; it is always true |
 | Schema label | A supported configurable capability | Yes, after resolution | Yes, within the module's role |
+| `inferredLabels` output | An additional claim guaranteed by the complete owning configuration | No | No; preserves resolved values and sampling |
 | `requireTargetLabels` | An explicit target precondition for view participation | No | No |
 | `rejectTargetLabels` | A stable, complete invalid domain for a view | No | No |
 | Selected-label compatibility predicate | A valid relation among candidate capabilities | No | Restricts admitted configurations before resolution |
@@ -164,8 +165,8 @@ one Ability or accepting a label name as a substitute for its witness. See
 [CHK-V6](checklist-view.md#chk-v6--keep-one-minimal-observable-contract-per-view).
 
 Generators do not annotate their output with ontology labels. Orchestration derives the sample's
-observable label set from the matched pair's invariant capabilities and resolved generator/view
-schema capabilities. Applicability-only `requireTargetLabels` and `rejectTargetLabels` never become sample
+observable label set from the matched pair's invariant capabilities, resolved generator/view
+schema capabilities and validated configuration inference. Applicability-only `requireTargetLabels` and `rejectTargetLabels` never become sample
 labels; target labels record what the standard requested, not the complete description of what the
 pair produced. See [IMPL-G3](implementation-generator.md#impl-g3--ontology-labels-are-resolved-outside-the-generator)
 for the generator boundary and [SPEC-6](spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
@@ -218,10 +219,20 @@ this facet while the [required upstream corrections](plan/label-dependency-graph
 remain pending. This local selector does not change global ontology eligibility or mutate
 the dependency package.
 
-Generation preserves the resolved annotation set; it does not infer extra labels from mathematical
-data, rewrite selected claims, or maintain a second annotation receipt. Concrete label corrections
-belong in reviewed declarations and schema resolution. VQA independently assesses whether the
-rendered exercise supports the supplied claims.
+Configuration inference is a fallback when ordinary matching-capable declarations do not provide
+a good expression of an additional claim. Invariants, labels on existing choices, and explicit
+supported profiles remain preferable when the claim should be requestable. Inferred outputs cannot
+supply a target capability, satisfy a participation requirement or influence selection; their
+`produces` inventory is used only for checks and semantic dependency discovery. The alternatives
+and authoring contract are in [SPEC-12](spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities).
+
+Orchestration evaluates independent pure `infer` lambdas from the complete owning configuration
+after resolution and before generation, merging their actual outputs into annotations. It preserves
+configuration, sampling and random continuation. It does not derive labels from mathematical draws
+or images, and it never invokes the dependency graph to fill missing labels. VQA independently
+assesses whether the rendered exercise supports the supplied claims. A static audit must distinguish
+pending inference from exhaustively established resolved outputs; possible `produces` labels alone
+are neither emitted annotations nor proof of source readiness.
 
 For example, `counting-basic` supplies a positive collection but does not declare whole-task
 zero absence: its parity projection can expose empty groups or a zero remainder. The simple,

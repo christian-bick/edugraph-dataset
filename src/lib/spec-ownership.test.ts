@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {ontologyNeutral} from './resolvers.ts';
-import {collectPositiveCapabilities, inspectPositiveOwnership,
+import {collectPositiveCapabilities, collectOwnedLabelDeclarations, inspectPositiveOwnership,
     type OwnershipModule, type CapabilityDeclaration} from './spec-ownership.ts';
 import {createWorkCounters} from './work-counters.ts';
 
@@ -11,14 +11,15 @@ const pair = {generatorId: 'g', viewId: 'v'};
 const module = (role: 'generator' | 'view', declaration: CapabilityDeclaration, labels: string[]): OwnershipModule => ({
     role, module_id: role === 'generator' ? 'g' : 'v',
     generalLabels: declaration === 'generalLabels' ? labels : [],
-    schema: declaration === 'schema' ? {choice: labels} : {}
+    schema: declaration === 'schema' ? {choice: labels} : {},
+    ...(declaration === 'inferredLabels' ? {inferredLabels: [{produces: labels}]} : {})
 });
 const inspectPair = (left: OwnershipModule, right: OwnershipModule) =>
     inspectPositiveOwnership({modules: [left, right], pairs: [pair]});
 
 describe('positive ownership contracts', () => {
-    for (const generatorDeclaration of ['generalLabels', 'schema'] as const) {
-        for (const viewDeclaration of ['generalLabels', 'schema'] as const) {
+    for (const generatorDeclaration of ['generalLabels', 'schema', 'inferredLabels'] as const) {
+        for (const viewDeclaration of ['generalLabels', 'schema', 'inferredLabels'] as const) {
             it.each([Area.Rectangle, Scope.ArabicNumerals, Ability.Formalization])(
                 `checks ${generatorDeclaration}/${viewDeclaration} overlap for %s`, label => {
                     const issues = inspectPair(module('generator', generatorDeclaration, [label]),
@@ -30,6 +31,7 @@ describe('positive ownership contracts', () => {
                         .toEqual([[generatorDeclaration, label], [viewDeclaration, label]]);
                     expect(overlap[0].message).toContain(label);
                     if (viewDeclaration === 'schema') expect(overlap[0].message).toContain('schema.choice');
+                    if (viewDeclaration === 'inferredLabels') expect(overlap[0].message).toContain('inferredLabels[0].produces');
                 });
         }
     }
@@ -71,6 +73,48 @@ describe('positive ownership contracts', () => {
             pairs: []})).toEqual([]);
         expect(collectPositiveCapabilities({role: 'view', module_id: 'v', generalLabels: [],
             schema: {style: ontologyNeutral(() => 'plain')}})).toEqual([]);
+    });
+
+    it.each(['generalLabels', 'schema'] as const)('allows inference to repeat %s labels of the same owner', declaration => {
+        for (const role of ['generator', 'view'] as const) {
+            for (const [declared, inferred] of [[Area.Rectangle, Area.Square], [Area.Square, Area.Rectangle],
+                [Scope.IntegerNumbers, Scope.IntegerNumbers]]) {
+                const owner = {...module(role, declaration, [declared]), inferredLabels: [{produces: [inferred]}]};
+                expect(inspectPositiveOwnership({modules: [owner], pairs: []})).toEqual([]);
+            }
+        }
+    });
+
+    it('keeps repeated inference entries within one owner without treating possible outputs as simultaneous claims', () => {
+        const owner = {...module('generator', 'inferredLabels', [Area.Rectangle, Area.Square]),
+            inferredLabels: [{produces: [Area.Rectangle, Area.Square]}, {produces: [Area.Square]}]};
+        expect(inspectPositiveOwnership({modules: [owner], pairs: []})).toEqual([]);
+        expect(collectOwnedLabelDeclarations(owner)).toHaveLength(3);
+        expect(inspectPositiveOwnership({modules: [{...owner, inferredLabels: [owner.inferredLabels[0]]}], pairs: []})).toEqual([]);
+    });
+
+    it('enforces Ability ownership for inferred outputs even in unmatched generators', () => {
+        expect(inspectPositiveOwnership({modules: [module('generator', 'inferredLabels', [Ability.Formalization])], pairs: []}))
+            .toMatchObject([{code: 'generator-ability', declarations: [{declaration: 'inferredLabels'}]}]);
+        expect(inspectPositiveOwnership({modules: [module('view', 'inferredLabels', [Ability.Formalization])], pairs: []}))
+            .toEqual([]);
+    });
+
+    it('collects inferred ownership separately from matching capabilities', () => {
+        const owner = {...module('generator', 'schema', [Area.Addition]),
+            generalLabels: [Scope.IntegerNumbers], inferredLabels: [{produces: [Scope.SingleDigitSmallestOperand]}]};
+        expect(collectPositiveCapabilities(owner).map(entry => entry.capability).sort())
+            .toEqual([Area.Addition, Scope.IntegerNumbers].sort());
+        expect(collectOwnedLabelDeclarations(owner).map(entry => entry.capability).sort())
+            .toEqual([Area.Addition, Scope.IntegerNumbers, Scope.SingleDigitSmallestOperand].sort());
+    });
+
+    it('lets the declaration gate report malformed inference without preventing other ownership diagnostics', () => {
+        const base = module('generator', 'generalLabels', [Ability.Formalization]);
+        for (const inferredLabels of [null, {}, [null, {produces: null}, {produces: [1, Scope.IntegerNumbers]}]]) {
+            expect(inspectPositiveOwnership({modules: [{...base, inferredLabels} as unknown as OwnershipModule], pairs: []}))
+                .toMatchObject([{code: 'generator-ability'}]);
+        }
     });
 
     it('does not compare incompatible roles, or use requirements as positive declarations', () => {

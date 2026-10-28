@@ -3,7 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {SourceSymbolIndex} from './source-symbol-index.ts';
 
 export interface SpecSourceIssue {
-    rule: 'SPEC-6' | 'SPEC-10' | 'SPEC-V4';
+    rule: 'SPEC-6' | 'SPEC-10' | 'SPEC-12' | 'SPEC-V4';
     field: string;
     line: number;
     column: number;
@@ -94,12 +94,12 @@ export function inspectSpecSource(source: string, fileName = 'spec.ts',
     const inspectField = (field: string, initializer: ts.Expression): void => {
         if (field !== 'schema') {
             for (const {node, owner} of deductionCalls(initializer, sourceFile, 'deductCompatible')) {
-                report(field === 'compatibility' ? 'SPEC-V4' : 'SPEC-10', field, node,
+                report(field === 'inferredLabels' ? 'SPEC-12' : field === 'compatibility' ? 'SPEC-V4' : 'SPEC-10', field, node,
                     'deductCompatible may appear only in schema capabilities', owner);
             }
         }
         for (const {node, owner} of deductionCalls(initializer, sourceFile, 'deductAdmitting', field === 'compatibility')) {
-            report(field === 'schema' ? 'SPEC-10' : 'SPEC-V4', field, node,
+            report(field === 'inferredLabels' ? 'SPEC-12' : field === 'schema' ? 'SPEC-10' : 'SPEC-V4', field, node,
                 'deductAdmitting may appear only in the labels argument of rejectTargetLabels within compatibility', owner);
         }
     };
@@ -137,7 +137,7 @@ export function inspectSpecSource(source: string, fileName = 'spec.ts',
                 report('SPEC-V4', field, node,
                     `${field} is no longer supported; declare a named ${field === 'requiredLabels'
                         ? 'requireTargetLabels' : 'rejectTargetLabels'} rule in compatibility`);
-            } else if (field === 'generalLabels' || field === 'compatibility') {
+            } else if (field === 'generalLabels' || field === 'compatibility' || field === 'inferredLabels') {
                 inspectField(field, node.initializer);
             }
         }

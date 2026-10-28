@@ -742,10 +742,12 @@ export function buildLabelArchitectureAudit(options: {
     const ownershipModules = [
         ...options.generators.map(generator => ({role: 'generator' as const,
             module_id: generator.generatorId, generalLabels: generator.spec?.generalLabels ?? [],
-            schema: generator.schema, file: resolve(generator.module.absolutePath, 'spec.ts')})),
+            schema: generator.schema, inferredLabels: generator.spec?.inferredLabels,
+            file: resolve(generator.module.absolutePath, 'spec.ts')})),
         ...options.views.map(view => ({role: 'view' as const,
             module_id: view.viewId, generalLabels: view.spec.generalLabels ?? [],
-            schema: view.schema, file: resolve(view.module.absolutePath, 'spec.ts')}))
+            schema: view.schema, inferredLabels: view.spec.inferredLabels,
+            file: resolve(view.module.absolutePath, 'spec.ts')}))
     ];
     const ownershipFiles = new Map(ownershipModules.map(module => [
         `${module.role}:${module.module_id}`, relative(options.projectRoot, module.file).replaceAll('\\', '/')

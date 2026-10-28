@@ -2,6 +2,7 @@ import { ConfigSchema, ConfigFromSchema, ResolvedConfig } from '../types/schema.
 import { capabilitySatisfies } from './ontology.ts';
 import { random } from './random.ts';
 import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
+export {extractSchemaLabels} from '../types/schema.ts';
 
 export type SchemaResolutionContractIssue = {
     field: string;
@@ -288,27 +289,6 @@ export function extractConfig<T extends ConfigSchema>(
     }
 
     return { config, resolvedLabels: Array.from(resolvedLabels) };
-}
-
-export function extractSchemaLabels<T extends ConfigSchema>(schema?: T): string[] {
-    if (!schema) return [];
-    const labels = new Set<string>();
-    
-    for (const key in schema) {
-        const schemaValue = schema[key];
-        if (typeof schemaValue === 'function') {
-            continue;
-        }
-        
-        const isTuple = isResolverTuple(schemaValue);
-        const supportedLabels: string[] = isTuple ? (schemaValue[0] as string[]) : (schemaValue as string[]);
-        
-        for (const label of supportedLabels) {
-            labels.add(label);
-        }
-    }
-    
-    return Array.from(labels);
 }
 
 export function generateWithLabels<TData = any, TConfig = any>(

@@ -6,8 +6,9 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
-No independent declaration repair remains queued. The 391 remaining requirements have exact
-ownership in 27 dependency decision batches. The known reasoning content defect in RB-A3-D3
+Six mathematically settled cases are now authorized for the configuration-inference implementation.
+The 391 remaining requirements have exact ownership in 27 dependency scopes, with six in progress
+and 385 still deferred. The known reasoning content defect in RB-A3-D3
 also remains open, despite its retired dependency requirements. Full dataset readiness still
 waits for those decisions. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
@@ -41,11 +42,11 @@ integer-only digit gate and range-policy exclusion are unchanged.
 | Progress since this baseline | Count |
 |---|---:|
 | Outstanding source gaps | 391 |
-| Queued, in review or not yet triaged | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 391 |
+| Authorized implementation in progress (subset of outstanding) | 6 |
+| Assigned to deferred decision batches (subset of outstanding) | 385 |
 | Verified repairs / introduced / reopened | 953 / 75 / 0 |
 | Policy-retired / policy-added requirements | 38 / 0 |
-| Active dependency decision scopes | 27 |
+| Active dependency scopes, including implementation | 27 |
 | Separately open content-defect scopes | 1 |
 
 All remaining findings have explicit child owners. Thirty child scopes have been created;
@@ -73,14 +74,14 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A4 | Three- and four-operand arithmetic | 24 | 0 | 0 | Complete |
 | RB-A5 | Arithmetic strategies and property relations | 38 | 0 | 0 | Complete; children below |
 | RB-A5-D1 | Compensation/unknown-role primary widths | 0 | 3 | 3 | Deferred |
-| RB-A5-D2 | Near-doubles legacy sampling/API boundary | 0 | 2 | 2 | Deferred |
+| RB-A5-D2 | Near-doubles legacy sampling/API boundary | 0 | 2 | 0 | Authorized configuration inference in progress |
 | RB-A6 | Patterns, estimation and equation-zero contexts | 36 | 0 | 0 | Complete; child below |
 | RB-A6-D1 | Equation/estimation zero distinctions | 0 | 6 | 6 | Deferred |
 | RB-A7 | Parity grouping and zero classification | 2 | 0 | 0 | Triaged; child below |
 | RB-A7-D1 | Singleton/even/larger-odd grouping | 0 | 2 | 2 | Deferred |
 | RB-A8 | Counting offsets, equal groups and arrays | 16 | 0 | 0 | Complete |
 | RB-A9 | Place value, rounding and powers of ten | 71 | 0 | 0 | Complete; children below |
-| RB-A9-D1 | Place-count/intermediate zero evidence | 0 | 29 | 29 | Deferred |
+| RB-A9-D1 | Place-count/intermediate zero evidence | 0 | 29 | 25 | Four expanded-form inference cases in progress; 25 deferred |
 | RB-A9-D2 | Variable place-value primary widths | 0 | 6 | 6 | Deferred |
 | RB-A10 | Written algorithms and division models | 22 | 0 | 0 | Complete; child below |
 | RB-A10-D1 | Algorithm operands/partial rows/remainders | 0 | 10 | 10 | Deferred |
@@ -118,7 +119,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **391** | **391** | |
+| **Total: 56 source batches** | | **1,307** | **391** | **385** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
@@ -167,9 +168,9 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-A1-01 | RB-A1-D1 | The remaining 102 pair contexts admit different primary digit widths inside the same operation/range/zero choices. | Agree ordinary pre-draw width profiles, preserving all supported numerical cases and explicitly assessing distribution changes. No width may be inferred from a sampled payload. |
 | DEC-A2-01 | RB-A2-D1 | Twenty-eight positive-pair contexts cannot inherit universal zero absence because compatible number-line projections display origin zero. | Review model/projection ownership while retaining both zero-capable and positive cases. A blanket absence default would be false for some projections. |
 | DEC-A5-01 | RB-A5-D1 | Two compensation contexts have small adjustments but variable primary widths; one inverse comparison can ask 24÷12 or 24÷2. | Classify primary operands, not adjustments or hidden relation roles; agree any new pre-draw distinction. |
-| DEC-A5-02 | RB-A5-D2 | Two near-doubles width claims are mathematically proved. The prototype preserves production plans but changes legacy extractConfig entropy in 32/128 probes; seed zero advances to 1831565813. | Decide whether to accept that concrete legacy-workflow difference or authorize API support beyond this initiative. Both cases remain open under the current preservation constraint. |
+| DEC-A5-02 | RB-A5-D2 | Two near-doubles width claims are mathematically proved. The earlier alias prototype preserved production plans but changed legacy extractConfig entropy in 32/128 probes. | The user authorized configuration inference after ordinary resolution, preserving entropy and matching. Both cases remain open until the third implementation checkpoint validates actual outputs. |
 | DEC-A6-01 | RB-A6-D1 | Six equation/estimation zero cases vary in generated quantities or displayed procedure evidence. | Review ordinary pre-draw cases and the exact participating values; do not choose absence from a positive sample. |
-| DEC-A9-01 | RB-A9-D1 | Twenty-nine place-value/rounding/power zero findings remain. Four expanded-form cases are mathematically settled, but their metadata prototype changes legacy extraction entropy and can select a wrong zero alias outside planner compatibility. | The low branch has only positive summands; the high branch displays a necessarily zero place coefficient. These four require a safe context-qualified declaration mechanism, not a new zero convention. Other cases retain component/ownership distinctions; a zero glyph alone is insufficient. |
+| DEC-A9-01 | RB-A9-D1 | Twenty-nine place-value/rounding/power zero findings remain. Four expanded-form cases are mathematically settled; their earlier alias prototype changed entropy and could select a wrong zero alias. | Implement the authorized configuration inference for those four after validating the shared contract. The low branch has only positive summands; the high branch displays a necessarily zero place coefficient. The other 25 remain deferred. |
 | DEC-A9-02 | RB-A9-D2 | Six place-value widths vary under existing magnitude/range profiles. | Propose normal width choices with supported-case and sampling comparisons; keep existing range policy unchanged. |
 | DEC-A10-01 | RB-A10-D1 | Ten algorithm contexts have varying zero operands, partial products, quotient digits or remainders. | Review explicit mathematical cases and question/solution procedures. Hidden initialization zero and shifted zero glyphs do not establish invariant zero participation. |
 
@@ -610,9 +611,42 @@ the two acceptance batches, **30 scopes remain**. The separate representation-co
 design topic is not estimated in this count. No rendering, sampling, target, adapter,
 automatic-completion or range-policy change is included.
 
+### Configuration inference checkpoint 1 — contract and validation (2026-10-29)
+
+The common `ModuleSpec<TSchema>` now supports `inferredLabels` with schema-derived,
+deeply read-only complete configuration. The shared runtime helper validates declared and
+returned IDs, eligibility and owner-local declarations; uses an isolated read-only snapshot;
+rejects asynchronous callbacks, mutation attempts and random-state access; and preserves
+independent rule inputs. It adds no matching capability. Static validation and ownership
+discovery include potential outputs without invoking callbacks or treating them as providers.
+
+[SPEC-12](../spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities)
+documents this as a fallback after invariant, existing-choice and explicit-profile alternatives.
+Those alternatives support matching; inferred labels deliberately do not. The documentation
+also distinguishes pending inference from exhaustively established resolved annotations.
+
+This checkpoint introduces no module callbacks or production integration, so **zero gaps close**.
+The fresh audit retains all **391** source requirements, **1,263** selections, **1,195** matches,
+and the same **2,808** stored samples. All 4,071 audit subject inputs/evaluations are identical
+apart from conservative plan source-identity changes. The recorded baseline includes all
+2,526 question/solution draws and 2,808 stored-origin draws for later preservation comparison.
+
+Validation: **843 suites / 6,594 tests pass**, type checking and spec ownership checks pass,
+and generator coverage thresholds pass. Configured coverage remains 98.49% statements,
+97.05% branches, 100% functions and 99.51% lines. Focused inference-helper coverage is 100%
+lines/functions and 97.95% branches. Documentation checks pass with five existing external-fetch
+warnings. Independent review found and verified corrections for sparse-array snapshots and
+seed inspection. The near-doubles acceptance review also clarified that the module is the owner:
+same-owner schema/inference output IDs may repeat and are deduplicated, preserving the existing
+make-ten matching capability. Cross-role overlap, generator Ability and existing invariant/schema
+restrictions remain enforced. An earlier full run overlapped guard corrections; the stable rerun
+above passes. Evidence is in `temp/inferred-labels/` and `temp/label-inference-static/`.
+Unrelated working-tree content and the stored dataset remain unchanged.
+
 ## Decision queue after autonomous declarations
 
-No declaration batch remains untriaged. The 27 active dependency child batches above account
+No declaration batch remains untriaged. Six cases now have explicit implementation authorization;
+the other 385 still require their recorded decisions. The 27 active dependency child batches account
 for every one of the 391 outstanding requirements. Their facet totals are:
 
 | Decision facet | Gaps |
@@ -625,7 +659,8 @@ for every one of the 391 outstanding requirements. Their facet totals are:
 | **Total** | **391** |
 
 The narrowed graph has no remaining source numeral/base findings; representation completeness
-remains a separate design question. Next resolve remaining question/solution declaration ownership
+remains a separate design question. First complete the three configuration-inference checkpoints
+for the two near-doubles and four expanded-form cases. Then resolve question/solution declaration ownership
 and ordinary width/model profiles, then fraction magnitude, algebra/legacy profile ownership
 and the two precisely bounded legacy-API cases. Retain the RB-A3-D3 reasoning content defect
 as its own open scope even though the graph no longer reports its retired numeral requirements. These are

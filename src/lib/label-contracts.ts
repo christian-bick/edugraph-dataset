@@ -22,6 +22,30 @@ export const labelContractIndex = createLabelContractIndex();
 const areas = new Set<string>(Object.values(Area));
 const abilities = new Set<string>(Object.values(Ability));
 
+/** Validate declared output bounds without executing an inference callback. */
+export function validateInferredLabelDeclarations(inferredLabels: unknown, location: string): string[] {
+    if (inferredLabels === undefined) return [];
+    if (!Array.isArray(inferredLabels)) return [`SPEC-12 ${location}.inferredLabels: expected an array.`];
+    return Array.from(inferredLabels).flatMap((entry, index) => {
+        const field = `${location}.inferredLabels[${index}]`;
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+            return [`SPEC-12 ${field}: expected a declaration with produces and infer.`];
+        }
+        const errors: string[] = [];
+        if (!Array.isArray(entry.produces) || entry.produces.length === 0
+            || Array.from(entry.produces).some((label: unknown) => typeof label !== 'string' || label.length === 0)) {
+            errors.push(`SPEC-12 ${field}.produces: expected a nonempty array of descriptor strings.`);
+        } else {
+            if (new Set(entry.produces).size !== entry.produces.length) {
+                errors.push(`SPEC-12 ${field}.produces: descriptors must be unique.`);
+            }
+            errors.push(...labelContractIndex.validate(entry.produces, `${field}.produces`));
+        }
+        if (typeof entry.infer !== 'function') errors.push(`SPEC-12 ${field}.infer: expected a function.`);
+        return errors;
+    });
+}
+
 export function validateTargetLabelContract(labels: readonly string[], location: string): string[] {
     const errors = labelContractIndex.validate(labels, location);
     if (!labels.some(label => areas.has(label))) errors.push(`TSPEC-14 ${location}: missing Area.`);
@@ -31,6 +55,7 @@ export function validateTargetLabelContract(labels: readonly string[], location:
 
 export function validateModuleLabelContract(spec: {
     generalLabels?: readonly string[];
+    inferredLabels?: unknown;
     compatibility?: readonly CompatibilityRule<any>[];
     schema?: ConfigSchema;
 }, location: string): string[] {
@@ -39,6 +64,7 @@ export function validateModuleLabelContract(spec: {
         if (field in spec) errors.push(`SPEC-V4 ${location}.${field}: removed declaration; use compatibility target policies.`);
     }
     errors.push(...labelContractIndex.validate(spec.generalLabels ?? [], `${location}.generalLabels`));
+    errors.push(...validateInferredLabelDeclarations(spec.inferredLabels, location));
     for (const rule of spec.compatibility ?? []) {
         errors.push(...labelContractIndex.validate((rule.dependencies ?? []).map(dependency => dependency.label),
             `${location}.compatibility.${rule.id}`));

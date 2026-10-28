@@ -4,6 +4,43 @@ Status: implemented as annotation-only validation. The repository contains one s
 a pure ontology-aware evaluator, and a shared strict gate and audit. Generator payloads and
 rendered images are outside this initiative.
 
+The approved [configuration-inference extension](#configuration-inference-checkpoints-2026-10-29)
+adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
+matching capabilities; representation completeness remains separate.
+
+## Configuration inference checkpoints (2026-10-29)
+
+The user approved configuration-based `inferredLabels`, superseding the proposed conditional-alias
+library repair for the six settled cases. Prefer matching-capable invariants and schema choices;
+use inference only when these cannot express a sound declaration without inappropriate behavior
+changes. See [SPEC-12](../spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities)
+for alternatives, ownership and the deliberate matching limitation.
+
+1. **Contract and validation:** common schema-typed spec field, output eligibility/ownership,
+   pure synchronous runtime checks, read-only complete configuration and unchanged random state.
+2. **Resolution, identity and audit:** integrate planned/direct owner resolution before generation;
+   bind source and output ontology semantics into artifact identity; verify replay; distinguish
+   static omissions, pending inference and exhaustively validated configuration outcomes.
+3. **Six acceptance cases:** two near-doubles width claims and four expanded-form zero claims,
+   preserving configuration, sampling, targets, matching and rendering. Verify all old choices,
+   both generation paths and both modes before updating closure counts.
+
+All callbacks receive the same owning configuration, with no feedback between rules. No generated
+payload, image or graph-driven label completion participates. The existing annotation evaluator,
+Area allowlist and range-policy exclusion remain unchanged. Inference outputs cannot admit new
+matches, select configurations or satisfy target participation requirements.
+
+The source baseline is **391** unresolved selection/facet requirements. `produces` is only a
+possible-output declaration, so introducing a callback closes no finding by itself. Unknown
+configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
+The candidate six-gap reduction must be established by the completed third checkpoint. The known
+reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
+for source readiness under the existing agreement.
+
+Checkpoint 1 introduces the contract and guards without adding module inference declarations
+or connecting them to production generation yet. Validation and subsequent checkpoint results
+are recorded in the progress ledger as they complete.
+
 Next work: the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
 [remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
