@@ -26,7 +26,13 @@ export const spec: GeneratorSpec = {
         const coins = selected(Scope.Coins);
         return (coins || selected(Scope.Banknotes)) && coins === coinDenominations.some(selected);
     })],
-    generalLabels: [Scope.Dollar, Scope.TwoOperands, Scope.SingleStep]
+    generalLabels: [
+        Scope.Dollar,
+        Scope.TwoOperands,
+        Scope.SingleStep,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
+    ]
 };
 
 export const CurrencyArithmeticGeneratorSchema = {

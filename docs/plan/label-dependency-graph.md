@@ -13,6 +13,8 @@ in separate division and multiplication checkpoints. The
 remaining measurement obligation to ten integer addition/subtraction selections. The
 [M4 width choices](#m4-integer-additive-width-choices-2026-10-28) resolve all ten through
 explicitly selected generator configurations and a separately approved sampling change.
+The [C1 currency batch](#c1-currency-word-problem-declarations-2026-10-28) adds supported
+quantity and notation invariants in two separate checkpoints.
 
 ## Scope
 
@@ -1321,3 +1323,69 @@ This completes the measurement source-declaration backlog under the agreed scope
 stored snapshot still has 4,146 non-range findings pending the agreed regeneration
 and VQA readiness checkpoint. The global Area allowlist and range-policy
 exclusion remain unchanged; no evidence adapter or automatic completion is present.
+
+## C1 currency word-problem declarations (2026-10-28)
+
+C1 adds four existing invariant capabilities to their owning declarations. It does not
+change schemas, compatibility, sampling, mathematical payloads or rendering. Targets,
+the complete Area allowlist and the range-policy exclusion remain unchanged. Labels are
+not inferred from generated data or completed automatically.
+
+| Checkpoint | Owner | Additions | Currency source gaps |
+|---|---|---|---:|
+| C1a | `currency-arithmetic` generator | `NumbersWithoutNegatives`, `NumbersWithoutZero` | 90 → 54 |
+| C1b | `currency-word-problem` view | `ArabicNumerals`, `Base10` | 54 → 18 |
+
+The generator constructs every item from positive denominations and counts. It adjusts
+equal operand totals before arithmetic and orders subtraction operands from larger to
+smaller, so operands and answers are strictly positive. These are mathematical invariants
+owned by the generator under [SPEC-G3](../spec-generator.md#spec-g3--declare-the-area-and-scope-capabilities-the-math-produces).
+The renderer's existing formatter uses Arabic base-ten numerals for item values, amounts,
+story text and revealed answers. Those representation claims belong to the view under
+[SPEC-11](../spec-general.md#spec-11--area-changes-task-nature-scope-changes-task-context).
+
+The payload remains `CurrencyArithmeticProblem`: operation and item counts/denominations
+are canonical mathematical data; totals and answer are calculated evidence; item kind is
+semantic context. No payload field contains view projection decisions. The sole consuming
+view keeps its existing contract, so no renderer adoption is needed.
+
+The remaining 18 number-kind findings are intentionally unresolved. The same existing
+configuration can display integer cents, whole dollars or decimal dollars. C1 does not
+assert a blanket integer or decimal kind, introduce a new mathematical choice, or infer
+one after generation. A future kind declaration must also reassess any newly activated
+integer operand-digit obligations.
+
+### C1a — Positive/nonzero quantities
+
+This checkpoint adds only the two generator invariants. Its 18 existing source selections
+retain their number-kind, numeral-system and base findings; no new dependency obligation
+is introduced. The declaration is tested across all nine currency representations, both
+operations, equal totals and both subtraction-order branches.
+
+The baseline under `temp/currency-c1/before/` records all 1,013 target label sets, 1,182
+matches, 18 currency assignments, 42 stored-origin draws and 432 further planned draws.
+The stored-origin content and task fingerprints match the stored rows before the changes.
+Protected inputs include the policy, target files, shared implementation, producer and
+renderer implementations, schemas and the immutable dataset pointer. Fresh report-only
+audit output is under `temp/currency-c1/before-audit/`.
+
+C1a verification preserves every target, match, currency selection and schema. All 42
+stored-origin draws and 432 further question/solution draws retain configurations, random
+states, payloads and content/task fingerprints; their annotations gain exactly the two
+quantity labels. The eight native rendered images are byte-identical to baseline. Policy,
+shared implementation, producer/renderer implementation and snapshot hashes are unchanged.
+
+Currency source gaps fall from **90 to 54**. Global raw non-range source gaps fall from
+**1,415 to 1,379**, and distinct gaps from **1,397 to 1,361**, with no conflicts, invalid
+contexts, row/contract errors or incomplete enumerations. The 18 remaining assessments
+for each of number kind, numeral system and base are still reported.
+
+The focused suite passes **55 tests across four files**; currency generator coverage is
+**100% statements, branches, functions and lines**. Type checking and the generator/view
+specification audit pass. Evidence is under `temp/currency-c1/generator/`,
+`generator-audit/`, `generator-coverage/` and the corresponding logs.
+
+The immutable stored snapshot remains at **4,146 non-range findings**, including 210
+currency findings across 42 rows. Current plan references change with declarations, while
+stored annotations and their assessments remain intact. Canonical regeneration and VQA
+remain deferred to the agreed readiness checkpoint.

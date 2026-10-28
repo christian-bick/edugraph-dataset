@@ -1,6 +1,6 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 
@@ -46,5 +46,18 @@ describe('CurrencyArithmeticGenerator spec', () => {
         ]) {
             expect(problem.labels).not.toContain(denomination);
         }
+    });
+
+    it.each([Area.Addition, Area.Subtraction])('does not parameterize quantity invariants for %s', operation => {
+        const labels = [Scope.Dollar, Scope.SingleStep, Scope.Coins, Scope.Banknotes,
+            Scope.MajorDenomination, Scope.QuarterDenomination, operation, Ability.TextualReception];
+        const generator = new CurrencyArithmeticGenerator();
+        setSeed('currency-invariant-resolution');
+        const original = generateWithLabels(generator, labels);
+        const originalState = getRandomState();
+        setSeed('currency-invariant-resolution');
+        const explicit = generateWithLabels(generator, [...labels, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
+        expect(explicit).toEqual(original);
+        expect(getRandomState()).toBe(originalState);
     });
 });

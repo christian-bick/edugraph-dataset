@@ -1,7 +1,17 @@
 import {Area, Scope} from 'edugraph-ts';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
+import {coinDenominations} from './spec.ts';
+
+const representationProfiles = [
+    {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const},
+    ...coinDenominations.flatMap(coinDenomination => [
+        {name: `coins ${coinDenomination}`, useCoins: true, useBanknotes: false, coinDenomination},
+        {name: `mixed ${coinDenomination}`, useCoins: true, useBanknotes: true, coinDenomination}
+    ])
+];
 
 describe('CurrencyArithmeticGenerator', () => {
     const generator = new CurrencyArithmeticGenerator();
@@ -64,6 +74,61 @@ describe('CurrencyArithmeticGenerator', () => {
 
         expect(problem.data.amounts.every(amount => amount.totalCents % 100 === 0)).toBe(true);
         expect(problem.data.amounts.flatMap(amount => amount.items).every(item => item.kind === 'banknote')).toBe(true);
+    });
+
+    it.each(representationProfiles)('keeps every quantity strictly positive for $name in both operations', profile => {
+        for (const operation of [Area.Addition, Area.Subtraction]) {
+            for (let seed = 0; seed < 40; seed++) {
+                setSeed(`${profile.name}-${operation}-${seed}`);
+                const stub = generator.generate({...profile, operation});
+                expect(stub).not.toBeNull();
+                const {amounts, answerCents} = stub!.data;
+                for (const amount of amounts) {
+                    expect(amount.items.length).toBeGreaterThan(0);
+                    for (const item of amount.items) {
+                        expect(item.denominationCents).toBeGreaterThan(0);
+                        expect(item.count).toBeGreaterThan(0);
+                    }
+                    expect(amount.totalCents).toBeGreaterThan(0);
+                    expect(amount.totalCents).toBe(amount.items.reduce(
+                        (total, item) => total + item.denominationCents * item.count, 0));
+                }
+                expect(answerCents).toBeGreaterThan(0);
+                expect(answerCents).toBe(operation === Area.Addition
+                    ? amounts[0].totalCents + amounts[1].totalCents
+                    : amounts[0].totalCents - amounts[1].totalCents);
+                expect(Object.keys(stub!)).toEqual(['data']);
+            }
+        }
+    });
+
+    it.each(representationProfiles)('avoids a zero difference when both sampled $name totals are equal', profile => {
+        const random = vi.spyOn(randomSource, 'random').mockReturnValue(0);
+        try {
+            const {amounts, answerCents} = generator.generate({...profile, operation: Area.Subtraction})!.data;
+            expect(amounts[0].totalCents).toBeGreaterThan(amounts[1].totalCents);
+            expect(answerCents).toBe(amounts[0].items[0].denominationCents);
+            for (const amount of amounts) expect(amount.totalCents).toBe(amount.items.reduce(
+                (total, item) => total + item.denominationCents * item.count, 0));
+        } finally {
+            random.mockRestore();
+        }
+    });
+
+    it.each([[0, 0.999], [0.999, 0]])('preserves positive subtraction for initial draw order %s / %s', (first, second) => {
+        const random = vi.spyOn(randomSource, 'random').mockReturnValueOnce(first).mockReturnValueOnce(second);
+        try {
+            const problem = generator.generate({operation: Area.Subtraction, useCoins: false,
+                useBanknotes: true, coinDenomination: 'none'})!.data;
+            expect(problem.amounts.map(amount => amount.totalCents)).toEqual([300, 100]);
+            expect(problem.answerCents).toBe(200);
+        } finally {
+            random.mockRestore();
+        }
+    });
+
+    it('returns no problem for an unsupported operation', () => {
+        expect(generator.generate({...config, operation: Area.Multiplication as typeof Area.Addition})).toBeNull();
     });
 
     it('rejects incomplete or contradictory configurations', () => {
