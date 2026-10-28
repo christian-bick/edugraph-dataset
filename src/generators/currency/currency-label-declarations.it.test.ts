@@ -20,7 +20,7 @@ const generatorId = 'currency-arithmetic';
 const viewId = 'currency-word-problem';
 const targets = grade2Targets.filter(target => target.id.startsWith('2.MD.C.8-currency-word-problems~'));
 const quantityLabels = [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
-const notationLabels = [Scope.ArabicNumerals, Scope.Base10];
+const notationLabels = [Scope.ArabicNumerals, Scope.Base10, Scope.DecimalNumbers];
 const integerLabels = [Scope.IntegerNumbers, Scope.SingleDigitLargestOperand,
     Scope.TwoDigitLargestOperand, Scope.TwoDigitSmallestOperand];
 let generator: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>[number];
@@ -40,10 +40,11 @@ beforeAll(async () => {
 });
 
 describe('currency declarations on existing Grade 2 word-problem targets', () => {
-    it('completes eight integer selections and retains ten number-kind findings across the same 18 targets', () => {
+    it('completes all 18 selections while retaining eight integer operand-digit obligations', () => {
         expect(targets).toHaveLength(18);
         const evaluator = createLabelDependencyEvaluator();
         let missing = 0;
+        let digitObligations = 0;
         for (const target of targets) {
             const originalLabels = [...target.labels];
             const matched = matchTarget(target, generator, view);
@@ -54,16 +55,26 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             expect(enumeration.selections).toHaveLength(1);
             const selected = enumeration.selections[0].labels;
             const integer = selected.includes(Scope.IntegerNumbers);
+            expect(selected).toContain(Scope.DecimalNumbers);
             const evaluation = evaluator.evaluate(selected);
             expect(evaluation.context.status).toBe('eligible');
             expect(evaluation.errors).toEqual([]);
             expect(evaluation.conflicts).toEqual([]);
             const gaps = evaluation.assessments.filter(assessment => assessment.status === 'missing' && assessment.facet !== 'range');
-            expect(gaps.map(assessment => assessment.facet)).toEqual(integer ? [] : ['numberKind']);
+            expect(gaps).toEqual([]);
             expect(evaluation.assessments.some(assessment => assessment.facet === 'operandDigits')).toBe(integer);
+            if (integer) {
+                digitObligations++;
+                const withoutWidth = evaluator.evaluate(selected.filter(label => label === Scope.IntegerNumbers
+                    || !integerLabels.includes(label as Scope)));
+                expect(withoutWidth.assessments).toEqual(expect.arrayContaining([
+                    expect.objectContaining({facet: 'operandDigits', status: 'missing'})
+                ]));
+            }
             missing += gaps.length;
         }
-        expect(missing).toBe(10);
+        expect(missing).toBe(0);
+        expect(digitObligations).toBe(8);
     });
 
     it('keeps quantity and notation invariants separate from the conditional integer declarations', () => {
@@ -75,10 +86,10 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             expect(view.generalLabels).toContain(label);
             expect(generator.generalLabels).not.toContain(label);
         }
-        for (const label of [Scope.IntegerNumbers, Scope.DecimalNumbers]) {
-            expect(generator.generalLabels).not.toContain(label);
-            expect(view.generalLabels).not.toContain(label);
-        }
+        expect(generator.generalLabels).not.toContain(Scope.IntegerNumbers);
+        expect(view.generalLabels).not.toContain(Scope.IntegerNumbers);
+        expect(generator.labels).not.toContain(Scope.DecimalNumbers);
+        expect(view.schema).toEqual({});
     });
 
     it.each(targets)('preserves configuration, mathematical draws and randomness for $id', target => {
@@ -92,7 +103,12 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             compatibility: precedingRules,
             spec: {...generator.spec, compatibility: precedingRules}
         };
-        const before = matchTarget(target, preceding, view);
+        const precedingView = {...view,
+            generalLabels: view.generalLabels.filter(label => label !== Scope.DecimalNumbers),
+            supportedLabels: view.supportedLabels.filter(label => label !== Scope.DecimalNumbers),
+            spec: {...view.spec, generalLabels: view.generalLabels.filter(label => label !== Scope.DecimalNumbers)}
+        };
+        const before = matchTarget(target, preceding, precedingView);
         const after = matchTarget(target, generator, view);
         if (!before.matched || !after.matched) throw new Error(`Currency target stopped matching: ${target.id}`);
         const producer = new CurrencyArithmeticGenerator();
@@ -114,7 +130,8 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             expect(currentDraw.stub).not.toBeNull();
             expect(currentDraw.stub!.data).toEqual(precedingDraw.stub!.data);
             expect(getRandomState()).toBe(precedingState);
-            expect(currentDraw.labels.filter(label => !integerLabels.includes(label as Scope))).toEqual(precedingDraw.labels);
+            expect(currentDraw.labels.filter(label => label !== Scope.DecimalNumbers && !integerLabels.includes(label as Scope)))
+                .toEqual(precedingDraw.labels);
             const data = currentDraw.stub!.data as CurrencyArithmeticProblem;
             expect(data.answerCents).toBeGreaterThan(0);
             const forceDollars = data.amounts.some(amount => amount.items.some(item => item.kind === 'banknote'));

@@ -3,8 +3,13 @@ export type DependencyTrigger = {readonly family: string}
     | {readonly any: readonly DependencyTrigger[]}
     | {readonly all: readonly DependencyTrigger[]}
     | {readonly areaWithin: string}
-    /** Requires at least one selected family member, with every member beneath this structural root. */
-    | {readonly familyWithin: {readonly family: string; readonly root: string}};
+    /** After ignoring optional structural branches, requires a nonempty family entirely beneath root. */
+    | {readonly familyWithin: {
+        readonly family: string;
+        readonly root: string;
+        /** These branches are ignored only for qualification; annotations and assessments are retained. */
+        readonly ignore?: readonly string[];
+    }};
 
 export type DependencyFacet = ({readonly root: string} | {readonly labels: readonly string[]})
     & {readonly check?: 'presence-only'};

@@ -189,8 +189,13 @@ Range-presence findings remain report-only; range policy is unchanged.
 
 Operand-digit completeness has a narrower, rule-specific context: at least one resolved
 Area must be structurally within `ArithmeticOperations` or `IntegerArithmetic`, and the
-declared number-kind family must be nonempty and entirely within `IntegerNumbers`. Fraction,
-decimal, mixed and unspecified number-kind contexts do not acquire a digit obligation.
+declared number-kind family must be nonempty and entirely within `IntegerNumbers` after
+excluding the `DecimalNumbers` representation branch from this qualification. Decimal
+notation includes whole-number notation, so an explicit integer claim retains its digit
+obligation when decimal representation is also declared. Decimal representation alone,
+fraction, other mixed and unspecified number-kind contexts do not acquire that obligation.
+The graph's optional `familyWithin.ignore` roots filter only this condition; they do not
+remove annotations or affect other facets. The remaining family must still be nonempty.
 Missing number-kind annotations remain findings under the numeric rule. Operand-count
 requirements remain independent of this qualification, and the global all-Area allowlist
 still applies to the complete annotation context.

@@ -50,7 +50,8 @@ describe('universal annotation dependency enforcement', () => {
     it.each([
         ['fraction', [Scope.FractionNumbers, Scope.ProperFractions]],
         ['decimal', [Scope.DecimalNumbers]],
-        ['mixed integer/decimal', [Scope.IntegerNumbers, Scope.DecimalNumbers]]
+        ['mixed integer/decimal/fraction', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.FractionNumbers, Scope.ProperFractions]],
+        ['mixed integer/decimal/rational', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.RationalNumbers]]
     ])('does not enforce operand digits on finalized %s annotations', (_name, kinds) => {
         const annotations = [...labels.filter(label => label !== Scope.IntegerNumbers
             && label !== Scope.SingleDigitSmallestOperand && label !== Scope.SingleDigitLargestOperand), ...kinds];
@@ -64,6 +65,22 @@ describe('universal annotation dependency enforcement', () => {
         expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
         expect(annotations).toEqual(original);
     });
+
+    it.each([Scope.DecimalNumbers, Scope.TenthDecimals, Scope.HundredthDecimals, Scope.ThousandthDecimals])(
+        'enforces integer widths alongside finalized decimal representation %s', representation => {
+            const annotations = [...labels.filter(label => label !== Scope.SingleDigitSmallestOperand
+                && label !== Scope.SingleDigitLargestOperand), representation];
+            const original = [...annotations];
+            const result = assess({labels: annotations});
+            expect(result.failures).toEqual([
+                expect.objectContaining({ruleId: 'LD-OPERANDS-02', code: 'missing', facet: 'operandDigits'})
+            ]);
+            expect(() => assertLabelDependencyCoverage(input({labels: annotations})))
+                .toThrow(LabelDependencyCoverageError);
+            expect(assess({labels: [...annotations, Scope.TwoDigitSmallestOperand]}).failures).toEqual([]);
+            expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+            expect(annotations).toEqual(original);
+        });
 
     it('does not accept a broad operand role group as the missing width value', () => {
         const annotations = labels.filter(label => label !== Scope.SingleDigitSmallestOperand

@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'currency-word-problem',
-    generalLabels: [Ability.TextualReception, Scope.ArabicNumerals, Scope.Base10]
+    generalLabels: [Ability.TextualReception, Scope.ArabicNumerals, Scope.Base10, Scope.DecimalNumbers]
 };
 
 export const CurrencyWordProblemViewSchema = {} as const;

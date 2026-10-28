@@ -35,7 +35,7 @@ export const labelDependencies = {
             assess: ['operandCount']},
         {id: 'LD-OPERANDS-02', when: {all: [
             {any: [{areaWithin: Area.ArithmeticOperations}, {areaWithin: Area.IntegerArithmetic}]},
-            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers}},
+            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers, ignore: [Scope.DecimalNumbers]}},
             {any: [{family: 'operandCount'}, {family: 'operandDigits'}]}
         ]}, assess: ['operandDigits']},
         {id: 'LD-FRACTION-01', when: {family: 'fraction'}, assess: ['fractionMagnitude']},

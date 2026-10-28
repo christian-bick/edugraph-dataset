@@ -62,15 +62,21 @@ has an additional qualification. It requires all three of:
 
 - at least one complete resolved Area structurally within `Area.ArithmeticOperations` or
   `Area.IntegerArithmetic`;
-- a nonempty set of declared number-kind labels, all structurally within `Scope.IntegerNumbers`;
+- a nonempty set of declared number-kind labels, all structurally within `Scope.IntegerNumbers`
+  after excluding the `Scope.DecimalNumbers` representation branch from this qualification;
 - an operand-count or actual operand-digit descriptor.
 
-This is a positive integer-context check. Fractional, decimal, mixed integer/noninteger, and
+This is a positive integer-context check. Fractional, decimal-only, other mixed, and
 missing-number-kind annotations do not trigger a digit requirement. A missing number kind
 still produces the existing numeric dependency finding; it is not inferred from an Area or
 payload. Integer annotations outside the two arithmetic branches likewise do not trigger
 operand-digit enforcement. Operand-count, numeric, fraction, decimal and conflict checks
 keep their own existing triggers.
+
+`DecimalNumbers` describes base-ten representation, including whole-number notation. An
+explicit integer claim therefore retains the digit obligation alongside that representation.
+Ignoring decimal representation for this qualification never establishes an integer claim;
+the remaining selected number-kind family must be nonempty and entirely integer.
 
 Both Area and number-kind qualification are necessary with the installed ontology. Generic
 `Addition` and `Subtraction` belong to `ArithmeticOperations`, not `IntegerArithmetic`.
@@ -128,7 +134,7 @@ export const labelDependencies = {
             assess: ['operandCount']},
         {id: 'LD-OPERANDS-02', when: {all: [
             {any: [{areaWithin: Area.ArithmeticOperations}, {areaWithin: Area.IntegerArithmetic}]},
-            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers}},
+            {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers, ignore: [Scope.DecimalNumbers]}},
             {any: [{family: 'operandCount'}, {family: 'operandDigits'}]}
         ]}, assess: ['operandDigits']},
         {id: 'LD-FRACTION-01', when: {family: 'fraction'}, assess: ['fractionMagnitude']},
@@ -150,8 +156,10 @@ capability specializations. Neither mechanism emits grouping roots as annotation
 Area conjunction for a descendant of its named root, including that root structurally;
 it does not add the root as a label or replace the global all-Area gate. `familyWithin`
 requires a nonempty selected family whose every member is structurally within its named
-root. It cannot succeed vacuously when the family is absent. These selectors use only
-annotations and ontology relations.
+root. Its optional `ignore` list excludes members under explicitly named structural roots
+only from this qualification. It cannot succeed vacuously when the family is absent or
+every member is ignored. The ignored labels remain annotations and participate in all
+other facet checks. These selectors use only annotations and ontology relations.
 
 The five obligations are:
 
@@ -1491,7 +1499,7 @@ four categories. Type checking, the generator/view specification audit and docum
 references pass. Evidence is in `temp/currency-c2/focused-coverage.log`,
 `focused-coverage/`, `integer-types.log`, `integer-specs.log` and `docs.log`.
 
-### C2b — Representation ownership and validator decision
+### C2b — Decimal representation and preserved integer qualification
 
 The installed `DecimalNumbers` definition describes base-ten positional representation;
 it does not assert a fractional part. Consequently it is true across the currency view,
@@ -1502,11 +1510,57 @@ The view has no existing schema field, and adding an unused field solely to atta
 label would also conflict with SPEC-6. Introducing a formatter parameter would add
 complexity and change task fingerprints without resolving that invariant meaning.
 
-The integer checkpoint therefore leaves those ten findings explicit. A possible follow-up
-is an invariant view declaration together with a narrowly scoped dependency-selector
-correction: ignore decimal representation claims when deciding whether the remaining
-declared number kinds are exclusively integer. Decimal-only contexts would still not
-require digit widths; integer-plus-decimal representation would retain the obligation;
-fraction, rational and other declared kinds would retain their exclusions. That would
-change the shared validator beyond the authorized declaration-only batch, and requires a
-separate decision. The Area allowlist and range-policy exclusion remain unchanged.
+The user approved extending C2b to the shared evaluator on 2026-10-28. The view now declares
+`DecimalNumbers` invariantly; its schema remains empty and its renderer/helpers are
+unchanged. The graph's `familyWithin` trigger supports an optional explicit `ignore` list
+of structural roots. Only the integer operand-digit rule uses it, with `DecimalNumbers`.
+After excluding that representation branch from the condition, the remaining selected
+number-kind family must be nonempty and entirely integer. Ignored labels remain in the
+annotations and all other facet assessments. No labels are inferred or completed.
+
+Decimal-only contexts still do not require digit widths; integer-plus-decimal notation
+retains the obligation. Fraction, rational, real, irrational and complex co-claims retain
+their exclusions. The decimal precision descendants are representation claims too and are
+covered by the same explicit branch. The complete Area allowlist, arithmetic qualification,
+range-presence policy, conflict rules and all other graph selectors remain unchanged.
+
+The evaluator validates ignored roots, normalizes their order for policy hashing and
+includes their ontology semantics in policy identity. Its evaluator version advances from
+4 to 5. Annotation/plan/validation identities change; configurations, sampling, payloads,
+rendering and content/task fingerprints do not.
+
+C2b verification closes all **18 currency source findings** across C2: eight at the
+integer checkpoint and ten at this checkpoint. All 18 selections declare decimal
+representation, and exactly eight still activate and satisfy the integer digit rule.
+Global raw source omissions fall **1,343 to 1,325**, distinct omissions **1,325 to
+1,307**, and failing selections **556 to 538**. No other source family's findings change;
+there are no conflicts, invalid contexts, row/contract errors or incomplete enumerations.
+
+All **1,013 target label sets, 1,182 matches and 18 currency selections** remain. The
+**42 stored-origin draws and 432 additional planned draws** retain configurations,
+random states, payloads and content/task fingerprints. All **12 native rendered images**
+are byte-identical. Comparison of the full graph proves that its only change is the
+explicit ignored decimal branch on the integer qualification: the Area allowlist, range
+facet, all other facets, conflicts and triggers are identical. Evidence is under
+`temp/currency-c2/view/` and `view-image-summary.json`.
+
+Stored assessment results remain **4,146 global / 210 currency**; the active dataset
+pointer is unchanged. Ignored decimal labels no longer appear as witnesses of the
+integer qualifier, but those diagnostic trace differences do not alter stored assessment
+statuses. Canonical regeneration and VQA remain deferred to the readiness checkpoint.
+The final `npm run check -- --spec=ccss` passes types, generator/view declarations,
+labels, documentation, standards and split integrity; its final strict annotation stage
+still reports those 4,146 existing stored findings. See `temp/currency-c2/check-final.log`.
+
+Focused validation passes **260 tests across seven files**, including the actual strict
+gate: removing a width from an integer-plus-decimal annotation still fails. The evaluator
+has **100%** statement, branch, function and line coverage. Evidence is in
+`temp/currency-c2/view-tests.log`, `strict-gate-tests.log`, `evaluator-coverage.log` and
+`evaluator-coverage/`.
+
+The final **`npm run test:coverage` passes 840 files / 6,436 tests** and every generator
+coverage threshold. Currency generator coverage remains 100% in all categories; aggregate
+generator coverage is 98.49% statements, 97.05% branches, 100% functions and 99.51% lines.
+The complete run uses two workers and normal filesystem permissions for Git/temporary-file
+fixtures. Evidence is `temp/currency-c2/c2b-full-coverage.log` and
+`full-coverage-summary.json`. Final documentation validation also passes.

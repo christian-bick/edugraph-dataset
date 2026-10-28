@@ -183,8 +183,13 @@ describe('integer-only operand-digit qualification', () => {
         ['fraction', [Scope.FractionNumbers]],
         ['fraction specialization', [Scope.ProperFractions]],
         ['decimal', [Scope.DecimalNumbers]],
+        ['decimal precision', [Scope.HundredthDecimals]],
         ['mixed integer/fraction', [Scope.IntegerNumbers, Scope.FractionNumbers]],
-        ['mixed integer/decimal', [Scope.IntegerNumbers, Scope.DecimalNumbers]],
+        ['mixed integer/decimal/fraction', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.FractionNumbers]],
+        ['mixed integer/decimal/rational', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.RationalNumbers]],
+        ['mixed integer/decimal/real', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.RealNumbers]],
+        ['mixed integer/decimal/irrational', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.IrrationalNumbers]],
+        ['mixed integer/decimal/complex', [Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.ComplexNumbers]],
         ['missing number kind', []]
     ])('does not infer integer-only content for %s annotations', (_name, kinds) => {
         const labels = [Area.Addition, ...kinds, Scope.TwoOperands];
@@ -195,6 +200,51 @@ describe('integer-only operand-digit qualification', () => {
         expect(result.assessments.some(item => item.facet === 'operandDigits')).toBe(false);
         expect(result.assessments.find(item => item.facet === 'operandCount')!.status).toBe('satisfied');
         expect(labels).toEqual(original);
+    });
+
+    it.each([Scope.DecimalNumbers, Scope.TenthDecimals, Scope.HundredthDecimals, Scope.ThousandthDecimals])(
+        'preserves integer width obligations alongside representation %s', representation => {
+            const labels = [Area.Addition, Scope.IntegerNumbers, representation, Scope.TwoOperands];
+            const original = [...labels];
+            const result = evaluator.evaluate(labels);
+            expect(result.assessments.find(item => item.facet === 'operandDigits'))
+                .toMatchObject({ruleId: 'LD-OPERANDS-02', status: 'missing', labels: []});
+            expect(result.assessments.find(item => item.facet === 'numberKind')?.labels)
+                .toEqual([Scope.IntegerNumbers, representation].sort());
+            expect(result.assessments.find(item => item.ruleId === 'LD-DECIMAL-01'))
+                .toMatchObject({facet: 'base', status: 'missing'});
+            expect(result.triggers.find(item => item.ruleId === 'LD-OPERANDS-02')?.labels).not.toContain(representation);
+            expect(digitAssessment([...labels, Scope.TwoDigitSmallestOperand]))
+                .toMatchObject({status: 'satisfied', labels: [Scope.TwoDigitSmallestOperand]});
+            expect(digitAssessment([Area.EquationSolving, ...labels])).toBeUndefined();
+            expect(labels).toEqual(original);
+        });
+
+    it('leaves an unconfigured family qualifier strict about every selected member', () => {
+        const value = graph();
+        const when = (value.rules.find(item => item.id === 'LD-OPERANDS-02')! as any).when;
+        delete when.all.find((child: any) => 'familyWithin' in child).familyWithin.ignore;
+        const strict = createLabelDependencyEvaluator(value);
+        expect(strict.evaluate([Area.Addition, Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.TwoOperands])
+            .assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        expect(strict.policyHash).not.toBe(evaluator.policyHash);
+    });
+
+    it('normalizes ignored-root order and duplicates without changing their qualification', () => {
+        const value = graph();
+        const when = (value.rules.find(item => item.id === 'LD-OPERANDS-02')! as any).when;
+        const within = when.all.find((child: any) => 'familyWithin' in child).familyWithin;
+        within.ignore = [Scope.DecimalNumbers, Scope.Base10];
+        const original = createLabelDependencyEvaluator(value);
+        within.ignore = [Scope.Base10, Scope.DecimalNumbers, Scope.DecimalNumbers];
+        const reordered = createLabelDependencyEvaluator(value);
+        expect(reordered.policyHash).toBe(original.policyHash);
+        const labels = [Area.Addition, Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.TwoOperands];
+        expect(reordered.evaluate(labels)).toEqual(original.evaluate(labels));
+        within.ignore = [Scope.IntegerNumbers, Scope.DecimalNumbers];
+        const empty = createLabelDependencyEvaluator(value);
+        expect(empty.evaluate(labels).assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        expect(empty.policyHash).not.toBe(original.policyHash);
     });
 
     it('does not let integer-branch Area ancestry require digits for decimal algorithms', () => {
@@ -335,6 +385,16 @@ describe('graph integrity', () => {
         mutate(value);
         expect(() => createLabelDependencyEvaluator(value)).toThrow('Label dependency graph:');
     });
+
+    it.each([
+        {name: 'null', ignore: null}, {name: 'non-array', ignore: Scope.DecimalNumbers},
+        {name: 'empty', ignore: []}, {name: 'unknown root', ignore: ['unknown']},
+        {name: 'empty root', ignore: ['']}, {name: 'invalid root', ignore: [7]}
+    ])('rejects $name ignored roots', ({ignore}) => {
+        const value = graph();
+        (value as any).rules[0].when = {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers, ignore}};
+        expect(() => createLabelDependencyEvaluator(value)).toThrow('Label dependency graph:');
+    });
 });
 
 describe('ontology-bound evaluation identity', () => {
@@ -397,5 +457,28 @@ describe('ontology-bound evaluation identity', () => {
                 objectKind: 'Literal'}]));
         expect(after.policyHash).not.toBe(before.policyHash);
         expect(after.evaluate([iri('allowed'), kindLeaf])).toEqual(before.evaluate([iri('allowed'), kindLeaf]));
+    });
+
+    it('binds ignored roots to policy identity and follows their structural descendants', () => {
+        const kind = iri('kind'), ignored = iri('ignored'), representation = iri('representation');
+        const base = [...fixture(), ...[kind, ignored, representation].map(label => statement(label,
+            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://edugraph.io/edu#Scope'))];
+        const qualified: LabelDependencyGraph = {...fixtureGraph,
+            facets: {...fixtureGraph.facets, kind: {labels: [kind, representation]}},
+            rules: [{id: 'qualified', when: {familyWithin: {family: 'kind', root: kind, ignore: [ignored]}},
+                assess: ['candidate']}]};
+        const before = createLabelDependencyEvaluator(qualified, createOntologyContext(base));
+        const linked = [...base, statement(representation, RELATION_IRIS.partOf, ignored)];
+        const after = createLabelDependencyEvaluator(qualified, createOntologyContext(linked));
+        const labels = [iri('allowed'), kind, representation];
+        expect(before.evaluate(labels).triggers[0].status).toBe('absent');
+        expect(after.evaluate(labels).triggers[0]).toEqual({ruleId: 'qualified', status: 'present', labels: [kind]});
+        expect(after.policyHash).not.toBe(before.policyHash);
+        expect(after.evaluate([iri('allowed'), representation]).triggers[0])
+            .toEqual({ruleId: 'qualified', status: 'absent', labels: []});
+        const clarified = createLabelDependencyEvaluator(qualified, createOntologyContext([...linked,
+            {...statement(ignored, 'http://www.w3.org/2000/01/rdf-schema#comment', 'Clarified ignored branch.'), objectKind: 'Literal'}]));
+        expect(clarified.policyHash).not.toBe(after.policyHash);
+        expect(clarified.evaluate(labels)).toEqual(after.evaluate(labels));
     });
 });
