@@ -1389,3 +1389,50 @@ The immutable stored snapshot remains at **4,146 non-range findings**, including
 currency findings across 42 rows. Current plan references change with declarations, while
 stored annotations and their assessments remain intact. Canonical regeneration and VQA
 remain deferred to the agreed readiness checkpoint.
+
+### C1b — Numeral and base notation
+
+This checkpoint adds `ArabicNumerals` and `Base10` to the currency view's `generalLabels`.
+The existing formatter and renderer remain unchanged: cents, whole dollars and decimal
+dollars already use these representations in both question and solution modes. No number
+kind is added, and the view does not take ownership of the generator's quantity invariants.
+
+The 18 currency source selections now retain only their number-kind findings. Both
+checkpoints are declaration-only and keep every existing mathematical configuration and
+all supported sampling behavior intact.
+
+C1b closes the next **36** source assessments, for **72** closed across C1. Global raw
+non-range source gaps are now **1,343** and distinct gaps **1,325**. All 1,013 target
+label sets, 1,182 matches and 18 currency selections remain unchanged. All 42 stored-origin
+draws and 432 further planned draws retain configurations, random states, payloads and
+fingerprints; annotations gain only the four intended invariant labels across C1.
+No other source assessment changes and no new conflict, context/contract error or
+incomplete enumeration appears.
+
+The focused suite passes **65 tests across four files** and type checking passes.
+Generator and currency-formatter coverage are **100%** in all four categories. Tests
+cover the 99/100/101-cent formatting boundary, forced dollar notation, all representation
+choices, both operations and both modes, while preserving the unresolved number-kind
+assessments. Evidence is in `temp/currency-c1/notation-tests.txt`, `notation-types.txt`
+and `notation-coverage/`.
+
+Native rendering checks cover coins, banknotes and mixed amounts in question and solution
+modes, including mixed validation examples. All **eight images are byte-identical** to
+the pre-C1 baseline after both commits' source changes and pass visual inspection. These
+local target-test artifacts do not update the stored dataset or VQA cache. Their manifests
+are `temp/currency-c1/render-{before,generator,view}.json`; impact and fresh audit reports
+are under `view/` and `view-audit/` in the same directory.
+
+`npm run check -- --spec=ccss` passes types, generator/view specifications, labels,
+documentation references, standards and split integrity. The final strict annotation
+stage still reports the **4,146 existing stored findings**, including 210 currency
+findings. The aggregate check therefore remains non-green until the stored snapshot is
+repaired through the agreed regeneration workflow. The source-only additions do not
+weaken that gate. The check log is `temp/currency-c1/check.txt`.
+
+The complete `npm run test:coverage` command passes **840 files / 6,398 tests** and all
+generator coverage thresholds. Currency generator coverage is **100%** in every category;
+aggregate generator coverage is 98.49% statements, 97.05% branches, 100% functions and
+99.51% lines. The run uses two workers and normal permissions for Git/filesystem fixtures.
+Evidence is saved in `temp/currency-c1/full-coverage.txt` and
+`full-coverage-summary.json`; final documentation references also pass.
