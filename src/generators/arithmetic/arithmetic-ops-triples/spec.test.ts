@@ -1,8 +1,12 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
+import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticOpsTriplesGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {ArithmeticOpsTriplesGeneratorSchema, spec} from './spec.ts';
 
 describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
     const generator = new ArithmeticOpsTriplesGenerator();
@@ -77,5 +81,52 @@ describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
             Area.Multiplication,
             Area.DistributiveLaw
         ]));
+    });
+
+    it('does not attach a distributive width to an ordinary addition configuration', () => {
+        const labels = [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.NumbersSmaller1000];
+        const result = planModelCompatibility({id: 'ordinary-addition-width', labels},
+            {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
+                schema: generator.schema, spec},
+            {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
+        expect(result).toMatchObject({supported: false, reason: 'incompatible-rules'});
+        setSeed(2);
+        expect(generateWithLabels(generator, labels)).toBeNull();
+    });
+
+    it.each([
+        [Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division],
+        [Area.Addition, Area.CommutativeLaw], [Area.Addition, Area.AssociativeLaw],
+        [Area.Addition, Area.Multiplication, Area.DistributiveLaw]
+    ].map(operationLabels => ({operationLabels})))('preserves the old configuration, entropy and choice counts for $operationLabels', ({operationLabels}) => {
+        const labels = [...operationLabels, Scope.NumbersSmaller100];
+        const legacySchema = {...ArithmeticOpsTriplesGeneratorSchema,
+            useDistributiveLaw: [[Area.DistributiveLaw], hasLabel(Area.DistributiveLaw)]} as const;
+        const domains = [legacySchema, generator.schema].map(schema => {
+            setSeed(71);
+            const choices = normalizeSchemaChoices(schema, labels, 'generator');
+            const result = planModelCompatibility({id: 'legacy-triple', labels},
+                {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
+                {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
+            expect(getRandomState()).toBe(71);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error('Expected the original triple profile to remain admitted.');
+            return {
+                choices: choices.map(domain => [domain.field, domain.alternatives.length]),
+                admitted: result.plan.domains.map(domain => [domain.field, domain.alternatives.length]),
+                groups: result.plan.groups.map(group => ({fields: group.fields, count: group.assignments.length}))
+            };
+        });
+        expect(domains[1]).toEqual(domains[0]);
+        for (const seed of [0, 2, 42]) {
+            const draws = [legacySchema, generator.schema].map(schema => {
+                setSeed(seed);
+                const {config} = extractConfig(schema, labels);
+                const configurationState = getRandomState();
+                const stub = generator.generate(config);
+                return {config, configurationState, stub, state: getRandomState()};
+            });
+            expect(draws[1]).toEqual(draws[0]);
+        }
     });
 });

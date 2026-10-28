@@ -1,5 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {FractionQuotientModelGenerator} from './generator.ts';
 import {FractionQuotientModelGeneratorSchema, spec} from './spec.ts';
@@ -43,7 +45,44 @@ const targetCases = [
     [Area.Equation, ...unitDivisorRoles], 'unit-divisor-equation']
 ] as const;
 
+const unchangedZeroAbsenceRequests = [
+    ['unit-dividend-basic', unitDividendRoles],
+    ['unit-dividend-inverse', [Area.Multiplication, ...unitDividendRoles]],
+    ['unit-dividend-equation', [Area.Equation, ...unitDividendRoles]],
+    ['fraction-as-quotient', [Scope.NumbersWithoutZero]],
+    ['fraction-as-quotient', [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]]
+] as const;
+
 describe('fraction-quotient-model schema integration', () => {
+    it.each(unchangedZeroAbsenceRequests)('completes the unchanged %s request without adding profile choices',
+        (relationProfile, requested) => {
+            const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, requested, 'generator');
+            expect(domain.alternatives).toHaveLength(1);
+            const selected = domain.alternatives[0].labels;
+            expect(selected).toContain(Scope.NumbersWithoutZero);
+            expect(resolveSchemaChoices(FractionQuotientModelGeneratorSchema, requested,
+                {relationProfile: selected}).config).toEqual({relationProfile});
+
+            for (let seed = 0; seed < 16; seed++) {
+                setSeed(seed);
+                const unchanged = extractConfig(FractionQuotientModelGeneratorSchema, [...requested]);
+                const continuation = getRandomState();
+                setSeed(seed);
+                const canonical = extractConfig(FractionQuotientModelGeneratorSchema, [...selected]);
+                expect(unchanged).toEqual(canonical);
+                expect(unchanged.config).toEqual({relationProfile});
+                expect(getRandomState()).toBe(continuation);
+            }
+        });
+
+    it('keeps eight unrequested mathematical profiles without duplicate alias choices', () => {
+        const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, [], 'generator');
+        expect(domain.alternatives).toHaveLength(8);
+        const profiles = domain.alternatives.map(({labels}) => resolveSchemaChoices(
+            FractionQuotientModelGeneratorSchema, [], {relationProfile: labels}).config.relationProfile);
+        expect(new Set(profiles).size).toBe(8);
+    });
+
     it('keeps only division invariant and all learner Abilities out of the producer', () => {
         expect(spec.generalLabels).toEqual([Area.Division]);
         expect(spec.generalLabels).not.toContain(Area.Equation);
@@ -60,7 +99,7 @@ describe('fraction-quotient-model schema integration', () => {
         const expectedLabels: readonly string[] = [...selected,
             ...(relationProfile === 'fraction-as-quotient'
                 ? [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
-                : [])];
+                : relationProfile.startsWith('unit-dividend-') ? [Scope.NumbersWithoutZero] : [])];
         expect(new Set<string>(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
         const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
         expect(new Set<string>(problem.labels)).toEqual(new Set<string>(expectedLabels));

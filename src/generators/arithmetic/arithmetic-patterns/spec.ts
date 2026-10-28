@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -28,7 +28,16 @@ export const ArithmeticPatternsGeneratorSchema = {
     operation: [[Area.Addition, Area.Multiplication], resolveOperation],
     useCommutativeLaw: [[Area.CommutativeLaw], hasLabel(Area.CommutativeLaw)],
     useAssociativeLaw: [[Area.AssociativeLaw], hasLabel(Area.AssociativeLaw)],
-    useDistributiveLaw: [[Area.DistributiveLaw], hasLabel(Area.DistributiveLaw)]
+    useDistributiveLaw: [
+        [Area.DistributiveLaw, Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        selectExactLabelSetMap([
+            [[], false],
+            [[Scope.NumbersWithoutZero], false],
+            [[Area.DistributiveLaw], true],
+            [[Area.DistributiveLaw, Scope.NumbersWithZero], true]
+        ] as const),
+        [[Area.DistributiveLaw, Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
+    ]
 } as const;
 
 export type ArithmeticPatternsGeneratorConfig = ConfigFromSchema<

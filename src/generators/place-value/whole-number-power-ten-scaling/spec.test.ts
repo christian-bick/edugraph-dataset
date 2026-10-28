@@ -15,7 +15,8 @@ describe('WholeNumberPowerTenScalingGenerator spec', () => {
             Scope.IntegerExponent,
             Scope.NumbersWithoutNegatives,
             Scope.Base10,
-            Scope.IntegerNumbers
+            Scope.IntegerNumbers,
+            Scope.NumbersWithZero
         ]);
         expect(WholeNumberPowerTenScalingGeneratorSchema).toEqual({});
     });

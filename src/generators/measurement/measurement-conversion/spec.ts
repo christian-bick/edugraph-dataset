@@ -44,7 +44,7 @@ const resolveNumericProfile = selectExactLabelSetMap([
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-conversion',
-    generalLabels: [Area.UnitScaleRelation]
+    generalLabels: [Area.UnitScaleRelation, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
 };
 
 export const MeasurementConversionGeneratorSchema = {

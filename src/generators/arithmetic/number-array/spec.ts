@@ -9,7 +9,8 @@ export const spec: GeneratorSpec = {
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller100
+        Scope.NumbersSmaller100,
+        Scope.IntegerNumbers
     ]
 };
 
@@ -24,8 +25,9 @@ export const NumberArrayGeneratorSchema = {
         ])
     ],
     requireTwoOperands: [
-        [Scope.TwoOperands],
-        hasLabel(Scope.TwoOperands)
+        [Scope.TwoOperands, Scope.SingleDigitSmallestOperand],
+        hasLabel(Scope.TwoOperands),
+        [[], [Scope.TwoOperands, Scope.SingleDigitSmallestOperand]]
     ],
     requireIteratedOperation: [
         [Area.IteratedOperation],

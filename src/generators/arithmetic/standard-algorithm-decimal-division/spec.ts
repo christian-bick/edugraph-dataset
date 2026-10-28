@@ -7,7 +7,9 @@ export const spec: GeneratorSpec = {
     generatorId: 'standard-algorithm-decimal-division',
     generalLabels: [
         Area.DivisionStandardAlgorithm, Scope.DecimalNumbers, Scope.Base10,
-        Scope.NumbersWithoutNegatives, Scope.MultipleDigitLargestOperand
+        Scope.NumbersWithoutNegatives, Scope.MultipleDigitLargestOperand,
+        Scope.TwoOperands,
+        Scope.NumbersWithZero
     ]
 };
 

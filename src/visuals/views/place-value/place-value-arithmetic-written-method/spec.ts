@@ -12,7 +12,8 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding,
-        Ability.Formalization
+        Ability.Formalization,
+        Scope.ArabicNumerals
     ]
 };
 

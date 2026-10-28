@@ -8,7 +8,7 @@ import {hundredOffsetRangeRules} from '../counting-offset-compatibility.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'counting-hundred-offset',
     compatibility: hundredOffsetRangeRules,
-    generalLabels: [...baseSpec.generalLabels.filter(label => label !== Scope.StepsOf1), Scope.StepsOf100]
+    generalLabels: [...baseSpec.generalLabels.filter(label => label !== Scope.StepsOf1), Scope.StepsOf100, Scope.TwoOperands]
 };
 export const CountingHundredOffsetGeneratorSchema = {
     ...CountingIncDecGeneratorSchema,

@@ -9,7 +9,7 @@ const mathematics = [Area.MultiplicationStandardAlgorithm, Scope.DecimalNumbers,
     Scope.NumbersWithoutNegatives, Scope.MultipleDigitLargestOperand];
 
 describe('standard decimal multiplication schema', () => {
-    it('owns the reviewed mathematical labels', () => expect(spec.generalLabels).toEqual(mathematics));
+    it('owns the reviewed mathematical labels', () => expect(spec.generalLabels).toEqual([...mathematics, Scope.TwoOperands]));
     it('resolves the real broad Grade 6 target without a magnitude label', () => {
         const problem = generateWithLabels(new StandardAlgorithmDecimalMultiplicationGenerator(), [
             ...mathematics, Scope.ArabicNumerals, Ability.ProcedureExecution

@@ -4,7 +4,8 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-unit-scale',
-    generalLabels: [Area.UnitScaleRelation, Scope.SegmentScale]
+    generalLabels: [Area.UnitScaleRelation, Scope.SegmentScale, Scope.IntegerNumbers,
+        Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
 };
 
 export const MeasurementUnitScaleGeneratorSchema = {} as const;

@@ -80,13 +80,17 @@ describe('arithmetic-property-relations specification', () => {
         expect(getRandomState()).toBe(73);
     });
 
-    it('keeps numeric-bound scopes out of matching rules', () => {
-        const dependencies = spec.compatibility!.flatMap(rule => rule.dependencies ?? []);
+    it('keeps numeric feasibility out of property-law rules while qualifying width claims', () => {
+        const propertyRules = spec.compatibility!.filter(rule => rule.id !== 'proved-triple-operand-width');
+        const dependencies = propertyRules.flatMap(rule => rule.dependencies ?? []);
         for (const rangeLabel of generator.schema.range[0]) {
             expect(dependencies.some(dependency => dependency.label === rangeLabel)).toBe(false);
         }
-        expect(spec.compatibility!.map(rule => rule.id)).toEqual([
+        expect(propertyRules.map(rule => rule.id)).toEqual([
             'exactly-one-property-law', 'property-operation', 'property-value-profile'
+        ]);
+        expect(spec.compatibility!.map(rule => rule.id)).toEqual([
+            'proved-triple-operand-width', 'exactly-one-property-law', 'property-operation', 'property-value-profile'
         ]);
     });
 

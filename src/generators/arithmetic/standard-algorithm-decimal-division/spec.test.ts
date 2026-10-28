@@ -9,7 +9,7 @@ const mathematics = [Area.DivisionStandardAlgorithm, Scope.DecimalNumbers, Scope
     Scope.NumbersWithoutNegatives, Scope.MultipleDigitLargestOperand];
 
 describe('standard decimal division schema', () => {
-    it('owns the reviewed mathematical labels', () => expect(spec.generalLabels).toEqual(mathematics));
+    it('owns the reviewed mathematical labels', () => expect(spec.generalLabels).toEqual([...mathematics, Scope.TwoOperands, Scope.NumbersWithZero]));
     it('resolves the actual broad Grade 6 target with no magnitude label', () => {
         const problem = generateWithLabels(new StandardAlgorithmDecimalDivisionGenerator(), [
             ...mathematics, Scope.ArabicNumerals, Ability.ProcedureExecution

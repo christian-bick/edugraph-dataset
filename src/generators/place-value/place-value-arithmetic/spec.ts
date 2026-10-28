@@ -1,6 +1,6 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -65,8 +65,13 @@ export const PlaceValueArithmeticGeneratorSchema = {
         hasLabel(Scope.TwoDigitLargestOperand)
     ],
     requireMultipleOf10: [
-        [Scope.MultiplesOf10],
-        hasLabel(Scope.MultiplesOf10)
+        [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand],
+        selectExactLabelSetMap([
+            [[], false],
+            [[Scope.MultiplesOf10], true],
+            [[Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand], true]
+        ] as const),
+        [[], [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand]]
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],

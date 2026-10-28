@@ -5,7 +5,7 @@ import {OperationsPatternCorrespondenceViewSchema, spec} from './spec.ts';
 
 describe('operations-pattern-correspondence view spec', () => {
     it('declares its fixed learner task and target precondition', () => {
-        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Ability.ConceptDerivation]);
+        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Ability.ConceptDerivation, Scope.Base10, Scope.NumbersWithZero]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Area.PatternCorrespondence]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(OperationsPatternCorrespondenceViewSchema).toEqual({});

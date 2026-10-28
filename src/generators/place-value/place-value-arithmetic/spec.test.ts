@@ -1,8 +1,10 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
-import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
+import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {spec as modelView} from '../../../visuals/views/place-value/place-value-arithmetic-model/spec.ts';
 import {spec as writtenView} from '../../../visuals/views/place-value/place-value-arithmetic-written-method/spec.ts';
 import {spec as explanationView} from '../../../visuals/views/place-value/place-value-arithmetic-explanation/spec.ts';
@@ -133,5 +135,53 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub!.data.operandProfile).toBe('general');
         expect(stub!.data.regrouping.kind).toBe(kind);
         expect(stub!.labels).toEqual(expect.arrayContaining([strategy, Area.IntegerRegrouping]));
+    });
+
+    it('does not attach a whole-tens width to general addition', () => {
+        const labels = [Area.Addition, Scope.TwoDigitSmallestOperand, Scope.NumbersSmaller1000];
+        const result = planModelCompatibility({id: 'general-addition-width', labels}, model,
+            {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
+        expect(result).toMatchObject({supported: false, reason: 'incompatible-rules'});
+        setSeed(0);
+        expect(generateWithLabels(new PlaceValueArithmeticGenerator(), labels)).toBeNull();
+    });
+
+    it.each([
+        [Area.Addition], [Area.Addition, Area.IntegerRegrouping],
+        [Area.Subtraction], [Area.Subtraction, Area.IntegerRegrouping],
+        [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
+        [Area.AdditionPlaceValuePartitioning, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand],
+        [Area.Subtraction, Scope.MultiplesOf10, Scope.NumbersWithoutZero],
+        [Area.Subtraction, Scope.MultiplesOf10, Scope.NumbersWithZero]
+    ].map(profileLabels => ({profileLabels})))('preserves the old configuration, entropy and choice counts for $profileLabels', ({profileLabels}) => {
+        const labels = [...profileLabels, Scope.NumbersSmaller100];
+        const generator = new PlaceValueArithmeticGenerator();
+        const legacySchema = {...PlaceValueArithmeticGeneratorSchema,
+            requireMultipleOf10: [[Scope.MultiplesOf10], hasLabel(Scope.MultiplesOf10)]} as const;
+        const domains = [legacySchema, generator.schema].map(schema => {
+            setSeed(71);
+            const choices = normalizeSchemaChoices(schema, labels, 'generator');
+            const result = planModelCompatibility({id: 'legacy-place-value', labels}, {...model, schema},
+                {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
+            expect(getRandomState()).toBe(71);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error('Expected the original place-value profile to remain admitted.');
+            return {
+                choices: choices.map(domain => [domain.field, domain.alternatives.length]),
+                admitted: result.plan.domains.map(domain => [domain.field, domain.alternatives.length]),
+                groups: result.plan.groups.map(group => ({fields: group.fields, count: group.assignments.length}))
+            };
+        });
+        expect(domains[1]).toEqual(domains[0]);
+        for (const seed of [0, 2, 42]) {
+            const draws = [legacySchema, generator.schema].map(schema => {
+                setSeed(seed);
+                const {config} = extractConfig(schema, labels);
+                const configurationState = getRandomState();
+                const stub = generator.generate(config);
+                return {config, configurationState, stub, state: getRandomState()};
+            });
+            expect(draws[1]).toEqual(draws[0]);
+        }
     });
 });

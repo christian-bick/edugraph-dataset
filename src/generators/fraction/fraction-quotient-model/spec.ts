@@ -23,7 +23,20 @@ const relationProfiles = [
         Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-divisor-equation']
 ] as const;
 
-const exactProfile = selectExactLabelSetMap(relationProfiles);
+// Canonical emitted choices add zero absence to the positive unit-dividend profiles.
+// Keep the original bundles as same-value aliases so unchanged requests remain exact.
+const canonicalProfiles = relationProfiles.map(([labels, value]) => [
+    labels.some(label => label === Scope.FractionDividend)
+        ? [...labels, Scope.NumbersWithoutZero] : labels,
+    value
+] as const);
+const exactProfile = selectExactLabelSetMap([
+    ...canonicalProfiles,
+    ...relationProfiles.filter(([labels]) => labels.some(label => label === Scope.FractionDividend)),
+    // These broad requests already select fraction-as-quotient; preserve that choice.
+    [[Scope.NumbersWithoutZero], 'fraction-as-quotient'],
+    [[Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient']
+] as const);
 
 // Fallback probes may combine a requested FractionNumbers label with a
 // UnitFractions alternative that specializes it. Those two choices describe
@@ -32,7 +45,7 @@ const resolveRelationProfile = withLabelChoices(exactResolver((labels: string[],
     supportedLabels?: readonly string[]) => {
     if (labels.includes(Scope.FractionNumbers) && labels.includes(Scope.UnitFractions)) return undefined;
     return exactProfile(labels, supportedLabels);
-}), {kind: 'alternatives', alternatives: relationProfiles.map(([labels]) => [...labels])});
+}), exactProfile.labelChoices!);
 
 const fractionNotationRole: GeneratorCompatibilityRule = {
     id: 'fraction-notation-original-wholes',
@@ -67,7 +80,7 @@ export const FractionQuotientModelGeneratorSchema = {
         Scope.UnitFractions,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
-    ], resolveRelationProfile, relationProfiles.map(([labels]) => labels)]
+    ], resolveRelationProfile, canonicalProfiles.map(([labels]) => labels)]
 } as const;
 
 export type FractionQuotientModelGeneratorConfig = ConfigFromSchema<

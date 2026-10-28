@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-operation-table',
-    generalLabels: [Scope.IntegerNumbers, Scope.Base10, Scope.NumbersWithoutNegatives]
+    generalLabels: [Scope.IntegerNumbers, Scope.Base10, Scope.NumbersWithoutNegatives, Scope.NumbersWithZero]
 };
 
 const resolveOperation = selectExactLabelMap([

@@ -5,7 +5,7 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-paired-patterns',
-    generalLabels: [Scope.PairedPatterns]
+    generalLabels: [Scope.PairedPatterns, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives]
 };
 
 export const ArithmeticPairedPatternsGeneratorSchema = {

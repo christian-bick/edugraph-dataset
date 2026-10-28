@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-pattern-correspondence-explanation',
-    generalLabels: [Scope.ArabicNumerals, Ability.Interpretation, Ability.TextualArticulation],
+    generalLabels: [Scope.ArabicNumerals, Ability.Interpretation, Ability.TextualArticulation, Scope.Base10, Scope.NumbersWithZero],
     compatibility: [
         requireTargetLabels('pattern-correspondence-explanation-request', [Area.PatternCorrespondence, Ability.TextualArticulation])
     ]

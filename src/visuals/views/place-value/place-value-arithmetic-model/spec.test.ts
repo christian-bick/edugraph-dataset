@@ -7,7 +7,8 @@ describe('place-value arithmetic model spec', () => {
     it('rejects sub-ten grouping targets outside the arithmetic presentation boundary', () => {
         expect(spec.generalLabels).toEqual([
             Scope.PhysicalNumbers,
-            Ability.ProcedureUnderstanding
+            Ability.ProcedureUnderstanding,
+            Scope.ArabicNumerals
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toContain(Scope.NumbersSmaller10);
         expect(PlaceValueArithmeticModelViewSchema).toEqual({});

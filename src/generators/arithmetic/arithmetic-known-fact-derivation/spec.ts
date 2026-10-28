@@ -64,7 +64,11 @@ export const ArithmeticKnownFactDerivationGeneratorSchema = {
             Scope.SingleDigitSmallestOperand,
             Scope.TwoDigitLargestOperand
         ],
-        hasLabel(Area.PlaceValue)
+        hasLabel(Area.PlaceValue),
+        [
+            [Scope.SingleDigitSmallestOperand],
+            [Area.PlaceValue, Scope.MultiplesOf10, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]
+        ]
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),

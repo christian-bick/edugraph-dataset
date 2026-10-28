@@ -7,9 +7,13 @@ import {matchTargets, type MatchTuple} from './matching.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
 import {summarizeLabelDependencyCoverage} from './label-dependency-coverage.ts';
 import {buildLabelDependencyAudit, enumerateDependencyAuditSelections} from './label-dependency-audit.ts';
+import {capabilitySatisfies} from './ontology.ts';
+import {labelDependencies} from '../validation/label-dependencies.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 let tuple: MatchTuple;
+const withoutOperandWidths = (labels: readonly string[]) => labels.filter(label =>
+    !labelDependencies.facets.operandDigits.labels.some(width => capabilitySatisfies(label, width)));
 beforeAll(async () => {
     const generatorFiles = new Map([['arithmetic-ops-pairs', resolve(root, 'src/generators/arithmetic/arithmetic-ops-pairs/spec.ts')]]);
     const viewFiles = new Map([['operations-boxes', resolve(root, 'src/visuals/views/operations/operations-boxes/spec.ts')]]);
@@ -23,7 +27,7 @@ beforeAll(async () => {
 });
 
 describe('annotation audit with real matched declarations', () => {
-    it('checks every admitted conjunction without executing a mathematical draw', () => {
+    it('reports a removed width in every admitted conjunction without executing a mathematical draw', () => {
         expect(tuple).toBeDefined();
         const selections = enumerateDependencyAuditSelections(tuple.plan);
         expect(selections.status).toBe('complete');
@@ -33,25 +37,32 @@ describe('annotation audit with real matched declarations', () => {
             expect(selection.labels).toContain(Area.Addition);
             expect(selection.labels).toContain(Ability.ProcedureExecution);
             expect(evaluate(selection.labels).context.status).toBe('eligible');
-            expect(evaluate(selection.labels).assessments.find(item => item.facet === 'operandDigits')?.status).toBe('missing');
+            expect(evaluate(withoutOperandWidths(selection.labels)).assessments
+                .find(item => item.facet === 'operandDigits')?.status).toBe('missing');
         }
     });
     it('adds one missing-base finding to existing declaration omissions without completing any labels', () => {
         const selected = enumerateDependencyAuditSelections(tuple.plan).selections[0];
         const original = [...selected.labels];
+        const incomplete = withoutOperandWidths(selected.labels);
+        const incompleteOriginal = [...incomplete];
+        const withoutBase = incomplete.filter(label => label !== Scope.Base10);
+        const withoutBaseOriginal = [...withoutBase];
         const evaluator = createLabelDependencyEvaluator();
         const report = (labels: readonly string[]) => buildLabelDependencyAudit({spec: 'integration', policyHash: evaluator.policyHash, ontology: {},
             dataset: {status: 'available', generationId: 'fixture'}, selectionCoverage: [], evaluate: evaluator.evaluate,
             subjects: [{kind: 'sample', id: 'stored:fixture', targetId: tuple.target.id, generatorId: tuple.generatorId,
                 viewId: tuple.viewId, labels, targetAssociations: [{spec: 'integration', target_id: 'alias'}]}]});
-        const baseline = summarizeLabelDependencyCoverage(report(selected.labels));
-        const modified = report(selected.labels.filter(label => label !== Scope.Base10));
+        const baseline = summarizeLabelDependencyCoverage(report(incomplete));
+        const modified = report(withoutBase);
         const strict = summarizeLabelDependencyCoverage(modified);
         expect(strict.failures).toContainEqual(expect.objectContaining({code: 'missing', facet: 'base'}));
         expect(strict.failures.length).toBe(baseline.failures.length + 1);
         expect(modified.findings.some(finding => finding.facet === 'base')).toBe(true);
         expect(modified.subjects[0].targetAssociations).toEqual([{spec: 'integration', target_id: 'alias'}]);
         expect(selected.labels).toEqual(original);
-        expect(selected.labels).not.toContain(Scope.SingleDigitSmallestOperand);
+        expect(incomplete).toEqual(incompleteOriginal);
+        expect(withoutBase).toEqual(withoutBaseOriginal);
+        expect(incomplete).not.toContain(Scope.SingleDigitSmallestOperand);
     });
 });

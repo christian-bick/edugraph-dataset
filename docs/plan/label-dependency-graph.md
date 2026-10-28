@@ -18,9 +18,15 @@ The [C1 currency batch](#c1-currency-word-problem-declarations-2026-10-28) adds 
 quantity and notation invariants in two separate checkpoints.
 The [C2 currency batch](#c2--currency-number-kinds-preserving-the-conversion-competency)
 closes all 18 remaining currency source findings and preserves the eight integer digit
-obligations. Autonomous execution starts from **1,307 distinct non-range source gaps**;
+obligations. Autonomous execution started from **1,307 distinct non-range source gaps**;
 the [progress ledger](label-dependency-progress.md) tracks current counts and child decisions.
-the stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
+The stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
+
+The autonomous declaration pass has triaged all 26 original source scopes: **930 requirements
+closed, 75 newly exposed, 452 remaining**. All remaining gaps have exact owners in **29 decision
+batches**; no independent declaration repair remains queued. The Area allowlist, integer-only
+digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
+for the remaining source decisions and their implementations.
 
 ## Scope
 

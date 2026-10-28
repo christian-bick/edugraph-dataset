@@ -12,7 +12,7 @@ const mathematicalLabels = [
 
 describe('standard-algorithm-division capability resolution', () => {
     it('owns the reviewed whole-number standard-division mathematics', () => {
-        expect(spec.generalLabels).toEqual(mathematicalLabels);
+        expect(spec.generalLabels).toEqual([...mathematicalLabels, Scope.TwoOperands]);
     });
 
     it('resolves the real Grade 6 target with no magnitude or divisor-width label', () => {

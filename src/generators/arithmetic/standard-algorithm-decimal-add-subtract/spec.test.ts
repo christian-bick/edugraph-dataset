@@ -9,7 +9,7 @@ const common = [Scope.DecimalNumbers, Scope.Base10, Scope.NumbersWithoutNegative
 
 describe('decimal standard add/sub capability resolution', () => {
     it('keeps the reviewed mathematical invariants on the producer', () => {
-        expect(spec.generalLabels).toEqual(common);
+        expect(spec.generalLabels).toEqual([...common, Scope.TwoOperands]);
     });
 
     it.each([[Area.AdditionStandardAlgorithm, 'addition'], [Area.SubtractionStandardAlgorithm, 'subtraction']] as const)(

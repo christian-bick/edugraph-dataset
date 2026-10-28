@@ -8,7 +8,8 @@ describe('place-value-arithmetic-written-method view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.PhysicalNumbers,
             Ability.ProcedureUnderstanding,
-            Ability.Formalization
+            Ability.Formalization,
+            Scope.ArabicNumerals
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Ability.Formalization]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toContain(Scope.NumbersSmaller10);

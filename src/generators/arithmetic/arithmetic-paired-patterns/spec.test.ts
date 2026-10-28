@@ -7,7 +7,7 @@ import {ArithmeticPairedPatternsGeneratorSchema, spec} from './spec.ts';
 
 describe('ArithmeticPairedPatternsGenerator schema', () => {
     it('keeps paired structure invariant but selects correspondence evidence', () => {
-        expect(spec.generalLabels).toEqual([Scope.PairedPatterns]);
+        expect(spec.generalLabels).toEqual([Scope.PairedPatterns, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives]);
         expect(ArithmeticPairedPatternsGeneratorSchema.hasCorrespondence[0]).toEqual([
             Area.PatternCorrespondence
         ]);

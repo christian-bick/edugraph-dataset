@@ -5,7 +5,7 @@ import {OperationsPairedPatternGenerationViewSchema, spec} from './spec.ts';
 
 describe('operations-paired-pattern-generation view spec', () => {
     it('declares its fixed learner task and target precondition', () => {
-        expect(spec.generalLabels).toEqual([Area.PatternGeneration, Scope.ArabicNumerals, Ability.ProcedureExecution]);
+        expect(spec.generalLabels).toEqual([Area.PatternGeneration, Scope.ArabicNumerals, Ability.ProcedureExecution, Scope.Base10, Scope.NumbersWithZero]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Area.PatternGeneration]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(OperationsPairedPatternGenerationViewSchema).toEqual({});

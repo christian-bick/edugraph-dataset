@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'operations-paired-pattern-generation',
-    generalLabels: [Area.PatternGeneration, Scope.ArabicNumerals, Ability.ProcedureExecution],
+    generalLabels: [Area.PatternGeneration, Scope.ArabicNumerals, Ability.ProcedureExecution, Scope.Base10, Scope.NumbersWithZero],
     compatibility: [
         requireTargetLabels('paired-pattern-generation-request', [Area.PatternGeneration])
     ]

@@ -1,13 +1,13 @@
 import {Area} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {arithmeticTripleLabels, arithmeticTripleSchema} from '../arithmetic-triple-schema.ts';
+import {arithmeticTripleLabels, arithmeticTripleSchema, arithmeticTripleWidthRule} from '../arithmetic-triple-schema.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-triples',
-    compatibility: [generatorLabelRule('three-operand-property-law', [
+    compatibility: [arithmeticTripleWidthRule, generatorLabelRule('three-operand-property-law', [
         Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
         Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw
     ], selected => {

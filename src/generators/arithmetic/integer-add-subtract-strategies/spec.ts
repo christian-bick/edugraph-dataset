@@ -1,17 +1,19 @@
 import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
-const resolveStrategy = selectExactLabelMap([
-    [Area.AdditionMakeTen, 'addition-make-ten'],
-    [Area.AdditionNearDoubles, 'addition-near-doubles'],
-    [Area.AdditionCompensation, 'addition-compensation'],
-    [Area.SubtractionCompensation, 'subtraction-compensation'],
-    [Area.SubtractionMakeTen, 'subtraction-make-ten'],
-    [Area.SubtractionThinkAddition, 'subtraction-think-addition']
-] as const);
+const strategyProfiles = [
+    [[Area.AdditionMakeTen, Scope.SingleDigitSmallestOperand], 'addition-make-ten'],
+    [[Area.AdditionNearDoubles], 'addition-near-doubles'],
+    [[Area.AdditionCompensation], 'addition-compensation'],
+    [[Area.SubtractionCompensation], 'subtraction-compensation'],
+    [[Area.SubtractionMakeTen, Scope.TwoDigitLargestOperand], 'subtraction-make-ten'],
+    [[Area.SubtractionThinkAddition, Scope.MultipleDigitLargestOperand], 'subtraction-think-addition']
+] as const;
+
+const resolveStrategy = selectExactLabelSetMap(strategyProfiles);
 
 export const spec: GeneratorSpec = {
     generatorId: 'integer-add-subtract-strategies',
@@ -31,8 +33,11 @@ export const IntegerAddSubtractStrategiesGeneratorSchema = {
         Area.AdditionCompensation,
         Area.SubtractionCompensation,
         Area.SubtractionMakeTen,
-        Area.SubtractionThinkAddition
-    ], resolveStrategy],
+        Area.SubtractionThinkAddition,
+        Scope.SingleDigitSmallestOperand,
+        Scope.TwoDigitLargestOperand,
+        Scope.MultipleDigitLargestOperand
+    ], resolveStrategy, strategyProfiles.map(([labels]) => labels)],
     range: [
         deductCompatible([Scope.NumbersSmaller1000]),
         resolveRangeFromLabels

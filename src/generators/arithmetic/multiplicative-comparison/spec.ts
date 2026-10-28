@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -16,13 +16,16 @@ export const spec: GeneratorSpec = {
     ]
 };
 
+const operationProfiles = [
+    [[Area.Multiplication, Scope.SingleDigitSmallestOperand], 'multiplication'],
+    [[Area.Division], 'division']
+] as const;
+
 export const MultiplicativeComparisonGeneratorSchema = {
     operation: [
-        [Area.Multiplication, Area.Division],
-        selectExactLabelMap([
-            [Area.Multiplication, 'multiplication'],
-            [Area.Division, 'division']
-        ])
+        [Area.Multiplication, Area.Division, Scope.SingleDigitSmallestOperand],
+        selectExactLabelSetMap(operationProfiles),
+        operationProfiles.map(([labels]) => labels)
     ]
 } as const;
 
