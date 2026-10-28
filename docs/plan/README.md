@@ -12,10 +12,12 @@ These items are not newly scheduled by the archive move.
   semantic decisions and dataset refresh. The [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
   and [progress ledger](label-dependency-progress.md) track autonomous declaration repairs,
   exact gap accounting and separate decision batches. All 26 original scopes are triaged;
-  429 gaps remain in 29 decision batches after the supported autonomous repairs and evidence re-review.
+  391 gaps remain in 27 dependency decision batches; one known reasoning content defect also remains
+  open, followed by two acceptance batches (30 remaining scopes).
   The [agreed conditional-dependency direction](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies)
-  narrows blanket numeral/base requirements first; implementation is pending and representation
-  completeness remains a separate design question.
+  is implemented: narrowing numeral/base obligations retires 38 source requirements without
+  claiming annotation repairs. Representation completeness remains a separate, unestimated
+  design question.
   Range-policy redesign remains excluded.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

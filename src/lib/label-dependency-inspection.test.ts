@@ -70,13 +70,14 @@ describe('immutable annotation inspection', () => {
         expect(sample).not.toHaveProperty('evidence'); expect(sample).not.toHaveProperty('replay');
     });
     it('checks every producer/view and both splits without a runtime generator', async () => {
-        const supplied = snapshot([stored(), stored({generator: 'new-generator', view: 'new-view', sample_key: 'new', labels: labels.filter(label => label !== Scope.Base10)})],
+        const positionalLabels = [...labels.filter(label => label !== Scope.Base10), Scope.BaseTenBlocks];
+        const supplied = snapshot([stored(), stored({generator: 'new-generator', view: 'new-view', sample_key: 'new', labels: positionalLabels})],
             [stored({mode: 'solution', sample_key: 'solution'})]);
         const report = await inspectLabelDependencies({projectRoot, spec: 'fixture', snapshot: supplied});
         expect(mocks.runtime).not.toHaveBeenCalled();
         expect(report.summary.samples).toBe(3);
         expect(report.subjects.find(subject => subject.generatorId === 'new-generator')?.evaluation.assessments
-            .find(item => item.facet === 'base')?.status).toBe('missing');
+            .find(item => item.facet === 'base')).toMatchObject({ruleId: 'LD-POSITIONAL-01', status: 'missing'});
         expect(report.subjects.find(subject => subject.id === 'sample:val:solution')?.mode).toBe('solution');
     });
     it('opens a missing snapshot once without importing runtime implementations', async () => {

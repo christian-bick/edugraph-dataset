@@ -20,26 +20,29 @@ The [C2 currency batch](#c2--currency-number-kinds-preserving-the-conversion-com
 closes all 18 remaining currency source findings and preserves the eight integer digit
 obligations. Autonomous execution started from **1,307 distinct non-range source gaps**;
 the [progress ledger](label-dependency-progress.md) tracks current counts and child decisions.
-The stored snapshot retains **4,146 findings** until the agreed readiness and refresh steps.
+The unchanged stored snapshot has **2,542 raw / 2,528 distinct non-range findings** under the
+narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding policy.
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
-source scopes: **953 requirements closed, 75 newly exposed, 429 remaining**. All remaining gaps have exact owners in **29 decision
-batches**; no independent declaration repair remains queued. The Area allowlist, integer-only
+source scopes: **953 requirements repaired, 75 newly exposed, 38 retired by policy, 391 remaining**.
+All remaining gaps have exact owners in **27 decision batches**; the reasoning-view content
+defect remains a separate open scope even though its numeral requirement is retired.
+No independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
-for the remaining source decisions and their implementations. The next agreed direction is
+for the remaining source decisions and their implementations. The implemented narrowing is
 [conditional notation dependencies](#agreed-direction-conditional-notation-dependencies);
-the implementation is unchanged and representation completeness is a separate design question.
+representation completeness remains a separate design question.
 
 ## Agreed direction: conditional notation dependencies
 
-**Direction agreed on 2026-10-28; implementation pending.** Narrow the overly broad
-numeral/base dependencies first. Treat completeness of representation labels as a separate
-design question. This supersedes the earlier proposal to require `NumberRepresentation`
+**Implemented on 2026-10-28.** The graph narrows the overly broad numeral/base dependencies.
+Completeness of representation labels remains a separate design question. This supersedes
+the earlier proposal to require `NumberRepresentation`
 whenever a numeric context is declared; that replacement obligation was not adopted.
 
-This record changes the plan only. The current graph, evaluator and shared strict gate are
-unchanged. Their existing 429 distinct source findings remain the implementation baseline;
-agreement on a policy direction does not itself close a finding.
+The graph changes; the pure evaluator and shared strict-gate semantics remain unchanged.
+The before/after audit retires **38 requirements**, reducing source findings from **429 to 391**.
+This is policy reclassification, with **zero label repairs and zero new distinct gaps**.
 
 The necessary-evidence re-review closes 23 findings without changing policy: thirteen explicit
 or necessarily required zero values and ten digital-construction numeral/base requirements.
@@ -51,46 +54,58 @@ records source proof and preservation.
 
 The remaining notation problem cannot be solved by adding Arabic numerals everywhere:
 
-| Current scope | Findings | Evidence and obstacle |
+| Scope before narrowing | Requirements retired | Evidence and remaining work |
 |---|---:|---|
 | Object-only conservation, comparison, matching and sorting | 20 | Ten selections display object quantities without written count symbols or positional places. Numerals and Base10 are not justified. |
 | Analog-clock reading | 10 | Five questions show an unnumbered dial and a generic response field. They do not require the Arabic-digit response used in the solution. |
-| Rounding-reasoning view | 8 | Numeral evidence is present, but declaring it admits an unsafe new target match: 23+32+45=100 can produce a proposed answer200. The existing rendering guarantee needs its separate decision. |
+| Rounding-reasoning view | 8 | Numeral evidence is present, but declaring it admits an unsafe new target match: 23+32+45=100 can produce a proposed answer200. The existing rendering guarantee still needs its separate decision; retiring the requirement does not fix it. |
 
 Number kind, numeral system and positional base answer different questions. Integers or
 fractions can be involved without written numerals. Numeral systems describe conventional
 written representations; not every such system has positional place values. The existence
 of quantities therefore does not by itself require either a numeral-system label or a base.
 
-The next implementation should:
+The implemented rules:
 
 1. Remove the blanket `numeralSystem` and `base` assessments from `LD-NUM-01`, retaining its
    other assessments and existing trigger. Do not replace them with a blanket representation
    assessment.
 2. Require a base when positive declared evidence establishes positional representation or
-   place value. Keep the existing decimal-to-base obligation. Review additional triggers
-   against the pinned ontology before implementing the exact selector.
-3. Keep numeral-omission detection separate: add a numeral-system dependency only where an
-   independently declared fact necessarily establishes numeral usage. A rule triggered solely
-   by a numeral-system label cannot detect that same label's absence.
+   place value, using the reviewed selectors below. Keep the existing decimal-to-base obligation.
+3. Keep numeral-omission detection separate. No mandatory numeral-system assessment is added.
+   Any future dependency needs an independently declared fact that necessarily establishes
+   numeral usage; a rule triggered solely by a numeral label cannot detect that label's absence.
 
-The intended rule shape uses existing graph mechanisms:
+The graph uses existing evaluator mechanisms:
 
 ```ts
 // Keep LD-NUM-01's existing trigger. Replace only its assessed groups:
 assess: ['numberKind', 'range', 'sign', 'zero']
 
-// Define positionalRepresentation using reviewed positive ontology selectors.
+positionalRepresentation: {labels: [
+    Scope.RodNumerals, Scope.BaseTenBlocks, Scope.ScientificExponentNotation
+]}
+
 // Keep LD-DECIMAL-01; add the other proven positional dependencies:
-{id: 'LD-POSITIONAL-01', when: {family: 'positionalRepresentation'}, assess: ['base']}
+{id: 'LD-POSITIONAL-01', when: {any: [
+    {family: 'positionalRepresentation'},
+    {areaWithin: Area.PlaceValue},
+    {areaWithin: Area.DecimalNotation}
+]}, assess: ['base']}
 ```
 
-Candidate positional evidence includes decimal notation, base-ten blocks, scientific notation
-and rod numeral place values. For Arabic numerals, verify whether the ontology descriptor
-alone guarantees positional usage or needs an additional condition; do not equate a digit
-repertoire with every positional property. Generic physical/visual/spatial representations,
-Roman numerals, an abacus or an analog clock alone do not establish positional place values.
-Determining a base never means automatically choosing Base10.
+The pinned ontology `0.31.0-pre.58.9231304124e9` defines rod numerals through place values,
+base-ten blocks through successive place units, and scientific exponent notation through
+scaled powers of ten. `PlaceValue` and `DecimalNotation` Areas independently establish
+positional usage. The existing `DecimalNumbers` family rule includes its precision descendants.
+
+`ArabicNumerals` describes the digit symbols 0–9, so it alone does not establish positional
+usage. Its `translates Base10` relation is not an implication; Roman numerals also have that
+relation. Arabic digits with an independent positional declaration acquire the base requirement
+through that declaration. Generic physical/visual/spatial representations, Roman numerals,
+an abacus or an analog clock alone do not establish positional place values. Any eligible
+numeric-base label satisfies the existing presence facet; this checkpoint adds no value
+inference, default Base10 label, or base-specific conflict policy.
 
 Number-kind, sign, zero, fraction and operand obligations retain their own conditions. Preserve
 the complete Area allowlist, integer-only digit qualification and range-policy exclusion.
@@ -116,22 +131,42 @@ gaps and **4,012 → 3,212** distinct stored gaps, is superseded. It remains his
 evidence in `temp/label-dependency-decisions/representation-counterfactual.json`, not a forecast
 for this narrower direction. Do not reuse those counts or count removed obligations as
 additive label repairs. The known reasoning-view rendering defect remains open even if a
-future dependency rule no longer reports its numeral omission.
+dependency rule no longer reports its numeral omission.
 
 ### Implementation and validation checkpoint
 
-Review the exact positive positional selectors, implement the narrowed graph in a separate
-checkpoint, and test object-only, mixed, Roman, decimal, rod, block and scientific-notation
-contexts. Include cases with missing base labels, missing numeral labels and absent positional
-evidence, plus the unchanged Area/integer/range boundaries. Confirm the evaluator still reads
-only annotations and ontology membership, and never adds labels.
+Regression coverage includes object-only, mixed, Roman, Arabic-only, decimal, rod, block and
+scientific-notation contexts, both positional Areas, missing bases, absent numeral labels,
+and unchanged Area/integer/range boundaries. Integration and orchestration fixtures use
+independent positional evidence for missing-base failures. The evaluator still reads only
+annotations and ontology membership and never adds labels.
 
-Rerun the audit under its new policy identity. Reconcile removed obligations, newly required
-obligations and actual declaration repairs separately, preserving follow-up ownership for
-known source defects. Keep targets, configuration, sampling and rendering unchanged. Full
-regeneration still waits for the agreed source readiness conditions under the implemented
-policy. This direction does not approve reasoning rendering changes, clock-mode architecture,
-zero ownership redesign or new mathematical sampling profiles.
+The fresh audit is bound to policy
+`de3acb553955484a3f8452b6fb149a079777ba3985f042a113fd23a402a50d1c`:
+
+| Measurement | Before | After |
+|---|---:|---:|
+| Source distinct / raw non-range findings | 429 / 429 | 391 / 391 |
+| Source selections with findings | 329 | 311 |
+| Stored distinct / raw non-range findings | 4,012 / 4,146 | 2,528 / 2,542 |
+| Stored samples with findings | 1,332 | 1,282 |
+
+All 1,263 selections (848 eligible), 1,195 matched tuples and 2,808 stored samples (1,884
+eligible) are unchanged. All 4,071 subjects retain their annotations, resolved Areas,
+configuration/plan identity and provenance. Other facet assessments, conflicts and context
+results are identical. Source retirement is 23 numeral-system and 15 base requirements;
+stored retirement is 830 numeral-system and 654 base requirements, counted distinctly.
+Neither count is a label repair. There are no new distinct findings, conflicts, invalid
+contexts, incomplete enumerations or contract errors. Raw counts also change when a
+duplicate rule assessment disappears; they are not a measure of separate repaired labels.
+
+Exact accounting, ownership and preservation evidence is under
+`temp/label-dependency-narrowing/`; the durable checkpoint and validation results are in the
+[progress ledger](label-dependency-progress.md). Full regeneration still waits for the agreed
+source readiness conditions, including resolution or explicit user-approved disposition of the known
+reasoning-view content defect. Representation completeness remains separate. This checkpoint
+does not approve reasoning rendering changes, clock-mode architecture, zero ownership redesign
+or new mathematical sampling profiles.
 
 ## Scope
 
@@ -227,6 +262,9 @@ export const labelDependencies = {
         numeric: {root: Scope.NumericAbstraction},
         numberKind: {root: Scope.NumericSpace},
         numeralSystem: {root: Scope.Numerals},
+        positionalRepresentation: {labels: [
+            Scope.RodNumerals, Scope.BaseTenBlocks, Scope.ScientificExponentNotation
+        ]},
         base: {root: Scope.NumericBase},
         range: {root: Scope.NumericRange, check: 'presence-only'},
         sign: {root: Scope.NumericSign},
@@ -246,7 +284,12 @@ export const labelDependencies = {
     rules: [
         {id: 'LD-NUM-01', when: {any: [{family: 'numeric'}, {family: 'numeralSystem'},
             {family: 'operandCount'}, {family: 'operandDigits'}]},
-            assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
+            assess: ['numberKind', 'range', 'sign', 'zero']},
+        {id: 'LD-POSITIONAL-01', when: {any: [
+            {family: 'positionalRepresentation'},
+            {areaWithin: Area.PlaceValue},
+            {areaWithin: Area.DecimalNotation}
+        ]}, assess: ['base']},
         {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'}]},
             assess: ['operandCount']},
         {id: 'LD-OPERANDS-02', when: {all: [
@@ -278,11 +321,12 @@ only from this qualification. It cannot succeed vacuously when the family is abs
 every member is ignored. The ignored labels remain annotations and participate in all
 other facet checks. These selectors use only annotations and ontology relations.
 
-The five obligations are:
+The six obligations are:
 
 | Rule | Annotation trigger | Required groups |
 |---|---|---|
-| `LD-NUM-01` | Numeric Scope, numeral system, operand count, or operand digits | Number kind, numeral system, base, sign, zero, plus report-only range presence |
+| `LD-NUM-01` | Numeric Scope, numeral system, operand count, or operand digits | Number kind, sign, zero, plus report-only range presence |
+| `LD-POSITIONAL-01` | Rod numerals, base-ten blocks, scientific exponent notation, or an Area within Place Value / Decimal Notation | Numeric base |
 | `LD-OPERANDS-01` | Operand count or operand digits | Operand count |
 | `LD-OPERANDS-02` | Operand count or operand digits, an arithmetic-operation/integer-arithmetic Area, and exclusively integer number-kind annotations | Operand digits |
 | `LD-FRACTION-01` | Fraction annotations | Proper/improper magnitude |
@@ -574,7 +618,8 @@ new sampling behavior; introducing a new mathematical distinction is a separate 
    unchanged; report both metrics.
 5. Use zero non-range missing requirements, conflicts, invalid contexts and incomplete
    enumerations across current admitted selections as the readiness checkpoint for another
-   full canonical run. This is a project work criterion, not a change to the report-only
+   full canonical run. Known content defects also require resolution or explicit user-approved disposition;
+   retiring a dependency does not repair them. This is a project work criterion, not a change to the report-only
    treatment of pre-draw omissions in the shared validator.
 6. At readiness, run the already authorized full affected regeneration with an authoritative
    graph rebuild. Audit the resulting stored annotations, exact target coverage, image
@@ -604,6 +649,10 @@ consumers of a shared declaration and both question and solution evidence. Prese
 complete Area allowlist and the current integer-only digit qualification, including C2b's
 decimal-representation treatment. Range-policy work remains excluded. Do not add adapters,
 automatic completion, payload classification or weaker validation rules.
+
+The separately approved conditional-notation checkpoint narrows blanket numeral/base
+requirements as documented above. This specific authorization does not extend to other
+policy changes; representation completeness remains a separate design question.
 
 A repair requiring a new semantic interpretation, ontology or evaluator change, mathematical
 schema distinction, or sampling/rendering change belongs in a decision batch. Previous
@@ -638,16 +687,19 @@ If all remaining work needs decisions, present the consolidated decision queue t
 Readiness to start autonomous repairs is distinct from dataset readiness. Deferred gaps remain
 part of the outstanding total. **All source gaps, including deferred gaps and newly activated
 requirements, must be resolved** before RB-V1; structural/contract errors and incomplete
-enumerations must also be zero. The existing full regeneration and selective Gemini VQA
+enumerations must also be zero. Known content defects, including RB-A3-D3, retain their own
+resolution or explicit user-approved disposition requirement even after their dependency findings disappear.
+The existing full regeneration and selective Gemini VQA
 authorization then applies to RB-V1/RB-V2. No regeneration or VQA runs during this preparation.
 
-The reproducible audit command for this checkpoint is:
+The reproducible audit command for the historical preparation checkpoint was:
 
 ```bash
 npm run audit:label-dependencies -- --spec=ccss --output-dir=temp/label-backlog-refresh/audit
 ```
 
-Its policy hash is `01584d603f3c0b48a0c882f3a0350acc7b0dc511553560e50c390ed52b41122c`.
+Its policy hash was `01584d603f3c0b48a0c882f3a0350acc7b0dc511553560e50c390ed52b41122c`;
+the implemented narrowing above records the current hash.
 The stored generation is `cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`.
 The committed inventory below is the durable checkpoint; local `backlog.json` and
 `build-backlog.mjs` under `temp/label-backlog-refresh/` retain pair-level detail and
@@ -666,9 +718,10 @@ They contain **1,307 distinct selection/facet gaps** and **1,325 raw rule/facet 
 row/label-contract errors are present. These are missing annotation groups, not 1,307 independent
 code edits or proof that a particular label can be added.
 
-The stored snapshot remains at **4,146 raw / 4,012 distinct sample/facet findings across 1,332 samples**.
+At this historical baseline, the stored snapshot has **4,146 raw / 4,012 distinct sample/facet findings across 1,332 samples**.
 That is a separate snapshot of the same repair effort, not an additional source backlog to add to
-1,307. Source declarations and stored rows are reconciled at the final regeneration checkpoints.
+1,307. The implemented conditional-notation checkpoint above gives its current policy counts.
+Source declarations and stored rows are reconciled at the final regeneration checkpoints.
 
 | Workstream | Generators | Pairs | Selections with gaps | Distinct gaps | Raw findings |
 |---|---:|---:|---:|---:|---:|

@@ -8,7 +8,7 @@ import {assessLabelDependencyCoverage, assertLabelDependencyCoverage, LABEL_DEPE
     type LabelDependencyCoverageInput} from './label-dependency-coverage.ts';
 
 const evaluator = createLabelDependencyEvaluator();
-const labels: string[] = [Area.Addition, Scope.IntegerNumbers, Scope.ArabicNumerals, Scope.Base10,
+const labels: string[] = [Area.Addition, Scope.IntegerNumbers, Scope.ArabicNumerals, Scope.BaseTenBlocks, Scope.Base10,
     Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero, Scope.TwoOperands,
     Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand];
 const input = (extra: Partial<LabelDependencyCoverageInput> = {}): LabelDependencyCoverageInput => ({
@@ -21,7 +21,7 @@ describe('universal annotation dependency enforcement', () => {
         const result = assess();
         expect(result.status).toBe('checked');
         expect(result.completenessEnforced).toBe(true);
-        expect(result.checkedFacets).toHaveLength(7);
+        expect(result.checkedFacets).toHaveLength(6);
         expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
         expect(result.failures).toEqual([]);
         expect(result.coverageHash).toBe(LABEL_DEPENDENCY_COVERAGE_HASH);
@@ -30,7 +30,7 @@ describe('universal annotation dependency enforcement', () => {
     });
 
     it.each([
-        [Scope.IntegerNumbers, 'numberKind'], [Scope.ArabicNumerals, 'numeralSystem'], [Scope.Base10, 'base'],
+        [Scope.IntegerNumbers, 'numberKind'], [Scope.Base10, 'base'],
         [Scope.NumbersWithoutNegatives, 'sign'], [Scope.NumbersWithoutZero, 'zero'],
         [Scope.TwoOperands, 'operandCount']
     ])('fails an omitted %s group using only the remaining annotations', (label, facet) => {
@@ -38,6 +38,40 @@ describe('universal annotation dependency enforcement', () => {
             expect.objectContaining({code: 'missing', facet})
         ]);
     });
+
+    it.each([
+        ['unspecified representation', []],
+        ['object quantities', [Scope.PhysicalNumbers]],
+        ['Roman numerals', [Scope.RomanNumerals]],
+        ['Arabic digit repertoire', [Scope.ArabicNumerals]],
+        ['mixed objects and digits', [Scope.PhysicalNumbers, Scope.ArabicNumerals]]
+    ])('does not invent notation completeness for %s', (_name, representation) => {
+        const annotations = [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero, ...representation];
+        const original = [...annotations];
+        const result = assertLabelDependencyCoverage(input({labels: annotations}));
+        expect(result.failures).toEqual([]);
+        expect(result.checkedFacets).toEqual(['LD-NUM-01/numberKind', 'LD-NUM-01/sign', 'LD-NUM-01/zero']);
+        expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        expect(annotations).toEqual(original);
+    });
+
+    it.each([Scope.RodNumerals, Scope.BaseTenBlocks, Scope.ScientificExponentNotation])(
+        'enforces positional base evidence from %s without requiring numeral labels', representation => {
+            const annotations = [Area.Addition, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithoutZero, representation];
+            const original = [...annotations];
+            const result = assess({labels: annotations});
+            expect(result.failures).toEqual([
+                expect.objectContaining({code: 'missing', ruleId: 'LD-POSITIONAL-01', facet: 'base'})
+            ]);
+            expect(() => assertLabelDependencyCoverage(input({labels: annotations})))
+                .toThrow(LabelDependencyCoverageError);
+            expect(assess({kind: 'selection', labels: annotations}).failures).toEqual([]);
+            expect(assess({labels: [...annotations, Scope.Base10]}).failures).toEqual([]);
+            expect(assess({labels: [...annotations, Area.EquationSolving]}).status).toBe('outside_policy_scope');
+            expect(annotations).toEqual(original);
+        });
 
     it('requires a digit descriptor but does not invent a particular numeric profile', () => {
         const oneDigitLabel = assess({labels: labels.filter(label => label !== Scope.SingleDigitLargestOperand)});
@@ -149,7 +183,7 @@ describe('universal annotation dependency enforcement', () => {
         expect(result.status).toBe('checked');
         expect(result.completenessEnforced).toBe(false);
         expect(result.checkedFacets).toEqual([]);
-        expect(result.reportOnlyFacets).toHaveLength(6);
+        expect(result.reportOnlyFacets).toHaveLength(4);
         expect(result.failures).toEqual([]);
         expect(assess({kind: 'selection', labels: [...labels, Scope.NumbersWithZero]}).failures)
             .toEqual([expect.objectContaining({code: 'contradiction'})]);
@@ -172,7 +206,7 @@ describe('universal annotation dependency enforcement', () => {
         } catch (error) {
             expect(error).toBeInstanceOf(LabelDependencyCoverageError);
             expect(error).toBeInstanceOf(ResolvedLabelContractError);
-            expect((error as Error).message).toContain('sample x: LD-NUM-01/base');
+            expect((error as Error).message).toContain('sample x: LD-POSITIONAL-01/base');
         }
         expect(() => assertLabelDependencyCoverage(input({labels: []}))).toThrow('artifact:');
     });
@@ -191,7 +225,7 @@ describe('strict annotation report summary', () => {
             subject('new-producer', {generatorId: 'new'}), subject('selection', {kind: 'selection', labels: [Area.Addition, Scope.IntegerNumbers]})];
         const result = summarizeLabelDependencyCoverage({dataset, subjects, selection_coverage: []});
         expect(result.counts).toMatchObject({checked: 3, samples_checked: 2, selections_checked: 1,
-            outside_policy_scope: 1, invalid_context: 1, checked_facets: 14, report_only_facets: 8});
+            outside_policy_scope: 1, invalid_context: 1, checked_facets: 12, report_only_facets: 6});
         expect(result.failures).toContainEqual(expect.objectContaining({subject: 'invalid', code: 'context'}));
         expect(result.coverage_hash).toBe(LABEL_DEPENDENCY_COVERAGE_HASH);
         expect(result.report_only_facets).toEqual(['range']);

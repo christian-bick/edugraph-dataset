@@ -3,7 +3,7 @@ export const labelDependencyCoverage = {
     version: 2,
     scope: 'all-eligible-annotations',
     reportOnlyFacets: ['range'],
-    // Selected configuration can gain supported descriptive labels after its draw.
+    // Static selection omissions are advisory; finalized samples enforce completeness.
     // Contradictions and invalid contexts are still checked before generation.
     reportOnlyCompletenessKinds: ['selection']
 } as const;

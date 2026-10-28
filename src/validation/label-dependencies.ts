@@ -12,6 +12,8 @@ export const labelDependencies = {
         numeric: {root: Scope.NumericAbstraction},
         numberKind: {root: Scope.NumericSpace},
         numeralSystem: {root: Scope.Numerals},
+        // These representations establish place values; a digit repertoire alone does not.
+        positionalRepresentation: {labels: [Scope.RodNumerals, Scope.BaseTenBlocks, Scope.ScientificExponentNotation]},
         base: {root: Scope.NumericBase},
         range: {root: Scope.NumericRange, check: 'presence-only'},
         sign: {root: Scope.NumericSign},
@@ -30,7 +32,10 @@ export const labelDependencies = {
     rules: [
         {id: 'LD-NUM-01', when: {any: [{family: 'numeric'}, {family: 'numeralSystem'},
             {family: 'operandCount'}, {family: 'operandDigits'}]},
-            assess: ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero']},
+            assess: ['numberKind', 'range', 'sign', 'zero']},
+        {id: 'LD-POSITIONAL-01', when: {any: [
+            {family: 'positionalRepresentation'}, {areaWithin: Area.PlaceValue}, {areaWithin: Area.DecimalNotation}
+        ]}, assess: ['base']},
         {id: 'LD-OPERANDS-01', when: {any: [{family: 'operandCount'}, {family: 'operandDigits'}]},
             assess: ['operandCount']},
         {id: 'LD-OPERANDS-02', when: {all: [

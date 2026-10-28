@@ -63,8 +63,8 @@ describe('annotation dependency assessment', () => {
         expect(result.triggers.find(trigger => trigger.ruleId === 'LD-NUM-01')).toEqual({
             ruleId: 'LD-NUM-01', status: 'present', labels: [Scope.IntegerNumbers]
         });
-        expect(result.assessments).toHaveLength(6);
-        expect(assessment(labels, 'base')).toEqual({ruleId: 'LD-NUM-01', facet: 'base', status: 'missing', labels: [],
+        expect(result.assessments).toHaveLength(4);
+        expect(assessment(labels, 'zero')).toEqual({ruleId: 'LD-NUM-01', facet: 'zero', status: 'missing', labels: [],
             reason: 'No label from the required annotation family is present.'});
         expect(assessment(labels, 'numberKind').status).toBe('satisfied');
         expect(result.assessments.every(item => ['missing', 'satisfied'].includes(item.status))).toBe(true);
@@ -166,6 +166,99 @@ describe('annotation dependency assessment', () => {
         (value as any).facets.zero = {labels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero]};
         expect(createLabelDependencyEvaluator(value).evaluate([Area.Addition, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).conflicts)
             .toHaveLength(1);
+    });
+});
+
+describe('conditional notation dependencies', () => {
+    const baseAssessments = (labels: readonly string[], areas?: readonly string[]) =>
+        evaluator.evaluate(labels, areas).assessments.filter(item => item.facet === 'base');
+
+    it.each([
+        ['unspecified representation', []],
+        ['object quantities', [Scope.PhysicalNumbers]],
+        ['visual quantities', [Scope.VisualNumbers]],
+        ['spatial quantities', [Scope.SpatialNumbers]],
+        ['generic representation', [Scope.NumberRepresentation]],
+        ['generic numerals', [Scope.Numerals]],
+        ['Arabic digit repertoire', [Scope.ArabicNumerals]],
+        ['Roman numerals', [Scope.RomanNumerals]],
+        ['generic abacus', [Scope.Abacus]],
+        ['analog clock', [Scope.AnalogClock]],
+        ['mixed objects and Arabic digits', [Scope.PhysicalNumbers, Scope.ArabicNumerals]],
+        ['mixed visual and Roman numerals', [Scope.VisualNumbers, Scope.RomanNumerals]]
+    ])('does not infer positional or representation completeness for %s', (_name, representation) => {
+        const labels = [Area.NumericOrder, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero, ...representation];
+        const original = [...labels];
+        const result = evaluator.evaluate(labels);
+        expect(result.errors).toEqual([]);
+        expect(result.assessments.map(item => item.facet).sort())
+            .toEqual(['numberKind', 'range', 'sign', 'zero']);
+        expect(result.assessments.filter(item => item.facet !== 'range').every(item => item.status === 'satisfied')).toBe(true);
+        expect(result.triggers.find(item => item.ruleId === 'LD-POSITIONAL-01')?.status).toBe('absent');
+        expect(labels).toEqual(original);
+    });
+
+    it.each([Scope.RodNumerals, Scope.BaseTenBlocks, Scope.ScientificExponentNotation])(
+        'requires a base from positional representation %s even without numeric-kind annotations', representation => {
+            const labels = [Area.NumericOrder, representation];
+            const original = [...labels];
+            expect(baseAssessments(labels)).toEqual([{
+                ruleId: 'LD-POSITIONAL-01', facet: 'base', status: 'missing', labels: [],
+                reason: 'No label from the required annotation family is present.'
+            }]);
+            expect(baseAssessments([...labels, Scope.Base10]))
+                .toEqual([expect.objectContaining({status: 'satisfied', labels: [Scope.Base10]})]);
+            expect(labels).toEqual(original);
+        });
+
+    it.each([Area.PlaceValue, Area.DecimalNotation])('requires a base for the explicit %s Area', area => {
+        const result = evaluator.evaluate([area]);
+        expect(result.context.status).toBe('eligible');
+        expect(result.triggers.find(item => item.ruleId === 'LD-POSITIONAL-01'))
+            .toEqual({ruleId: 'LD-POSITIONAL-01', status: 'present', labels: [area]});
+        expect(result.assessments).toEqual([expect.objectContaining({facet: 'base', status: 'missing'})]);
+        expect(baseAssessments([Area.NumericOrder], [area]))
+            .toEqual([expect.objectContaining({ruleId: 'LD-POSITIONAL-01', status: 'missing'})]);
+    });
+
+    it('retains positional evidence in mixed representations without adding a numeral label or choosing a base', () => {
+        const labels = [Area.PlaceValue, Scope.PhysicalNumbers, Scope.ArabicNumerals];
+        const original = [...labels];
+        expect(baseAssessments(labels)).toEqual([expect.objectContaining({status: 'missing'})]);
+        expect(baseAssessments(labels.filter(label => label !== Scope.ArabicNumerals)))
+            .toEqual([expect.objectContaining({status: 'missing'})]);
+        expect(baseAssessments([...labels, Scope.Base2]))
+            .toEqual([expect.objectContaining({status: 'satisfied', labels: [Scope.Base2]})]);
+        expect(evaluator.evaluate(labels).assessments.some(item => item.facet === 'numeralSystem')).toBe(false);
+        expect(labels).toEqual(original);
+    });
+
+    it.each([Scope.DecimalNumbers, Scope.TenthDecimals, Scope.HundredthDecimals, Scope.ThousandthDecimals])(
+        'retains the independent decimal base obligation for %s without a numeral declaration', decimal => {
+            expect(baseAssessments([Area.NumericOrder, decimal]))
+                .toEqual([expect.objectContaining({ruleId: 'LD-DECIMAL-01', status: 'missing'})]);
+        });
+
+    it('emits one positional obligation for multiple witnesses and retains the separate decimal rule', () => {
+        const labels = [Area.PlaceValue, Area.DecimalNotation, Scope.BaseTenBlocks, Scope.RodNumerals,
+            Scope.ScientificExponentNotation, Scope.DecimalNumbers];
+        expect(baseAssessments(labels).map(item => item.ruleId)).toEqual(['LD-DECIMAL-01', 'LD-POSITIONAL-01']);
+        expect(baseAssessments([...labels, Scope.Base10]).every(item => item.status === 'satisfied')).toBe(true);
+        expect(baseAssessments([...labels, Area.EquationSolving])).toEqual([]);
+        expect(baseAssessments(labels, [Area.AlgebraicModeling])).toEqual([]);
+    });
+
+    it('binds the narrowed rule and each positional selector into policy identity', () => {
+        const old = graph();
+        (old as any).rules = old.rules.filter(rule => rule.id !== 'LD-POSITIONAL-01');
+        delete (old as any).facets.positionalRepresentation;
+        (old as any).rules.find((rule: {id: string}) => rule.id === 'LD-NUM-01').assess =
+            ['numberKind', 'numeralSystem', 'base', 'range', 'sign', 'zero'];
+        expect(createLabelDependencyEvaluator(old).policyHash).not.toBe(evaluator.policyHash);
+        const changed = graph();
+        (changed as any).facets.positionalRepresentation.labels = [Scope.RodNumerals];
+        expect(createLabelDependencyEvaluator(changed).policyHash).not.toBe(evaluator.policyHash);
     });
 });
 

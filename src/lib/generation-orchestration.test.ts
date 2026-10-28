@@ -33,7 +33,7 @@ describe('module sample orchestration', () => {
             Scope.NumbersWithoutNegatives, Scope.TwoOperands, Scope.SingleDigitLargestOperand];
         const entry = {...base.entry, generalLabels: labels, labels,
             generator: {type: 'arithmetic', schema: {}, generate}, spec: {generatorId: base.entry.generatorId, generalLabels: labels}} as GeneratorCatalogEntry;
-        const viewLabels = [Ability.ProcedureExecution, Scope.ArabicNumerals];
+        const viewLabels = [Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.BaseTenBlocks];
         const view = {...base.view, generalLabels: viewLabels, supportedLabels: viewLabels,
             spec: {viewId: base.view.viewId, generalLabels: viewLabels}} as ViewCatalogEntry;
         const tuples = matchTargets([{id: 'missing-base', labels: [Area.Addition, Ability.ProcedureExecution]}], [entry], [view]).tuples;

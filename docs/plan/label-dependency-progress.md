@@ -6,19 +6,21 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
-No independent declaration repair remains queued. The 429 remaining requirements have exact
-ownership in 29 decision batches. Full dataset readiness still waits for those decisions. Counts below
+No independent declaration repair remains queued. The 391 remaining requirements have exact
+ownership in 27 dependency decision batches. The known reasoning content defect in RB-A3-D3
+also remains open, despite its retired dependency requirements. Full dataset readiness still
+waits for those decisions. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
 currency repairs. The source still has gaps, so dataset regeneration is not ready.
 
-The user has agreed to [narrow the blanket numeral/base dependencies first](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies),
-with representation completeness tracked separately. That policy revision is planned but not
-implemented; counts here still describe the existing graph. No mandatory `NumberRepresentation`
-replacement has been adopted.
+The agreed [narrowing of the blanket numeral/base dependencies](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies)
+is implemented. It retires 38 source requirements without changing annotations or claiming
+repairs. Representation completeness remains a separate, unestimated design topic; no mandatory
+`NumberRepresentation` replacement has been adopted.
 
 ## Verified starting point
 
-The fresh report-only audit matches the previously committed backlog exactly:
+This historical preparation audit matched the previously committed backlog exactly:
 
 | Measure | Baseline |
 |---|---:|
@@ -38,14 +40,19 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 429 |
+| Outstanding source gaps | 391 |
 | Queued, in review or not yet triaged | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 429 |
-| Verified closed / introduced / reopened | 953 / 75 / 0 |
-| Active decision scopes | 29 |
+| Assigned to deferred decision batches (subset of outstanding) | 391 |
+| Verified repairs / introduced / reopened | 953 / 75 / 0 |
+| Policy-retired / policy-added requirements | 38 / 0 |
+| Active dependency decision scopes | 27 |
+| Separately open content-defect scopes | 1 |
 
-All remaining topics now have explicit child owners. Thirty child scopes have been created;
-the quotient metadata child is complete and 29 remain. Deferred gaps stay in the outstanding total.
+All remaining findings have explicit child owners. Thirty child scopes have been created;
+the quotient metadata child is complete, the object-only applicability requirements are retired,
+27 children own dependency gaps, and RB-A3-D3 retains an open content defect with zero graph
+gaps. Deferred gaps stay in the outstanding total. Cumulative accounting is
+**1,307 + 75 - 953 - 38 = 391**; the policy retirement is separate from verified repairs.
 
 ## Source batch ledger
 
@@ -60,9 +67,9 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A2 | Binary arithmetic zero participation | 28 | 0 | 0 | Triaged; child below |
 | RB-A2-D1 | Pair zero projection/ownership | 0 | 28 | 28 | Deferred |
 | RB-A3 | Elementary numeral/base and number views | 64 | 0 | 0 | Complete; children below |
-| RB-A3-D1 | Object-only numeral/base applicability | 0 | 20 | 20 | Deferred |
+| RB-A3-D1 | Object-only numeral/base applicability | 0 | 0 | 0 | Requirements policy-retired; representation design separate |
 | RB-A3-D2 | Writing zero declaration ownership | 0 | 11 | 11 | Deferred |
-| RB-A3-D3 | Rounding-reasoning match guarantees | 0 | 8 | 8 | Deferred |
+| RB-A3-D3 | Rounding-reasoning match guarantees | 0 | 0 | 0 | Open content defect; dependency requirements policy-retired |
 | RB-A4 | Three- and four-operand arithmetic | 24 | 0 | 0 | Complete |
 | RB-A5 | Arithmetic strategies and property relations | 38 | 0 | 0 | Complete; children below |
 | RB-A5-D1 | Compensation/unknown-role primary widths | 0 | 3 | 3 | Deferred |
@@ -107,23 +114,25 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M1 | Legacy conversion profiles and shared consumers | 84 | 0 | 0 | Complete; child below |
 | RB-M1-D1 | Legacy integer profile/ownership distinction | 0 | 21 | 21 | Deferred |
 | RB-M2 | Clock reading and construction | 46 | 0 | 0 | Complete; child below |
-| RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 27 | 27 | Partial; remaining deferred |
+| RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 17 | 17 | Partial; zero findings deferred, notation requirements policy-retired |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **429** | **429** | |
+| **Total: 56 source batches** | | **1,307** | **391** | **391** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
-| RB-V1 — Source readiness and canonical refresh | Waiting for readiness | Zero non-range source gaps, including deferred/new obligations; no conflicts, invalid contexts, contract errors or incomplete enumerations. |
+| RB-V1 — Source readiness and canonical refresh | Waiting for readiness | Zero non-range source gaps, including deferred/new obligations; no conflicts, invalid contexts, contract errors or incomplete enumerations; repair or explicit user-approved scope disposition of the known RB-A3-D3 reasoning content defect. Policy retirement does not repair that defect. |
 | RB-V2 — VQA and stored acceptance | Waiting for refreshed dataset | Successful RB-V1, then necessary VQA refresh and strict stored annotation, image and coverage checks. |
 
 The original baseline remains **28 batches including acceptance**; thirty explicit child scopes
 bring the current inventory to **58**. All 26 original scopes have been triaged and the quotient
-technical child is complete; **29 decision batches plus two acceptance batches remain**.
+technical child is complete; **27 dependency decision scopes, one content-defect scope and two
+acceptance batches remain: 30 scopes in total**. Representation completeness is a separate,
+unestimated design topic outside this count.
 This exceeds the original planning allowance, which was not a cap.
 Splitting does not close gaps. Verified closure and newly introduced requirements are the primary
-progress measures.
+progress measures; policy retirement is reported separately.
 
 ## Decision topics
 
@@ -136,14 +145,14 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-ALG-01 | RB-D1-D1 | Thirty-five remaining gaps concern explicit/hidden domains and variable sign/zero evidence. `3 + x`, `3 / x` with a nonzero restriction, and a displayed zero or negative coefficient must not inherit one occurrence claim. | Base10 closes 14 gaps and explicit-domain/substituted rational-kind declarations close seven. Resolve the seven hidden-domain kind findings and 28 sign/zero findings through the [algebra decision note](label-dependency-graph.md#algebra-establish-the-numerical-context-of-each-projection), without excluding this intended Area boundary. |
 | DEC-PAR-01 | RB-A7-D1 | Count 2 gives group size 1/remainder 0; count 1 gives 0/1; count 3 gives 1/1. Oddness alone cannot justify zero absence. | Review the [parity decision note](label-dependency-graph.md#parity-retain-singleton-even-and-larger-odd-cases). Preserve singleton, even and larger-odd cases and agree a normal mathematical grouping contract; zero is not a universal shared-counting claim. |
 | DEC-CONV-01 | RB-M1-D1 | Twenty-one legacy selections still need number kind. Legacy and explicit-integer choices are both whole-number contexts but have different resolved values/task branches. | Supported invariants/notation close 77 old gaps and expose 14 legacy-kind gaps; the two unit-scale consumers are complete. Review the [conversion note](label-dependency-graph.md#deferred-conversion-decision--cover-legacy-profiles-and-shared-consumers) for profile/ownership design. Same-label aliases cannot equate different mathematical/configuration values. |
-| DEC-A3-01 | RB-A3-D1 | Twenty numeral/base requirements belong to object-only counting conservation, counting comparison/matching and sorting-extremum tasks. Neither mode shows count numerals; the ontology explicitly distinguishes numerals from object quantities. | The agreed direction narrows blanket numeral/base applicability, with exact selectors and implementation next. Representation completeness remains separate; ArabicNumerals/Base10 cannot be added from hidden counts. Current findings remain until a verified policy revision. |
+| DEC-A3-01 | RB-A3-D1 | Twenty object-only numeral/base requirements are policy-retired; zero graph findings remain in this scope. Neither mode shows count numerals; the ontology explicitly distinguishes numerals from object quantities. | Representation completeness remains a separate design topic. ArabicNumerals/Base10 cannot be added from hidden counts; removing the overbroad obligations is not an annotation repair. |
 | DEC-A3-02 | RB-A3-D2 | Eleven writing zero requirements span six projections. The producer owns `requireZero`; its positive branch feeds a number-line projection with visible origin zero. View-owned zero invariants overlap the producer schema under SPEC-8/SPEC-11. | Review a normal pre-draw declaration ownership contract that preserves positive/explicit-zero configurations and all projections. The attempted number-line zero additions were withdrawn after ownership validation; the two arithmetic zero gaps remain in RB-A2. |
-| DEC-A3-03 | RB-A3-D3 | Eight existing reasoning numeral gaps are deferred because declaring ArabicNumerals would also admit unsafe new matches. Generator seed 92 with Addition+Addition and range 0..100 produces 23+32+45=100; view seed 1 renders proposed answer 200. | Agree a repair for the existing projection/compatibility guarantee before enabling those matches. Preserve targets and range policy. The proposed reasoning declaration and test edit were fully withdrawn. |
+| DEC-A3-03 | RB-A3-D3 | Eight reasoning numeral requirements are policy-retired, but the known content defect remains open. Declaring ArabicNumerals would admit unsafe new matches: generator seed 92 with Addition+Addition and range 0..100 produces 23+32+45=100; view seed 1 renders proposed answer 200. | Agree a repair or explicit user-approved scope disposition for the existing projection/compatibility guarantee. Preserve targets and range policy. The proposed reasoning declaration and test edit were fully withdrawn; zero dependency findings do not establish source readiness for this defect. |
 | DEC-F1-01 | RB-F1-D1 | Three decimal reading/writing zero requirements remain; whole parts and expanded coefficients vary. Five comparison/conversion findings are closed by explicit or necessarily requested Ones=0 coefficients. | Apply the existing ontology's necessary-consequence evidence rule; a zero glyph alone remains insufficient. The remaining writing profiles still need a pre-draw distinction and projection review. |
 | DEC-F8-01 | RB-F8-D1 | Four fraction-axis magnitude findings remain. One supported axis may show 0/1, 1/2 and 5/2; another stays below magnitude one. | Decide whether magnitude describes the located value or all displayed fraction representations, and how mixed axes are represented. Preserve points, axes and sampling; no range-policy change. |
 | DEC-F9-01 | RB-F9-D1 | Four contextual-order sign findings vary with the two sampled signed readings inside existing choices. | Define ordinary pre-draw distinctions or clarify intended involved-value evidence; no sampled-payload classification. |
 | DEC-F9-02 | RB-F9-D2 | Two signed-context zero findings remain. Seven order/magnitude findings are closed because all their projections explicitly establish a numerical zero datum, including sea level. | The separate signed-context producer already owns zero through its relation choices and does not uniformly expose the same reference. Review its ownership and selected readings; do not generalize the seven repairs to this producer. |
-| DEC-M2-01 | RB-M2-D1 | Twenty-seven clock requirements remain: ten analog-reading numeral/base findings and seventeen zero findings. Ten digital-construction notation findings are closed because the visible task necessarily requests positional decimal digits. | Analog reading's generic response does not require the same notation. Reconcile the notation obligations after the agreed conditional-dependency revision; keep representation completeness and zero-selector ownership separate. Preserve targets, precision and rendering. |
+| DEC-M2-01 | RB-M2-D1 | Seventeen clock zero findings remain after ten analog-reading numeral/base requirements were policy-retired. The earlier ten digital-construction notation findings were repaired by declarations because the visible task necessarily requests positional decimal digits. | Review zero-selector ownership. Analog reading's generic response does not require the same notation; representation completeness remains separate. Preserve targets, precision and rendering. |
 | DEC-M3-01 | RB-M3-D1 | Six elapsed/interval zero findings remain. A positive question such as 1:31 to 2:05 has a solution introducing the reference 2:00. | Clarify component versus composite time occurrence and mode-specific evidence. A zero digit alone is not sufficient. |
 | DEC-D2-01 | RB-D2-D1 | Ten power sign/zero findings remain: the same exponent profile admits 2^2, (-2)^2 and 0^2; another admits exponent zero. | Review ordinary pre-draw distinctions preserving all supported bases, coefficients and exponents. PositiveExponent alone does not classify base sign or zero participation. |
 | DEC-F2-01 | RB-F2-D1 | Seven decimal zero findings remain. Equality's guaranteed zero thousandths coefficient is now declared on its existing choice; inequality, expansion, scaling, rounding and arithmetic values still vary. | Preserve existing numeric choices and distinguish explicit coefficients from digit glyphs. Further blanket zero declarations are not justified. |
@@ -151,7 +160,7 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-F4-01 | RB-F4-D1 | Thirty-five division zero findings vary by model and projection. General models can display origin zero; shared union views also accept positive unit-part models without that origin. | Review model/projection ownership and question/solution evidence without blanket generator absence or union-view presence. |
 | DEC-F4-02 | RB-F4-D2 | Nineteen magnitude findings include eighteen exposed by truthful FractionNumbers declarations; dividends and quotients can be proper, equal-whole or improper. | Represent actual mathematical distinctions before drawing, preserving all original values and cases. |
 | DEC-F4-03 | RB-F4-D3 | The remaining whole-sharing kind is visible in solutions, but adding FractionNumbers to its profile would make it compete with the original fraction-as-quotient profile. | Agree a profile/ownership design preserving the distinct contexts; adding the label directly changes admitted configurations. |
-| REVIEW-F4-04 | RB-F4-D4 — complete | The sixteen unit-dividend claims are repaired through existing same-value aliases, forwarded equivalence groups and canonical enriched fallback bundles. | No user decision was required. The 1→3 widening is eliminated while preserving all old admitted request domains and sampling; this completed child is not part of the 452 remaining gaps. |
+| REVIEW-F4-04 | RB-F4-D4 — complete | The sixteen unit-dividend claims are repaired through existing same-value aliases, forwarded equivalence groups and canonical enriched fallback bundles. | No user decision was required. The 1→3 widening is eliminated while preserving all old admitted request domains and sampling; this completed child is not part of the current backlog. |
 | DEC-F5-01 | RB-F5-D1 | Two tenths assignments include both proper 1/10–9/10 and equal-whole 10/10=100/100. | Preserve numerator ten and agree a normal pre-draw magnitude distinction. |
 | DEC-F7-01 | RB-F7-D1 | Three nonmixed product magnitude findings vary across multiplier, quantity and product values. | Review supported pre-draw distinctions without choosing a label from one sampled value. |
 | DEC-F7-02 | RB-F7-D2 | Two product-story questions show only positive quantities; their solutions add a model with origin zero. | Settle question/solution evidence scope before declaring either zero member. |
@@ -187,14 +196,17 @@ For each checkpoint record:
 - Batch and child IDs; start/end revision and audit policy/ontology identity; owned files.
 - Declaration evidence and all affected consumers; before/after target, match and configuration
   comparison; any genuinely added matches and their review.
-- Distinct and raw findings, affected selections, closed/introduced/reopened counts, assigned
-  deferred subset, and transfers between batches, both locally and globally.
+- Distinct and raw findings, affected selections, repaired/introduced/reopened counts,
+  policy-retired/policy-added requirements, assigned deferred subset, and transfers between
+  batches, both locally and globally.
 - Tests, coverage, replay/rendering evidence as applicable, independent reviewer findings and
   disposition, the checkpoint commit, and the next queued scope or decision.
 
-Globally, `before + introduced + reopened - closed = after`. Within a batch, add transfers in
-and subtract transfers out. Count each shared fix once globally and reconcile all affected
-owner rows. Deferred gaps are a subset of outstanding gaps, never subtracted from that total.
+Globally, `before + introduced + reopened - verified repairs + policy-added - policy-retired = after`.
+Within a batch, add transfers in and subtract transfers out. Count each shared fix once globally
+and reconcile all affected owner rows. Policy retirement changes an obligation; it does not
+repair annotations or a known content defect. Deferred gaps are a subset of outstanding gaps,
+never subtracted from that total.
 
 Audit selection IDs locate findings within one snapshot. Label additions can alter those
 hashes; compare preserved target/generator/view/configuration lineage before calling a gap
@@ -523,45 +535,107 @@ policy and unrelated work are unchanged; regeneration/VQA still wait for source 
 
 ### Conditional-dependency plan refinement
 
+Historical documentation-only checkpoint (`ff716c87`).
+
 The user agreed to narrow the overly broad numeral/base requirements first and keep
-representation completeness as a separate design question. The plan now records that direction,
-conditional base evidence and the required selector/audit verification. It removes the previous
+representation completeness as a separate design question. That plan checkpoint recorded the direction,
+conditional base evidence and the required selector/audit verification. It removed the previous
 recommendation for a blanket `NumberRepresentation` assessment and marks its counterfactual
-counts as superseded. This is documentation only: graph, evaluator, annotations, targets,
-sampling, rendering, Area allowlist and range exclusion are unchanged. All **429 gaps across
-29 child scopes** remain in the current ledger; no policy reclassification or repair is claimed.
-Documentation validation and independent scope review pass, with five existing external-fetch
+counts as superseded. That change was documentation only: graph, evaluator, annotations, targets,
+sampling, rendering, Area allowlist and range exclusion were unchanged. All **429 gaps across
+29 child scopes** remained at that checkpoint; no policy reclassification or repair was claimed.
+Documentation validation and independent scope review passed, with five existing external-fetch
 warnings and no errors. All 3,296 paths outside these three plan documents and the dataset
 pointer are byte-identical to the pre-edit state. Evidence is in
 `temp/label-dependency-policy-plan/`; runtime tests were not rerun for this documentation-only change.
 
+### Narrowed numeral/base dependencies — current implementation checkpoint
+
+The graph now removes `numeralSystem` and `base` from the blanket `LD-NUM-01`
+assessments while retaining number kind, range presence, sign and zero. The new
+`LD-POSITIONAL-01` requires a base for the evidenced positional representations
+`RodNumerals`, `BaseTenBlocks` and `ScientificExponentNotation`, or an involved Area
+within `PlaceValue` or `DecimalNotation`. `LD-DECIMAL-01` retains the decimal-number
+base requirement. A numeral repertoire alone does not establish positional notation;
+the graph adds no mandatory representation label or inferred annotation.
+
+The Area allowlist remains universal over the involved Areas: all must belong beneath
+Arithmetic, IntuitiveMathematics or FormalMathematics, and at least one Area must be
+present. The integer-only operand-digit gate, other assessments and conflict rules are
+unchanged. Range-policy work remains excluded. Representation completeness is a
+separate design question, so zero numeral findings do not prove complete numeral labeling.
+
+The same 1,263 source selections, including 848 eligible selections, were reevaluated:
+
+| Measure | Before | After | Accounting |
+|---|---:|---:|---|
+| Distinct / raw source findings | 429 / 429 | 391 / 391 | 38 policy-retired; zero repairs or new findings |
+| Affected source selections | 329 | 311 | Same selection population |
+| RB-A3-D1 object-only requirements | 20 | 0 | 10 numeral + 10 base retired |
+| RB-A3-D3 reasoning requirements | 8 | 0 | Eight numeral requirements retired; content defect stays open |
+| RB-M2-D1 clock requirements | 27 | 17 | Five numeral + five base retired; 17 zero findings remain |
+| Stored raw / distinct sample-facet findings | 4,146 / 4,012 | 2,542 / 2,528 | 1,484 distinct requirements policy-retired; zero new findings |
+| Stored samples with findings | 1,332 | 1,282 | Same 2,808 stored rows; 1,884 eligible |
+
+The source retirement is **23 numeral + 15 base = 38**. Cumulative verified declaration
+repairs remain **953**, with **75** introduced requirements and no reopened requirements:
+**1,307 + 75 - 953 - 38 = 391**. Stored distinct retirement is **830 numeral + 654 base
+= 1,484**; its raw reduction differs because repeated rule/facet findings are counted
+separately. Source and stored findings are separate measurements, not additive backlogs.
+The stored results changed only through policy reevaluation; the dataset was not regenerated.
+
+Verification confirms all **4,071** source/stored annotation inputs, **1,195** matched
+target/generator/view tuples, targets, selection plans, stored dataset and unrelated work
+are unchanged. The policy SHA-256 changes from
+`01584d603f3c0b48a0c882f3a0350acc7b0dc511553560e50c390ed52b41122c` to
+`de3acb553955484a3f8452b6fb149a079777ba3985f042a113fd23a402a50d1c`.
+Evidence is in `temp/label-dependency-narrowing/verification.json`, `policy-retired.json`,
+`deferred.json`, the before/after audits and the ontology/accounting reviews in that directory.
+Validation passes: **841 suites / 6,517 tests**, type checking and all generator coverage
+thresholds. The configured coverage scope has **98.49% statements, 97.05% branches,
+100% functions and 99.51% lines**. Documentation checks pass with five existing external-fetch
+warnings and no errors. The initial full run identified one obsolete Arabic-only missing-base
+fixture; it now declares independent positional evidence and still verifies failure before
+retry/fallback. The complete rerun passes. Independent review confirms the ontology selectors,
+strict-gate behavior, policy identity, preservation and separate retirement accounting.
+All 56 source ledger rows reconcile with the audit, retaining baseline 1,307 and current 391.
+All 3,288 baseline paths outside the eleven owned source/test/documentation files, unrelated
+Git status and the dataset pointer are unchanged. Logs include `coverage-final.log`,
+`generator-coverage.log`, `types.log`, `docs.log`, `verification.log` and `acceptance-review.md`.
+
+Twenty-seven child scopes now own all 391 dependency gaps. RB-A3-D3 separately retains
+the known reasoning guarantee defect and must receive a repair or explicit user-approved scope disposition
+before source readiness; withdrawing its numeral obligation did not repair it. Together with
+the two acceptance batches, **30 scopes remain**. The separate representation-completeness
+design topic is not estimated in this count. No rendering, sampling, target, adapter,
+automatic-completion or range-policy change is included.
+
 ## Decision queue after autonomous declarations
 
-No declaration batch remains untriaged. The 29 active child batches above account for every
-one of the 429 outstanding requirements. Their facet totals are:
+No declaration batch remains untriaged. The 27 active dependency child batches above account
+for every one of the 391 outstanding requirements. Their facet totals are:
 
 | Decision facet | Gaps |
 |---|---:|
 | Zero occurrence, components, model/projection ownership | 177 |
 | Integer primary-operand widths (including two legacy-API cases) | 113 |
 | Fraction magnitude and mixed representations | 49 |
-| Numeral-system evidence/applicability | 23 |
-| Base evidence/applicability | 15 |
 | Number-kind/domain/profile ownership | 29 |
 | Sign occurrence/domain distinctions | 23 |
-| **Total** | **429** |
+| **Total** | **391** |
 
-Next implement the agreed conditional numeral/base dependencies after reviewing their exact
-positive ontology selectors, while tracking representation completeness as a separate design
-question. Then resolve remaining question/solution declaration ownership and ordinary width/model profiles;
-then address fraction magnitude,
-algebra/legacy profile ownership and the two precisely bounded legacy-API cases. These are
+The narrowed graph has no remaining source numeral/base findings; representation completeness
+remains a separate design question. Next resolve remaining question/solution declaration ownership
+and ordinary width/model profiles, then fraction magnitude, algebra/legacy profile ownership
+and the two precisely bounded legacy-API cases. Retain the RB-A3-D3 reasoning content defect
+as its own open scope even though the graph no longer reports its retired numeral requirements. These are
 reviewable semantic/model or preservation-contract decisions, not permission requests for
 routine declaration edits. The source reports provide counterexamples and recommendations.
 The ontology already accepts necessarily required answers and meaningful zero references;
 do not reopen those as blanket semantic votes. Keep the Area allowlist and range exclusion fixed
 when deciding the unresolved model/policy cases. RB-V1/RB-V2 remain
-blocked by source readiness; no regeneration, stored-label rewrite or VQA run was performed.
+blocked by source readiness, including repair or explicit user-approved scope disposition of the known reasoning
+defect; no regeneration, stored-label rewrite or VQA run was performed.
 
 ## Baseline evidence and preservation
 

@@ -187,6 +187,15 @@ in static reports; strict completeness applies to actual artifact annotations. S
 and invalid contexts still fail. Targets remain partial requests, and matching never evaluates a payload.
 Range-presence findings remain report-only; range policy is unchanged.
 
+Numeric contexts do not universally require a numeral system or base. Base completeness
+applies when annotations establish positional representation: `RodNumerals`, `BaseTenBlocks`,
+`ScientificExponentNotation`, or an Area within `PlaceValue` or `DecimalNotation`. The separate
+decimal-to-base rule remains in force. In the pinned ontology, `ArabicNumerals` identifies the
+digit repertoire alone; it does not independently establish positional usage. These conditions
+require a declared base without selecting its value. They neither infer missing numeral labels
+nor require a generic `NumberRepresentation` label. Detecting every applicable but undeclared
+representation remains a separate design question.
+
 Operand-digit completeness has a narrower, rule-specific context: at least one resolved
 Area must be structurally within `ArithmeticOperations` or `IntegerArithmetic`, and the
 declared number-kind family must be nonempty and entirely within `IntegerNumbers` after
