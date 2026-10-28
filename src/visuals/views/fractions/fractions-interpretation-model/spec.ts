@@ -6,7 +6,9 @@ export const spec: ViewSpec = {
     viewId: 'fractions-interpretation-model',
     generalLabels: [
         Scope.VisualNumbers,
-        Ability.Interpretation
+        Ability.Interpretation,
+        Scope.ArabicNumerals,
+        Scope.Base10
     ]
 };
 

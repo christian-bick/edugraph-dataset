@@ -9,13 +9,14 @@ describe('DecimalDivisionModelGenerator spec', () => {
     it('declares the reviewed mathematical capabilities with no view Ability', () => {
         expect(spec.generatorId).toBe('decimal-division-model');
         expect(spec.generalLabels).toEqual([
-            Area.Division,
-            Area.PlaceValue,
-            Scope.HundredthDecimals,
-            Scope.Base10,
-            Scope.NumbersWithoutNegatives,
-            Scope.TwoOperands
-        ]);
+        Area.Division,
+        Area.PlaceValue,
+        Scope.HundredthDecimals,
+        Scope.Base10,
+        Scope.NumbersWithoutNegatives,
+        Scope.TwoOperands,
+        Scope.NumbersWithZero
+    ]);
         expect(DecimalDivisionModelGeneratorSchema).toEqual({});
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
     });

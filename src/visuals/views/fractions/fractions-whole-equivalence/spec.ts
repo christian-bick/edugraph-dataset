@@ -4,7 +4,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-whole-equivalence',
-    generalLabels: [Scope.ArabicNumerals, Ability.Formalization]
+    generalLabels: [Scope.ArabicNumerals, Ability.Formalization, Scope.Base10, Scope.NumbersWithoutZero]
 };
 
 export const FractionsWholeEquivalenceViewSchema = {} as const;

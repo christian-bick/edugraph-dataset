@@ -140,7 +140,9 @@ export const spec: GeneratorSpec = {
     })],
     generalLabels: [
         Area.Equation,
-        Scope.SingleFrameOfReference
+        Scope.SingleFrameOfReference,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 

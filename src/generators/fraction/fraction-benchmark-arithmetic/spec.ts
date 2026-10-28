@@ -15,7 +15,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.FractionReferenceComparison,
         Scope.FractionNumbers,
-        Scope.SingleFrameOfReference
+        Scope.SingleFrameOfReference,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

@@ -29,7 +29,9 @@ describe('FractionArithmeticGenerator spec integration', () => {
             generatorId: 'fraction-arithmetic',
             generalLabels: [
                 Area.Equation,
-                Scope.SingleFrameOfReference
+                Scope.SingleFrameOfReference,
+                Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithoutZero
             ]
         });
         expect(spec.generalLabels).not.toContain(Scope.VisualNumbers);

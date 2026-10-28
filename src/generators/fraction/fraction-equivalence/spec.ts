@@ -9,7 +9,8 @@ export const spec: GeneratorSpec = {
         Area.FractionEquivalence,
         Scope.Equal,
         Scope.EqualShares,
-        Scope.ProperFractions
+        Scope.ProperFractions,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

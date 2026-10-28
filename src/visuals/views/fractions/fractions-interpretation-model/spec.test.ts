@@ -6,9 +6,11 @@ import {spec} from './spec.ts';
 describe('fractions-interpretation-model view spec', () => {
     it('owns its invariant fraction interpretation', () => {
         expect(spec.generalLabels).toEqual([
-            Scope.VisualNumbers,
-            Ability.Interpretation
-        ]);
+        Scope.VisualNumbers,
+        Ability.Interpretation,
+        Scope.ArabicNumerals,
+        Scope.Base10
+    ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

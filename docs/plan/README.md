@@ -11,7 +11,7 @@ These items are not newly scheduled by the archive move.
   the [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap) separates repairs,
   semantic decisions and dataset refresh. The [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
   and [progress ledger](label-dependency-progress.md) track autonomous declaration repairs,
-  exact gap accounting and separate decision batches; 1,028 gaps remain after eleven source scopes.
+  exact gap accounting and separate decision batches; 722 gaps remain after sixteen source scopes.
   Range-policy redesign remains excluded.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

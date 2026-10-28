@@ -13,7 +13,7 @@ const profiles = [
 
 describe('fraction-division-relations capabilities', () => {
     it('owns division and its nonnegative domain without a learner action', () => {
-        expect(spec.generalLabels).toEqual([Area.Division, Scope.NumbersWithoutNegatives]);
+        expect(spec.generalLabels).toEqual([Area.Division, Scope.NumbersWithoutNegatives, Scope.FractionNumbers]);
     });
 
     it.each(profiles)('resolves the exact original operand bundle %s', (labels, operandProfile) => {

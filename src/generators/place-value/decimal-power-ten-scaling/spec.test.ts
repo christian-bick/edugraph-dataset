@@ -8,16 +8,17 @@ import {DecimalPowerTenScalingGeneratorSchema, spec} from './spec.ts';
 describe('DecimalPowerTenScalingGenerator spec', () => {
     it('declares the invariant power-ten and decimal mathematics', () => {
         expect(spec.generalLabels).toEqual([
-            Area.PatternRecognition,
-            Area.PlaceValue,
-            Area.ProportionalScaling,
-            Area.Exponentiation,
-            Scope.PowersOf10,
-            Scope.IntegerExponent,
-            Scope.NumbersWithoutNegatives,
-            Scope.Base10,
-            Scope.DecimalNumbers
-        ]);
+        Area.PatternRecognition,
+        Area.PlaceValue,
+        Area.ProportionalScaling,
+        Area.Exponentiation,
+        Scope.PowersOf10,
+        Scope.IntegerExponent,
+        Scope.NumbersWithoutNegatives,
+        Scope.Base10,
+        Scope.DecimalNumbers,
+        Scope.NumbersWithZero
+    ]);
         expect(Object.keys(DecimalPowerTenScalingGeneratorSchema)).toEqual(['operation']);
     });
 

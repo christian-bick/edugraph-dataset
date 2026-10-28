@@ -6,10 +6,12 @@ import {spec} from './spec.ts';
 describe('fractions-understanding-model view spec', () => {
     it('owns its invariant procedural relations and equation formalization', () => {
         expect(spec.generalLabels).toEqual([
-            Scope.VisualNumbers,
-            Ability.ProcedureUnderstanding,
-            Ability.Formalization
-        ]);
+        Scope.VisualNumbers,
+        Ability.ProcedureUnderstanding,
+        Ability.Formalization,
+        Scope.ArabicNumerals,
+        Scope.Base10
+    ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });
 });

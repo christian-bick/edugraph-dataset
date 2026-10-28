@@ -11,7 +11,7 @@ const productProfiles = [
         Scope.EqualShares], 'fraction-partition'],
     [[Area.Equation, Scope.FractionNumbers,
         Scope.SingleFrameOfReference], 'fraction-equation'],
-    [[Area.Equation, Scope.MixedNumbers,
+    [[Area.Equation, Scope.MixedNumbers, Scope.ImproperFractions,
         Scope.SingleFrameOfReference], 'mixed-equation']
 ] as const;
 
@@ -41,7 +41,7 @@ const originalOperandForm: GeneratorCompatibilityRule = {
 
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-products',
-    generalLabels: [Area.Multiplication],
+    generalLabels: [Area.Multiplication, Scope.NumbersWithoutNegatives],
     compatibility: [originalOperandForm]
 };
 
@@ -53,6 +53,7 @@ export const FractionProductsGeneratorSchema = {
         Area.Equation,
         Scope.FractionNumbers,
         Scope.MixedNumbers,
+        Scope.ImproperFractions,
         Scope.EqualShares,
         Scope.SingleFrameOfReference
     ], resolveProductProfile, productProfiles.map(([labels]) => labels)]

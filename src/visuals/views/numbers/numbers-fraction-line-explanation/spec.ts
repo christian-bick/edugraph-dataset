@@ -8,7 +8,10 @@ export const spec: ViewSpec = {
         Scope.Numberline,
         Scope.SingleFrameOfReference,
         Ability.Formalization,
-        Ability.ProcedureUnderstanding
+        Ability.ProcedureUnderstanding,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithZero
     ]
 };
 

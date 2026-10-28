@@ -6,7 +6,9 @@ export const spec: ViewSpec = {
     viewId: 'fractions-operation-model',
     generalLabels: [
         Scope.VisualNumbers,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.ArabicNumerals,
+        Scope.Base10
     ]
 };
 

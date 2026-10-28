@@ -6,10 +6,12 @@ import {spec} from './spec.ts';
 describe('fractions-word-problem view spec', () => {
     it('owns its invariant story reception and visual-number representation', () => {
         expect(spec.generalLabels).toEqual([
-            Ability.TextualReception,
-            Scope.VisualNumbers,
-            Ability.ProcedureExecution
-        ]);
+        Ability.TextualReception,
+        Scope.VisualNumbers,
+        Ability.ProcedureExecution,
+        Scope.ArabicNumerals,
+        Scope.Base10
+    ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([
             Ability.TextualReception
         ]);

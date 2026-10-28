@@ -57,7 +57,10 @@ describe('fraction-quotient-model schema integration', () => {
         const labels = [Area.Division, ...requested];
         const resolved = extractConfig(FractionQuotientModelGeneratorSchema, labels);
         expect(resolved.config).toEqual({relationProfile});
-        const expectedLabels: readonly string[] = selected;
+        const expectedLabels: readonly string[] = [...selected,
+            ...(relationProfile === 'fraction-as-quotient'
+                ? [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
+                : [])];
         expect(new Set<string>(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
         const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
         expect(new Set<string>(problem.labels)).toEqual(new Set<string>(expectedLabels));

@@ -6,7 +6,7 @@ import {FractionDivisionRelationsGenerator} from '../../../generators/fraction/f
 import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
 import {FractionQuotientBody, type FractionQuotientTask} from './fraction-quotient-view.tsx';
 import {spec as modelSpec} from './fractions-division-model-construction/spec.ts';
-import {Ability} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 
 const leafIds = [
     'fractions-division-execution', 'fractions-division-interpretation',
@@ -119,7 +119,7 @@ describe('general fraction division leaf contracts', () => {
     });
 
     it('declares construction as a fixed visual articulation task', () => {
-        expect(modelSpec.generalLabels).toEqual([Ability.VisualArticulation]);
+        expect(modelSpec.generalLabels).toEqual([Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10]);
         expect(modelSpec.compatibility).toBeUndefined();
     });
 });

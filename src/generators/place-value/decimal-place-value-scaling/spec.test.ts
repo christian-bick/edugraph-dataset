@@ -7,13 +7,14 @@ import {DecimalPlaceValueScalingGeneratorSchema, spec} from './spec.ts';
 describe('DecimalPlaceValueScalingGenerator spec', () => {
     it('keeps the bidirectional adjacent-place claims invariant', () => {
         expect(spec.generalLabels).toEqual([
-            Area.PlaceValue,
-            Area.ProportionalScaling,
-            Area.Multiplication,
-            Area.Division,
-            Scope.Base10,
-            Scope.DecimalNumbers
-        ]);
+        Area.PlaceValue,
+        Area.ProportionalScaling,
+        Area.Multiplication,
+        Area.Division,
+        Scope.Base10,
+        Scope.DecimalNumbers,
+        Scope.NumbersWithoutNegatives
+    ]);
         expect(DecimalPlaceValueScalingGeneratorSchema).toEqual({});
     });
 

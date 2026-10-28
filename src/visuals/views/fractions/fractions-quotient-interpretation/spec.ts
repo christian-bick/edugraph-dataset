@@ -1,11 +1,11 @@
-import {Ability, Area} from 'edugraph-ts';
+import {Ability, Area, Scope} from 'edugraph-ts';
 import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import type {ConfigFromSchema} from '../../../../types/schema.ts';
 import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-quotient-interpretation',
-    generalLabels: [Area.FractionNotation, Ability.Interpretation],
+    generalLabels: [Area.FractionNotation, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10],
     compatibility: [requireTargetLabels('fraction-quotient-notation-task', [Area.FractionNotation])]
 };
 

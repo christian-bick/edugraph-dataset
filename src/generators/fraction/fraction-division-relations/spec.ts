@@ -11,7 +11,7 @@ const operandProfiles = [
 
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-division-relations',
-    generalLabels: [Area.Division, Scope.NumbersWithoutNegatives]
+    generalLabels: [Area.Division, Scope.NumbersWithoutNegatives, Scope.FractionNumbers]
 };
 
 export const FractionDivisionRelationsGeneratorSchema = {

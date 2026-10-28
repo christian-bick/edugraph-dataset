@@ -8,7 +8,9 @@ export const spec: ViewSpec = {
     generalLabels: [
         Ability.TextualReception,
         Scope.VisualNumbers,
-        Ability.ProcedureExecution
+        Ability.ProcedureExecution,
+        Scope.ArabicNumerals,
+        Scope.Base10
     ],
     compatibility: [requireTargetLabels('fraction-arithmetic-word-request', [Ability.TextualReception])]
 };

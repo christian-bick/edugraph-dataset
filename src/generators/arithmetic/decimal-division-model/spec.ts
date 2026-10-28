@@ -10,7 +10,8 @@ export const spec: GeneratorSpec = {
         Scope.HundredthDecimals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.TwoOperands
+        Scope.TwoOperands,
+        Scope.NumbersWithZero
     ]
 };
 

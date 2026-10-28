@@ -6,7 +6,7 @@ import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const relationProfiles = [
-    [[Scope.FractionNumbers], 'fraction-as-quotient'],
+    [[Scope.FractionNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient'],
     [[Area.Equation, Scope.IntegerDividend, Scope.IntegerDivisor,
         Scope.FractionQuotient, Scope.NumbersWithoutNegatives], 'whole-sharing-equation'],
     [[Scope.FractionDividend, Scope.IntegerDivisor,
@@ -65,7 +65,8 @@ export const FractionQuotientModelGeneratorSchema = {
         Scope.FractionDivisor,
         Scope.FractionQuotient,
         Scope.UnitFractions,
-        Scope.NumbersWithoutNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ], resolveRelationProfile, relationProfiles.map(([labels]) => labels)]
 } as const;
 

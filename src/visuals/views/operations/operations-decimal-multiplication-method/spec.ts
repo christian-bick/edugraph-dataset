@@ -9,7 +9,8 @@ export const spec: ViewSpec = {
         Scope.VisualNumbers,
         Ability.ProcedureExecution,
         Ability.ProcedureUnderstanding,
-        Ability.TextualArticulation
+        Ability.TextualArticulation,
+        Scope.NumbersWithZero
     ]
 };
 

@@ -10,7 +10,8 @@ export const spec: GeneratorSpec = {
         Area.Multiplication,
         Area.Division,
         Scope.Base10,
-        Scope.DecimalNumbers
+        Scope.DecimalNumbers,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

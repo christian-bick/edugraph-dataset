@@ -4,9 +4,6 @@ import {spec} from './spec.ts';
 
 describe('FractionsWholeEquivalenceViewSpec', () => {
     it('owns the numeral presentation and its invariant Formalization task', () => {
-        expect(spec.generalLabels).toEqual([
-            Scope.ArabicNumerals,
-            Ability.Formalization
-        ]);
+        expect(spec.generalLabels).toEqual([Scope.ArabicNumerals, Ability.Formalization, Scope.Base10, Scope.NumbersWithoutZero]);
     });
 });

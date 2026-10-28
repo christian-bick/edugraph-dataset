@@ -32,7 +32,7 @@ const cases = [
 
 describe('fraction-products schema integration', () => {
     it('owns invariant multiplication and leaves Abilities to the views', () => {
-        expect(spec.generalLabels).toEqual([Area.Multiplication]);
+        expect(spec.generalLabels).toEqual([Area.Multiplication, Scope.NumbersWithoutNegatives]);
         for (const ability of Object.values(Ability)) {
             expect(spec.generalLabels).not.toContain(ability);
         }
@@ -42,10 +42,11 @@ describe('fraction-products schema integration', () => {
         (_target, requested, selected, productProfile) => {
             const resolved = extractConfig(FractionProductsGeneratorSchema, [...requested]);
             expect(resolved.config).toEqual({productProfile});
-            expect(new Set(resolved.resolvedLabels)).toEqual(new Set<string>(selected));
+            const expectedLabels = [...selected, ...(productProfile === 'mixed-equation' ? [Scope.ImproperFractions] : [])];
+            expect(new Set(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
 
             const generated = generateWithLabels(new FractionProductsGenerator(), [...requested])!;
-            expect(new Set(generated.labels)).toEqual(new Set<string>(selected));
+            expect(new Set(generated.labels)).toEqual(new Set<string>(expectedLabels));
             expect(generated.data.equationWitness !== undefined)
                 .toBe(productProfile !== 'fraction-partition');
             expect(generated.data.operandForm === 'mixed-numbers')

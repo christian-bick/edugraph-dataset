@@ -7,7 +7,10 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.VisualNumbers,
         Scope.SingleFrameOfReference,
-        Ability.ConceptClassification
+        Ability.ConceptClassification,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithoutZero
     ]
 };
 
