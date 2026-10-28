@@ -6,7 +6,7 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
-No independent declaration repair remains queued. The 452 remaining requirements have exact
+No independent declaration repair remains queued. The 430 remaining requirements have exact
 ownership in 29 decision batches. Full dataset readiness still waits for those decisions. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
 currency repairs. The source still has gaps, so dataset regeneration is not ready.
@@ -33,10 +33,10 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 452 |
+| Outstanding source gaps | 430 |
 | Queued, in review or not yet triaged | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 452 |
-| Verified closed / introduced / reopened | 930 / 75 / 0 |
+| Assigned to deferred decision batches (subset of outstanding) | 430 |
+| Verified closed / introduced / reopened | 952 / 75 / 0 |
 | Active decision scopes | 29 |
 
 All remaining topics now have explicit child owners. Thirty child scopes have been created;
@@ -77,7 +77,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-D2 | Numerical expressions and powers | 44 | 0 | 0 | Complete; child below |
 | RB-D2-D1 | Power-expression sign and zero | 0 | 10 | 10 | Deferred |
 | RB-F1 | Decimal notation, comparison and transcription | 35 | 0 | 0 | Complete; child below |
-| RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 8 | 8 | Deferred |
+| RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 3 | 3 | Partial; remaining deferred |
 | RB-F2 | Decimal operations and place-value zero | 14 | 0 | 0 | Complete; child below |
 | RB-F2-D1 | Decimal zero/component distinctions | 0 | 8 | 8 | Deferred |
 | RB-F3 | Fraction arithmetic and benchmark estimation | 133 | 0 | 0 | Complete; child below |
@@ -97,16 +97,16 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-F8-D1 | Mixed fraction-axis magnitude | 0 | 4 | 4 | Deferred |
 | RB-F9 | Signed rationals, order, magnitude and opposites | 54 | 0 | 0 | Complete; children below |
 | RB-F9-D1 | Contextual order sign distinctions | 0 | 4 | 4 | Deferred |
-| RB-F9-D2 | Contextual zero/reference distinctions | 0 | 9 | 9 | Deferred |
+| RB-F9-D2 | Contextual zero/reference distinctions | 0 | 2 | 2 | Partial; remaining deferred |
 | RB-F10 | Ratios, rates and percentages | 30 | 0 | 0 | Complete |
 | RB-M1 | Legacy conversion profiles and shared consumers | 84 | 0 | 0 | Complete; child below |
 | RB-M1-D1 | Legacy integer profile/ownership distinction | 0 | 21 | 21 | Deferred |
 | RB-M2 | Clock reading and construction | 46 | 0 | 0 | Complete; child below |
-| RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 37 | 37 | Deferred |
+| RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 27 | 27 | Partial; remaining deferred |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **452** | **452** | |
+| **Total: 56 source batches** | | **1,307** | **430** | **430** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
@@ -134,11 +134,11 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-A3-01 | RB-A3-D1 | Twenty numeral/base requirements belong to object-only counting conservation, counting comparison/matching and sorting-extremum tasks. Neither mode shows count numerals; the ontology explicitly distinguishes numerals from object quantities. | Decide the dependency applicability or representation contract; ArabicNumerals/Base10 cannot be added from hidden counts. No gate or rendering change is made here. |
 | DEC-A3-02 | RB-A3-D2 | Eleven writing zero requirements span six projections. The producer owns `requireZero`; its positive branch feeds a number-line projection with visible origin zero. View-owned zero invariants overlap the producer schema under SPEC-8/SPEC-11. | Review a normal pre-draw declaration ownership contract that preserves positive/explicit-zero configurations and all projections. The attempted number-line zero additions were withdrawn after ownership validation; the two arithmetic zero gaps remain in RB-A2. |
 | DEC-A3-03 | RB-A3-D3 | Eight existing reasoning numeral gaps are deferred because declaring ArabicNumerals would also admit unsafe new matches. Generator seed 92 with Addition+Addition and range 0..100 produces 23+32+45=100; view seed 1 renders proposed answer 200. | Agree a repair for the existing projection/compatibility guarantee before enabling those matches. Preserve targets and range policy. The proposed reasoning declaration and test edit were fully withdrawn. |
-| DEC-F1-01 | RB-F1-D1 | Eight zero requirements concern decimal comparison, fraction/decimal transcription and decimal reading/writing. Place-value coefficients, zero whole parts and solution-only decompositions provide different evidence; a zero glyph alone does not establish an involved zero value. | Review the concrete target/projection examples in `temp/label-dependency-execution/f1-review.md`. Preserve both modes; do not declare blanket zero absence on positive decimal values or infer presence from hidden solution coefficients. |
+| DEC-F1-01 | RB-F1-D1 | Three decimal reading/writing zero requirements remain; whole parts and expanded coefficients vary. Five comparison/conversion findings are closed by explicit or necessarily requested Ones=0 coefficients. | Apply the existing ontology's necessary-consequence evidence rule; a zero glyph alone remains insufficient. The remaining writing profiles still need a pre-draw distinction and projection review. |
 | DEC-F8-01 | RB-F8-D1 | Four fraction-axis magnitude findings remain. One supported axis may show 0/1, 1/2 and 5/2; another stays below magnitude one. | Decide whether magnitude describes the located value or all displayed fraction representations, and how mixed axes are represented. Preserve points, axes and sampling; no range-policy change. |
 | DEC-F9-01 | RB-F9-D1 | Four contextual-order sign findings vary with the two sampled signed readings inside existing choices. | Define ordinary pre-draw distinctions or clarify intended involved-value evidence; no sampled-payload classification. |
-| DEC-F9-02 | RB-F9-D2 | Nine contextual zero/reference findings differ by projection and selected readings; visible reference zero and absence of a zero reading are different evidence. | Review the exact examples in `f8-f9-review.md` before adding a zero descriptor. |
-| DEC-M2-01 | RB-M2-D1 | Thirty-seven clock requirements remain: nineteen original findings plus eighteen activated by truthful integer/nonnegative declarations. Analog-reading questions can have no digits; digital-construction questions use words/placeholders, with digits in solutions. Zero components also vary. | Decide representation and zero evidence across modes and the existing one-sided zero selector. Keep all targets, clock precision and rendering. |
+| DEC-F9-02 | RB-F9-D2 | Two signed-context zero findings remain. Seven order/magnitude findings are closed because all their projections explicitly establish a numerical zero datum, including sea level. | The separate signed-context producer already owns zero through its relation choices and does not uniformly expose the same reference. Review its ownership and selected readings; do not generalize the seven repairs to this producer. |
+| DEC-M2-01 | RB-M2-D1 | Twenty-seven clock requirements remain: ten analog-reading numeral/base findings and seventeen zero findings. Ten digital-construction notation findings are closed because the visible task necessarily requests positional decimal digits. | Analog reading's generic response does not require the same notation. Review the proposed representation contract and the existing one-sided zero selector separately; keep targets, precision and rendering. |
 | DEC-M3-01 | RB-M3-D1 | Six elapsed/interval zero findings remain. A positive question such as 1:31 to 2:05 has a solution introducing the reference 2:00. | Clarify component versus composite time occurrence and mode-specific evidence. A zero digit alone is not sufficient. |
 | DEC-D2-01 | RB-D2-D1 | Ten power sign/zero findings remain: the same exponent profile admits 2^2, (-2)^2 and 0^2; another admits exponent zero. | Review ordinary pre-draw distinctions preserving all supported bases, coefficients and exponents. PositiveExponent alone does not classify base sign or zero participation. |
 | DEC-F2-01 | RB-F2-D1 | Eight decimal zero findings concern component/decomposition evidence and values or results that vary inside existing choices. | Separate zero digits from involved zero values; review the concrete expanded, comparison, rounding and addition/subtraction projections. |
@@ -433,28 +433,76 @@ also passes. Logs: `last-final-types.log`, `last-final-specs.log`, `last-coverag
 All remaining source findings now have a concrete decision owner;
 transferring them does not count as closure.
 
+### Necessary mathematical and notation evidence re-review
+
+Starting from `c0cd7a1d`, a fresh audit exactly reproduced the prior final report. Review of
+the installed ontology's content-evidence rules corrected an overly literal interpretation
+of evidence in three deferred children. Accessible necessary consequences are already
+accepted; a new semantic convention or evaluator change is not needed for these cases.
+
+| Child | Supported evidence | Existing gaps closed | Remaining |
+|---|---|---:|---:|
+| RB-F1-D1 | Explicit Ones=0 table entries, or the necessarily zero Ones response for a proper fraction, in three decimal views | 5 | 3 |
+| RB-F9-D2 | Explicit contextual zero reference in four order/magnitude views: 0°C, settled balance or sea-level datum | 7 | 2 |
+| RB-M2-D1 | Digital-construction instructions, time clue and digit slots necessarily require Arabic digits and positional decimal components | 10 | 27 |
+| **Total** | Eight view invariants; five existing test expectation updates | **22** | **32 in these children** |
+
+The repair adds ordinary declarations only. It does not classify sampled payloads or borrow
+an optional solution method as question evidence. A digit zero inside a nonzero numeral
+still does not establish an involved numerical zero. Analog reading's generic answer box
+still does not require Arabic notation. Earlier scratch reviews that treated `Numerals`
+as ineligible were also incorrect: the pinned ontology marks it eligible, but its written-symbol
+definition cannot truthfully label an object-only task.
+
+Global accounting is **452 - 22 = 430 distinct/raw gaps**, across 330 selections. Cumulative
+progress is **1,307 + 75 - 952 = 430**. All 29 child owners remain active. The audit retains
+1,263 admitted / 848 eligible selections, 1,013 targets and 1,195 matches, with no new or
+removed matches, conflicts, invalid contexts, contract errors or incomplete enumerations.
+All 1,263 old configurations, 2,526 question/solution probes and 2,808 stored-origin draws
+preserve configurations, random states and continuation, data and content/task fingerprints.
+No existing annotation is removed. Rendering sources, policy and stored dataset are unchanged.
+
+Focused validation passes 20 suites / 120 tests; independent declaration and evidence review,
+type and ownership checks pass. Full coverage passes 841 suites / 6,483 tests at 98.49%
+statements, 97.05% branches, 100% functions and 99.51% lines; generator thresholds pass.
+Documentation passes with the same five external-fetch warnings and no errors. Logs are
+`coverage.log`, `generator-coverage.log`, `types.log`, `specs.log` and `docs.log` in the evidence
+directory below. The current policy remains unchanged; the
+[representation proposal](label-dependency-graph.md#next-decision-representation-completeness)
+is an unapproved counterfactual and contributes no closures to this ledger.
+
+Evidence is in `temp/label-dependency-decisions/`: `before.json`, the zero/digital owned-file
+manifests and before copies, `zero-review.md`, `numeral-decision-review.md`, `contract-review.md`,
+`verification.json`, and the current exact `deferred.json`. Replay/audit snapshots are
+`temp/label-dependency-execution/decisions-before/` and `decisions-after/`; the latter contains
+the comparison and complete lineage. Protected unrelated file hashes and the dataset pointer
+remain unchanged. No regeneration or VQA was run.
+
 ## Decision queue after autonomous declarations
 
 No declaration batch remains untriaged. The 29 active child batches above account for every
-one of the 452 outstanding requirements. Their facet totals are:
+one of the 430 outstanding requirements. Their facet totals are:
 
 | Decision facet | Gaps |
 |---|---:|
-| Zero occurrence, components, model/projection ownership | 190 |
+| Zero occurrence, components, model/projection ownership | 178 |
 | Integer primary-operand widths (including two legacy-API cases) | 113 |
 | Fraction magnitude and mixed representations | 49 |
-| Numeral-system evidence/applicability | 28 |
-| Base evidence/applicability | 20 |
+| Numeral-system evidence/applicability | 23 |
+| Base evidence/applicability | 15 |
 | Number-kind/domain/profile ownership | 29 |
 | Sign occurrence/domain distinctions | 23 |
-| **Total** | **452** |
+| **Total** | **430** |
 
-Recommended review order: settle observable numeral/base and question/solution occurrence
-semantics first; agree ordinary width/model profiles next; then address fraction magnitude,
+Recommended review order: decide the concrete representation-completeness proposal first,
+then resolve remaining question/solution declaration ownership and ordinary width/model profiles;
+then address fraction magnitude,
 algebra/legacy profile ownership and the two precisely bounded legacy-API cases. These are
 reviewable semantic/model or preservation-contract decisions, not permission requests for
 routine declaration edits. The source reports provide counterexamples and recommendations.
-Keep the Area allowlist and range exclusion fixed when deciding them. RB-V1/RB-V2 remain
+The ontology already accepts necessarily required answers and meaningful zero references;
+do not reopen those as blanket semantic votes. Keep the Area allowlist and range exclusion fixed
+when deciding the unresolved model/policy cases. RB-V1/RB-V2 remain
 blocked by source readiness; no regeneration, stored-label rewrite or VQA run was performed.
 
 ## Baseline evidence and preservation

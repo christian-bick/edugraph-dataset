@@ -14,6 +14,7 @@ export const spec: ViewSpec = {
         Scope.VisualNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.NumbersWithZero,
         Ability.Formalization
     ]
 };

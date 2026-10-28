@@ -6,6 +6,8 @@ describe('time-digital-construction view spec', () => {
     it('owns construction of a digital display from a textual time clue', () => {
         expect(spec.generalLabels).toEqual([
             Scope.DigitalClock,
+            Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.Formalization,
             Ability.TextualReception,
             Ability.VisualArticulation

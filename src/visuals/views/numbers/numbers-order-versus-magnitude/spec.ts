@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-order-versus-magnitude',
-    generalLabels: [Ability.ConceptClassification, Scope.ArabicNumerals, Scope.Base10],
+    generalLabels: [Ability.ConceptClassification, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero],
     compatibility: [requireTargetLabels('numbers-order-versus-magnitude-task', [Ability.ConceptClassification])]
 };
 export const NumbersOrderVersusMagnitudeViewSchema = {} as const;

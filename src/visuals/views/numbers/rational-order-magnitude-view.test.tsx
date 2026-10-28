@@ -137,8 +137,8 @@ describe('order and magnitude fixed learner-task projections', () => {
         for (const spec of specs) expect(Object.values(spec).find(value => value && typeof value === 'object' && Object.keys(value).length === 0)).toEqual({});
         expect(lineSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10]);
         expect(distanceSpec.spec.generalLabels).toEqual([Scope.Numberline, Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10]);
-        expect(absoluteSpec.spec.generalLabels).toEqual([Ability.Interpretation, Ability.Formalization, Scope.ArabicNumerals, Scope.Base10]);
-        expect(classificationSpec.spec.generalLabels).toEqual([Ability.ConceptClassification, Scope.ArabicNumerals, Scope.Base10]);
+        expect(absoluteSpec.spec.generalLabels).toEqual([Ability.Interpretation, Ability.Formalization, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero]);
+        expect(classificationSpec.spec.generalLabels).toEqual([Ability.ConceptClassification, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero]);
     });
 });
 

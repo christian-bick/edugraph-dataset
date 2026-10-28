@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-contextual-absolute-value',
-    generalLabels: [Ability.Interpretation, Ability.Formalization, Scope.ArabicNumerals, Scope.Base10],
+    generalLabels: [Ability.Interpretation, Ability.Formalization, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero],
     compatibility: [requireTargetLabels('numbers-contextual-absolute-value-task', [Ability.Interpretation, Ability.Formalization])]
 };
 export const NumbersContextualAbsoluteValueViewSchema = {} as const;

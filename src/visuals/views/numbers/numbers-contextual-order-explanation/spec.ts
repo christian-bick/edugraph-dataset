@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-contextual-order-explanation',
-    generalLabels: [Ability.Interpretation, Ability.TextualArticulation, Ability.TextualReception, Scope.ArabicNumerals, Scope.Base10],
+    generalLabels: [Ability.Interpretation, Ability.TextualArticulation, Ability.TextualReception, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero],
     compatibility: [requireTargetLabels('numbers-contextual-order-explanation-task', [Ability.Interpretation, Ability.TextualArticulation])]
 };
 export const NumbersContextualOrderExplanationViewSchema = {} as const;

@@ -10,6 +10,7 @@ describe('numbers-decimal-comparison view spec', () => {
             Scope.VisualNumbers,
             Scope.ArabicNumerals,
             Scope.Base10,
+            Scope.NumbersWithZero,
             Ability.ConceptDerivation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);

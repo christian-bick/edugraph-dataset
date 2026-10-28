@@ -6,6 +6,8 @@ export const spec: ViewSpec = {
     viewId: 'time-digital-construction',
     generalLabels: [
         Scope.DigitalClock,
+        Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.Formalization,
         Ability.TextualReception,
         Ability.VisualArticulation

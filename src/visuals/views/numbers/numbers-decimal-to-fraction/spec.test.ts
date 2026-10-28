@@ -15,6 +15,7 @@ describe('numbers-decimal-to-fraction view spec', () => {
             Scope.VisualNumbers,
             Scope.ArabicNumerals,
             Scope.Base10,
+            Scope.NumbersWithZero,
             Ability.Interpretation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
