@@ -6,7 +6,7 @@ import {
 } from '../../../lib/whole-number-notation.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {PlaceValueExpandedProblem} from '../../../types/problems.ts';
-import {PlaceValueExpandedGeneratorConfig, PlaceValueExpandedGeneratorSchema} from './spec.ts';
+import {PlaceValueExpandedGeneratorConfig, PlaceValueExpandedGeneratorSchema, spec} from './spec.ts';
 
 function expandedTerms(number: number): number[] {
     return createWholeNumberPlaceValues(number)
@@ -17,6 +17,7 @@ function expandedTerms(number: number): number[] {
 export class PlaceValueExpandedGenerator implements ProblemGenerator<PlaceValueExpandedProblem, PlaceValueExpandedGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = PlaceValueExpandedGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: PlaceValueExpandedGeneratorConfig): ProblemStub<PlaceValueExpandedProblem> | null {
         validateConfigFields('place-value-expanded', config, ['range']);

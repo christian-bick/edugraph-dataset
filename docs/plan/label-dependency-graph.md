@@ -33,7 +33,7 @@ matches, select configurations or satisfy target participation requirements.
 The source baseline is **391** unresolved selection/facet requirements. `produces` is only a
 possible-output declaration, so introducing a callback closes no finding by itself. Unknown
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
-The candidate six-gap reduction must be established by the completed third checkpoint. The known
+The completed third checkpoint establishes six closures, leaving **385** source gaps. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -88,14 +88,37 @@ The unchanged stored snapshot has **2,542 raw / 2,528 distinct non-range finding
 narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding policy.
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
-source scopes: **953 requirements repaired, 75 newly exposed, 38 retired by policy, 391 remaining**.
-All remaining gaps have exact owners in **27 decision batches**; the reasoning-view content
+source scopes, followed by the six configuration-inference acceptance cases:
+**959 requirements repaired, 75 newly exposed, 38 retired by policy, 385 remaining**.
+All remaining gaps have exact owners in **26 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
 for the remaining source decisions and their implementations. The implemented narrowing is
 [conditional notation dependencies](#agreed-direction-conditional-notation-dependencies);
 representation completeness remains a separate design question.
+
+### Completed inference acceptance cases
+
+| Owner / resolved configuration | Added annotation | Exhaustive evidence | Why use the fallback here? |
+|---|---|---|---|
+| Near-doubles, maximum 10 or 20 | `SingleDigitSmallestOperand` | The smaller positive integer is `b`, with `2b + 1` below the configured bound. Thus `b <= 9`; the other operand may be 10. | Width depends on both strategy and range. A strategy-wide label overclaims wider configurations; additional selectable profiles would require redesigning legacy choice and sampling behavior. |
+| Expanded form, existing maximum-at-most-1000 branch, two or three terms | `NumbersWithoutZero` | Every required expansion term is positive; solutions show these terms. Zero digits inside a numeral are not separate zero-valued operands/components in this layout. | Zero occurrence differs by the existing generator/rendering branch; it is not a module or cardinality invariant. |
+| Expanded form, larger branch, two or three nonzero terms | `NumbersWithZero` | The complete place strip has at least four positions and only two or three nonzero coefficients, so a zero coefficient is visible in both modes. | The claim requires the complete range/cardinality configuration; adding branch aliases would change existing fallback selection. |
+
+These are the six original selection/facet findings, not six labels or six sampled successes.
+All 12 admitted selections for these two owners have exhaustive singleton configuration outcomes;
+six add a label and six retain their existing annotations. `declaredLabels` still exposes the
+original six omissions, while actual resolved output closes them. The source report therefore
+contains **385 effective gaps**, with zero pending/invalid inference selections and no new gaps.
+
+All 1,013 targets, 1,195 matches and 1,263 selections remain unchanged. The complete preservation
+comparison covers 2,526 question/solution probes and 2,808 stored-origin draws: configuration,
+mathematical payload, view configuration, fingerprints and random continuation are identical.
+The two generators only gain spec metadata and annotation declarations; mathematical branches,
+schemas and view sources are unchanged. The stored dataset itself is unchanged, so its findings
+are not counted as repaired before regeneration. See the
+[checkpoint ledger](label-dependency-progress.md#configuration-inference-checkpoint-3--six-acceptance-cases-2026-10-29).
 
 ## Agreed direction: conditional notation dependencies
 

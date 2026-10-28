@@ -12,8 +12,10 @@ These items are not newly scheduled by the archive move.
   semantic decisions and dataset refresh. The [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
   and [progress ledger](label-dependency-progress.md) track autonomous declaration repairs,
   exact gap accounting and separate decision batches. All 26 original scopes are triaged;
-  391 gaps remain in 27 dependency decision batches; one known reasoning content defect also remains
-  open, followed by two acceptance batches (30 remaining scopes).
+  six configuration-inference acceptance cases are complete, leaving 385 gaps in 26 dependency
+  decision batches. One known reasoning content defect also remains open, followed by two acceptance
+  batches (29 remaining scopes). Inference is a fallback for additional annotations and supplies
+  no matching capability; matching-capable alternatives remain preferred.
   The [agreed conditional-dependency direction](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies)
   is implemented: narrowing numeral/base obligations retires 38 source requirements without
   claiming annotation repairs. Representation completeness remains a separate, unestimated

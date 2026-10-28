@@ -7,8 +7,9 @@ import {IntegerAddSubtractStrategyProblem} from '../../../types/problems.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {resolveInferredLabels} from '../../../lib/inferred-labels.ts';
 import {IntegerAddSubtractStrategiesGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {IntegerAddSubtractStrategiesGeneratorSchema, spec} from './spec.ts';
 
 const invariantLabels = [
     Scope.TwoOperands,
@@ -20,6 +21,57 @@ const invariantLabels = [
 
 describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
     const generator = new IntegerAddSubtractStrategiesGenerator();
+
+    it.each([Scope.NumbersSmaller10, Scope.NumbersSmaller20])(
+        'infers the smallest-operand width for bounded near doubles: %s', rangeLabel => {
+            for (let seed = 0; seed < 24; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, [Area.AdditionNearDoubles, rangeLabel]);
+                expect(stub).not.toBeNull();
+                expect(stub!.labels).toContain(Scope.SingleDigitSmallestOperand);
+                expect(Math.min(stub!.data.leftOperand, stub!.data.rightOperand)).toBeLessThan(10);
+                expect(stub!.labels.filter(label => label === Scope.SingleDigitSmallestOperand)).toHaveLength(1);
+            }
+        }
+    );
+
+    it('claims only the smaller operand at the 9 + 10 boundary', () => {
+        const config = {strategy: 'addition-near-doubles', range: {min: 9, max: 20}} as const;
+        const labels = resolveInferredLabels({spec, schema: IntegerAddSubtractStrategiesGeneratorSchema,
+            config, labels: [], owner: 'generator'});
+        const data = generator.generate(config)!.data;
+        expect(labels).toEqual([Scope.SingleDigitSmallestOperand]);
+        expect([data.leftOperand, data.rightOperand].sort((a, b) => a - b)).toEqual([9, 10]);
+    });
+
+    it.each([
+        {strategy: 'addition-near-doubles', range: {min: 0, max: 21}},
+        {strategy: 'addition-near-doubles', range: {min: 10, max: 22}},
+        {strategy: 'addition-near-doubles', range: {min: 0, max: 1000}},
+        {strategy: 'addition-near-doubles', range: undefined},
+        {strategy: 'addition-compensation', range: {min: 0, max: 20}},
+        {strategy: undefined, range: {min: 0, max: 20}}
+    ] as const)('leaves wider, other-strategy and unresolved configurations unclaimed: %j', config => {
+        expect(resolveInferredLabels({spec, schema: IntegerAddSubtractStrategiesGeneratorSchema,
+            config, labels: [], owner: 'generator'})).toEqual([]);
+    });
+
+    it('supports two-digit near doubles outside the inferred range', () => {
+        const data = generator.generate({strategy: 'addition-near-doubles', range: {min: 10, max: 22}})!.data;
+        expect([data.leftOperand, data.rightOperand].sort((a, b) => a - b)).toEqual([10, 11]);
+        const stub = generateWithLabels(generator, [Area.AdditionNearDoubles, Scope.NumbersSmaller1000]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).not.toContain(Scope.SingleDigitSmallestOperand);
+    });
+
+    it('retains the existing matching-capable make-ten width declaration', () => {
+        const stub = generateWithLabels(generator, [Area.AdditionMakeTen, Scope.NumbersSmaller20]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels.filter(label => label === Scope.SingleDigitSmallestOperand)).toHaveLength(1);
+        expect(IntegerAddSubtractStrategiesGeneratorSchema.strategy[2]).toContainEqual([
+            Area.AdditionMakeTen, Scope.SingleDigitSmallestOperand
+        ]);
+    });
 
     it('declares only invariant mathematical capabilities as general labels', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariantLabels));

@@ -15,7 +15,7 @@ const strategyProfiles = [
 
 const resolveStrategy = selectExactLabelSetMap(strategyProfiles);
 
-export const spec: GeneratorSpec = {
+export const spec: GeneratorSpec<typeof IntegerAddSubtractStrategiesGeneratorSchema> = {
     generatorId: 'integer-add-subtract-strategies',
     generalLabels: [
         Scope.TwoOperands,
@@ -23,7 +23,16 @@ export const spec: GeneratorSpec = {
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
-    ]
+    ],
+    // SPEC-12: width depends on both strategy and range; a strategy-wide bundle would
+    // overclaim, while extra schema profiles would alter existing choice/RNG behavior.
+    // Here b + (b + 1) < 20 implies b <= 9; the larger operand may still be 10.
+    inferredLabels: [{
+        produces: [Scope.SingleDigitSmallestOperand],
+        infer: ({strategy, range}) => strategy === 'addition-near-doubles' && range && range.max <= 20
+            ? [Scope.SingleDigitSmallestOperand]
+            : []
+    }]
 };
 
 export const IntegerAddSubtractStrategiesGeneratorSchema = {

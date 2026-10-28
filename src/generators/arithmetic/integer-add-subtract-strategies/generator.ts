@@ -2,7 +2,7 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {IntegerFlexibleStrategyProblem} from '../../../types/problems.ts';
 import {additionMakeTen, additionNearDoubles, additionCompensation, subtractionCompensation, subtractionMakeTen, subtractionThinkAddition, strategyBounds} from '../integer-strategy-evidence.ts';
-import {IntegerAddSubtractStrategiesGeneratorConfig, IntegerAddSubtractStrategiesGeneratorSchema} from './spec.ts';
+import {IntegerAddSubtractStrategiesGeneratorConfig, IntegerAddSubtractStrategiesGeneratorSchema, spec} from './spec.ts';
 
 const builders = {
     'addition-make-ten': additionMakeTen,
@@ -19,6 +19,7 @@ export class IntegerAddSubtractStrategiesGenerator implements ProblemGenerator<
 > {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = IntegerAddSubtractStrategiesGeneratorSchema;
+    readonly spec = spec;
 
     generate(
         config: IntegerAddSubtractStrategiesGeneratorConfig
