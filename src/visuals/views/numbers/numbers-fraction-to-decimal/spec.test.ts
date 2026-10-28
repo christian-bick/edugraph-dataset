@@ -8,11 +8,13 @@ describe('numbers-fraction-to-decimal view spec', () => {
         expect(spec.generalLabels).toEqual([
             Area.DecimalEquivalence,
             Area.FractionNotation,
-            Scope.FractionNumbers,
+            Scope.ProperFractions,
             Scope.EqualShares,
             Scope.Equal,
             Scope.SingleFrameOfReference,
             Scope.VisualNumbers,
+            Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.Formalization
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);

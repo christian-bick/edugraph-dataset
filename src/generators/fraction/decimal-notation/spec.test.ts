@@ -60,7 +60,7 @@ describe('DecimalNotationGenerator spec integration', () => {
     it('declares only the invariant decimal capabilities', () => {
         expect(spec).toEqual({
             generatorId: 'decimal-notation',
-            generalLabels: [Area.DecimalNotation, Scope.DecimalNumbers]
+            generalLabels: [Area.DecimalNotation, Scope.DecimalNumbers, Scope.NumbersWithoutNegatives]
         });
     });
 

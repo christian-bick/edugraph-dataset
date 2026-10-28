@@ -8,6 +8,9 @@ export const spec: ViewSpec = {
         Area.NumerationWithDecimals,
         Scope.Numberline,
         Scope.SingleFrameOfReference,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithZero,
         Ability.VisualArticulation
     ]
 };

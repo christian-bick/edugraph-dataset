@@ -4,7 +4,8 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'ratio-table-comparison',
-    generalLabels: [Scope.TabularAlgebraicRepresentation, Ability.ProcedureExecution]
+    generalLabels: [Scope.TabularAlgebraicRepresentation, Scope.ArabicNumerals, Scope.Base10,
+        Ability.ProcedureExecution]
 };
 
 export const RatioTableComparisonViewSchema = {} as const;

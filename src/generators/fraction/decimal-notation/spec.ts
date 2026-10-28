@@ -6,7 +6,8 @@ export const spec: GeneratorSpec = {
     generatorId: 'decimal-notation',
     generalLabels: [
         Area.DecimalNotation,
-        Scope.DecimalNumbers
+        Scope.DecimalNumbers,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

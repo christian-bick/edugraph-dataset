@@ -4,7 +4,8 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'ratio-table-missing-values',
-    generalLabels: [Scope.TabularAlgebraicRepresentation, Ability.ProcedureInversion]
+    generalLabels: [Scope.TabularAlgebraicRepresentation, Scope.ArabicNumerals, Scope.Base10,
+        Scope.NumbersWithoutZero, Ability.ProcedureInversion]
 };
 
 export const RatioTableMissingValuesViewSchema = {} as const;

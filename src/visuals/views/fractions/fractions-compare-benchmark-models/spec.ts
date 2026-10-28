@@ -6,6 +6,8 @@ export const spec: ViewSpec = {
     viewId: 'fractions-compare-benchmark-models',
     generalLabels: [
         Scope.VisualNumbers,
+        Scope.ArabicNumerals,
+        Scope.Base10,
         Ability.ProcedureUnderstanding
     ]
 };

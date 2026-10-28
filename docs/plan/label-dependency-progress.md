@@ -5,8 +5,9 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 [autonomous execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
-**Execution started: RB-A3's supported declarations are implemented.** RB-F1 is next, followed
-by RB-F6 and RB-F10, with early decision review for RB-D1, RB-A7 and RB-M1. Counts below
+**Execution in progress: RB-A3, RB-F1, RB-F6 and RB-F10 declarations are implemented.**
+RB-F8/RB-F9 are next; measurement and expression reviews also have supported candidates.
+Decision review continues for the deferred children, RB-D1, RB-A7 and RB-M1. Counts below
 start at this preparation baseline; they do not erase previously completed measurement and
 currency repairs. The source still has gaps, so dataset regeneration is not ready.
 
@@ -32,13 +33,13 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 1,306 |
-| Queued or not yet triaged | 1,267 |
-| Assigned to deferred decision batches (subset of outstanding) | 39 |
-| Verified closed / introduced / reopened | 25 / 24 / 0 |
-| Known decision topics | 6 |
+| Outstanding source gaps | 1,209 |
+| Queued or not yet triaged | 1,162 |
+| Assigned to deferred decision batches (subset of outstanding) | 47 |
+| Verified closed / introduced / reopened | 122 / 24 / 0 |
+| Known decision topics | 7 |
 
-The three original topics remain open; RB-A3 adds three concrete child scopes below.
+The three original topics remain open; RB-A3 adds three concrete child scopes and RB-F1 adds one.
 Deferred gaps remain included in the outstanding total.
 
 ## Source batch ledger
@@ -64,29 +65,30 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A10 | Written algorithms and division models | 22 | 22 | 0 | Queued |
 | RB-D1 | Symbolic and substituted algebra expressions | 56 | 56 | 0 | Queued |
 | RB-D2 | Numerical expressions and powers | 44 | 44 | 0 | Queued |
-| RB-F1 | Decimal notation, comparison and transcription | 35 | 35 | 0 | Queued — next |
+| RB-F1 | Decimal notation, comparison and transcription | 35 | 0 | 0 | Complete; child below |
+| RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 8 | 8 | Deferred |
 | RB-F2 | Decimal operations and place-value zero | 14 | 14 | 0 | Queued |
 | RB-F3 | Fraction arithmetic and benchmark estimation | 133 | 133 | 0 | Queued |
 | RB-F4 | Fraction division and quotient projections | 177 | 177 | 0 | Queued |
 | RB-F5 | Fraction equivalence and whole/tenths projections | 49 | 49 | 0 | Queued |
-| RB-F6 | Fraction comparison and number lines | 40 | 40 | 0 | Queued |
+| RB-F6 | Fraction comparison and number lines | 40 | 0 | 0 | Complete |
 | RB-F7 | Fraction products and scaling | 40 | 40 | 0 | Queued |
-| RB-F8 | Rational number-line representations | 40 | 40 | 0 | Queued |
-| RB-F9 | Signed rationals, order, magnitude and opposites | 54 | 54 | 0 | Queued |
-| RB-F10 | Ratios, rates and percentages | 30 | 30 | 0 | Queued |
+| RB-F8 | Rational number-line representations | 40 | 40 | 0 | Queued — next |
+| RB-F9 | Signed rationals, order, magnitude and opposites | 54 | 54 | 0 | Queued — next |
+| RB-F10 | Ratios, rates and percentages | 30 | 0 | 0 | Complete |
 | RB-M1 | Legacy conversion profiles and shared consumers | 84 | 84 | 0 | Queued |
 | RB-M2 | Clock reading and construction | 46 | 46 | 0 | Queued |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 24 | 0 | Queued |
 | RB-M4 | Length measurement and unit relations | 22 | 22 | 0 | Queued |
-| **Total: 29 source batches** | | **1,307** | **1,306** | **39** | |
+| **Total: 30 source batches** | | **1,307** | **1,209** | **47** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
 | RB-V1 — Source readiness and canonical refresh | Waiting for readiness | Zero non-range source gaps, including deferred/new obligations; no conflicts, invalid contexts, contract errors or incomplete enumerations. |
 | RB-V2 — VQA and stored acceptance | Waiting for refreshed dataset | Successful RB-V1, then necessary VQA refresh and strict stored annotation, image and coverage checks. |
 
-The original baseline remains **28 batches including acceptance**; three explicit child scopes
-bring the current inventory to **31**. Splitting does not close gaps. Verified closure and newly
+The original baseline remains **28 batches including acceptance**; four explicit child scopes
+bring the current inventory to **32**. Splitting does not close gaps. Verified closure and newly
 introduced requirements are the primary progress measures.
 
 ## Decision topics
@@ -103,6 +105,7 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-A3-01 | RB-A3-D1 | Twenty numeral/base requirements belong to object-only counting conservation, counting comparison/matching and sorting-extremum tasks. Neither mode shows count numerals; the ontology explicitly distinguishes numerals from object quantities. | Decide the dependency applicability or representation contract; ArabicNumerals/Base10 cannot be added from hidden counts. No gate or rendering change is made here. |
 | DEC-A3-02 | RB-A3-D2 | Eleven writing zero requirements span six projections. The producer owns `requireZero`; its positive branch feeds a number-line projection with visible origin zero. View-owned zero invariants overlap the producer schema under SPEC-8/SPEC-11. | Review a normal pre-draw declaration ownership contract that preserves positive/explicit-zero configurations and all projections. The attempted number-line zero additions were withdrawn after ownership validation; the two arithmetic zero gaps remain in RB-A2. |
 | DEC-A3-03 | RB-A3-D3 | Eight existing reasoning numeral gaps are deferred because declaring ArabicNumerals would also admit unsafe new matches. Generator seed 92 with Addition+Addition and range 0..100 produces 23+32+45=100; view seed 1 renders proposed answer 200. | Agree a repair for the existing projection/compatibility guarantee before enabling those matches. Preserve targets and range policy. The proposed reasoning declaration and test edit were fully withdrawn. |
+| DEC-F1-01 | RB-F1-D1 | Eight zero requirements concern decimal comparison, fraction/decimal transcription and decimal reading/writing. Place-value coefficients, zero whole parts and solution-only decompositions provide different evidence; a zero glyph alone does not establish an involved zero value. | Review the concrete target/projection examples in `temp/label-dependency-execution/f1-review.md`. Preserve both modes; do not declare blanket zero absence on positive decimal values or infer presence from hidden solution coefficients. |
 
 For each decision, record the concrete examples, affected declarations and projections,
 available options, recommended choice, and effects on targets, configuration, sampling,
@@ -197,7 +200,46 @@ encountered contention. Documentation checks pass with five external-fetch warni
 logs: `a3-types.log`, `a3-specs-final.log`, `a3-coverage-bounded.log`,
 `a3-generator-coverage.log`, `a3-docs.log` and `a3-preservation.json`. Only the nine owned source,
 test and documentation paths differ from the execution working-tree baseline. The checkpoint
-is the commit adding this section. Next queued batch: RB-F1.
+is `cedb75c3`. Next queued batch at that checkpoint: RB-F1.
+
+### RB-F1 / RB-F6 / RB-F10 — Decimal, fraction and ratio declarations
+
+These independent scopes share one acceptance checkpoint. Their production changes are
+23 `spec.ts` files, with 15 existing declaration assertions updated. All schemas, resolvers,
+mathematical generators and rendering sources retain their previous bytes. F1 supplies
+supported nonnegative/numeral/base/explicit-origin claims. Three conversion leaves refine
+`FractionNumbers` to `ProperFractions`, retaining the parent capability through specialization
+and avoiding redundant invariant ancestors under SPEC-2. F6 supplies fraction-comparison
+sign/zero guarantees and fraction-line notation/visible-origin evidence. F10 supplies ratio,
+unit-rate and percent notation and supported zero absence. Ratio-table zero absence stays on
+the two table leaves because the shared coordinate consumer displays origin zero.
+
+The fresh full audit closes **97 distinct / 104 raw findings**: F1 closes 27 distinct / 34 raw,
+F6 closes 40, and F10 closes 30. No new missing requirement is introduced. F1's eight remaining
+zero findings transfer to RB-F1-D1 with baseline zero; both F6 and F10 are complete. The global
+total is **1,306 - 97 = 1,209 distinct / 1,220 raw source findings**, across 540 selections.
+There are 1,260 admitted / 845 eligible selections; no conflicts, invalid contexts, contract
+errors or incomplete enumerations occur. All 1,013 targets and 1,190 prior matches remain.
+Two rational-number-line positioning matches add four complete selections, bringing matching
+to 1,192; their full target and question/solution evidence is reviewed separately.
+
+Replay reconciles all 235 prior affected tuple/configuration lineages: 470 question/solution
+probes and 522 stored-origin draws preserve configuration, prepared/generator random states,
+continuation, mathematical payloads and content/task fingerprints. The only replaced annotation
+claims are the three justified proper-fraction refinements above. Stored rows, their 4,146 raw
+findings and the dataset pointer remain unchanged.
+
+Evidence is under `temp/label-dependency-execution/`: `f1-review.md`, `f6-f10-review.md`,
+`f-declarations/{draws.json,comparison.json,audit/}`, `f1-owned-paths.json`,
+`f6-f10-owned-paths.json` and their exact before-file copies. Four owned files already contain
+unrelated ontology-adoption changes; only declaration/expectation hunks are staged. The saved
+before copies match the execution-start hashes, preserving those unrelated edits. The two
+focused runs pass 15 suites / 52 tests and 20 suites / 110 tests respectively. Type and
+declaration ownership checks pass. Independent source and new-match review found no actionable
+issues. The shared complete coverage gate passes 840 suites / 6,436 tests, with 98.49% statements,
+97.05% branches, 100% functions and 99.51% lines; all checked generators clear their thresholds.
+Logs: `f-types.log`, `f-specs.log`, `f-coverage.log` and `f-generator-coverage.log`.
+Next queued scopes: RB-F8/RB-F9.
 
 ## Baseline evidence and preservation
 

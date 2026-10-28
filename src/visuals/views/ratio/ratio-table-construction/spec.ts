@@ -4,7 +4,8 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'ratio-table-construction',
-    generalLabels: [Scope.TabularAlgebraicRepresentation, Ability.VisualArticulation]
+    generalLabels: [Scope.TabularAlgebraicRepresentation, Scope.ArabicNumerals, Scope.Base10,
+        Scope.NumbersWithoutZero, Ability.VisualArticulation]
 };
 
 export const RatioTableConstructionViewSchema = {} as const;

@@ -7,6 +7,8 @@ describe('FractionsCompareModelsViewSpec', () => {
     it('owns invariant common-component inference', () => {
         expect(spec.generalLabels).toEqual([
             Scope.VisualNumbers,
+            Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.LogicalInference
         ]);
         expect(spec.generalLabels).not.toContain(Scope.SingleFrameOfReference);

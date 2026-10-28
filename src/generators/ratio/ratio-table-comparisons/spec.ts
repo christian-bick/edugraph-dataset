@@ -7,7 +7,8 @@ export const spec: GeneratorSpec = {
     generatorId: 'ratio-table-comparisons',
     generalLabels: [
         Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation,
-        Area.RatioEquivalence, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives
+        Area.RatioEquivalence, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 

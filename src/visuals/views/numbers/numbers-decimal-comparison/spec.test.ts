@@ -8,6 +8,8 @@ describe('numbers-decimal-comparison view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.SingleFrameOfReference,
             Scope.VisualNumbers,
+            Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.ConceptDerivation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);

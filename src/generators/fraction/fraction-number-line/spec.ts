@@ -5,7 +5,8 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-number-line',
     generalLabels: [
-        Area.NumerationWithFractions
+        Area.NumerationWithFractions,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

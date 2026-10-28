@@ -1,10 +1,10 @@
-import {Ability} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import type {ConfigFromSchema} from '../../../../types/schema.ts';
 import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'percent-whole-inversion',
-    generalLabels: [Ability.ProcedureInversion]
+    generalLabels: [Ability.ProcedureInversion, Scope.ArabicNumerals, Scope.Base10]
 };
 
 export const PercentWholeInversionViewSchema = {} as const;

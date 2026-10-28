@@ -26,7 +26,9 @@ describe('FractionComparisonGenerator spec integration', () => {
             generatorId: 'fraction-comparison',
             generalLabels: [
                 Scope.ProperFractions,
-                Scope.SingleFrameOfReference
+                Scope.SingleFrameOfReference,
+                Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithoutZero
             ]
         });
         expect(spec.generalLabels).not.toContain(Scope.VisualNumbers);

@@ -12,7 +12,7 @@ const mathematicalLabels = [
 
 describe('percent-quantity-relations capabilities', () => {
     it('owns only the reviewed invariant percent and scaling mathematics', () => {
-        expect(spec.generalLabels).toEqual(mathematicalLabels);
+        expect(spec.generalLabels).toEqual([...mathematicalLabels, Scope.NumbersWithoutZero]);
     });
 
     it.each([Ability.ProcedureExecution, Ability.ProcedureInversion])(

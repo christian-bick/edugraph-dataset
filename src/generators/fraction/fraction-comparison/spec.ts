@@ -25,7 +25,9 @@ export const spec: GeneratorSpec = {
     })],
     generalLabels: [
         Scope.ProperFractions,
-        Scope.SingleFrameOfReference
+        Scope.SingleFrameOfReference,
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersWithoutZero
     ]
 };
 

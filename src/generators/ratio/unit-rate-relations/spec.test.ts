@@ -25,7 +25,7 @@ describe('unit-rate-relations capabilities', () => {
         expect(spec.generalLabels).toEqual([
             Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation,
             Area.RatioEquivalence, Area.Division, Area.ProportionalScaling,
-            Scope.RationalNumbers, Scope.NumbersWithoutNegatives
+            Scope.RationalNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
         ]);
     });
 

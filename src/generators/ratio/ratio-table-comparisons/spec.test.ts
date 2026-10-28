@@ -28,7 +28,8 @@ describe('ratio-table-comparisons capabilities', () => {
     it('keeps all invariant mathematical claims separate from selected comparison', () => {
         expect(spec.generalLabels).toEqual([
             Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation,
-            Area.RatioEquivalence, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives
+            Area.RatioEquivalence, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero
         ]);
     });
 });

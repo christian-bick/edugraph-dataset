@@ -8,6 +8,9 @@ describe('NumbersFractionLineViewSchema', () => {
         expect(spec.generalLabels).toEqual([
             Scope.Numberline,
             Scope.SingleFrameOfReference,
+            Scope.ArabicNumerals,
+            Scope.Base10,
+            Scope.NumbersWithZero,
             Ability.VisualArticulation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);

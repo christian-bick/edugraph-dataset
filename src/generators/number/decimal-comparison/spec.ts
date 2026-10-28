@@ -15,7 +15,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.NumerationWithDecimals,
         Area.DecimalPrecission,
-        Scope.DecimalNumbers
+        Scope.DecimalNumbers,
+        Scope.NumbersWithoutNegatives
     ]
 };
 

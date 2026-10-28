@@ -7,7 +7,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'percent-quantity-relations',
     generalLabels: [
         Area.PercentageEquivalence, Area.ProportionalScaling,
-        Scope.RationalNumbers, Scope.NumbersWithoutNegatives
+        Scope.RationalNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
     ]
 };
 

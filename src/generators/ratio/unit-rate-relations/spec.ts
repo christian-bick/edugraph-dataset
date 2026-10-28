@@ -8,7 +8,7 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation,
         Area.RatioEquivalence, Area.Division, Area.ProportionalScaling,
-        Scope.RationalNumbers, Scope.NumbersWithoutNegatives
+        Scope.RationalNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
     ]
 };
 

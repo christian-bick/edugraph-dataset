@@ -7,11 +7,14 @@ export const spec: ViewSpec = {
     generalLabels: [
         Area.DecimalEquivalence,
         Area.FractionNotation,
-        Scope.FractionNumbers,
+        Scope.ProperFractions,
         Scope.MeterScale,
         Scope.EqualShares,
         Scope.Equal,
         Scope.SingleFrameOfReference,
+        Scope.ArabicNumerals,
+        Scope.Base10,
+        Scope.NumbersWithZero,
         Ability.Formalization
     ]
 };

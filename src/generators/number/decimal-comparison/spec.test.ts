@@ -29,7 +29,8 @@ describe('DecimalComparisonGenerator spec integration', () => {
             generalLabels: [
                 Area.NumerationWithDecimals,
                 Area.DecimalPrecission,
-                Scope.DecimalNumbers
+                Scope.DecimalNumbers,
+                Scope.NumbersWithoutNegatives
             ]
         });
     });

@@ -7,6 +7,8 @@ describe('fractions-compare-benchmark-models view spec', () => {
     it('owns invariant benchmark procedure understanding', () => {
         expect(spec.generalLabels).toEqual([
             Scope.VisualNumbers,
+            Scope.ArabicNumerals,
+            Scope.Base10,
             Ability.ProcedureUnderstanding
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);

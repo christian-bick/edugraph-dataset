@@ -12,7 +12,8 @@ describe('FractionNumberLineGenerator spec integration', () => {
         expect(spec).toEqual({
             generatorId: 'fraction-number-line',
             generalLabels: [
-                Area.NumerationWithFractions
+                Area.NumerationWithFractions,
+                Scope.NumbersWithoutNegatives
             ]
         });
     });

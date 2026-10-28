@@ -8,11 +8,14 @@ describe('numbers-decimal-measurement view spec', () => {
         expect(spec.generalLabels).toEqual([
             Area.DecimalEquivalence,
             Area.FractionNotation,
-            Scope.FractionNumbers,
+            Scope.ProperFractions,
             Scope.MeterScale,
             Scope.EqualShares,
             Scope.Equal,
             Scope.SingleFrameOfReference,
+            Scope.ArabicNumerals,
+            Scope.Base10,
+            Scope.NumbersWithZero,
             Ability.Formalization
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
