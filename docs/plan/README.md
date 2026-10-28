@@ -13,8 +13,9 @@ These items are not newly scheduled by the archive move.
   and [progress ledger](label-dependency-progress.md) track autonomous declaration repairs,
   exact gap accounting and separate decision batches. All 26 original scopes are triaged;
   429 gaps remain in 29 decision batches after the supported autonomous repairs and evidence re-review.
-  The [next representation-completeness decision](label-dependency-graph.md#next-decision-representation-completeness)
-  has a concrete graph proposal and measured tradeoffs; it remains unimplemented.
+  The [agreed conditional-dependency direction](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies)
+  narrows blanket numeral/base requirements first; implementation is pending and representation
+  completeness remains a separate design question.
   Range-policy redesign remains excluded.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

@@ -26,14 +26,20 @@ The autonomous declaration pass and necessary-evidence re-review have triaged al
 source scopes: **953 requirements closed, 75 newly exposed, 429 remaining**. All remaining gaps have exact owners in **29 decision
 batches**; no independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
-for the remaining source decisions and their implementations. The next concrete proposal is
-[representation completeness](#next-decision-representation-completeness); it is not implemented.
+for the remaining source decisions and their implementations. The next agreed direction is
+[conditional notation dependencies](#agreed-direction-conditional-notation-dependencies);
+the implementation is unchanged and representation completeness is a separate design question.
 
-## Next decision: representation completeness
+## Agreed direction: conditional notation dependencies
 
-**Proposal only; approval is pending.** This changes the graph's completeness contract and is
-outside the declaration-only authorization. The current graph, evaluator, shared strict gate,
-Area allowlist, integer-digit qualification and range exclusion remain unchanged.
+**Direction agreed on 2026-10-28; implementation pending.** Narrow the overly broad
+numeral/base dependencies first. Treat completeness of representation labels as a separate
+design question. This supersedes the earlier proposal to require `NumberRepresentation`
+whenever a numeric context is declared; that replacement obligation was not adopted.
+
+This record changes the plan only. The current graph, evaluator and shared strict gate are
+unchanged. Their existing 429 distinct source findings remain the implementation baseline;
+agreement on a policy direction does not itself close a finding.
 
 The necessary-evidence re-review closes 23 findings without changing policy: thirteen explicit
 or necessarily required zero values and ten digital-construction numeral/base requirements.
@@ -51,73 +57,81 @@ The remaining notation problem cannot be solved by adding Arabic numerals everyw
 | Analog-clock reading | 10 | Five questions show an unnumbered dial and a generic response field. They do not require the Arabic-digit response used in the solution. |
 | Rounding-reasoning view | 8 | Numeral evidence is present, but declaring it admits an unsafe new target match: 23+32+45=100 can produce a proposed answer200. The existing rendering guarantee needs its separate decision. |
 
-**Recommended contract:** require an evidenced number representation for numeric contexts,
-and require a base only when a declared representation establishes positional notation or
-place value. Physical quantities, spatial models and written numerals are different valid
-representations. A collection of objects is not necessarily a numeral system.
+Number kind, numeral system and positional base answer different questions. Integers or
+fractions can be involved without written numerals. Numeral systems describe conventional
+written representations; not every such system has positional place values. The existence
+of quantities therefore does not by itself require either a numeral-system label or a base.
 
-The smallest graph-only proposal uses existing selectors and existing ontology descriptors:
+The next implementation should:
+
+1. Remove the blanket `numeralSystem` and `base` assessments from `LD-NUM-01`, retaining its
+   other assessments and existing trigger. Do not replace them with a blanket representation
+   assessment.
+2. Require a base when positive declared evidence establishes positional representation or
+   place value. Keep the existing decimal-to-base obligation. Review additional triggers
+   against the pinned ontology before implementing the exact selector.
+3. Keep numeral-omission detection separate: add a numeral-system dependency only where an
+   independently declared fact necessarily establishes numeral usage. A rule triggered solely
+   by a numeral-system label cannot detect that same label's absence.
+
+The intended rule shape uses existing graph mechanisms:
 
 ```ts
-// Additional facets; these are selectors, never automatic labels.
-numberRepresentation: {root: Scope.NumberRepresentation},
-positionalRepresentation: {labels: [
-    Scope.ArabicNumerals, Scope.RodNumerals,
-    Scope.BaseTenBlocks, Scope.ScientificExponentNotation
-]}
-
 // Keep LD-NUM-01's existing trigger. Replace only its assessed groups:
-assess: ['numberKind', 'numberRepresentation', 'range', 'sign', 'zero']
+assess: ['numberKind', 'range', 'sign', 'zero']
 
-// Add this base obligation; keep LD-DECIMAL-01 as well.
+// Define positionalRepresentation using reviewed positive ontology selectors.
+// Keep LD-DECIMAL-01; add the other proven positional dependencies:
 {id: 'LD-POSITIONAL-01', when: {family: 'positionalRepresentation'}, assess: ['base']}
 ```
 
-Arabic digits require determining their base, not automatically choosing Base10. Decimal
-notation, rods, base-ten blocks and scientific notation retain positive base obligations.
-Generic physical/visual/spatial representation, Roman numerals, an abacus or an analog clock
-alone does not establish positional place values. No absence of notation is inferred from an
-absent label. Number-kind, sign, zero, fraction and operand obligations otherwise remain as is.
+Candidate positional evidence includes decimal notation, base-ten blocks, scientific notation
+and rod numeral place values. For Arabic numerals, verify whether the ontology descriptor
+alone guarantees positional usage or needs an additional condition; do not equate a digit
+repertoire with every positional property. Generic physical/visual/spatial representations,
+Roman numerals, an abacus or an analog clock alone do not establish positional place values.
+Determining a base never means automatically choosing Base10.
 
-There is a deliberate completeness tradeoff. In an objects-plus-numerals task, retaining
-`PhysicalNumbers` while accidentally omitting `ArabicNumerals` would still satisfy the new
-representation facet. The graph would require one evidenced category, not prove that every
-coexisting representation was annotated. Declaration review and VQA remain responsible for
-truth and the observable evidence; neither can be advertised as a new automatic exhaustive
-omission detector. The current blanket rule catches that particular omission but also demands
-false numeral claims for object-only tasks. A rule triggered only by an existing numeral label
-cannot detect its absence and is not a substitute for this explicit contract decision.
+Number-kind, sign, zero, fraction and operand obligations retain their own conditions. Preserve
+the complete Area allowlist, integer-only digit qualification and range-policy exclusion.
+No adapters, automatic completion, payload classification or per-view exceptions are introduced.
 
-A read-only simulation on the current annotations gives **429 → 406** distinct source gaps:
+### Separate question: representation completeness
 
-| Owner | Current notation gaps removed | Replacement representation gaps | Net reduction |
-|---|---:|---:|---:|
-| RB-A3-D1 object-only | 20 | 2 sorting selections lack any representation declaration | 18 |
-| RB-M2-D1 analog reading | 10 | 5 | 5 |
-| RB-A3-D3 reasoning | 8 | 8 | 0 |
-| **Total** | **38** | **15** | **23** |
+How to detect every applicable but undeclared representation remains open. A mixed task can
+contain both objects and written numerals. `PhysicalNumbers` does not say that numerals are
+absent, and an absent numeral label supplies no evidence that no numerals occur. Requiring
+one `NumberRepresentation` family member would not establish that all coexisting
+representations were annotated, so it is not adopted as a general solution.
 
-These are **policy reclassifications, not additive repairs or accepted closures**. No ledger
-counts are changed by the simulation. The two sorting representation claims and the five
-analog claims would still require source/ontology evidence review; the reasoning obstruction
-would remain. The stored snapshot counterfactual is 4,012 → 3,212 distinct gaps, measured
-separately and not counted as refreshed or accepted data. The simulation is in
-`temp/label-dependency-decisions/representation-counterfactual.json` and never writes a graph,
-sample, label or model configuration.
+Future work may identify independent positive triggers that establish a particular
+representation, or establish a justified applicability contract. It must distinguish number
+kind from written notation, review both pure and mixed cases, and avoid relying on hidden
+metadata. Source review can investigate omissions; VQA of supplied labels must not be claimed
+to exhaustively find undeclared ones. No ontology additions or new representation requirement
+are authorized by this plan refinement.
 
-The alternative is to retain universal numeral completeness and design an explicit exclusive
-nonwritten-representation descriptor upstream. Existing `PhysicalNumbers`, `VisualNumbers`
-and clock labels do not mean “only this representation.” Such ontology work and package
-adoption are larger than this local graph proposal. Per-view exceptions or missing-label
-bypasses would undermine the shared annotation-only contract and are not proposed.
+The previous `NumberRepresentation` proposal's read-only simulation, **429 → 406** source
+gaps and **4,012 → 3,212** distinct stored gaps, is superseded. It remains historical scratch
+evidence in `temp/label-dependency-decisions/representation-counterfactual.json`, not a forecast
+for this narrower direction. Do not reuse those counts or count removed obligations as
+additive label repairs. The known reasoning-view rendering defect remains open even if a
+future dependency rule no longer reports its numeral omission.
 
-If the representation contract is approved, implement it in a separate checkpoint, add
-evaluator tests for objects, mixed representations, Roman numerals, decimal/rod/block/scientific
-notation and the unchanged Area/integer/range boundaries, then rerun the audit. Report removed
-obligations, new obligations and actual declaration repairs separately. Preserve all targets,
-configuration, sampling and rendered tasks; do not regenerate until remaining source readiness
-is achieved. Approval of this proposal would not approve rendering changes for reasoning,
-clock-mode architecture, zero ownership, or new mathematical sampling profiles.
+### Implementation and validation checkpoint
+
+Review the exact positive positional selectors, implement the narrowed graph in a separate
+checkpoint, and test object-only, mixed, Roman, decimal, rod, block and scientific-notation
+contexts. Include cases with missing base labels, missing numeral labels and absent positional
+evidence, plus the unchanged Area/integer/range boundaries. Confirm the evaluator still reads
+only annotations and ontology membership, and never adds labels.
+
+Rerun the audit under its new policy identity. Reconcile removed obligations, newly required
+obligations and actual declaration repairs separately, preserving follow-up ownership for
+known source defects. Keep targets, configuration, sampling and rendering unchanged. Full
+regeneration still waits for the agreed source readiness conditions under the implemented
+policy. This direction does not approve reasoning rendering changes, clock-mode architecture,
+zero ownership redesign or new mathematical sampling profiles.
 
 ## Scope
 
