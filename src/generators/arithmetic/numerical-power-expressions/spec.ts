@@ -15,10 +15,9 @@ export const spec: GeneratorSpec = {
     compatibility: [generatorLabelRule('single-power-numeric-profile',
         [Area.OrderOfOperations, Scope.PositiveExponent, ...numericProfileLabels], selected => {
             const labels = numericProfileLabels.filter(label => selected(label));
-            if (selected(Area.OrderOfOperations)) return labels.length === 0;
             return numericProfileBundles.some((bundle, index) => labels.length === bundle.length
                 && bundle.every(label => selected(label))
-                && !(index === 3 && selected(Scope.PositiveExponent)));
+                && !(index === 3 && selected(Scope.PositiveExponent) && !selected(Area.OrderOfOperations)));
         })]
 };
 

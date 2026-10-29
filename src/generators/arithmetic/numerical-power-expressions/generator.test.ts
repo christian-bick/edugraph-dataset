@@ -52,15 +52,19 @@ describe('real mathematical structure and exponent sampling', () => {
             const shapes = new Set<string>();
             for (let seed = 0; seed < 192; seed++) {
                 setSeed(seed);
-                const numericProfile = structure === 'mixed-precedence' ? 0
-                    : (exponents === 'positive' ? [1, 2, 3] : [1, 2, 3, 4])[seed % (exponents === 'positive' ? 3 : 4)]! as 1 | 2 | 3 | 4;
-                const stub = generator.generate({structure, exponents, numericProfile});
+                const profiles = structure === 'single-power' && exponents === 'positive' ? [1, 2, 3] : [1, 2, 3, 4];
+                const numericProfile = profiles[seed % profiles.length]! as 1 | 2 | 3 | 4;
+                const stub = generator.generate({structure, exponents, numericProfile})!;
                 const data = stub.data;
                 expect(Object.keys(stub)).toEqual(['data']);
                 expect(Object.keys(data).sort()).toEqual(['expression', 'finalValue', 'kind', 'nodeValues', 'powerFacts', 'precedenceWitness', 'reductions']);
                 expect(isNumericalPowerExpressionProblem(data)).toBe(true);
                 expect(asFraction(data.finalValue)).toEqual(evaluate(data.expression));
                 const original = nodes(data.expression);
+                const values = [...original.map(node => Number(evaluate(node)[0])),
+                    ...original.flatMap(node => node.kind === 'power' ? [node.exponent] : [])];
+                expect(values.some(value => value < 0)).toBe(numericProfile > 2);
+                expect(values.some(value => value === 0)).toBe(numericProfile % 2 === 0);
                 expect(original.length).toBeLessThanOrEqual(25);
                 expect(depth(data.expression)).toBeLessThanOrEqual(8);
                 expect(new Set(original.map(node => node.id)).size).toBe(original.length);
@@ -112,7 +116,8 @@ describe('real mathematical structure and exponent sampling', () => {
         let trap = false, largeComponent = false, exactFraction = false;
         for (let seed = 0; seed < 192; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({structure: 'mixed-precedence', exponents: 'allow-zero', numericProfile: 0});
+            const {data} = generator.generate({structure: 'mixed-precedence', exponents: 'allow-zero',
+                numericProfile: (seed % 4 + 1) as 1 | 2 | 3 | 4})!;
             const ids = data.reductions.map(step => step.targetNodeId);
             if (ids.includes('left-sum') && ids.includes('product') && data.powerFacts.length === 1) {
                 expect(ids.indexOf('power')).toBeLessThan(ids.indexOf('product'));
@@ -129,7 +134,7 @@ describe('real mathematical structure and exponent sampling', () => {
 
     it('replays exact data and rejects empty, missing or false mathematical config', () => {
         const generator = new NumericalPowerExpressionsGenerator();
-        const config = {structure: 'mixed-precedence', exponents: 'positive', numericProfile: 0} as const;
+        const config = {structure: 'mixed-precedence', exponents: 'positive', numericProfile: 1} as const;
         setSeed(31); const first = generator.generate(config);
         setSeed(31); expect(generator.generate(config)).toEqual(first);
         for (const value of [null, undefined, {}, {structure: 'single-power'}, {exponents: 'positive'},

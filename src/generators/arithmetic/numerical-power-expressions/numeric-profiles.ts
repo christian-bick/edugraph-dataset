@@ -9,21 +9,25 @@ export const numericProfileBundles = [
     [Scope.NumbersWithNegatives, Scope.NumbersWithoutZero],
     [Scope.NumbersWithNegatives, Scope.NumbersWithZero]
 ] as const;
-export type NumericProfile = 0 | 1 | 2 | 3 | 4;
+export type NumericProfile = 1 | 2 | 3 | 4;
 export const numericProfileLabels = [...new Set(numericProfileBundles.flat())];
 
 export const resolveNumericProfile = withLabelChoices(exactResolver((labels: string[]): NumericProfile | undefined => {
     const selected = labels.filter(label => numericProfileLabels.includes(label as never));
-    if (labels.includes(Area.OrderOfOperations)) return selected.length ? undefined : 0;
     const index = numericProfileBundles.findIndex(bundle => bundle.length === selected.length
         && bundle.every(label => selected.includes(label)));
-    if (index < 0 || index === 3 && labels.includes(Scope.PositiveExponent)) return undefined;
+    if (index < 0 || index === 3 && labels.includes(Scope.PositiveExponent)
+        && !labels.includes(Area.OrderOfOperations)) return undefined;
     return (index + 1) as NumericProfile;
 }), {
-    kind: 'alternatives', alternatives: [[], ...numericProfileBundles],
-    defaults: [{whenAll: [Area.OrderOfOperations], labels: []}],
+    kind: 'alternatives', alternatives: numericProfileBundles,
     contextLabels: [Area.OrderOfOperations, Scope.PositiveExponent]
 });
+
+/** Constrains all exact mathematical values, including written exponents and intermediate results. */
+export const permitsNumericValues = (numerators: readonly number[], profile: NumericProfile): boolean =>
+    numerators.some(value => value < 0) === (profile > 2)
+    && numerators.some(value => value === 0) === (profile % 2 === 0);
 
 /** The original exponent/denominator/numerator/sign draws, before rational reduction. */
 export function singlePowerCandidates(positiveExponent: boolean, profile: NumericProfile) {

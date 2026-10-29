@@ -43,12 +43,13 @@ describe('single-power numeric profiles', () => {
         expect(sampleSinglePower(true, 4)).toBeNull();
     });
 
-    it('keeps the mixed empty binding separate from single fallback bundles', () => {
-        expect(resolveNumericProfile([Area.OrderOfOperations])).toBe(0);
+    it('requires a complete mixed binding while allowing its positive-exponent zero contexts', () => {
+        expect(resolveNumericProfile([Area.OrderOfOperations])).toBeUndefined();
         expect(resolveNumericProfile([])).toBeUndefined();
         expect(resolveNumericProfile([...numericProfileBundles[0]])).toBe(1);
         expect(resolveNumericProfile([...numericProfileBundles[3], Scope.PositiveExponent])).toBeUndefined();
-        expect(resolveNumericProfile([...numericProfileBundles[0], Area.OrderOfOperations])).toBeUndefined();
+        expect(resolveNumericProfile([...numericProfileBundles[0], Area.OrderOfOperations])).toBe(1);
+        expect(resolveNumericProfile([...numericProfileBundles[3], Area.OrderOfOperations, Scope.PositiveExponent])).toBe(4);
     });
 });
 

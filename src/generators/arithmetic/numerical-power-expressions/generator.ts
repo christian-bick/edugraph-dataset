@@ -5,7 +5,7 @@ import type {ArithmeticOperation, ExactNumericalExpressionNode, ExactNumericExpr
 import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
 import {buildNumericalPowerExpressionProblem} from '../numerical-power-helpers.ts';
 import {NumericalPowerExpressionsGeneratorSchema, type NumericalPowerExpressionsGeneratorConfig} from './spec.ts';
-import {sampleSinglePower} from './numeric-profiles.ts';
+import {permitsNumericValues, sampleSinglePower} from './numeric-profiles.ts';
 
 const generatorId = 'numerical-power-expressions';
 const constraints: ExactNumericExpressionConstraints = {domain: 'rational', maximumAbsoluteValue: {numerator: 100, denominator: 1},
@@ -58,10 +58,11 @@ export class NumericalPowerExpressionsGenerator implements ProblemGenerator<Nume
     type: AbstractProblem['type'] = 'arithmetic';
     schema = NumericalPowerExpressionsGeneratorSchema;
 
-    generate(config: NumericalPowerExpressionsGeneratorConfig): ProblemStub<NumericalPowerExpressionProblem> {
+    generate(config: NumericalPowerExpressionsGeneratorConfig): ProblemStub<NumericalPowerExpressionProblem> | null {
         validateConfigFields(generatorId, config, ['structure', 'exponents', 'numericProfile']);
         if ((config.structure !== 'single-power' && config.structure !== 'mixed-precedence')
-            || (config.exponents !== 'allow-zero' && config.exponents !== 'positive')) {
+            || (config.exponents !== 'allow-zero' && config.exponents !== 'positive')
+            || ![1, 2, 3, 4].includes(config.numericProfile!)) {
             throw new GeneratorValidationError(generatorId, 'Choose a supported mathematical expression structure and exponent domain.');
         }
         const positive = config.exponents === 'positive';
@@ -71,8 +72,16 @@ export class NumericalPowerExpressionsGenerator implements ProblemGenerator<Nume
             if (!sample) throw new GeneratorValidationError(generatorId, 'Choose a feasible single-power numeric profile.');
             expression = {id: 'power', kind: 'power', base: literal('power-base', sample.base), exponent: sample.exponent};
         } else {
-            if (config.numericProfile !== 0) throw new GeneratorValidationError(generatorId, 'Mixed expressions retain the unrestricted numeric profile.');
-            expression = mixedExpression(positive);
+            // Keep the original correlated scenario sampler, conditioned on a profile
+            // already selected by configuration. No labels are read from a candidate.
+            // Scenario zero gives each profile probability at least 1/1152;
+            // the bounded retry failure is below 5e-13 and retries remain pipeline-owned.
+            for (let attempt = 0; attempt < 32768; attempt++) {
+                const data = buildNumericalPowerExpressionProblem(mixedExpression(positive), constraints);
+                if (permitsNumericValues([...data.nodeValues.map(item => item.value.numerator),
+                    ...data.powerFacts.map(fact => fact.exponent)], config.numericProfile!)) return {data};
+            }
+            return null;
         }
         return {data: buildNumericalPowerExpressionProblem(expression, constraints)};
     }

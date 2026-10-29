@@ -25,10 +25,7 @@ describe('exact expression structure/exponent capability bundles', () => {
                 const labels = [...structureLabels, ...exponentLabels];
                 const resolved = extractConfig(NumericalPowerExpressionsGeneratorSchema, labels);
                 expect(resolved.config).toMatchObject({structure, exponents});
-                if (structure === 'mixed-precedence') {
-                    expect(resolved.config.numericProfile).toBe(0);
-                    expect(new Set(resolved.resolvedLabels)).toEqual(new Set(labels));
-                } else expect(resolved.config.numericProfile).toBeGreaterThan(0);
+                expect(resolved.config.numericProfile).toBeGreaterThan(0);
                 const data = generateWithLabels(new NumericalPowerExpressionsGenerator(), labels)!.data;
                 expect(data.precedenceWitness === null).toBe(structure === 'single-power');
                 if (exponents === 'positive') expect(data.powerFacts.every(fact => fact.exponent > 0)).toBe(true);
@@ -58,7 +55,7 @@ describe('exact expression structure/exponent capability bundles', () => {
                     Scope.NumbersWithZero, Scope.NumbersWithoutZero];
                 expect(new Set(draw.labels.filter(label => !numeric.includes(label as never))))
                     .toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.Base10]));
-                if (writing) expect(draw.labels.filter(label => numeric.includes(label as never))).toHaveLength(2);
+                expect(draw.labels.filter(label => numeric.includes(label as never))).toHaveLength(2);
                 expect(draw.stub!.data.precedenceWitness === null).toBe(writing);
                 if (target.labels.includes(Scope.PositiveExponent)) expect(draw.stub!.data.powerFacts.every((fact: ExactPowerFact) => fact.exponent > 0)).toBe(true);
             }
