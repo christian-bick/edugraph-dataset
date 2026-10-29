@@ -13,9 +13,10 @@ const nonExcludingContext = new Set<string>([
 ]);
 
 describe('Binary operand-width profile resolution', () => {
-    it('requires a width for the scoped addition domain and resolves both fallback values', () => {
-        expect(usesLargestOperandWidthProfiles(selectedFrom(addition))).toBe(true);
-        expect(resolveLargestOperandDigits(addition)).toBeUndefined();
+    it.each([Area.Addition, Area.Subtraction])('requires a width for the scoped %s domain', operation => {
+        const labels = [operation, Scope.NumbersSmaller20];
+        expect(usesLargestOperandWidthProfiles(selectedFrom(labels))).toBe(true);
+        expect(resolveLargestOperandDigits(labels)).toBeUndefined();
         expect(resolveLargestOperandDigits([Scope.SingleDigitLargestOperand])).toBe(1);
         expect(resolveLargestOperandDigits([Scope.TwoDigitLargestOperand])).toBe(2);
         expect(resolveLargestOperandDigits([])).toBe(0);
@@ -45,7 +46,7 @@ describe('Binary operand-width profile resolution', () => {
         }
     );
 
-    it.each([Area.Subtraction, Area.Multiplication, Area.Division])(
+    it.each([Area.Multiplication, Area.Division])(
         'keeps %s on the existing sampler', operation => {
             expect(resolveLargestOperandDigits([operation, Scope.NumbersSmaller20])).toBe(0);
             expect(resolveLargestOperandDigits([

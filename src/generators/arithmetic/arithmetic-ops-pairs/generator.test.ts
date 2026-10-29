@@ -24,9 +24,9 @@ describe('ArithmeticOpsPairsGenerator', () => {
     });
 
     it.each([1, 2] as const)('generates the declared %i-digit primary operands within 20', largestOperandDigits => {
-        for (let seed = 0; seed < 100; seed++) {
+        for (const operation of [Area.Addition, Area.Subtraction] as const) for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const data = generator.generate({operation: Area.Addition, largestOperandDigits,
+            const data = generator.generate({operation, largestOperandDigits,
                 requireNegative: false, requireZero: false, requireMultipleOf10: false,
                 requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}})!.data;
             expectValidEquation(data);

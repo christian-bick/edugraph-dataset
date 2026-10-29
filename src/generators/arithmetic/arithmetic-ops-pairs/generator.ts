@@ -5,7 +5,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {operationNames} from '../helpers.ts';
 import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
-import {sampleAdditionWidthPair} from './width-sampling.ts';
+import {sampleOperandWidthPair} from './width-sampling.ts';
 
 export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticPairProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -39,7 +39,7 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (![0, 1, 2].includes(digits)) return null;
         const existingSingleDigitDomain = digits === 1 && maxMagnitude <= 5;
         const widthProfile = digits !== 0 && !existingSingleDigitDomain;
-        if (widthProfile && (operation !== Area.Addition || config.requireEqualAddends
+        if (widthProfile && ((operation !== Area.Addition && operation !== Area.Subtraction) || config.requireEqualAddends
             || requireNegative || requireZero || requireMultipleOf10
             || minMagnitude !== 1 || maxMagnitude !== 20)) return null;
 
@@ -89,7 +89,7 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = -magnitude;
                 answer = -2 * magnitude;
             } else if (widthProfile) {
-                [num1, num2] = sampleAdditionWidthPair(digits as 1 | 2);
+                [num1, num2] = sampleOperandWidthPair('addition', digits as 1 | 2);
                 answer = num1 + num2;
             } else {
                 const first = randomMagnitude(minMagnitude, maxMagnitude - minMagnitude);
@@ -113,6 +113,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num1 = magnitude;
                 num2 = 2 * magnitude;
                 answer = -magnitude;
+            } else if (widthProfile) {
+                [num1, num2] = sampleOperandWidthPair('subtraction', digits as 1 | 2);
+                answer = num1 - num2;
             } else {
                 const subtrahend = randomMagnitude(minMagnitude, maxMagnitude - minMagnitude);
                 if (subtrahend === null) return null;

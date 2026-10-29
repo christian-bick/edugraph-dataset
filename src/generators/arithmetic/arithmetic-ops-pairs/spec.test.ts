@@ -6,7 +6,7 @@ import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
-import {ArithmeticOpsPairsGeneratorSchema, spec} from './spec.ts';
+import {type ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema, spec} from './spec.ts';
 
 const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
 const makeWidthPlan = (labels: string[]) => planModelCompatibility({id: 'width', labels},
@@ -23,8 +23,8 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(spec.generalLabels).toContain(Scope.SingleStep);
     });
 
-    it('exposes both truthful largest-width profiles to matching for ordinary addition within twenty', () => {
-        const labels = [Area.Addition, Scope.NumbersSmaller20,
+    it.each([Area.Addition, Area.Subtraction])('exposes both largest-width profiles to matching for ordinary %s within twenty', operation => {
+        const labels = [operation, Scope.NumbersSmaller20,
             Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
         const result = makeWidthPlan(labels);
         expect(result.supported).toBe(true);
@@ -52,9 +52,12 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
                 generatorSchema: ArithmeticOpsPairsGeneratorSchema, viewSchema: {}, plan: result.plan,
                 sampleKey: 'width#arithmetic-ops-pairs#width-test#train#question#inst:0', seed, attempt: 1
             });
-            resolvedOperations.add(generatorConfig.operation);
-            expect(generatorConfig.largestOperandDigits === 0)
-                .toBe(generatorConfig.operation !== Area.Addition);
+            const config = generatorConfig as ArithmeticOpsPairsGeneratorConfig;
+            const operation = config.operation;
+            if (operation === undefined) throw new Error('Expected a resolved operation.');
+            resolvedOperations.add(operation);
+            expect(config.largestOperandDigits === 0)
+                .toBe(operation !== Area.Addition && operation !== Area.Subtraction);
         }
         expect(resolvedOperations).toEqual(new Set(operations));
     });
@@ -71,11 +74,11 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         }
     });
 
-    it('selects and emits a largest-width profile through direct resolution too', () => {
+    it.each([Area.Addition, Area.Subtraction])('selects and emits a largest-width profile through direct %s resolution too', operation => {
         const widths = new Set<number>();
         for (let seed = 0; seed < 32; seed++) {
             setSeed(seed);
-            const labels = [Area.Addition, Scope.NumbersSmaller20,
+            const labels = [operation, Scope.NumbersSmaller20,
                 Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
             const resolved = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
             widths.add(resolved.config.largestOperandDigits!);

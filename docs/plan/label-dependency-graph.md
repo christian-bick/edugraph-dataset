@@ -37,8 +37,8 @@ possible-output declaration, so introducing a callback closes no finding by itse
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
 The subsequent measurement split closes 21 more; two subtraction-width fixes and the
-21 zero-absence repairs reduce the total to 341. The first width-profile checkpoint below
-closes 14 more, leaving **327**. The known
+21 zero-absence repairs reduce the total to 341. The first two width-profile checkpoints below
+close 28 more, leaving **313**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -100,7 +100,7 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**1,017 requirements repaired, 75 newly exposed, 38 retired by policy, 327 remaining**.
+**1,031 requirements repaired, 75 newly exposed, 38 retired by policy, 313 remaining**.
 All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
@@ -302,6 +302,19 @@ question/solution SSR comparisons, 936 replay checks and rejection of 126 stale 
 The 72 focused tests, type check and declaration audit pass. Evidence is under
 `temp/arithmetic-width-profiles/`, including exhaustive selection lineage; sampled probes
 are supplementary evidence rather than an exhaustive claim about random outputs.
+
+The second checkpoint extends the same field to subtraction. Its 190 original positive
+problems partition into 36 single-digit and 154 two-digit primary-operand pairs. The old
+sampler chooses the subtrahend first, then a positive difference; the local sampler preserves
+those probabilities while classifying the resulting minuend and subtrahend. In particular,
+`10 - 1` belongs to the two-digit profile even though its difference is one digit. Equal-addend
+addition remains on its old path until the third checkpoint.
+
+Subtraction acceptance closes another 14 original requirements: **327 → 313** source gaps,
+1,312 selections and no new omissions or conflicts. All 1,013 targets and 1,209 tuples remain.
+Cumulative preservation checks cover 1,020 planned probes/replays, 846 direct requests, 340
+exact SSR comparisons and 126 stale-plan rejections. All 77 focused tests and type checking pass;
+the subtraction evidence is alongside the first checkpoint under the same directory.
 
 The user supplied the decision required by the
 [autonomous execution agreement](#autonomous-execution-agreement-2026-10-28), which places a
