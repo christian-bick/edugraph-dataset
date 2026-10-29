@@ -35,9 +35,10 @@ const generateAddition = (
     return data;
 };
 
-const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view'): TenthsToHundredthsProblem => {
+const generateEquivalence = (seed = 'tenths-hundredths-equivalence-view',
+    fractionMagnitude: 'proper' | 'equal-whole' = 'proper'): TenthsToHundredthsProblem => {
     setSeed(seed);
-    const data = new FractionTenthsEquivalenceGenerator().generate({}).data;
+    const data = new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude}).data;
     if (data.task !== 'tenths-to-hundredths') {
         throw new Error('Expected a tenths-to-hundredths payload.');
     }
@@ -55,7 +56,7 @@ describe('tenths/hundredths view contract', () => {
         let sawBoundaryCrossing = false;
         let sawWholeSum = false;
         for (let seed = 0; seed < 200; seed++) {
-            const equivalence = generateEquivalence(`equivalence-${seed}`);
+            const equivalence = generateEquivalence(`equivalence-${seed}`, seed % 2 === 0 ? 'proper' : 'equal-whole');
             const addition = generateAddition(`addition-${seed}`);
             expect(isValidTenthsToHundredthsProblem(equivalence)).toBe(true);
             expect(isValidTenthsHundredthsAdditionProblem(addition)).toBe(true);

@@ -20,7 +20,7 @@ describe('equivalence payload families', () => {
                 usesMultiplication: true,
                 usesProportionalScaling: false
             }).data;
-            const tenths = new FractionTenthsEquivalenceGenerator().generate({}).data;
+            const tenths = new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude: 'proper'}).data;
             const whole = new FractionWholeEquivalenceGenerator().generate({}).data;
             for (const solution of [false, true]) {
                 for (const mode of ['formalization', 'explanation'] as const) {

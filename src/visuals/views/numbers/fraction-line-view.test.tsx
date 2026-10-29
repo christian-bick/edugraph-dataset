@@ -44,12 +44,8 @@ const locationData: FractionNumberLineProblem = {
 };
 
 function wholeTenthsData(): TenthsToHundredthsProblem {
-    for (let attempt = 0; attempt < 200; attempt++) {
-        setSeed(`fraction-line-whole-${attempt}`);
-        const data = new FractionTenthsEquivalenceGenerator().generate({}).data;
-        if (data.task === 'tenths-to-hundredths' && data.tenths.numerator === 10) return data;
-    }
-    throw new Error('Expected a seeded 10/10 to 100/100 equivalence model.');
+    setSeed('fraction-line-whole');
+    return new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude: 'equal-whole'}).data;
 }
 
 describe('fraction-line Ability projections', () => {
