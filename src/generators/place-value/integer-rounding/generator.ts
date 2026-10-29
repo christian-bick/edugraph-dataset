@@ -3,7 +3,7 @@ import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {IntegerRoundingProblem} from '../../../types/problems.ts';
-import {IntegerRoundingGeneratorConfig, IntegerRoundingGeneratorSchema} from './spec.ts';
+import {IntegerRoundingGeneratorConfig, IntegerRoundingGeneratorSchema, spec} from './spec.ts';
 
 type RoundingPlace = 10 | 100 | 1000 | 10000 | 100000;
 
@@ -54,6 +54,7 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
 > {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = IntegerRoundingGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: IntegerRoundingGeneratorConfig): ProblemStub<IntegerRoundingProblem> | null {
         validateConfigFields('integer-rounding', config, ['range', 'roundingMagnitude']);
