@@ -1,9 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {DecimalPlaceComparisonGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {DecimalPlaceComparisonGeneratorSchema, spec} from './spec.ts';
 
 const commonLabels = [
     Area.PlaceValue,
@@ -44,8 +44,9 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe(relation);
-        expect(stub!.labels).toEqual(relation === 'equal'
-            ? [area, scope, Scope.NumbersWithZero] : [area, scope]);
+        expect(stub!.labels).toEqual(expect.arrayContaining([area, scope]));
+        expect(stub!.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never)))
+            .toHaveLength(1);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
         if (relation === 'equal') {
             expect(stub!.data.left.fractionalDigits[2]).toBe(0);
@@ -53,12 +54,16 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
         }
 
         setSeed(`decimal-place-comparison-labels-${relation}`);
-        expect(generator.generate({comparisonKind, relation})?.data).toEqual(stub!.data);
+        const resolved = extractConfig(DecimalPlaceComparisonGeneratorSchema, labels);
+        expect(generator.generate(resolved.config)?.data).toEqual(stub!.data);
     });
 
-    it.each([Scope.Greater, Scope.Less])('does not claim zero for an unrestricted %s comparison', relation => {
-        expect(() => generateWithLabels(generator, [
-            ...commonLabels, Area.NumericInequality, relation, Scope.NumbersWithZero
-        ])).toThrow('Unsupported exact label combination');
+    it.each([Scope.Greater, Scope.Less])('constrains the requested zero profile for %s comparison', relation => {
+        for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
+            const stub = generateWithLabels(generator, [...commonLabels, Area.NumericInequality, relation, zero])!;
+            expect(stub.labels).toContain(zero);
+            const digits = [stub.data.left, stub.data.right].flatMap(operand => [...operand.wholeDigits, ...operand.fractionalDigits]);
+            expect(digits.includes(0)).toBe(zero === Scope.NumbersWithZero);
+        }
     });
 });

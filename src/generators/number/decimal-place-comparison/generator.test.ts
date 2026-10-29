@@ -1,5 +1,6 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
 import type {
     DecimalPlaceComparisonOperand,
     DecimalPlaceComparisonPlace,
@@ -12,13 +13,14 @@ import {
 import type {DecimalPlaceComparisonGeneratorConfig} from './spec.ts';
 
 const generator = new DecimalPlaceComparisonGenerator();
+afterEach(() => vi.restoreAllMocks());
 const PLACES: readonly DecimalPlaceComparisonPlace[] = [
     'hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'
 ];
 const configs = {
-    greater: {comparisonKind: 'inequality', relation: 'greater'},
+    greater: {comparisonKind: 'inequality', relation: 'greater-zero'},
     equal: {comparisonKind: 'equality', relation: 'equal'},
-    less: {comparisonKind: 'inequality', relation: 'less'}
+    less: {comparisonKind: 'inequality', relation: 'less-zero'}
 } as const satisfies Record<DecimalPlaceComparisonProblem['relation'],
     DecimalPlaceComparisonGeneratorConfig>;
 
@@ -146,6 +148,19 @@ describe('createDecimalPlaceComparison', () => {
 });
 
 describe('DecimalPlaceComparisonGenerator', () => {
+    it.each(['greater-nonzero', 'less-nonzero'] as const)('proves coefficient absence for %s', relation => {
+        for (let seed = 0; seed < 64; seed++) {
+            setSeed(seed);
+            const problem = generator.generate({comparisonKind: 'inequality', relation})!.data;
+            expectExactProblem(problem);
+            expect([...digitsOf(problem.left), ...digitsOf(problem.right)].every(digit => digit > 0)).toBe(true);
+        }
+    });
+
+    it('bounds numeric rejection without changing the requested profile', () => {
+        vi.spyOn(rng, 'random').mockReturnValue(0.9);
+        expect(generator.generate({comparisonKind: 'inequality', relation: 'greater-nonzero'})).toBeNull();
+    });
     it('rejects missing, extra, and incompatible relation configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('comparisonKind');
         expect(() => generator.generate({...configs.less, relation: 'invalid'} as never))

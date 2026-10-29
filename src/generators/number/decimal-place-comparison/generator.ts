@@ -151,6 +151,20 @@ const sampleInequalityPair = (
     return relation === 'less' ? [low, high] : [high, low];
 };
 
+/** Constrain the original correlated sampler after the mathematical profile is selected.
+ * Each profile has positive acceptance probability: at least 1/18 for zero and
+ * (1/2)*(729/999)*(9/10)^2*(8/9) for nonzero (thousandths-first cases alone).
+ * Truncation can return null, but never changes the conditional law of successful draws.
+ */
+function sampleProfiledInequalityPair(relation: 'greater' | 'less', requireZero: boolean) {
+    for (let attempt = 0; attempt < 4096; attempt++) {
+        const pair = sampleInequalityPair(relation);
+        const hasZero = pair.some(input => [...wholeDigits(input.wholePart), ...input.fractionalDigits].includes(0));
+        if (hasZero === requireZero) return pair;
+    }
+    return null;
+}
+
 export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
     DecimalPlaceComparisonProblem,
     DecimalPlaceComparisonGeneratorConfig
@@ -167,8 +181,7 @@ export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
                 'decimal-place-comparison', 'The configuration contains an unexpected field.'
             );
         }
-        if (config.relation !== 'greater' && config.relation !== 'equal'
-            && config.relation !== 'less') {
+        if (!['greater-zero', 'greater-nonzero', 'equal', 'less-zero', 'less-nonzero'].includes(config.relation!)) {
             throw new GeneratorValidationError(
                 'decimal-place-comparison', 'The relation must be Greater, Equal, or Less.'
             );
@@ -181,9 +194,12 @@ export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
             );
         }
 
-        const [left, right] = config.relation === 'equal'
+        const pair = config.relation === 'equal'
             ? sampleEqualityPair()
-            : sampleInequalityPair(config.relation);
+            : sampleProfiledInequalityPair(config.relation!.startsWith('greater') ? 'greater' : 'less',
+                config.relation!.endsWith('-zero'));
+        if (!pair) return null;
+        const [left, right] = pair;
         const data = createDecimalPlaceComparison(left, right);
         return data === null ? null : {data};
     }

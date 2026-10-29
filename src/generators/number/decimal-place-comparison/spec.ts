@@ -26,18 +26,22 @@ const resolveComparisonKind = selectExactLabelMap([
 ] as const);
 
 const resolveRelation = selectExactLabelSetMap([
-    [[Scope.Greater], 'greater'],
+    [[Scope.Greater, Scope.NumbersWithZero], 'greater-zero'],
+    [[Scope.Greater, Scope.NumbersWithoutZero], 'greater-nonzero'],
     [[Scope.Equal], 'equal'],
     [[Scope.Equal, Scope.NumbersWithZero], 'equal'],
-    [[Scope.Less], 'less']
+    [[Scope.Less, Scope.NumbersWithZero], 'less-zero'],
+    [[Scope.Less, Scope.NumbersWithoutZero], 'less-nonzero']
 ] as const);
 
 export const DecimalPlaceComparisonGeneratorSchema = {
     comparisonKind: [[Area.NumericEquality, Area.NumericInequality], resolveComparisonKind],
     relation: [
-        [Scope.Greater, Scope.Equal, Scope.Less, Scope.NumbersWithZero],
+        [Scope.Greater, Scope.Equal, Scope.Less, Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         resolveRelation,
-        [[Scope.Greater], [Scope.Equal, Scope.NumbersWithZero], [Scope.Less]]
+        [[Scope.Greater, Scope.NumbersWithZero], [Scope.Greater, Scope.NumbersWithoutZero],
+            [Scope.Equal, Scope.NumbersWithZero], [Scope.Less, Scope.NumbersWithZero],
+            [Scope.Less, Scope.NumbersWithoutZero]]
     ]
 } as const;
 
