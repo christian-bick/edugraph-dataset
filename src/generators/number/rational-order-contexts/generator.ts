@@ -15,11 +15,14 @@ export class RationalOrderContextsGenerator implements ProblemGenerator<Rational
     schema = RationalOrderContextsGeneratorSchema;
 
     generate(config: RationalOrderContextsGeneratorConfig): ProblemStub<RationalOrderContextProblem> {
-        validateConfigFields(generatorId, config, ['relation']);
+        validateConfigFields(generatorId, config, ['relation', 'signDomain']);
         if (config.relation !== 'less' && config.relation !== 'greater') {
             throw new GeneratorValidationError(generatorId, 'Relation must be less or greater.');
         }
-        const pair = sampleOrderedContextPair('unrestricted');
+        if (config.signDomain !== 'signed' && config.signDomain !== 'nonnegative') {
+            throw new GeneratorValidationError(generatorId, 'Sign domain must be signed or nonnegative.');
+        }
+        const pair = sampleOrderedContextPair(config.signDomain);
         const swap = pair.relation !== config.relation;
         return {data: buildRationalOrderContextProblem(pair.context.kind,
             swap ? pair.second.value : pair.first.value, swap ? pair.first.value : pair.second.value)};

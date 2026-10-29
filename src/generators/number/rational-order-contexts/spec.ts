@@ -9,6 +9,9 @@ export const spec: GeneratorSpec = {
 };
 
 export const RationalOrderContextsGeneratorSchema = {
+    signDomain: [[Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives], selectExactLabelMap([
+        [Scope.NumbersWithNegatives, 'signed'], [Scope.NumbersWithoutNegatives, 'nonnegative']
+    ] as const)],
     relation: [[Scope.Less, Scope.Greater], selectExactLabelMap([
         [Scope.Less, 'less'], [Scope.Greater, 'greater']
     ] as const)]
