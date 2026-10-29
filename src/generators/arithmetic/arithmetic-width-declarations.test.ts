@@ -86,7 +86,7 @@ describe('Arithmetic operand-width declaration preservation', () => {
     it.each([
         [Area.Division, Scope.NumbersSmaller10, Scope.SingleDigitSmallestOperand],
         [Area.Addition, Scope.NumbersSmaller100, Scope.SingleDigitSmallestOperand],
-        [Area.Addition, Scope.NumbersSmaller20, Scope.SingleDigitLargestOperand],
+        [Area.Addition, Scope.NumbersSmaller5, Scope.TwoDigitLargestOperand],
         [Area.Subtraction, Scope.NumbersSmaller100, Scope.TwoDigitSmallestOperand]
     ])('rejects an unsupported explicit pair width for %s', (operation, range, width) => {
         expect(plan(new ArithmeticOpsPairsGenerator(), pairSpec,

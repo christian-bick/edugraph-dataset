@@ -37,7 +37,8 @@ possible-output declaration, so introducing a callback closes no finding by itse
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
 The subsequent measurement split closes 21 more; two subtraction-width fixes and the
-21 zero-absence repairs below reduce the current total to **341**. The known
+21 zero-absence repairs reduce the total to 341. The first width-profile checkpoint below
+closes 14 more, leaving **327**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -99,7 +100,7 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**1,003 requirements repaired, 75 newly exposed, 38 retired by policy, 341 remaining**.
+**1,017 requirements repaired, 75 newly exposed, 38 retired by policy, 327 remaining**.
 All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
@@ -230,9 +231,11 @@ exact audit reconciliation, individual proof reviews and validation logs. The
 [progress ledger](label-dependency-progress.md#conditional-zero-absence-acceptance-2026-10-29)
 records the current owners and acceptance checks.
 
-### Next decision: positive binary widths within 20
+### Minimal positive binary width profiles within 20
 
-**Proposed; not implemented or approved.** Of the 102 remaining `arithmetic-ops-pairs`
+**Approved for implementation on 2026-10-29.** The user accepted incidental sampling changes
+to close these gaps and requested minimal profiles, without a balancing framework. Of the
+102 remaining `arithmetic-ops-pairs`
 width findings, a bounded first slice contains 30 positive, zero-free selections within the
 existing inclusive maximum 20: 14 ordinary addition, 14 subtraction, and two equal-addend
 selections. The other 72 cover wider or unspecified bounds and multiplication/division.
@@ -241,16 +244,16 @@ The same complete current configuration can produce `1 + 1` or `10 + 10`, and `2
 `20 - 10`. Configuration inference cannot distinguish those draws. Reinterpreting the bound
 or labeling the sampled payload would violate the agreed scope.
 
-Propose two ordinary matching-capable profiles: largest primary operand at most 9
+Use two ordinary matching-capable profiles: largest primary operand at most 9
 (`SingleDigitLargestOperand`), or between 10 and 99 (`TwoDigitLargestOperand`). They partition
 the existing positive within-20 cases without removing any concrete problem. Inversion views
 retain the original operation's operands, including a necessarily required missing operand.
 Existing targets remain unchanged; broad requests may admit both profiles, and explicit width
 requests can match the corresponding capability.
 
-The current planner selects alternatives uniformly. This requires an explicit sampling decision:
+The existing planner selects alternatives uniformly. Its incidental sampling effect is accepted:
 
-| Existing positive configuration | Current single-digit-largest share | Proposed single-/two-digit share |
+| Existing positive configuration | Previous single-digit-largest share | Single-/two-digit share |
 |---|---:|---:|
 | Ordinary addition | 29.310224% | 50% / 50% |
 | Ordinary subtraction | 11.544814% | 50% / 50% |
@@ -260,15 +263,14 @@ These current shares are analytical consequences of the sampler: addition uses
 `sum(a=1..9, 9/(20-a))/19`; subtraction uses `sum(s=1..8, (9-s)/(20-s))/19`; equal addends
 draw uniformly from 1 through 10. They are not empirical estimates.
 
-**Recommendation:** accept the balanced profile mixture for this 30-selection slice, preserving
-all old supported pairs and their conditional distribution within each chosen width. Seeded
+Preserve all old supported pairs and their conditional distribution within each chosen width. Seeded
 outcomes and random continuation may change inside the slice. Keep signed, zero, whole-tens,
 wider-bound and unspecified-bound configurations on their existing paths. Preserve all target
 coverage, rendered task contracts, the Area allowlist and range-policy exclusion.
 
-The alternative is a broader weighted-profile selection design that preserves the old mixture;
-it still would not promise old seed-by-seed outcomes. Keeping these findings deferred is also
-valid if sampling must remain strictly unchanged. No generator/view split is proposed.
+No weighted-profile selection framework or generator/view split is needed. A bounded local
+sampler retains the previous conditional pair probabilities; ordinary schema alternatives make
+the widths matching-capable. The profiles are justified by gap closure, not a balancing goal.
 
 Before implementation acceptance, resolve the existing small-width aliases in
 `requireMultipleOf10` and the direct-resolution conditional-fallback contract. Prove each
@@ -279,7 +281,29 @@ compatible projection. Rematching may multiply existing non-width findings, so r
 actual introduced requirements; do not assume a net reduction of 30 before the audit.
 Use separate addition, subtraction and equal-addend checkpoints.
 
-This decision is reserved to the user by the
+The first checkpoint introduces `largestOperandDigits` with the existing schema-choice
+contract: `0` retains the original sampler, and `1`/`2` select the two width profiles. Its
+compatibility rule initially enables ordinary addition only. The existing within-5
+single-digit alias moves from `requireMultipleOf10` to this field without changing its
+mathematics; smallest-operand aliases retain their original owner. Direct resolution uses
+the same width boundary, and an unrestricted outside-slice selection adds no random draw.
+The payload remains `{num1, num2, answer, operation}`, so no consumer changes are required.
+
+Addition has 190 supported ordered pairs, split into 81 single-digit and 109 two-digit
+pairs. Their original probabilities are `1 / (19 * (20 - first))`; conditioning these
+weights on width preserves the relative distribution without rejection or retrying another
+profile. Exhaustive support tests and interval tests cover every pair. No inference callback,
+shared resolver extension or dependency-policy change is introduced.
+
+Addition acceptance closes the 14 original requirements: **341 → 327** source gaps, with
+1,298 admitted selections and no new omissions or conflicts. All 1,013 targets and 1,209
+tuples remain. Verification includes 936 planned probes, 846 direct requests, 312 exact
+question/solution SSR comparisons, 936 replay checks and rejection of 126 stale source plans.
+The 72 focused tests, type check and declaration audit pass. Evidence is under
+`temp/arithmetic-width-profiles/`, including exhaustive selection lineage; sampled probes
+are supplementary evidence rather than an exhaustive claim about random outputs.
+
+The user supplied the decision required by the
 [autonomous execution agreement](#autonomous-execution-agreement-2026-10-28), which places a
 "mathematical schema distinction, or sampling/rendering change" in a decision batch.
 Local selection inventory and derivation: `temp/remaining-zero-batches/next-width-decision.md`

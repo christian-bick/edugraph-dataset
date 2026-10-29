@@ -148,10 +148,10 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 341 |
-| Authorized implementation in progress (subset of outstanding) | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 341 |
-| Verified repairs / introduced / reopened | 1003 / 75 / 0 |
+| Outstanding source gaps | 327 |
+| Authorized implementation in progress (subset of outstanding) | 16 |
+| Assigned to deferred decision batches (subset of outstanding) | 311 |
+| Verified repairs / introduced / reopened | 1017 / 75 / 0 |
 | Policy-retired / policy-added requirements | 38 / 0 |
 | Active dependency scopes, including implementation | 25 |
 | Separately open content-defect scopes | 1 |
@@ -161,7 +161,7 @@ the quotient metadata, near-doubles and measurement-conversion children are comp
 the object-only applicability requirements are retired, 25 children own dependency gaps,
 and RB-A3-D3 retains an open content defect with zero graph
 gaps. Deferred gaps stay in the outstanding total. Cumulative accounting is
-**1,307 + 75 - 1,003 - 38 = 341**; the policy retirement is separate from verified repairs.
+**1,307 + 75 - 1,017 - 38 = 327**; the policy retirement is separate from verified repairs.
 
 ## Source batch ledger
 
@@ -172,7 +172,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | Batch | Scope | Baseline gaps | Current gaps | Deferred subset | State |
 |---|---|---:|---:|---:|---|
 | RB-A1 | Binary arithmetic operand widths | 118 | 0 | 0 | Complete; child below |
-| RB-A1-D1 | Variable pair width profiles | 0 | 102 | 102 | Deferred |
+| RB-A1-D1 | Variable pair width profiles | 0 | 88 | 72 | 14 addition widths complete; 16 approved; 72 deferred |
 | RB-A2 | Binary arithmetic zero participation | 28 | 0 | 0 | Triaged; child below |
 | RB-A2-D1 | Pair zero projection/ownership | 0 | 28 | 28 | Deferred |
 | RB-A3 | Elementary numeral/base and number views | 64 | 0 | 0 | Complete; children below |
@@ -227,7 +227,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **341** | **341** | |
+| **Total: 56 source batches** | | **1,307** | **327** | **311** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|

@@ -23,18 +23,43 @@ describe('ArithmeticOpsPairsGenerator', () => {
         expect(generator.type).toBe('arithmetic');
     });
 
+    it.each([1, 2] as const)('generates the declared %i-digit primary operands within 20', largestOperandDigits => {
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(seed);
+            const data = generator.generate({operation: Area.Addition, largestOperandDigits,
+                requireNegative: false, requireZero: false, requireMultipleOf10: false,
+                requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}})!.data;
+            expectValidEquation(data);
+            expect(data.answer).toBeLessThanOrEqual(20);
+            expect(Math.max(data.num1, data.num2) < 10 ? 1 : 2).toBe(largestOperandDigits);
+        }
+    });
+
+    it('rejects explicit profiles outside their supported mathematical domain', () => {
+        const base = {operation: Area.Addition, largestOperandDigits: 2,
+            requireNegative: false, requireZero: false, requireMultipleOf10: false,
+            requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}} as const;
+        for (const patch of [{operation: Area.Multiplication}, {requireNegative: true}, {requireZero: true},
+            {requireMultipleOf10: true}, {requireEqualAddends: true}, {range: {min: 10, max: 20}},
+            {range: {min: 1, max: 100}}, {largestOperandDigits: 3}]) {
+            expect(generator.generate({...base, ...patch} as never)).toBeNull();
+        }
+    });
+
     it('strictly validates every required config field', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate({
             operation: Area.Addition,
             requireNegative: false,
             requireZero: false,
+            largestOperandDigits: 0,
             requireMultipleOf10: false
         } as never)).toThrow();
         expect(() => generator.generate({
             operation: Area.Addition,
             range: {min: 1, max: 10},
             requireZero: false,
+            largestOperandDigits: 0,
             requireMultipleOf10: false
         } as never)).toThrow();
     });
@@ -49,6 +74,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
                             operation,
                             requireNegative,
                             requireZero,
+                            largestOperandDigits: 0,
                             requireMultipleOf10: false,
                             requireEqualAddends: false,
                             requireEvenResult: false,
@@ -75,6 +101,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
                         operation,
                         requireNegative: false,
                         requireZero,
+                        largestOperandDigits: 0,
                         requireMultipleOf10: true,
                         requireEqualAddends: false,
                         requireEvenResult: false,
@@ -97,6 +124,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
                 operation: Area.Multiplication,
                 requireNegative: false,
                 requireZero: false,
+                largestOperandDigits: 0,
                 requireMultipleOf10: true,
                 requireEqualAddends: false,
                 requireEvenResult: false,
@@ -118,6 +146,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
             operation: Area.Addition,
             requireNegative: false,
             requireZero: false,
+            largestOperandDigits: 0,
             requireMultipleOf10: false,
             requireEqualAddends: false,
             requireEvenResult: false,
@@ -131,6 +160,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
         const baseConfig = {
             requireNegative: false,
             requireZero: false,
+            largestOperandDigits: 0,
             requireMultipleOf10: false,
             requireEqualAddends: false,
             requireEvenResult: false,
@@ -148,6 +178,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
                 operation: Area.Addition,
                 requireNegative: false,
                 requireZero: false,
+                largestOperandDigits: 0,
                 requireMultipleOf10: false,
                 requireEqualAddends: true,
                 requireEvenResult: true,

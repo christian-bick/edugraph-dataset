@@ -4,13 +4,14 @@ import {hasAllLabels, hasLabel} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema, withLabelChoices} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../helpers.ts';
+import {largestOperandWidthLabels, operandWidthContextLabels, permitsLargestOperandWidth,
+    resolveLargestOperandDigits, usesLargestOperandWidthProfiles} from './operand-width.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 
 const operandWidthLabels = [
     Scope.SingleDigitSmallestOperand,
-    Scope.SingleDigitLargestOperand,
     Scope.TwoDigitSmallestOperand
 ] as const;
 
@@ -25,7 +26,7 @@ const resolveMultipleOf10 = withLabelChoices(hasLabel(Scope.MultiplesOf10), {
     kind: 'alternatives',
     alternatives: [[], [Scope.MultiplesOf10], ...operandWidthLabels.map(label => [label])],
     defaults: [
-        {whenAll: [Scope.NumbersSmaller5], labels: [Scope.SingleDigitLargestOperand]},
+        {whenAll: [Scope.NumbersSmaller5], labels: []},
         {whenAll: [Area.Addition, Scope.NumbersSmaller10],
             whenNone: [Scope.NumbersWithZero, Scope.NumbersWithNegatives],
             labels: [Scope.SingleDigitSmallestOperand]},
@@ -49,12 +50,21 @@ const operandWidthRule = generatorLabelRule('operand-width-existing-domain', [
     const positiveNoZero = !selected(Scope.NumbersWithZero) && !selected(Scope.NumbersWithNegatives);
     const smallBound = selected(Scope.NumbersSmaller10);
     const wholeTensOrLarger = multipleDigitLowerBounds.some(label => selected(label));
-    return (!selected(Scope.SingleDigitLargestOperand) || allSingle)
-        && (!selected(Scope.SingleDigitSmallestOperand) || allSingle
+    return (!selected(Scope.SingleDigitSmallestOperand) || allSingle
             || smallBound && positiveNoZero && (selected(Area.Addition) || selected(Area.Subtraction)))
         && (!selected(Scope.TwoDigitSmallestOperand)
             || selected(Area.Addition) && wholeTensOrLarger && selected(Scope.NumbersSmaller100)
                 && positiveNoZero && !selected(Scope.MultiplesOf10));
+});
+
+const largestOperandWidthRule = generatorLabelRule('largest-operand-width-domain', [
+    ...largestOperandWidthLabels, ...operandWidthContextLabels
+], selected => {
+    const single = selected(Scope.SingleDigitLargestOperand);
+    const two = selected(Scope.TwoDigitLargestOperand);
+    if (single && two) return false;
+    if (single || two) return permitsLargestOperandWidth(selected, single ? 1 : 2);
+    return !usesLargestOperandWidthProfiles(selected);
 });
 
 export const spec: GeneratorSpec = {
@@ -62,7 +72,8 @@ export const spec: GeneratorSpec = {
     compatibility: [generatorLabelRule('equal-addends-domain', [
         Area.Addition, Area.IteratedOperation, Scope.NumbersWithNegatives, Scope.NumbersWithZero
     ], selected => !(selected(Area.Addition) && selected(Area.IteratedOperation))
-        || !selected(Scope.NumbersWithNegatives) && !selected(Scope.NumbersWithZero)), operandWidthRule],
+        || !selected(Scope.NumbersWithNegatives) && !selected(Scope.NumbersWithZero)),
+        operandWidthRule, largestOperandWidthRule],
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,
@@ -86,6 +97,11 @@ export const ArithmeticOpsPairsGeneratorSchema = {
         [Scope.MultiplesOf10, ...operandWidthLabels],
         resolveMultipleOf10,
         [[], [Scope.MultiplesOf10]]
+    ],
+    largestOperandDigits: [
+        largestOperandWidthLabels,
+        resolveLargestOperandDigits,
+        [[], ...largestOperandWidthLabels.map(label => [label])]
     ],
     requireEqualAddends: [
         [Area.IteratedOperation],

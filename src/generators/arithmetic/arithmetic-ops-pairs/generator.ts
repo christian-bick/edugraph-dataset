@@ -5,6 +5,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {operationNames} from '../helpers.ts';
 import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
+import {sampleAdditionWidthPair} from './width-sampling.ts';
 
 export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticPairProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -18,7 +19,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             'requireZero',
             'requireMultipleOf10',
             'requireEqualAddends',
-            'requireEvenResult'
+            'requireEvenResult',
+            'largestOperandDigits'
         ]);
 
         const operation = config.operation!;
@@ -32,6 +34,14 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         const minMagnitude = Math.ceil(Math.max(1, resolvedRange.min) / step) * step;
         const maxMagnitude = Math.floor(resolvedRange.max / step) * step;
         if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
+
+        const digits = config.largestOperandDigits!;
+        if (![0, 1, 2].includes(digits)) return null;
+        const existingSingleDigitDomain = digits === 1 && maxMagnitude <= 5;
+        const widthProfile = digits !== 0 && !existingSingleDigitDomain;
+        if (widthProfile && (operation !== Area.Addition || config.requireEqualAddends
+            || requireNegative || requireZero || requireMultipleOf10
+            || minMagnitude !== 1 || maxMagnitude !== 20)) return null;
 
         const randomMagnitude = (min: number, max: number): number | null => {
             const first = Math.ceil(min / step) * step;
@@ -78,6 +88,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num1 = -magnitude;
                 num2 = -magnitude;
                 answer = -2 * magnitude;
+            } else if (widthProfile) {
+                [num1, num2] = sampleAdditionWidthPair(digits as 1 | 2);
+                answer = num1 + num2;
             } else {
                 const first = randomMagnitude(minMagnitude, maxMagnitude - minMagnitude);
                 if (first === null) return null;
