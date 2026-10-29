@@ -372,6 +372,39 @@ Full coverage passes **849 suites / 6,692 tests**, including every generator cov
 The coverage workflow used four workers after a sandbox transform-cache failure and a
 default-worker timeout; no validation was disabled.
 
+### Split checkpoint 2 — integrated producer and view migration
+
+`measurement-unit-equivalences` now supplies the sequence contract with invariant
+`IntegerNumbers`; `measurement-conversion-values` supplies required numeric equalities with
+ordinary `integer` / `decimal` choices. The old generator and execution leaf are retired.
+The two fixed execution leaves reuse existing markup, with derivation accepting generic or
+sequence payloads and table accepting only sequences. No inference or automatic completion
+was introduced. Numeric generation no longer draws a discarded sequence.
+
+The unit-pair schema is shared with conversion stories through `conversion-schema.ts`;
+all 384 story preservation probes pass. Both new generators retain the exact candidate
+domains, pair facts and per-profile selection algorithm. Target sources, Area policy and
+range-policy exclusion remain unchanged. Required-field validation is specific to each
+payload contract and rejects missing/sparse rows or equalities before rendering.
+
+Real catalog verification confirms **1,013 covered targets, 1,209 tuples and 1,284 selections**,
+with all 35 old family selections mapped to successors. The expected 14 additional tuples
+and 21 selections are exactly those reviewed above. All 56 family selections have ordinary
+matching-capable annotations and no non-range gaps or ownership conflicts. Unaffected
+selection semantics are unchanged.
+
+All 288 same-math rendering comparisons are byte-identical. The 56 new selections pass
+deterministic replay and question-to-solution reuse; five retired-ID/stale-plan groups reject
+replay through the new catalog. New sample seeds change as expected. The fresh audit verifies
+21 original number-kind repairs, zero new non-range requirements and **364** remaining
+requirements; checkpoint 3 records the consolidated acceptance and backlog reconciliation.
+
+Integrated types, ownership, label validation, documentation and the routing regression pass.
+Full coverage passes **851 suites / 6,713 tests** and every generator threshold; both new
+generators have 100% scoped coverage. Independent generator and view reviews found no
+actionable issues. Native target previews also render successfully; their visual review and
+the final source/stored accounting are recorded in checkpoint 3.
+
 ## Agreed direction: conditional notation dependencies
 
 **Implemented on 2026-10-28.** The graph narrows the overly broad numeral/base dependencies.
@@ -1449,9 +1482,8 @@ The [2026-10-29 split proposal and matching review](#proposed-measurement-genera
 supersedes this legacy-profile decision approach; implementation was approved on 2026-10-29.
 The counts below describe the earlier declaration state, not the current 385-gap baseline.
 
-Keep `measurement-conversion` outside M2. Its
-[numeric-profile schema](../../src/generators/measurement/measurement-conversion/spec.ts)
-has `[] -> legacy`, `IntegerNumbers -> integer` and `DecimalNumbers -> decimal` choices.
+Keep `measurement-conversion` outside M2. Its historical `numericProfile` schema had
+`[] -> legacy`, `IntegerNumbers -> integer` and `DecimalNumbers -> decimal` choices.
 Legacy and explicit-integer profiles both involve whole quantities but produce different
 payload/task branches. Simply assigning the same exact choice label to both needs a design
 review; a blanket generator kind also overlaps the existing schema ownership.

@@ -1,6 +1,6 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
-import type {MeasurementConversionPair, StandardUnitEquivalencesProblem} from '../../../types/problems.ts';
+import type {MeasurementConversionPair, UnitEquivalenceSequenceProblem} from '../../../types/problems.ts';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {getMeasurementUnitPresentation} from '../../helpers/measurement-conversion.ts';
@@ -16,13 +16,13 @@ const pairs = [
     {id: 'minute-second', quantityKind: 'time', scalingKind: 'factor', largerUnit: 'minute', smallerUnit: 'second', factor: 60}
 ] as const satisfies readonly MeasurementConversionPair[];
 
-const sequence = (pair: MeasurementConversionPair, start: number): StandardUnitEquivalencesProblem => ({
+const sequence = (pair: MeasurementConversionPair, start: number): UnitEquivalenceSequenceProblem => ({
     pair, equivalents: Array.from({length: 5}, (_, index) => ({
         largerValue: start + index, smallerValue: (start + index) * pair.factor
     }))
 });
 
-function render(data: StandardUnitEquivalencesProblem, isSolutionView: boolean): string {
+function render(data: UnitEquivalenceSequenceProblem, isSolutionView: boolean): string {
     const payload: ViewRenderPayload<'measure-conversion-table'> = {
         problem: {type: 'measurement', data, labels: []}, viewId: 'measure-conversion-table',
         targetLabels: [], isSolutionView, seed: 19

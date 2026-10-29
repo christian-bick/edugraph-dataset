@@ -1696,16 +1696,9 @@ export type MeasurementConversionValuesProblem = {
     numericExamples: MeasurementConversionNumericExamples;
 };
 
-export type StandardUnitEquivalencesProblem = {
-    pair: MeasurementConversionPair;
-    equivalents: readonly MeasurementUnitEquivalence[];
-    /** Absent for the legacy five-row unit-equivalence profile. */
-    numericExamples?: MeasurementConversionNumericExamples;
-};
-
 export type MeasurementConversionProblem =
     | GenericUnitScaleRelationProblem
-    | StandardUnitEquivalencesProblem;
+    | UnitEquivalenceSequenceProblem;
 
 /**
  * A two-step measurement relation: convert the source quantity into the other
@@ -5546,8 +5539,9 @@ export interface ViewTypeMap {
     'measure-select-tool': MeasurementToolSelectionProblem;
     'measure-unit-scale-relation': GenericUnitScaleRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;
-    'measure-conversion-execution': StandardUnitEquivalencesProblem;
-    'measure-conversion-table': StandardUnitEquivalencesProblem;
+    'measure-conversion-to-smaller': UnitEquivalenceSequenceProblem;
+    'measure-conversion-bidirectional': MeasurementConversionValuesProblem;
+    'measure-conversion-table': UnitEquivalenceSequenceProblem;
     'measure-conversion-problems': MeasurementConversionStoryProblem;
     'measure-length-estimate': MeasurementEstimateProblem;
     'measure-length-difference': MeasurementLengthDifferenceProblem;

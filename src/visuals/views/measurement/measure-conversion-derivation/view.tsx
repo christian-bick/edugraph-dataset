@@ -1,7 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {MeasureConversionView} from '../measure-conversion-view.tsx';
+import {MeasureConversionDerivationView} from '../measure-conversion-view.tsx';
 import {
     MeasureConversionDerivationViewConfig,
     MeasureConversionDerivationViewSchema
@@ -16,7 +16,7 @@ interface CoreProps {
 }
 
 const Core = ({payload}: CoreProps) => (
-    <MeasureConversionView mode="derivation" payload={payload} viewId={VIEW_ID} />
+    <MeasureConversionDerivationView payload={payload} />
 );
 
 export const MeasureConversionDerivation = withConfig(

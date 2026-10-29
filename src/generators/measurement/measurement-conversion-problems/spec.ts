@@ -2,7 +2,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
-import {MeasurementConversionGeneratorSchema} from '../measurement-conversion/spec.ts';
+import {measurementConversionUnitPairSchema} from '../conversion-schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-conversion-problems',
@@ -17,7 +17,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const MeasurementConversionProblemsGeneratorSchema = {
-    unitPair: MeasurementConversionGeneratorSchema.unitPair,
+    unitPair: measurementConversionUnitPairSchema,
     numberKind: [
         [Scope.IntegerNumbers, Scope.DecimalNumbers],
         selectExactLabelMap([

@@ -1,10 +1,10 @@
+import type {ReactNode} from 'react';
 import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     GenericUnitScaleRelationProblem,
-    MeasurementConversionNumericExamples,
-    MeasurementConversionProblem,
-    StandardUnitEquivalencesProblem
+    MeasurementConversionValuesProblem,
+    UnitEquivalenceSequenceProblem
 } from '../../../types/problems.ts';
 import {
     formatFactorInstruction,
@@ -14,25 +14,16 @@ import {
     formatUnitEquivalence,
     getMeasurementUnitPresentation,
     getQuantityName,
+    isValidUnitEquivalenceSequence,
     MeasurementUnitPresentation
 } from '../../helpers/measurement-conversion.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {
     formatConversionHundredths,
     formatConversionMeasurement,
-    isValidMeasureConversionProblem
+    isValidGenericUnitScaleRelation,
+    isValidMeasurementConversionValues
 } from './measure-conversion-helpers.ts';
-
-export type MeasureConversionTaskMode = 'derivation' | 'execution';
-type MeasureConversionViewId =
-    | 'measure-conversion-derivation'
-    | 'measure-conversion-execution';
-
-interface MeasureConversionViewProps {
-    mode: MeasureConversionTaskMode;
-    payload: ViewRenderPayload<MeasureConversionViewId>;
-    viewId: MeasureConversionViewId;
-}
 
 const UnitCard = ({unit, role}: {
     unit: MeasurementUnitPresentation;
@@ -52,7 +43,7 @@ const UnitCard = ({unit, role}: {
 );
 
 const UnitPair = ({data}: {
-    data: StandardUnitEquivalencesProblem;
+    data: Pick<UnitEquivalenceSequenceProblem, 'pair'>;
 }) => (
     <div className="grid grid-cols-[1fr_76px_1fr] items-center gap-3">
         <UnitCard
@@ -134,7 +125,7 @@ const GenericUnitScale = ({data, isSolutionView}: {
 };
 
 const RelativeUnitSize = ({data, isSolutionView}: {
-    data: StandardUnitEquivalencesProblem;
+    data: UnitEquivalenceSequenceProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
@@ -197,7 +188,7 @@ const RelativeUnitSize = ({data, isSolutionView}: {
 };
 
 const LargerToSmaller = ({data, isSolutionView}: {
-    data: StandardUnitEquivalencesProblem;
+    data: UnitEquivalenceSequenceProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
@@ -263,15 +254,14 @@ const LargerToSmaller = ({data, isSolutionView}: {
     );
 };
 
-const BidirectionalConversions = ({data, numericExamples, isSolutionView}: {
-    data: StandardUnitEquivalencesProblem;
-    numericExamples: MeasurementConversionNumericExamples;
+const BidirectionalConversions = ({data, isSolutionView}: {
+    data: MeasurementConversionValuesProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
     const factor = formatStandardNumeral(data.pair.factor);
-    const [forward, reverse] = numericExamples.equalities;
+    const [forward, reverse] = data.numericExamples.equalities;
     const rows = [
         {
             label: 'Larger to smaller',
@@ -347,62 +337,83 @@ const BidirectionalConversions = ({data, numericExamples, isSolutionView}: {
     );
 };
 
-export const MeasureConversionView = ({mode, payload, viewId}: MeasureConversionViewProps) => {
-    const data: MeasurementConversionProblem = payload.problem.data;
+const ConversionFrame = ({title, prompt, children}: {
+    title: string;
+    prompt: string;
+    children: ReactNode;
+}) => (
+    <div className="w-[860px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
+        <div className="text-center">
+            <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">{title}</div>
+            <div className="mt-1 text-xl font-bold text-slate-800">{prompt}</div>
+        </div>
+        {children}
+    </div>
+);
+
+export const MeasureConversionDerivationView = ({payload}: {
+    payload: ViewRenderPayload<'measure-conversion-derivation'>;
+}) => {
+    const viewId = 'measure-conversion-derivation';
+    const data = payload.problem.data;
     validateProblemData(viewId, data, []);
     if (!('pair' in data)) {
-        validateProblemData(viewId, data, [
-            'largeUnitCount',
-            'smallUnitCount',
-            'unitsPerLarge'
-        ]);
-    } else {
-        validateProblemData(viewId, data, ['pair', 'equivalents']);
-    }
-
-    if ((!('pair' in data) && mode !== 'derivation') || !isValidMeasureConversionProblem(data)) {
-        throw new ViewValidationError(
-            viewId,
-            'The fixed task identity, unit pair, scale factor, and quantities must agree.'
+        validateProblemData(viewId, data, ['largeUnitCount', 'smallUnitCount', 'unitsPerLarge']);
+        if (!isValidGenericUnitScaleRelation(data)) {
+            throw new ViewValidationError(viewId, 'The unit counts and scale factor must agree.');
+        }
+        return (
+            <ConversionFrame title="Derive a unit-size relation"
+                prompt="The same length is measured with large units and small units. Which unit size needs more units?">
+                <GenericUnitScale data={data} isSolutionView={payload.isSolutionView} />
+            </ConversionFrame>
         );
     }
-
-    const numericExamples = 'pair' in data && mode === 'execution'
-        ? data.numericExamples
-        : undefined;
-
-    const prompt = !('pair' in data)
-        ? 'The same length is measured with large units and small units. Which unit size needs more units?'
-        : mode === 'derivation'
-        ? `Use the equivalent ${getQuantityName(data.pair.quantityKind)} to determine how many ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural} equal 1 ${getMeasurementUnitPresentation(data.pair.largerUnit).singular}.`
-        : numericExamples !== undefined
-        ? 'Convert one measure to smaller units and another measure to larger units.'
-        : `Convert ${formatMeasurement(data.equivalents[0]!.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
-
+    validateProblemData(viewId, data, ['pair', 'equivalents']);
+    if (!isValidUnitEquivalenceSequence(data)) {
+        throw new ViewValidationError(viewId, 'The unit pair, scale factor, and equivalent quantities must agree.');
+    }
+    const prompt = `Use the equivalent ${getQuantityName(data.pair.quantityKind)} to determine how many ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural} equal 1 ${getMeasurementUnitPresentation(data.pair.largerUnit).singular}.`;
     return (
-        <div className="w-[860px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
-            <div className="text-center">
-                <div className="text-sm font-bold uppercase tracking-[0.16em] text-indigo-700">
-                    {mode === 'derivation'
-                        ? 'Derive a unit-size relation'
-                        : numericExamples !== undefined
-                        ? 'Convert in both directions'
-                        : 'Convert to a smaller unit'}
-                </div>
-                <div className="mt-1 text-xl font-bold text-slate-800">{prompt}</div>
-            </div>
-            {!('pair' in data) ? (
-                <GenericUnitScale data={data} isSolutionView={payload.isSolutionView} />
-            ) : (
-                <>
-                    <div className="mt-5"><UnitPair data={data} /></div>
-                    {mode === 'derivation'
-                        ? <RelativeUnitSize data={data} isSolutionView={payload.isSolutionView} />
-                        : numericExamples !== undefined
-                        ? <BidirectionalConversions data={data} numericExamples={numericExamples} isSolutionView={payload.isSolutionView} />
-                        : <LargerToSmaller data={data} isSolutionView={payload.isSolutionView} />}
-                </>
-            )}
-        </div>
+        <ConversionFrame title="Derive a unit-size relation" prompt={prompt}>
+            <div className="mt-5"><UnitPair data={data} /></div>
+            <RelativeUnitSize data={data} isSolutionView={payload.isSolutionView} />
+        </ConversionFrame>
+    );
+};
+
+export const MeasureConversionToSmallerView = ({payload}: {
+    payload: ViewRenderPayload<'measure-conversion-to-smaller'>;
+}) => {
+    const viewId = 'measure-conversion-to-smaller';
+    const data = payload.problem.data;
+    validateProblemData(viewId, data, ['pair', 'equivalents']);
+    if (!isValidUnitEquivalenceSequence(data)) {
+        throw new ViewValidationError(viewId, 'The unit pair, scale factor, and equivalent quantities must agree.');
+    }
+    const prompt = `Convert ${formatMeasurement(data.equivalents[0]!.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
+    return (
+        <ConversionFrame title="Convert to a smaller unit" prompt={prompt}>
+            <div className="mt-5"><UnitPair data={data} /></div>
+            <LargerToSmaller data={data} isSolutionView={payload.isSolutionView} />
+        </ConversionFrame>
+    );
+};
+
+export const MeasureConversionBidirectionalView = ({payload}: {
+    payload: ViewRenderPayload<'measure-conversion-bidirectional'>;
+}) => {
+    const viewId = 'measure-conversion-bidirectional';
+    const data = payload.problem.data;
+    validateProblemData(viewId, data, ['pair', 'numericExamples']);
+    if (!isValidMeasurementConversionValues(data)) {
+        throw new ViewValidationError(viewId, 'The unit pair, scale factor, and numeric equalities must agree.');
+    }
+    return (
+        <ConversionFrame title="Convert in both directions"
+            prompt="Convert one measure to smaller units and another measure to larger units.">
+            <div className="mt-5"><UnitPair data={data} /></div>
+            <BidirectionalConversions data={data} isSolutionView={payload.isSolutionView} />
+        </ConversionFrame>
     );
 };

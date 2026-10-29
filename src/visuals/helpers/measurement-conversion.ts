@@ -3,7 +3,7 @@ import {
     MeasurementConversionPair,
     MeasurementConversionPairId,
     MeasurementConversionUnitId,
-    StandardUnitEquivalencesProblem
+    UnitEquivalenceSequenceProblem
 } from '../../types/problems.ts';
 
 export type MeasurementUnitPresentation = {
@@ -102,10 +102,10 @@ export const getMeasurementUnitPresentation = (
     unitId: MeasurementConversionUnitId
 ): MeasurementUnitPresentation => units[unitId];
 
-export const isValidStandardUnitEquivalences = (data: StandardUnitEquivalencesProblem): boolean => {
+export const isValidUnitEquivalenceSequence = (data: UnitEquivalenceSequenceProblem): boolean => {
     if (!data || !isValidMeasurementConversionPair(data.pair)
         || !Array.isArray(data.equivalents) || data.equivalents.length !== 5) return false;
-    return data.equivalents.every((equivalent, index) => Boolean(equivalent)
+    return Array.from(data.equivalents).every((equivalent, index) => Boolean(equivalent)
         && Number.isSafeInteger(equivalent.largerValue) && equivalent.largerValue > 0
         && Number.isSafeInteger(equivalent.smallerValue) && equivalent.smallerValue > 0
         && equivalent.smallerValue === equivalent.largerValue * data.pair.factor

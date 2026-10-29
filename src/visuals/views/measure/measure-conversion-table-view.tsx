@@ -1,19 +1,19 @@
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import {StandardUnitEquivalencesProblem} from '../../../types/problems.ts';
+import {UnitEquivalenceSequenceProblem} from '../../../types/problems.ts';
 import {formatStandardNumeral as formatTableValue} from '../../../lib/whole-number-notation.ts';
 import {
     capitalize,
     formatFactorInstruction,
     formatMeasurementEquation,
     getMeasurementUnitPresentation,
-    isValidStandardUnitEquivalences as hasCoherentConversionTable
+    isValidUnitEquivalenceSequence as hasCoherentConversionTable
 } from '../../helpers/measurement-conversion.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 
 const VIEW_ID = 'measure-conversion-table';
 
 function assertConversionTable(
-    data: StandardUnitEquivalencesProblem
+    data: UnitEquivalenceSequenceProblem
 ): void {
     validateProblemData(VIEW_ID, data, ['pair', 'equivalents']);
     if (!hasCoherentConversionTable(data)) {
@@ -29,7 +29,7 @@ interface CoreProps {
 }
 
 function ConversionTable({data, isSolutionView}: {
-    data: StandardUnitEquivalencesProblem;
+    data: UnitEquivalenceSequenceProblem;
     isSolutionView: boolean;
 }) {
     const hiddenIndices = new Set([3, 4]);

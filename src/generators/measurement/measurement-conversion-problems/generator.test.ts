@@ -5,7 +5,7 @@ import type {
     MeasurementConversionStoryProblem
 } from '../../../types/problems.ts';
 import {measurementConversionPairSeeds} from '../helpers.ts';
-import {MeasurementConversionGenerator} from '../measurement-conversion/generator.ts';
+import {MeasurementUnitEquivalencesGenerator} from '../measurement-unit-equivalences/generator.ts';
 import {MeasurementConversionProblemsGenerator} from './generator.ts';
 
 const pairs = [
@@ -59,20 +59,20 @@ describe('MeasurementConversionProblemsGenerator', () => {
     const generator = new MeasurementConversionProblemsGenerator();
 
     it('shares immutable pair facts while both generators return detached payloads', () => {
-        const legacyGenerator = new MeasurementConversionGenerator();
+        const sequenceGenerator = new MeasurementUnitEquivalencesGenerator();
         expect(Object.isFrozen(measurementConversionPairSeeds)).toBe(true);
         for (const [unitPair] of pairs) {
             const seedPair = measurementConversionPairSeeds[unitPair];
             expect(Object.isFrozen(seedPair)).toBe(true);
             setSeed(`shared-pair-${unitPair}`);
-            const legacy = legacyGenerator.generate({unitPair, numericProfile: 'legacy'}).data;
+            const sequence = sequenceGenerator.generate({unitPair}).data;
             setSeed(`shared-pair-${unitPair}`);
             const story = generator.generate({unitPair, numberKind: 'integer'}).data;
-            expect(legacy.pair).toEqual(seedPair);
+            expect(sequence.pair).toEqual(seedPair);
             expect(story.pair).toEqual(seedPair);
-            expect(legacy.pair).not.toBe(seedPair);
+            expect(sequence.pair).not.toBe(seedPair);
             expect(story.pair).not.toBe(seedPair);
-            expect(legacy.equivalents).toHaveLength(5);
+            expect(sequence.equivalents).toHaveLength(5);
         }
     });
 

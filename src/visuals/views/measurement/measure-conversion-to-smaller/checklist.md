@@ -1,0 +1,2 @@
+- **Identity:** A named unit relation supports one larger-to-smaller conversion with a given measure and requested smaller unit.
+- **Modes:** Question Mode shows the source, target unit and factor but withholds the converted measure; Solution Mode reveals the multiplication equation and equal measurements.

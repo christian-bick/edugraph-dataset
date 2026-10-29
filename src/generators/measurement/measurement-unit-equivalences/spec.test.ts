@@ -2,7 +2,8 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
-import {MeasurementConversionGenerator} from './generator.ts';
+import {MeasurementUnitEquivalencesGenerator} from './generator.ts';
+import {MeasurementUnitEquivalencesGeneratorSchema, spec} from './spec.ts';
 
 const unitPairCases = [
     [[Area.UnitMagnitudeScaling, Scope.KilometerScale, Scope.MeterScale], 'kilometer-meter'],
@@ -14,13 +15,22 @@ const unitPairCases = [
     [[Area.UnitFactorScaling, Scope.MinuteIntervals, Scope.SecondIntervals], 'minute-second']
 ] as const;
 
-describe('MeasurementConversionGenerator spec integration', () => {
-    const generator = new MeasurementConversionGenerator();
+describe('MeasurementUnitEquivalencesGenerator spec integration', () => {
+    const generator = new MeasurementUnitEquivalencesGenerator();
 
-    it.each(unitPairCases)('resolves %s independently of the requested projection', (pairLabels, pairId) => {
+    it('owns integer, positive, nonzero unit relations as ordinary invariants', () => {
+        expect(spec.generalLabels).toEqual([
+            Area.UnitScaleRelation, Scope.IntegerNumbers,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
+        ]);
+        expect(spec.inferredLabels).toBeUndefined();
+        expect(Object.keys(MeasurementUnitEquivalencesGeneratorSchema)).toEqual(['unitPair']);
+        expect(MeasurementUnitEquivalencesGeneratorSchema.unitPair[0]).not.toContain(Scope.IntegerNumbers);
+    });
+
+    it.each(unitPairCases)('preserves the named-unit declaration for %s in every projection', (pairLabels, pairId) => {
         setSeed(pairId);
         const reference = generateWithLabels(generator, [...pairLabels])!;
-        expect(reference.data).not.toHaveProperty('numericExamples');
         for (const projection of [
             [Area.UnitScaleRelation, Ability.ConceptDerivation],
             [Ability.ProcedureExecution],
@@ -35,22 +45,6 @@ describe('MeasurementConversionGenerator spec integration', () => {
         }
     });
 
-    it.each(unitPairCases)('resolves explicit integer and decimal profiles for %s', (pairLabels, pairId) => {
-        for (const [numberLabel, numberKind] of [
-            [Scope.IntegerNumbers, 'integer'],
-            [Scope.DecimalNumbers, 'decimal']
-        ] as const) {
-            setSeed(`${pairId}-${numberKind}`);
-            const stub = generateWithLabels(generator, [
-                ...pairLabels, numberLabel, Ability.ProcedureExecution
-            ])!;
-            expect(stub.data.pair.id).toBe(pairId);
-            expect(stub.data.equivalents).toHaveLength(5);
-            expect(stub.data.numericExamples?.numberKind).toBe(numberKind);
-            expect(new Set(stub.labels)).toEqual(new Set([...pairLabels, numberLabel]));
-        }
-    });
-
     it.each([
         [Area.UnitMagnitudeScaling, Scope.KilometerScale, Scope.CentimeterScale],
         [Scope.HourIntervals, Scope.SecondIntervals]
@@ -58,22 +52,11 @@ describe('MeasurementConversionGenerator spec integration', () => {
         expect(() => generateWithLabels(generator, labels)).toThrow('Unsupported exact label combination');
     });
 
-    it('rejects simultaneous integer and decimal profiles', () => {
-        expect(() => generateWithLabels(generator, [
-            Area.UnitFactorScaling,
-            Scope.PoundScale,
-            Scope.OunceScale,
-            Scope.IntegerNumbers,
-            Scope.DecimalNumbers
-        ])).toThrow('Unsupported exact label combination');
-    });
-
-    it('completes a broad request with a fully labeled named-unit pair', () => {
+    it('resolves a broad request to a fully labeled named-unit pair', () => {
         setSeed('unit-pair-fallback');
         const stub = generateWithLabels(generator, [Ability.ProcedureExecution])!;
-        const data = stub.data;
-        const expected = unitPairCases.find(([, pairId]) => pairId === data.pair.id)!;
+        const expected = unitPairCases.find(([, pairId]) => pairId === stub.data.pair.id)!;
         expect(new Set(stub.labels)).toEqual(new Set(expected[0]));
-        expect(data).not.toHaveProperty('numericExamples');
+        expect(stub.data.equivalents).toHaveLength(5);
     });
 });

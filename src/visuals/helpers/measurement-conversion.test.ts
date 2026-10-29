@@ -7,7 +7,8 @@ import {
     formatRelativeSizeStatement,
     formatUnitEquivalence,
     getMeasurementUnitPresentation,
-    isValidMeasurementConversionPair
+    isValidMeasurementConversionPair,
+    isValidUnitEquivalenceSequence
 } from './measurement-conversion.ts';
 
 const hourMinute: MeasurementConversionPair = {
@@ -55,5 +56,20 @@ describe('measurement-conversion presentation', () => {
         [{...hourMinute, id: 'liter-milliliter', quantityKind: 'liquid-volume', scalingKind: 'magnitude', largerUnit: 'liter', smallerUnit: 'milliliter', factor: 1000}, 'One liter holds 1,000 times as much liquid volume as one milliliter.']
     ] as const)('formats the %s relative-size statement', (pair, expected) => {
         expect(formatRelativeSizeStatement(pair as MeasurementConversionPair)).toBe(expected);
+    });
+});
+
+
+describe('unit-equivalence sequence validation', () => {
+    it('accepts all five consecutive rows at the upper boundary without the numeric-value bound', () => {
+        const pair = {id: 'kilometer-meter', quantityKind: 'length', scalingKind: 'magnitude',
+            largerUnit: 'kilometer', smallerUnit: 'meter', factor: 1000} as const;
+        const equivalents = Array.from({length: 5}, (_, index) => ({
+            largerValue: 9 + index, smallerValue: (9 + index) * 1000
+        }));
+        expect(isValidUnitEquivalenceSequence({pair, equivalents})).toBe(true);
+        const sparse = [...equivalents];
+        delete sparse[2];
+        expect(isValidUnitEquivalenceSequence({pair, equivalents: sparse})).toBe(false);
     });
 });

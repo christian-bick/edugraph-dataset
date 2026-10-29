@@ -3,12 +3,12 @@ import {ConfigFromSchema} from '../../../../types/schema.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
-    viewId: 'measure-conversion-execution',
+    viewId: 'measure-conversion-to-smaller',
     generalLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.Base10]
 };
 
-export const MeasureConversionExecutionViewSchema = {} as const;
+export const MeasureConversionToSmallerViewSchema = {} as const;
 
-export type MeasureConversionExecutionViewConfig = ConfigFromSchema<
-    typeof MeasureConversionExecutionViewSchema
+export type MeasureConversionToSmallerViewConfig = ConfigFromSchema<
+    typeof MeasureConversionToSmallerViewSchema
 >;

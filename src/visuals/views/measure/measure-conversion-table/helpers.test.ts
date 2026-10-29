@@ -1,13 +1,13 @@
 import {describe, expect, it} from 'vitest';
-import {MeasurementConversionGenerator} from '../../../../generators/measurement/measurement-conversion/generator.ts';
+import {MeasurementUnitEquivalencesGenerator} from '../../../../generators/measurement/measurement-unit-equivalences/generator.ts';
 import {setSeed} from '../../../../lib/random.ts';
-import {StandardUnitEquivalencesProblem} from '../../../../types/problems.ts';
+import {UnitEquivalenceSequenceProblem} from '../../../../types/problems.ts';
 import {formatTableValue, hasCoherentConversionTable} from './helpers.ts';
 
-const buildEquivalences = (seed: string): StandardUnitEquivalencesProblem => {
+const buildEquivalences = (seed: string): UnitEquivalenceSequenceProblem => {
     setSeed(seed);
-    const data = new MeasurementConversionGenerator().generate({
-        unitPair: 'kilometer-meter', numericProfile: 'legacy'
+    const data = new MeasurementUnitEquivalencesGenerator().generate({
+        unitPair: 'kilometer-meter'
     }).data;
     return data;
 };

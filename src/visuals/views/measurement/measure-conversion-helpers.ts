@@ -1,12 +1,12 @@
 import {formatStandardNumeral} from '../../../lib/whole-number-notation.ts';
 import {
-    MeasurementConversionProblem,
+    GenericUnitScaleRelationProblem,
     MeasurementConversionUnitId,
-    StandardUnitEquivalencesProblem
+    MeasurementConversionValuesProblem
 } from '../../../types/problems.ts';
 import {
     getMeasurementUnitPresentation,
-    isValidStandardUnitEquivalences
+    isValidMeasurementConversionPair
 } from '../../helpers/measurement-conversion.ts';
 
 const MAX_DISPLAY_HUNDREDTHS = 1_000_000;
@@ -30,17 +30,16 @@ export const formatConversionMeasurement = (
     return `${formatConversionHundredths(hundredths)} ${hundredths === 100 ? unit.singular : unit.plural}`;
 };
 
-export const isValidConversionNumericExamples = (
-    data: StandardUnitEquivalencesProblem
-): boolean => {
+export const isValidMeasurementConversionValues = (data: MeasurementConversionValuesProblem): boolean => {
+    if (!data || !isValidMeasurementConversionPair(data.pair)) return false;
     const examples = data.numericExamples;
     if (!examples || (examples.numberKind !== 'integer' && examples.numberKind !== 'decimal')
         || !Array.isArray(examples.equalities) || examples.equalities.length !== 2) return false;
-    if (examples.equalities[0]?.largerHundredths === examples.equalities[1]?.largerHundredths) return false;
+    const [first, second] = examples.equalities;
+    if (!first || !second || first.largerHundredths === second.largerHundredths) return false;
 
     return examples.equalities.every(equality => {
-        if (!equality
-            || !Number.isSafeInteger(equality.largerHundredths)
+        if (!Number.isSafeInteger(equality.largerHundredths)
             || !Number.isSafeInteger(equality.smallerHundredths)
             || equality.largerHundredths <= 0
             || equality.smallerHundredths <= 0
@@ -53,21 +52,12 @@ export const isValidConversionNumericExamples = (
     });
 };
 
-export const isValidMeasureConversionProblem = (
-    data: MeasurementConversionProblem
-): boolean => {
-    if (!data) return false;
-    if (!('pair' in data)) {
-        return Number.isSafeInteger(data.largeUnitCount)
-            && data.largeUnitCount >= 3
-            && data.largeUnitCount <= 6
-            && Number.isSafeInteger(data.unitsPerLarge)
-            && data.unitsPerLarge >= 2
-            && data.unitsPerLarge <= 3
-            && Number.isSafeInteger(data.smallUnitCount)
-            && data.smallUnitCount === data.largeUnitCount * data.unitsPerLarge;
-    }
-
-    return isValidStandardUnitEquivalences(data)
-        && (data.numericExamples === undefined || isValidConversionNumericExamples(data));
-};
+export const isValidGenericUnitScaleRelation = (data: GenericUnitScaleRelationProblem): boolean => Boolean(data)
+    && Number.isSafeInteger(data.largeUnitCount)
+    && data.largeUnitCount >= 3
+    && data.largeUnitCount <= 6
+    && Number.isSafeInteger(data.unitsPerLarge)
+    && data.unitsPerLarge >= 2
+    && data.unitsPerLarge <= 3
+    && Number.isSafeInteger(data.smallUnitCount)
+    && data.smallUnitCount === data.largeUnitCount * data.unitsPerLarge;
