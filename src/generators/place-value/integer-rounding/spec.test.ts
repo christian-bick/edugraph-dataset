@@ -30,10 +30,10 @@ describe('IntegerRoundingGenerator spec integration', () => {
     );
 
     it.each([
-        {range: {min: 0, max: 11}, roundingMagnitude: Scope.StepsOf10},
-        {range: {min: 0, max: 101}, roundingMagnitude: Scope.StepsOf100},
-        {range: {min: 1000, max: 1001}, roundingMagnitude: Scope.StepsOf10000},
-        {range: {min: 1000, max: 1001}, roundingMagnitude: Scope.StepsOf100000}
+        {range: {min: 0, max: 11}, roundingMagnitude: Scope.StepsOf10, zeroEndpoint: true},
+        {range: {min: 0, max: 101}, roundingMagnitude: Scope.StepsOf100, zeroEndpoint: true},
+        {range: {min: 1000, max: 1001}, roundingMagnitude: Scope.StepsOf10000, zeroEndpoint: true},
+        {range: {min: 1000, max: 1001}, roundingMagnitude: Scope.StepsOf100000, zeroEndpoint: true}
     ] as const)('abstains when a supported configuration can expose zero: %j', config => {
         setSeed(0);
         const data = generator.generate(config)!.data;
@@ -71,7 +71,7 @@ describe('IntegerRoundingGenerator spec integration', () => {
             expect(generatePlannedDraw({...input, replay: draw.replay})).toEqual(draw);
             expect(getRandomState()).toBe(state);
             expect(planModelCompatibility({...target, labels: [...target.labels, Scope.NumbersWithoutZero]},
-                model, view).supported).toBe(false);
+                model, view).supported).toBe(true);
         }
     );
 
@@ -89,8 +89,7 @@ describe('IntegerRoundingGenerator spec integration', () => {
                         return {config: resolved.config, labels: resolved.resolvedLabels,
                             configurationState, stub, state: getRandomState()};
                     });
-                    expect({...draws[1], labels: draws[1].labels.filter(label => label !== Scope.NumbersWithoutZero)})
-                        .toEqual(draws[0]);
+                    expect(draws[1]).toEqual(draws[0]);
                 }
             }
         }

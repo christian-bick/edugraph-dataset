@@ -18,7 +18,8 @@ describe('IntegerRoundingGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 range: {min: 0, max: 1000},
-                roundingMagnitude
+                roundingMagnitude,
+                zeroEndpoint: false
             })!.data;
 
             expect(data.roundingPlace).toBe(roundingPlace);
@@ -47,7 +48,8 @@ describe('IntegerRoundingGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 range: {min: 1000, max: 1_000_000},
-                roundingMagnitude
+                roundingMagnitude,
+                zeroEndpoint: false
             })!.data;
 
             expect('task' in data && data.task).toBe('multi-digit-integer-rounding');
@@ -84,7 +86,8 @@ describe('IntegerRoundingGenerator', () => {
             setSeed(seed);
             const data = generator.generate({
                 range: {min: 1000, max: 1_000_000},
-                roundingMagnitude
+                roundingMagnitude,
+                zeroEndpoint: false
             })!.data;
             if (!('task' in data)) continue;
 
@@ -105,7 +108,8 @@ describe('IntegerRoundingGenerator', () => {
         const midpoint = lowerMultiple + roundingPlace / 2;
         const tie = generator.generate({
             range: {min: midpoint, max: midpoint},
-            roundingMagnitude
+            roundingMagnitude,
+            zeroEndpoint: false
         })!.data;
         expect(tie).toMatchObject({
             task: 'multi-digit-integer-rounding',
@@ -118,7 +122,8 @@ describe('IntegerRoundingGenerator', () => {
             const obscuredNonTie = midpoint + minimumMidpointDistance - 1;
             expect(generator.generate({
                 range: {min: obscuredNonTie, max: obscuredNonTie},
-                roundingMagnitude
+                roundingMagnitude,
+                zeroEndpoint: false
             })).toBeNull();
         }
     });
@@ -126,7 +131,8 @@ describe('IntegerRoundingGenerator', () => {
     it('supplies an explicit midpoint rule and grouped non-tie distances', () => {
         const tie = generator.generate({
             range: {min: 1500, max: 1500},
-            roundingMagnitude: Scope.StepsOf1000
+            roundingMagnitude: Scope.StepsOf1000,
+            zeroEndpoint: false
         })!.data;
         expect(tie).toMatchObject({
             task: 'multi-digit-integer-rounding',
@@ -141,7 +147,8 @@ describe('IntegerRoundingGenerator', () => {
 
         const nonTie = generator.generate({
             range: {min: 123456, max: 123456},
-            roundingMagnitude: Scope.StepsOf100000
+            roundingMagnitude: Scope.StepsOf100000,
+            zeroEndpoint: false
         })!.data;
         expect(nonTie).toMatchObject({
             task: 'multi-digit-integer-rounding',
@@ -151,7 +158,8 @@ describe('IntegerRoundingGenerator', () => {
 
         const lowerBand = generator.generate({
             range: {min: 1000, max: 1000},
-            roundingMagnitude: Scope.StepsOf100000
+            roundingMagnitude: Scope.StepsOf100000,
+            zeroEndpoint: true
         })!.data;
         expect(lowerBand).toMatchObject({
             task: 'multi-digit-integer-rounding',
@@ -165,7 +173,8 @@ describe('IntegerRoundingGenerator', () => {
     it('includes the upper million boundary and is deterministic', () => {
         const config = {
             range: {min: 999999, max: 999999},
-            roundingMagnitude: Scope.StepsOf100000
+            roundingMagnitude: Scope.StepsOf100000,
+            zeroEndpoint: false
         } as const;
         setSeed('integer-rounding-grade-four');
         const first = generator.generate(config);
@@ -182,19 +191,23 @@ describe('IntegerRoundingGenerator', () => {
     it('returns null for unsupported magnitudes and unusable ranges', () => {
         expect(generator.generate({
             range: {min: 0, max: 1000},
-            roundingMagnitude: 'unsupported'
+            roundingMagnitude: 'unsupported',
+            zeroEndpoint: false
         } as never)).toBeNull();
         expect(generator.generate({
             range: {min: 995, max: 1000},
-            roundingMagnitude: Scope.StepsOf100
+            roundingMagnitude: Scope.StepsOf100,
+            zeroEndpoint: false
         })).toBeNull();
         expect(generator.generate({
             range: {min: 1_000_001, max: 1_000_001},
-            roundingMagnitude: Scope.StepsOf100000
+            roundingMagnitude: Scope.StepsOf100000,
+            zeroEndpoint: false
         })).toBeNull();
         expect(generator.generate({
             range: {min: 2000, max: 2000},
-            roundingMagnitude: Scope.StepsOf1000
+            roundingMagnitude: Scope.StepsOf1000,
+            zeroEndpoint: false
         })).toBeNull();
     });
 });

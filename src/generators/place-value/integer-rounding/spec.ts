@@ -2,20 +2,20 @@ import {Area, deductCompatible, Scope} from 'edugraph-ts';
 import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {endpointContext, hasEndpointProfile, resolveZeroEndpoint, roundingPlaces} from './endpoint-profile.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec<typeof IntegerRoundingGeneratorSchema> = {
     generatorId: 'integer-rounding',
-    // SPEC-12: positive endpoints require both the existing high-range branch and
-    // one of these magnitudes. Neither field alone is a truthful zero-absence
-    // capability; keep their choices and fallback sampling unchanged.
-    inferredLabels: [{
-        produces: [Scope.NumbersWithoutZero],
-        infer: ({range, roundingMagnitude}) => range && range.max > 1000
-            && (roundingMagnitude === Scope.StepsOf10 || roundingMagnitude === Scope.StepsOf100
-                || roundingMagnitude === Scope.StepsOf1000)
-            ? [Scope.NumbersWithoutZero]
-            : []
-    }],
+    compatibility: [generatorLabelRule('rounding-endpoint-availability', [
+        Scope.NumbersWithZero, Scope.NumbersWithoutZero, ...endpointContext
+    ], selected => {
+        const zero = selected(Scope.NumbersWithZero), positive = selected(Scope.NumbersWithoutZero);
+        if (zero === positive) return false;
+        const magnitude = roundingPlaces.find(([label]) => selected(label));
+        return !!magnitude && hasEndpointProfile(resolveRangeFromLabels(endpointContext.filter(label => selected(label))),
+            magnitude[1], zero);
+    })],
     generalLabels: [
         Area.IntegerRounding,
         Scope.IntegerNumbers,
@@ -35,6 +35,11 @@ export const IntegerRoundingGeneratorSchema = {
         Scope.StepsOf1000,
         Scope.StepsOf10000,
         Scope.StepsOf100000
+    ],
+    zeroEndpoint: [
+        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        resolveZeroEndpoint,
+        [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
     ]
 } as const;
 

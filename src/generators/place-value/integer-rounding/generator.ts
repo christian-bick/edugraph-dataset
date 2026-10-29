@@ -4,10 +4,11 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {IntegerRoundingProblem} from '../../../types/problems.ts';
 import {IntegerRoundingGeneratorConfig, IntegerRoundingGeneratorSchema, spec} from './spec.ts';
+import {hasEndpointProfile, midpointClearanceRatio} from './endpoint-profile.ts';
 
 type RoundingPlace = 10 | 100 | 1000 | 10000 | 100000;
 
-const GRADE_FOUR_MIDPOINT_CLEARANCE_RATIO = 0.05;
+const GRADE_FOUR_MIDPOINT_CLEARANCE_RATIO = midpointClearanceRatio;
 const GRADE_FOUR_MIDPOINT_TIE_RATE = 0.2;
 
 const places = new Map<string, RoundingPlace>([
@@ -57,11 +58,14 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
     readonly spec = spec;
 
     generate(config: IntegerRoundingGeneratorConfig): ProblemStub<IntegerRoundingProblem> | null {
-        validateConfigFields('integer-rounding', config, ['range', 'roundingMagnitude']);
+        validateConfigFields('integer-rounding', config, ['range', 'roundingMagnitude', 'zeroEndpoint']);
 
         const place = places.get(config.roundingMagnitude!);
         if (!place) return null;
         const roundingPlace = place;
+        const zeroEndpoint = config.zeroEndpoint!;
+        if (typeof zeroEndpoint !== 'boolean'
+            || !hasEndpointProfile(config.range!, roundingPlace, zeroEndpoint)) return null;
 
         if (config.range!.max > 1000 || roundingPlace > 100) {
             const minimum = Math.max(1000, Math.ceil(config.range!.min));
@@ -70,7 +74,9 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
             const maximumLowerIndex = Math.floor((maximum - 1) / roundingPlace);
             if (minimum > maximum || minimumLowerIndex > maximumLowerIndex) return null;
 
-            const lowerMultiple = randomInteger(minimumLowerIndex, maximumLowerIndex)
+            const firstIndex = zeroEndpoint ? 0 : Math.max(1, minimumLowerIndex);
+            const lastIndex = zeroEndpoint ? 0 : maximumLowerIndex;
+            const lowerMultiple = randomInteger(firstIndex, lastIndex)
                 * roundingPlace;
             const upperMultiple = lowerMultiple + roundingPlace;
             const minimumNumber = Math.max(minimum, lowerMultiple + 1);
@@ -114,10 +120,9 @@ export class IntegerRoundingGenerator implements ProblemGenerator<
             * roundingPlace;
         if (minimumLower > maximumLower) return null;
 
-        const lowerMultiple = randomInteger(
-            minimumLower / roundingPlace,
-            maximumLower / roundingPlace
-        ) * roundingPlace;
+        const firstIndex = zeroEndpoint ? 0 : Math.max(1, minimumLower / roundingPlace);
+        const lastIndex = zeroEndpoint ? 0 : maximumLower / roundingPlace;
+        const lowerMultiple = randomInteger(firstIndex, lastIndex) * roundingPlace;
         const upperMultiple = lowerMultiple + roundingPlace;
         const midpoint = lowerMultiple + roundingPlace / 2;
         const offset = randomInteger(1, roundingPlace - 1);
