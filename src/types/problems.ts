@@ -5542,7 +5542,7 @@ export interface ViewTypeMap {
     'counting-objects-one-to-one': CountingProblem;
     'counting-objects-cardinality': CountingProblem;
     'counting-objects-count-out': CountingSelectionProblem;
-    'counting-objects-parity': CountingProblem;
+    'counting-objects-parity': ParityGroupingProblem;
     'counting-inc-dec': CountingSmallOffsetProblem;
     'counting-ten-more-less': CountingTenOffsetProblem;
     'counting-hundred-more-less': CountingHundredOffsetProblem;

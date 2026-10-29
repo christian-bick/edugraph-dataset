@@ -17,12 +17,12 @@ function ObjectDot({color}: {color: string}) {
 
 const colors = ['bg-sky-500', 'bg-violet-500', 'bg-teal-500', 'bg-amber-500'];
 
-const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
+export const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
-    validateProblemData('counting-objects-parity', data, ['numObjects', 'parity']);
+    validateProblemData('counting-objects-parity', data, ['kind', 'numObjects', 'groupSize', 'remainder', 'parity']);
 
-    if (!Number.isInteger(data.numObjects) || data.numObjects < 1 || data.numObjects > 20) {
+    if (data.kind !== 'parity-grouping' || !Number.isInteger(data.numObjects) || data.numObjects < 1 || data.numObjects > 20) {
         throw new ViewValidationError('counting-objects-parity', 'Parity groups require 1 through 20 objects.');
     }
     if (data.parity !== 'even' && data.parity !== 'odd') {
@@ -32,9 +32,12 @@ const CountingObjectsParityCore = ({config: _config, payload}: CoreProps) => {
     if (data.parity !== actualParity) {
         throw new ViewValidationError('counting-objects-parity', 'The parity label does not match the object count.');
     }
-
-    const groupSize = Math.floor(data.numObjects / 2);
-    const remainder = data.numObjects % 2 as 0 | 1;
+    if (!Number.isInteger(data.groupSize) || data.groupSize < 0
+        || data.remainder !== 0 && data.remainder !== 1
+        || 2 * data.groupSize + data.remainder !== data.numObjects) {
+        throw new ViewValidationError('counting-objects-parity', 'The equal groups and remainder must reconstruct the collection.');
+    }
+    const {groupSize, remainder} = data;
     const color = colors[seed % colors.length];
 
     return (
@@ -98,7 +101,7 @@ export const CountingObjectsParity = withConfig(CountingObjectsParityViewSchema,
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-window.renderView = (payload: ViewRenderPayload<'counting-objects-parity'>) => {
+if (typeof window !== 'undefined') window.renderView = (payload: ViewRenderPayload<'counting-objects-parity'>) => {
     const container = document.getElementById('view');
     if (container) {
         if (!root) root = createRoot(container);
