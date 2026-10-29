@@ -5,6 +5,7 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {needsPrimaryWidth, permitsPrimaryWidth, primaryWidthContext, primaryWidthLabels,
     resolvePrimaryWidth} from './width-profile.ts';
+import {resolveResultZero} from './zero-result.ts';
 
 const resolveOperation = selectExactLabelMap([
     [Area.AdditionPlaceValuePartitioning, Area.Addition],
@@ -20,7 +21,7 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
     compatibility: [generatorLabelRule('place-value-operand-profile', [
         Area.Addition, Area.AdditionPlaceValuePartitioning, Area.Subtraction, Area.SubtractionPlaceValuePartitioning,
         Area.IntegerRegrouping, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand,
-        Scope.MultiplesOf10, Scope.NumbersWithZero
+        Scope.MultiplesOf10, Scope.NumbersWithZero, Scope.NumbersWithoutZero
     ], selected => {
         const singleDigit = selected(Scope.SingleDigitSmallestOperand);
         const twoDigit = selected(Scope.TwoDigitLargestOperand);
@@ -30,7 +31,10 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
         const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
         if (singleDigit && multiples || singleDigit && !twoDigit || twoDigit && !singleDigit && !multiples) return false;
         if (addition) {
-            return !zero && (!multiples || twoDigit && !regrouping);
+            // Two-digit Grade-1 operands expose zero hundreds in every consumer;
+            // the result-zero resolver keeps their actual arithmetic positive.
+            const zeroClaim = twoDigit ? zero && !selected(Scope.NumbersWithoutZero) : !zero;
+            return zeroClaim && (!multiples || twoDigit && !regrouping);
         }
         if (twoDigit || singleDigit) return false;
         // The whole-tens profile operates in one unit; its views do not expose
@@ -102,7 +106,8 @@ export const PlaceValueArithmeticGeneratorSchema = {
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        hasLabel(Scope.NumbersWithZero)
+        resolveResultZero,
+        [[], [Scope.NumbersWithZero]]
     ],
     largestOperandProfile: [
         primaryWidthLabels,
