@@ -41,13 +41,25 @@ function carryOffset(lower: number, quantum: number): number {
     return (lower + offset) % 10_000 === 0 ? offset + 1 : offset;
 }
 
-function decimalRounding(): DecimalRoundingProblem {
-    const roundingPlace = PLACES[randomInteger(0, PLACES.length - 1)]!;
+/** Original place/scenario probabilities, conditioned on the lower endpoint being zero. */
+export function decimalRoundingCases(requireZeroEndpoint: boolean) {
+    return PLACES.flatMap(roundingPlace => [0, 1, 2, 3].flatMap(scenario => {
+        const intervalCount = MAX_VALUE_IN_TEN_THOUSANDTHS / roundingPlace.quantumInTenThousandths;
+        const zeroShare = scenario === 3 ? 0 : 1 / intervalCount;
+        const weight = requireZeroEndpoint ? zeroShare : 1 - zeroShare;
+        return weight === 0 ? [] : [{roundingPlace, scenario, weight}];
+    }));
+}
+
+function decimalRounding(requireZeroEndpoint: boolean): DecimalRoundingProblem {
+    const cases = decimalRoundingCases(requireZeroEndpoint);
+    let remaining = random() * cases.reduce((total, entry) => total + entry.weight, 0);
+    const {roundingPlace, scenario} = cases.find(entry => (remaining -= entry.weight) < 0) ?? cases[cases.length - 1]!;
     const quantum = roundingPlace.quantumInTenThousandths;
-    const scenario = randomInteger(0, 3);
     const lowerCandidateInTenThousandths = scenario === 3
         ? carryLower(quantum)
-        : randomInteger(0, MAX_VALUE_IN_TEN_THOUSANDTHS / quantum - 1) * quantum;
+        : requireZeroEndpoint ? 0
+            : randomInteger(1, MAX_VALUE_IN_TEN_THOUSANDTHS / quantum - 1) * quantum;
     const upperCandidateInTenThousandths = lowerCandidateInTenThousandths + quantum;
     const halfQuantum = quantum / 2;
     const offset = scenario === 3 ? carryOffset(lowerCandidateInTenThousandths, quantum)
@@ -80,7 +92,7 @@ export class DecimalRoundingGenerator implements ProblemGenerator<DecimalRoundin
     schema = DecimalRoundingGeneratorSchema;
 
     generate(config: DecimalRoundingGeneratorConfig): ProblemStub<DecimalRoundingProblem> {
-        validateConfigFields('decimal-rounding', config, []);
-        return {data: decimalRounding()};
+        validateConfigFields('decimal-rounding', config, ['requireZeroEndpoint']);
+        return {data: decimalRounding(config.requireZeroEndpoint!)};
     }
 }
