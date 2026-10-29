@@ -7,8 +7,14 @@ import {IntegerAddSubtractStrategiesGeneratorConfig, IntegerAddSubtractStrategie
 const builders = {
     'addition-make-ten': additionMakeTen,
     'addition-near-doubles': additionNearDoubles,
-    'addition-compensation': additionCompensation,
-    'subtraction-compensation': subtractionCompensation,
+    'addition-compensation-single': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
+        additionCompensation({...bounds, largestOperandWidth: 'single'}),
+    'addition-compensation-multiple': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
+        additionCompensation({...bounds, largestOperandWidth: 'multiple'}),
+    'subtraction-compensation-single': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
+        subtractionCompensation({...bounds, largestOperandWidth: 'single'}),
+    'subtraction-compensation-multiple': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
+        subtractionCompensation({...bounds, largestOperandWidth: 'multiple'}),
     'subtraction-make-ten': subtractionMakeTen,
     'subtraction-think-addition': subtractionThinkAddition
 };

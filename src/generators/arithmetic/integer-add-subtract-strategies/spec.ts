@@ -7,8 +7,10 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 const strategyProfiles = [
     [[Area.AdditionMakeTen, Scope.SingleDigitSmallestOperand], 'addition-make-ten'],
     [[Area.AdditionNearDoubles], 'addition-near-doubles'],
-    [[Area.AdditionCompensation], 'addition-compensation'],
-    [[Area.SubtractionCompensation], 'subtraction-compensation'],
+    [[Area.AdditionCompensation, Scope.SingleDigitLargestOperand], 'addition-compensation-single'],
+    [[Area.AdditionCompensation, Scope.MultipleDigitLargestOperand], 'addition-compensation-multiple'],
+    [[Area.SubtractionCompensation, Scope.SingleDigitLargestOperand], 'subtraction-compensation-single'],
+    [[Area.SubtractionCompensation, Scope.MultipleDigitLargestOperand], 'subtraction-compensation-multiple'],
     [[Area.SubtractionMakeTen, Scope.TwoDigitLargestOperand], 'subtraction-make-ten'],
     [[Area.SubtractionThinkAddition, Scope.MultipleDigitLargestOperand], 'subtraction-think-addition']
 ] as const;
@@ -44,6 +46,7 @@ export const IntegerAddSubtractStrategiesGeneratorSchema = {
         Area.SubtractionMakeTen,
         Area.SubtractionThinkAddition,
         Scope.SingleDigitSmallestOperand,
+        Scope.SingleDigitLargestOperand,
         Scope.TwoDigitLargestOperand,
         Scope.MultipleDigitLargestOperand
     ], resolveStrategy, strategyProfiles.map(([labels]) => labels)],

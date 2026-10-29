@@ -49,7 +49,7 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         {strategy: 'addition-near-doubles', range: {min: 10, max: 22}},
         {strategy: 'addition-near-doubles', range: {min: 0, max: 1000}},
         {strategy: 'addition-near-doubles', range: undefined},
-        {strategy: 'addition-compensation', range: {min: 0, max: 20}},
+        {strategy: 'addition-compensation-multiple', range: {min: 0, max: 20}},
         {strategy: undefined, range: {min: 0, max: 20}}
     ] as const)('leaves wider, other-strategy and unresolved configurations unclaimed: %j', config => {
         expect(resolveInferredLabels({spec, schema: IntegerAddSubtractStrategiesGeneratorSchema,
@@ -72,6 +72,21 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
             Area.AdditionMakeTen, Scope.SingleDigitSmallestOperand
         ]);
     });
+
+    it.each([Area.AdditionCompensation, Area.SubtractionCompensation])(
+        'honors both matching-capable largest-operand profiles for %s', area => {
+            for (const width of [Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand]) {
+                for (let seed = 0; seed < 40; seed++) {
+                    setSeed(seed);
+                    const stub = generateWithLabels(generator, [area, width, Scope.NumbersSmaller1000]);
+                    expect(stub).not.toBeNull();
+                    expect(stub!.labels).toContain(width);
+                    expect(Math.max(stub!.data.leftOperand, stub!.data.rightOperand) < 10)
+                        .toBe(width === Scope.SingleDigitLargestOperand);
+                }
+            }
+        }
+    );
 
     it('declares only invariant mathematical capabilities as general labels', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariantLabels));

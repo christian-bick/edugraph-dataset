@@ -2,6 +2,13 @@ import {random} from '../../lib/random.ts';
 import {AdditionCountingOnProblem, SubtractionCountingBackProblem, AdditionMakeTenProblem, AdditionNearDoublesProblem, AdditionCompensationProblem, SubtractionCompensationProblem, SubtractionMakeTenProblem, SubtractionThinkAdditionProblem, IntegerAddSubtractStrategyStep} from '../../types/problems.ts';
 
 type Bounds = {minimum: number; maximum: number};
+type CompensationBounds = Bounds & {largestOperandWidth?: 'single' | 'multiple'};
+
+const compensationLeftBounds = (minimum: number, maximum: number, right: number,
+    width: CompensationBounds['largestOperandWidth']): Bounds => ({
+    minimum: width === 'multiple' && right < 10 ? Math.max(10, minimum) : minimum,
+    maximum: width === 'single' ? right < 10 ? Math.min(9, maximum) : -1 : maximum
+});
 
 const integerBetween = (minimum: number, maximum: number): number =>
     minimum + Math.floor(random() * (maximum - minimum + 1));
@@ -22,6 +29,19 @@ const eligibleValues = (
 
 const choose = (values: readonly number[]): number | null =>
     values.length === 0 ? null : values[Math.floor(random() * values.length)];
+
+// The old sampler chooses the right operand uniformly, then the left uniformly.
+// Weight each surviving row by its retained fraction to preserve that law conditional on width.
+const chooseCompensationRight = (values: readonly number[], retainedFraction: (right: number) => number): number | null => {
+    if (values.length === 0) return null;
+    const weights = values.map(retainedFraction);
+    let position = random() * weights.reduce((sum, weight) => sum + weight, 0);
+    for (let index = 0; index < values.length; index++) {
+        if (position < weights[index]!) return values[index]!;
+        position -= weights[index]!;
+    }
+    return values.at(-1)!;
+};
 
 const operationStep = (
     operation: 'addition' | 'subtraction',
@@ -164,20 +184,25 @@ export const additionNearDoubles = ({minimum, maximum}: Bounds): AdditionNearDou
     };
 };
 
-export const additionCompensation = ({minimum, maximum}: Bounds): AdditionCompensationProblem | null => {
-    const rightOperand = choose(eligibleValues(minimum, maximum, candidate => {
+export const additionCompensation = ({minimum, maximum, largestOperandWidth}: CompensationBounds): AdditionCompensationProblem | null => {
+    const leftBounds = (right: number) => compensationLeftBounds(
+        Math.max(minimum, nextTenAdjustment(right) + 1), maximum - right, right, largestOperandWidth
+    );
+    const rightOperand = chooseCompensationRight(eligibleValues(minimum, maximum, candidate => {
         if (candidate % 10 === 0) return false;
         const adjustment = nextTenAdjustment(candidate);
-        const minimumLeft = Math.max(minimum, adjustment + 1);
-        return candidate + adjustment <= maximum && minimumLeft <= maximum - candidate;
-    }));
+        const left = leftBounds(candidate);
+        return candidate + adjustment <= maximum && left.minimum <= left.maximum;
+    }), right => {
+        const left = leftBounds(right);
+        const originalMinimum = Math.max(minimum, nextTenAdjustment(right) + 1);
+        return (left.maximum - left.minimum + 1) / (maximum - right - originalMinimum + 1);
+    });
     if (rightOperand === null) return null;
 
     const adjustment = nextTenAdjustment(rightOperand);
-    const leftOperand = integerBetween(
-        Math.max(minimum, adjustment + 1),
-        maximum - rightOperand
-    );
+    const left = leftBounds(rightOperand);
+    const leftOperand = integerBetween(left.minimum, left.maximum);
     const adjustedLeft = leftOperand - adjustment;
     const friendlyRight = rightOperand + adjustment;
     const answer = leftOperand + rightOperand;
@@ -199,20 +224,26 @@ export const additionCompensation = ({minimum, maximum}: Bounds): AdditionCompen
     };
 };
 
-export const subtractionCompensation = ({minimum, maximum}: Bounds): SubtractionCompensationProblem | null => {
-    const rightOperand = choose(eligibleValues(minimum, maximum, candidate => {
+export const subtractionCompensation = ({minimum, maximum, largestOperandWidth}: CompensationBounds): SubtractionCompensationProblem | null => {
+    const leftBounds = (right: number) => compensationLeftBounds(
+        Math.max(right + minimum, minimum), maximum - nextTenAdjustment(right), right, largestOperandWidth
+    );
+    const rightOperand = chooseCompensationRight(eligibleValues(minimum, maximum, candidate => {
         if (candidate % 10 === 0) return false;
         const adjustment = nextTenAdjustment(candidate);
-        const minimumLeft = Math.max(candidate + minimum, minimum);
-        return candidate + adjustment <= maximum && minimumLeft <= maximum - adjustment;
-    }));
+        const left = leftBounds(candidate);
+        return candidate + adjustment <= maximum && left.minimum <= left.maximum;
+    }), right => {
+        const left = leftBounds(right);
+        const originalMinimum = Math.max(right + minimum, minimum);
+        return (left.maximum - left.minimum + 1)
+            / (maximum - nextTenAdjustment(right) - originalMinimum + 1);
+    });
     if (rightOperand === null) return null;
 
     const adjustment = nextTenAdjustment(rightOperand);
-    const leftOperand = integerBetween(
-        Math.max(rightOperand + minimum, minimum),
-        maximum - adjustment
-    );
+    const left = leftBounds(rightOperand);
+    const leftOperand = integerBetween(left.minimum, left.maximum);
     const adjustedLeft = leftOperand + adjustment;
     const friendlyRight = rightOperand + adjustment;
     const answer = leftOperand - rightOperand;

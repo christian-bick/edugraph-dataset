@@ -186,7 +186,9 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     const generateStrategy = (config: {strategy: IntegerAddSubtractStrategy; range: {min: number; max: number}}) =>
         config.strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator().generate({range: config.range})
             : config.strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator().generate({range: config.range})
-                : generator.generate({strategy: config.strategy, range: config.range});
+                : generator.generate({strategy: config.strategy === 'addition-compensation'
+                    || config.strategy === 'subtraction-compensation' ? `${config.strategy}-multiple` : config.strategy,
+                range: config.range});
 
     it('strictly validates every required configuration field', () => {
         expect(() => generator.generate({} as never)).toThrow();
