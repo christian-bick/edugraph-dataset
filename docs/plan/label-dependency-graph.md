@@ -37,8 +37,8 @@ possible-output declaration, so introducing a callback closes no finding by itse
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
 The subsequent measurement split closes 21 more; two subtraction-width fixes and the
-21 zero-absence repairs reduce the total to 341. The first two width-profile checkpoints below
-close 28 more, leaving **313**. The known
+21 zero-absence repairs reduce the total to 341. The three width-profile checkpoints below
+close 30 original width requirements and expose two inherited zero obligations, leaving **313**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -100,7 +100,7 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**1,031 requirements repaired, 75 newly exposed, 38 retired by policy, 313 remaining**.
+**1,033 requirements repaired, 77 newly exposed, 38 retired by policy, 313 remaining**.
 All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
@@ -233,9 +233,9 @@ records the current owners and acceptance checks.
 
 ### Minimal positive binary width profiles within 20
 
-**Approved for implementation on 2026-10-29.** The user accepted incidental sampling changes
+**Implemented in three checkpoints on 2026-10-29.** The user accepted incidental sampling changes
 to close these gaps and requested minimal profiles, without a balancing framework. Of the
-102 remaining `arithmetic-ops-pairs`
+102 pre-batch `arithmetic-ops-pairs`
 width findings, a bounded first slice contains 30 positive, zero-free selections within the
 existing inclusive maximum 20: 14 ordinary addition, 14 subtraction, and two equal-addend
 selections. The other 72 cover wider or unspecified bounds and multiplication/division.
@@ -315,6 +315,35 @@ Subtraction acceptance closes another 14 original requirements: **327 → 313** 
 Cumulative preservation checks cover 1,020 planned probes/replays, 846 direct requests, 340
 exact SSR comparisons and 126 stale-plan rejections. All 77 focused tests and type checking pass;
 the subtraction evidence is alongside the first checkpoint under the same directory.
+
+The third checkpoint adds equal-addend addition: single-digit addends are uniform on 1–9,
+and the two-digit case is exactly `10 + 10`. All ten previous exercises remain supported,
+and every result is even. Iterated subtraction retains its previous behavior. No generator
+or view ID changes, target changes, adapters, inference or automatic completion are involved.
+
+The final audit verifies **all 30 original width closures**, leaving 72 widths in RB-A1-D1.
+The two equal-addend selections also had unresolved zero annotations; their four width
+variants inherit four such omissions. These **two additional zero obligations** belong to
+RB-A2-D1, so the net source backlog is **341 − 30 + 2 = 313**, across 237 selections.
+Remaining facets are zero **154**, operand digits **79**, fraction magnitude **49**, sign **23**
+and number kind **8**. No new conflict, invalid context, incomplete enumeration or pending
+inference appears. Representation completeness and range-policy work remain excluded.
+
+All **1,013 targets / 1,209 tuples** remain, with no new matches and **1,314 selections**.
+Final cumulative verification covers 1,032 planned draws/replays, 846 direct requests, 344
+exact question/solution SSR comparisons and rejection of 126 stale source plans. The 672
+planned and 780 direct outside-slice probes preserve payloads and random continuation;
+600 plan-sampling probes preserve outside-slice choices. All seven target files, unowned
+sources, graph/evaluator, Area allowlist and stored dataset are unchanged. Schema and artifact
+identities correctly change for the edited producer; old receipts are not silently replayed.
+The stored backlog remains **2,542 raw / 2,528 distinct** findings. Dataset regeneration and
+VQA still wait for source readiness and the separate reasoning-view content defect.
+
+Final validation passes **853 suites / 6,812 tests** with `npm run test:coverage`; every
+generator meets the coverage thresholds. This generator has **87.57% statements / 82.70%
+branches**. Type, label, generator/view specification and documentation checks pass; the
+documentation check retains five external-fetch warnings. Independent mathematical, schema
+and preservation reviews found no unresolved implementation issue.
 
 The user supplied the decision required by the
 [autonomous execution agreement](#autonomous-execution-agreement-2026-10-28), which places a

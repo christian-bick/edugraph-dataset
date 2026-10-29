@@ -39,7 +39,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (![0, 1, 2].includes(digits)) return null;
         const existingSingleDigitDomain = digits === 1 && maxMagnitude <= 5;
         const widthProfile = digits !== 0 && !existingSingleDigitDomain;
-        if (widthProfile && ((operation !== Area.Addition && operation !== Area.Subtraction) || config.requireEqualAddends
+        if (widthProfile && ((operation !== Area.Addition && operation !== Area.Subtraction)
+            || config.requireEqualAddends && operation !== Area.Addition
             || requireNegative || requireZero || requireMultipleOf10
             || minMagnitude !== 1 || maxMagnitude !== 20)) return null;
 
@@ -71,7 +72,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (operation === Area.Addition) {
             if (config.requireEqualAddends) {
                 if (requireNegative || requireZero) return null;
-                const addend = randomMagnitude(minMagnitude, Math.floor(maxMagnitude / 2));
+                const addend = randomMagnitude(
+                    widthProfile && digits === 2 ? 10 : minMagnitude,
+                    widthProfile && digits === 1 ? 9 : Math.floor(maxMagnitude / 2));
                 if (addend === null) return null;
                 num1 = addend;
                 num2 = addend;

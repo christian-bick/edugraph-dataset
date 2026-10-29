@@ -1,10 +1,12 @@
 import {Area} from 'edugraph-ts';
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
 import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
 
 const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
+afterEach(() => vi.restoreAllMocks());
 
 function expectValidEquation(problem: ArithmeticPairProblem) {
     if (problem.operation === 'addition') expect(problem.num1 + problem.num2).toBe(problem.answer);
@@ -40,10 +42,31 @@ describe('ArithmeticOpsPairsGenerator', () => {
             requireNegative: false, requireZero: false, requireMultipleOf10: false,
             requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}} as const;
         for (const patch of [{operation: Area.Multiplication}, {requireNegative: true}, {requireZero: true},
-            {requireMultipleOf10: true}, {requireEqualAddends: true}, {range: {min: 10, max: 20}},
+            {requireMultipleOf10: true}, {requireEqualAddends: true, operation: Area.Subtraction}, {range: {min: 10, max: 20}},
             {range: {min: 1, max: 100}}, {largestOperandDigits: 3}]) {
             expect(generator.generate({...base, ...patch} as never)).toBeNull();
         }
+    });
+
+    it('partitions all ten equal-addend exercises into nine single-digit and one two-digit case', () => {
+        const draw = vi.spyOn(rng, 'random');
+        const allAddends: number[] = [];
+        for (const largestOperandDigits of [1, 2] as const) {
+            const count = largestOperandDigits === 1 ? 9 : 1;
+            for (let index = 0; index < count; index++) {
+                draw.mockReturnValue((index + 0.5) / count);
+                const data = generator.generate({operation: Area.Addition, largestOperandDigits,
+                    requireNegative: false, requireZero: false, requireMultipleOf10: false,
+                    requireEqualAddends: true, requireEvenResult: true, range: {min: 1, max: 20}})!.data;
+                expectValidEquation(data);
+                expect(data.num1).toBe(data.num2);
+                expect(data.num1).toBe(largestOperandDigits === 1 ? index + 1 : 10);
+                expect(data.answer % 2).toBe(0);
+                allAddends.push(data.num1);
+            }
+        }
+        expect(allAddends).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        expect(draw).toHaveBeenCalledTimes(10);
     });
 
     it('strictly validates every required config field', () => {

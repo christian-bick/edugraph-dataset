@@ -93,6 +93,38 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(widths).toEqual(new Set([1, 2]));
     });
 
+    it.each([Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand])(
+        'admits and generates the equal-addend profile %s', width => {
+            const labels = [Area.Addition, Area.IteratedOperation, Scope.EvenNumbers,
+                Scope.NumbersSmaller20, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero, width];
+            expect(makeWidthPlan(labels).supported).toBe(true);
+            const addends = new Set<number>();
+            for (let seed = 0; seed < 64; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, labels);
+                expect(stub).not.toBeNull();
+                expect(stub!.labels).toContain(width);
+                expect(stub!.data.num1).toBe(stub!.data.num2);
+                expect(stub!.data.answer).toBe(stub!.data.num1 * 2);
+                addends.add(stub!.data.num1);
+            }
+            if (width === Scope.SingleDigitLargestOperand) {
+                expect([...addends].every(addend => addend >= 1 && addend <= 9)).toBe(true);
+                expect(addends).toContain(9);
+            } else expect(addends).toEqual(new Set([10]));
+        }
+    );
+
+    it('keeps iterated subtraction on its original unrestricted profile', () => {
+        const labels = [Area.Subtraction, Area.IteratedOperation, Scope.NumbersSmaller20];
+        const result = makeWidthPlan(labels);
+        expect(result.supported).toBe(true);
+        if (!result.supported) return;
+        expect(result.plan.domains.find(domain => domain.field === 'largestOperandDigits')?.alternatives
+            .map(alternative => alternative.labels)).toEqual([[]]);
+        expect(extractConfig(ArithmeticOpsPairsGeneratorSchema, labels).config.largestOperandDigits).toBe(0);
+    });
+
     it('keeps the legacy within-five default and explicit largest-width request', () => {
         const labels = [Area.Subtraction, Scope.NumbersSmaller5];
         const choices = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator');

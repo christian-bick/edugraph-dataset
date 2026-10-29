@@ -9,7 +9,8 @@ import {ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
 const addition = [Area.Addition, Scope.NumbersSmaller20];
 const selectedFrom = (labels: readonly string[]) => (label: string) => labels.includes(label);
 const nonExcludingContext = new Set<string>([
-    Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division, Scope.NumbersSmaller20
+    Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
+    Area.IteratedOperation, Scope.NumbersSmaller20
 ]);
 
 describe('Binary operand-width profile resolution', () => {
@@ -54,6 +55,16 @@ describe('Binary operand-width profile resolution', () => {
             ])).toBeUndefined();
         }
     );
+
+    it('includes equal-addend addition while retaining the existing iterated-subtraction behavior', () => {
+        expect(resolveLargestOperandDigits([...addition, Area.IteratedOperation])).toBeUndefined();
+        expect(resolveLargestOperandDigits([
+            ...addition, Area.IteratedOperation, Scope.TwoDigitLargestOperand
+        ])).toBe(2);
+        expect(resolveLargestOperandDigits([
+            Area.Subtraction, Area.IteratedOperation, Scope.NumbersSmaller20
+        ])).toBe(0);
+    });
 
     it('retains the existing within-five single-width claim', () => {
         const legacy = [Area.Subtraction, Scope.NumbersSmaller5, Scope.NumbersWithZero];

@@ -6,7 +6,6 @@ export const largestOperandWidthLabels = [
 ] as const;
 
 const excludedWidthContexts = [
-    Area.IteratedOperation,
     Scope.NumbersWithNegatives, Scope.NumbersWithZero, Scope.MultiplesOf10,
     Scope.NumbersSmaller5, Scope.NumbersSmaller10,
     Scope.NumbersLarger5, Scope.NumbersLarger10, Scope.NumbersLarger20,
@@ -16,14 +15,15 @@ const excludedWidthContexts = [
 
 export const operandWidthContextLabels = [
     Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
-    Scope.NumbersSmaller20, ...excludedWidthContexts
+    Area.IteratedOperation, Scope.NumbersSmaller20, ...excludedWidthContexts
 ] as const;
 
 type LabelSelection = (label: string) => boolean;
 
 /** These profiles partition the existing positive addition/subtraction support from 1 through 20. */
 export const usesLargestOperandWidthProfiles = (selected: LabelSelection): boolean =>
-    (selected(Area.Addition) || selected(Area.Subtraction)) && selected(Scope.NumbersSmaller20)
+    (selected(Area.Addition) || selected(Area.Subtraction) && !selected(Area.IteratedOperation))
+    && selected(Scope.NumbersSmaller20)
     && !excludedWidthContexts.some(label => selected(label));
 
 export const permitsLargestOperandWidth = (selected: LabelSelection, digits: 1 | 2): boolean =>
