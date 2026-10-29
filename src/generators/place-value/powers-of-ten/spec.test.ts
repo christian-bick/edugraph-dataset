@@ -14,7 +14,16 @@ describe('PowersOfTenGenerator spec integration', () => {
             Scope.Base10,
             Scope.IntegerNumbers
         ]);
-        expect(PowersOfTenGeneratorSchema).toEqual({});
+        expect(PowersOfTenGeneratorSchema.zeroExponent[0]).toEqual([
+            Scope.NumbersWithZero, Scope.NumbersWithoutZero
+        ]);
+    });
+
+    it.each([Scope.NumbersWithZero, Scope.NumbersWithoutZero])('honors matching-capable %s', label => {
+        const stub = generateWithLabels(new PowersOfTenGenerator(), [...spec.generalLabels, label]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).toContain(label);
+        expect(stub!.data.power.exponent === 0).toBe(label === Scope.NumbersWithZero);
     });
 
     it('generates for the Grade 5 formalization target', () => {

@@ -1,4 +1,4 @@
-import {validateConfigFields} from '../../../lib/errors.ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {PowerTenNotationProblem, PowerTenPower} from '../../../types/problems.ts';
@@ -19,8 +19,12 @@ export class PowersOfTenGenerator implements ProblemGenerator<
     schema = PowersOfTenGeneratorSchema;
 
     generate(config: PowersOfTenGeneratorConfig): ProblemStub<PowerTenNotationProblem> {
-        validateConfigFields('powers-of-ten', config, []);
-        const power = POWERS[Math.floor(random() * POWERS.length)]!;
+        validateConfigFields('powers-of-ten', config, ['zeroExponent']);
+        if (typeof config.zeroExponent !== 'boolean') {
+            throw new GeneratorValidationError('powers-of-ten', 'Expected a boolean zero-exponent profile.');
+        }
+        const candidates = POWERS.filter(power => (power.exponent === 0) === config.zeroExponent);
+        const power = candidates[Math.floor(random() * candidates.length)]!;
         return {data: {kind: 'power-ten-notation', power}};
     }
 }

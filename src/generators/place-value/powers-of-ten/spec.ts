@@ -1,6 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'powers-of-ten',
@@ -14,7 +15,15 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const PowersOfTenGeneratorSchema = {} as const;
+export const PowersOfTenGeneratorSchema = {
+    zeroExponent: [
+        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        selectExactLabelMap([
+            [Scope.NumbersWithZero, true],
+            [Scope.NumbersWithoutZero, false]
+        ] as const)
+    ]
+} as const;
 
 export type PowersOfTenGeneratorConfig = ConfigFromSchema<
     typeof PowersOfTenGeneratorSchema
