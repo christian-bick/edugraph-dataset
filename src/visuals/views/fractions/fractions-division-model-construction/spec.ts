@@ -4,7 +4,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-division-model-construction',
-    generalLabels: [Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10]
+    generalLabels: [Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero]
 };
 
 export const FractionsDivisionModelConstructionViewSchema = {} as const;
