@@ -112,16 +112,21 @@ describe('general fraction division leaf contracts', () => {
             'unit-dividend-basic', 'unit-dividend-inverse', 'unit-dividend-equation',
             'unit-divisor-basic', 'unit-divisor-inverse', 'unit-divisor-equation'
         ] as const) {
-            setSeed(`legacy-division-regression-${relationProfile}`);
-            const {data} = generator.generate({relationProfile});
-            for (const id of leafIds.slice(0, 5)) {
-                for (const isSolutionView of [false, true]) {
-                    const task = id.replace('fractions-', '') as FractionQuotientTask;
-                    const original = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView={isSolutionView} />);
-                    expect(render(id, data, isSolutionView)).toBe(original);
+            const numericProfiles = relationProfile === 'fraction-as-quotient'
+                ? ['proper', 'improper'] as const : relationProfile.startsWith('unit-dividend-')
+                    ? ['nonzero'] as const : ['zero', 'nonzero'] as const;
+            for (const numericProfile of numericProfiles) {
+                setSeed(`legacy-division-regression-${relationProfile}-${numericProfile}`);
+                const {data} = generator.generate({relationProfile, numericProfile});
+                for (const id of leafIds.slice(0, 5)) {
+                    for (const isSolutionView of [false, true]) {
+                        const task = id.replace('fractions-', '') as FractionQuotientTask;
+                        const original = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView={isSolutionView} />);
+                        expect(render(id, data, isSolutionView)).toBe(original);
+                    }
                 }
+                expect(() => render('fractions-division-model-construction', data, false)).toThrow(/Validation Error/);
             }
-            expect(() => render('fractions-division-model-construction', data, false)).toThrow(/Validation Error/);
         }
     });
 
