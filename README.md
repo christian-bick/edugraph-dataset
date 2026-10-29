@@ -43,6 +43,14 @@ Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use or
 matching-capable mathematical profiles. The
 [autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
 record separates verified repairs from concrete questions about content, annotation contracts
+Parity grouping and decimal reading now have dedicated canonical producers. Their existing views
+consume the grouping relation or source/comparison values, preserving every target route and the
+original mathematical sampling law. The
+[two-step review](docs/plan/label-dependency-graph.md#two-step-competency-review-2026-10-29)
+separates these completed local migrations from the ongoing zero-applicability decision.
+Question and solution evaluation remain independent: each judgement receives one image and may
+reason through the competency required by that image.
+
 and rare module splits. Source readiness remains separate from stored-dataset acceptance.
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**

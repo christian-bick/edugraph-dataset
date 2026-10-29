@@ -80,6 +80,22 @@ through ordinary declarations; this family needs no inferred annotations. The
 [migration record](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
 documents retained targets, additional matches and new replay/sample identities.
 
+Parity and decimal reading likewise use dedicated canonical producers. `parity-grouping` carries
+the collection size, equal-group size, remainder and parity; the existing parity view renders that
+relation. `decimal-reading-relations` carries the source decimal and three exact comparison values;
+the reading view formats and orders them. Existing decimal-writing consumers keep their source-only
+producer. Shared samplers preserve the old mathematical draw order and conditional probabilities;
+new producer IDs deliberately change sample keys and replay identities. The
+[two-step review](docs/plan/label-dependency-graph.md#two-step-competency-review-2026-10-29)
+records complete target-route successors and same-value rendering checks. These migrations do not
+change dependency policy or automatically close missing annotations.
+
+VQA judges question and solution images independently. Each request contains its own image and
+mode, with no paired image or previous verdict. The system prompt explicitly permits deriving the
+mathematical work required by a question; solution mode evaluates the shown work and answer.
+Mode-specific verdicts and cache entries remain separate. Prompt/checklist edits change evaluation
+identities without themselves changing rendered pixels or proving empirical model accuracy.
+
 The current content modules also use finite mathematical profiles for operand widths,
 fraction magnitudes and settled coefficient/endpoint/sign distinctions. Their samplers
 partition the previous supported exercises before generation; labels remain ordinary

@@ -5,10 +5,14 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 [autonomous execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
-**The current source backlog is 63 requirements across 56 affected selections and eight
-dependency owners. All 63 are input-dependent; no autonomous implementation batch remains queued.**
-The [current classification and concrete questions](label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
-supersede the earlier blanket deferral of 263 requirements. That historical checkpoint combined
+**The current source backlog is 63 requirements across 56 affected selections, eight backlog
+scopes and ten producers.** The approved parity and decimal-reading migrations are complete;
+zero applicability and the separate seven sign findings remain under review. No zero-policy
+retirement or labeling repair is claimed for these structural changes. The
+[two-step competency review](label-dependency-graph.md#two-step-competency-review-2026-10-29)
+supersedes the earlier six approval proposals: artifact-mode annotations and algebra-domain hints
+are withdrawn. The [earlier classification](label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
+superseded the blanket deferral of 263 requirements. That historical checkpoint combined
 engineering work with actual decisions about content, artifact context or rare module splits.
 The subsequent autonomous work closes 216 of those baseline requirements and 12 introduced
 requirements. Of 28 introduced obligations, 16 remain open alongside the 47 original
@@ -23,6 +27,54 @@ The agreed [narrowing of the blanket numeral/base dependencies](label-dependency
 is implemented. It retires 38 source requirements without changing annotations or claiming
 repairs. Representation completeness remains a separate, unestimated design topic; no mandatory
 `NumberRepresentation` replacement has been adopted.
+
+## Two-step competency review and current backlog (2026-10-29)
+
+The approved local producers are implemented: `parity-grouping` supplies the grouping relation,
+and `decimal-reading-relations` supplies the source and its three exact alternative values.
+Question and solution VQA remain independent, each receiving one image and no other verdict.
+The prompt now expressly permits reasoning through the question. No exercise hints, artifact-mode
+annotations or automatic completion are added.
+
+All **1,013 targets / 1,213 tuples / 1,578 selections** remain. Exactly three tuples migrate producer
+ID: both parity routes and the decimal-reading route. The other 1,210 tuple identities are
+unchanged, with no extra matches. Source findings remain **63**; stored findings remain **2,542 raw /
+2,528 distinct**, across 1,282 samples and 2,808 image rows. Graph/evaluator policy is unchanged.
+
+| Current producer | Zero | Sign | Next treatment |
+|---|---:|---:|---|
+| `arithmetic-ops-pairs` | 5 | 0 | Number-line zero relevance and canonical reference-frame review. |
+| `writing` | 1 | 0 | Number-line marking zero relevance and reference-frame review. |
+| `parity-grouping` | 2 | 0 | Canonical producer complete; remaining zero applicability is separate. |
+| `time-elapsed` | 2 | 0 | Zero applicability; no artifact-mode annotation extension. |
+| `time-interval-arithmetic` | 4 | 0 | Integer operation does not alone settle time-component zero relevance. |
+| `decimal-reading-relations` | 1 | 0 | Canonical producer complete; remaining zero applicability is separate. |
+| `decimal-writing` | 1 | 0 | Zero applicability, then review unneeded writer profiles and sampler effects. |
+| `fraction-products` | 3 | 0 | Zero applicability; no artifact-mode annotation extension. |
+| `algebra-expressions` | 7 | 7 | Exempt structural algebra from automatic zero completeness; separately review sign applicability. No domain hint is authorized. |
+| `fraction-division-relations` | 30 | 0 | 24 general-model and six story selections; approved view split remains conditional on applicability. |
+| **Total** | **56** | **7** | **63 source requirements, none closed by structural migration alone.** |
+
+Target review finds **154 explicit-zero targets** (seven WithZero, 147 WithoutZero). A literal ban
+whenever any Area lies outside Arithmetic/IntuitiveMathematics is incompatible: 31 targets lose all
+routes, and 15 lose some. It blocks 71 of 246 distinct explicit-zero tuples (109 of 380 selections),
+including zero numeral writing and zero-opposite. Notation is genuinely under FormalMathematics in
+the pinned ontology. As an automatic-completeness qualification only, the field test preserves all
+matching, would retire 18 zero omissions and leave **38 zero + seven sign = 45**. It still includes
+24 general fraction-division findings while exempting 15 numerical-power selections. These are
+**counterfactual counts**, not achieved closure. No field ban, ontology correction, target change or
+zero cleanup has been implemented. The outer Area allowlist and range-policy exclusion remain.
+
+The main plan records exact compatibility evidence, independent-mode evaluation, sampling and
+render preservation, and conditional cleanup candidates. Checkpoints are `cbdd7220`, `e07d9997`,
+`5d4ae2c6` and `2e1a08f1`; evidence is under `temp/two-step-competency/`. Canonical regeneration
+and external VQA remain deferred until source/content readiness. The historical tables below retain
+their accounting lineage; their six old approval requests no longer describe the current decisions.
+
+Full verification passes **884 suites / 7,119 tests** and all generator coverage thresholds. Type,
+label, ownership/applicability and documentation checks pass (five external-fetch warnings).
+All seven target files, 15 dependency implementation files and 3,355 unowned baseline files are
+byte-identical. All 189 pre-existing dirty paths remain; unrelated README/DOCS content is preserved.
 
 ## Autonomous engineering completion and input-dependent backlog (2026-10-29)
 
@@ -310,10 +362,10 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A1 | Binary arithmetic operand widths | 118 | 0 | 0 | Complete; child below |
 | RB-A1-D1 | Variable pair width profiles | 0 | 0 | 0 | Complete; unspecified safe-integer bounds use analytical conditional sampling |
 | RB-A2 | Binary arithmetic zero participation | 28 | 0 | 0 | Triaged; child below |
-| RB-A2-D1 | Pair zero projection/ownership | 0 | 5 | 5 | Input-dependent: Q-SPLIT-AXES; ordinary-view zero declarations complete |
+| RB-A2-D1 | Pair zero projection/ownership | 0 | 5 | 5 | Zero applicability/reference-frame review; ordinary-view declarations complete |
 | RB-A3 | Elementary numeral/base and number views | 64 | 0 | 0 | Complete; children below |
 | RB-A3-D1 | Object-only numeral/base applicability | 0 | 0 | 0 | Requirements policy-retired; representation design separate |
-| RB-A3-D2 | Writing zero declaration ownership | 0 | 1 | 1 | Input-dependent: Q-SPLIT-AXES; source coefficient profiles complete |
+| RB-A3-D2 | Writing zero declaration ownership | 0 | 1 | 1 | Zero applicability/reference-frame review; source coefficient profiles complete |
 | RB-A3-D3 | Rounding-reasoning match guarantees | 0 | 0 | 0 | Open content defect; dependency requirements policy-retired |
 | RB-A4 | Three- and four-operand arithmetic | 24 | 0 | 0 | Complete |
 | RB-A5 | Arithmetic strategies and property relations | 38 | 0 | 0 | Complete; children below |
@@ -322,7 +374,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A6 | Patterns, estimation and equation-zero contexts | 36 | 0 | 0 | Complete; child below |
 | RB-A6-D1 | Equation/estimation zero distinctions | 0 | 0 | 0 | Complete through canonical mathematical claims/proposals and zero profiles |
 | RB-A7 | Parity grouping and zero classification | 2 | 0 | 0 | Triaged; child below |
-| RB-A7-D1 | Singleton/even/larger-odd grouping | 0 | 2 | 2 | Input-dependent: Q-SPLIT-PARITY |
+| RB-A7-D1 | Singleton/even/larger-odd grouping | 0 | 2 | 2 | Canonical parity producer implemented; zero qualification remains under review |
 | RB-A8 | Counting offsets, equal groups and arrays | 16 | 0 | 0 | Complete |
 | RB-A9 | Place value, rounding and powers of ten | 71 | 0 | 0 | Complete; children below |
 | RB-A9-D1 | Place-count/intermediate zero evidence | 0 | 0 | 0 | Complete; joint coefficient/result and rounding-endpoint profiles |
@@ -330,17 +382,17 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A10 | Written algorithms and division models | 22 | 0 | 0 | Complete; child below |
 | RB-A10-D1 | Algorithm operands/partial rows/remainders | 0 | 0 | 0 | Complete; explicit visible/required mathematical trace profiles |
 | RB-D1 | Symbolic and substituted algebra expressions | 56 | 0 | 0 | Complete; child below |
-| RB-D1-D1 | Algebra domain/sign/zero distinctions | 0 | 14 | 14 | Input-dependent: Q-DOMAIN sign/zero restrictions; numeric-frame profiles and seven integer-literal presence declarations complete |
+| RB-D1-D1 | Algebra domain/sign/zero distinctions | 0 | 14 | 14 | Structural algebra zero exemption and separate sign applicability review; domain hints withdrawn |
 | RB-D2 | Numerical expressions and powers | 44 | 0 | 0 | Complete; child below |
 | RB-D2-D1 | Power-expression sign and zero | 0 | 0 | 0 | Complete; single/mixed exact-value and exponent profiles |
 | RB-F1 | Decimal notation, comparison and transcription | 35 | 0 | 0 | Complete; child below |
-| RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 2 | 2 | Input-dependent: Q-SPLIT-DECIMAL reading/numeral writing; independent number-name writing profile complete |
+| RB-F1-D1 | Decimal zero-component/projection decisions | 0 | 2 | 2 | Canonical reading producer implemented; zero qualification and writer cleanup remain conditional |
 | RB-F2 | Decimal operations and place-value zero | 14 | 0 | 0 | Complete; child below |
 | RB-F2-D1 | Decimal zero/component distinctions | 0 | 0 | 0 | Complete; correlated inequality and arithmetic-trace profiles |
 | RB-F3 | Fraction arithmetic and benchmark estimation | 133 | 0 | 0 | Complete; child below |
 | RB-F3-D1 | Arithmetic/benchmark fraction magnitude | 0 | 0 | 0 | Complete; evidenced proper components and conditional magnitude profiles |
 | RB-F4 | Fraction division and quotient projections | 177 | 0 | 0 | Complete; children below |
-| RB-F4-D1 | Variable division/model zero | 0 | 30 | 30 | Input-dependent: 24 Q-SPLIT-DIVISION and six Q-ARTIFACT requirements; quotient profiles complete |
+| RB-F4-D1 | Variable division/model zero | 0 | 30 | 30 | 24 general-model and six story zero findings; view split approved but reassessed after qualification; no explicit-zero targets |
 | RB-F4-D2 | Division fraction magnitude | 0 | 0 | 0 | Complete; original aliases/routing and supported fractions retained |
 | RB-F4-D3 | Whole-sharing number-kind/profile design | 0 | 0 | 0 | Complete; explicit integer operands, count and width without changing original routing |
 | RB-F4-D4 | Unit-dividend label/configuration preservation | 0 | 0 | 0 | Complete |
@@ -349,7 +401,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-F6 | Fraction comparison and number lines | 40 | 0 | 0 | Complete |
 | RB-F7 | Fraction products and scaling | 40 | 0 | 0 | Complete; children below |
 | RB-F7-D1 | Nonmixed-product fraction magnitude | 0 | 0 | 0 | Complete through evidenced magnitude profiles |
-| RB-F7-D2 | Product word-problem zero across modes | 0 | 3 | 3 | Input-dependent: Q-ARTIFACT; includes one inherited profile obligation |
+| RB-F7-D2 | Product word-problem zero across modes | 0 | 3 | 3 | Zero qualification under review; artifact-mode annotation proposal withdrawn |
 | RB-F8 | Rational number-line representations | 40 | 0 | 0 | Complete; child below |
 | RB-F8-D1 | Mixed fraction-axis magnitude | 0 | 0 | 0 | Complete; every fractional axis exposes a proper step 1/d |
 | RB-F9 | Signed rationals, order, magnitude and opposites | 54 | 0 | 0 | Complete; children below |
@@ -361,7 +413,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M2 | Clock reading and construction | 46 | 0 | 0 | Complete; child below |
 | RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 0 | 0 | Complete; joint precision/minute/second-zero contract |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
-| RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Input-dependent: Q-ARTIFACT |
+| RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Zero qualification under review; artifact-mode annotation proposal withdrawn |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
 | **Total: 56 source batches** | | **1,307** | **63** | **63** | |
 
@@ -380,28 +432,28 @@ This exceeds the original planning allowance, which was not a cap.
 Splitting does not close gaps. Verified closure and newly introduced requirements are the primary
 progress measures; policy retirement is reported separately.
 
-## Decision topics
+## Historical decision topics and their disposition
 
-The current questions below partition all 63 outstanding requirements; they are not extra
-batches. Detailed examples, alternatives and migration consequences are in the main plan's
-[concrete questions](label-dependency-graph.md#concrete-questions-for-the-user). Earlier
+The old questions below partition the same 63 outstanding requirements; they are not extra
+batches. Their proposed actions are superseded by the
+[two-step competency review](label-dependency-graph.md#two-step-competency-review-2026-10-29). Earlier
 `DEC-*` engineering topics are resolved where the source ledger now says complete. They must
 not be reused as requests for decisions about evidence rules already settled by the ontology.
 
 | Question | Exclusive current owners/subsets | Current gaps | Decision needed |
 |---|---|---:|---|
-| Q-ARTIFACT | RB-F4-D1 story subset 6; RB-F7-D2 3; RB-M3-D1 6 | 15 | Permit a narrowly specified pre-generation artifact-mode context so question and solution annotations can differ when only the solution supplies the zero reference/component. The accepted config-only inference contract does not currently receive mode. |
-| Q-DOMAIN | RB-D1-D1 | 14 | Permit visible domain/restriction text for seven symbolic tasks' sign/zero claims. Explicit integer constants already establish IntegerNumbers presence without claiming an integer domain for x; hidden variable restrictions remain unproved. |
-| Q-SPLIT-AXES | RB-A2-D1 5; RB-A3-D2 1 | 6 | Confirm rare canonical reference-frame producer splits for arithmetic number lines and whole-number marking, retaining all target routes and layouts. Ordinary binary/writing repairs are complete; duplicate cross-role zero ownership is not permitted. |
-| Q-SPLIT-PARITY | RB-A7-D1 | 2 | Confirm a dedicated parity-grouping payload/producer exposing total, group count and remainder, preserving singleton/even/larger-odd support. This is a structural confirmation, not a vote on whether an empty group counts as zero. |
-| Q-SPLIT-DIVISION | RB-F4-D1 shared-model subset | 24 | Confirm four general-division-only view leaves, retaining the original IDs for quotient models and preserving all 12 general and 16 quotient target/task routes. General origins and quotient numeric profiles require distinct positive owners. |
-| Q-SPLIT-DECIMAL | RB-F1-D1 | 2 | Confirm a separate decimal-reading relation producer with canonical alternative values, while numeral writing keeps its source-only contract. A reading distractor can introduce a zero coefficient absent from the source. Independent number-name writing is repaired. |
+| Q-ARTIFACT | RB-F4-D1 story subset 6; RB-F7-D2 3; RB-M3-D1 6 | 15 | Artifact-mode annotation extension withdrawn. Review zero applicability; keep one-image question/solution judgement independent. |
+| Q-DOMAIN | RB-D1-D1 | 14 | Domain-hint proposal withdrawn. Review structural algebra zero exemption and sign completeness independently; integer literals do not establish variable domains. |
+| Q-SPLIT-AXES | RB-A2-D1 5; RB-A3-D2 1 | 6 | Reassess canonical reference-frame split after zero relevance is settled. |
+| Q-SPLIT-PARITY | RB-A7-D1 | 2 | Approved producer implemented and target/sampling/render/replay preservation verified. Zero findings remain separate. |
+| Q-SPLIT-DIVISION | RB-F4-D1 shared-model subset | 24 | Split approved but conditional: all 20 task targets exist, none explicitly requests zero, so narrowing completeness may make extra leaves unnecessary. |
+| Q-SPLIT-DECIMAL | RB-F1-D1 | 2 | Approved reading producer implemented; numeral writing unchanged. Zero applicability and possible old-profile cleanup remain conditional. |
 | Q-REASONING | RB-A3-D3, separate content defect | 0 | Permit the bounded correctness repair for the projection that can introduce 200 for the exact sum 23+32+45=100 despite the rendering-preservation constraint. Zero graph requirements does not mean this defect is accepted. |
 | **Total dependency requirements** | **Eight exclusive dependency owners** | **63** | **Zero autonomous batches remain queued.** |
 
-The four structural split proposals require the user's standing confirmation. The remaining
-contract/content questions likewise concern changes to the accepted constraints. Approval is
-not closure: implementation, complete support/matching review and verification must follow.
+Parity and decimal reading have their approved structural migrations. Other structural changes
+remain subject to the standing confirmation rule and the current scope review. Approval is
+not closure: complete support/matching review and verification must follow implementation.
 Preserve targets, the Area allowlist and the range-policy exclusion; no adapter or automatic
 completion is proposed. Representation completeness remains a separate design topic.
 

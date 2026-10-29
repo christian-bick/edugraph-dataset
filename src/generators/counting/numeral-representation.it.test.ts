@@ -16,7 +16,7 @@ const numeralConsumers = [
     ['counting-selection', 'counting-objects-count-out', Ability.ProcedureExecution],
     ['counting-basic', 'counting-objects-one-to-one', Ability.ProcedureExecution],
     ['counting-basic', 'counting-objects-simple', Ability.ProcedureUnderstanding],
-    ['counting-basic', 'counting-objects-parity', Ability.ConceptClassification],
+    ['parity-grouping', 'counting-objects-parity', Ability.ConceptClassification],
     ['counting-basic', 'counting-objects-cardinality', Ability.ProcedureUnderstanding],
     ['counting-classify-count', 'sorting-classify-count', Ability.ConceptClassification],
     ['counting-classify-sort', 'sorting-classify-order', Ability.ProcedureExecution]
@@ -87,17 +87,27 @@ describe('counting numeral representation ownership', () => {
             expect(result.plan.viewLabels).toContain(Scope.Base10);
             if (generatorId === 'counting-basic') {
                 expect(result.plan.generatorLabels).not.toContain(Scope.NumbersWithoutZero);
-                expect(result.plan.viewLabels.includes(Scope.NumbersWithoutZero))
-                    .toBe(viewId !== 'counting-objects-parity');
+                expect(result.plan.viewLabels).toContain(Scope.NumbersWithoutZero);
+            }
+            if (generatorId === 'parity-grouping') {
+                expect(result.plan.generatorLabels).not.toContain(Scope.NumbersWithoutZero);
+                expect(result.plan.viewLabels).not.toContain(Scope.NumbersWithoutZero);
             }
         }
     );
 
     it('does not advertise zero absence for parity classification', () => {
-        const generator = generators.find(entry => entry.generatorId === 'counting-basic')!;
+        const generator = generators.find(entry => entry.generatorId === 'parity-grouping')!;
         const view = views.find(entry => entry.viewId === 'counting-objects-parity')!;
         expect(matchesTarget([...quantityLabels, Ability.ConceptClassification], generator, view))
             .toEqual({matched: false, reason: 'unsupported-label', label: Scope.NumbersWithoutZero});
+    });
+
+    it('keeps the scalar counting producer outside the canonical grouping payload contract', () => {
+        const generator = generators.find(entry => entry.generatorId === 'counting-basic')!;
+        const view = views.find(entry => entry.viewId === 'counting-objects-parity')!;
+        expect(matchesTarget([...quantityLabels.filter(label => label !== Scope.NumbersWithoutZero),
+            Ability.ConceptClassification], generator, view)).toEqual({matched: false, reason: 'incompatible-type'});
     });
 
 });

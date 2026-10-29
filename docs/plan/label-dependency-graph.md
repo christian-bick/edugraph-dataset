@@ -18,7 +18,7 @@ image. Question judgement may solve or reason through the stated task; it receiv
 hidden generator metadata or previous verdict. A higher question-mode error rate remains measurable.
 No exercise hint, mode-specific inference callback or automatic label completion is proposed.
 
-Step 1 implements the approved local changes that remain useful independently of zero policy:
+Step 1 is implemented in the approved local changes that remain useful independently of zero policy:
 
 - `parity-grouping` owns the collection size, equal-group size, remainder and parity. The existing
   parity view consumes this canonical relation. Preserve all old counts and their sampling law,
@@ -49,6 +49,120 @@ currently have no active targets; this does not authorize expanding the outer Ar
 The earlier 63-gap acceptance remains the baseline. A narrowed obligation is a policy retirement,
 not a labeling repair; a changed producer/view route is an explicit migration, not lost target
 coverage. The division split remains approved subject to the target review; it is not part of Step 1.
+
+### Step 1 acceptance and independent evaluation
+
+Checkpoint commits are `cbdd7220` (named contracts and execution plan), `e07d9997` (parity),
+`5d4ae2c6` (independent question/solution judgement), and `2e1a08f1` (decimal reading).
+
+| Change | Matching and targets | Mathematics, rendering and sampling |
+|---|---|---|
+| Parity grouping | Both existing target/view routes migrate from `counting-basic` to `parity-grouping`. Nine other counting routes remain unchanged. | All 20 counts, the original single scalar draw and conditional probabilities remain. 640 direct probes preserve config/count/random continuation; 160 same-value question/solution render comparisons are identical. No singleton profile or balancing is added. |
+| Decimal reading | The existing reading route migrates from `decimal-writing` to `decimal-reading-relations`. Both writing routes retain their producer and payload. | Source sampling and three comparison values are preserved for all 9,990 canonical decimals; 39,960 presentation comparisons preserve the four rotations. 768 raw and 768 direct writing probes preserve config/math/random continuation. Eight same-value question/solution render comparisons are identical. |
+| Independent judgement | Matching, targets, generation and rendering are unchanged. The prompt and checklist change VQA cache identities. | Question mode reasons from its one question image; solution mode assesses its one solution image. Neither receives the other image or verdict. A mocked transport regression checks separate requests, retries, outcomes and cache records. No live Gemini evaluation or empirical error-rate measurement is claimed. |
+
+Both migrated families pass 24 planned generation/replay checks each. New producer IDs intentionally
+change sample keys, seeds and replay identities; preservation at an identical mathematical value and
+render seed does not claim that newly seeded images remain identical. The old payloads are rejected
+by the migrated views rather than supported through fallback unions. The decimal source sampler is
+shared with writing without changing the existing writer configuration or zero profiles.
+
+The final source audit still has **63 non-range requirements: 56 zero and seven sign, across 56
+selections, eight backlog scopes and ten producers**. These structural changes close **zero** labeling requirements and
+retire **zero** policy requirements. The graph and evaluator are unchanged. Full matching retains
+all **1,013 targets / 1,213 tuples / 1,578 selections**, with exactly the three named producer-route
+successors above. No target is removed or weakened. Stored-dataset findings remain separate from
+this source result; regeneration waits for source/content readiness.
+
+Final verification passes **884 suites / 7,119 tests** with `npm run test:coverage` and all generator
+coverage thresholds. Types, label contracts, generator/view ownership/applicability and documentation
+checks pass (five external-fetch warnings). All seven target files, 15 dependency implementation
+files and 3,355 unowned baseline files are byte-identical. All 189 pre-existing dirty paths and the
+unrelated README/DOCS content are preserved. The integration ownership test now names the new parity
+producer and expressly rejects routing the old scalar producer to that grouping view.
+
+### Step 2: target compatibility of the proposed zero boundary
+
+The latest proposal exempts algebra, geometry, analysis and other fields: every involved Area must
+be transitively below **Arithmetic or IntuitiveMathematics**. This would be a zero-specific
+qualification; it does not change the evaluator's outer **Arithmetic / IntuitiveMathematics /
+FormalMathematics** allowlist. The exhaustive comparison uses all 1,013 normalized targets and
+1,578 resolved source selections after Step 1. Target-only labels and resolved generator/view Areas
+are checked separately, because a producer can add an Area absent from the target conjunction.
+
+Two different interpretations have materially different consequences:
+
+| Interpretation | Compatibility with preserved targets | Counterfactual source accounting |
+|---|---|---|
+| Forbid asserting either zero descriptor whenever any Area falls outside the two roots | Incompatible: 31 explicit-zero targets lose every current route; 15 lose some routes. 71 of 246 distinct explicit-zero tuples are blocked (109 of 380 admitted selections). | Not an accepted repair or policy; no labels or routes have been removed. |
+| Require automatic zero completeness only inside those two roots; retain truthful explicit zero declarations elsewhere | No matching or target loss from changing this annotation-only qualification. | 18 of 56 zero omissions become policy retirements; 38 zero plus seven sign requirements remain. These numbers are comparisons, not achieved closure. |
+
+The authored target conjunctions already contain **21** conflicts with a literal ban: 17 elementary
+equation targets, three Kindergarten numeral-writing targets, and the zero-opposite target. Resolved
+routes expose additional conflicts through producer/view Areas. In the pinned ontology,
+`DigitNotation`, `SignNotation`, `Equation`, `ArithmeticExpression` and `OrderOfOperations` have
+FormalMathematics ancestry. Thus the field test rejects writing the numeral **0**, interpreting **0
+as its own opposite**, and several ordinary equation/power tasks. These are actual ontology
+memberships, not an algebra-domain inference from a visible integer constant.
+
+The field test also retains all **24** general fraction-division zero findings while excluding **15**
+Grade-6 numerical power selections. It therefore does not, by itself, express the intended
+integer-arithmetic competency boundary. The earlier operation-plus-IntegerNumbers candidate has
+the opposite problem of admitting three structural algebra cases through their integer literals.
+Those literals do not establish the variables' number domain; structural algebra needs an explicit
+exemption from automatic zero completeness.
+
+Additional target evidence constrains the next refinement:
+
+- **154 targets explicitly use zero polarity** (seven WithZero, 147 WithoutZero). The 45 entirely
+  outside the simple resolved operation/integer-number combination include counting, writing,
+  comparison, collection division and the two explicit zero concepts. A narrower automatic rule
+  cannot justify deleting their matching capabilities or mathematical restrictions.
+- Integer exponents are role-specific. Four numerical-power targets resolve to 15 selections with
+  `RationalNumbers + IntegerExponent`, not `IntegerNumbers`. A future qualifying exponent/factorial
+  branch must identify the relevant integer role rather than match names beginning with `Integer`.
+  There are 12 active exponentiation targets and no factorial targets.
+- Ten intuitive collection targets use SetComparison, UnionOfCollections or PartitionOfCollections;
+  all explicitly request WithoutZero. Formal SetTheory has no active targets and stays outside the
+  outer Area allowlist. Expanding an entire foundational root would also reintroduce parity and
+  elapsed-time obligations, so such an expansion is not a neutral exception.
+- The four division task families have 20 distinct active targets and 28 routes (12 general, 16
+  quotient), but **none explicitly requests either zero descriptor**. The 24 general selections need
+  no additional view leaves solely to preserve zero-specific target coverage. Reassess the approved
+  split after the applicability decision rather than implementing it to satisfy the old broad rule.
+
+**Current decision boundary:** the literal field ban is incompatible with target preservation.
+Do not implement it, remove asserted labels, or silently exempt notation from its actual field
+membership. The next policy decision must distinguish automatic completeness from an assertion
+ban and settle whether foundational notation/power contexts need explicit positive exceptions or
+an ontology correction. Algebra, geometry and analysis must not acquire automatic zero obligations
+through incidental numeric constants. Any approved qualification must retain the outer allowlist,
+explicit target routes, assertion-conflict checks and range-policy exclusion. Record each retired
+subject separately from annotation repairs. No zero-policy change has been applied in this checkpoint.
+
+### Earlier zero-only complexity: conditional cleanup backlog
+
+Cleanup follows the final applicability decision, not the declaration of a possible policy. A
+target-capable zero profile remains protected whenever existing zero targets need its restrictions.
+The two decimal-writing routes intersect **none** of the 154 explicit-zero targets and are the first
+reviewed cleanup candidate. Removing their zero-only profile would retain both routes and complete
+mathematical support, reducing three writer selections to two. It would restore the raw name-writing
+sampler: the original zero-presence mixture is 0.6724/0.3276 and precision mixture 12%/12%/76%.
+Numeral-writing probes preserve 128/128 seeded payloads/random continuations; name-writing restores
+the original unconditioned sampler and changes 63/128 sampled payloads. This is a disclosed sampling
+change, not a metadata-only edit. Neither the cleanup nor those sampling changes are implemented.
+
+Other non-target-protected decimal comparison, expanded-form, scaling and rounding profiles need
+separate sampler/support and applicability reviews. Do not broadly delete existing zero labels,
+their tests or inference rules. Artifact-specific annotations and algebra-domain hints are withdrawn;
+question and solution judgement remains independent. Structural algebra's seven remaining **sign**
+findings require their own applicability review; narrowing zero does not close them.
+
+Reproducible local evidence is under `temp/two-step-competency/`: `parity/`, `decimal/`,
+`phase1-audit/`, `zero-target-review.ts/json/md`, and `zero-field-gate.ts/json`. The target/gate
+comparisons are exhaustive over current targets and admitted configurations. Seeded mathematical,
+random-continuation and render probes supplement those comparisons; they are not represented as
+exhaustive random-stream proof.
 
 ## Autonomous work and decisions requiring input (2026-10-29)
 
@@ -103,9 +217,11 @@ subsequent evidence proves an independent repair, transfer that requirement with
 
 ### Concrete questions for the user
 
-These questions remain pending; technical design and independent implementations continue.
-Recommendations are proposals, not authorization. The Area allowlist, range-policy exclusion,
-target preservation, no adapters and no automatic completion remain fixed.
+The questions below are the historical pre-review proposals. Their current status is governed by
+the [two-step competency review](#two-step-competency-review-2026-10-29): artifact-mode annotations
+and algebra-domain hints are withdrawn, parity and decimal reading are implemented, and the
+division split is approved but conditional on the zero-applicability review. The Area allowlist,
+range-policy exclusion, target preservation, no adapters and no automatic completion remain fixed.
 
 **Q-ARTIFACT — May the annotation contract receive artifact mode before generation, so a question
 and its solution can carry different justified zero annotations?**
