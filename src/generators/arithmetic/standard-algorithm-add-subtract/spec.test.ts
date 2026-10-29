@@ -4,6 +4,7 @@ import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {StandardAlgorithmAddSubtractGenerator} from './generator.ts';
 import {spec} from './spec.ts';
+import {isZeroFreeStandardAlgorithm} from './zero-arithmetic.ts';
 
 const invariantLabels = [
     Scope.TwoOperands,
@@ -44,6 +45,8 @@ describe('StandardAlgorithmAddSubtractGenerator spec integration', () => {
             Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000
         ]));
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.NumbersWithoutZero);
+        expect(isZeroFreeStandardAlgorithm(stub!.data)).toBe(true);
     });
 
     it.each([
@@ -64,5 +67,7 @@ describe('StandardAlgorithmAddSubtractGenerator spec integration', () => {
         expect(stub!.data.columns).toHaveLength(3);
         expect(stub!.data.topValue).toBeGreaterThanOrEqual(100);
         expect(stub!.data.topValue).toBeLessThan(1000);
+        expect([...spec.generalLabels, ...stub!.labels]).toContain(Scope.NumbersWithoutZero);
+        expect(isZeroFreeStandardAlgorithm(stub!.data)).toBe(true);
     });
 });

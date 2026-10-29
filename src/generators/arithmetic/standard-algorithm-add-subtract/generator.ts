@@ -10,6 +10,7 @@ import {
     StandardAlgorithmAddSubtractGeneratorConfig,
     StandardAlgorithmAddSubtractGeneratorSchema
 } from './spec.ts';
+import {isZeroFreeStandardAlgorithm} from './zero-arithmetic.ts';
 
 const placeColumns = [
     1,
@@ -45,8 +46,6 @@ const randomRegroupingOperand = (minimum: number, maximum: number): number | nul
 
 const digitAt = (value: number, placeValue: number): number =>
     Math.floor(value / placeValue) % 10;
-
-const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
 
 const buildAdditionColumns = (
     topValue: number,
@@ -165,14 +164,8 @@ export class StandardAlgorithmAddSubtractGenerator implements ProblemGenerator<
             if (firstOperand === null) return null;
             const secondOperand = randomRegroupingOperand(fullWidthMinimum, maximum - firstOperand);
             if (secondOperand === null) continue;
-            const sum = firstOperand + secondOperand;
-
-            // NumbersWithoutZero excludes zero as a number. Keeping every displayed
-            // numeral zero-free also prevents a result-place zero from visually
-            // suggesting that zero is an operand of the authored procedure.
-            if ([firstOperand, secondOperand, sum].every(hasNoZeroDigit)) {
-                return {data: buildProblem(operation, firstOperand, secondOperand)};
-            }
+            const data = buildProblem(operation, firstOperand, secondOperand);
+            if (isZeroFreeStandardAlgorithm(data)) return {data};
         }
         return null;
     }
