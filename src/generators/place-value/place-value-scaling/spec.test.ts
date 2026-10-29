@@ -19,7 +19,19 @@ describe('PlaceValueScalingGenerator spec integration', () => {
         ]));
         expect(spec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
         expect(spec.generalLabels).not.toContain(Scope.NumbersLarger100000);
-        expect(PlaceValueScalingGeneratorSchema).toEqual({});
+        expect(PlaceValueScalingGeneratorSchema.hasZeroCoefficient[0]).toEqual([
+            Scope.NumbersWithZero, Scope.NumbersWithoutZero
+        ]);
+    });
+
+    it.each([Scope.NumbersWithZero, Scope.NumbersWithoutZero])('honors %s in the complete coefficient strip', label => {
+        for (let seed = 0; seed < 40; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, [label]);
+            expect(stub).not.toBeNull();
+            expect(stub!.labels).toContain(label);
+            expect(stub!.data.digits.includes(0)).toBe(label === Scope.NumbersWithZero);
+        }
     });
 
     it('generates from the exact Grade 4 mathematical labels', () => {

@@ -1,6 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-scaling',
@@ -16,7 +17,15 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const PlaceValueScalingGeneratorSchema = {} as const;
+export const PlaceValueScalingGeneratorSchema = {
+    hasZeroCoefficient: [
+        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        selectExactLabelMap([
+            [Scope.NumbersWithZero, true],
+            [Scope.NumbersWithoutZero, false]
+        ] as const)
+    ]
+} as const;
 
 export type PlaceValueScalingGeneratorConfig = ConfigFromSchema<
     typeof PlaceValueScalingGeneratorSchema
