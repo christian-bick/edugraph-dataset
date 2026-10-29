@@ -25,13 +25,15 @@ const decimal = (wholePart: number, digits: [number, number, number], scale: 1 |
         digits, numerator: Number(digits.slice(0, scale).join('')), denominator: 10 ** scale as 10 | 100 | 1000} as DecimalWritingProblem['fractionalPart']
 });
 
-describe('decimal number-name source coefficient profiles', () => {
-    it('excludes unused padding and keeps both kinds of active zero', () => {
+describe('decimal number-name whole-quantity zero profiles', () => {
+    it('requires zero wholes and never uses a fractional zero digit as its criterion', () => {
         expect(decimalWritingHasZero(decimal(1, [2, 0, 0], 1))).toBe(false);
         expect(decimalWritingHasZero(decimal(1, [2, 3, 0], 2))).toBe(false);
         expect(decimalWritingHasZero(decimal(0, [2, 3, 4], 3))).toBe(true);
-        expect(decimalWritingHasZero(decimal(1, [0, 3, 4], 3))).toBe(true);
-        expect(decimalWritingHasZero(decimal(1, [2, 0, 4], 3))).toBe(true);
+        expect(decimalWritingHasZero(decimal(1, [0, 3, 4], 3))).toBe(false);
+        expect(decimalWritingHasZero(decimal(1, [2, 0, 4], 3))).toBe(false);
+        expect(decimalWritingHasZero(decimal(2, [0, 5, 0], 2))).toBe(false);
+        expect(decimalWritingHasZero(decimal(0, [2, 0, 5], 3))).toBe(true);
         expect(decimalWritingHasZero(decimal(1, [2, 3, 4], 3))).toBe(false);
     });
 
@@ -121,8 +123,8 @@ describe('decimal number-name source coefficient profiles', () => {
         }
         expect(paths).toBe(10080);
         expect(masses.size).toBe(9990);
-        expect(zeroMass).toBeCloseTo(0.6724, 12);
-        expect(nonzeroMass).toBeCloseTo(0.3276, 12);
+        expect(zeroMass).toBeCloseTo(0.1, 12);
+        expect(nonzeroMass).toBeCloseTo(0.9, 12);
         expect([...masses.values()].reduce((sum, mass) => sum + mass, 0)).toBeCloseTo(1, 12);
     });
 
@@ -138,7 +140,8 @@ describe('decimal number-name source coefficient profiles', () => {
     it('keeps reading distractors outside the name-source zero guarantee for broad requests too', () => {
         const source = decimal(5, [1, 9, 9], 3);
         expect(decimalWritingHasZero(source)).toBe(false);
-        // The same source needs no zero in name writing, but reading adds5.209.
+        // Both values have positive wholes; a zero digit in an alternative
+        // does not change the name-source numerical-zero classification.
         expect(decimalReadingChoices(buildDecimalReadingRelation(source), 0).some(choice => choice.valueInThousandths === 5209)).toBe(true);
         const readingPlan = (labels: string[]) => planModelCompatibility({id: 'reading-zero', labels},
             {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},

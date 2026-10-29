@@ -7,10 +7,9 @@ export const decimalNotationLabels = [Area.DecimalNotation, Area.NumberNameNotat
 export const decimalZeroLabels = [Scope.NumbersWithZero, Scope.NumbersWithoutZero] as const;
 export type DecimalZeroProfile = 'legacy' | 'with-zero' | 'without-zero';
 
-/** Unused fractional padding is not an active source numeral coefficient. */
-export const decimalWritingHasZero = (data: DecimalWritingProblem): boolean => data.wholePart === 0
-    || data.fractionalPart.digits.slice(0, data.fractionalPart.precision === 'tenths' ? 1
-        : data.fractionalPart.precision === 'hundredths' ? 2 : 3).includes(0);
+/** The name-writing task requires both whole and fractional quantities. Zero
+ * wholes are numerical zero; a zero digit inside a positive fraction is not. */
+export const decimalWritingHasZero = (data: DecimalWritingProblem): boolean => data.wholePart === 0;
 
 /** A new zero request can only use the existing number-name mathematical family. */
 export const resolveDecimalNotation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {

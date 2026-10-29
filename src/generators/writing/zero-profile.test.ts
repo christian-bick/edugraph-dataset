@@ -4,39 +4,32 @@ import {getRandomState, setSeed} from '../../lib/random.ts';
 import {extractConfig, findSchemaFallbackContractIssues} from '../../lib/utils.ts';
 import {hasStaticResolution} from '../../lib/static-resolvers.ts';
 import {normalizeSchemaChoices} from '../../lib/schema-choices.ts';
+import {planModelCompatibility} from '../../lib/model-compatibility.ts';
 import {WritingGenerator} from './generator.ts';
 import {spec, WritingGeneratorSchema} from './spec.ts';
-import {hasWritingZero, resolveWritingZero, writingProfileCount, writingProfileValue} from './zero-profile.ts';
+import {resolveWritingZero} from './zero-profile.ts';
 
-describe('writing coefficient-zero profiles', () => {
-    it('counts the complete original million-value support exactly', () => {
-        let zero = 0;
-        for (let value = 1; value <= 1_000_000; value++) if (hasWritingZero(value)) zero++;
-        expect(writingProfileCount(1, 1_000_000, true)).toBe(zero);
-        expect(writingProfileCount(1, 1_000_000, false)).toBe(1_000_000 - zero);
-        expect(zero).toBe(401_949);
-        expect(writingProfileCount(5, 2, true)).toBe(0);
-    });
+const positiveRange = [Scope.NumbersLarger1000, Scope.NumbersSmaller1000000];
+const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: WritingGeneratorSchema, spec};
+const view = {viewId: 'writing-test', generalLabels: [], schema: {}, spec: {viewId: 'writing-test', generalLabels: []}};
 
-    it('inverts every eligible rank, including singleton and inclusive boundaries', () => {
-        for (const [minimum, maximum] of [[0, 20], [990, 1200], [9990, 10100], [999900, 1_000_000],
-            [1000, 1000], [1001, 1001], [1111, 1111], [1000.2, 1010.8]]) {
-            for (const zero of [false, true]) {
-                const lower = Math.max(0, Math.ceil(minimum!));
-                const values = Array.from({length: Math.max(0, Math.floor(maximum!) - lower + 1)},
-                    (_, index) => lower + index).filter(value => hasWritingZero(value) === zero);
-                expect(writingProfileCount(minimum!, maximum!, zero)).toBe(values.length);
-                for (const [rank, value] of values.entries()) {
-                    expect(writingProfileValue(minimum!, maximum!, zero, rank)).toBe(value);
-                }
-                expect(writingProfileValue(minimum!, maximum!, zero, values.length)).toBeNull();
-                expect(writingProfileValue(minimum!, maximum!, zero, -1)).toBeNull();
-                expect(writingProfileValue(minimum!, maximum!, zero, 0.5)).toBeNull();
-            }
+describe('writing scalar-zero choices', () => {
+    it('rejects contradictory zero choices and ranges that cannot contain the requested scalar', () => {
+        const rule = spec.compatibility![0]!;
+        for (const [labels, expected] of [
+            [[Scope.NumbersWithZero, Scope.NumbersWithoutZero], false],
+            [[Scope.NumbersWithoutZero, Scope.Numberline], false],
+            [[Scope.NumbersWithZero, Scope.NumbersSmaller20], true],
+            [[Scope.NumbersWithZero, ...positiveRange], false],
+            [[Scope.NumbersWithoutZero, Scope.NumbersLarger1000000, Scope.NumbersSmaller10000], false],
+            [[Scope.NumbersWithoutZero, ...positiveRange], true]
+        ] as const) {
+            expect(rule.predicate({exact: (_scope, label) => (labels as readonly string[]).includes(label),
+                has: (_scope, label) => (labels as readonly string[]).includes(label)})).toBe(expected);
         }
     });
 
-    it('reviews the exact resolver identity, contextual branches and truthful infeasibility', () => {
+    it('keeps the reviewed pure resolver and the legacy contextual boundaries', () => {
         expect(hasStaticResolution(resolveWritingZero)).toBe(true);
         expect(hasStaticResolution(Object.assign((labels: string[]) => resolveWritingZero(labels), resolveWritingZero))).toBe(false);
         expect(findSchemaFallbackContractIssues(WritingGeneratorSchema)).toEqual([]);
@@ -48,53 +41,52 @@ describe('writing coefficient-zero profiles', () => {
         expect(resolveWritingZero([Scope.NumbersSmaller1000000])).toBeUndefined();
         expect(resolveWritingZero([Scope.NumbersLarger1000])).toBe(false);
         expect(resolveWritingZero([Scope.NumbersLarger1000, Scope.NumbersWithZero])).toBeUndefined();
-        for (const [label, profile] of [[Scope.NumbersWithZero, 'coefficient-zero'],
-            [Scope.NumbersWithoutZero, 'coefficient-nonzero']] as const) {
-            const state = getRandomState();
-            expect(resolveWritingZero([label, Scope.NumbersLarger1000, Scope.NumbersSmaller1000000])).toBe(profile);
-            expect(getRandomState()).toBe(state);
-        }
+        const state = getRandomState();
+        expect(resolveWritingZero([...positiveRange, Scope.NumbersWithoutZero])).toBe(false);
+        expect(resolveWritingZero([...positiveRange, Scope.NumbersWithZero])).toBeUndefined();
+        expect(getRandomState()).toBe(state);
     });
 
-    it('resolves before generation and emits only justified matching-capable claims', () => {
-        const generator = new WritingGenerator();
+    it('admits only scalar zero absence throughout the existing positive Grade 4 range', () => {
         for (const notation of [Area.DigitNotation, Area.NumberNameNotation]) {
-            for (const label of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
-                for (let seed = 0; seed < 64; seed++) {
-                    setSeed(seed);
-                    const resolved = extractConfig(WritingGeneratorSchema, [notation, label,
-                        Scope.NumbersLarger1000, Scope.NumbersSmaller1000000], {spec, owner: 'generator'});
-                    expect(resolved.resolvedLabels).toContain(label);
-                    const stub = generator.generate(resolved.config)!;
-                    expect(hasWritingZero(stub.data.number)).toBe(label === Scope.NumbersWithZero);
-                    if ('placeValues' in stub.data) {
-                        expect(stub.data.placeValues.some(place => place.digit === 0)).toBe(label === Scope.NumbersWithZero);
-                    }
-                }
+            const target = {id: 'positive-writing', labels: [notation, ...positiveRange]};
+            const result = planModelCompatibility(target, model, view);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error('Expected the positive writing target to remain supported.');
+            expect(result.plan.domains.find(domain => domain.field === 'requireZero')!.alternatives
+                .map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithoutZero]]);
+            expect(planModelCompatibility({...target, labels: [...target.labels, Scope.NumbersWithZero]}, model, view)
+                .supported).toBe(false);
+            expect(() => extractConfig(WritingGeneratorSchema, [...target.labels, Scope.NumbersWithZero])).toThrow();
+            for (let seed = 0; seed < 64; seed++) {
+                setSeed(seed);
+                const resolved = extractConfig(WritingGeneratorSchema, target.labels, {spec, owner: 'generator'});
+                expect(resolved.config.requireZero).toBe(false);
+                expect(resolved.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+                expect(resolved.resolvedLabels).not.toContain(Scope.NumbersWithZero);
+                expect(new WritingGenerator().generate(resolved.config)!.data.number).toBeGreaterThan(0);
             }
         }
     });
 
-    it('retains the old scalar branches and rejects invalid coefficient profiles', () => {
+    it('keeps every positive value, including zero digits, and the scalar-zero teaching branch', () => {
         const generator = new WritingGenerator();
-        const config = {notationFamily: Area.DigitNotation, range: {min: 1111, max: 1111}};
-        expect(generator.generate({...config, requireZero: 'coefficient-zero'})).toBeNull();
-        expect(generator.generate({...config, requireZero: 'coefficient-nonzero'})!.data.number).toBe(1111);
-        expect(generator.generate({...config, range: {min: 0, max: 0}, requireZero: 'coefficient-zero'})!.data.number).toBe(0);
-        expect(() => generator.generate({...config, requireZero: 'other'} as any)).toThrow(/profile/);
-        expect(() => generator.generate({...config, range: {min: 1, max: Infinity},
-            requireZero: 'coefficient-zero'})).toThrow(/finite/);
-        for (const requireZero of [false, true]) {
-            const original = {notationFamily: Area.DigitNotation, range: {min: 0, max: 20}, requireZero};
-            setSeed(7);
-            const stub = generator.generate(original)!;
-            expect(stub.data.number === 0).toBe(requireZero);
+        for (const number of [10, 1000, 1001, 1005, 1010, 1111, 1_000_000]) {
+            const data = generator.generate({notationFamily: Area.DigitNotation,
+                range: {min: number, max: number}, requireZero: false})!.data;
+            expect(data.number).toBe(number);
+            expect('placeValues' in data).toBe(number > 1000);
+        }
+        expect(generator.generate({notationFamily: Area.DigitNotation, range: {min: 0, max: 20}, requireZero: true})!.data)
+            .toEqual({number: 0});
+        for (const requireZero of ['coefficient-zero', 'coefficient-nonzero', 'other']) {
+            expect(() => generator.generate({notationFamily: Area.DigitNotation, range: {min: 0, max: 20}, requireZero} as never))
+                .toThrow('boolean scalar-zero selector');
         }
     });
 
     it('keeps unspecified and tighter scalar bounds on the original empty planned default', () => {
-        for (const labels of [[Scope.NumbersLarger1000],
-            [Scope.NumbersSmaller1000, Scope.NumbersSmaller10000]]) {
+        for (const labels of [[Scope.NumbersLarger1000], [Scope.NumbersSmaller1000, Scope.NumbersSmaller10000]]) {
             const choices = normalizeSchemaChoices(WritingGeneratorSchema, labels, 'generator');
             expect(choices.find(choice => choice.field === 'requireZero')!.alternatives.map(choice => choice.labels)).toEqual([[]]);
         }

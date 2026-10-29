@@ -78,7 +78,7 @@ describe('DecimalWritingGenerator', () => {
         let example: DecimalWritingProblem | undefined;
         for (let seed = 0; seed < 10000 && !example; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'with-zero'})!;
+            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero'})!;
             if (data.canonicalNumeral === '5.008') example = data;
         }
         expect(example).toEqual({
