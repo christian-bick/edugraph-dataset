@@ -5,7 +5,8 @@ import {FractionProductsGenerator} from './generator.ts';
 import type {FractionProductsGeneratorConfig} from './spec.ts';
 
 const generator = new FractionProductsGenerator();
-const profiles = ['fraction-partition', 'fraction-equation', 'mixed-equation'] as const;
+const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
+    'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const;
 type Profile = typeof profiles[number];
 
 const sample = (productProfile: Profile, seed: string): FractionProductProblem => {
@@ -84,7 +85,7 @@ describe('fraction-products exact multiplication', () => {
                 }
             }
 
-            expect(data.equationWitness !== undefined).toBe(profile !== 'fraction-partition');
+            expect(data.equationWitness !== undefined).toBe(!profile.startsWith('fraction-partition'));
             if (data.equationWitness) {
                 expect(data.equationWitness).toEqual({
                     factor: data.multiplierValue,
@@ -99,7 +100,7 @@ describe('fraction-products exact multiplication', () => {
 
     it('covers proper and improper partition factors with whole and fractional q', () => {
         const cases = Array.from({length: 240}, (_, seed) =>
-            sample('fraction-partition', `partition-coverage-${seed}`));
+            sample(seed % 2 ? 'fraction-partition-proper' : 'fraction-partition-improper', `partition-coverage-${seed}`));
         expect(cases.some(data => data.multiplierValue.numerator
             < data.multiplierValue.denominator)).toBe(true);
         expect(cases.some(data => data.multiplierValue.numerator
@@ -113,7 +114,7 @@ describe('fraction-products exact multiplication', () => {
 
     it('keeps word-problem operand forms genuinely fractional and genuinely mixed', () => {
         for (let seed = 0; seed < 120; seed++) {
-            const fraction = sample('fraction-equation', `fraction-word-${seed}`);
+            const fraction = sample(seed % 2 ? 'fraction-equation-proper' : 'fraction-equation-improper', `fraction-word-${seed}`);
             const mixed = sample('mixed-equation', `mixed-word-${seed}`);
             expect(fraction.operandForm).toBe('fractions');
             expect(fraction.multiplierValue.numerator % fraction.multiplierValue.denominator)

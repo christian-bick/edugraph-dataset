@@ -23,9 +23,9 @@ const integer = (minimum: number, maximum: number): number =>
 const value = (numerator: number, denominator: number): FractionProductValue =>
     ({numerator, denominator});
 
-const fractionMultiplier = (): FractionProductFractionOperand => {
+const fractionMultiplier = (proper: boolean): FractionProductFractionOperand => {
     const denominator = integer(2, 6);
-    const numerator = random() < 0.5
+    const numerator = proper
         ? integer(1, denominator - 1)
         : (() => {
             const candidate = integer(denominator + 1, 3 * denominator - 1);
@@ -107,14 +107,16 @@ function sample(profile: ProductProfile): FractionProductProblem {
         };
     }
 
-    const multiplier = fractionMultiplier();
-    const quantity = profile === 'fraction-partition' && random() < 0.5
+    const partition = profile === 'fraction-partition-proper' || profile === 'fraction-partition-improper';
+    const proper = profile === 'fraction-partition-proper' || profile === 'fraction-equation-proper';
+    const multiplier = fractionMultiplier(proper);
+    const quantity = partition && random() < 0.5
         ? wholeQuantity()
         : fractionalQuantity();
     return {
         ...common(value(multiplier.numerator, multiplier.denominator),
             value(quantity.numerator, quantity.denominator),
-            profile === 'fraction-equation'),
+            !partition),
         operandForm: 'fractions', multiplier, quantity
     };
 }
@@ -129,8 +131,10 @@ export class FractionProductsGenerator implements ProblemGenerator<
     generate(config: FractionProductsGeneratorConfig): ProblemStub<FractionProductProblem> {
         validateConfigFields('fraction-products', config, ['productProfile']);
         switch (config.productProfile) {
-            case 'fraction-partition':
-            case 'fraction-equation':
+            case 'fraction-partition-proper':
+            case 'fraction-partition-improper':
+            case 'fraction-equation-proper':
+            case 'fraction-equation-improper':
             case 'mixed-equation':
                 return {data: sample(config.productProfile)};
             default:

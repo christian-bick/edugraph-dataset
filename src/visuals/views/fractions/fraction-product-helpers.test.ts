@@ -5,7 +5,8 @@ import {FractionProductsGenerator} from '../../../generators/fraction/fraction-p
 import {formatProductOperand, isValidFractionProduct} from './fraction-product-helpers.ts';
 
 const generator = new FractionProductsGenerator();
-const profiles = ['fraction-partition', 'fraction-equation', 'mixed-equation'] as const;
+const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
+    'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const;
 const sample = (productProfile: typeof profiles[number]) => {
     setSeed(`fraction-product-view-${productProfile}`);
     return generator.generate({productProfile}).data;
@@ -32,7 +33,7 @@ describe('fraction product view contract', () => {
     });
 
     it('rejects wrong selected parts, q-part size, product, original notation, or contextual equation', () => {
-        const base = sample('fraction-equation');
+        const base = sample('fraction-equation-proper');
         expect(isValidFractionProduct({...base, partition: {...base.partition,
             selectedPartCount: base.partition.selectedPartCount + 1}})).toBe(false);
         expect(isValidFractionProduct({...base, partition: {...base.partition,

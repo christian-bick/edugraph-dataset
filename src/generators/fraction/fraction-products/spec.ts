@@ -8,9 +8,14 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 const productProfiles = [
     [[Area.Division, Area.FractionNumeratorInterpretation,
         Area.FractionDenominatorInterpretation, Scope.FractionNumbers,
-        Scope.EqualShares], 'fraction-partition'],
+        Scope.EqualShares, Scope.ProperFractions], 'fraction-partition-proper'],
+    [[Area.Division, Area.FractionNumeratorInterpretation,
+        Area.FractionDenominatorInterpretation, Scope.FractionNumbers,
+        Scope.EqualShares, Scope.ImproperFractions], 'fraction-partition-improper'],
     [[Area.Equation, Scope.FractionNumbers,
-        Scope.SingleFrameOfReference], 'fraction-equation'],
+        Scope.SingleFrameOfReference, Scope.ProperFractions], 'fraction-equation-proper'],
+    [[Area.Equation, Scope.FractionNumbers,
+        Scope.SingleFrameOfReference, Scope.ImproperFractions], 'fraction-equation-improper'],
     [[Area.Equation, Scope.MixedNumbers, Scope.ImproperFractions,
         Scope.SingleFrameOfReference], 'mixed-equation']
 ] as const;
@@ -54,6 +59,7 @@ export const FractionProductsGeneratorSchema = {
         Scope.FractionNumbers,
         Scope.MixedNumbers,
         Scope.ImproperFractions,
+        Scope.ProperFractions,
         Scope.EqualShares,
         Scope.SingleFrameOfReference
     ], resolveProductProfile, productProfiles.map(([labels]) => labels)]

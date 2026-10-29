@@ -38,7 +38,8 @@ const render = (id: LeafId, data: FractionProductProblem, isSolutionView: boolea
 describe('fraction product leaf contracts', () => {
     it('accepts all three producer profiles in every leaf and mode', () => {
         const generator = new FractionProductsGenerator();
-        for (const productProfile of ['fraction-partition', 'fraction-equation', 'mixed-equation'] as const) {
+        for (const productProfile of ['fraction-partition-proper', 'fraction-partition-improper',
+            'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const) {
             for (let seed = 0; seed < 20; seed++) {
                 setSeed(`fraction-product-leaf-${productProfile}-${seed}`);
                 const data = generator.generate({productProfile}).data;

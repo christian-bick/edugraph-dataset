@@ -6,14 +6,16 @@ import {formatProductValue} from './fraction-product-helpers.ts';
 import {FractionProductBody} from './fraction-product-view.tsx';
 
 const generator = new FractionProductsGenerator();
-const sample = (productProfile: 'fraction-partition' | 'fraction-equation' | 'mixed-equation') => {
+const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
+    'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const;
+const sample = (productProfile: typeof profiles[number]) => {
     setSeed(`fraction-product-render-${productProfile}`);
     return generator.generate({productProfile}).data;
 };
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('fraction product task projections', () => {
-    it.each(['fraction-partition', 'fraction-equation', 'mixed-equation'] as const)(
+    it.each(profiles)(
         '%s keeps the three requested actions distinct in Q/S', productProfile => {
             const data = sample(productProfile);
             const partitionQ = renderToStaticMarkup(<FractionProductBody data={data} task="partition-interpretation" isSolutionView={false} />);
@@ -64,7 +66,7 @@ describe('fraction product task projections', () => {
         let found = false;
         for (let seed = 0; seed < 100; seed++) {
             setSeed(`fraction-product-singular-${seed}`);
-            const data = generator.generate({productProfile: 'fraction-equation'}).data;
+            const data = generator.generate({productProfile: 'fraction-equation-proper'}).data;
             if (data.product.numerator > data.product.denominator) continue;
             const solution = visible(renderToStaticMarkup(<FractionProductBody data={data}
                 task="word-problem" isSolutionView />));
