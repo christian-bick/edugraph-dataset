@@ -1,4 +1,4 @@
-import type {DecimalWritingProblem} from '../../../types/problems.ts';
+import type {DecimalReadingRelationProblem, DecimalWritingProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
 import {numberToEnglishName} from './numbers-read-standard/helpers.ts';
 
@@ -69,16 +69,27 @@ function nameForFraction(wholePart: number, fractionInThousandths: number): stri
 
 export type DecimalReadingChoice = Readonly<{valueInThousandths: number; name: string; correct: boolean}>;
 
-/** The three alternatives change exact thousandths values without changing the whole part. */
-export function decimalReadingChoices(data: DecimalWritingProblem, seed: number): readonly DecimalReadingChoice[] {
-    const fractional = data.valueInThousandths - data.wholePart * 1000;
-    const fractions = [fractional, ...[1, 10, 100].map(offset =>
-        fractional + offset <= 999 ? fractional + offset : fractional - offset
-    )];
-    const choices = fractions.map((value, index) => ({
-        valueInThousandths: data.wholePart * 1000 + value,
-        name: nameForFraction(data.wholePart, value),
-        correct: index === 0
+export function assertDecimalReadingRelation(viewId: string, data: DecimalReadingRelationProblem): void {
+    if (data?.kind !== 'decimal-reading-relation') {
+        throw new ViewValidationError(viewId, 'Expected a canonical decimal reading relation.');
+    }
+    assertDecimalWritingProblem(viewId, data.source);
+    const values = data.comparisonValues;
+    const minimum = data.source.wholePart * 1000 + 1;
+    if (!Array.isArray(values) || values.length !== 3
+        || values.some(value => !Number.isSafeInteger(value) || value < minimum || value > minimum + 998)
+        || new Set([data.source.valueInThousandths, ...values]).size !== 4) {
+        throw new ViewValidationError(viewId, 'Expected three distinct exact comparison values in the source whole part.');
+    }
+}
+
+/** Formatting and rotation only; all compared mathematics is supplied by the producer. */
+export function decimalReadingChoices(data: DecimalReadingRelationProblem, seed: number): readonly DecimalReadingChoice[] {
+    const source = data.source;
+    const choices = [source.valueInThousandths, ...data.comparisonValues].map(value => ({
+        valueInThousandths: value,
+        name: nameForFraction(source.wholePart, value - source.wholePart * 1000),
+        correct: value === source.valueInThousandths
     }));
     const rotation = ((seed % choices.length) + choices.length) % choices.length;
     return [...choices.slice(rotation), ...choices.slice(0, rotation)];

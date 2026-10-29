@@ -5529,7 +5529,7 @@ export interface ViewTypeMap {
     'numbers-power-ten-zero-pattern-explanation': WholeNumberPowerTenScalingProblem;
     'numbers-power-ten-decimal-pattern-explanation': DecimalPowerTenScalingProblem;
     'numbers-power-ten-exponent-notation': PowerTenNotationProblem;
-    'numbers-decimal-numeral-reading': DecimalWritingProblem;
+    'numbers-decimal-numeral-reading': DecimalReadingRelationProblem;
     'numbers-decimal-numeral-writing': DecimalWritingProblem;
     'numbers-decimal-name-writing': DecimalWritingProblem;
     'numbers-decimal-expanded-form': DecimalPlaceValueExpandedProblem;

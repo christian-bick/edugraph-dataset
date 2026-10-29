@@ -1,7 +1,8 @@
 import {describe, expect, it} from 'vitest';
-import type {DecimalWritingProblem} from '../../../types/problems.ts';
+import type {DecimalReadingRelationProblem, DecimalWritingProblem} from '../../../types/problems.ts';
 import {
     assertDecimalWritingProblem,
+    assertDecimalReadingRelation,
     decimalNumberName,
     decimalReadingChoices,
     decimalResponseDigits
@@ -12,6 +13,9 @@ const placeholder: DecimalWritingProblem = {
     valueInThousandths: 5008, canonicalNumeral: '5.008',
     fractionalPart: {precision: 'thousandths', digits: [0, 0, 8], numerator: 8, denominator: 1000}
 };
+const readingRelation: DecimalReadingRelationProblem = {
+    kind: 'decimal-reading-relation', source: placeholder, comparisonValues: [5009, 5018, 5108]
+};
 
 describe('decimal-writing view presentation', () => {
     it('retains interior zero placeholders in the numeral while naming the exact fraction', () => {
@@ -21,7 +25,7 @@ describe('decimal-writing view presentation', () => {
     });
 
     it('makes reading options denote four distinct values with one correct meaning', () => {
-        const choices = decimalReadingChoices(placeholder, 13);
+        const choices = decimalReadingChoices(readingRelation, 13);
         expect(choices).toHaveLength(4);
         expect(new Set(choices.map(choice => choice.valueInThousandths)).size).toBe(4);
         expect(new Set(choices.map(choice => choice.name)).size).toBe(4);
@@ -39,7 +43,8 @@ describe('decimal-writing view presentation', () => {
             canonicalNumeral: '5.999',
             fractionalPart: {precision: 'thousandths', digits: [9, 9, 9], numerator: 999, denominator: 1000}
         };
-        const choices = decimalReadingChoices(nearBoundary, 3);
+        const choices = decimalReadingChoices({kind: 'decimal-reading-relation', source: nearBoundary,
+            comparisonValues: [5998, 5989, 5899]}, 3);
         expect(choices.every(choice => choice.valueInThousandths >= 5001 && choice.valueInThousandths <= 5999)).toBe(true);
         expect(new Set(choices.map(choice => choice.valueInThousandths)).size).toBe(4);
     });
@@ -53,5 +58,17 @@ describe('decimal-writing view presentation', () => {
             ...placeholder,
             fractionalPart: {precision: 'thousandths', digits: [0, 8, 0], numerator: 80, denominator: 1000}
         })).toThrow('necessary final place');
+    });
+
+    it('requires supplied canonical comparisons instead of reconstructing missing mathematics', () => {
+        expect(() => assertDecimalReadingRelation('test', readingRelation)).not.toThrow();
+        expect(() => assertDecimalReadingRelation('test', placeholder as never)).toThrow(/canonical/);
+        for (const values of [undefined, [5009, 5018], [5008, 5018, 5108], [5009, 5009, 5108],
+            [5009, 5018, 6001], [5009, 5018, 5000], [5009, 5018, 5108.5]]) {
+            expect(() => assertDecimalReadingRelation('test', {...readingRelation, comparisonValues: values as never})).toThrow(/comparison values/);
+        }
+        expect(() => assertDecimalReadingRelation('test', {...readingRelation,
+            source: {...placeholder, canonicalNumeral: '5.08'}})).toThrow(/must agree/);
+        expect(decimalReadingChoices(readingRelation, -1)).toEqual(decimalReadingChoices(readingRelation, 3));
     });
 });

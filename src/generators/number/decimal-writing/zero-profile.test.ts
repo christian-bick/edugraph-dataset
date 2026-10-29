@@ -10,6 +10,7 @@ import {DecimalWritingGeneratorSchema, spec} from './spec.ts';
 import {decimalWritingHasZero, resolveDecimalNotation, resolveDecimalZeroProfile} from './zero-profile.ts';
 import {spec as readingSpec} from '../../../visuals/views/numbers/numbers-decimal-numeral-reading/spec.ts';
 import {decimalReadingChoices} from '../../../visuals/views/numbers/decimal-writing-helpers.ts';
+import {buildDecimalReadingRelation} from '../decimal-reading-relations/generator.ts';
 
 afterEach(() => vi.restoreAllMocks());
 const generator = new DecimalWritingGenerator();
@@ -138,7 +139,7 @@ describe('decimal number-name source coefficient profiles', () => {
         const source = decimal(5, [1, 9, 9], 3);
         expect(decimalWritingHasZero(source)).toBe(false);
         // The same source needs no zero in name writing, but reading adds5.209.
-        expect(decimalReadingChoices(source, 0).some(choice => choice.valueInThousandths === 5209)).toBe(true);
+        expect(decimalReadingChoices(buildDecimalReadingRelation(source), 0).some(choice => choice.valueInThousandths === 5209)).toBe(true);
         const readingPlan = (labels: string[]) => planModelCompatibility({id: 'reading-zero', labels},
             {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},
             {viewId: readingSpec.viewId, generalLabels: readingSpec.generalLabels, schema: {}, spec: readingSpec});

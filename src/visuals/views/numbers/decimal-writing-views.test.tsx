@@ -21,19 +21,24 @@ beforeAll(async () => {
 });
 afterAll(() => vi.unstubAllGlobals());
 
-function payload<T extends 'numbers-decimal-numeral-reading' | 'numbers-decimal-numeral-writing' | 'numbers-decimal-name-writing'>(
+function payload<T extends 'numbers-decimal-numeral-writing' | 'numbers-decimal-name-writing'>(
     viewId: T,
     isSolutionView: boolean
 ): ViewRenderPayload<T> {
     return {problem: {type: 'arithmetic', data: placeholder, labels: []}, viewId, targetLabels: [], isSolutionView, seed: 13};
 }
+const readingPayload = (isSolutionView: boolean): ViewRenderPayload<'numbers-decimal-numeral-reading'> => ({
+    problem: {type: 'writing', labels: [], data: {kind: 'decimal-reading-relation', source: placeholder,
+        comparisonValues: [5009, 5018, 5108]}},
+    viewId: 'numbers-decimal-numeral-reading', targetLabels: [], isSolutionView, seed: 13
+});
 
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('decimal reading and writing leaf views', () => {
     it('uses an unmarked receptive choice task, then marks one exact meaning', () => {
-        const question = renderToStaticMarkup(<ReadingCore payload={payload('numbers-decimal-numeral-reading', false)} />);
-        const solution = renderToStaticMarkup(<ReadingCore payload={payload('numbers-decimal-numeral-reading', true)} />);
+        const question = renderToStaticMarkup(<ReadingCore payload={readingPayload(false)} />);
+        const solution = renderToStaticMarkup(<ReadingCore payload={readingPayload(true)} />);
         expect(visible(question)).toContain('5.008');
         expect(visible(question)).toContain('five and eight thousandths');
         expect(question).not.toContain('✓');

@@ -3,7 +3,7 @@ import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {DecimalSourceCard, DecimalWritingFrame} from '../decimal-writing-components.tsx';
-import {assertDecimalWritingProblem, decimalReadingChoices} from '../decimal-writing-helpers.ts';
+import {assertDecimalReadingRelation, decimalReadingChoices} from '../decimal-writing-helpers.ts';
 import {NumbersDecimalNumeralReadingViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
 
@@ -14,8 +14,8 @@ export const NumbersDecimalNumeralReadingCore = ({payload}: {
     payload: ViewRenderPayload<typeof VIEW_ID>;
 }) => {
     const {data} = payload.problem;
-    validateProblemData(VIEW_ID, data, ['kind', 'base', 'wholePart', 'valueInThousandths', 'canonicalNumeral', 'fractionalPart']);
-    assertDecimalWritingProblem(VIEW_ID, data);
+    validateProblemData(VIEW_ID, data, ['kind', 'source', 'comparisonValues']);
+    assertDecimalReadingRelation(VIEW_ID, data);
     const choices = decimalReadingChoices(data, payload.seed);
 
     return <DecimalWritingFrame
@@ -23,7 +23,7 @@ export const NumbersDecimalNumeralReadingCore = ({payload}: {
         title="Which words match this numeral?"
         prompt="Read the decimal and choose its exact written meaning."
     >
-        <DecimalSourceCard label="Decimal numeral" numeral>{data.canonicalNumeral}</DecimalSourceCard>
+        <DecimalSourceCard label="Decimal numeral" numeral>{data.source.canonicalNumeral}</DecimalSourceCard>
         <div className="mt-5 grid gap-3">
             {choices.map((choice, index) => {
                 const selected = payload.isSolutionView && choice.correct;
