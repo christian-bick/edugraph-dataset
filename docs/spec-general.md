@@ -179,6 +179,12 @@ mean a declared no-label configuration, not an opportunity for later random capa
 Field resolution receives only its admitted binding plus declared context; a value resolver must
 not recreate an unrestricted fallback after matching.
 
+Alternative contracts use exact supported requests by default. Opt into `relation: 'capability'`
+when a supported broad descriptor must also be realizable through more-specific alternatives.
+For example, a multiple-digit request can select a two- or three-digit alternative even if the
+broad descriptor itself is another legal profile. Compatibility still controls which choices
+are valid. This opt-in neither executes a resolver during planning nor changes unrelated fields.
+
 Every multi-label resolver declares one dimension-neutral contract. `exact` selects one declared
 alternative or exact bundle; `predicate` answers one fixed capability question; `aggregate`
 preserves every matching member; and `compositional` combines independent constraints into a new

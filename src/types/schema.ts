@@ -14,6 +14,8 @@ export interface LabelChoiceDefault {
  */
 export type LabelChoiceContract = (
   | {readonly kind: 'alternatives'; readonly alternatives?: readonly (readonly string[])[];
+      /** Opt in to realizing supported requests through equal or more-specific alternatives. */
+      readonly relation?: 'exact' | 'capability';
       /** Selections that resolve identically and may share explicit fallback completion. */
       readonly equivalenceGroups?: readonly (readonly (readonly string[])[])[];
       readonly defaults?: readonly LabelChoiceDefault[]}

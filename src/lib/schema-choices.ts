@@ -43,7 +43,7 @@ function declaration(field: string, value: ConfigSchema[string]): Declaration | 
     if (contract.kind !== 'alternatives' && contract.kind !== 'target') {
         throw new SchemaChoiceContractError(field, 'unknown choice kind.');
     }
-    if (contract.kind === 'target' && contract.relation !== undefined
+    if (contract.relation !== undefined
         && contract.relation !== 'exact' && contract.relation !== 'capability') {
         throw new SchemaChoiceContractError(field, 'unknown target relation.');
     }
@@ -148,7 +148,8 @@ export function normalizeSchemaChoices(
         } else {
             const legal = contract.alternatives ?? supported.map(label => [label]);
             const requested = supported.filter(label => targetLabels.includes(label));
-            const exact = requested.length ? legal.find(labels => key(labels) === key(requested)) : undefined;
+            const exact = requested.length && contract.relation !== 'capability'
+                ? legal.find(labels => key(labels) === key(requested)) : undefined;
             const defaultChoice = !requested.length ? contract.defaults?.find(item =>
                 (item.whenAll ?? []).every(label => targetLabels.includes(label))
                 && (item.whenNone ?? []).every(label => !targetLabels.includes(label))) : undefined;
@@ -163,7 +164,8 @@ export function normalizeSchemaChoices(
             if (exact) selections = equivalentCompletions(exact);
             else if (defaultChoice) selections = equivalentCompletions(defaultChoice.labels);
             else {
-                selections = (fallback ?? legal).filter(labels => requested.every(request =>
+                const candidates = contract.relation === 'capability' && requested.length ? legal : fallback ?? legal;
+                selections = candidates.filter(labels => requested.every(request =>
                     labels.some(label => capabilitySatisfies(label, request))));
                 if (direct) {
                     const comparable = selections.filter(labels => labels.some(label =>

@@ -28,6 +28,29 @@ describe('schema label choices', () => {
         expect(labelsOf(schema, ['a'])).toEqual([[['a']]]);
     });
 
+    it('opts into specialization alternatives when a supported broad descriptor is also selectable', () => {
+        const supported = [Scope.MultipleDigitLargestOperand, Scope.TwoDigitLargestOperand,
+            Scope.ThreeDigitLargestOperand, Scope.SingleDigitLargestOperand];
+        const resolver = vi.fn(() => {throw new Error('normalization must not resolve values');});
+        const exact = {width: [supported, withLabelChoices(resolver, {kind: 'alternatives'})]} as const;
+        expect(labelsOf(exact, [Scope.MultipleDigitLargestOperand])).toEqual([[[Scope.MultipleDigitLargestOperand]]]);
+        const capability = {width: [supported, withLabelChoices(vi.fn(resolver),
+            {kind: 'alternatives', relation: 'capability'}), [[Scope.SingleDigitLargestOperand]]]} as const;
+        const expected = [[Scope.MultipleDigitLargestOperand], [Scope.ThreeDigitLargestOperand], [Scope.TwoDigitLargestOperand]];
+        expect(labelsOf(capability, [Scope.MultipleDigitLargestOperand])).toEqual([expected]);
+        expect(labelsOf(capability, [Scope.MultipleDigitLargestOperand, Scope.TwoDigitLargestOperand]))
+            .toEqual([[[Scope.TwoDigitLargestOperand]]]);
+        expect(labelsOf(capability, [Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand])).toEqual([[]]);
+        expect(labelsOf(capability)).toEqual([[[Scope.SingleDigitLargestOperand]]]);
+        expect(resolver).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid request relations for alternative contracts', () => {
+        const schema = {width: [['a'], withLabelChoices(() => 'a',
+            {kind: 'alternatives', relation: 'invalid'} as never)]} as const;
+        expect(() => validateSchemaChoiceContracts(schema)).toThrow(/unknown target relation/);
+    });
+
     it('distinguishes all legal conjunctions from the smaller fallback set', () => {
         const schema = {choice: [['a', 'b'], selectExactLabelSetMap([
             [['a'], 1], [['a', 'b'], 2]
