@@ -14,12 +14,12 @@ interface CoreProps {
 export const OperationsEquationJudgmentCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
-    validateProblemData('operations-equation-judgment', data, ['num1', 'num2', 'operation', 'answer']);
+    validateProblemData('operations-equation-judgment', data, ['num1', 'num2', 'operation', 'answer', 'claimedAnswer']);
     const exactAnswer = data.operation === 'addition' ? data.num1 + data.num2 : data.num1 - data.num2;
     if (!['addition', 'subtraction'].includes(data.operation) || data.answer !== exactAnswer) {
         throw new ViewValidationError('operations-equation-judgment', 'Unsupported equation judgment payload.');
     }
-    const claim = resolveEquationClaim(data, payload.seed);
+    const claim = resolveEquationClaim(data);
 
     const symbol = data.operation === 'addition' ? '+' : '−';
     const choiceClass = (value: boolean) => {

@@ -660,6 +660,8 @@ export type EquationJudgmentProblem = {
     num2: number;
     operation: 'addition' | 'subtraction';
     answer: number;
+    /** Right-hand value asserted by the canonical equality; truth follows from the exact relation. */
+    claimedAnswer: number;
 };
 
 export type ArithmeticEstimationProblem = {

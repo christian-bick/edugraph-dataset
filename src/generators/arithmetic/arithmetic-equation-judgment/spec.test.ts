@@ -32,19 +32,19 @@ describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
             for (let num2 = 1; num1 + num2 <= 100; num2++) {
                 const data = {num1, num2, answer: num1 + num2, operation: 'addition' as const};
                 for (const seed of [0, 1]) {
-                    expect(resolveEquationClaim(data, seed).claimedAnswer).toBeGreaterThan(0);
+                    expect(resolveEquationClaim({...data, claimedAnswer: data.answer - seed}).claimedAnswer).toBeGreaterThan(0);
                 }
             }
         }
-        const positive = generateWithLabels(generator, [Area.Addition, Scope.NumbersSmaller20]);
+        const positive = generateWithLabels(generator, [Area.Addition, Scope.NumbersWithoutZero, Scope.NumbersSmaller20]);
         expect(positive!.labels).toContain(Scope.NumbersWithoutZero);
-        for (const labels of [[Area.Subtraction], [Area.Addition, Scope.NumbersWithZero]]) {
+        for (const labels of [[Area.Subtraction, Scope.NumbersWithZero], [Area.Addition, Scope.NumbersWithZero]]) {
             const stub = generateWithLabels(generator, [...labels, Scope.NumbersSmaller20]);
             expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
         }
     });
 
-    it('preserves direct configurations, payloads and random continuation', () => {
+    it('keeps direct configuration and mathematical sampling independent of whether the spec is supplied', () => {
         for (const operation of [Area.Addition, Area.Subtraction]) {
             for (const zero of [[], [Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]) {
                 for (const seed of [0, 1, 42]) {
@@ -61,11 +61,11 @@ describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
         }
     });
 
-    it('annotates and replays the existing planned addition target', () => {
+    it('annotates and replays a planned canonical addition equality', () => {
         const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
             schema: ArithmeticEquationJudgmentGeneratorSchema, spec};
         const consumer = {viewId: viewSpec.viewId, generalLabels: viewSpec.generalLabels, schema: {}, spec: viewSpec};
-        const labels = [Area.Addition, Scope.NumbersSmaller20, ...viewSpec.generalLabels];
+        const labels = [Area.Addition, Scope.NumbersWithoutZero, Scope.NumbersSmaller20, ...viewSpec.generalLabels];
         const result = planModelCompatibility({id: 'positive-addition-judgment', labels}, model, consumer);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error('Expected the original addition target to remain admitted.');
