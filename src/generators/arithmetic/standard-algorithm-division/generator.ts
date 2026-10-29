@@ -3,6 +3,7 @@ import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {StandardDivisionProblem, StandardDivisionStep} from '../../../types/problems.ts';
 import {StandardAlgorithmDivisionGeneratorSchema, type StandardAlgorithmDivisionGeneratorConfig} from './spec.ts';
+import {standardDivisionHasZero} from './zero-profile.ts';
 
 const generatorId = 'standard-algorithm-division';
 const randomInteger = (minimum: number, maximum: number): number =>
@@ -93,8 +94,11 @@ export class StandardAlgorithmDivisionGenerator implements ProblemGenerator<
     type: AbstractProblem['type'] = 'arithmetic';
     schema = StandardAlgorithmDivisionGeneratorSchema;
 
-    generate(config: StandardAlgorithmDivisionGeneratorConfig): ProblemStub<StandardDivisionProblem> {
-        validateConfigFields(generatorId, config, ['range', 'divisorDigits']);
+    generate(config: StandardAlgorithmDivisionGeneratorConfig): ProblemStub<StandardDivisionProblem> | null {
+        validateConfigFields(generatorId, config, ['range', 'divisorDigits', 'requireZero']);
+        if (typeof config.requireZero !== 'boolean') {
+            throw new GeneratorValidationError(generatorId, 'Expected a declared zero-occurrence profile.');
+        }
         const range = config.range!;
         if (typeof range !== 'object' || range === null || range.min !== 0
             || ![10000, 100000, Number.MAX_SAFE_INTEGER].includes(range.max)) {
@@ -106,7 +110,17 @@ export class StandardAlgorithmDivisionGenerator implements ProblemGenerator<
         }
 
         const ceiling = range.max === Number.MAX_SAFE_INTEGER ? 99999 : range.max - 1;
-        const divisor = randomInteger(10 ** (config.divisorDigits - 1), 10 ** config.divisorDigits - 1);
-        return {data: buildStandardDivisionProblem(sampleDividend(divisor, ceiling), divisor)};
+        // Keep the complete original arithmetic distribution within each profile.
+        // A finite retry bound also terminates for a hostile/randomness test source.
+        for (let attempt = 0; attempt < 4096; attempt++) {
+            const divisor = randomInteger(10 ** (config.divisorDigits - 1), 10 ** config.divisorDigits - 1);
+            // In the old sampler, exact and zero-quotient scenarios necessarily
+            // include zero. The other eligible scenarios are the same uniform
+            // dividend distribution, so draw it directly for the zero-free profile.
+            const dividend = config.requireZero ? sampleDividend(divisor, ceiling) : randomInteger(10, ceiling);
+            const data = buildStandardDivisionProblem(dividend, divisor);
+            if (standardDivisionHasZero(data) === config.requireZero) return {data};
+        }
+        return null;
     }
 }

@@ -7,7 +7,7 @@ import type {StandardAlgorithmDivisionGeneratorConfig} from './spec.ts';
 
 const generator = new StandardAlgorithmDivisionGenerator();
 const config = (divisorDigits: 1 | 2 | 3 = 3, max = 100000): StandardAlgorithmDivisionGeneratorConfig => ({
-    range: {min: 0, max}, divisorDigits
+    range: {min: 0, max}, divisorDigits, requireZero: true
 });
 
 const assertTrace = (data: StandardDivisionProblem): void => {
@@ -111,7 +111,7 @@ describe('standard-algorithm-division configuration and variation', () => {
             for (const width of [1, 2, 3] as const) {
                 for (let seed = 0; seed < 100; seed++) {
                     setSeed(seed);
-                    const data = generator.generate(config(width, max)).data;
+                    const data = generator.generate(config(width, max))!.data;
                     const bound = max === Number.MAX_SAFE_INTEGER ? 100000 : max;
                     expect(data.dividend).toBeGreaterThanOrEqual(10);
                     expect(data.dividend).toBeLessThan(bound);
@@ -133,7 +133,7 @@ describe('standard-algorithm-division configuration and variation', () => {
         const observed = new Set<string>();
         for (let seed = 0; seed < 160; seed++) {
             setSeed(seed);
-            const data = generator.generate(config(3)).data;
+            const data = generator.generate(config(3))!.data;
             if (data.remainder === 0) observed.add('exact');
             if (data.remainder > 0) observed.add('imperfect');
             if (data.quotient === 0) observed.add('zero');
@@ -147,10 +147,11 @@ describe('standard-algorithm-division configuration and variation', () => {
         let largerInstance = false;
         for (let seed = 0; seed < 30; seed++) {
             setSeed(seed);
-            const smaller = generator.generate(config(2, 10000)).data;
+            const smaller = generator.generate(config(2, 10000))!.data;
             setSeed(seed);
-            const larger = generator.generate(config(2, 100000)).data;
-            expect(larger.divisor).toBe(smaller.divisor);
+            const larger = generator.generate(config(2, 100000))!.data;
+            expect(smaller.dividend).toBeLessThan(10000);
+            expect(String(larger.divisor)).toHaveLength(2);
             if (larger.dividend >= 10000) largerInstance = true;
         }
         expect(largerInstance).toBe(true);
@@ -161,6 +162,6 @@ describe('standard-algorithm-division configuration and variation', () => {
         const first = generator.generate(config());
         setSeed(461);
         expect(generator.generate(config())).toEqual(first);
-        expect(Object.keys(first)).toEqual(['data']);
+        expect(Object.keys(first!)).toEqual(['data']);
     });
 });

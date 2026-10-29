@@ -83,6 +83,7 @@ describe('MultiDigitDivisionGenerator spec integration', () => {
             dividendLabel
         ]));
         expect(stub!.labels).not.toContain(Area.ImperfectDivisibility);
-        expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(stub!.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as any)))
+            .toHaveLength(1);
     });
 });

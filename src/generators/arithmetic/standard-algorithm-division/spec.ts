@@ -9,6 +9,9 @@ const resolveDivisorDigits = selectExactLabelMap([
     [Scope.TwoDigitDivisor, 2],
     [Scope.ThreeDigitDivisor, 3]
 ] as const);
+const resolveZeroOccurrence = selectExactLabelMap([
+    [Scope.NumbersWithZero, true], [Scope.NumbersWithoutZero, false]
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'standard-algorithm-division',
@@ -24,7 +27,8 @@ export const spec: GeneratorSpec = {
 
 export const StandardAlgorithmDivisionGeneratorSchema = {
     range: [[Scope.NumbersSmaller10000, Scope.NumbersSmaller100000], resolveRangeFromLabels],
-    divisorDigits: [[Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor], resolveDivisorDigits]
+    divisorDigits: [[Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor], resolveDivisorDigits],
+    requireZero: [[Scope.NumbersWithZero, Scope.NumbersWithoutZero], resolveZeroOccurrence]
 } as const;
 
 export type StandardAlgorithmDivisionGeneratorConfig = ConfigFromSchema<typeof StandardAlgorithmDivisionGeneratorSchema>;

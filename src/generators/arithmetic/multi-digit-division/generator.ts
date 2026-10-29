@@ -11,6 +11,7 @@ import {
     MultiDigitDivisionGeneratorConfig,
     MultiDigitDivisionGeneratorSchema
 } from './spec.ts';
+import {partialQuotientHasZero} from './zero-profile.ts';
 
 type DividendDigits = 1 | 2 | 3 | 4;
 
@@ -54,10 +55,12 @@ const randomInteger = (minimum: number, maximum: number): number =>
     minimum + Math.floor(random() * (maximum - minimum + 1));
 
 /** Build a two-digit-divisor instance from its exact quotient and remainder bounds. */
-const buildTwoDigitDivisorCandidate = (dividendDigits: Exclude<DividendDigits, 1>): DivisionCandidate => {
+const buildTwoDigitDivisorCandidate = (
+    dividendDigits: Exclude<DividendDigits, 1>, requiredExact?: false
+): DivisionCandidate => {
     const minimum = 10 ** (dividendDigits - 1);
     const maximum = 10 ** dividendDigits - 1;
-    const exact = random() < 0.5;
+    const exact = requiredExact ?? random() < 0.5;
     // 99 has no non-exact two-digit dividend: 99 * 1 + 1 already has three digits.
     const divisor = randomInteger(10, dividendDigits === 2 && !exact ? 98 : 99);
     const minimumQuotient = Math.max(1, Math.ceil(
@@ -122,11 +125,16 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
 
     generate(
         config: MultiDigitDivisionGeneratorConfig
-    ): ProblemStub<MultiDigitDivisionProblem> {
+    ): ProblemStub<MultiDigitDivisionProblem> | null {
         validateConfigFields('multi-digit-division', config, [
             'divisorDigits',
-            'dividendDigits'
+            'dividendDigits',
+            'requireZero'
         ]);
+
+        if (typeof config.requireZero !== 'boolean' || config.divisorDigits === 1 && config.requireZero) {
+            throw new GeneratorValidationError('multi-digit-division', 'Expected a feasible declared zero-occurrence profile.');
+        }
 
         if (config.divisorDigits !== 1 && config.divisorDigits !== 2) {
             throw new GeneratorValidationError(
@@ -151,9 +159,19 @@ export class MultiDigitDivisionGenerator implements ProblemGenerator<
             );
         }
 
-        const {dividend, divisor, quotient, remainder} = config.divisorDigits === 1
-            ? randomItem(candidates)
-            : buildTwoDigitDivisorCandidate(dividendDigits as Exclude<DividendDigits, 1>);
+        // Condition the original sampler on the selected mathematics; labels are
+        // resolved before this function and never derived from an accepted payload.
+        let candidate: DivisionCandidate | undefined;
+        if (config.divisorDigits === 1) candidate = randomItem(candidates);
+        else for (let attempt = 0; attempt < 256; attempt++) {
+            // An exact division necessarily has a zero remainder. Removing that
+            // impossible half before rejection preserves the nonzero conditional law.
+            const next = buildTwoDigitDivisorCandidate(dividendDigits as Exclude<DividendDigits, 1>,
+                config.requireZero ? undefined : false);
+            if (partialQuotientHasZero(next) === config.requireZero) {candidate = next; break;}
+        }
+        if (!candidate) return null;
+        const {dividend, divisor, quotient, remainder} = candidate;
         const dividendDecomposition = buildDecomposition(dividend);
         const divisorDecomposition = buildDecomposition(divisor);
         const partialQuotients = buildPartialQuotients(dividend, divisor, quotient);
