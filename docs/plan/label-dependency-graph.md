@@ -1,8 +1,10 @@
 # Local label dependency graph
 
 Status: implemented as annotation-only validation. The repository contains one small graph,
-a pure ontology-aware evaluator, and a shared strict gate and audit. Generator payloads and
-rendered images are outside this initiative.
+a pure ontology-aware evaluator, and a shared strict gate and audit. Payload and rendering
+changes are outside ordinary annotation repairs. The separately proposed
+[measurement split](#proposed-measurement-generatorview-split-2026-10-29) is a structural
+decision batch awaiting implementation confirmation; it does not expand the graph's role.
 
 The approved [configuration-inference extension](#configuration-inference-checkpoints-2026-10-29)
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
@@ -68,7 +70,8 @@ dataset graph rebuild (`--rebuild-graph`); existing no-op receipts alone do not 
 after the pipeline-version change. The current stored snapshot remains an audit of persisted
 labels, without retroactively applying source inference.
 
-Next work: the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
+Next proposed batch: the [measurement generator/view split and matching migration review](#proposed-measurement-generatorview-split-2026-10-29).
+The broader work remains in the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
 [remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
 [second measurement batch](#second-measurement-batch), including M2b, is implemented.
@@ -119,6 +122,228 @@ The two generators only gain spec metadata and annotation declarations; mathemat
 schemas and view sources are unchanged. The stored dataset itself is unchanged, so its findings
 are not counted as repaired before regeneration. See the
 [checkpoint ledger](label-dependency-progress.md#configuration-inference-checkpoint-3--six-acceptance-cases-2026-10-29).
+
+## Proposed measurement generator/view split (2026-10-29)
+
+**Status: plan and matching migration review only; implementation requires explicit user
+confirmation.** This is the next proposed RB-M1 batch. It supersedes the proposed
+`numericProfile === 'legacy'` inference for the 21 remaining conversion number-kind gaps.
+No source gap is closed by this plan: the implemented baseline remains **385**.
+
+Structural splits should be rare. First consider a truthful invariant, a label bundle on an
+existing choice, or a coherent explicit schema profile. Consider a split when mathematical
+contracts or learner tasks genuinely differ, as described by
+[IMPL-7](../implementation-general.md#impl-7--extend-before-you-create-extend-only-when-changes-are-surgical-otherwise-create),
+[IMPL-G7](../implementation-generator.md#impl-g7--extend-capabilities-within-a-stable-payload-contract)
+and [SPEC-V6](../spec-view.md#spec-v6--an-ability-driven-task-identity-is-a-leaf-view).
+Under this initiative, prepare the contract boundary and migration evidence and obtain explicit
+confirmation before implementing such a split. Routine autonomous declaration approval does
+not cover it. `inferredLabels` remains the fallback when good matching-capable alternatives
+are unsuitable, with the matching limitation in [SPEC-12](../spec-general.md#spec-12--inferred-annotations-are-a-fallback-without-matching-capabilities).
+
+The user clarified the migration criteria:
+
+- A broad target may validly match both resulting generators. Additional supported matches
+  are acceptable; they do not require artificial exclusive routing.
+- No currently covered target may lose coverage. Also retain a semantically equivalent path
+  for each existing conversion task/configuration family, so a surviving unrelated match
+  cannot hide the removal of a supported exercise.
+- New module IDs changing sample keys, seeds, replay identities and cache/artifact identities
+  are already accounted for. Exact old tuple or sample identity preservation is not an
+  acceptance criterion for this proposed split.
+- Targets, existing task layouts and mathematical case domains stay intact. The complete
+  Area allowlist, integer-only digit qualification and range-policy exclusion stay intact;
+  representation completeness stays separate. No payload adapters or graph-driven completion
+  are introduced. The matcher itself is unchanged; ordinary module capabilities change.
+
+### Contract and declaration boundary
+
+Today `measurement-conversion` always creates an integer equivalence sequence. Its `legacy`
+profile stops there; its `integer` and `decimal` profiles additionally create two exact
+equalities in `numericExamples`. The execution view uses the optional field's presence to
+switch from larger-to-smaller conversion to bidirectional conversion. Derivation and table
+views use the integer sequence and ignore the additional numeric examples. Consequently,
+letting a decimal-producing contract feed either projection would not establish decimal
+evidence in the rendered exercise.
+
+The split makes these two mathematical contracts explicit. It needs no conditional inference
+for number kind and no third producer merely to distinguish integers from decimals.
+The names below are proposed new IDs/types, not implemented modules.
+
+| Role | Proposed contract and declarations | Consumers / task |
+|---|---|---|
+| Generator `measurement-unit-equivalences` | `UnitEquivalenceSequenceProblem`: required `pair` and five `equivalents`; existing seven `unitPair` choices; invariant `IntegerNumbers`, `NumbersWithoutNegatives`, `NumbersWithoutZero` and `UnitScaleRelation`. No `numericProfile`. | One-way conversion, standard-unit derivation and conversion table. |
+| Generator `measurement-conversion-values` | `MeasurementConversionValuesProblem`: required `pair` and required `numericExamples` containing number kind and two exact equalities. Existing seven `unitPair` choices and ordinary `integer` / `decimal` schema choices; existing positive/nonzero and relation invariants. No `legacy` alternative or unused sequence. | Bidirectional conversion. |
+| View `measure-conversion-to-smaller` | Accept only `UnitEquivalenceSequenceProblem`; retain `ProcedureExecution`, `ArabicNumerals`, `Base10` and an empty view schema. | Current larger-to-smaller task, fixed by the leaf view. |
+| View `measure-conversion-bidirectional` | Accept only `MeasurementConversionValuesProblem`; retain the same Ability and notation declarations and an empty view schema. | Current two-direction task, fixed by the leaf view. |
+| Existing `measure-conversion-derivation` | Accept `GenericUnitScaleRelationProblem` or `UnitEquivalenceSequenceProblem`; retain current declarations. | Preserve both `measurement-unit-scale` and standard-unit derivation paths. |
+| Existing `measure-conversion-table` | Accept only `UnitEquivalenceSequenceProblem`; retain `Formalization`, `ConversionTable` and notation declarations. | Preserve the current table task. |
+
+Keep all unit-pair label bundles and scale factors, including volume context on liter/milliliter.
+Number kind belongs to each producer; notation and Ability stay view-owned. The sequence
+producer's invariant must not also appear in its schema. The numeric producer's two number
+kinds stay schema-owned. Check ownership against every compatible consumer, including the
+unchanged generic-unit-scale producer.
+
+Define the concrete object types and `ViewTypeMap` contracts before independent role work
+([IMPL-8](../implementation-general.md#impl-8--establish-the-shared-problem-contract-before-parallel-role-implementation)).
+Use the types to express real payload boundaries, not labels or target IDs to discriminate
+between producer implementation branches. Both models remain Ability-neutral under
+[IMPL-G8](../implementation-generator.md#impl-g8--payloads-are-ability-neutral-mathematical-models):
+retain exact equalities and sequence witnesses, but put conversion direction, blanks, prompts
+and requested responses in the views. Reuse the unit-factor definitions, exact arithmetic,
+formatters and React components. Remove the old optional-field task dispatch when its consumers
+have migrated; do not retain a compatibility adapter or duplicate production modules.
+
+### Matching migration review
+
+The baseline is the current working-tree catalog on `codex/label-dependency-audit`, after
+`b485b36b` and including the already present ontology-adoption work. It has **1,013 normalized
+targets, all covered; 1,195 target/generator/view tuples; and 1,263 admitted selections**.
+The affected `measurement-conversion` family has **35 targets, tuples and selections**.
+The additional generic `measurement-unit-scale` / derivation path must also survive.
+
+| Existing route / resolved profile | Required successor | Existing selections |
+|---|---|---:|
+| `measurement-conversion` / execution / `legacy` | Unit-equivalence generator / to-smaller view, same unit pair | 7 |
+| `measurement-conversion` / execution / `integer` | Conversion-values generator / bidirectional view / `integer`, same unit pair | 7 |
+| `measurement-conversion` / execution / `decimal` | Conversion-values generator / bidirectional view / `decimal`, same unit pair | 7 |
+| `measurement-conversion` / derivation / `legacy` | Unit-equivalence generator / existing derivation, same unit pair | 7 |
+| `measurement-conversion` / table / `legacy` | Unit-equivalence generator / existing table, same unit pair | 7 |
+
+The review uses the actual catalog loader, nominal payload-type parser, matcher and admitted
+selection planner with prospective descriptors and a scratch type fixture. It leaves production
+types, specs and targets unchanged. Its counts establish feasibility of matching the proposed
+contracts; they do not establish implemented generation or render correctness. Re-run the
+same comparison against the real modules after implementation.
+
+The completed in-memory comparison gives:
+
+| Measure | Current catalog | Proposed catalog |
+|---|---:|---:|
+| Covered normalized targets | 1,013 | 1,013 |
+| Target/generator/view tuples | 1,195 | 1,209 |
+| Admitted selections | 1,263 | 1,284 |
+| Targets served by the conversion family | 35 | 35 |
+| Conversion-family tuples | 35 | 49 |
+| Conversion-family selections | 35 | 56 |
+
+There are **zero lost targets**, all **35** old selections have the designated successor,
+and unaffected tuple keys are unchanged, including the generic derivation path. The proposed
+type graph admits only the intended producer/consumer combinations. The 56 local selections
+have **zero non-range missing requirements, conflicts or prospective ownership violations**.
+This is declaration/configuration evidence for the proposed descriptors, not an implemented
+source closure or verification of rendered evidence.
+
+The **14 additional tuples / 21 additional selections** are fully accounted for:
+
+| Existing target family | Additional path | Tuples | Selections | Review |
+|---|---|---:|---:|---|
+| Seven `4.MD.A.1-convert-larger-to-smaller` targets | Conversion-values / bidirectional, integer and decimal alternatives | 7 | 14 | Their conjunction requests the unit-pair relation and `ProcedureExecution`, with no number-kind or direction restriction. Both alternatives cover those claims. The original one-way path remains. |
+| Seven integer `5.MD.A.1-convert-within-system` targets | Unit-equivalences / to-smaller | 7 | 7 | The new integer invariant supplies the requested kind; unit-pair and Ability claims are preserved. The original bidirectional integer path remains. |
+
+Target IDs describe their provenance; they do not add unexpressed matching constraints.
+Accept the additional paths under the current conjunctions, subject to implementation and
+render checks. If an actual task-evidence defect is found, isolate it as a decision rather
+than editing targets or inventing a routing restriction to make counts match.
+
+Local review evidence is in `temp/measurement-split-plan/matching-review.json` (SHA-256
+`a3d8b79aaa8b2c3a5f7fe958348427a4eecdebc540a7f9fac9042d9bf646572f`), with
+`matching-review.ts` and the scratch nominal-type fixture. This section preserves the durable
+result and exact proposed transformation; scratch files are not production implementation.
+Regenerate the review from the then-current catalog before implementation, as the working
+tree includes independent ongoing changes.
+
+For that comparison, require set inclusion of all previously covered target IDs, not equality
+of old module tuples. Check the successor table by target, unit pair, profile and learner task;
+report retired IDs, mapped successors and additional routes separately. Additional routes
+must cover the complete target conjunction, admit valid configurations and expose the claimed
+evidence in both modes. Do not introduce grade gates, target-ID routing, arbitrary number-kind
+exclusions or extra participation requirements simply to preserve historical match counts.
+Inspect broad targets explicitly: the two execution leaves have the same Ability, so both may
+provide legitimate paths without a new task-routing label.
+
+### Behavior, identity and backlog accounting
+
+Preserve the sequence family: start uniformly from integers 2 through 9, retain five successive
+larger values, and multiply by the unchanged pair factor. Preserve the numeric family: choose
+two distinct larger values from the existing eight whole-number candidates or 75 fractional
+candidates, and retain exact hundredths arithmetic. Test every unit pair and both numeric
+profiles. A decimal conversion can have an integral smaller-unit result; it must still expose
+the nonintegral larger-unit value where the decimal claim applies.
+Keep validators specific to their contracts: a sequence can reach larger value 13, so the
+numeric-equality formatter's display bound must not accidentally truncate its supported cases.
+
+Preserve each family's supported cases and draw probabilities. A new numeric producer need
+not generate and discard the old unused integer sequence or consume a dummy random draw.
+New IDs already change seeds; old-to-new PRNG continuation and byte-identical generated images
+are not promised. Keep existing task components, wording, answer placement and formatting;
+use matched payload fixtures to verify rendering separately from new sample identities.
+Additional routes and alternatives can also change per-target allocation and the dataset's
+overall task distribution. Quantify those changes in the migration report rather than claim
+that global sampling remains unchanged.
+
+Do not rename old replay receipts or relabel old rows as though new modules generated them.
+Bind new IDs, sources and contracts through the existing artifact/cache identity mechanisms;
+verify deterministic replay within each new identity. Keep the current immutable dataset until
+a successful pipeline-generated successor is accepted.
+
+The expected repair concerns the **21 original number-kind omissions** on legacy executions,
+derivations and tables. They become ordinary, matching-capable `IntegerNumbers` declarations.
+Map their findings to the successors and validate actual resolved labels before crediting
+closure. A deleted module ID is not itself a repaired finding. Additional matches can create
+additional selections and obligations, so do not assume a final total of `385 - 21` merely
+from the declaration change. Report original requirements repaired, carried-forward gaps,
+newly admitted obligations and the new effective total separately. Keep the historical RB-M1
+counterfactual below as history; this proposal replaces its unresolved legacy-profile approach.
+
+### Implementation checkpoints after confirmation
+
+1. **Establish contracts and shared helpers.** Capture the fresh complete catalog, target
+   hashes, admitted configurations, affected rendering fixtures and existing dirty paths.
+   Add the two concrete problem types and prospective view-map contracts; extract pure shared
+   math/render helpers without changing active behavior. Check types and existing tests before
+   independent producer/view work. A temporary old type may remain solely for still-active
+   modules during this checkpoint; it is removed in the migration checkpoint.
+2. **Migrate the complete producer/consumer family.** Introduce the two generators and two
+   execution leaves, narrow derivation/table types, apply ordinary number-kind declarations,
+   and retire the old generator/execution view and optional payload branch together. Preserve
+   the generic-unit-scale derivation route. Include generator/spec tests and both leaf
+   checklists. Commit only after integrated types, ownership, matching and focused behavioral
+   checks pass; a partially disconnected family is not a checkpoint.
+3. **Verify migration and reconcile the backlog.** Run the full matching/configuration
+   comparison, review every additional path, verify rendering and replay, and run the fresh
+   source dependency audit. Update this plan and the progress ledger with measured closures,
+   introduced requirements, remaining counts and evidence. Resolve migration regressions before
+   the checkpoint commit. This is not authorization for unrelated structural changes.
+
+Validation must include:
+
+- Unchanged target source hashes and normalized conjunctions; zero lost covered targets;
+  successors for all 35 old family selections; retention of the generic producer's consumers.
+- Exhaustive review of the seven sequence configurations and fourteen numeric configurations,
+  plus every newly admitted selection. Finite candidate domains support exact arithmetic and
+  positive/nonzero proofs; sampled images alone cannot establish universal label claims.
+- Generator and spec tests for invalid/missing configuration, all unit pairs, whole/decimal
+  boundaries, distinct equality values, label ownership and deterministic generation. View
+  tests and question/solution fixtures cover all four consumers and the generic derivation
+  member. Re-run `npm run check:types`, `npm run check:generator-view-specs`,
+  `npm run check:labels`, `npm run check:docs`, and `npm run test:coverage`.
+- The unchanged annotation evaluator and strict gate, including the complete Area allowlist:
+  a nonempty Area set whose every member is within Arithmetic, IntuitiveMathematics or
+  FormalMathematics. Preserve the integer-only digit qualification. Do not broaden graph
+  obligations or add range-policy/representation-completeness work to make this split pass.
+- Actual resolved annotations and complete source-audit reconciliation. Canonical regeneration,
+  authoritative graph rebuild and VQA remain at the agreed source-readiness checkpoint; preview
+  fixtures and a successful matching review do not establish final dataset acceptance.
+
+The implementation decision to confirm is this two-producer/two-execution-leaf boundary,
+ordinary matching-capable number-kind declarations and the reviewed migration consequences.
+New splits elsewhere require their own justification and confirmation.
+
+Planning verification: independent contract and migration reviews completed;
+`npm run check:docs` passed with five unavailable external-document fetch warnings, and
+`git diff --check` passed. Only this plan changes in the documentation checkpoint.
 
 ## Agreed direction: conditional notation dependencies
 
@@ -748,6 +973,12 @@ Record concrete counterexamples, the affected projections and labels, options, a
 and its consequences before requesting that decision. Missing evidence is not permission to
 choose a convenient label. Continue independent provable work while a decision remains open.
 
+Generator/view splits are a rare option when a coherent mathematical contract or learner-task
+boundary warrants them. Prepare a migration review and obtain explicit user confirmation
+before implementation; the [measurement split proposal](#proposed-measurement-generatorview-split-2026-10-29)
+records the current case. Additional valid matches are acceptable. Preserve previously covered
+targets and document successor paths; do not equate retired module tuples with lost coverage.
+
 For each implementation checkpoint:
 
 1. Capture the current audit, matching/configuration baseline and touched-file state. Reconcile
@@ -1185,6 +1416,11 @@ through 12. One fixed digit-profile label would therefore be false. Fractional/d
 semantics also need review before proposing ordinary configuration distinctions.
 
 ### Deferred conversion decision — Cover legacy profiles and shared consumers
+
+**Historical counterfactual.** The current remaining scope is 21 number-kind omissions.
+The [2026-10-29 split proposal and matching review](#proposed-measurement-generatorview-split-2026-10-29)
+supersedes this legacy-profile decision approach; implementation still awaits confirmation.
+The counts below describe the earlier declaration state, not the current 385-gap baseline.
 
 Keep `measurement-conversion` outside M2. Its
 [numeric-profile schema](../../src/generators/measurement/measurement-conversion/spec.ts)
