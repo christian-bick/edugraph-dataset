@@ -60,10 +60,10 @@ const operandWidthRule = generatorLabelRule('operand-width-existing-domain', [
 const largestOperandWidthRule = generatorLabelRule('largest-operand-width-domain', [
     ...largestOperandWidthLabels, ...operandWidthContextLabels
 ], selected => {
-    const single = selected(Scope.SingleDigitLargestOperand);
-    const two = selected(Scope.TwoDigitLargestOperand);
-    if (single && two) return false;
-    if (single || two) return permitsLargestOperandWidth(selected, single ? 1 : 2);
+    const widths = largestOperandWidthLabels.filter(label => selected(label));
+    if (widths.length > 1) return false;
+    if (widths.length === 1) return permitsLargestOperandWidth(selected,
+        (largestOperandWidthLabels.indexOf(widths[0]!) + 1) as 1 | 2 | 3 | 4);
     return !usesLargestOperandWidthProfiles(selected);
 });
 

@@ -43,7 +43,7 @@ describe('ArithmeticOpsPairsGenerator', () => {
             requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}} as const;
         for (const patch of [{operation: Area.Multiplication}, {requireNegative: true}, {requireZero: true},
             {requireMultipleOf10: true}, {requireEqualAddends: true, operation: Area.Subtraction}, {range: {min: 10, max: 20}},
-            {range: {min: 1, max: 100}}, {largestOperandDigits: 3}]) {
+            {range: {min: 1, max: 10000}}, {largestOperandDigits: 3}]) {
             expect(generator.generate({...base, ...patch} as never)).toBeNull();
         }
     });

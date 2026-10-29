@@ -5,7 +5,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {operationNames} from '../helpers.ts';
 import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
-import {sampleOperandWidthPair} from './width-sampling.ts';
+import {sampleBoundedOperandWidthPair, sampleOperandWidthPair} from './width-sampling.ts';
 
 export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticPairProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -36,13 +36,15 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
         const digits = config.largestOperandDigits!;
-        if (![0, 1, 2].includes(digits)) return null;
+        if (![0, 1, 2, 3, 4].includes(digits)) return null;
         const existingSingleDigitDomain = digits === 1 && maxMagnitude <= 5;
         const widthProfile = digits !== 0 && !existingSingleDigitDomain;
-        if (widthProfile && ((operation !== Area.Addition && operation !== Area.Subtraction)
+        if (widthProfile && 10 ** (digits - 1) > maxMagnitude - (operation === Area.Addition ? 1 : 0)) return null;
+        const additive = operation === Area.Addition || operation === Area.Subtraction;
+        if (widthProfile && (!(additive ? [20, 100, 1000].includes(maxMagnitude) : maxMagnitude === 100)
             || config.requireEqualAddends && operation !== Area.Addition
             || requireNegative || requireZero || requireMultipleOf10
-            || minMagnitude !== 1 || maxMagnitude !== 20)) return null;
+            || minMagnitude !== 1)) return null;
 
         const randomMagnitude = (min: number, max: number): number | null => {
             const first = Math.ceil(min / step) * step;
@@ -73,8 +75,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             if (config.requireEqualAddends) {
                 if (requireNegative || requireZero) return null;
                 const addend = randomMagnitude(
-                    widthProfile && digits === 2 ? 10 : minMagnitude,
-                    widthProfile && digits === 1 ? 9 : Math.floor(maxMagnitude / 2));
+                    widthProfile ? 10 ** (digits - 1) : minMagnitude,
+                    widthProfile ? Math.min(10 ** digits - 1, Math.floor(maxMagnitude / 2)) : Math.floor(maxMagnitude / 2));
                 if (addend === null) return null;
                 num1 = addend;
                 num2 = addend;
@@ -92,7 +94,10 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = -magnitude;
                 answer = -2 * magnitude;
             } else if (widthProfile) {
-                [num1, num2] = sampleOperandWidthPair('addition', digits as 1 | 2);
+                const pair = maxMagnitude === 20 ? sampleOperandWidthPair('addition', digits as 1 | 2)
+                    : sampleBoundedOperandWidthPair('addition', digits, maxMagnitude);
+                if (!pair) return null;
+                [num1, num2] = pair;
                 answer = num1 + num2;
             } else {
                 const first = randomMagnitude(minMagnitude, maxMagnitude - minMagnitude);
@@ -117,7 +122,10 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = 2 * magnitude;
                 answer = -magnitude;
             } else if (widthProfile) {
-                [num1, num2] = sampleOperandWidthPair('subtraction', digits as 1 | 2);
+                const pair = maxMagnitude === 20 ? sampleOperandWidthPair('subtraction', digits as 1 | 2)
+                    : sampleBoundedOperandWidthPair('subtraction', digits, maxMagnitude);
+                if (!pair) return null;
+                [num1, num2] = pair;
                 answer = num1 - num2;
             } else {
                 const subtrahend = randomMagnitude(minMagnitude, maxMagnitude - minMagnitude);
@@ -156,6 +164,10 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                     num1 = multiple;
                     num2 = signedOneDigit;
                 }
+            } else if (widthProfile) {
+                const pair = sampleBoundedOperandWidthPair('multiplication', digits, maxMagnitude);
+                if (!pair) return null;
+                [num1, num2] = pair;
             } else {
                 const factors = randomFactorPair();
                 if (!factors) return null;
@@ -170,6 +182,11 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num1 = 0;
                 num2 = requireNegative ? -magnitude : magnitude;
                 answer = 0;
+            } else if (widthProfile) {
+                const pair = sampleBoundedOperandWidthPair('division', digits, maxMagnitude);
+                if (!pair) return null;
+                [num1, num2] = pair;
+                answer = num1 / num2;
             } else {
                 const factors = randomFactorPair();
                 if (!factors) return null;

@@ -63,7 +63,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
     });
 
     it('keeps unspecified and wider bounds outside the width profiles', () => {
-        for (const bounds of [[], [Scope.NumbersSmaller100]]) {
+        for (const bounds of [[], [Scope.NumbersSmaller10000]]) {
             const result = makeWidthPlan([Area.Addition, ...bounds]);
             expect(result.supported).toBe(true);
             if (!result.supported) continue;

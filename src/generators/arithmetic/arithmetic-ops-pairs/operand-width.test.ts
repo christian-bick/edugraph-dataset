@@ -10,7 +10,8 @@ const addition = [Area.Addition, Scope.NumbersSmaller20];
 const selectedFrom = (labels: readonly string[]) => (label: string) => labels.includes(label);
 const nonExcludingContext = new Set<string>([
     Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
-    Area.IteratedOperation, Scope.NumbersSmaller20
+    Area.IteratedOperation, Scope.NumbersSmaller20, Scope.NumbersSmaller100, Scope.NumbersSmaller120,
+    Scope.NumbersSmaller1000
 ]);
 
 describe('Binary operand-width profile resolution', () => {
