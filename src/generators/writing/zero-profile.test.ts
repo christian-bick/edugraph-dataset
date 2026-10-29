@@ -21,8 +21,9 @@ describe('writing coefficient-zero profiles', () => {
         for (const [minimum, maximum] of [[0, 20], [990, 1200], [9990, 10100], [999900, 1_000_000],
             [1000, 1000], [1001, 1001], [1111, 1111], [1000.2, 1010.8]]) {
             for (const zero of [false, true]) {
-                const values = Array.from({length: Math.max(0, Math.floor(maximum!) - Math.max(1, Math.ceil(minimum!)) + 1)},
-                    (_, index) => Math.max(1, Math.ceil(minimum!)) + index).filter(value => hasWritingZero(value) === zero);
+                const lower = Math.max(0, Math.ceil(minimum!));
+                const values = Array.from({length: Math.max(0, Math.floor(maximum!) - lower + 1)},
+                    (_, index) => lower + index).filter(value => hasWritingZero(value) === zero);
                 expect(writingProfileCount(minimum!, maximum!, zero)).toBe(values.length);
                 for (const [rank, value] of values.entries()) {
                     expect(writingProfileValue(minimum!, maximum!, zero, rank)).toBe(value);
@@ -78,6 +79,7 @@ describe('writing coefficient-zero profiles', () => {
         const config = {notationFamily: Area.DigitNotation, range: {min: 1111, max: 1111}};
         expect(generator.generate({...config, requireZero: 'coefficient-zero'})).toBeNull();
         expect(generator.generate({...config, requireZero: 'coefficient-nonzero'})!.data.number).toBe(1111);
+        expect(generator.generate({...config, range: {min: 0, max: 0}, requireZero: 'coefficient-zero'})!.data.number).toBe(0);
         expect(() => generator.generate({...config, requireZero: 'other'} as any)).toThrow(/profile/);
         expect(() => generator.generate({...config, range: {min: 1, max: Infinity},
             requireZero: 'coefficient-zero'})).toThrow(/finite/);

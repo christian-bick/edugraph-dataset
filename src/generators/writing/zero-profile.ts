@@ -37,16 +37,17 @@ const absenceThrough = (maximum: number): number => {
 export function writingProfileCount(minimum: number, maximum: number, zero: boolean): number {
     const lower = Math.max(1, Math.ceil(minimum));
     const upper = Math.floor(maximum);
-    if (upper < lower) return 0;
+    const scalarZero = zero && minimum <= 0 && maximum >= 0 ? 1 : 0;
+    if (upper < lower) return scalarZero;
     const absent = absenceThrough(upper) - absenceThrough(lower - 1);
-    return zero ? upper - lower + 1 - absent : absent;
+    return zero ? upper - lower + 1 - absent + scalarZero : absent;
 }
 
 /** Invert the exact cumulative count; each old eligible integer has the same conditional mass. */
 export function writingProfileValue(minimum: number, maximum: number, zero: boolean, rank: number): number | null {
     const total = writingProfileCount(minimum, maximum, zero);
     if (!Number.isInteger(rank) || rank < 0 || rank >= total) return null;
-    let lower = Math.max(1, Math.ceil(minimum));
+    let lower = Math.max(zero ? 0 : 1, Math.ceil(minimum));
     let upper = Math.floor(maximum);
     while (lower < upper) {
         const middle = Math.floor((lower + upper) / 2);
