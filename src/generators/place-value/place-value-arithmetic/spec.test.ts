@@ -30,6 +30,37 @@ const generate = (labels: string[]) => generateWithLabels(
 );
 
 describe('PlaceValueArithmeticGenerator spec integration', () => {
+    it('annotates zero absence only for positive whole-tens subtraction', () => {
+        const generator = new PlaceValueArithmeticGenerator();
+        const labels = [Area.Subtraction, Scope.MultiplesOf10, Scope.NumbersSmaller100];
+        for (let seed = 0; seed < 32; seed++) {
+            setSeed(seed);
+            const stub = generateWithLabels(generator, labels)!;
+            expect(stub.labels).toContain(Scope.NumbersWithoutZero);
+            expect(stub.labels).not.toContain(Scope.NumbersWithZero);
+            for (const value of [stub.data.num1, stub.data.num2, stub.data.answer]) {
+                expect(value).toBeGreaterThan(0);
+                expect(value % 10).toBe(0);
+            }
+            setSeed(seed);
+            const withZero = generateWithLabels(generator, [...labels, Scope.NumbersWithZero])!;
+            expect(withZero.data.answer).toBe(0);
+            expect(withZero.labels).toContain(Scope.NumbersWithZero);
+            expect(withZero.labels).not.toContain(Scope.NumbersWithoutZero);
+        }
+    });
+
+    it.each([
+        [Area.AdditionPlaceValuePartitioning, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand],
+        [Area.Addition], [Area.Addition, Area.IntegerRegrouping],
+        [Area.Subtraction], [Area.Subtraction, Area.IntegerRegrouping]
+    ].map(labels => ({labels})))('does not generalize whole-tens zero absence to $labels', ({labels}) => {
+        setSeed(12);
+        const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [...labels, Scope.NumbersSmaller1000]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
+    });
+
     it.each([Area.Subtraction, Area.SubtractionPlaceValuePartitioning])(
         'annotates the guaranteed multi-digit largest operand for %s with borrowing', operation => {
             const widths = new Set<number>();

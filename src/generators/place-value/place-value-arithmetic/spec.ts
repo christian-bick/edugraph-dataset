@@ -44,6 +44,16 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
         infer: ({operation, requireRegrouping}) => operation === Area.Subtraction && requireRegrouping
             ? [Scope.MultipleDigitLargestOperand]
             : []
+    }, {
+        // The positive whole-tens subtraction profile omits empty place counts
+        // in every projection. A multiples-wide/default label would overclaim
+        // addition and the explicit zero-result profile (SPEC-12).
+        produces: [Scope.NumbersWithoutZero],
+        infer: ({operation, requireMultipleOf10, requireRegrouping, requireSingleDigitSmallest,
+            requireTwoDigitLargest, requireZero}) => operation === Area.Subtraction && requireMultipleOf10
+            && !requireRegrouping && !requireSingleDigitSmallest && !requireTwoDigitLargest && !requireZero
+            ? [Scope.NumbersWithoutZero]
+            : []
     }],
     generalLabels: [
         Area.PlaceValue,
