@@ -7,7 +7,8 @@ and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
 Six mathematically settled cases are now closed through exhaustively validated configuration inference.
-The 385 remaining requirements have exact ownership in 26 dependency scopes, all still deferred.
+The 385 remaining requirements have exact ownership in 26 dependency scopes. The measurement
+split is authorized for 21 requirements; the other 364 remain deferred.
 The known reasoning content defect in RB-A3-D3
 also remains open, despite its retired dependency requirements. Full dataset readiness still
 waits for those decisions. Counts below
@@ -42,8 +43,8 @@ integer-only digit gate and range-policy exclusion are unchanged.
 | Progress since this baseline | Count |
 |---|---:|
 | Outstanding source gaps | 385 |
-| Authorized implementation in progress (subset of outstanding) | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 385 |
+| Authorized implementation in progress (subset of outstanding) | 21 |
+| Assigned to deferred decision batches (subset of outstanding) | 364 |
 | Verified repairs / introduced / reopened | 959 / 75 / 0 |
 | Policy-retired / policy-added requirements | 38 / 0 |
 | Active dependency scopes, including implementation | 26 |
@@ -113,13 +114,13 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-F9-D2 | Contextual zero/reference distinctions | 0 | 2 | 2 | Partial; remaining deferred |
 | RB-F10 | Ratios, rates and percentages | 30 | 0 | 0 | Complete |
 | RB-M1 | Legacy conversion profiles and shared consumers | 84 | 0 | 0 | Complete; child below |
-| RB-M1-D1 | Legacy integer profile/ownership distinction | 0 | 21 | 21 | Deferred |
+| RB-M1-D1 | Legacy integer profile/ownership distinction | 0 | 21 | 0 | Approved measurement split; contract foundation in progress |
 | RB-M2 | Clock reading and construction | 46 | 0 | 0 | Complete; child below |
 | RB-M2-D1 | Clock numeral/base/zero evidence | 0 | 17 | 17 | Partial; zero findings deferred, notation requirements policy-retired |
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **385** | **385** | |
+| **Total: 56 source batches** | | **1,307** | **385** | **364** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|

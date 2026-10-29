@@ -1684,6 +1684,18 @@ export type MeasurementConversionNumericExamples = {
     ];
 };
 
+/** Five consecutive positive whole-number quantities and their exact unit equivalents. */
+export type UnitEquivalenceSequenceProblem = {
+    pair: MeasurementConversionPair;
+    equivalents: readonly MeasurementUnitEquivalence[];
+};
+
+/** Exact symmetric unit equalities; the consuming view chooses direction and unknowns. */
+export type MeasurementConversionValuesProblem = {
+    pair: MeasurementConversionPair;
+    numericExamples: MeasurementConversionNumericExamples;
+};
+
 export type StandardUnitEquivalencesProblem = {
     pair: MeasurementConversionPair;
     equivalents: readonly MeasurementUnitEquivalence[];

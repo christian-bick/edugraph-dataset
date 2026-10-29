@@ -3,8 +3,8 @@
 Status: implemented as annotation-only validation. The repository contains one small graph,
 a pure ontology-aware evaluator, and a shared strict gate and audit. Payload and rendering
 changes are outside ordinary annotation repairs. The separately proposed
-[measurement split](#proposed-measurement-generatorview-split-2026-10-29) is a structural
-decision batch awaiting implementation confirmation; it does not expand the graph's role.
+[measurement split](#proposed-measurement-generatorview-split-2026-10-29) is a separately
+approved structural decision batch; it does not expand the graph's role.
 
 The approved [configuration-inference extension](#configuration-inference-checkpoints-2026-10-29)
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
@@ -70,7 +70,7 @@ dataset graph rebuild (`--rebuild-graph`); existing no-op receipts alone do not 
 after the pipeline-version change. The current stored snapshot remains an audit of persisted
 labels, without retroactively applying source inference.
 
-Next proposed batch: the [measurement generator/view split and matching migration review](#proposed-measurement-generatorview-split-2026-10-29).
+Current batch: the [measurement generator/view split and matching migration review](#proposed-measurement-generatorview-split-2026-10-29).
 The broader work remains in the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
 [remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
@@ -125,10 +125,11 @@ are not counted as repaired before regeneration. See the
 
 ## Proposed measurement generator/view split (2026-10-29)
 
-**Status: plan and matching migration review only; implementation requires explicit user
-confirmation.** This is the next proposed RB-M1 batch. It supersedes the proposed
+**Status: implementation approved on 2026-10-29 in three checkpoints.** This is the RB-M1-D1
+repair batch. It supersedes the proposed
 `numericProfile === 'legacy'` inference for the 21 remaining conversion number-kind gaps.
-No source gap is closed by this plan: the implemented baseline remains **385**.
+The foundation checkpoint closes no source gap: the baseline remains **385** until the
+implemented migration and fresh audit verify the original requirements' successors.
 
 Structural splits should be rare. First consider a truthful invariant, a label bundle on an
 existing choice, or a coherent explicit schema profile. Consider a split when mathematical
@@ -168,7 +169,7 @@ evidence in the rendered exercise.
 
 The split makes these two mathematical contracts explicit. It needs no conditional inference
 for number kind and no third producer merely to distinguish integers from decimals.
-The names below are proposed new IDs/types, not implemented modules.
+The names below define the approved new IDs/types; checkpoint results are recorded below.
 
 | Role | Proposed contract and declarations | Consumers / task |
 |---|---|---|
@@ -297,15 +298,16 @@ from the declaration change. Report original requirements repaired, carried-forw
 newly admitted obligations and the new effective total separately. Keep the historical RB-M1
 counterfactual below as history; this proposal replaces its unresolved legacy-profile approach.
 
-### Implementation checkpoints after confirmation
+### Approved implementation checkpoints
 
 1. **Establish contracts and shared helpers.** Capture the fresh complete catalog, target
    hashes, admitted configurations, affected rendering fixtures and existing dirty paths.
-   Add the two concrete problem types and prospective view-map contracts; extract pure shared
+   Add the two concrete problem types; extract pure shared
    math/render helpers without changing active behavior. Check types and existing tests before
    independent producer/view work. A temporary old type may remain solely for still-active
    modules during this checkpoint; it is removed in the migration checkpoint.
-2. **Migrate the complete producer/consumer family.** Introduce the two generators and two
+2. **Migrate the complete producer/consumer family.** Add and typecheck the new view-map
+   contracts before role work diverges. Introduce the two generators and two
    execution leaves, narrow derivation/table types, apply ordinary number-kind declarations,
    and retire the old generator/execution view and optional payload branch together. Preserve
    the generic-unit-scale derivation route. Include generator/spec tests and both leaf
@@ -337,13 +339,38 @@ Validation must include:
   authoritative graph rebuild and VQA remain at the agreed source-readiness checkpoint; preview
   fixtures and a successful matching review do not establish final dataset acceptance.
 
-The implementation decision to confirm is this two-producer/two-execution-leaf boundary,
-ordinary matching-capable number-kind declarations and the reviewed migration consequences.
-New splits elsewhere require their own justification and confirmation.
+The user confirmed this two-producer/two-execution-leaf boundary, ordinary matching-capable
+number-kind declarations and the reviewed migration consequences. New splits elsewhere
+require their own justification and confirmation.
 
 Planning verification: independent contract and migration reviews completed;
 `npm run check:docs` passed with five unavailable external-document fetch warnings, and
 `git diff --check` passed. Only this plan changes in the documentation checkpoint.
+
+### Split checkpoint 1 — contract foundation
+
+Add the concrete sequence and numeric-values types before changing active consumers.
+Extract the existing samplers into category helpers and the
+table renderer into a pure shared component. The existing generator still draws its sequence
+before numeric examples, preserving this checkpoint's configurations, payloads and random
+continuation. Existing target declarations and active matching capabilities are unchanged.
+The new producer/view paths become active together in checkpoint 2.
+The prospective view mappings typechecked during contract preparation, but the catalog validator
+correctly rejects entries without discovered leaves. Keep them out of the foundation commit;
+add and typecheck them again at the start of checkpoint 2 before parallel role implementation.
+
+The immutable baseline records all seven target source hashes and the current dirty paths.
+The foundation preserves all 1,013 covered targets, 1,195 tuples and 1,263 admitted selections.
+All 88 payload/PRNG probes and 288 exact rendered-markup fixtures match the baseline. A further
+384 conversion-story probes preserve configuration, labels, payloads and random continuation.
+Shared-builder tests exhaust all 56 sequence outcomes and 39,242 ordered numeric outcomes
+across the seven pairs; helper and old-generator coverage is 100%. Local evidence is under
+`temp/measurement-split-implementation/`.
+
+Checkpoint validation passes types, spec ownership, documentation and independent review.
+Full coverage passes **849 suites / 6,692 tests**, including every generator coverage threshold.
+The coverage workflow used four workers after a sandbox transform-cache failure and a
+default-worker timeout; no validation was disabled.
 
 ## Agreed direction: conditional notation dependencies
 
@@ -1419,7 +1446,7 @@ semantics also need review before proposing ordinary configuration distinctions.
 
 **Historical counterfactual.** The current remaining scope is 21 number-kind omissions.
 The [2026-10-29 split proposal and matching review](#proposed-measurement-generatorview-split-2026-10-29)
-supersedes this legacy-profile decision approach; implementation still awaits confirmation.
+supersedes this legacy-profile decision approach; implementation was approved on 2026-10-29.
 The counts below describe the earlier declaration state, not the current 385-gap baseline.
 
 Keep `measurement-conversion` outside M2. Its
