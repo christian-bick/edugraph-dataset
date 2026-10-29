@@ -5,6 +5,7 @@ import type {ArithmeticOperation, ExactNumericalExpressionNode, ExactNumericExpr
 import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
 import {buildNumericalPowerExpressionProblem} from '../numerical-power-helpers.ts';
 import {NumericalPowerExpressionsGeneratorSchema, type NumericalPowerExpressionsGeneratorConfig} from './spec.ts';
+import {sampleSinglePower} from './numeric-profiles.ts';
 
 const generatorId = 'numerical-power-expressions';
 const constraints: ExactNumericExpressionConstraints = {domain: 'rational', maximumAbsoluteValue: {numerator: 100, denominator: 1},
@@ -58,13 +59,21 @@ export class NumericalPowerExpressionsGenerator implements ProblemGenerator<Nume
     schema = NumericalPowerExpressionsGeneratorSchema;
 
     generate(config: NumericalPowerExpressionsGeneratorConfig): ProblemStub<NumericalPowerExpressionProblem> {
-        validateConfigFields(generatorId, config, ['structure', 'exponents']);
+        validateConfigFields(generatorId, config, ['structure', 'exponents', 'numericProfile']);
         if ((config.structure !== 'single-power' && config.structure !== 'mixed-precedence')
             || (config.exponents !== 'allow-zero' && config.exponents !== 'positive')) {
             throw new GeneratorValidationError(generatorId, 'Choose a supported mathematical expression structure and exponent domain.');
         }
         const positive = config.exponents === 'positive';
-        const expression = config.structure === 'single-power' ? power('power', integer(positive ? 1 : 0, 3)) : mixedExpression(positive);
+        let expression: ExactNumericalExpressionNode;
+        if (config.structure === 'single-power') {
+            const sample = sampleSinglePower(positive, config.numericProfile!);
+            if (!sample) throw new GeneratorValidationError(generatorId, 'Choose a feasible single-power numeric profile.');
+            expression = {id: 'power', kind: 'power', base: literal('power-base', sample.base), exponent: sample.exponent};
+        } else {
+            if (config.numericProfile !== 0) throw new GeneratorValidationError(generatorId, 'Mixed expressions retain the unrestricted numeric profile.');
+            expression = mixedExpression(positive);
+        }
         return {data: buildNumericalPowerExpressionProblem(expression, constraints)};
     }
 }

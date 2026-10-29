@@ -52,7 +52,9 @@ describe('real mathematical structure and exponent sampling', () => {
             const shapes = new Set<string>();
             for (let seed = 0; seed < 192; seed++) {
                 setSeed(seed);
-                const stub = generator.generate({structure, exponents});
+                const numericProfile = structure === 'mixed-precedence' ? 0
+                    : (exponents === 'positive' ? [1, 2, 3] : [1, 2, 3, 4])[seed % (exponents === 'positive' ? 3 : 4)]! as 1 | 2 | 3 | 4;
+                const stub = generator.generate({structure, exponents, numericProfile});
                 const data = stub.data;
                 expect(Object.keys(stub)).toEqual(['data']);
                 expect(Object.keys(data).sort()).toEqual(['expression', 'finalValue', 'kind', 'nodeValues', 'powerFacts', 'precedenceWitness', 'reductions']);
@@ -110,7 +112,7 @@ describe('real mathematical structure and exponent sampling', () => {
         let trap = false, largeComponent = false, exactFraction = false;
         for (let seed = 0; seed < 192; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({structure: 'mixed-precedence', exponents: 'allow-zero'});
+            const {data} = generator.generate({structure: 'mixed-precedence', exponents: 'allow-zero', numericProfile: 0});
             const ids = data.reductions.map(step => step.targetNodeId);
             if (ids.includes('left-sum') && ids.includes('product') && data.powerFacts.length === 1) {
                 expect(ids.indexOf('power')).toBeLessThan(ids.indexOf('product'));
@@ -127,7 +129,7 @@ describe('real mathematical structure and exponent sampling', () => {
 
     it('replays exact data and rejects empty, missing or false mathematical config', () => {
         const generator = new NumericalPowerExpressionsGenerator();
-        const config = {structure: 'mixed-precedence', exponents: 'positive'} as const;
+        const config = {structure: 'mixed-precedence', exponents: 'positive', numericProfile: 0} as const;
         setSeed(31); const first = generator.generate(config);
         setSeed(31); expect(generator.generate(config)).toEqual(first);
         for (const value of [null, undefined, {}, {structure: 'single-power'}, {exponents: 'positive'},
