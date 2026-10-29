@@ -2,6 +2,9 @@ import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {allowedNumericProfiles, numericContextLabels, numericProfileBundles, numericProfileLabels,
+    resolveNumericProfile} from './numeric-profiles.ts';
 
 const relations = [
     [[Area.AlgebraicExpression, Scope.RationalNumbers], 'plain'],
@@ -32,11 +35,20 @@ export const spec: GeneratorSpec = {
         description: 'Powered calculations belong to the substitution and precedence relation.',
         dependencies: [{scope: 'generator', label: Area.Exponentiation}, {scope: 'generator', label: Area.AlgebraicSubstitution}],
         predicate: labels => !labels.has('generator', Area.Exponentiation) || labels.has('generator', Area.AlgebraicSubstitution)
-    }]
+    }, generatorLabelRule('algebra-expression-evidenced-numeric-profile',
+        [...numericContextLabels, ...numericProfileLabels], selected => {
+            const chosen = numericProfileLabels.filter(selected);
+            const index = numericProfileBundles.findIndex(bundle => bundle.length === chosen.length
+                && bundle.every(selected));
+            const profile = chosen.length ? index + 1 : 0;
+            return index >= 0 || !chosen.length
+                ? allowedNumericProfiles(selected).some(value => value === profile) : false;
+        })]
 };
 
 export const AlgebraExpressionsGeneratorSchema = {
     relation: [[...new Set(relations.flatMap<string>(([labels]) => labels))], selectExactLabelSetMap(relations), relations.map(([labels]) => labels)],
-    power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)]
+    power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)],
+    numericProfile: [numericProfileLabels, resolveNumericProfile, [[], ...numericProfileBundles]]
 } as const;
 export type AlgebraExpressionsGeneratorConfig = ConfigFromSchema<typeof AlgebraExpressionsGeneratorSchema>;

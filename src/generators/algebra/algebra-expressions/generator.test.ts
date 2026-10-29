@@ -5,6 +5,7 @@ import type {AlgebraicExpressionProblem, AlgebraicScalar, ExactSymbolicExpressio
 import {isAlgebraicExpressionProblem} from '../algebra-expression-helpers.ts';
 import {AlgebraExpressionsGenerator} from './generator.ts';
 import type {AlgebraExpressionsGeneratorConfig} from './spec.ts';
+import {profilesForRelation} from './numeric-profiles.ts';
 
 type Fraction = readonly [bigint, bigint];
 const reduced = (numerator: bigint, denominator: bigint): Fraction => {
@@ -43,7 +44,8 @@ describe('canonical algebra expression mathematics', () => {
         const examples = new Set<string>();
         for (let seed = 0; seed < 48; seed++) {
             setSeed(seed);
-            const stub = generator.generate({relation, power: 'none'}), data = stub.data;
+            const profiles = profilesForRelation(relation);
+            const stub = generator.generate({relation, power: 'none', numericProfile: profiles[seed % profiles.length]})!, data = stub.data;
             expect(Object.keys(stub)).toEqual(['data']);
             expect(isAlgebraicExpressionProblem(data)).toBe(true);
             expect(fraction(data.substitution.finalValue)).toEqual(evaluate(data.expression, data.substitution.bindings));
@@ -90,7 +92,7 @@ describe('canonical algebra expression mathematics', () => {
         const coefficients = new Set<number>(), features = new Set<string>();
         for (let seed = 0; seed < 160; seed++) {
             setSeed(seed);
-            const coefficient = generator.generate({relation: 'symbolic-coefficient', power: 'none'}).data.structuralRelations[0];
+            const coefficient = generator.generate({relation: 'symbolic-coefficient', power: 'none', numericProfile: 0})!.data.structuralRelations[0];
             expect(coefficient.kind).toBe('coefficient');
             if (coefficient.kind === 'coefficient') {
                 coefficients.add(coefficient.coefficient.numerator);
@@ -99,7 +101,7 @@ describe('canonical algebra expression mathematics', () => {
             }
             for (const power of ['none', 'allow-zero', 'positive'] as const) {
                 setSeed(seed);
-                const data = generator.generate({relation: 'substitution', power}).data;
+                const data = generator.generate({relation: 'substitution', power, numericProfile: 0})!.data;
                 expect(isAlgebraicExpressionProblem(data)).toBe(true);
                 expect(fraction(data.substitution.finalValue)).toEqual(evaluate(data.expression, data.substitution.bindings));
                 expect(data.substitution.bindings[0].occurrenceNodeIds).toHaveLength(2);
@@ -118,7 +120,7 @@ describe('canonical algebra expression mathematics', () => {
     });
 
     it('replays exact payloads and rejects missing, unsupported, or incompatible mathematical config', () => {
-        const generator = new AlgebraExpressionsGenerator(), config = {relation: 'substitution', power: 'positive'} as const;
+        const generator = new AlgebraExpressionsGenerator(), config = {relation: 'substitution', power: 'positive', numericProfile: 0} as const;
         setSeed(17); const first = generator.generate(config);
         setSeed(17); expect(generator.generate(config)).toEqual(first);
         for (const invalid of [null, undefined, {}, {relation: 'plain'}, {power: 'none'}, {...config, relation: 'evaluate'},
@@ -130,14 +132,14 @@ describe('canonical algebra expression mathematics', () => {
     it('excludes zero only at a division denominator and retains zero in ordinary parameter domains', () => {
         const generator = new AlgebraExpressionsGenerator();
         setSeed(70);
-        const plainDivision = generator.generate({relation: 'plain', power: 'none'}).data;
+        const plainDivision = generator.generate({relation: 'plain', power: 'none', numericProfile: 3})!.data;
         expect(plainDivision.expression.kind === 'binary' && plainDivision.expression.operation).toBe('division');
         expect(plainDivision.substitution.bindings[0].value).toEqual({numerator: 1, denominator: 2});
         setSeed(54);
-        const quotient = generator.generate({relation: 'numeric-quotient', power: 'none'}).data;
+        const quotient = generator.generate({relation: 'numeric-quotient', power: 'none', numericProfile: 3})!.data;
         expect(quotient.substitution.bindings[0].value).toEqual({numerator: -1, denominator: 2});
         setSeed(54);
-        const ordinary = generator.generate({relation: 'plain', power: 'none'}).data;
+        const ordinary = generator.generate({relation: 'plain', power: 'none', numericProfile: 4})!.data;
         expect(ordinary.substitution.bindings[0].value.numerator).toBe(0);
         expect(ordinary.restrictions).toEqual([]);
         expect(ordinary.symbols[0].domain.excludedValues).toEqual([]);

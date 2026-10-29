@@ -6,6 +6,7 @@ import type {AlgebraicExpressionContext, AlgebraicExpressionProblem, AlgebraicSc
 import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
 import {buildAlgebraicExpressionProblem} from '../algebra-expression-helpers.ts';
 import {AlgebraExpressionsGeneratorSchema, type AlgebraExpressionsGeneratorConfig} from './spec.ts';
+import {inputsMeetNumericProfile, profilesForRelation, type ExpressionInputs} from './numeric-profiles.ts';
 
 const generatorId = 'algebra-expressions';
 const integer = (minimum: number, maximum: number): number => minimum + Math.floor(random() * (maximum - minimum + 1));
@@ -42,15 +43,22 @@ function purchase(): AlgebraicExpressionProblem {
         bindings: [{symbolId: 't', value: input, notation: notation(input)}], structuralKind: 'symbolic', relation: 'sum', context});
 }
 
-function mathematicalInstance(config: Required<AlgebraExpressionsGeneratorConfig>): AlgebraicExpressionProblem {
+function drawInputs(relation: string): ExpressionInputs {
+    const inputs: ExpressionInputs = {a: integer(2, 9), b: integer(1, 6), c: integer(1, 5),
+        input: value(integer(-8, 8), integer(1, 4))};
+    if (relation === 'plain') inputs.operation = (['addition', 'subtraction', 'multiplication', 'division'] as const)[integer(0, 3)]!;
+    return inputs;
+}
+
+function mathematicalInstance(config: Required<AlgebraExpressionsGeneratorConfig>, inputs?: ExpressionInputs): AlgebraicExpressionProblem {
     if (config.relation === 'modeling') return purchase();
-    const a = integer(2, 9), b = integer(1, 6), c = integer(1, 5);
-    let input = value(integer(-8, 8), integer(1, 4));
+    const {a, b, c} = inputs!;
+    let {input} = inputs!;
     let expression: ExactSymbolicExpressionNode;
     let relation: AlgebraicStructuralRelation['kind'];
     const groupedInput = () => group('input-group', variable('input'));
     if (config.relation === 'plain') {
-        const operation = (['addition', 'subtraction', 'multiplication', 'division'] as const)[integer(0, 3)]!;
+        const operation = inputs!.operation!;
         if (operation === 'division' && input.numerator === 0) input = value(1, 2);
         expression = binary('root', operation, literal('constant', a), groupedInput());
         relation = operation === 'division' ? 'quotient' : operation === 'multiplication' ? 'product' : 'additive-components';
@@ -94,14 +102,25 @@ export class AlgebraExpressionsGenerator implements ProblemGenerator<AlgebraicEx
     type: AbstractProblem['type'] = 'arithmetic';
     schema = AlgebraExpressionsGeneratorSchema;
 
-    generate(config: AlgebraExpressionsGeneratorConfig): ProblemStub<AlgebraicExpressionProblem> {
-        validateConfigFields(generatorId, config, ['relation', 'power']);
+    generate(config: AlgebraExpressionsGeneratorConfig): ProblemStub<AlgebraicExpressionProblem> | null {
+        validateConfigFields(generatorId, config, ['relation', 'power', 'numericProfile']);
         if (!config.relation || !config.power || !['plain', 'numeric-terms', 'symbolic-terms', 'numeric-factors', 'symbolic-factors', 'symbolic-coefficient',
             'numeric-sum', 'symbolic-sum', 'numeric-product', 'symbolic-product', 'numeric-quotient', 'symbolic-quotient',
             'numeric-grouped', 'symbolic-grouped', 'substitution', 'modeling'].includes(config.relation)
-            || !['none', 'allow-zero', 'positive'].includes(config.power) || (config.relation !== 'substitution' && config.power !== 'none')) {
+            || !['none', 'allow-zero', 'positive'].includes(config.power) || (config.relation !== 'substitution' && config.power !== 'none')
+            || !profilesForRelation(config.relation).includes(config.numericProfile!)) {
             throw new GeneratorValidationError(generatorId, 'Choose a supported expression relation and its compatible power domain.');
         }
-        return {data: mathematicalInstance({relation: config.relation, power: config.power})};
+        const complete = {relation: config.relation, power: config.power, numericProfile: config.numericProfile!};
+        if (config.relation === 'modeling') return {data: mathematicalInstance(complete)};
+        // Condition the original raw draws before constructing a payload. The complete
+        // finite parameter-domain proof establishes acceptance >= 1/100 for every profile.
+        for (let attempt = 0; attempt < 4096; attempt++) {
+            const inputs = drawInputs(config.relation);
+            if (inputsMeetNumericProfile(config.relation, inputs, config.numericProfile!)) {
+                return {data: mathematicalInstance(complete, inputs)};
+            }
+        }
+        return null;
     }
 }

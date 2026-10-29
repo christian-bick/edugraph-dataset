@@ -15,6 +15,7 @@ import {spec as formula, AlgebraFormulaEvaluateViewSchema as formulaSchema} from
 import {spec as model, AlgebraExpressionModelViewSchema as modelSchema} from '../../../visuals/views/operations/algebra-expression-model/spec.ts';
 import {AlgebraExpressionsGenerator} from './generator.ts';
 import {AlgebraExpressionsGeneratorSchema, spec} from './spec.ts';
+import {numericProfileLabels, profilesForRelation} from './numeric-profiles.ts';
 
 const viewEntries = [[write, writeSchema], [parts, partsSchema], [grouped, groupedSchema], [evaluate, evaluateSchema],
     [formula, formulaSchema], [model, modelSchema]] as const;
@@ -31,7 +32,7 @@ const plan = (targetId: string, labels: readonly string[], entry: typeof viewEnt
 describe('algebra expression capability ownership and composition', () => {
     it('resolves complete mathematical bundles without invariant expression-kind or Ability claims', () => {
         expect(spec.generalLabels).toEqual([]);
-        expect(Object.keys(AlgebraExpressionsGeneratorSchema)).toEqual(['relation', 'power']);
+        expect(Object.keys(AlgebraExpressionsGeneratorSchema)).toEqual(['relation', 'power', 'numericProfile']);
         expect(findSchemaFallbackContractIssues(AlgebraExpressionsGeneratorSchema)).toEqual([]);
         const relationBundles = AlgebraExpressionsGeneratorSchema.relation[2];
         expect(relationBundles).toHaveLength(16);
@@ -43,11 +44,13 @@ describe('algebra expression capability ownership and composition', () => {
             const config = {relation: AlgebraExpressionsGeneratorSchema.relation[1](labels),
                 power: AlgebraExpressionsGeneratorSchema.power[1](labels)};
             if (power.length && !relation.includes(Area.AlgebraicSubstitution as never)) continue;
-            values.add(JSON.stringify(config));
-            const stub = new AlgebraExpressionsGenerator().generate(config);
-            expect(stub.data.structuralExpression.kind).toBe(relation.includes(Area.ArithmeticExpression as never) ? 'numeric' : 'symbolic');
+            for (const numericProfile of profilesForRelation(config.relation!)) {
+                values.add(JSON.stringify({...config, numericProfile}));
+                const stub = new AlgebraExpressionsGenerator().generate({...config, numericProfile})!;
+                expect(stub.data.structuralExpression.kind).toBe(relation.includes(Area.ArithmeticExpression as never) ? 'numeric' : 'symbolic');
+            }
         }
-        expect(values.size).toBe(18);
+        expect(values.size).toBe(34);
     });
 
     it('executes all 21 reviewed actual target plans with exactly their observable claims', () => {
@@ -71,7 +74,10 @@ describe('algebra expression capability ownership and composition', () => {
                     if (target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId) {
                         supportedLabels.push(Scope.RationalNumbers);
                     }
-                    expect(new Set(draw.labels)).toEqual(new Set([...target.labels, ...supportedLabels]));
+                    expect(new Set(draw.labels.filter(label => !numericProfileLabels.includes(label as never))))
+                        .toEqual(new Set([...target.labels, ...supportedLabels]));
+                    expect(draw.labels.filter(label => numericProfileLabels.includes(label as never)))
+                        .toHaveLength(target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId ? 2 : 0);
                     const data = draw.stub!.data as AlgebraicExpressionProblem;
                     if (target.labels.includes(Area.AlgebraicModeling)) expect(data.context.kind).toBe('quantitative-system');
                     if (target.labels.includes(Area.OrderOfOperations)) expect(data.substitution.precedenceWitness).not.toBeNull();
@@ -87,7 +93,7 @@ describe('algebra expression capability ownership and composition', () => {
         const result = plan('prescribed-phrase', labels, viewEntries[0]);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);
-        expect(result.plan.domains.filter(domain => domain.owner === 'generator').map(domain => domain.alternatives.length)).toEqual([1, 1]);
+        expect(result.plan.domains.filter(domain => domain.owner === 'generator').map(domain => domain.alternatives.length)).toEqual([2, 1, 1]);
         for (const extra of [Area.Term, Area.Factor, Area.Coefficient, Area.Addition, Area.Multiplication, Area.Division,
             Area.GroupingSymbol, Area.Operand, Area.AlgebraicSubstitution, Area.OrderOfOperations, Area.AlgebraicModeling, Area.Exponentiation]) {
             expect(plan(`phrase-${extra}`, [...labels, extra], viewEntries[0]).supported).toBe(false);
