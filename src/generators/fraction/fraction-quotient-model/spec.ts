@@ -23,16 +23,20 @@ const relationProfiles = [
         Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-divisor-equation']
 ] as const;
 
-// Canonical emitted choices add zero absence to the positive unit-dividend profiles.
+// Canonical choices describe the original operands as well as the relation.
+// Integer presence does not classify the necessarily required quotient as integral.
 // Keep the original bundles as same-value aliases so unchanged requests remain exact.
 const canonicalProfiles = relationProfiles.map(([labels, value]) => [
     labels.some(label => label === Scope.FractionDividend)
-        ? [...labels, Scope.NumbersWithoutZero] : labels,
+        ? [...labels, Scope.NumbersWithoutZero]
+        : value === 'whole-sharing-equation'
+            ? [...labels, Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand] : labels,
     value
 ] as const);
 const exactProfile = selectExactLabelSetMap([
     ...canonicalProfiles,
-    ...relationProfiles.filter(([labels]) => labels.some(label => label === Scope.FractionDividend)),
+    ...relationProfiles.filter(([labels, value]) => labels.some(label => label === Scope.FractionDividend)
+        || value === 'whole-sharing-equation'),
     // These broad requests already select fraction-as-quotient; preserve that choice.
     [[Scope.NumbersWithoutZero], 'fraction-as-quotient'],
     [[Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient']
@@ -77,6 +81,9 @@ export const FractionQuotientModelGeneratorSchema = {
         Scope.FractionDividend,
         Scope.FractionDivisor,
         Scope.FractionQuotient,
+        Scope.IntegerNumbers,
+        Scope.TwoOperands,
+        Scope.SingleDigitLargestOperand,
         Scope.UnitFractions,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero

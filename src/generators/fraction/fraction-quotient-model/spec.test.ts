@@ -1,6 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {FractionQuotientModelGenerator} from './generator.ts';
@@ -99,11 +100,39 @@ describe('fraction-quotient-model schema integration', () => {
         const expectedLabels: readonly string[] = [...selected,
             ...(relationProfile === 'fraction-as-quotient'
                 ? [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
-                : relationProfile.startsWith('unit-dividend-') ? [Scope.NumbersWithoutZero] : [])];
+                : relationProfile.startsWith('unit-dividend-') ? [Scope.NumbersWithoutZero]
+                    : relationProfile === 'whole-sharing-equation'
+                        ? [Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand] : [])];
         expect(new Set<string>(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
         const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
         expect(new Set<string>(problem.labels)).toEqual(new Set<string>(expectedLabels));
         expect(problem.data.equationWitness !== undefined).toBe(relationProfile.endsWith('-equation'));
         expect(problem.data.multiplicationWitness !== undefined).toBe(relationProfile.endsWith('-inverse'));
+    });
+
+    it('grounds whole-sharing integer presence and width in the explicit original operands', () => {
+        const labels = [Area.Equation, ...wholeRoles];
+        const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, labels, 'generator');
+        expect(domain.alternatives).toHaveLength(1);
+        expect(domain.alternatives[0].labels).toEqual(expect.arrayContaining([
+            Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand, Scope.FractionQuotient
+        ]));
+        for (let seed = 0; seed < 64; seed++) {
+            setSeed(seed);
+            const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
+            expect(problem.labels).toEqual(expect.arrayContaining([
+                Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand, Scope.FractionQuotient
+            ]));
+            for (const operand of [problem.data.dividend, problem.data.divisor]) {
+                expect(operand.denominator).toBe(1);
+                expect(operand.numerator).toBeGreaterThanOrEqual(0);
+                expect(operand.numerator).toBeLessThan(10);
+            }
+        }
+        const evaluation = createLabelDependencyEvaluator().evaluate([
+            Area.Division, ...domain.alternatives[0].labels
+        ]);
+        expect(evaluation.assessments.filter(item => ['numberKind', 'operandCount', 'operandDigits']
+            .includes(item.facet)).every(item => item.status === 'satisfied')).toBe(true);
     });
 });
