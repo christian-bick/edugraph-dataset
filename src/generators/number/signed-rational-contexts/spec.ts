@@ -7,6 +7,9 @@ const relationProfiles = [
     [[Area.ZeroConcept, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives], 'reference-zero'],
     [[Area.SignNotation, Scope.NumbersWithNegatives], 'directed-pair']
 ] as const;
+const canonicalProfiles = relationProfiles.map(([labels, value]) => [
+    value === 'directed-pair' ? [...labels, Scope.NumbersWithoutZero] : labels, value
+] as const);
 
 export const spec: GeneratorSpec = {
     generatorId: 'signed-rational-contexts',
@@ -15,9 +18,9 @@ export const spec: GeneratorSpec = {
 
 export const SignedRationalContextsGeneratorSchema = {
     relation: [
-        [Area.ZeroConcept, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Area.SignNotation, Scope.NumbersWithNegatives],
-        selectExactLabelSetMap(relationProfiles),
-        relationProfiles.map(([labels]) => labels)
+        [Area.ZeroConcept, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Area.SignNotation, Scope.NumbersWithNegatives, Scope.NumbersWithoutZero],
+        selectExactLabelSetMap([...canonicalProfiles, relationProfiles[1]]),
+        canonicalProfiles.map(([labels]) => labels)
     ]
 } as const;
 

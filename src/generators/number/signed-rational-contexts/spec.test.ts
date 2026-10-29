@@ -8,14 +8,15 @@ import {SignedRationalContextsGeneratorSchema, spec} from './spec.ts';
 const zeroBundle = [Area.ZeroConcept, Scope.NumbersWithZero];
 const resolvedZeroBundle = [...zeroBundle, Scope.NumbersWithoutNegatives];
 const signedBundle = [Area.SignNotation, Scope.NumbersWithNegatives];
+const resolvedSignedBundle = [...signedBundle, Scope.NumbersWithoutZero];
 const resolveRelation = SignedRationalContextsGeneratorSchema.relation[1];
 
 describe('signed rational context capability ownership', () => {
     it('declares complete fallback conjunctions and resolves every fallback with the production audit', () => {
-        expect(SignedRationalContextsGeneratorSchema.relation[2]).toEqual([resolvedZeroBundle, signedBundle]);
+        expect(SignedRationalContextsGeneratorSchema.relation[2]).toEqual([resolvedZeroBundle, resolvedSignedBundle]);
         expect(findSchemaFallbackContractIssues(SignedRationalContextsGeneratorSchema)).toEqual([]);
         const singletonFallbackSchema = {relation: [SignedRationalContextsGeneratorSchema.relation[0], resolveRelation] as const};
-        expect(findSchemaFallbackContractIssues(singletonFallbackSchema)).toHaveLength(5);
+        expect(findSchemaFallbackContractIssues(singletonFallbackSchema)).toHaveLength(6);
     });
 
     it('keeps RationalNumbers invariant and correlates exact Area/numeric-domain bundles', () => {
@@ -38,10 +39,14 @@ describe('signed rational context capability ownership', () => {
         for (let seed = 0; seed < 25; seed++) {
             setSeed(seed);
             const problem = generateWithLabels(new SignedRationalContextsGenerator(), [...bundle, Scope.RationalNumbers, ...abilities])!;
-            expect(problem.labels).toEqual(relation === 'reference-zero' ? resolvedZeroBundle : [...bundle]);
+            expect(problem.labels).toEqual(relation === 'reference-zero' ? resolvedZeroBundle : resolvedSignedBundle);
             expect(problem.data.kind).toBe('signed-rational-contexts');
             if (relation === 'reference-zero') expect(problem.data.observations.map(({value}) => value.numerator)).toEqual([0]);
-            else expect(problem.data.observations.map(({sign}) => sign).sort()).toEqual([-1, 1]);
+            else {
+                expect(problem.data.observations.map(({sign}) => sign).sort()).toEqual([-1, 1]);
+                expect(problem.data.observations.every(({value, magnitude}) => value.numerator !== 0
+                    && magnitude.numerator > 0)).toBe(true);
+            }
         }
     });
 
