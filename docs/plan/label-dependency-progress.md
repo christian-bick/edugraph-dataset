@@ -65,6 +65,15 @@ matching, would retire 18 zero omissions and leave **38 zero + seven sign = 45**
 **counterfactual counts**, not achieved closure. No field ban, ontology correction, target change or
 zero cleanup has been implemented. The outer Area allowlist and range-policy exclusion remain.
 
+At the user's request, all 31 wholly blocked targets have now had a
+[competency-level review](label-dependency-graph.md#review-of-the-31-incompatible-explicit-zero-targets).
+The exact inventory comprises 22 equation/known-fact tasks, four remainder-division tasks, three
+numeral-writing variants, one decomposition task and one zero-opposite task. All 29 WithoutZero
+restrictions and both WithZero claims are supported. Preserve their explicit matching requirements;
+this review does not justify a blanket ban or an ontology rewrite. Mandatory-completeness scope
+remains undecided, and the 15 partially blocked targets are a separate follow-up. No additional
+repair, policy retirement, changed target or sampling change is credited.
+
 The main plan records exact compatibility evidence, independent-mode evaluation, sampling and
 render preservation, and conditional cleanup candidates. Checkpoints are `cbdd7220`, `e07d9997`,
 `5d4ae2c6` and `2e1a08f1`; evidence is under `temp/two-step-competency/`. Canonical regeneration

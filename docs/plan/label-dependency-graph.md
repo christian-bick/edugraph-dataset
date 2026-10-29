@@ -140,6 +140,120 @@ through incidental numeric constants. Any approved qualification must retain the
 explicit target routes, assertion-conflict checks and range-policy exclusion. Record each retired
 subject separately from annotation repairs. No zero-policy change has been applied in this checkpoint.
 
+### Review of the 31 incompatible explicit-zero targets
+
+The user requested this review before choosing a zero-policy change. It covers the **31 targets
+that would lose every route under a literal ban**, not 31 current dependency omissions. They already
+match and have their requested zero annotations. The further 15 targets with partially blocked
+routes are a separate follow-up; no policy or target changes are made by this review.
+
+**Recommendation: preserve all 31 explicit target requirements and their matching capabilities.**
+The review found **29 truthful WithoutZero restrictions and two explicit WithZero competencies**.
+An automatic-completeness exemption can coexist with these declarations. The ontology's zero
+Scopes describe whether the numerical value zero participates; they do not say that every exercise
+must teach zero, or that a numeral must contain/lack the glyph `0`. Thus `20` is a positive value,
+whereas a zero remainder or a decomposition part equal to zero is a participating numerical zero.
+
+| Reviewed group | Targets | Why the proposed field ban rejects them | Evidence and recommended disposition |
+|---|---:|---|---|
+| Arithmetic equations and known-fact derivations | 22 | `Equation` belongs to FormalMathematics: 17 targets request it directly; five acquire it from their producer. | Positive operands, determined unknowns, results and required intermediate values support WithoutZero. Preserve the restrictions. Grade-4 letter-equation formalization is early algebraic thinking and can be exempt from mandatory completeness without losing its explicit restriction. |
+| Partial-quotient division | 4 | Resolved `ImperfectDivisibility` belongs to NumberTheory. | Divisors, quotient chunks, products and final/intermediate remainders are positive. Preserve the nonzero-remainder slice. These routes already fall outside the unchanged outer graph allowlist; their explicit matching restrictions remain valid. |
+| Kindergarten numeral writing | 3 | Authored `DigitNotation` belongs to FormalMathematics. | Two variants generate positive values 1..10 and 1..20; the third generates exactly 0. Preserve both writing views and all three numeric domains. A zero glyph in 10/20 does not make their value zero. |
+| Kindergarten decomposition | 1 | The producer adds formal `NumberNotation`. | Each supported split has two nonempty parts, such as `5 = 1 + 4` and `5 = 2 + 3`. WithoutZero distinguishes these from the empty-part/additive-identity case `5 = 0 + 5`. Preserve it. |
+| Zero as its own opposite | 1 | Authored `SignNotation` belongs to FormalMathematics, even though `Zero` belongs to Arithmetic. | The numeric fixed point and its opposite are exactly 0 at the same axis position. Zero is the competency's subject; sign notation is meaningful evidence. Preserve the target and its WithZero annotation. |
+| **Total** | **31** | **21 conflicts already occur in the authored target; ten appear only after producer/view resolution.** | **No false zero annotation or unsupported domain restriction was found in this reviewed inventory.** |
+
+The 17 directly requested equations need a pedagogical distinction. Grade-1/3 missing-number
+tasks such as `17 + □ = 18`, `8 − □ = 4` and `3 ÷ □ = 3` have determined positive answers; no
+unconstrained variable domain is assumed. The known-fact task connects `3 × 2 = 6` with
+`6 ÷ 3 = ?`. Grade-4 story formalization explicitly introduces `n`, for example
+`(29 × 50) − 39 = n`, whose positive intermediate is 1450 and answer 1411. That is an early
+algebraic activity; its truthful positive-number restriction does not justify requiring zero
+analysis for every algebraic task. It also differs from a free expression such as `3 + x`, whose
+literal does not determine x's sign or whether x can be zero.
+
+The producers enforce these claims before rendering. The pair generator's zero-absence branch
+constructs positive operands/results, including a positive difference for subtraction. Known facts
+use factors 2..9. Grade-4 stories validate every operand, intermediate and answer against their
+positive minimum. The division profile requires positive final remainder and positive chunks;
+remaining intermediate remainders are that final remainder plus unsubtracted positive products.
+The decomposition producer constructs parts from 1 through half the positive whole. These are
+construction proofs over supported outputs; the examples above illustrate them rather than
+substitute for them.
+
+For numeral writing, the WithZero variant is the singleton **value 0**, not a request to sample any
+value from 0 through 20. Its standard-writing question represents an empty collection and asks for
+the numeral; the solution writes `0`. The zero-opposite question instead asks why reflection fixes
+the origin, and its solution explains `−0 = 0`. Its signed rational axis also genuinely supports
+the existing negative/rational context. Neither case should lose zero classification merely
+because its notation Area is formal. Current inclusive bounds are described here without any
+range-policy change.
+
+All exact permutations are listed below. `Without` means NumbersWithoutZero; `With` means
+NumbersWithZero. The operation column describes the requested conjunction, not an imposed order
+of operations for mixed story targets.
+
+| Exact target ID | Zero | Competency variant | Blocking Area |
+|---|---|---|---|
+| `1.OA.D.8-unknown-number~e016e02b` | Without | Addition; formalize/determine missing number | Equation |
+| `1.OA.D.8-unknown-number~51a0f301` | Without | Subtraction; formalize/determine missing number | Equation |
+| `1.OA.D.8-unknown-operand~5c8b4082` | Without | Addition; recover missing input | Equation |
+| `1.OA.D.8-unknown-operand~0e335fbe` | Without | Subtraction; recover missing input | Equation |
+| `3.OA.A.4-unknown-multiplication-division~ce0f22ff` | Without | Multiplication; recover missing factor | Equation |
+| `3.OA.A.4-unknown-multiplication-division~782524bc` | Without | Division; recover missing input | Equation |
+| `3.OA.B.5-multiplication-known-fact-properties~78d53767` | Without | Commutative multiplication derivation | Equation, added by producer |
+| `3.OA.B.5-multiplication-known-fact-properties~9604650c` | Without | Associative multiplication derivation | Equation, added by producer |
+| `3.OA.B.6-division-as-unknown-factor~9a09589d` | Without | Interpret division through unknown-factor multiplication | Equation |
+| `3.OA.C.7-multiplication-known-fact-fluency~b3ee4d2c` | Without | Derive multiplication facts | Equation, added by producer |
+| `3.OA.C.7-division-known-fact-fluency~24a2d345` | Without | Derive division facts | Equation, added by producer |
+| `3.NBT.A.3-one-digit-times-multiple-of-ten~a0353fc0` | Without | Multiply using a related factor-of-ten fact | Equation, added by producer |
+| `4.OA.A.3-multistep-letter-equations~11c59444` | Without | Addition story; formalize with a letter | Equation |
+| `4.OA.A.3-multistep-letter-equations~51db4054` | Without | Subtraction story; formalize with a letter | Equation |
+| `4.OA.A.3-multistep-letter-equations~0faaeac6` | Without | Multiplication story; formalize with a letter | Equation |
+| `4.OA.A.3-multistep-letter-equations~f033378d` | Without | Division story; formalize with a letter | Equation |
+| `4.OA.A.3-multistep-letter-equations~deb0b7da` | Without | Addition + subtraction story | Equation |
+| `4.OA.A.3-multistep-letter-equations~387f086c` | Without | Addition + multiplication story | Equation |
+| `4.OA.A.3-multistep-letter-equations~b5bcba3f` | Without | Addition + division story | Equation |
+| `4.OA.A.3-multistep-letter-equations~38d3ce84` | Without | Subtraction + multiplication story | Equation |
+| `4.OA.A.3-multistep-letter-equations~b8304735` | Without | Subtraction + division story | Equation |
+| `4.OA.A.3-multistep-letter-equations~9c3feebd` | Without | Multiplication + division story | Equation |
+| `4.NBT.B.6-multi-digit-division~c6e9d8a7` | Without | One-digit dividend/divisor; partial quotients and remainder | ImperfectDivisibility, resolved profile |
+| `4.NBT.B.6-multi-digit-division~817c2ec3` | Without | Two-digit dividend, one-digit divisor; same method | ImperfectDivisibility, resolved profile |
+| `4.NBT.B.6-multi-digit-division~c6e038d5` | Without | Three-digit dividend, one-digit divisor; same method | ImperfectDivisibility, resolved profile |
+| `4.NBT.B.6-multi-digit-division~de7008db` | Without | Four-digit dividend, one-digit divisor; same method | ImperfectDivisibility, resolved profile |
+| `6.NS.C.6a-zero-opposite~176c0409` | With | Explain why zero is its own opposite | SignNotation |
+| `K.CC.A.3-write-numerals~f1976481` | Without | Write the numeral for a positive value 1..10 | DigitNotation |
+| `K.CC.A.3-write-numerals~dc15b9b6` | Without | Write the numeral for a positive value 1..20 | DigitNotation |
+| `K.CC.A.3-write-numerals~71492382` | With | Write the numeral for the value 0 | DigitNotation |
+| `K.OA.A.3-decompose~fc7d71ed` | Without | Decompose a positive whole into two nonempty parts | NumberNotation, added by producer |
+
+The review establishes a mismatch between the proposed **blanket ban** and current competencies;
+it does not establish that Equation or notation's formal ancestry is erroneous. Moving every
+equation into Arithmetic would affect genuine algebraic equations too. Likewise, the standards
+being broader than these positive slices is not authorization to rewrite their targets. Preserve
+all explicit matching routes while refining which contexts **must** declare zero. Outside the
+eventual qualification, omission remains not assessed, never WithoutZero by implication.
+
+The tested predicate uses the same positive-branch interpretation as the agreed outer allowlist:
+each Area must belong to at least one allowed root. It does not ban every Area that also has another
+field ancestor. CommutativeLaw and AssociativeLaw genuinely belong to both Arithmetic and Algebra;
+they qualify through Arithmetic. A stricter prohibition on any Algebra ancestry would be a different
+test with additional consequences, not the 31-target result reported here. An exercise's domain
+cannot be established solely by the presence of one shared property-law or notation descriptor.
+
+The recommended next policy discussion is therefore about mandatory completeness and the intended
+status of elementary equations/notation, not deleting these 31 target requirements. Retain the
+algebra/geometry/analysis exemption intention; the proposed structural test needs to express it
+without treating every formal representation as an excluded mathematical domain. No exception list,
+ontology correction, asserted-label cleanup or zero-policy change is implemented by this review.
+Source findings remain **63**, including the seven separately unresolved sign findings. Question
+and solution judgement remain independent and may reason through their own visible task.
+
+Evidence: `temp/two-step-competency/31-target-review/{equations,foundations,resolved-only}.md`,
+the equation and foundational configuration probes, and the exhaustive field-gate inventory.
+The foundational review's 108 focused existing tests pass. No dataset regeneration or live VQA
+call was needed for this source/target analysis.
+
 ### Earlier zero-only complexity: conditional cleanup backlog
 
 Cleanup follows the final applicability decision, not the declaration of a possible policy. A
