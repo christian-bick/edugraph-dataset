@@ -57,6 +57,9 @@ function declaration(field: string, value: ConfigSchema[string]): Declaration | 
         }
     };
     if (contract.contextLabels) checkLabels(contract.contextLabels, false);
+    if (contract.resolvedContext !== undefined && (contract.resolvedContext !== true || !contract.contextLabels?.length)) {
+        throw new SchemaChoiceContractError(field, 'resolved context requires true and nonempty declared context labels.');
+    }
     const fallback = tuple && value.length >= 3
         ? value[2] as readonly (readonly string[])[] : undefined;
     if (contract.kind === 'alternatives') {

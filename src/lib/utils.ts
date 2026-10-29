@@ -4,6 +4,7 @@ import { random } from './random.ts';
 import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
 import type {ModuleSpec, AnyModuleSpec} from '../types/module-spec.ts';
 import {resolveInferredLabels} from './inferred-labels.ts';
+import {validateSchemaChoiceContracts} from './schema-choices.ts';
 export {extractSchemaLabels} from '../types/schema.ts';
 
 export type SchemaResolutionContractIssue = {
@@ -210,10 +211,17 @@ export function extractConfig<T extends ConfigSchema>(
 
         if (isTuple) {
             const resolver = schemaValue[1];
+            const contract = resolver.labelChoices;
+            if (contract?.resolvedContext !== undefined) validateSchemaChoiceContracts({[key]: schemaValue});
+            const resolverLabels = contract?.resolvedContext === true ? [...new Set([
+                ...competencyLabels,
+                ...Array.from(resolvedLabels).filter(label => !supportedLabels.includes(label)
+                    && contract.contextLabels!.some(boundary => capabilitySatisfies(label, boundary)))
+            ])] : competencyLabels;
             const matchingSupportedLabels = supportedLabels.filter(label =>
                 competencyLabels.includes(label)
             );
-            let resolved = resolver(competencyLabels, supportedLabels);
+            let resolved = resolver(resolverLabels, supportedLabels);
             const hasExplicitFallback = schemaValue.length >= 3;
             if (hasExplicitFallback) {
                 const relevantLabels = competencyLabels.filter(label =>
@@ -226,7 +234,7 @@ export function extractConfig<T extends ConfigSchema>(
                 );
                 const resolvedCandidates = compatibleCandidates.flatMap(labelSet => {
                     const candidateValue = resolver(
-                        [...new Set([...competencyLabels, ...labelSet])],
+                        [...new Set([...resolverLabels, ...labelSet])],
                         supportedLabels
                     );
                     if (candidateValue === undefined || candidateValue === null) return [];
@@ -263,7 +271,7 @@ export function extractConfig<T extends ConfigSchema>(
                 const selectedLabels = fallbackLabelSets(schemaValue, supportedLabels)[
                     Math.floor(random() * supportedLabels.length)
                 ];
-                resolved = resolver([...new Set([...competencyLabels, ...selectedLabels])], supportedLabels);
+                resolved = resolver([...new Set([...resolverLabels, ...selectedLabels])], supportedLabels);
                 if (resolved === undefined || resolved === null) {
                     throw new Error(`Schema field "${key}" fallback did not resolve a configuration value.`);
                 }

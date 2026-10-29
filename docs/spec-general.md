@@ -185,6 +185,13 @@ For example, a multiple-digit request can select a two- or three-digit alternati
 broad descriptor itself is another legal profile. Compatibility still controls which choices
 are valid. This opt-in neither executes a resolver during planning nor changes unrelated fields.
 
+For direct configuration resolution, `resolvedContext: true` additionally exposes labels already
+selected by earlier authored schema fields, limited to the resolver's declared `contextLabels`.
+Declare providers before readers. Original target requests and fallback scoring stay unchanged;
+other fields retain their original inputs and entropy. Planned resolution already has the complete
+admitted binding. This is configuration dependency resolution, not annotation inference or feedback
+between `inferredLabels` callbacks.
+
 Every multi-label resolver declares one dimension-neutral contract. `exact` selects one declared
 alternative or exact bundle; `predicate` answers one fixed capability question; `aggregate`
 preserves every matching member; and `compositional` combines independent constraints into a new
@@ -381,6 +388,11 @@ containing only declared IDs.
 Source readiness distinguishes pre-resolution omissions, pending inference, and validated resolved
 annotations. Only exhaustive configuration-outcome validation can establish source closure;
 sampled executions are supplementary evidence. A `produces` entry alone never closes a gap.
+
+An owner-specific resolver can join the explicit deterministic-resolution registry after review
+of every admitted binding/context and a singleton-outcome proof. Registration trusts that exact
+function identity; copied metadata and unregistered custom callbacks remain unproven. Document
+the reviewed owner function and its context/entropy tests with the implementation checkpoint.
 Preserve configuration values, supported cases, probabilities and random continuation, and bind
 inference source/output semantics into artifact/cache identity and replay verification.
 

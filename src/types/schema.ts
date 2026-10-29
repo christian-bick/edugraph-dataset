@@ -25,6 +25,8 @@ export type LabelChoiceContract = (
 ) & {
   /** Additional labels read by the value resolver, beyond this field's labels. */
   readonly contextLabels?: readonly string[];
+  /** Direct resolution may also read declared labels already selected by earlier schema fields. */
+  readonly resolvedContext?: true;
 };
 
 export type ResolverFn<T> = ((labels: string[], supportedLabels?: readonly string[]) => T) & {
