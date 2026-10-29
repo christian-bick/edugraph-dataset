@@ -6,6 +6,7 @@ import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {operationNames} from '../helpers.ts';
 import {ArithmeticOpsPairsGeneratorConfig, ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
 import {sampleBoundedOperandWidthPair, sampleOperandWidthPair} from './width-sampling.ts';
+import {sampleUnboundedOperandWidthPair} from './unbounded-width-sampling.ts';
 
 export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticPairProblem, ArithmeticOpsPairsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -36,13 +37,18 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
         if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
 
         const digits = config.largestOperandDigits!;
-        if (![0, 1, 2, 3, 4].includes(digits)) return null;
+        if (![0, 1, 2, 3, 4, 'multiple'].includes(digits)) return null;
         const existingSingleDigitDomain = digits === 1 && maxMagnitude <= 5;
         const widthProfile = digits !== 0 && !existingSingleDigitDomain;
-        if (widthProfile && 10 ** (digits - 1) > maxMagnitude - (operation === Area.Addition ? 1 : 0)) return null;
+        const exactDigits = typeof digits === 'number' ? digits : 0;
+        const unboundedProfile = widthProfile && maxMagnitude === Number.MAX_SAFE_INTEGER
+            && (digits === 1 || digits === 'multiple');
+        if (widthProfile && !unboundedProfile
+            && (digits === 'multiple' || 10 ** (exactDigits - 1) > maxMagnitude - (operation === Area.Addition ? 1 : 0))) return null;
         const additive = operation === Area.Addition || operation === Area.Subtraction;
-        if (widthProfile && (!(additive ? [20, 100, 1000].includes(maxMagnitude) : maxMagnitude === 100)
+        if (widthProfile && ((!unboundedProfile && !(additive ? [20, 100, 1000].includes(maxMagnitude) : maxMagnitude === 100))
             || config.requireEqualAddends && operation !== Area.Addition
+            || unboundedProfile && config.requireEqualAddends
             || requireNegative || requireZero || requireMultipleOf10
             || minMagnitude !== 1)) return null;
 
@@ -75,8 +81,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
             if (config.requireEqualAddends) {
                 if (requireNegative || requireZero) return null;
                 const addend = randomMagnitude(
-                    widthProfile ? 10 ** (digits - 1) : minMagnitude,
-                    widthProfile ? Math.min(10 ** digits - 1, Math.floor(maxMagnitude / 2)) : Math.floor(maxMagnitude / 2));
+                    widthProfile ? 10 ** (exactDigits - 1) : minMagnitude,
+                    widthProfile ? Math.min(10 ** exactDigits - 1, Math.floor(maxMagnitude / 2)) : Math.floor(maxMagnitude / 2));
                 if (addend === null) return null;
                 num1 = addend;
                 num2 = addend;
@@ -94,8 +100,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = -magnitude;
                 answer = -2 * magnitude;
             } else if (widthProfile) {
-                const pair = maxMagnitude === 20 ? sampleOperandWidthPair('addition', digits as 1 | 2)
-                    : sampleBoundedOperandWidthPair('addition', digits, maxMagnitude);
+                const pair = unboundedProfile ? sampleUnboundedOperandWidthPair('addition', digits === 1 ? 'single' : 'multiple')
+                    : maxMagnitude === 20 ? sampleOperandWidthPair('addition', digits as 1 | 2)
+                        : sampleBoundedOperandWidthPair('addition', exactDigits, maxMagnitude);
                 if (!pair) return null;
                 [num1, num2] = pair;
                 answer = num1 + num2;
@@ -122,8 +129,9 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = 2 * magnitude;
                 answer = -magnitude;
             } else if (widthProfile) {
-                const pair = maxMagnitude === 20 ? sampleOperandWidthPair('subtraction', digits as 1 | 2)
-                    : sampleBoundedOperandWidthPair('subtraction', digits, maxMagnitude);
+                const pair = unboundedProfile ? sampleUnboundedOperandWidthPair('subtraction', digits === 1 ? 'single' : 'multiple')
+                    : maxMagnitude === 20 ? sampleOperandWidthPair('subtraction', digits as 1 | 2)
+                        : sampleBoundedOperandWidthPair('subtraction', exactDigits, maxMagnitude);
                 if (!pair) return null;
                 [num1, num2] = pair;
                 answer = num1 - num2;
@@ -165,7 +173,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                     num2 = signedOneDigit;
                 }
             } else if (widthProfile) {
-                const pair = sampleBoundedOperandWidthPair('multiplication', digits, maxMagnitude);
+                const pair = unboundedProfile ? sampleUnboundedOperandWidthPair('multiplication', digits === 1 ? 'single' : 'multiple')
+                    : sampleBoundedOperandWidthPair('multiplication', exactDigits, maxMagnitude);
                 if (!pair) return null;
                 [num1, num2] = pair;
             } else {
@@ -183,7 +192,8 @@ export class ArithmeticOpsPairsGenerator implements ProblemGenerator<ArithmeticP
                 num2 = requireNegative ? -magnitude : magnitude;
                 answer = 0;
             } else if (widthProfile) {
-                const pair = sampleBoundedOperandWidthPair('division', digits, maxMagnitude);
+                const pair = unboundedProfile ? sampleUnboundedOperandWidthPair('division', digits === 1 ? 'single' : 'multiple')
+                    : sampleBoundedOperandWidthPair('division', exactDigits, maxMagnitude);
                 if (!pair) return null;
                 [num1, num2] = pair;
                 answer = num1 / num2;

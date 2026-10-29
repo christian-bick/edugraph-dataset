@@ -4,7 +4,7 @@ import {hasAllLabels, hasLabel} from '../../../lib/resolvers.ts';
 import {ConfigFromSchema, withLabelChoices} from '../../../types/schema.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {arithmeticOperations, resolveDeclaredOperation} from '../helpers.ts';
-import {largestOperandWidthLabels, operandWidthContextLabels, permitsLargestOperandWidth,
+import {largestOperandWidthLabels, largestOperandWidthValue, operandWidthContextLabels, permitsLargestOperandWidth,
     resolveLargestOperandDigits, usesLargestOperandWidthProfiles} from './operand-width.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
@@ -62,8 +62,7 @@ const largestOperandWidthRule = generatorLabelRule('largest-operand-width-domain
 ], selected => {
     const widths = largestOperandWidthLabels.filter(label => selected(label));
     if (widths.length > 1) return false;
-    if (widths.length === 1) return permitsLargestOperandWidth(selected,
-        (largestOperandWidthLabels.indexOf(widths[0]!) + 1) as 1 | 2 | 3 | 4);
+    if (widths.length === 1) return permitsLargestOperandWidth(selected, largestOperandWidthValue(widths[0]!));
     return !usesLargestOperandWidthProfiles(selected);
 });
 

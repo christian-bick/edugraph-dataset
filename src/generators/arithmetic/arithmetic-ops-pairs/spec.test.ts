@@ -23,6 +23,60 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(spec.generalLabels).toContain(Scope.SingleStep);
     });
 
+    it.each(operations)('exposes finite truthful width choices for unspecified %s bounds', operation => {
+        const labels = [operation, Scope.NumbersWithoutNegatives];
+        const result = makeWidthPlan(labels);
+        expect(result.supported).toBe(true);
+        if (!result.supported) return;
+        expect(result.plan.domains.find(domain => domain.field === 'largestOperandDigits')?.alternatives
+            .map(alternative => alternative.labels)).toEqual([
+            [Scope.MultipleDigitLargestOperand], [Scope.SingleDigitLargestOperand]
+        ]);
+        for (const label of [Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand]) {
+            expect(makeWidthPlan([...labels, label]).supported).toBe(true);
+            for (let seed = 0; seed < 16; seed++) {
+                setSeed(seed);
+                const resolved = extractConfig(ArithmeticOpsPairsGeneratorSchema, [...labels, label]);
+                expect(resolved.config.range?.max).toBe(Number.MAX_SAFE_INTEGER);
+                expect(resolved.resolvedLabels).toContain(label);
+                const data = generator.generate(resolved.config)!.data;
+                expect([data.num1, data.num2, data.answer].every(Number.isSafeInteger)).toBe(true);
+                expect(Math.max(data.num1, data.num2) < 10).toBe(label === Scope.SingleDigitLargestOperand);
+            }
+        }
+        for (let seed = 0; seed < 24; seed++) {
+            const planned = resolvePlannedConfigurations({generatorSchema: generator.schema, viewSchema: {},
+                plan: result.plan, sampleKey: 'width#arithmetic-ops-pairs#width-test#train#question#inst:0', seed, attempt: 1});
+            const config = planned.generatorConfig as ArithmeticOpsPairsGeneratorConfig;
+            expect([1, 'multiple']).toContain(config.largestOperandDigits);
+            expect(generator.generate(config)).not.toBeNull();
+        }
+    });
+
+    it.each([
+        [Area.Addition, Scope.NumbersSmaller100], [Area.Subtraction, Scope.NumbersSmaller100],
+        [Area.Multiplication, Scope.NumbersSmaller100], [Area.Division, Scope.NumbersSmaller100],
+        [Area.Addition, Scope.NumbersSmaller1000], [Area.Subtraction, Scope.NumbersSmaller1000]
+    ] as const)('preserves a broad multiple-digit request for bounded %s', (operation, bound) => {
+        const labels = [operation, bound, Scope.MultipleDigitLargestOperand,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
+        const result = makeWidthPlan(labels);
+        expect(result.supported).toBe(true);
+        if (!result.supported) return;
+        const alternatives = result.plan.domains.find(domain => domain.field === 'largestOperandDigits')!.alternatives;
+        expect(alternatives.length).toBeGreaterThan(0);
+        expect(alternatives.every(alternative => alternative.labels.length === 1
+            && [Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand,
+                Scope.FourDigitLargestOperand].some(label => label === alternative.labels[0]))).toBe(true);
+        for (let seed = 0; seed < 16; seed++) {
+            setSeed(seed);
+            const resolved = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
+            expect([2, 3, 4]).toContain(resolved.config.largestOperandDigits);
+            const data = generator.generate(resolved.config)!.data;
+            expect(Math.max(data.num1, data.num2)).toBeGreaterThanOrEqual(10);
+        }
+    });
+
     it.each([Area.Addition, Area.Subtraction])('exposes both largest-width profiles to matching for ordinary %s within twenty', operation => {
         const labels = [operation, Scope.NumbersSmaller20,
             Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
@@ -62,8 +116,8 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         expect(resolvedOperations).toEqual(new Set(operations));
     });
 
-    it('keeps unspecified and wider bounds outside the width profiles', () => {
-        for (const bounds of [[], [Scope.NumbersSmaller10000]]) {
+    it('keeps wider explicit bounds outside the width profiles', () => {
+        for (const bounds of [[Scope.NumbersSmaller10000]]) {
             const result = makeWidthPlan([Area.Addition, ...bounds]);
             expect(result.supported).toBe(true);
             if (!result.supported) continue;
@@ -75,7 +129,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
     });
 
     it.each([Area.Addition, Area.Subtraction])('selects and emits a largest-width profile through direct %s resolution too', operation => {
-        const widths = new Set<number>();
+        const widths = new Set<number | 'multiple'>();
         for (let seed = 0; seed < 32; seed++) {
             setSeed(seed);
             const labels = [operation, Scope.NumbersSmaller20,

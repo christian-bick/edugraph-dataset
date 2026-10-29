@@ -11,7 +11,8 @@ const selectedFrom = (labels: readonly string[]) => (label: string) => labels.in
 const nonExcludingContext = new Set<string>([
     Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
     Area.IteratedOperation, Scope.NumbersSmaller20, Scope.NumbersSmaller100, Scope.NumbersSmaller120,
-    Scope.NumbersSmaller1000
+    Scope.NumbersSmaller1000, Scope.NumbersSmaller10000, Scope.NumbersSmaller100000,
+    Scope.NumbersSmaller1000000
 ]);
 
 describe('Binary operand-width profile resolution', () => {
@@ -37,6 +38,19 @@ describe('Binary operand-width profile resolution', () => {
         expect(resolveLargestOperandDigits([
             ...addition, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand
         ])).toBeUndefined();
+    });
+
+    it('accepts one precise completion of a broad multiple-digit request without hiding conflicts', () => {
+        const bounded = [Area.Subtraction, Scope.NumbersSmaller100];
+        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand])).toBeUndefined();
+        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
+            Scope.TwoDigitLargestOperand])).toBe(2);
+        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
+            Scope.ThreeDigitLargestOperand])).toBe(3);
+        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
+            Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand])).toBeUndefined();
+        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
+            Scope.SingleDigitLargestOperand])).toBeUndefined();
     });
 
     it.each(operandWidthContextLabels.filter(label => !nonExcludingContext.has(label)))(
