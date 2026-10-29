@@ -12,6 +12,7 @@ import {spec as writtenView} from '../../../visuals/views/place-value/place-valu
 import {spec as explanationView} from '../../../visuals/views/place-value/place-value-arithmetic-explanation/spec.ts';
 import {PlaceValueArithmeticGenerator} from './generator.ts';
 import {PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
+import {hasCoefficientZero} from './width-domain.ts';
 
 const invariantLabels = [
     Scope.TwoOperands,
@@ -54,11 +55,13 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         [Area.AdditionPlaceValuePartitioning, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand],
         [Area.Addition], [Area.Addition, Area.IntegerRegrouping],
         [Area.Subtraction], [Area.Subtraction, Area.IntegerRegrouping]
-    ].map(labels => ({labels})))('does not generalize whole-tens zero absence to $labels', ({labels}) => {
+    ].map(labels => ({labels})))('uses the matching coefficient profile outside whole-tens subtraction: $labels', ({labels}) => {
         setSeed(12);
         const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [...labels, Scope.NumbersSmaller1000]);
         expect(stub).not.toBeNull();
-        expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
+        const zero = hasCoefficientZero(stub!.data.num1, stub!.data.num2, stub!.data.operation);
+        expect(stub!.labels).toContain(zero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero);
+        expect(stub!.labels).not.toContain(zero ? Scope.NumbersWithoutZero : Scope.NumbersWithZero);
     });
 
     it.each([Area.Subtraction, Area.SubtractionPlaceValuePartitioning])(

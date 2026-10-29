@@ -7,6 +7,7 @@ export interface WidthDomain {
     readonly maximum: number;
     readonly regrouping: boolean;
     readonly zeroResult?: boolean;
+    readonly coefficientZero?: boolean;
 }
 interface PairRow {
     readonly first: number;
@@ -18,16 +19,22 @@ const cache = new Map<string, readonly PairRow[]>();
 const hasWidth = (a: number, b: number, width: PrimaryWidth) => width === 'legacy'
     || (Math.max(a, b) <= 9) === (width === 'single');
 
+/** All three consumers expose complete H/T/O counts outside positive whole-tens subtraction. */
+export const hasCoefficientZero = (first: number, second: number, operation: WidthDomain['operation']): boolean =>
+    [first, second, operation === 'addition' ? first + second : first - second]
+        .some(value => Math.floor(value / 100) === 0 || Math.floor(value % 100 / 10) === 0 || value % 10 === 0);
+
 /** Complete finite support with the original uniform-first/uniform-second proposal weights. */
 export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): readonly PairRow[] {
-    const key = JSON.stringify([domain.operation, domain.minimum, domain.maximum, domain.regrouping, domain.zeroResult, width]);
+    const key = JSON.stringify([domain.operation, domain.minimum, domain.maximum, domain.regrouping,
+        domain.zeroResult, domain.coefficientZero, width]);
     const cached = cache.get(key);
     if (cached) return cached;
     const rows: PairRow[] = [];
     const {operation, minimum, maximum, regrouping} = domain;
     if (operation === 'subtraction' && domain.zeroResult) {
         if (!regrouping) for (let operand = minimum; operand <= maximum; operand++) {
-            if (hasWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
+            if (domain.coefficientZero !== false && hasWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
                 weight: 1 / (maximum - minimum + 1)});
         }
         cache.set(key, rows);
@@ -42,6 +49,8 @@ export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): read
         const seconds: number[] = [];
         for (let second = minimum; second <= secondMaximum; second++) {
             if (!hasWidth(first, second, width)) continue;
+            if (domain.coefficientZero !== undefined
+                && hasCoefficientZero(first, second, operation) !== domain.coefficientZero) continue;
             if (operation === 'addition') {
                 if ((first % 10 + second % 10 >= 10) !== regrouping) continue;
             } else {

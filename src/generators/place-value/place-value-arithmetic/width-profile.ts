@@ -10,7 +10,7 @@ const operations = [Area.Addition, Area.AdditionPlaceValuePartitioning,
 const rangeLabels = resolveRangeFromLabels.labelChoices!.contextLabels!;
 export const primaryWidthContext = [...operations, Area.IntegerRegrouping,
     Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.MultiplesOf10,
-    Scope.NumbersWithZero, ...rangeLabels] as const;
+    Scope.NumbersWithZero, Scope.NumbersWithoutZero, ...rangeLabels] as const;
 type Selected = (label: string) => boolean;
 const addition = (selected: Selected) => selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
 const subtraction = (selected: Selected) => selected(Area.Subtraction) || selected(Area.SubtractionPlaceValuePartitioning);
@@ -23,7 +23,8 @@ const domainFromLabels = (selected: Selected): WidthDomain => {
     const range = resolveRangeFromLabels(rangeLabels.filter(label => selected(label)));
     return {operation: addition(selected) ? 'addition' : 'subtraction',
         minimum: Math.max(1, Math.ceil(range.min)), maximum: Math.min(999, Math.floor(range.max) - 1),
-        regrouping: selected(Area.IntegerRegrouping), zeroResult: selected(Scope.NumbersWithZero)};
+        regrouping: selected(Area.IntegerRegrouping), zeroResult: selected(Scope.NumbersWithZero),
+        coefficientZero: selected(Scope.NumbersWithoutZero) ? false : undefined};
 };
 export const permitsPrimaryWidth = (selected: Selected, width: Exclude<PrimaryWidth, 'legacy'>) => {
     if (existingWidth(selected) || !addition(selected) && !subtraction(selected)) return false;

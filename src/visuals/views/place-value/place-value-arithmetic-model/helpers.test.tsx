@@ -22,6 +22,7 @@ const config = (
     requireMultipleOf10: false,
     requireZero: false,
     largestOperandProfile: 'legacy',
+    coefficientPresence: true,
     range: {min: 0, max: 1000},
     ...overrides
 });
@@ -56,6 +57,7 @@ const grade1TensSubtraction = (requireZero: boolean): PlaceValueArithmeticProble
         operation: Area.Subtraction,
         requireMultipleOf10: true,
         requireZero,
+        coefficientPresence: requireZero,
         range: {min: 0, max: 100}
     });
 

@@ -15,9 +15,6 @@ import {samplePrimaryWidth} from './width-domain.ts';
 type OperandPair = readonly [number, number];
 type Operation = PlaceValueArithmeticProblem['operation'];
 
-const randomInteger = (min: number, max: number): number =>
-    min + Math.floor(random() * (max - min + 1));
-
 const choose = <T>(values: readonly T[]): T | null =>
     values.length === 0 ? null : values[Math.floor(random() * values.length)];
 
@@ -84,47 +81,6 @@ const grade1SubtractionPairs = (
         }
     }
     return pairs;
-};
-
-const generalAdditionPair = (
-    minimum: number,
-    maximum: number,
-    requireRegrouping: boolean
-): OperandPair | null => {
-    if (maximum < 2 * minimum) return null;
-    for (let attempt = 0; attempt < 500; attempt++) {
-        const num1 = randomInteger(minimum, maximum - minimum);
-        const num2 = randomInteger(minimum, maximum - num1);
-        if ((num1 % 10 + num2 % 10 >= 10) === requireRegrouping) return [num1, num2];
-    }
-    return null;
-};
-
-const generalSubtractionPair = (
-    minimum: number,
-    maximum: number,
-    requireRegrouping: boolean,
-    requireZero: boolean
-): OperandPair | null => {
-    if (requireZero) {
-        const operand = randomInteger(minimum, maximum);
-        return [operand, operand];
-    }
-    if (maximum <= minimum) return null;
-    for (let attempt = 0; attempt < 500; attempt++) {
-        const num1 = randomInteger(minimum + 1, maximum);
-        const num2 = randomInteger(minimum, num1 - 1);
-        const decomposesTen = num1 % 10 < num2 % 10;
-        const left = digits(num1);
-        const right = digits(num2);
-        const adjustedLeftTens = left.tens - (decomposesTen ? 1 : 0);
-        const needsNoHigherBorrow = adjustedLeftTens >= right.tens
-            && left.hundreds >= right.hundreds;
-        if (decomposesTen === requireRegrouping && needsNoHigherBorrow) {
-            return [num1, num2];
-        }
-    }
-    return null;
 };
 
 const additionEvidence = (
@@ -285,7 +241,8 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
             'requireMultipleOf10',
             'requireZero',
             'range',
-            'largestOperandProfile'
+            'largestOperandProfile',
+            'coefficientPresence'
         ]);
         if (config.operation !== Area.Addition && config.operation !== Area.Subtraction) {
             throw new GeneratorValidationError(
@@ -304,6 +261,10 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
 
         const requireRegrouping = config.requireRegrouping!;
         const requireZero = config.requireZero!;
+        const coefficientPresence = config.coefficientPresence!;
+        if (typeof coefficientPresence !== 'boolean') {
+            throw new GeneratorValidationError('place-value-arithmetic', 'Expected a boolean coefficient presence profile.');
+        }
         const primaryWidth = config.largestOperandProfile!;
         if (!['legacy', 'single', 'multiple'].includes(primaryWidth)) {
             throw new GeneratorValidationError('place-value-arithmetic', 'Unsupported primary operand width profile.');
@@ -314,18 +275,17 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
         if (config.operation === Area.Addition) {
             if (requireZero || profile === 'multiples-of-ten') return null;
             pair = profile === 'general'
-                ? primaryWidth === 'legacy' ? generalAdditionPair(minimum, maximum, requireRegrouping)
-                    : samplePrimaryWidth({operation: 'addition', minimum, maximum, regrouping: requireRegrouping}, primaryWidth)
-                : choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping));
+                ? samplePrimaryWidth({operation: 'addition', minimum, maximum, regrouping: requireRegrouping,
+                    coefficientZero: coefficientPresence}, primaryWidth)
+                : coefficientPresence ? choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping)) : null;
         } else if (profile === 'multiples-of-ten') {
             if (requireRegrouping) return null;
+            if (coefficientPresence !== requireZero) return null;
             pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero));
         } else if (profile === 'general') {
             if (requireZero && requireRegrouping) return null;
-            pair = primaryWidth === 'legacy' || requireRegrouping
-                ? generalSubtractionPair(minimum, maximum, requireRegrouping, requireZero)
-                : samplePrimaryWidth({operation: 'subtraction', minimum, maximum, regrouping: requireRegrouping,
-                    zeroResult: requireZero}, primaryWidth);
+            pair = samplePrimaryWidth({operation: 'subtraction', minimum, maximum, regrouping: requireRegrouping,
+                zeroResult: requireZero, coefficientZero: coefficientPresence}, primaryWidth);
         }
 
         if (pair === null) return null;

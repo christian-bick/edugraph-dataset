@@ -29,10 +29,8 @@ describe('Grade-1 coefficient-zero/result-zero separation', () => {
                 const first = resolveResultZero(labels);
                 expect(resolveResultZero(labels)).toBe(first);
                 expect(getRandomState()).toBe(state);
-                if (zero.length === 2) expect(first).toBeUndefined();
-                else if (operation.some(label => [Area.Addition, Area.AdditionPlaceValuePartitioning].includes(label))
-                    && width.length) expect(first).toBe(zero[0] === Scope.NumbersWithZero ? false : undefined);
-                else expect(first).toBe(zero[0] === Scope.NumbersWithZero);
+                const addition = operation.some(label => [Area.Addition, Area.AdditionPlaceValuePartitioning].includes(label));
+                expect(first).toBe(zero.includes(Scope.NumbersWithZero) && !addition);
             }
         }
     });

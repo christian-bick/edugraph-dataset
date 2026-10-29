@@ -125,7 +125,7 @@ describe('reviewed owner-specific resolver contract', () => {
         if (!match.supported) throw new Error(match.reason);
         const selections = enumerateDependencyAuditSelections(match.plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength(2);
+        expect(selections.selections).toHaveLength(3);
         for (const selection of selections.selections) {
             const resolved = resolveDependencyAuditAnnotation({id: 'test-width', plan: match.plan,
                 selection, generator: model, view: consumer});
@@ -159,14 +159,15 @@ describe('reviewed owner-specific resolver contract', () => {
             range: {min: 0, max: 1000}} as const;
         const generator = new PlaceValueArithmeticGenerator();
         expect(() => generator.generate(base)).toThrow(/largestOperandProfile/);
-        expect(() => generator.generate({...base, largestOperandProfile: 'unsupported'} as never)).toThrow(/width profile/);
+        expect(() => generator.generate({...base, coefficientPresence: true,
+            largestOperandProfile: 'unsupported'} as never)).toThrow(/width profile/);
         expect(generator.generate({...base, requireTwoDigitLargest: true, requireSingleDigitSmallest: true,
-            largestOperandProfile: 'single'})).toBeNull();
+            coefficientPresence: true, largestOperandProfile: 'single'})).toBeNull();
         expect(generator.generate({...base, operation: Area.Subtraction, requireRegrouping: true,
-            largestOperandProfile: 'single'})).toBeNull();
+            coefficientPresence: true, largestOperandProfile: 'single'})).toBeNull();
         for (const width of ['single', 'multiple'] as const) {
             const result = generator.generate({...base, operation: Area.Subtraction, requireZero: true,
-                largestOperandProfile: width})!;
+                coefficientPresence: true, largestOperandProfile: width})!;
             expect(result.data.answer).toBe(0);
             expect(result.data.num1).toBe(result.data.num2);
             expect(result.data.num1 <= 9).toBe(width === 'single');

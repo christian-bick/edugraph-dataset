@@ -13,6 +13,7 @@ const generalConfig = (overrides: Partial<PlaceValueArithmeticGeneratorConfig> =
     requireMultipleOf10: false,
     requireZero: false,
     largestOperandProfile: 'legacy',
+    coefficientPresence: true,
     range: {min: 0, max: 1000},
     ...overrides
 });
@@ -143,6 +144,7 @@ describe('PlaceValueArithmeticGenerator', () => {
                 operation: Area.Subtraction,
                 requireMultipleOf10: true,
                 requireZero,
+                coefficientPresence: requireZero,
                 range: {min: 0, max: 100}
             }))!.data;
             expect(data.operandProfile).toBe('multiples-of-ten');
