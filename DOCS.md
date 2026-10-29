@@ -80,6 +80,14 @@ through ordinary declarations; this family needs no inferred annotations. The
 [migration record](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
 documents retained targets, additional matches and new replay/sample identities.
 
+The current content modules also use finite mathematical profiles for operand widths,
+fraction magnitudes and settled coefficient/endpoint/sign distinctions. Their samplers
+partition the previous supported exercises before generation; labels remain ordinary
+matching capabilities. The
+[continuation record](docs/plan/label-dependency-graph.md#autonomous-continuation-2026-10-29)
+documents conditional sampling, new matches and deliberately deferred ownership/projection
+contracts. Source audit closure remains separate from regeneration and stored-dataset acceptance.
+
 After type and positive-capability matching, the planner admits only valid joint schema-label
 selections. Every tuple carries a versioned plan. Generation selects from it without increasing
 sample counts; rendering, retry,

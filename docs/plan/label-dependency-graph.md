@@ -10,6 +10,113 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Autonomous continuation (2026-10-29)
+
+The user requested continuation through the remaining batches using existing solution
+approaches, documenting and skipping cases needing a further design. This extends the
+reviewed minimal mathematical-profile approach to the settled cases below. Incidental
+sampling changes are recorded: an ordinary profile choice changes the mixture; conditional
+samplers retain the previous probability law within each profile. No weighted matching
+framework, generator/view split, ontology change or dependency-policy change is introduced.
+
+| Checkpoint | Original requirements closed | Implementation and evidence | Commit |
+|---|---:|---|---|
+| Tenths equivalence magnitude | 2 | Proper numerators 1–9 versus equal-whole numerator 10; all ten payloads retained. Existing two tuples survive, with four reviewed new proper-equivalence matches. | `11668120` |
+| Rational contextual order sign | 4 | Existing signed/nonnegative helper modes become matching-capable choices; their union is the previous support. | `95a65406` |
+| Decimal expanded-form zero | 1 | All six coefficients participate. Four old patterns force zero; the remaining whole parts partition 270/729. | `fdf36dd1` |
+| Bounded binary operand widths | 64 | Addition/subtraction within 100/1,000 and multiplication/division within 100. Inclusive bounds retain 100 and 1,000 through three-/four-digit profiles where needed. | `0c879c94` |
+| Fraction construction origin | 3 | The dedicated construction view always displays the numerical zero tick in both modes; add its invariant. | `5d3de931` |
+| Decimal rounding zero endpoint | 1 | Zero versus positive lower interval endpoints, preserving all six quanta and 24 old place/scenario families. | `241fad3d` |
+| Decimal scaling zero coefficients | 1 | All six coefficients participate. Repeated-place patterns and 6,561 free-digit combinations are partitioned without removing a digit pattern. | `c8a7f331` |
+| Whole-hour minute zero | 4 | All four clock projections display or necessarily require the zero minute component. Existing configuration inference adds this guaranteed annotation. | `6ae87495` |
+| Powers-of-ten zero exponent | 1 | Exponent zero versus exponents one/two retain all three old problems. | `ba2fe6c4` |
+| Positive addition judgments | 1 | Positive operands imply answer ≥2, so the exact and adjacent false claims remain positive. Config inference excludes subtraction. | `b560d722` |
+| Compensation operand widths | 2 | Existing exact strategy bundles select single-/multiple-digit primary operands; weighted eligible rows retain every old pair and its conditional law. | `15d72265` |
+| Inverse-comparison widths | 1 | The compared quantity is the largest primary operand in both inverse projections. Single-/two-digit dividend profiles retain all factor pairs and leave unknown-role selection to the view. | `e5a6b606` |
+| Integer place-value scaling zero | 1 | All six coefficients participate. The 269,001 original coefficient vectors partition into 84,681 with zero and 184,320 without. | `5bb56a3d` |
+
+The mixture changes are not necessarily small: at bound 999, compensation's single-digit
+profile previously had about **0.004085%** probability and now receives **50%** through the
+ordinary two-choice mechanism. Each compensation operation retains all 444,609 pairs
+(36 single-digit, 444,573 multiple-digit). Inverse comparison retains 87 pairs (6 single-digit,
+81 two-digit). Exhaustive conditional-law checks differ by at most 7e-18 from the original
+law. These choices close missing width requirements; no balancing goal or weighted matching
+feature is added. Stored sampling/seed outcomes require refresh at source readiness.
+
+The bounded arithmetic sampler compresses each original first draw into its contiguous
+admissible second draws. Row mass is the admissible count divided by the original first/second
+counts; choosing a weighted row then a uniform second draw preserves the conditional law.
+This uses O(bound) rows, avoiding an O(bound²) pair list. The previous within-20 sampler,
+legacy within-five aliases, signed/zero/whole-tens branches and unspecified bounds retain
+their old paths. Exhaustive pair-count/mass tests and row-endpoint tests cover the extensions.
+
+The 64 original width selections become 187 declared variants. Their existing zero gaps
+multiply **30 → 66**: +3/+6 for addition/subtraction within 100, +6/+9 within 1,000, and +6
+each for multiplication/division. These **36 inherited obligations** remain owned by RB-A2-D1;
+they are not hidden or counted as repaired. All seven target files and 1,013 target conjunctions
+remain unchanged. Four added tenths tuples preserve the original 1,209 matches, giving 1,213.
+The new matches cover proper equivalent tenths/hundredths through model and number-line
+explanations; their targets impose no incompatible scale-factor or denominator restriction.
+
+Source acceptance uses complete selection lineage and mathematical support proofs, with
+sampled rendering/replay checks as supplementary evidence. Bounded arithmetic alone has
+1,770 planned/replay probes, 846 direct requests, 590 identical question/solution SSR comparisons
+and 126 stale-plan rejections. Outside that slice, 648 planned and 642 direct probes preserve
+payloads/PRNG continuation; 420 plan-sampling probes preserve old choices. The decimal leaves
+each add 64 planned/replay probes and 128 identical SSR comparisons; tenths adds 36 replay
+checks and 60 SSR comparisons, and construction adds 144 SSR comparisons.
+
+Across the continuation, **86 original requirements close** and the width partitions expose
+**36 inherited zero obligations**, so **313 − 86 + 36 = 263** source gaps remain. Facets are
+zero **177**, integer operand width **12**, fraction magnitude **47**, sign **19**, and number
+kind **8**. All remaining gaps have explicit owners in **22** dependency scopes, plus the
+separate reasoning defect and two acceptance scopes. All were reviewed; their unresolved
+contracts are documented below. There are no policy retirements or reopened requirements.
+
+The Area allowlist, integer qualification, range-policy exclusion and representation-completeness
+separation are unchanged. The evaluator remains annotation-only. The stored snapshot is unchanged
+at **2,542 raw / 2,528 distinct** non-range findings; source repairs do not rewrite its labels.
+Canonical regeneration and VQA still await source readiness and the separate reasoning defect.
+Local evidence is in `temp/continuation-batches/`; durable gap ownership is in the
+[progress ledger](label-dependency-progress.md).
+
+Final validation passes **855 suites / 6,864 tests** with `npm run test:coverage`, including
+all generator coverage thresholds. Types, labels, generator/view specifications and documentation
+references pass; the documentation check retains five external-fetch warnings. The final
+audit has **1,455 selections**, zero conflicts, invalid contexts, contract errors or incomplete
+enumerations, and **82 exhaustive / zero pending / zero invalid** inference selections.
+
+### Cases skipped because the existing approach is insufficient
+
+These are retained obligations, not policy retirements. Each requires the concrete contract
+review below before further implementation; difficulty alone is not the reason for deferral.
+
+| Owner | Required further design and counterexample |
+|---|---|
+| RB-A1-D1 — unspecified binary bounds | Eight configurations resolve to `Number.MAX_SAFE_INTEGER`. Extending the finite O(bound) sampler is infeasible; imposing a cap removes supported problems. Review an analytical conditional sampler and safe-integer support before extending these profiles. |
+| RB-A2-D1 — binary zero | `1 + 1` has no participating zero in boxes/story projections, while a number line displays origin zero. The generator already owns both zero members; adding a view invariant duplicates ownership under SPEC-8/SPEC-11. A producer/view ownership migration must preserve both contexts and all targets. |
+| RB-A3-D2 — writing zero | The number-line origin and high-range coefficient strips have different evidence from positive number/name tasks. A single generator absence rule is false for the former; a view invariant conflicts with the current generator selector. |
+| RB-A3-D3 — known reasoning defect | The proposed answer can render 200 for `23+32+45=100`. This is an open projection/compatibility content defect even though its former numeral dependency is retired; it needs an explicit repair design. |
+| RB-A6-D1 — judgment/estimation zero | Subtraction answer 1 can display false claim 0; estimation proposals and rounding steps vary with view randomness. Generator positivity does not establish zero absence in those projections. |
+| RB-A7-D1 — parity grouping | Counts 1, 2 and 3 respectively expose grouping counts 0/1, 1/0 and 1/1. Raw count zero and grouping-component zero need a shared contract before reusing the count generator's zero selector. |
+| RB-A9-D1 — remaining place-value/rounding zero | Grade-1 concrete models already prove zero hundreds coefficients, but the owning false `requireZero` config conflates no declaration with explicit `NumbersWithoutZero`; adding inference can produce contradictory claims. Migrate that existing result-zero selector/compatibility contract. Integer rounding's zero endpoint also depends jointly on range and magnitude; an unconditional profile admits impossible selections. |
+| RB-A9-D2 — remaining place-value widths | Existing flags constrain smallest/largest operands jointly and overlap range/regrouping choices. A further selector needs an explicit joint migration of those flags and direct fallbacks; copying one independent width field does not prove preserved support. |
+| RB-A10-D1 — algorithm zero | Zero partial products, quotient positions, remainders and exchange counts can be printed or omitted independently of positive operands. Review participating intermediate evidence across question/solution procedures before partitioning the pools. |
+| RB-D1-D1 — algebra | Hidden rational domains/bindings do not establish visible or necessarily required sign, zero or domain claims for `3+x` versus substituted expressions. A domain/evidence/consumer contract is needed. |
+| RB-D2-D1 — powers | Single-power versus mixed-expression structure uses different empty/contextual schema bindings. Mandatory single-power profiles with an unrestricted mixed fallback need a direct/planned contract review. Mixed expressions also vary in visible intermediates and cancellation; do not classify a sampled expression. |
+| RB-F1-D1 — decimal writing | `5.008` has positive whole/fractional quantities in a name task but zero named coefficient slots in numeral construction. The projection-sensitive component boundary needs a design before a generator-wide zero declaration. |
+| RB-F2-D1 — decimal inequalities/algorithms | Comparison suffix repair correlates digits, first difference and precision; an independent zero digit profile does not preserve that joint support. Arithmetic can introduce zero only in exchanges/intermediates, requiring its evidence contract first. |
+| RB-F3-D1 — fraction arithmetic/benchmarks | Proper inputs can coexist with whole/improper results, transformed fractions and benchmark candidates. Agree the participating-object/mixed-magnitude contract; one input or internal pool name is insufficient. |
+| RB-F4-D1 — division zero | Shared model leaves accept general-division frames with zero origin and quotient-family payloads without that frame. Story questions may omit the model that solutions show. Empty view configs cannot distinguish those cases; payload-driven inference is excluded. |
+| RB-F4-D2 — division magnitude | Dividend, divisor, quotient, reciprocal and partition measures can straddle magnitude one. The quotient-only selector additionally has carefully preserved aliases preventing the old 1→3 fallback widening. Both need a joint migration review. |
+| RB-F4-D3 — whole-sharing kind | Adding `FractionNumbers` to whole-sharing makes it compete with a distinct existing fraction-as-quotient choice. Preserve that original-operand routing through an explicit profile/ownership design. |
+| RB-F7-D1 — product magnitude | Multiplier, quantity, product and partition measures can have different magnitudes in one exercise; choosing a label from one factor would silently select a new meaning. |
+| RB-F7-D2 — product-story zero | Positive question quantities gain a zero-origin model only in solutions. Neither zero member is invariant across both modes under the present annotation contract. |
+| RB-F8-D1 — rational axes | An unchanged axis can display `0/1`, `1/2` and `5/2` together. Classifying only the marked point versus all represented fractions requires a mixed-magnitude scope decision. |
+| RB-F9-D2 — contextual zero | Numeric values and visible zero references depend on the contextual projection. Hidden reference values do not supply a universal occurrence declaration. |
+| RB-M2-D1 — unrestricted clock minutes | The legacy zero selector constrains seconds at second precision, while minutes can still be zero or positive. Extending it needs a precision-aware selector migration that preserves static inference and direct fallback semantics. |
+| RB-M3-D1 — elapsed/interval time | A question such as 1:31 to 2:05 has positive components; its solution introduces reference 2:00. Mode-specific component evidence needs a further annotation/model contract. |
+
 ## Configuration inference checkpoints (2026-10-29)
 
 The user approved configuration-based `inferredLabels`, superseding the proposed conditional-alias
@@ -38,7 +145,9 @@ configuration outcomes remain pending; sampled checks cannot be presented as exh
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
 The subsequent measurement split closes 21 more; two subtraction-width fixes and the
 21 zero-absence repairs reduce the total to 341. The three width-profile checkpoints below
-close 30 original width requirements and expose two inherited zero obligations, leaving **313**. The known
+close 30 original width requirements and expose two inherited zero obligations, leaving 313.
+The subsequent autonomous continuation closes 86 original requirements and exposes 36 inherited
+zero obligations, leaving **263**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -100,8 +209,8 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**1,033 requirements repaired, 77 newly exposed, 38 retired by policy, 313 remaining**.
-All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
+**1,119 requirements repaired, 113 newly exposed, 38 retired by policy, 263 remaining**.
+All remaining gaps have exact owners in **22 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
@@ -1325,7 +1434,7 @@ approval. Execution started with RB-A3. The
 [progress and decision ledger](label-dependency-progress.md) records the baseline, verified
 closures, newly admitted obligations, deferred child scopes and the next queued batch.
 
-The authorization covers truthful additive invariants and labels on existing choices whose
+The initial declaration-pass authorization covers truthful additive invariants and labels on existing choices whose
 resolved values and behavior remain unchanged. Preserve target conjunctions and existing
 coverage, rendering, supported configurations, sampling and random continuation. Review all
 consumers of a shared declaration and both question and solution evidence. Preserve the
@@ -1337,9 +1446,12 @@ The separately approved conditional-notation checkpoint narrows blanket numeral/
 requirements as documented above. This specific authorization does not extend to other
 policy changes; representation completeness remains a separate design question.
 
-A repair requiring a new semantic interpretation, ontology or evaluator change, mathematical
-schema distinction, or sampling/rendering change belongs in a decision batch. Previous
-specific approvals, such as M4 and C2b, do not authorize new changes of the same kind.
+A repair requiring a new semantic interpretation, ontology or evaluator change, or a mathematical
+schema/sampling/rendering approach not already reviewed belongs in a decision batch. The user's
+2026-10-29 continuation request authorizes reuse of the reviewed finite-profile method for settled
+remaining cases, with incidental sampling consequences recorded above. It asks that cases needing
+a further approach be documented and skipped while other supported batches continue. This does
+not authorize generator/view splits, a new annotation ownership model or broader policy changes.
 Record concrete counterexamples, the affected projections and labels, options, a recommendation
 and its consequences before requesting that decision. Missing evidence is not permission to
 choose a convenient label. Continue independent provable work while a decision remains open.
