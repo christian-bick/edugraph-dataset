@@ -76,13 +76,30 @@ export function createExpandedDecimal(
     };
 }
 
-function sampleValue(): readonly [number, FractionalDigits, 3] {
+const WHOLE_PARTS = Array.from({length: 999}, (_, index) => index + 1);
+const ZERO_WHOLE_PARTS = WHOLE_PARTS.filter(value => wholeDigits(value).includes(0));
+const NONZERO_WHOLE_PARTS = WHOLE_PARTS.filter(value => !wholeDigits(value).includes(0));
+
+function sampleValue(requireZeroCoefficient: boolean): readonly [number, FractionalDigits, 3] {
     // Each dataset sample includes a 1/1000 contribution; sparse cases also
     // expose 5.008- and 0.305-style placeholders regularly.
-    switch (Math.floor(random() * 5)) {
+    // Four old patterns guarantee zero; only the all-positive-fraction pattern
+    // needs its whole-part support partitioned. These weights retain each
+    // pattern's original probability conditional on the selected zero profile.
+    const allPositiveFractionWeight = ZERO_WHOLE_PARTS.length / WHOLE_PARTS.length;
+    const draw = requireZeroCoefficient ? random() * (4 + allPositiveFractionWeight) : 0;
+    const pattern = !requireZeroCoefficient ? 2
+        : draw < 2 ? Math.floor(draw)
+        : draw < 2 + allPositiveFractionWeight ? 2
+        : draw < 3 + allPositiveFractionWeight ? 3 : 4;
+    switch (pattern) {
         case 0: return [randomInteger(1, 99), [0, 0, nonzeroDigit()], 3];
         case 1: return [0, [nonzeroDigit(), 0, nonzeroDigit()], 3];
-        case 2: return [randomInteger(1, 999), [nonzeroDigit(), nonzeroDigit(), nonzeroDigit()], 3];
+        case 2: {
+            const wholeParts = requireZeroCoefficient ? ZERO_WHOLE_PARTS : NONZERO_WHOLE_PARTS;
+            return [wholeParts[randomInteger(0, wholeParts.length - 1)]!,
+                [nonzeroDigit(), nonzeroDigit(), nonzeroDigit()], 3];
+        }
         case 3: return [randomInteger(0, 99), [0, nonzeroDigit(), nonzeroDigit()], 3];
         default: return [randomInteger(100, 999), [nonzeroDigit(), 0, nonzeroDigit()], 3];
     }
@@ -98,8 +115,8 @@ export class DecimalPlaceValueExpandedGenerator implements ProblemGenerator<
     generate(
         config: DecimalPlaceValueExpandedGeneratorConfig
     ): ProblemStub<DecimalPlaceValueExpandedProblem> | null {
-        validateConfigFields('decimal-place-value-expanded', config, []);
-        const [wholePart, fractionalDigits, fractionalPrecision] = sampleValue();
+        validateConfigFields('decimal-place-value-expanded', config, ['requireZeroCoefficient']);
+        const [wholePart, fractionalDigits, fractionalPrecision] = sampleValue(config.requireZeroCoefficient!);
         const data = createExpandedDecimal(wholePart, fractionalDigits, fractionalPrecision);
         return data === null ? null : {data};
     }

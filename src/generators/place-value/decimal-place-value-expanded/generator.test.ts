@@ -1,5 +1,6 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
 import type {DecimalPlaceValueExpandedProblem} from '../../../types/problems.ts';
 import {createExpandedDecimal, DecimalPlaceValueExpandedGenerator} from './generator.ts';
 
@@ -9,6 +10,7 @@ const EXPONENTS = [2, 1, 0, -1, -2, -3];
 const UNIT_NUMERATORS = [100, 10, 1, 1, 1, 1];
 const UNIT_DENOMINATORS = [1, 1, 1, 10, 100, 1000];
 const THOUSANDTH_FACTORS = [100000, 10000, 1000, 100, 10, 1];
+afterEach(() => vi.restoreAllMocks());
 
 function verifyExactDecomposition(data: DecimalPlaceValueExpandedProblem): void {
     expect(data.kind).toBe('decimal-place-value-expanded');
@@ -51,6 +53,7 @@ function verifyExactDecomposition(data: DecimalPlaceValueExpandedProblem): void 
 describe('DecimalPlaceValueExpandedGenerator', () => {
     it('rejects a missing configuration object', () => {
         expect(() => generator.generate(null as never)).toThrow();
+        expect(() => generator.generate({})).toThrow();
     });
 
     it.each([
@@ -81,7 +84,7 @@ describe('DecimalPlaceValueExpandedGenerator', () => {
         let zeroWholeThousandths = 0;
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({})!.data;
+            const data = generator.generate({requireZeroCoefficient: true})!.data;
             verifyExactDecomposition(data);
             expect(data.fractionalPrecision).toBe(3);
             expect(data.sumTerms.some(term => term.name === 'thousandths')).toBe(true);
@@ -96,8 +99,39 @@ describe('DecimalPlaceValueExpandedGenerator', () => {
 
     it('replays the exact same decomposition under one seed', () => {
         setSeed('decimal-expanded-form');
-        const first = generator.generate({});
+        const first = generator.generate({requireZeroCoefficient: true});
         setSeed('decimal-expanded-form');
-        expect(generator.generate({})).toEqual(first);
+        expect(generator.generate({requireZeroCoefficient: true})).toEqual(first);
+    });
+
+    it('exhaustively partitions the 999 whole parts in the positive-fraction pattern', () => {
+        const draw = vi.spyOn(rng, 'random');
+        const allWholeParts = new Set<number>();
+        for (const requireZeroCoefficient of [true, false]) {
+            const count = requireZeroCoefficient ? 270 : 729;
+            const sampled = new Set<number>();
+            for (let index = 0; index < count; index++) {
+                draw.mockReset().mockReturnValue(0.5);
+                if (requireZeroCoefficient) draw.mockReturnValueOnce((2 + 270 / 999 / 2) / (4 + 270 / 999));
+                draw.mockReturnValueOnce((index + 0.5) / count);
+                const data = generator.generate({requireZeroCoefficient})!.data;
+                expect(data.places.some(place => place.digit === 0)).toBe(requireZeroCoefficient);
+                expect(data.fractionalDigits.every(digit => digit > 0)).toBe(true);
+                sampled.add(data.wholePart);
+                expect(allWholeParts.has(data.wholePart)).toBe(false);
+                allWholeParts.add(data.wholePart);
+            }
+            expect(sampled.size).toBe(count);
+        }
+        expect([...allWholeParts].sort((a, b) => a - b)).toEqual(Array.from({length: 999}, (_, index) => index + 1));
+    });
+
+    it.each([true, false])('always realizes the resolved zero-coefficient profile %s', requireZeroCoefficient => {
+        for (let seed = 0; seed < 300; seed++) {
+            setSeed(seed);
+            const data = generator.generate({requireZeroCoefficient})!.data;
+            verifyExactDecomposition(data);
+            expect(data.places.some(place => place.digit === 0)).toBe(requireZeroCoefficient);
+        }
     });
 });

@@ -1,4 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -13,7 +14,12 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-export const DecimalPlaceValueExpandedGeneratorSchema = {} as const;
+export const DecimalPlaceValueExpandedGeneratorSchema = {
+    requireZeroCoefficient: [
+        [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
+        selectExactLabelMap([[Scope.NumbersWithZero, true], [Scope.NumbersWithoutZero, false]] as const)
+    ]
+} as const;
 
 export type DecimalPlaceValueExpandedGeneratorConfig = ConfigFromSchema<
     typeof DecimalPlaceValueExpandedGeneratorSchema
