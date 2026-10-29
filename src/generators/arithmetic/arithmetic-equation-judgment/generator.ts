@@ -3,11 +3,12 @@ import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {EquationJudgmentProblem} from '../../../types/problems.ts';
-import {ArithmeticEquationJudgmentGeneratorConfig, ArithmeticEquationJudgmentGeneratorSchema} from './spec.ts';
+import {ArithmeticEquationJudgmentGeneratorConfig, ArithmeticEquationJudgmentGeneratorSchema, spec} from './spec.ts';
 
 export class ArithmeticEquationJudgmentGenerator implements ProblemGenerator<EquationJudgmentProblem, ArithmeticEquationJudgmentGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticEquationJudgmentGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: ArithmeticEquationJudgmentGeneratorConfig): ProblemStub | null {
         validateConfigFields('arithmetic-equation-judgment', config, ['operation', 'requireZero', 'range']);

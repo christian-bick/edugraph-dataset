@@ -4,13 +4,21 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
-export const spec: GeneratorSpec = {
+export const spec: GeneratorSpec<typeof ArithmeticEquationJudgmentGeneratorSchema> = {
     generatorId: 'arithmetic-equation-judgment',
     generalLabels: [
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives
-    ]
+    ],
+    // SPEC-12: a false predicate is not an unconditional absence declaration.
+    // Positive addition has answer >= 2, so both neighboring judgment claims stay positive.
+    // Positive subtraction can have answer 1 and display the false claim 0.
+    inferredLabels: [{
+        produces: [Scope.NumbersWithoutZero],
+        infer: ({operation, requireZero}) => operation === Area.Addition && !requireZero
+            ? [Scope.NumbersWithoutZero] : []
+    }]
 };
 
 export const ArithmeticEquationJudgmentGeneratorSchema = {
