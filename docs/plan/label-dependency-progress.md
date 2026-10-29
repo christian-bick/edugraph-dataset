@@ -6,9 +6,9 @@ Prepared on 2026-10-28 on `codex/label-dependency-audit`, using the working tree
 and [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap).
 
 **All 26 original source scopes are triaged; supported declaration repairs are implemented.**
-Six mathematically settled cases are closed through exhaustively validated configuration inference.
+Eight mathematically settled cases are closed through exhaustively validated configuration inference.
 The measurement generator/view split closes another 21 through ordinary declarations.
-The **364** remaining requirements have exact ownership in **25** dependency scopes, all deferred.
+The **362** remaining requirements have exact ownership in **25** dependency scopes, all deferred.
 The known reasoning content defect in RB-A3-D3
 also remains open, despite its retired dependency requirements. Full dataset readiness still
 waits for those decisions. Counts below
@@ -19,6 +19,40 @@ The agreed [narrowing of the blanket numeral/base dependencies](label-dependency
 is implemented. It retires 38 source requirements without changing annotations or claiming
 repairs. Representation completeness remains a separate, unestimated design topic; no mandatory
 `NumberRepresentation` replacement has been adopted.
+
+## Place-value subtraction width acceptance (2026-10-29)
+
+The two mathematically settled RB-A9-D2 subtraction-with-borrowing omissions are closed.
+The [implementation and alternative review](label-dependency-graph.md#place-value-subtraction-width-fixes-2026-10-29)
+explains why ordinary conditional bundles do not preserve the existing direct resolution
+contract and why the narrowly scoped `inferredLabels` fallback is appropriate here.
+
+- Source gaps decrease **364 → 362**; operand-digit findings decrease **111 → 109**.
+  RB-A9-D2 retains four unresolved width findings. Other facet counts are unchanged.
+- All 22 place-value selections have exhaustive configuration outcomes, with two actual
+  width additions and 20 abstentions. The total inference count is 34 exhaustive,
+  zero pending and zero invalid. Possible `produces` labels are not counted as repairs.
+- All **1,013 targets**, **1,209 tuples** and **1,284 selections** are preserved. The complete
+  plan domains, correlations and ordering are equal before and after the change; all seven
+  target files and 3,056 unowned source files are byte-identical.
+- Before/after sampling checks pass for **132 planned draws** and **2,880 direct probes**,
+  including unspecified operations and unsupported combinations. Configuration, null/success
+  outcomes, payloads and random continuation are identical. All **44 question/solution SSR
+  comparisons** are byte-identical, and 132 replays reproduce their original draw.
+  These payload/render checks are sampled; complete configuration-domain equality and static
+  annotation resolution provide the exhaustive evidence.
+- All 22 old source plans are rejected by freshness validation. Semantic plan hashes stay
+  stable because their choices are unchanged; source input identities change as required.
+- Type, label, ownership/spec and documentation checks pass. Full coverage passes
+  **851 suites / 6,728 tests** and every generator threshold; the affected generator has
+  **92.18% statements / 87.91% branches**. Independent implementation review is clean.
+- Matching capabilities, targets, Area allowlist, integer qualification and range-policy
+  exclusion remain unchanged. The shared proof registrations change the audit implementation
+  hash, not the dependency policy. Stored findings remain **2,542 raw / 2,528 distinct**;
+  canonical regeneration and VQA remain deferred until source readiness.
+
+Local evidence: `temp/place-value-width-fixes/`, including the before/after audit,
+exact requirement reconciliation, preservation comparison and validation logs.
 
 ## Measurement split acceptance (2026-10-29)
 
@@ -75,10 +109,10 @@ integer-only digit gate and range-policy exclusion are unchanged.
 
 | Progress since this baseline | Count |
 |---|---:|
-| Outstanding source gaps | 364 |
+| Outstanding source gaps | 362 |
 | Authorized implementation in progress (subset of outstanding) | 0 |
-| Assigned to deferred decision batches (subset of outstanding) | 364 |
-| Verified repairs / introduced / reopened | 980 / 75 / 0 |
+| Assigned to deferred decision batches (subset of outstanding) | 362 |
+| Verified repairs / introduced / reopened | 982 / 75 / 0 |
 | Policy-retired / policy-added requirements | 38 / 0 |
 | Active dependency scopes, including implementation | 25 |
 | Separately open content-defect scopes | 1 |
@@ -88,7 +122,7 @@ the quotient metadata, near-doubles and measurement-conversion children are comp
 the object-only applicability requirements are retired, 25 children own dependency gaps,
 and RB-A3-D3 retains an open content defect with zero graph
 gaps. Deferred gaps stay in the outstanding total. Cumulative accounting is
-**1,307 + 75 - 980 - 38 = 364**; the policy retirement is separate from verified repairs.
+**1,307 + 75 - 982 - 38 = 362**; the policy retirement is separate from verified repairs.
 
 ## Source batch ledger
 
@@ -117,7 +151,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-A8 | Counting offsets, equal groups and arrays | 16 | 0 | 0 | Complete |
 | RB-A9 | Place value, rounding and powers of ten | 71 | 0 | 0 | Complete; children below |
 | RB-A9-D1 | Place-count/intermediate zero evidence | 0 | 25 | 25 | Four expanded-form cases complete; 25 deferred |
-| RB-A9-D2 | Variable place-value primary widths | 0 | 6 | 6 | Deferred |
+| RB-A9-D2 | Variable place-value primary widths | 0 | 4 | 4 | Partial; two borrowing-subtraction widths complete, remaining deferred |
 | RB-A10 | Written algorithms and division models | 22 | 0 | 0 | Complete; child below |
 | RB-A10-D1 | Algorithm operands/partial rows/remainders | 0 | 10 | 10 | Deferred |
 | RB-D1 | Symbolic and substituted algebra expressions | 56 | 0 | 0 | Complete; child below |
@@ -154,7 +188,7 @@ The roadmap contains each scope's uncertainties and generator inventory.
 | RB-M3 | Elapsed time and interval arithmetic | 24 | 0 | 0 | Complete; child below |
 | RB-M3-D1 | Clock-component zero across modes | 0 | 6 | 6 | Deferred |
 | RB-M4 | Length measurement and unit relations | 22 | 0 | 0 | Complete |
-| **Total: 56 source batches** | | **1,307** | **364** | **364** | |
+| **Total: 56 source batches** | | **1,307** | **362** | **362** | |
 
 | Acceptance batch | State | Entry condition |
 |---|---|---|
@@ -206,7 +240,7 @@ before/after lineage. Preserve independent provable portions in the parent batch
 | DEC-A5-02 | RB-A5-D2 — complete | Two near-doubles width claims are closed by validated configuration inference. The earlier alias prototype preserved production plans but changed legacy extractConfig entropy in 32/128 probes. | Inference now adds only the proved smaller-operand width after ordinary resolution. Both planned and direct paths preserve configuration and entropy; no matching capability is added. |
 | DEC-A6-01 | RB-A6-D1 | Six equation/estimation zero cases vary in generated quantities or displayed procedure evidence. | Review ordinary pre-draw cases and the exact participating values; do not choose absence from a positive sample. |
 | DEC-A9-01 | RB-A9-D1 | Twenty-five place-value/rounding/power zero findings remain. Four expanded-form cases are now closed by validated configuration inference; their earlier alias prototype changed entropy and could select a wrong zero alias. | The completed low-branch annotation follows positive summands; the high-branch annotation follows a necessarily zero place coefficient. The other 25 still need their projection/model decisions. |
-| DEC-A9-02 | RB-A9-D2 | Six place-value widths vary under existing magnitude/range profiles. | Propose normal width choices with supported-case and sampling comparisons; keep existing range policy unchanged. |
+| DEC-A9-02 | RB-A9-D2 | Two borrowing-subtraction width findings are closed by exhaustive configuration inference; four other place-value widths still vary under existing profiles. | Propose normal width choices for the remaining four, with supported-case and sampling comparisons; keep existing range policy unchanged. |
 | DEC-A10-01 | RB-A10-D1 | Ten algorithm contexts have varying zero operands, partial products, quotient digits or remainders. | Review explicit mathematical cases and question/solution procedures. Hidden initialization zero and shifted zero glyphs do not establish invariant zero participation. |
 
 For each decision, record the concrete examples, affected declarations and projections,
@@ -762,18 +796,18 @@ Local audit, draw comparisons and validation evidence are in `temp/inferred-labe
 
 ## Decision queue after autonomous declarations
 
-No declaration batch remains untriaged. The six accepted inference cases and the measurement
-split are complete; the remaining 364 require their recorded decisions. The 25 active
+No declaration batch remains untriaged. The eight accepted inference cases and the measurement
+split are complete; the remaining 362 require their recorded decisions. The 25 active
 dependency child batches account for every outstanding requirement. Their facet totals are:
 
 | Decision facet | Gaps |
 |---|---:|
 | Zero occurrence, components, model/projection ownership | 173 |
-| Integer primary-operand widths | 111 |
+| Integer primary-operand widths | 109 |
 | Fraction magnitude and mixed representations | 49 |
 | Number-kind/domain/profile ownership | 8 |
 | Sign occurrence/domain distinctions | 23 |
-| **Total** | **364** |
+| **Total** | **362** |
 
 The narrowed graph has no remaining source numeral/base findings; representation completeness
 remains a separate design question. The three configuration-inference checkpoints are complete.

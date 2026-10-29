@@ -36,7 +36,8 @@ The source baseline is **391** unresolved selection/facet requirements. `produce
 possible-output declaration, so introducing a callback closes no finding by itself. Unknown
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
-The subsequent measurement split closes 21 more, leaving **364**. The known
+The subsequent measurement split closes 21 more; the two subtraction-width fixes below
+reduce the current total to **362**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -64,6 +65,10 @@ The first proof mechanism supports singleton outcomes from direct label arrays a
 callbacks, copied resolver metadata and ontology-neutral functions do not establish exhaustive
 outcomes. No seeds are sampled to infer determinism. A later reviewed finite-outcome mechanism
 can extend this without treating potential `produces` labels as actual output.
+
+The subtraction-width checkpoint also reviews and registers the existing deterministic
+`hasLabel` and `selectExactLabelMap` factories. Their resolution behavior and metadata are
+unchanged. Copied metadata does not certify a wrapper, and unknown outcomes remain pending.
 
 Module artifacts bind the inference source/import closure and declared output ontology semantics.
 These outputs do not enter matching capabilities. At source readiness, run the authoritative
@@ -94,7 +99,7 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**980 requirements repaired, 75 newly exposed, 38 retired by policy, 364 remaining**.
+**982 requirements repaired, 75 newly exposed, 38 retired by policy, 362 remaining**.
 All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
@@ -124,6 +129,52 @@ The two generators only gain spec metadata and annotation declarations; mathemat
 schemas and view sources are unchanged. The stored dataset itself is unchanged, so its findings
 are not counted as repaired before regeneration. See the
 [checkpoint ledger](label-dependency-progress.md#configuration-inference-checkpoint-3--six-acceptance-cases-2026-10-29).
+
+## Place-value subtraction width fixes (2026-10-29)
+
+The two supported RB-A9-D2 omissions are closed: `2.NBT.B.7-concrete-regrouping~0130749a`
+with `place-value-arithmetic-model`, and `2.NBT.B.7-model-to-written-method~7682ea5d`
+with `place-value-arithmetic-written-method`.
+
+The owning generator adds `MultipleDigitLargestOperand` only when its resolved operation is
+subtraction and regrouping is required. The existing sampler enforces `num1 > num2` and
+`num1 % 10 < num2 % 10`. A one-digit minuend would contradict these inequalities. Both
+two- and three-digit minuends remain possible, so `TwoDigitLargestOperand` would overclaim.
+No range interpretation or sampling bound changes are needed.
+
+Matching-capable declarations were reviewed first, following SPEC-12. An invariant or a
+label on subtraction/regrouping alone would be false. Ordinary equivalent operation bundles
+plus compatibility can constrain the planned path, but direct `extractConfig` does not apply
+that compatibility: tied plain/enriched fallbacks consume extra randomness and can select an
+untrue width annotation. A context-aware resolver could filter them, but the current fallback
+validator requires each authored bundle to resolve without that context. Supporting those
+conditional bundles would require a separate schema-contract extension. A new profile or
+module split is disproportionate to this additional annotation and would require another
+preservation review. Therefore this batch uses the agreed inference fallback, preserving the
+existing schema, matching capabilities and mathematical sampler.
+
+The matching caveat remains deliberate: `produces` does not make an explicit
+`MultipleDigitLargestOperand` target match this generator. Inference runs after ordinary
+configuration resolution and before generation in both planned and direct paths. It does not
+read generated operands, call the graph, select a profile or consume randomness.
+
+The existing pure `hasLabel` and `selectExactLabelMap` factories are registered for static
+singleton proof. All 22 admitted place-value selections now resolve exhaustively; two add
+the width, and 20 retain their existing labels. Combined with the preceding acceptance
+owners, the audit has 34 exhaustive and zero pending/invalid inference selections.
+Exactly two source requirements close, **364 → 362**, with no new non-range requirements,
+conflicts, invalid contexts, contract errors or incomplete enumerations. The four remaining
+place-value width findings still need ordinary profile/model decisions.
+
+The graph, evaluator, Area allowlist, integer-only qualification and range-policy exclusion
+are unchanged. The audit implementation identity changes because `resolvers.ts` participates
+in its hash; this does not retire or change any dependency rule. Stored data remains at
+**2,542 raw / 2,528 distinct** non-range findings. Regeneration and VQA still wait for source
+readiness and the separately tracked reasoning content defect.
+
+Verification evidence is retained under `temp/place-value-width-fixes/`. The
+[progress ledger](label-dependency-progress.md#place-value-subtraction-width-acceptance-2026-10-29)
+records the preservation checks and updated totals.
 
 ## Proposed measurement generator/view split (2026-10-29)
 

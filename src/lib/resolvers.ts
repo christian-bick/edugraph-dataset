@@ -30,8 +30,8 @@ export const ontologyNeutral = <T>(resolver: () => T): OntologyNeutralResolverFn
     Object.assign(resolver, {ontologyNeutral: true as const});
 
 export const hasLabel = (targetLabel: string): ResolverFn<boolean> => {
-    return withLabelChoices(predicateResolver((labels: string[]) => labels.includes(targetLabel)),
-        {kind: 'target', contextLabels: [targetLabel], predicate: {all: [targetLabel]}});
+    return registerStaticResolver(withLabelChoices(predicateResolver((labels: string[]) => labels.includes(targetLabel)),
+        {kind: 'target', contextLabels: [targetLabel], predicate: {all: [targetLabel]}}));
 };
 
 /** Requires every exact label of a conjunctive task condition. */
@@ -75,14 +75,14 @@ export const selectExactLabelMap = <
         throw new Error('Exact label mappings must not declare a label more than once.');
     }
 
-    return withLabelChoices(exactResolver((labels: string[]) => {
+    return registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
         const matches = mappings.filter(([label]) => labels.includes(label));
         if (matches.length > 1) {
             throw new Error(`Ambiguous exact label mapping: ${matches.map(([label]) => label).join(' + ')}`);
         }
         return matches[0]?.[1];
     }), {kind: 'alternatives', alternatives: mappedLabels.map(label => [label]),
-        equivalenceGroups: mappingEquivalenceGroups(mappings.map(([label, value]) => [[label], value]))});
+        equivalenceGroups: mappingEquivalenceGroups(mappings.map(([label, value]) => [[label], value]))}));
 };
 
 export const selectExactLabelSetMap = <

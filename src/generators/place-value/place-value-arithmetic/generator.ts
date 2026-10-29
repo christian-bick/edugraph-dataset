@@ -9,7 +9,7 @@ import {
     PlaceValueDigits,
     PlaceValueRegroupingEvidence
 } from '../../../types/problems.ts';
-import {PlaceValueArithmeticGeneratorConfig, PlaceValueArithmeticGeneratorSchema} from './spec.ts';
+import {PlaceValueArithmeticGeneratorConfig, PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
 
 type OperandPair = readonly [number, number];
 type Operation = PlaceValueArithmeticProblem['operation'];
@@ -273,6 +273,7 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
 > {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = PlaceValueArithmeticGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: PlaceValueArithmeticGeneratorConfig): ProblemStub<PlaceValueArithmeticProblem> | null {
         validateConfigFields('place-value-arithmetic', config, [

@@ -13,7 +13,7 @@ const resolveOperation = selectExactLabelMap([
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
-export const spec: GeneratorSpec = {
+export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
     generatorId: 'place-value-arithmetic',
     compatibility: [generatorLabelRule('place-value-operand-profile', [
         Area.Addition, Area.AdditionPlaceValuePartitioning, Area.Subtraction, Area.SubtractionPlaceValuePartitioning,
@@ -36,6 +36,15 @@ export const spec: GeneratorSpec = {
         if (multiples && selected(Area.SubtractionPlaceValuePartitioning)) return false;
         return multiples ? !regrouping : !zero || !regrouping;
     })],
+    // SPEC-12: neither subtraction nor regrouping alone guarantees this width.
+    // Conditional same-value bundles would change direct fallback sampling;
+    // keep the existing choices and annotate their resolved conjunction only.
+    inferredLabels: [{
+        produces: [Scope.MultipleDigitLargestOperand],
+        infer: ({operation, requireRegrouping}) => operation === Area.Subtraction && requireRegrouping
+            ? [Scope.MultipleDigitLargestOperand]
+            : []
+    }],
     generalLabels: [
         Area.PlaceValue,
         Scope.TwoOperands,

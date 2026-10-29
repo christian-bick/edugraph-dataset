@@ -1,6 +1,8 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
+import {resolveInferredLabels} from '../../../lib/inferred-labels.ts';
+import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
@@ -28,6 +30,94 @@ const generate = (labels: string[]) => generateWithLabels(
 );
 
 describe('PlaceValueArithmeticGenerator spec integration', () => {
+    it.each([Area.Subtraction, Area.SubtractionPlaceValuePartitioning])(
+        'annotates the guaranteed multi-digit largest operand for %s with borrowing', operation => {
+            const widths = new Set<number>();
+            for (let seed = 0; seed < 32; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [operation,
+                    Area.IntegerRegrouping, Scope.NumbersSmaller1000]);
+                expect(stub).not.toBeNull();
+                expect(stub!.labels).toContain(Scope.MultipleDigitLargestOperand);
+                expect(stub!.labels).not.toContain(Scope.TwoDigitLargestOperand);
+                expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
+                expect(stub!.data.num1 % 10).toBeLessThan(stub!.data.num2 % 10);
+                expect(stub!.data.num1).toBeGreaterThanOrEqual(10);
+                widths.add(String(stub!.data.num1).length);
+            }
+            expect(widths).toEqual(new Set([2, 3]));
+        }
+    );
+
+    it.each([
+        [Area.Addition], [Area.Addition, Area.IntegerRegrouping],
+        [Area.AdditionPlaceValuePartitioning, Area.IntegerRegrouping],
+        [Area.Subtraction], [Area.SubtractionPlaceValuePartitioning]
+    ].map(labels => ({labels})))('does not infer a width from either condition alone: $labels', ({labels}) => {
+        setSeed(9);
+        const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [...labels, Scope.NumbersSmaller1000]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).not.toContain(Scope.MultipleDigitLargestOperand);
+    });
+
+    it('keeps the width annotation out of matching capabilities', () => {
+        const labels = [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping,
+            Scope.NumbersSmaller1000, ...modelView.generalLabels];
+        const consumer = {viewId: modelView.viewId, generalLabels: modelView.generalLabels, schema: {}, spec: modelView};
+        expect(planModelCompatibility({id: 'borrow', labels}, model, consumer).supported).toBe(true);
+        for (const width of [Scope.MultipleDigitLargestOperand, Scope.SingleDigitLargestOperand]) {
+            expect(planModelCompatibility({id: 'borrow-with-width', labels: [...labels, width]}, model, consumer)
+                .supported).toBe(false);
+        }
+    });
+
+    it.each([modelView, writtenView])('resolves and replays the additional annotation for $viewId', view => {
+        const target = {id: 'borrow', labels: [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping,
+            Scope.NumbersSmaller1000, ...view.generalLabels]};
+        const result = planModelCompatibility(target, model,
+            {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view});
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error('Expected borrowing to remain admitted.');
+        const input = {generator: new PlaceValueArithmeticGenerator(), viewSchema: {}, generatorSpec: spec,
+            viewSpec: view, plan: result.plan, sampleKey: `borrow#place-value-arithmetic#${view.viewId}#train#question#inst:0`,
+            attempt: 1, seed: 42};
+        const draw = generatePlannedDraw(input);
+        const state = getRandomState();
+        expect(draw.stub).not.toBeNull();
+        expect(draw.labels).toContain(Scope.MultipleDigitLargestOperand);
+        expect(generatePlannedDraw({...input, replay: draw.replay})).toEqual(draw);
+        expect(getRandomState()).toBe(state);
+    });
+
+    it('preserves direct configuration, payload and entropy with unspecified operations as well', () => {
+        const generator = new PlaceValueArithmeticGenerator();
+        const withoutInference = {...spec, inferredLabels: undefined};
+        for (const operation of [[], [Area.Addition], [Area.Subtraction],
+            [Area.AdditionPlaceValuePartitioning], [Area.SubtractionPlaceValuePartitioning]]) {
+            for (const regrouping of [[], [Area.IntegerRegrouping]]) {
+                const labels = [...operation, ...regrouping, Scope.NumbersSmaller1000];
+                for (const seed of [0, 1, 17, 2026]) {
+                    const draws = [withoutInference, spec].map(owner => {
+                        setSeed(seed);
+                        const resolved = extractConfig(generator.schema, labels, {spec: owner, owner: 'generator'});
+                        const configurationState = getRandomState();
+                        const stub = generator.generate(resolved.config);
+                        return {config: resolved.config, labels: resolved.resolvedLabels, configurationState,
+                            stub, state: getRandomState()};
+                    });
+                    const expected = draws[0];
+                    const width = expected.config.operation === Area.Subtraction && expected.config.requireRegrouping
+                        ? [Scope.MultipleDigitLargestOperand] : [];
+                    expect(draws[1]).toEqual({...expected, labels: [...new Set([...expected.labels, ...width])]});
+                }
+            }
+        }
+        const {config} = extractConfig(generator.schema, [Area.Subtraction, Area.IntegerRegrouping,
+            Scope.NumbersSmaller1000]);
+        expect(resolveInferredLabels({spec, schema: generator.schema, config,
+            labels: [Scope.MultipleDigitLargestOperand], owner: 'generator'})).toEqual([Scope.MultipleDigitLargestOperand]);
+    });
+
     it('declares invariant math while parameterizing regrouping and operand constraints', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariantLabels));
         expect(spec.generalLabels).not.toContain(Area.IntegerRegrouping);
