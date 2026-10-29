@@ -7,6 +7,7 @@ import {
     DecimalWritingGeneratorSchema,
     type DecimalWritingGeneratorConfig
 } from './spec.ts';
+import {decimalWritingHasZero} from './zero-profile.ts';
 
 type FractionalPart = DecimalWritingProblem['fractionalPart'];
 
@@ -51,6 +52,18 @@ function fractionalPart(selected: FractionalPart['precision']): FractionalPart {
 const precisionLength = (selected: FractionalPart['precision']): number =>
     selected === 'tenths' ? 1 : selected === 'hundredths' ? 2 : 3;
 
+/** Original unconditioned mathematical sampler, including duplicate zero paths. */
+function sampleDecimalWriting(): DecimalWritingProblem {
+    const wholePart = Math.floor(random() * 10);
+    const fraction = fractionalPart(precision());
+    const scale = precisionLength(fraction.precision);
+    const valueInThousandths = wholePart * 1000
+        + fraction.numerator * 10 ** (3 - scale);
+    const canonicalNumeral = `${wholePart}.${fraction.digits.slice(0, scale).join('')}`;
+    return {kind: 'decimal-writing', base: 10, wholePart, valueInThousandths,
+        canonicalNumeral, fractionalPart: fraction};
+}
+
 export class DecimalWritingGenerator implements ProblemGenerator<
     DecimalWritingProblem,
     DecimalWritingGeneratorConfig
@@ -58,8 +71,8 @@ export class DecimalWritingGenerator implements ProblemGenerator<
     type: AbstractProblem['type'] = 'writing';
     schema = DecimalWritingGeneratorSchema;
 
-    generate(config: DecimalWritingGeneratorConfig): ProblemStub<DecimalWritingProblem> {
-        validateConfigFields('decimal-writing', config, ['notationFamily']);
+    generate(config: DecimalWritingGeneratorConfig): ProblemStub<DecimalWritingProblem> | null {
+        validateConfigFields('decimal-writing', config, ['notationFamily', 'zeroProfile']);
         if (config.notationFamily !== Area.DecimalNotation
             && config.notationFamily !== Area.NumberNameNotation) {
             throw new GeneratorValidationError(
@@ -68,21 +81,21 @@ export class DecimalWritingGenerator implements ProblemGenerator<
             );
         }
 
-        const wholePart = Math.floor(random() * 10);
-        const fraction = fractionalPart(precision());
-        const scale = precisionLength(fraction.precision);
-        const valueInThousandths = wholePart * 1000
-            + fraction.numerator * 10 ** (3 - scale);
-        const canonicalNumeral = `${wholePart}.${fraction.digits.slice(0, scale).join('')}`;
-        return {
-            data: {
-                kind: 'decimal-writing',
-                base: 10,
-                wholePart,
-                valueInThousandths,
-                canonicalNumeral,
-                fractionalPart: fraction
-            }
-        };
+        const profile = config.zeroProfile;
+        if (config.notationFamily === Area.DecimalNotation) {
+            if (profile !== 'legacy') throw new GeneratorValidationError('decimal-writing',
+                'DecimalNotation requires the unchanged legacy profile.');
+            return {data: sampleDecimalWriting()};
+        }
+        if (profile !== 'with-zero' && profile !== 'without-zero') {
+            throw new GeneratorValidationError('decimal-writing', 'NumberNameNotation requires a declared zero profile.');
+        }
+        // Condition the same raw mathematics after a matching-capable profile is
+        // resolved. The accepted payload never supplies or changes its labels.
+        for (let attempt = 0; attempt < 256; attempt++) {
+            const data = sampleDecimalWriting();
+            if (decimalWritingHasZero(data) === (profile === 'with-zero')) return {data};
+        }
+        return null;
     }
 }

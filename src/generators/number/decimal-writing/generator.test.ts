@@ -40,19 +40,20 @@ describe('DecimalWritingGenerator', () => {
     it('requires a supported notation family', () => {
         expect(() => generator.generate({})).toThrow('notationFamily');
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({notationFamily: 'invalid'})).toThrow(
+        expect(() => generator.generate({notationFamily: 'invalid', zeroProfile: 'legacy'} as never)).toThrow(
             'Expected DecimalNotation or NumberNameNotation'
         );
     });
 
-    it.each([Area.DecimalNotation, Area.NumberNameNotation])(
+    it.each([Area.DecimalNotation, Area.NumberNameNotation] as const)(
         'samples exact decimals through thousandths under %s', notationFamily => {
             const precisions = new Set<string>();
             let interiorZeroCases = 0;
             let zeroWholeCases = 0;
             for (let seed = 0; seed < 240; seed++) {
                 setSeed(seed);
-                const {data} = generator.generate({notationFamily});
+                const {data} = generator.generate({notationFamily,
+                    zeroProfile: notationFamily === Area.DecimalNotation ? 'legacy' : 'with-zero'})!;
                 verifyExactValue(data);
                 precisions.add(data.fractionalPart.precision);
                 if (data.fractionalPart.precision === 'thousandths'
@@ -68,16 +69,16 @@ describe('DecimalWritingGenerator', () => {
 
     it('replays the same decimal under the same seed', () => {
         setSeed('decimal-writing-replay');
-        const first = generator.generate({notationFamily: Area.DecimalNotation});
+        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'legacy'});
         setSeed('decimal-writing-replay');
-        expect(generator.generate({notationFamily: Area.DecimalNotation})).toEqual(first);
+        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'legacy'})).toEqual(first);
     });
 
     it('can represent five and eight thousandths with both zero placeholders', () => {
         let example: DecimalWritingProblem | undefined;
         for (let seed = 0; seed < 10000 && !example; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({notationFamily: Area.NumberNameNotation});
+            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'with-zero'})!;
             if (data.canonicalNumeral === '5.008') example = data;
         }
         expect(example).toEqual({

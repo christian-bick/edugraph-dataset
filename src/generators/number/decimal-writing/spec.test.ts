@@ -12,7 +12,7 @@ describe('DecimalWritingGenerator spec', () => {
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ]);
-        expect(Object.keys(DecimalWritingGeneratorSchema)).toEqual(['notationFamily']);
+        expect(Object.keys(DecimalWritingGeneratorSchema)).toEqual(['notationFamily', 'zeroProfile']);
     });
 
     it.each([Area.DecimalNotation, Area.NumberNameNotation])(
