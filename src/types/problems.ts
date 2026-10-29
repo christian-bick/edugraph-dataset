@@ -675,6 +675,8 @@ export type ArithmeticEstimationProblem = {
     roundingPlace: 10;
     exactAnswer: number;
     estimatedAnswer: number;
+    /** Canonical mathematical proposal; its plausibility is evaluated by the consumer. */
+    proposal: {proposedAnswer: number; roundedProposedAnswer: number};
 };
 
 export type ArithmeticPatternOperation = 'addition' | 'multiplication';

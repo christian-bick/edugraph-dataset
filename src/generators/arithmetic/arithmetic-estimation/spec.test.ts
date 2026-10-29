@@ -49,12 +49,10 @@ describe('ArithmeticEstimationGenerator spec integration', () => {
             expect(draw.stub!.labels).toContain(Scope.NumbersSmaller20);
             const data = draw.stub!.data;
             expect(data.numberDomain).toEqual({min: 0, max: 20});
-            for (const claimSeed of [2 * seed, 2 * seed + 1]) {
-                const claim = resolveEstimationClaim(data, claimSeed);
-                expect(claim.isReasonable).toBe(claimSeed % 2 === 0);
-                expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]
-                    .every(value => value >= 0 && value <= 20)).toBe(true);
-            }
+            const claim = resolveEstimationClaim(data);
+            expect(claim.isReasonable).toBe(claim.roundedProposedAnswer === claim.roundedEstimatedAnswer);
+            expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]
+                .every(value => value >= 0 && value <= 20)).toBe(true);
         }
     });
 });

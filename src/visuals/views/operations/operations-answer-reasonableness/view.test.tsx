@@ -48,7 +48,7 @@ describe('answer reasonableness domain rendering', () => {
     it.each([...targets, ...estimationTargets])('renders both modes and verdicts for fixture $id', target => {
         for (const seed of [0, 1]) {
             const payload = prepare(target, seed);
-            const claim = resolveEstimationClaim(payload.problem.data, seed);
+            const claim = resolveEstimationClaim(payload.problem.data);
             const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
             const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
             expect(question).toContain('Round to the nearest ten');
@@ -62,6 +62,8 @@ describe('answer reasonableness domain rendering', () => {
 
     it.each([
         [{numberDomain: undefined}, 'Required field "numberDomain"'],
+        [{proposal: undefined}, 'Required field "proposal"'],
+        [{proposal: {proposedAnswer: 3, roundedProposedAnswer: 99}}, 'canonical bounded proposal'],
         [{numberDomain: {min: -1, max: 20}}, 'Invalid estimation number domain'],
         [{numberDomain: {min: 0, max: 1001}}, 'Invalid estimation number domain'],
         [{numberDomain: {min: 5.5, max: 20}}, 'Invalid estimation number domain'],

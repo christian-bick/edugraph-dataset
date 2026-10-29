@@ -41,7 +41,8 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
         'roundedNum2',
         'roundingPlace',
         'exactAnswer',
-        'estimatedAnswer'
+        'estimatedAnswer',
+        'proposal'
     ]);
 
     if (!Object.hasOwn(symbols, data.operation) || data.roundingPlace !== 10) {
@@ -87,7 +88,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
             'The supplied exact and estimated relations are mathematically inconsistent.'
         );
     }
-    const claim = resolveEstimationClaim(data, payload.seed);
+    const claim = resolveEstimationClaim(data);
 
     const symbol = symbols[data.operation];
     const choiceClass = (reasonable: boolean) => {

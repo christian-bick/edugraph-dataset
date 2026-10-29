@@ -3,9 +3,18 @@ import {Area} from 'edugraph-ts';
 import {ArithmeticEstimationGenerator} from '../../../../generators/arithmetic/arithmetic-estimation/generator.ts';
 import {setSeed} from '../../../../lib/random.ts';
 import {ArithmeticEstimationProblem} from '../../../../types/problems.ts';
-import {resolveEstimationClaim} from './helpers.ts';
+import {estimationProposalForSeed} from '../../../../generators/arithmetic/arithmetic-estimation/proposal-domain.ts';
+import {estimationProfileMass} from '../../../../generators/arithmetic/arithmetic-estimation/numeric-domain.ts';
+import {operationNames} from '../../../../generators/arithmetic/helpers.ts';
+import {resolveEstimationClaim as readClaim} from './helpers.ts';
+type Relation = Omit<ArithmeticEstimationProblem, 'proposal'>;
+const resolveEstimationClaim = (data: Relation, seed: number) => {
+    const proposal = estimationProposalForSeed(data, seed);
+    if (!proposal) throw new Error('The estimate has no requested reasonableness classification.');
+    return readClaim({...data, proposal});
+};
 
-const problem: ArithmeticEstimationProblem = {
+const problem: Relation = {
     numberDomain: {min: 0, max: 1000},
     num1: 247,
     num2: 132,
@@ -58,7 +67,7 @@ describe('answer reasonableness projection', () => {
     });
 
     it('uses the displayed nearest-ten strategy for small division estimates', () => {
-        const division: ArithmeticEstimationProblem = {
+        const division: Relation = {
             numberDomain: {min: 0, max: 1000},
             num1: 270,
             num2: 27,
@@ -83,7 +92,7 @@ describe('answer reasonableness projection', () => {
     });
 
     it('uses the mathematical domain when rounding extends below the canonical value hull', () => {
-        const division: ArithmeticEstimationProblem = {
+        const division: Relation = {
             numberDomain: {min: 0, max: 1000}, num1: 42, num2: 21, operation: 'division',
             roundedNum1: 40, roundedNum2: 20, roundingPlace: 10, exactAnswer: 2, estimatedAnswer: 2
         };
@@ -128,13 +137,25 @@ describe('answer reasonableness projection', () => {
 
     it.each([{min: -1, max: 20}, {min: 0, max: 1001}, {min: 1.5, max: 20}, {min: 20, max: 10}])(
         'rejects invalid domain %j', numberDomain => {
-            expect(() => resolveEstimationClaim({...problem, numberDomain}, 0)).toThrow('Invalid estimation number domain');
+            expect(() => readClaim({...problem, numberDomain,
+                proposal: estimationProposalForSeed(problem, 0)!})).toThrow('Invalid estimation number domain');
         }
     );
 
     it('rejects an out-of-domain displayed rounded estimate', () => {
-        expect(() => resolveEstimationClaim({...problem, numberDomain: {min: 1, max: 20}, estimatedAnswer: 2}, 0))
+        expect(() => readClaim({...problem, numberDomain: {min: 1, max: 20}, estimatedAnswer: 2,
+            proposal: estimationProposalForSeed(problem, 0)!}))
             .toThrow('rounded estimate lies outside');
+    });
+
+    it('requires canonical proposal evidence and rejects inconsistent rounding instead of using a view seed', () => {
+        expect(() => readClaim(problem as ArithmeticEstimationProblem)).toThrow('canonical bounded proposal');
+        expect(() => readClaim({...problem, proposal: {proposedAnswer: 378, roundedProposedAnswer: 370}}))
+            .toThrow('consistent nearest-ten rounding');
+        expect(() => readClaim({...problem, proposal: {proposedAnswer: 378, roundedProposedAnswer: 380,
+            legacySeed: 2} as never})).toThrow('canonical bounded proposal');
+        const canonical = {...problem, proposal: estimationProposalForSeed(problem, 2)!};
+        expect(readClaim(canonical)).toEqual(readClaim(canonical));
     });
 
     it.each([{min: 0, max: 10}, {min: 0, max: 20}, {min: 0, max: 1000}, {min: 30, max: 1000}])(
@@ -143,7 +164,9 @@ describe('answer reasonableness projection', () => {
             for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const) {
                 for (let seed = 0; seed < 12; seed++) {
                     setSeed(seed);
-                    const generated = generator.generate({operation, range});
+                    const zeroPresence = estimationProfileMass({operation: operationNames[operation],
+                        minimum: range.min, maximum: range.max}, true) > 0;
+                    const generated = generator.generate({operation, range, zeroPresence});
                     expect(generated).not.toBeNull();
                     for (const claimSeed of [2 * seed, 2 * seed + 1]) {
                         const claim = resolveEstimationClaim(generated!.data, claimSeed);
