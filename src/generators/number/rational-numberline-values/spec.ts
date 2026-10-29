@@ -5,7 +5,9 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const numberKinds = [
     [[Area.NumerationWithIntegers, Scope.IntegerNumbers], 'integer'],
-    [[Area.NumerationWithFractions, Scope.FractionNumbers], 'fraction'],
+    // Every fraction axis explicitly displays its step 1/d, d in {2,3,4,6,8}.
+    // Other ticks may be improper too; evidenced descriptors can coexist (ONT-E5).
+    [[Area.NumerationWithFractions, Scope.FractionNumbers, Scope.ProperFractions], 'fraction'],
     [[Area.NumerationWithDecimals, Scope.DecimalNumbers], 'decimal']
 ] as const;
 
@@ -13,7 +15,7 @@ export const spec: GeneratorSpec = {generatorId: 'rational-numberline-values', g
 
 export const RationalNumberlineValuesGeneratorSchema = {
     numberKind: [[Area.NumerationWithIntegers, Scope.IntegerNumbers, Area.NumerationWithFractions, Scope.FractionNumbers,
-        Area.NumerationWithDecimals, Scope.DecimalNumbers], selectExactLabelSetMap(numberKinds), numberKinds.map(([labels]) => labels)],
+        Area.NumerationWithDecimals, Scope.DecimalNumbers, Scope.ProperFractions], selectExactLabelSetMap(numberKinds), numberKinds.map(([labels]) => labels)],
     signDomain: [[Scope.NumbersWithoutNegatives, Scope.NumbersWithNegatives], selectExactLabelMap([
         [Scope.NumbersWithoutNegatives, 'nonnegative'], [Scope.NumbersWithNegatives, 'signed']
     ] as const)]

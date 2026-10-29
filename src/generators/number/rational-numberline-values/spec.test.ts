@@ -1,5 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import * as rng from '../../../lib/random.ts';
+import {RationalLinePositioningBody, RationalLineReadingBody} from '../../../visuals/views/numbers/rational-numberline-view.tsx';
 import {planCompatibility} from '../../../lib/compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -11,11 +15,33 @@ import {RationalNumberlineValuesGeneratorSchema, spec} from './spec.ts';
 
 const forms = [
     [Area.NumerationWithIntegers, Scope.IntegerNumbers],
-    [Area.NumerationWithFractions, Scope.FractionNumbers],
+    [Area.NumerationWithFractions, Scope.FractionNumbers, Scope.ProperFractions],
     [Area.NumerationWithDecimals, Scope.DecimalNumbers]
 ];
 
 describe('numberline mathematical capabilities and complete correlated numeric forms', () => {
+    it('exposes a proper step in both projections/modes for every fraction-axis configuration', () => {
+        const random = vi.spyOn(rng, 'random');
+        try {
+            for (const signDomain of ['signed', 'nonnegative'] as const) {
+                for (const [index, denominator] of [2, 3, 4, 6, 8].entries()) {
+                    for (let radius = 2; radius <= 5; radius++) {
+                        random.mockReturnValueOnce((radius - 2 + 0.5) / 4)
+                            .mockReturnValueOnce((index + 0.5) / 5).mockReturnValueOnce(0).mockReturnValueOnce(0);
+                        const data = new RationalNumberlineValuesGenerator().generate({numberKind: 'fraction', signDomain}).data;
+                        expect(data.axis.step).toEqual({numerator: 1, denominator});
+                        for (const body of [RationalLineReadingBody, RationalLinePositioningBody]) {
+                            for (const isSolutionView of [false, true]) for (const seed of [0, 1]) {
+                                const html = renderToStaticMarkup(React.createElement(body, {data, isSolutionView, seed}))
+                                    .replace(/<!--.*?-->/g, '');
+                                expect(html).toContain(`Step: 1/${denominator}`);
+                            }
+                        }
+                    }
+                }
+            }
+        } finally {random.mockRestore();}
+    });
     it('owns the zero-containing axis and selected numeration/form/sign claims with complete fallback bundles', () => {
         expect(spec.generalLabels).toEqual([Scope.NumbersWithZero]);
         expect(Object.keys(RationalNumberlineValuesGeneratorSchema)).toEqual(['numberKind', 'signDomain']);
@@ -61,7 +87,8 @@ describe('numberline mathematical capabilities and complete correlated numeric f
                 const draw = generatePlannedDraw({generator: new RationalNumberlineValuesGenerator(), viewSchema: {}, plan: result.plan,
                     sampleKey: `${target.id}#${spec.generatorId}#${viewId}#train#question#inst:0`, seed, attempt: 1});
                 expect(draw.stub!.data.kind).toBe('rational-numberline-values');
-                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.NumbersWithZero]));
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.NumbersWithZero,
+                    ...(target.labels.includes(Scope.FractionNumbers) ? [Scope.ProperFractions] : [])]));
             }
         }
     });
