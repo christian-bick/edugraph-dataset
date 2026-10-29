@@ -10,6 +10,88 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Fraction-model representation Scopes (2026-10-30)
+
+### Implemented: three Numberline declarations
+
+The user approved adding the existing eligible `Scope.Numberline` to these views' invariant
+`generalLabels`:
+
+- `fractions-division-model-construction`: Question supplies a numbered common-unit frame;
+  Solution completes it with dividend and divisor-sized groups on the same scale.
+- `fractions-product-partition-interpretation`: both modes show the graduated meter ruler above
+  the measured partition strips.
+- `fractions-product-story-creation`: both modes show that same ruler and partition model.
+
+These are view-owned representation claims under SPEC-V5, using the specific eligible descriptor
+under SPEC-2 and SPEC-3. No ancestor representation label is added. The schemas remain empty;
+there is no inference, adapter, completion or change to a target, payload, renderer or sampler.
+The dependency graph, its Area allowlist and range-policy exclusion remain unchanged.
+
+### Suggested ontology additions for the remaining model forms
+
+The installed ontology (`0.31.0-pre.58.9231304124e9`) has broad eligible representation Scopes,
+but no dedicated bar/tape or numerical area-model descriptor. The user will author the ontology
+additions. The following names and definitions are proposals, not available enum members or
+implemented declarations:
+
+| Proposed Scope | Suggested definition | Specialization parent | Current application |
+|---|---|---|---|
+| `BarModel` | Numerical quantities and their relationships represented by proportional lengths of one or more bars or strips, with an identified unit or reference whole. | `SpatialNumbers` | Product partition strips, general division's common-unit grouping bars, and positive legacy quotient/sharing strips. Treat strip model and tape diagram as synonyms, not separate labels. |
+| `AreaModel` | Numerical quantities and arithmetic relationships represented through the areas of regions, with an identified area unit or reference whole; partitions or tiles show the represented measures. | `NumberRepresentation` | Fractional rectangle tiling and area/product models. The definition can cover drawn or physical representations; an actual diagram may separately support `VisualNumbers`. |
+
+These descriptors describe representations, so `specializes` expresses a true substitutable
+capability. They need no new organizational parent or constituent children. A rectangle is an
+`AreaModel` only when its area encodes the quantities: the decorative thickness of a length strip
+does not make it an area model. Neither descriptor claims a geometric competency or the Ability
+to construct a model merely because the representation is present.
+
+If distinguishing division grouping from other bars is a classification objective, a further
+optional `CommonUnitGroupingModel` could specialize `BarModel`: quantities represented by bars
+partitioned into one shared unit and grouped into divisor-sized portions, including a partial
+final group, to express a quotient. The first two descriptors suffice for the current model-form
+inventory; this extra subtype is not necessary merely to record that a bar model is used.
+
+### Remaining declaration boundaries
+
+| Case | Suggested Scope(s) | What remains before declaring them |
+|---|---|---|
+| General numerical division models | Existing `Numberline`; proposed `BarModel` for the proportional bars, or the optional grouping subtype if adopted. | Four other both-mode leaves share their spec with legacy strip producers. `Numberline` is true for the general branch, not the whole shared view. |
+| Legacy quotient/sharing strips | Existing `SpatialNumbers`; proposed `BarModel`. | Positive strips support these claims. Several zero branches show only text, so a blanket invariant would overclaim. Execution's separate unit-reference diagram supports the existing `SpatialNumbers` candidate across its supported branches. |
+| Product partition models | Existing `Numberline` now implemented in interpretation/story creation; proposed `BarModel` for the strip representation itself. | Adopt the new descriptor after the ontology package supplies it. Existing `EqualShares` describes equal partitioning and remains generator-owned; it is not a substitute model name. |
+| Fractional rectangle tiling/area models | Proposed `AreaModel`; existing `VisualNumbers` for actual diagrams. | Verify the particular view's complete contract when adopting the new descriptor. Do not transfer this claim to length-only strips. |
+| Product/division word-problem Solution models | Proposed `BarModel`, with existing `Numberline` only where there is a numbered axis. | Current Questions do not supply or require that specific representation. A new ontology term alone does not resolve the shared Question/Solution declaration boundary or the division view's mixed producer forms. Retain the authored models. |
+
+`Numberline` and `EqualShares` remain independent properties of a bar model: an unnumbered strip
+does not imply a numerical axis, and proportional bars need not partition a whole into equal
+shares. Existing `MeterScale` can describe the product tasks' meter quantities, including prose-only
+Questions; it does not identify the visual model and needs no ontology addition. No generic
+Solution-model Scope, mode-specific annotation mechanism or automatic target strengthening is proposed.
+
+### Verification
+
+Focused view tests pass **24 tests across four files**, including the actual axes and zero/one
+ticks in Question and Solution mode across every supported producer profile. Types, label
+eligibility and generator/view specification checks pass. The independent catalog comparison
+preserves all **1,013 target IDs and label sets, 1,213 tuples and 1,575 admitted selections**,
+with no added or lost target route. Exactly **five tuples / ten selections** gain `Numberline`;
+all joint schema-choice receipts and domains remain identical. Annotation/plan identities change
+for that slice as expected; the change does not claim old dataset annotations have been refreshed.
+Sixty before/after planned draw pairs (12 seeds for each of the five tuples) retain generator/view
+configurations, payload data, resolution/generation random states and prepared-view continuation.
+Their final annotations differ only by `Numberline`. All seven target files, 3,379 unowned files
+and 189 pre-existing dirty paths are byte-preserved.
+
+The report-only audit retains **63 non-range source requirements: 56 zero and seven sign**.
+All selection assessments, inference outcomes and **2,542 raw non-range stored findings** remain
+unchanged. There are no conflicts, invalid contexts, row/contract errors or incomplete tuples.
+The policy hash is unchanged; this representation repair is not credited as closing a zero/sign
+dependency gap. Regeneration and VQA remain deferred to source/content readiness.
+
+Evidence is under `temp/numberline-scope-additions/`: focused/type/spec/label logs,
+`independent-matching.json`, `independent-draws.json`, `audit-verification.json`, and the preservation manifest. The ontology
+inventory and renderer review are under `temp/model-scope-review/`.
+
 ## Numerical-zero repairs and model falsification (2026-10-29)
 
 This section supersedes the earlier digit/coefficient interpretations and the proposal to remove

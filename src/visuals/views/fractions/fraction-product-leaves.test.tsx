@@ -4,6 +4,9 @@ import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {FractionProductsGenerator} from '../../../generators/fraction/fraction-products/generator.ts';
 import type {FractionProductProblem} from '../../../types/problems.ts';
+import {spec as interpretationSpec} from './fractions-product-partition-interpretation/spec.ts';
+import {spec as storySpec} from './fractions-product-story-creation/spec.ts';
+import {Scope} from 'edugraph-ts';
 
 const leafIds = [
     'fractions-product-partition-interpretation',
@@ -36,16 +39,24 @@ const render = (id: LeafId, data: FractionProductProblem, isSolutionView: boolea
     }}));
 
 describe('fraction product leaf contracts', () => {
-    it('accepts all three producer profiles in every leaf and mode', () => {
+    it('accepts every producer profile and evidences the declared number lines in both modes', () => {
         const generator = new FractionProductsGenerator();
+        expect(interpretationSpec.generalLabels).toContain(Scope.Numberline);
+        expect(storySpec.generalLabels).toContain(Scope.Numberline);
         for (const productProfile of ['fraction-partition-proper', 'fraction-partition-improper',
             'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const) {
             for (let seed = 0; seed < 20; seed++) {
                 setSeed(`fraction-product-leaf-${productProfile}-${seed}`);
                 const data = generator.generate({productProfile}).data;
                 for (const id of leafIds) {
-                    expect(() => render(id, data, false)).not.toThrow();
-                    expect(() => render(id, data, true)).not.toThrow();
+                    for (const isSolutionView of [false, true]) {
+                        const markup = render(id, data, isSolutionView);
+                        if (id !== 'fractions-product-word-problem') {
+                            expect(markup).toContain('<line x1="132" y1="60" x2="692" y2="60"');
+                            expect(markup).toMatch(/<text x="132"[^>]*>0 m<\/text>/);
+                            expect(markup).toMatch(/<text[^>]*>1 m<\/text>/);
+                        }
+                    }
                 }
             }
         }

@@ -63,9 +63,12 @@ describe('general fraction division leaf contracts', () => {
                             expect(question).not.toContain('Validation Error');
                             expect(solution).not.toContain('Validation Error');
                             if (id === 'fractions-division-model-construction') {
-                                // Both the blank construction scale and the completed model retain origin zero.
-                                expect(question).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
-                                expect(solution).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                                // The invariant Numberline claim holds for the blank and completed frames.
+                                for (const markup of [question, solution]) {
+                                    expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
+                                    expect(markup).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                                    expect(markup).toMatch(/<text[^>]*>1<\/text>/);
+                                }
                             }
                             if (id === 'fractions-division-word-problem') {
                                 expect(question).toContain('Equation: ____________________');
@@ -132,7 +135,7 @@ describe('general fraction division leaf contracts', () => {
 
     it('declares construction as a fixed visual articulation task', () => {
         expect(modelSpec.generalLabels).toEqual([
-            Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero
+            Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.NumbersWithZero
         ]);
         expect(modelSpec.compatibility).toBeUndefined();
     });
