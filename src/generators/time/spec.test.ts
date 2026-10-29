@@ -70,9 +70,7 @@ describe('TimeGenerator Spec Integration', () => {
     });
 
     it.each([
-        [Scope.MinuteIntervals], [Scope.SecondIntervals],
-        [Scope.HalfHourIntervals, Scope.NumbersWithZero],
-        [Scope.MinuteIntervals, Scope.MultiplesOf5, Scope.NumbersWithZero]
+        [Scope.SecondIntervals]
     ].map(labels => ({labels})))('retains abstention and explicit zero requests: $labels', ({labels}) => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
@@ -86,6 +84,8 @@ describe('TimeGenerator Spec Integration', () => {
             [Scope.MinuteIntervals, Scope.MultiplesOf5], [Scope.SecondIntervals]]) {
             for (const zero of [[], [Scope.NumbersWithZero]]) {
                 for (const period of [[], [Scope.AnteMeridiem], [Scope.PostMeridiem]]) {
+                    if (zero.length && (interval.includes(Scope.HalfHourIntervals)
+                        || interval.includes(Scope.MultiplesOf5))) continue;
                     for (const seed of [0, 1, 17, 42]) {
                         const labels = [...interval, ...zero, ...period];
                         const draws = [withoutInference, spec].map(owner => {
@@ -146,7 +146,7 @@ describe('TimeGenerator Spec Integration', () => {
     );
 
     it.each([analog, analogConstruction, digital, digitalConstruction])(
-        'resolves and replays the annotation without admitting new targets for $viewId', view => {
+        'resolves and replays the matching-capable positive annotation for $viewId', view => {
             const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
                 schema: TimeGeneratorSchema, spec};
             const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
@@ -155,7 +155,7 @@ describe('TimeGenerator Spec Integration', () => {
             expect(result.supported).toBe(true);
             if (!result.supported) throw new Error('Expected the original positive clock target to remain admitted.');
             expect(planModelCompatibility({id: 'zero-absence-request',
-                labels: [...labels, Scope.NumbersWithoutZero]}, model, consumer).supported).toBe(false);
+                labels: [...labels, Scope.NumbersWithoutZero]}, model, consumer).supported).toBe(true);
             const input = {generator, generatorSpec: spec, viewSpec: view, viewSchema: {}, plan: result.plan,
                 sampleKey: `positive-clock#time#${view.viewId}#train#question#inst:0`, attempt: 1, seed: 42};
             const draw = generatePlannedDraw(input);

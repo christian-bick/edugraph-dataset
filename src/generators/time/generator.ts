@@ -4,8 +4,9 @@ import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
 import {TimeGeneratorConfig, TimeGeneratorSchema, spec} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
+import {ClockInterval} from './clock-profile.ts';
 
-function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): TimeIntervalSeconds {
+function resolveInterval(intervalLabel: string | undefined): TimeIntervalSeconds {
     switch (intervalLabel) {
         case Scope.SecondIntervals:
             return 1;
@@ -20,24 +21,43 @@ function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): T
     }
 }
 
+/** Explicit legacy mathematical calls remain available; schema resolution emits ClockProfile. */
+interface LegacyTimeConfig {
+    intervalLabel: string;
+    requireZero: boolean;
+    requireMultipleOf5: boolean;
+    isAnteMeridiem: boolean;
+    isPostMeridiem: boolean;
+}
+
 export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGeneratorConfig> {
     type: AbstractProblem['type'] = 'time';
     schema = TimeGeneratorSchema;
     readonly spec = spec;
 
-    generate(config: TimeGeneratorConfig): ProblemStub | null {
+    generate(config: TimeGeneratorConfig | LegacyTimeConfig): ProblemStub | null {
         validateConfigFields('time', config, [
-            'intervalLabel',
-            'requireZero',
+            ...('intervalLabel' in config ? ['intervalLabel', 'requireZero'] : ['clockProfile']),
             'requireMultipleOf5',
             'isAnteMeridiem',
             'isPostMeridiem'
         ]);
-        const interval = resolveInterval(config.intervalLabel);
+        const legacy = 'intervalLabel' in config;
+        const intervalLabel = legacy ? config.intervalLabel : config.clockProfile!.intervalLabel;
+        const mode = legacy ? undefined : config.clockProfile!.mode;
+        const validModes: Record<ClockInterval, readonly string[]> = {
+            [Scope.HourIntervals]: ['whole-hour'], [Scope.HalfHourIntervals]: ['half-hour'],
+            [Scope.MinuteIntervals]: ['zero-minutes', 'positive-minutes'],
+            [Scope.SecondIntervals]: ['legacy-seconds', 'zero-seconds']
+        };
+        if (!legacy && !validModes[intervalLabel as ClockInterval]?.includes(mode!)) {
+            throw new GeneratorValidationError('time', 'Unsupported clock interval/profile combination.');
+        }
+        const interval = resolveInterval(intervalLabel);
         if (config.isAnteMeridiem && config.isPostMeridiem) {
             throw new GeneratorValidationError('time', 'A time cannot be both ante meridiem and post meridiem.');
         }
-        if (config.requireMultipleOf5 && config.intervalLabel !== Scope.MinuteIntervals) {
+        if (config.requireMultipleOf5 && (intervalLabel !== Scope.MinuteIntervals || mode === 'zero-minutes')) {
             return null;
         }
 
@@ -54,11 +74,18 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
             const hour = firstHour + Math.floor(selection / 6);
             const minute = 5 + (selection % 6) * 10;
             totalSeconds = hour * 3600 + minute * 60;
+        } else if (mode === 'zero-minutes' || mode === 'positive-minutes') {
+            const firstHour = Math.floor(periodStart / 3600);
+            const hourCount = Math.floor((periodEnd - periodStart) / 3600);
+            const minuteCount = mode === 'zero-minutes' ? 1 : 59;
+            const selection = Math.floor(random() * hourCount * minuteCount);
+            const minute = mode === 'zero-minutes' ? 0 : 1 + selection % minuteCount;
+            totalSeconds = (firstHour + Math.floor(selection / minuteCount)) * 3600 + minute * 60;
         } else {
             const minInterval = Math.ceil(periodStart / interval);
             const maxIntervalExclusive = Math.floor(periodEnd / interval);
-            const alignment = config.intervalLabel === Scope.HalfHourIntervals ? 2 : 1;
-            const residue = config.intervalLabel === Scope.HalfHourIntervals ? 1 : 0;
+            const alignment = intervalLabel === Scope.HalfHourIntervals ? 2 : 1;
+            const residue = intervalLabel === Scope.HalfHourIntervals ? 1 : 0;
             const firstInterval = minInterval
                 + ((residue - (minInterval % alignment) + alignment) % alignment);
             const alignedCount = Math.floor((maxIntervalExclusive - 1 - firstInterval) / alignment) + 1;
@@ -68,7 +95,7 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
             totalSeconds = randomInterval * interval;
         }
 
-        if (config.requireZero && interval === 1) {
+        if ((legacy ? config.requireZero : mode === 'zero-seconds') && interval === 1) {
             totalSeconds -= totalSeconds % 60;
         }
 
