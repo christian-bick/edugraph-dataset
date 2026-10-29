@@ -10,6 +10,46 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Two-step competency review (2026-10-29)
+
+The user's latest annotations supersede the artifact-mode and algebra-domain-text proposals below.
+One exercise competency is assessed independently from the question image and from the solution
+image. Question judgement may solve or reason through the stated task; it receives no paired answer,
+hidden generator metadata or previous verdict. A higher question-mode error rate remains measurable.
+No exercise hint, mode-specific inference callback or automatic label completion is proposed.
+
+Step 1 implements the approved local changes that remain useful independently of zero policy:
+
+- `parity-grouping` owns the collection size, equal-group size, remainder and parity. The existing
+  parity view consumes this canonical relation. Preserve all old counts and their sampling law,
+  including the singleton's 1/10 share among odd counts 1..19. Add no zero selector or zero label.
+- `decimal-reading-relations` owns the source decimal and its three exact comparison values. The
+  reading view derives names and presentation from those values; the two source-writing consumers
+  retain their existing mathematics. Add no new zero profiles or labels.
+
+The named payload contracts are `ParityGroupingProblem` and `DecimalReadingRelationProblem`.
+Their existing `ViewTypeMap` entries migrate atomically with consumer adoption, avoiding temporary
+union fallbacks. Other consumers keep their original contracts. New producer IDs change sample keys
+and seeds; complete target-route successors and same-value render comparisons are acceptance gates.
+
+Step 2 reviews zero applicability against actual targets before any zero-driven cleanup or view
+split. Preserve the Area allowlist and range-policy exclusion, and retain conflict checks for asserted
+labels. Outside the final qualification, an omitted zero label means not assessed; it never means
+`NumbersWithoutZero`. Proposed qualification starts with arithmetic operations plus an integer
+context and explicitly considers integer exponents, factorials, foundational intuitive mathematics
+and target-backed set competencies. Integer literals alone do not establish a variable's domain.
+
+Initial inventory: 154 normalized targets explicitly request zero polarity (7 with zero, 147 without).
+45 have every current route outside the simple resolved arithmetic-operation/integer-number
+combination. Those matching requirements must survive any cleanup. All four proposed division tasks
+exist (20 distinct targets, 12 general and 16 quotient routes), but none requests zero polarity:
+their 24 zero findings come from the broad automatic dependency. Formal SetTheory and Factorial
+currently have no active targets; this does not authorize expanding the outer Area allowlist.
+
+The earlier 63-gap acceptance remains the baseline. A narrowed obligation is a policy retirement,
+not a labeling repair; a changed producer/view route is an explicit migration, not lost target
+coverage. The division split remains approved subject to the target review; it is not part of Step 1.
+
 ## Autonomous work and decisions requiring input (2026-10-29)
 
 The user requested an executable split of the remaining backlog and continued autonomous

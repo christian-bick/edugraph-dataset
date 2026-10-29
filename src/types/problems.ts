@@ -1228,6 +1228,13 @@ export type DecimalWritingProblem = Readonly<{
         }>;
 }>;
 
+/** Exact reference value and three distinct comparison values, in absolute thousandths. */
+export type DecimalReadingRelationProblem = Readonly<{
+    kind: 'decimal-reading-relation';
+    source: DecimalWritingProblem;
+    comparisonValues: readonly [number, number, number];
+}>;
+
 export type DecimalExpandedPlace = Readonly<{
     name: WholeNumberPlaceName | 'tenths' | 'hundredths' | 'thousandths';
     /** Base-ten place exponent; the fractional places are -1, -2, and -3. */
@@ -1555,6 +1562,15 @@ export type CountingProblem = {
     simpleAnswer: number;
     parity?: 'even' | 'odd';
 };
+
+/** Canonical division of a collection into two equal groups and its remainder. */
+export type ParityGroupingProblem = Readonly<{
+    kind: 'parity-grouping';
+    numObjects: number;
+    groupSize: number;
+    remainder: 0 | 1;
+    parity: 'even' | 'odd';
+}>;
 
 /** Cardinalities of a nonempty subset and its containing collection. */
 export type CountingSelectionProblem = {
