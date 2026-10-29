@@ -70,6 +70,16 @@ Target requirements remain independent learner-task participation policies. Sche
 translates ontology-backed capabilities into typed configuration for the owning role before
 generation or rendering.
 
+Measurement conversion has two canonical producers: `measurement-unit-equivalences` returns
+five integer equivalences, while `measurement-conversion-values` returns two required exact
+equalities selected through integer/decimal schema choices. The sequence feeds the to-smaller,
+derivation and table views; numeric values feed the bidirectional view. Derivation also accepts
+the existing generic unit-scale model. Shared samplers, unit-pair choices and rendering components
+retain common behavior without optional-field task dispatch. Number kind is matching-capable
+through ordinary declarations; this family needs no inferred annotations. The
+[migration record](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
+documents retained targets, additional matches and new replay/sample identities.
+
 After type and positive-capability matching, the planner admits only valid joint schema-label
 selections. Every tuple carries a versioned plan. Generation selects from it without increasing
 sample counts; rendering, retry,

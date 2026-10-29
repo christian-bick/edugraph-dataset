@@ -34,6 +34,11 @@ comes from active targets in Kindergarten through Grade 6.
 For example, shape-composition exercises separate predicting suitable pieces from constructing
 an arrangement. Construction solutions use explicit component geometry supplied by the generator.
 
+Measurement conversion uses separate generators for whole-number equivalence sequences and
+integer/decimal equalities, with dedicated one-way and bidirectional execution views. The
+[split verification](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
+records preserved target coverage and the resulting annotation repairs.
+
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 
 ## First Steps

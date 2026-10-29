@@ -35,7 +35,8 @@ matches, select configurations or satisfy target participation requirements.
 The source baseline is **391** unresolved selection/facet requirements. `produces` is only a
 possible-output declaration, so introducing a callback closes no finding by itself. Unknown
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
-The completed third checkpoint establishes six closures, leaving **385** source gaps. The known
+The completed third inference checkpoint established six closures, leaving **385** source gaps.
+The subsequent measurement split closes 21 more, leaving **364**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -70,7 +71,8 @@ dataset graph rebuild (`--rebuild-graph`); existing no-op receipts alone do not 
 after the pipeline-version change. The current stored snapshot remains an audit of persisted
 labels, without retroactively applying source inference.
 
-Current batch: the [measurement generator/view split and matching migration review](#proposed-measurement-generatorview-split-2026-10-29).
+The [measurement generator/view split](#proposed-measurement-generatorview-split-2026-10-29)
+is implemented and verified in three checkpoints.
 The broader work remains in the [refreshed backlog](#consolidated-declaration-backlog-2026-10-28),
 [remaining batch roadmap](#remaining-batch-roadmap) and
 [algebra/parity decisions](#algebra-and-parity-decision-note). The
@@ -92,8 +94,8 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**959 requirements repaired, 75 newly exposed, 38 retired by policy, 385 remaining**.
-All remaining gaps have exact owners in **26 decision batches**; the reasoning-view content
+**980 requirements repaired, 75 newly exposed, 38 retired by policy, 364 remaining**.
+All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
 digit qualification and range-policy exclusion are unchanged. Dataset acceptance still waits
@@ -125,11 +127,11 @@ are not counted as repaired before regeneration. See the
 
 ## Proposed measurement generator/view split (2026-10-29)
 
-**Status: implementation approved on 2026-10-29 in three checkpoints.** This is the RB-M1-D1
+**Status: implemented and verified on 2026-10-29 in three checkpoints.** This is the RB-M1-D1
 repair batch. It supersedes the proposed
 `numericProfile === 'legacy'` inference for the 21 remaining conversion number-kind gaps.
-The foundation checkpoint closes no source gap: the baseline remains **385** until the
-implemented migration and fresh audit verify the original requirements' successors.
+The foundation checkpoint closed no source gap. The completed migration and fresh audit
+verify all 21 original number-kind repairs, reducing the baseline **385 → 364**.
 
 Structural splits should be rare. First consider a truthful invariant, a label bundle on an
 existing choice, or a coherent explicit schema profile. Consider a split when mathematical
@@ -349,8 +351,8 @@ Planning verification: independent contract and migration reviews completed;
 
 ### Split checkpoint 1 — contract foundation
 
-Add the concrete sequence and numeric-values types before changing active consumers.
-Extract the existing samplers into category helpers and the
+Commit `214d9b05` adds the concrete sequence and numeric-values types before changing active
+consumers. It extracts the existing samplers into category helpers and the
 table renderer into a pure shared component. The existing generator still draws its sequence
 before numeric examples, preserving this checkpoint's configurations, payloads and random
 continuation. Existing target declarations and active matching capabilities are unchanged.
@@ -373,6 +375,8 @@ The coverage workflow used four workers after a sandbox transform-cache failure 
 default-worker timeout; no validation was disabled.
 
 ### Split checkpoint 2 — integrated producer and view migration
+
+Commit `2be5fa36` completes the coordinated source migration.
 
 `measurement-unit-equivalences` now supplies the sequence contract with invariant
 `IntegerNumbers`; `measurement-conversion-values` supplies required numeric equalities with
@@ -404,6 +408,69 @@ Full coverage passes **851 suites / 6,713 tests** and every generator threshold;
 generators have 100% scoped coverage. Independent generator and view reviews found no
 actionable issues. Native target previews also render successfully; their visual review and
 the final source/stored accounting are recorded in checkpoint 3.
+
+### Split checkpoint 3 — acceptance and backlog reconciliation
+
+The real catalog and runtime checks confirm the proposed migration without changing any of
+the seven target source files. All 35 old selections retain their designated task/configuration
+successor; all 1,013 targets remain covered. Additional matches are accepted exactly as reviewed,
+without target-ID restrictions or changes to the matcher.
+
+An actual pre-dedup candidate run over the 35 affected targets uses the existing defaults
+(one instance per tuple and validation ratio 0.25). It produces **88 → 126** candidates:
+training question/solution counts **35/35 → 49/49**, validation counts **9/9 → 14/14**.
+All candidates are valid, with zero errors, null results or retries. The additional routes
+contribute 36 candidates; changed validation assignment among successor identities contributes
+the other two. The added-route mix is 12 decimal and 10 integer bidirectional candidates on
+the broad Grade 4 targets, plus 14 sequence candidates on Grade 5 integer targets. This is
+measured candidate allocation, not a prediction of final canonical counts after deduplication.
+Evidence is in `temp/measurement-split-implementation/pre-dedup-allocations.json`.
+
+| Measure | Before split | Verified after split |
+|---|---:|---:|
+| Source non-range requirements, raw / distinct | 385 / 385 | 364 / 364 |
+| Source selections with non-range findings | 305 | 284 |
+| Remaining number-kind requirements | 29 | 8 |
+| Original requirements repaired / new non-range requirements | — | 21 / 0 |
+| Active dependency scopes | 26 | 25 |
+| Stored findings, raw / distinct | 2,542 / 2,528 | 2,542 / 2,528 |
+
+The remaining source facets are zero 173, operand digits 111, fraction magnitude 49,
+sign 23 and number kind 8. Conflicts, invalid contexts, row/contract errors, incomplete
+enumerations and pending/invalid inference remain zero. The existing twelve exhaustive
+inference selections are unchanged; this family uses ordinary declarations only.
+
+The raw report's total missing count stays at 4,321 because the 21 additional selections
+also introduce 21 report-only range-presence assessments (source range count 450 → 471).
+Those assessments are excluded from this initiative's backlog; no range label, range policy
+or validation exemption was added. The complete Area-policy hash remains
+`5d84db382ffd8c83761470d4d341df2ee0365eee3eca9d93d97e28c339ef747b`.
+
+Verification includes 56 current-identity replays, 56 question-to-solution reuse checks,
+112 runtime static renders, 288 byte-identical same-math render comparisons and 384 unchanged
+conversion-story probes. Five real target debug runs produced 22 native preview images,
+covering both new leaves, sequence derivation/table and generic derivation. Visual review
+checked both modes, answer withholding, arithmetic, unit notation and clipping. These local
+previews are supplementary evidence; they are not canonical dataset or Gemini VQA acceptance.
+
+Types, ownership, labels, documentation, integration tests and full coverage pass. Independent
+contract, generator and view reviews found no actionable issues. Runtime source is unchanged
+after checkpoint 2, so its **851 passing suites / 6,713 tests** remain the final coverage result.
+Both new generators have 100% scoped statements, branches, functions and lines.
+
+The dataset generation remains
+`cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`; stored artifacts and VQA
+caches were not rewritten. Canonical regeneration, authoritative graph rebuild and VQA still
+wait for the remaining 364 source requirements and the separate reasoning-view content defect.
+The [progress ledger](label-dependency-progress.md#measurement-split-acceptance-2026-10-29)
+records RB-M1-D1 as complete and leaves 28 open scopes including the content defect and two
+acceptance scopes. Representation completeness remains separate.
+
+Local evidence: `temp/measurement-split-implementation/migration-acceptance.json` (SHA-256
+`e203147e0f2cd5ac71f7d15cc930742cc3b445cd9c54d5219cdd05e5800b9b6c`),
+`audit-reconciliation.json`, `after-audit/`, coverage logs and five `render-*.log` records.
+The saved baseline preserves unrelated working-tree changes; checkpoint commits include only
+the migration and its documentation.
 
 ## Agreed direction: conditional notation dependencies
 
@@ -1477,10 +1544,11 @@ semantics also need review before proposing ordinary configuration distinctions.
 
 ### Deferred conversion decision — Cover legacy profiles and shared consumers
 
-**Historical counterfactual.** The current remaining scope is 21 number-kind omissions.
+**Historical counterfactual.** The later pre-split scope was 21 number-kind omissions;
+all 21 are now closed.
 The [2026-10-29 split proposal and matching review](#proposed-measurement-generatorview-split-2026-10-29)
-supersedes this legacy-profile decision approach; implementation was approved on 2026-10-29.
-The counts below describe the earlier declaration state, not the current 385-gap baseline.
+supersedes this legacy-profile decision approach and was implemented on 2026-10-29.
+The counts below describe earlier declaration states, not the current 364-gap backlog.
 
 Keep `measurement-conversion` outside M2. Its historical `numericProfile` schema had
 `[] -> legacy`, `IntegerNumbers -> integer` and `DecimalNumbers -> decimal` choices.
@@ -1488,9 +1556,9 @@ Legacy and explicit-integer profiles both involve whole quantities but produce d
 payload/task branches. Simply assigning the same exact choice label to both needs a design
 review; a blanket generator kind also overlaps the existing schema ownership.
 
-The current 35 assignments comprise seven legacy executions, seven legacy derivations,
-seven legacy tables and 14 explicit integer/decimal executions. Only 21 currently contain
-non-range gaps. Consumer review must cover:
+The pre-split 35 assignments comprised seven legacy executions, seven legacy derivations,
+seven legacy tables and 14 explicit integer/decimal executions. After the earlier declaration
+repairs, 21 still contained number-kind gaps. The consumer review covered:
 
 - `measurement-conversion` supplying `measure-conversion-execution`,
   `measure-conversion-derivation` and `measure-conversion-table`.
@@ -1500,7 +1568,7 @@ non-range gaps. Consumer review must cover:
 Adding numeral/base declarations to all three conversion views and positive/nonzero
 declarations to the conversion generator would have the following retained-assignment effect:
 
-| Pair | Current raw assessments | After those additions |
+| Pair | Historical raw assessments | After those additions |
 |---|---:|---:|
 | conversion / execution | 63 | 7 number-kind gaps |
 | conversion / derivation | 0 | 7 newly triggered number-kind gaps |
