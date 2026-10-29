@@ -16,6 +16,11 @@ export const spec: GeneratorSpec<typeof TimeGeneratorSchema> = {
     // Conditional aliases would change direct fallback sampling. At these precisions,
     // every consumer uses positive 12-hour components and omits the stored zero seconds.
     inferredLabels: [{
+        // All four consumers require the minute component, which is zero at whole hours.
+        // Keep the existing precision selector and its direct fallback sampling unchanged.
+        produces: [Scope.NumbersWithZero],
+        infer: ({intervalLabel}) => intervalLabel === Scope.HourIntervals ? [Scope.NumbersWithZero] : []
+    }, {
         produces: [Scope.NumbersWithoutZero],
         infer: ({intervalLabel, requireZero, requireMultipleOf5}) => !requireZero
             && (intervalLabel === Scope.HalfHourIntervals
