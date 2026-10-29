@@ -5,13 +5,24 @@ import {hasLabel, selectExactMatch} from '../../lib/resolvers.ts';
 
 import {generatorLabelRule} from '../compatibility-rules.ts';
 
-export const spec: GeneratorSpec = {
+export const spec: GeneratorSpec<typeof TimeGeneratorSchema> = {
     generatorId: 'time',
     compatibility: [generatorLabelRule('clock-period-and-interval', [
         Scope.AnteMeridiem, Scope.PostMeridiem, Scope.MultiplesOf5, Scope.MinuteIntervals
     ], selected => !(selected(Scope.AnteMeridiem) && selected(Scope.PostMeridiem))
         && (!selected(Scope.MultiplesOf5) || selected(Scope.MinuteIntervals)))],
     generalLabels: [Area.MeasuringTime, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives],
+    // SPEC-12: neither the interval nor the false zero predicate alone proves absence.
+    // Conditional aliases would change direct fallback sampling. At these precisions,
+    // every consumer uses positive 12-hour components and omits the stored zero seconds.
+    inferredLabels: [{
+        produces: [Scope.NumbersWithoutZero],
+        infer: ({intervalLabel, requireZero, requireMultipleOf5}) => !requireZero
+            && (intervalLabel === Scope.HalfHourIntervals
+                || intervalLabel === Scope.MinuteIntervals && requireMultipleOf5)
+            ? [Scope.NumbersWithoutZero]
+            : []
+    }],
 };
 
 

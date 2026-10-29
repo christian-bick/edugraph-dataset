@@ -2,7 +2,7 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {TimeIntervalSeconds, TimeProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {Scope} from "edugraph-ts";
-import {TimeGeneratorConfig, TimeGeneratorSchema} from "./spec.ts";
+import {TimeGeneratorConfig, TimeGeneratorSchema, spec} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
 
 function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): TimeIntervalSeconds {
@@ -23,6 +23,7 @@ function resolveInterval(intervalLabel: TimeGeneratorConfig['intervalLabel']): T
 export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGeneratorConfig> {
     type: AbstractProblem['type'] = 'time';
     schema = TimeGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: TimeGeneratorConfig): ProblemStub | null {
         validateConfigFields('time', config, [
