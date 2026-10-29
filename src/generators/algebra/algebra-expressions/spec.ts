@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
-import type {ConfigFromSchema} from '../../../types/schema.ts';
+import {exactResolver, withLabelChoices, type ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 import {allowedNumericProfiles, numericContextLabels, numericProfileBundles, numericProfileLabels,
     resolveNumericProfile} from './numeric-profiles.ts';
@@ -24,6 +24,26 @@ const relations = [
     [[Area.AlgebraicExpression, Area.AlgebraicSubstitution, Area.OrderOfOperations], 'substitution'],
     [[Area.AlgebraicExpression, Area.AlgebraicModeling], 'modeling']
 ] as const;
+// These symbolic frames all display integral constants or coefficients. Integer
+// presence describes those values; it does not assert a domain for the unbound variable.
+const canonicalRelations = relations.map(([labels, value]) => [
+    value.startsWith('symbolic-') ? [...labels, Scope.IntegerNumbers] : labels, value
+] as const);
+const exactRelation = selectExactLabelSetMap([
+    ...canonicalRelations, ...relations.filter(([, value]) => value.startsWith('symbolic-'))
+]);
+const resolveRelation = withLabelChoices(exactResolver((labels: string[]) => {
+    // Preserve original RationalNumbers routes when fallback probing combines a
+    // requested broad kind with a newly declared integer-literal alternative.
+    if (labels.includes(Scope.RationalNumbers) && labels.includes(Scope.IntegerNumbers)) return undefined;
+    try { return exactRelation(labels); } catch (error) {
+        // A fallback can specialize Factor to Coefficient. Reject the blended
+        // exact roles instead of treating that probe as an authored conjunction.
+        if (labels.includes(Scope.IntegerNumbers) && error instanceof Error
+            && error.message.startsWith('Unsupported exact label combination:')) return undefined;
+        throw error;
+    }
+}), exactRelation.labelChoices!);
 const powers = [[[], 'none'], [[Area.Exponentiation, Scope.IntegerExponent], 'allow-zero'],
     [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], 'positive']] as const;
 
@@ -43,11 +63,18 @@ export const spec: GeneratorSpec = {
             const profile = chosen.length ? index + 1 : 0;
             return index >= 0 || !chosen.length
                 ? allowedNumericProfiles(selected).some(value => value === profile) : false;
-        })]
+        }), {
+        id: 'algebra-original-rational-context',
+        dependencies: [{scope: 'target', label: Scope.RationalNumbers},
+            {scope: 'generator', label: Scope.RationalNumbers}],
+        predicate: labels => !labels.exact('target', Scope.RationalNumbers)
+            || labels.exact('generator', Scope.RationalNumbers)
+    }]
 };
 
 export const AlgebraExpressionsGeneratorSchema = {
-    relation: [[...new Set(relations.flatMap<string>(([labels]) => labels))], selectExactLabelSetMap(relations), relations.map(([labels]) => labels)],
+    relation: [[...new Set(canonicalRelations.flatMap<string>(([labels]) => labels))],
+        resolveRelation, canonicalRelations.map(([labels]) => labels)],
     power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)],
     numericProfile: [numericProfileLabels, resolveNumericProfile, [[], ...numericProfileBundles]]
 } as const;

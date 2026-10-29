@@ -2,9 +2,11 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planCompatibility} from '../../../lib/compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
+import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
-import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {implementationTodos, spec as activeTargets} from '../../../spec/ccss/grade-06.ts';
 import type {AlgebraicExpressionProblem, ExactPowerFact} from '../../../types/problems.ts';
 import {spec as write, AlgebraExpressionWriteViewSchema as writeSchema} from '../../../visuals/views/operations/algebra-expression-write/spec.ts';
@@ -73,6 +75,8 @@ describe('algebra expression capability ownership and composition', () => {
                         ? [Scope.Base10] : [];
                     if (target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId) {
                         supportedLabels.push(Scope.RationalNumbers);
+                    } else if ([parts.viewId, grouped.viewId].includes(intendedViewId)) {
+                        supportedLabels.push(Scope.IntegerNumbers);
                     }
                     expect(new Set(draw.labels.filter(label => !numericProfileLabels.includes(label as never))))
                         .toEqual(new Set([...target.labels, ...supportedLabels]));
@@ -86,6 +90,52 @@ describe('algebra expression capability ownership and composition', () => {
                 }
             }
         }
+    });
+
+    it('annotates explicit integer literals in every symbolic frame without claiming a variable domain or sign/zero', () => {
+        const roles = [[Area.Term], [Area.Factor], [Area.Coefficient], [Area.Addition],
+            [Area.Multiplication], [Area.Division], [Area.GroupingSymbol, Area.Operand]];
+        const evaluator = createLabelDependencyEvaluator();
+        for (const role of roles) {
+            const requested = [Area.AlgebraicExpression, ...role];
+            const resolved = extractConfig(AlgebraExpressionsGeneratorSchema, requested);
+            expect(resolved.resolvedLabels).toContain(Scope.IntegerNumbers);
+            expect(resolved.resolvedLabels).not.toContain(Scope.RationalNumbers);
+            expect(resolved.config.numericProfile).toBe(0);
+            expect(resolved.resolvedLabels.filter(label => numericProfileLabels.includes(label as never))).toEqual([]);
+            const evaluated = evaluator.evaluate([...resolved.resolvedLabels, Scope.ArabicNumerals, Scope.Base10]);
+            expect(evaluated.assessments.find(item => item.facet === 'numberKind')?.status).toBe('satisfied');
+            expect(evaluated.assessments.filter(item => ['operandCount', 'operandDigits'].includes(item.facet))).toEqual([]);
+            const stub = new AlgebraExpressionsGenerator().generate(resolved.config)!;
+            const literals = (node: AlgebraicExpressionProblem['expression']): number[] => node.kind === 'number'
+                ? node.value.denominator === 1 ? [node.value.numerator] : []
+                : node.kind === 'binary' ? [...literals(node.left), ...literals(node.right)]
+                    : node.kind === 'group' ? literals(node.expression)
+                        : node.kind === 'negation' ? literals(node.operand)
+                            : node.kind === 'power' ? literals(node.base) : [];
+            expect(literals(stub.data.structuralExpression.expression).length).toBeGreaterThan(0);
+        }
+    });
+
+    it('keeps explicit broad RationalNumbers requests on their original exact-rational relations', () => {
+        const requested = [Scope.RationalNumbers];
+        const result = planCompatibility({identity: {targetId: 'rational-context', generatorId: spec.generatorId, viewId: 'proof'},
+            targetLabels: requested, generatorLabels: [], viewLabels: [], generatorRules: spec.compatibility,
+            fields: normalizeSchemaChoices(AlgebraExpressionsGeneratorSchema, requested, 'generator')});
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error(result.reason);
+        for (const selection of enumerateDependencyAuditSelections(result.plan).selections) {
+            expect(selection.labels).toContain(Scope.RationalNumbers);
+            expect(selection.labels).not.toContain(Scope.IntegerNumbers);
+        }
+        for (let seed = 0; seed < 32; seed++) {
+            setSeed(seed);
+            const resolved = extractConfig(AlgebraExpressionsGeneratorSchema, requested);
+            expect(resolved.resolvedLabels).toContain(Scope.RationalNumbers);
+            expect(resolved.config.relation?.startsWith('symbolic-')).toBe(false);
+        }
+        expect(() => extractConfig(AlgebraExpressionsGeneratorSchema,
+            [Area.AlgebraicExpression, Area.Factor, Area.Coefficient])).toThrow(/Unsupported exact label combination/);
     });
 
     it('does not let a prescribed phrase acquire hidden fallback structural or modeling claims', () => {

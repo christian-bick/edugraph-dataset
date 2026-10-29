@@ -79,7 +79,7 @@ describe('algebra numeric-frame and visible-domain profiles', () => {
         }
     });
 
-    it('leaves all seven hidden-domain structural contexts unresolved without reading their bindings', () => {
+    it('leaves unproved sign/zero claims unresolved in all seven symbolic contexts without reading hidden bindings', () => {
         for (const relation of ['symbolic-terms', 'symbolic-factors', 'symbolic-coefficient', 'symbolic-sum',
             'symbolic-product', 'symbolic-quotient', 'symbolic-grouped']) {
             expect(profilesForRelation(relation)).toEqual([0]);
