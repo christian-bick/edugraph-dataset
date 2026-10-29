@@ -106,9 +106,15 @@ describe('catalog label choice contracts', () => {
     it('declares fraction task conjunctions beyond the fallback and retains operation context', () => {
         const schema = {task: FractionArithmeticGeneratorSchema.task};
         const labels = [Scope.TenthFractions, Area.Addition, Area.Multiplication];
-        expect(choices(schema, labels)[0].alternatives.map(choice => choice.labels)).toEqual([[Scope.TenthFractions]]);
-        expect(resolveSchemaChoices(schema, labels, {task: [Scope.TenthFractions]}).config.task)
+        const canonicalTenths = [Scope.TenthFractions, Scope.ProperFractions];
+        expect(choices(schema, labels)[0].alternatives.map(choice => choice.labels)).toEqual([[...canonicalTenths].sort()]);
+        const resolved = resolveSchemaChoices(schema, labels, {task: canonicalTenths});
+        expect(resolved.config.task)
             .toBe('tenths-hundredths-addition');
+        expect(resolved.resolvedLabels).toEqual([...canonicalTenths].sort());
+        expect(schema.task[1](labels)).toBe(resolved.config.task);
+        expect(() => resolveSchemaChoices(schema, [Scope.TenthFractions, Area.Addition],
+            {task: canonicalTenths})).toThrow(/did not resolve/);
         const mixed = [Scope.ImproperFractions, Scope.MixedNumbers];
         expect(resolveSchemaChoices(schema, mixed, {task: mixed}).config.task).toBe('decompose-mixed');
     });

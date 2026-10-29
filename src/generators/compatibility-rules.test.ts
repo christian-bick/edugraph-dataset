@@ -5,8 +5,10 @@ import {planModelCompatibility, type ViewChoiceModel} from '../lib/model-compati
 import {planCompatibility, sampleGenerationPlan} from '../lib/compatibility.ts';
 import {bindingsForSelection} from '../lib/planned-generation.ts';
 import {resolveSchemaChoices} from '../lib/schema-choices.ts';
+import {setSeed} from '../lib/random.ts';
 import {generatorLabelRule} from './compatibility-rules.ts';
 import {ShapeClassifyAttributesGenerator} from './shape/shape-classify-attributes/generator.ts';
+import {PlaceValueArithmeticGenerator} from './place-value/place-value-arithmetic/generator.ts';
 
 let generators: Map<string, GeneratorModelDescriptor>;
 let views: Map<string, ViewModelDescriptor>;
@@ -98,17 +100,18 @@ const cases: readonly [string, string, readonly string[], readonly string[]][] =
     ['place-value-arithmetic', 'single-digit operand profile',
         [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
         [Area.Addition, Scope.SingleDigitSmallestOperand]],
-    ['place-value-arithmetic', 'addition zero exclusion',
-        [Area.AdditionPlaceValuePartitioning], [Area.AdditionPlaceValuePartitioning, Scope.NumbersWithZero]],
+    ['place-value-arithmetic', 'two-digit addition coefficient zero',
+        [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.NumbersWithZero],
+        [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.NumbersWithoutZero]],
     ['place-value-arithmetic', 'multiple-ten addition profile',
         [Area.Addition, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand], [Area.Addition, Scope.MultiplesOf10]],
     ['place-value-arithmetic', 'multiple-ten regrouping',
         [Area.Subtraction, Scope.MultiplesOf10], [Area.Subtraction, Scope.MultiplesOf10, Area.IntegerRegrouping]],
     ['place-value-arithmetic', 'subtraction operand profile',
         [Area.Subtraction], [Area.Subtraction, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]],
-    ['place-value-arithmetic', 'zero regrouping exclusion',
-        [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero],
-        [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero, Area.IntegerRegrouping]],
+    ['place-value-arithmetic', 'regrouping requires a multiple-digit largest operand',
+        [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero, Area.IntegerRegrouping],
+        [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero, Area.IntegerRegrouping, Scope.SingleDigitLargestOperand]],
     ['area-decomposition', 'distributive area features',
         [Area.DistributiveLaw, Area.Multiplication, Scope.ThreeOperands], [Area.DistributiveLaw]],
     ['geometry-perimeter', 'rectangle equation',
@@ -138,6 +141,26 @@ describe('generator configuration compatibility', () => {
         const result = plan(generator, rejected);
         expect(result.supported, 'unsupported semantic configuration').toBe(false);
         if (!result.supported) expect(result.reason).toBe('incompatible-rules');
+    });
+
+    it.each([
+        [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
+        [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping]
+    ])('allows zero coefficients without changing %s into an equality', (...profile) => {
+        const labels = [...profile, Scope.NumbersWithZero, Scope.NumbersSmaller1000];
+        const result = plan('place-value-arithmetic', labels);
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error(result.reason);
+        const receipt = sampleGenerationPlan(result.plan, () => 0);
+        const binding = bindingsForSelection(result.plan, receipt);
+        const generator = new PlaceValueArithmeticGenerator();
+        const resolved = resolveSchemaChoices(generator.schema, labels, binding.generator);
+        expect(resolved.config.requireZero).toBe(false);
+        expect(resolved.config.coefficientPresence).toBe(true);
+        setSeed(73);
+        const {data} = generator.generate(resolved.config)!;
+        expect(data.answer).toBeGreaterThan(0);
+        expect([...data.operands, data.result].flatMap(digits => Object.values(digits))).toContain(0);
     });
 
     it('rejects competing explicit attribute count modes before rule evaluation', () => {
