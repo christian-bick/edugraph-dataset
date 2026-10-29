@@ -206,11 +206,11 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             .map(alternative => alternative.labels)).toEqual([[]]);
     });
 
-    it.each(operations)('keeps an absent zero claim unannotated without changing %s samples', operation => {
+    it.each(operations)('declares the existing zero-free default without changing %s samples', operation => {
         const labels = [operation, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20];
         const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
             .find(domain => domain.field === 'requireZero');
-        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[]]);
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithoutZero]]);
 
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
@@ -223,12 +223,32 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             expect(after.config.requireZero).toBe(false);
             expect(after.config).toEqual(before.config);
             expect(before.resolvedLabels).toContain(Scope.NumbersWithoutZero);
-            expect(after.resolvedLabels).not.toContain(Scope.NumbersWithoutZero);
+            expect(after.resolvedLabels).toContain(Scope.NumbersWithoutZero);
             expect(after.resolvedLabels).not.toContain(Scope.NumbersWithZero);
             expect(updated).not.toBeNull();
             expect(updated?.data).toEqual(original?.data);
             expect([updated!.data.num1, updated!.data.num2, updated!.data.answer]).not.toContain(0);
         }
+    });
+
+    it.each([Area.Addition, Area.Subtraction])('keeps the unannotated %s branch for requested number lines', operation => {
+        const labels = [operation, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20, Scope.Numberline];
+        const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
+            .find(domain => domain.field === 'requireZero');
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[]]);
+        for (let seed = 0; seed < 20; seed++) {
+            setSeed(seed);
+            const ordinary = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels.filter(label => label !== Scope.Numberline));
+            const ordinaryData = generator.generate(ordinary.config)?.data;
+            setSeed(seed);
+            const numberLine = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
+            expect(numberLine.config).toEqual(ordinary.config);
+            expect(generator.generate(numberLine.config)?.data).toEqual(ordinaryData);
+            expect(numberLine.resolvedLabels).not.toContain(Scope.NumbersWithZero);
+            expect(numberLine.resolvedLabels).not.toContain(Scope.NumbersWithoutZero);
+        }
+        expect(() => extractConfig(ArithmeticOpsPairsGeneratorSchema, [...labels, Scope.NumbersWithoutZero]))
+            .toThrow('cannot complete');
     });
 
     it.each(operations)('preserves the explicitly requested zero branch for %s', operation => {
@@ -339,7 +359,7 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
             expect(stub!.data.num1).toBe(stub!.data.num2);
             expect(stub!.data.answer % 2).toBe(0);
             expect(stub!.data.answer).toBeLessThanOrEqual(20);
-            expect(stub!.labels).not.toContain(Scope.NumbersWithoutZero);
+            expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
             expect([stub!.data.num1, stub!.data.num2, stub!.data.answer]).not.toContain(0);
         }
     });

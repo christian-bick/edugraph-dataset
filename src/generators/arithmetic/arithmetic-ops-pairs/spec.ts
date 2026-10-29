@@ -8,6 +8,7 @@ import {largestOperandWidthLabels, largestOperandWidthValue, operandWidthContext
     resolveLargestOperandDigits, usesLargestOperandWidthProfiles} from './operand-width.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {resolveZeroOccurrence} from './zero-occurrence.ts';
 
 
 const operandWidthLabels = [
@@ -90,7 +91,8 @@ export const ArithmeticOpsPairsGeneratorSchema = {
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        hasLabel(Scope.NumbersWithZero)
+        resolveZeroOccurrence,
+        [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
     ],
     requireMultipleOf10: [
         [Scope.MultiplesOf10, ...operandWidthLabels],
