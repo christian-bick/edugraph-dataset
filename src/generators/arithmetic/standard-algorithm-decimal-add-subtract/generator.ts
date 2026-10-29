@@ -4,6 +4,7 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {DecimalStandardAddSubtractColumn, DecimalStandardAddSubtractProblem} from '../../../types/problems.ts';
 import {alignedDecimalCoefficient, decimalPowerOfTen, exactDecimal, parseExactDecimal, validateMagnitudeRange} from '../standard-decimal-helpers.ts';
 import {StandardAlgorithmDecimalAddSubtractGeneratorSchema, type StandardAlgorithmDecimalAddSubtractGeneratorConfig} from './spec.ts';
+import {hasDecimalColumnZero} from './zero-profile.ts';
 
 const generatorId = 'standard-algorithm-decimal-add-subtract';
 type Operation = DecimalStandardAddSubtractProblem['operation'];
@@ -85,13 +86,23 @@ export class StandardAlgorithmDecimalAddSubtractGenerator implements ProblemGene
     type: AbstractProblem['type'] = 'arithmetic';
     schema = StandardAlgorithmDecimalAddSubtractGeneratorSchema;
 
-    generate(config: StandardAlgorithmDecimalAddSubtractGeneratorConfig): ProblemStub<DecimalStandardAddSubtractProblem> {
-        validateConfigFields(generatorId, config, ['operation', 'range']);
+    generate(config: StandardAlgorithmDecimalAddSubtractGeneratorConfig): ProblemStub<DecimalStandardAddSubtractProblem> | null {
+        validateConfigFields(generatorId, config, ['operation', 'range', 'zeroPresence']);
         if (config.operation !== 'addition' && config.operation !== 'subtraction') {
             throw new GeneratorValidationError(generatorId, 'Operation must be addition or subtraction.');
         }
+        if (typeof config.zeroPresence !== 'boolean') {
+            throw new GeneratorValidationError(generatorId, 'Zero presence must be a boolean.');
+        }
         const ceiling = validateMagnitudeRange(config.range, generatorId);
-        const [top, bottom] = sampleNumerals(config.operation, ceiling);
-        return {data: buildDecimalStandardAddSubtractProblem(config.operation, top, bottom)};
+        // Condition the unchanged proposal law. Both profiles have positive support
+        // at every admitted cap (e.g. 11.1+11.1 and 33.3-11.1 are zero-free).
+        // A numeric exhaustion uses the normal deterministic pipeline retry, IMPL-G1.
+        for (let attempt = 0; attempt < 2048; attempt++) {
+            const [top, bottom] = sampleNumerals(config.operation, ceiling);
+            const data = buildDecimalStandardAddSubtractProblem(config.operation, top, bottom);
+            if (hasDecimalColumnZero(data) === config.zeroPresence) return {data};
+        }
+        return null;
     }
 }

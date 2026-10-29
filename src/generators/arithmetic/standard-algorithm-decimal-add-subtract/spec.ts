@@ -14,7 +14,10 @@ export const StandardAlgorithmDecimalAddSubtractGeneratorSchema = {
         [Area.AdditionStandardAlgorithm, 'addition'],
         [Area.SubtractionStandardAlgorithm, 'subtraction']
     ] as const)],
-    range: [[Scope.NumbersSmaller100000, Scope.NumbersSmaller1000000], resolveRangeFromLabels]
+    range: [[Scope.NumbersSmaller100000, Scope.NumbersSmaller1000000], resolveRangeFromLabels],
+    zeroPresence: [[Scope.NumbersWithZero, Scope.NumbersWithoutZero], selectExactLabelMap([
+        [Scope.NumbersWithZero, true], [Scope.NumbersWithoutZero, false]
+    ] as const)]
 } as const;
 
 export type StandardAlgorithmDecimalAddSubtractGeneratorConfig = ConfigFromSchema<

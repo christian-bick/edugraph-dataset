@@ -7,7 +7,8 @@ import type {StandardAlgorithmDecimalAddSubtractGeneratorConfig} from './spec.ts
 
 const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
 type Operation = DecimalStandardAddSubtractProblem['operation'];
-const config = (operation: Operation = 'addition', max = 100000): StandardAlgorithmDecimalAddSubtractGeneratorConfig => ({operation, range: {min: 0, max}});
+const config = (operation: Operation = 'addition', max = 100000): StandardAlgorithmDecimalAddSubtractGeneratorConfig =>
+    ({operation, range: {min: 0, max}, zeroPresence: true});
 
 function assertTrace(data: DecimalStandardAddSubtractProblem): void {
     const scale = Math.max(data.top.scale, data.bottom.scale);
@@ -105,7 +106,7 @@ describe('decimal standard addition/subtraction configured generation', () => {
                 const observed = new Set<string>();
                 for (let seed = 0; seed < 80; seed++) {
                     setSeed(seed);
-                    const data = generator.generate(config(operation, max)).data;
+                    const data = generator.generate(config(operation, max))!.data;
                     assertTrace(data);
                     expect(data.operation).toBe(operation);
                     expect(data.top.coefficient >= 10 * 10 ** data.top.scale || data.bottom.coefficient >= 10 * 10 ** data.bottom.scale).toBe(true);
@@ -134,9 +135,9 @@ describe('decimal standard addition/subtraction configured generation', () => {
         let larger = false;
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const small = generator.generate(config('addition', 100000)).data;
+            const small = generator.generate(config('addition', 100000))!.data;
             setSeed(seed);
-            const large = generator.generate(config('addition', 1000000)).data;
+            const large = generator.generate(config('addition', 1000000))!.data;
             if (large.alignment.topCoefficient > 100000 || large.result.coefficient > 100000) larger = true;
             expect(small.result.coefficient).toBeLessThanOrEqual(100000);
         }
@@ -147,7 +148,7 @@ describe('decimal standard addition/subtraction configured generation', () => {
         let boundary: DecimalStandardAddSubtractProblem | undefined;
         for (let seed = 0; seed < 80; seed++) {
             setSeed(seed);
-            const data = generator.generate(config('addition', max)).data;
+            const data = generator.generate(config('addition', max))!.data;
             if (data.result.coefficient === max) { boundary = data; break; }
         }
         expect(boundary?.result.coefficient).toBe(max);
@@ -160,6 +161,6 @@ describe('decimal standard addition/subtraction configured generation', () => {
         const first = generator.generate(config('subtraction'));
         setSeed(149);
         expect(generator.generate(config('subtraction'))).toEqual(first);
-        expect(Object.keys(first)).toEqual(['data']);
+        expect(Object.keys(first!)).toEqual(['data']);
     });
 });
