@@ -12,6 +12,7 @@ const generalConfig = (overrides: Partial<PlaceValueArithmeticGeneratorConfig> =
     requireTwoDigitLargest: false,
     requireMultipleOf10: false,
     requireZero: false,
+    largestOperandProfile: 'legacy',
     range: {min: 0, max: 1000},
     ...overrides
 });

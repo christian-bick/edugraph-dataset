@@ -30,6 +30,7 @@ const generate = (
         requireTwoDigitLargest: options.twoDigit ?? false,
         requireMultipleOf10: options.multipleOf10 ?? false,
         requireZero: options.zero ?? false,
+        largestOperandProfile: 'legacy',
         range: {min: 1, max: options.twoDigit || options.multipleOf10 ? 100 : 1000}
     });
     expect(stub).not.toBeNull();

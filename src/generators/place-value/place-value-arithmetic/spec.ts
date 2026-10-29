@@ -3,6 +3,8 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {needsPrimaryWidth, permitsPrimaryWidth, primaryWidthContext, primaryWidthLabels,
+    resolvePrimaryWidth} from './width-profile.ts';
 
 const resolveOperation = selectExactLabelMap([
     [Area.AdditionPlaceValuePartitioning, Area.Addition],
@@ -35,6 +37,12 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
         // the decomposition and partial differences of a partitioning strategy.
         if (multiples && selected(Area.SubtractionPlaceValuePartitioning)) return false;
         return multiples ? !regrouping : !zero || !regrouping;
+    }), generatorLabelRule('place-value-primary-width', [...primaryWidthLabels, ...primaryWidthContext], selected => {
+        const single = selected(Scope.SingleDigitLargestOperand);
+        const multiple = selected(Scope.MultipleDigitLargestOperand);
+        if (single && multiple) return false;
+        if (single || multiple) return permitsPrimaryWidth(selected, single ? 'single' : 'multiple');
+        return !needsPrimaryWidth(selected);
     })],
     // SPEC-12: neither subtraction nor regrouping alone guarantees this width.
     // Conditional same-value bundles would change direct fallback sampling;
@@ -95,6 +103,11 @@ export const PlaceValueArithmeticGeneratorSchema = {
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
         hasLabel(Scope.NumbersWithZero)
+    ],
+    largestOperandProfile: [
+        primaryWidthLabels,
+        resolvePrimaryWidth,
+        [[], ...primaryWidthLabels.map(label => [label])]
     ],
     range: [
         deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),

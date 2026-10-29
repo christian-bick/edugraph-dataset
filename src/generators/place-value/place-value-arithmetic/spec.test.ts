@@ -84,22 +84,24 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         [Area.Addition], [Area.Addition, Area.IntegerRegrouping],
         [Area.AdditionPlaceValuePartitioning, Area.IntegerRegrouping],
         [Area.Subtraction], [Area.SubtractionPlaceValuePartitioning]
-    ].map(labels => ({labels})))('does not infer a width from either condition alone: $labels', ({labels}) => {
+    ].map(labels => ({labels})))('uses the selected general width instead of assuming borrowing: $labels', ({labels}) => {
         setSeed(9);
         const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [...labels, Scope.NumbersSmaller1000]);
         expect(stub).not.toBeNull();
-        expect(stub!.labels).not.toContain(Scope.MultipleDigitLargestOperand);
+        const width = Math.max(stub!.data.num1, stub!.data.num2) <= 9
+            ? Scope.SingleDigitLargestOperand : Scope.MultipleDigitLargestOperand;
+        expect(stub!.labels).toContain(width);
     });
 
-    it('keeps the width annotation out of matching capabilities', () => {
+    it('makes a truthful borrowed width matching-capable and rejects single-digit borrowing', () => {
         const labels = [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping,
             Scope.NumbersSmaller1000, ...modelView.generalLabels];
         const consumer = {viewId: modelView.viewId, generalLabels: modelView.generalLabels, schema: {}, spec: modelView};
         expect(planModelCompatibility({id: 'borrow', labels}, model, consumer).supported).toBe(true);
-        for (const width of [Scope.MultipleDigitLargestOperand, Scope.SingleDigitLargestOperand]) {
-            expect(planModelCompatibility({id: 'borrow-with-width', labels: [...labels, width]}, model, consumer)
-                .supported).toBe(false);
-        }
+        expect(planModelCompatibility({id: 'borrow-with-width',
+            labels: [...labels, Scope.MultipleDigitLargestOperand]}, model, consumer).supported).toBe(true);
+        expect(planModelCompatibility({id: 'borrow-with-width',
+            labels: [...labels, Scope.SingleDigitLargestOperand]}, model, consumer).supported).toBe(false);
     });
 
     it.each([modelView, writtenView])('resolves and replays the additional annotation for $viewId', view => {
