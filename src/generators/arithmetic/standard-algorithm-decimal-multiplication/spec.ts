@@ -8,7 +8,10 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.MultiplicationStandardAlgorithm, Scope.DecimalNumbers, Scope.Base10,
         Scope.NumbersWithoutNegatives, Scope.MultipleDigitLargestOperand,
-        Scope.TwoOperands
+        Scope.TwoOperands,
+        // The prescribed first coefficient pass has place-shift count zero;
+        // the consumer explicitly prints “shift 0” in every worked solution.
+        Scope.NumbersWithZero
     ]
 };
 

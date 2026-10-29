@@ -10,7 +10,9 @@ export const spec: GeneratorSpec = {
         Scope.IntegerNumbers,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.MultipleDigitSmallestOperand
+        Scope.MultipleDigitSmallestOperand,
+        // Every multi-digit multiplier has a shifted partial row with a zero place.
+        Scope.NumbersWithZero
     ]
 };
 

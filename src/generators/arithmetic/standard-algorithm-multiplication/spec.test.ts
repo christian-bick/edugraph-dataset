@@ -13,7 +13,8 @@ describe('StandardAlgorithmMultiplicationGenerator spec', () => {
             Scope.IntegerNumbers,
             Scope.Base10,
             Scope.NumbersWithoutNegatives,
-            Scope.MultipleDigitSmallestOperand
+            Scope.MultipleDigitSmallestOperand,
+            Scope.NumbersWithZero
         ]);
         expect(StandardAlgorithmMultiplicationGeneratorSchema).toEqual({});
     });
@@ -34,5 +35,6 @@ describe('StandardAlgorithmMultiplicationGenerator spec', () => {
         expect(stub!.data.partialRows).toHaveLength(String(stub!.data.multiplier).length);
         expect(stub!.data.partialRows.reduce((sum, row) => sum + row.alignedProduct, 0))
             .toBe(stub!.data.product);
+        expect(stub!.data.partialRows.some(row => row.shiftPlaces > 0 && row.alignedProduct % 10 === 0)).toBe(true);
     });
 });
