@@ -48,7 +48,9 @@ describe('general fraction division leaf contracts', () => {
     it('accepts every original operand profile, context, and optional witness state in all six leaves and modes', () => {
         const generator = new FractionDivisionRelationsGenerator();
         const contexts = new Set<string>();
-        for (const operandProfile of ['fraction-by-fraction', 'fraction-by-integer', 'integer-by-fraction'] as const) {
+        for (const operandProfile of ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
+            'fraction-by-integer-proper', 'fraction-by-integer-improper',
+            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const) {
             for (const withEquation of [false, true]) {
                 for (const withMultiplication of [false, true]) {
                     for (let seed = 0; seed < 12; seed++) {
@@ -87,7 +89,7 @@ describe('general fraction division leaf contracts', () => {
     it('rejects malformed general arithmetic, models, contexts, and optional witnesses in every leaf', () => {
         setSeed('general-fraction-invalid-leaf');
         const {data} = new FractionDivisionRelationsGenerator().generate({
-            operandProfile: 'fraction-by-fraction', withEquation: true, withMultiplication: true
+            operandProfile: 'fraction-by-fraction-proper', withEquation: true, withMultiplication: true
         });
         for (const invalid of [
             undefined,

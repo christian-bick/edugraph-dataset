@@ -21,12 +21,13 @@ const reduced = (value: FractionQuotientValue) => {
 describe('FractionDivisionRelationsGenerator', () => {
     it('requires all mathematical configuration fields without silent defaults', () => {
         for (const config of [
-            null, {}, {operandProfile: 'fraction-by-fraction'},
-            {operandProfile: 'fraction-by-fraction', withEquation: false},
-            {operandProfile: 'fraction-by-fraction', withEquation: null, withMultiplication: false},
-            {operandProfile: 'fraction-by-fraction', withEquation: 'false', withMultiplication: false},
-            {operandProfile: 'fraction-by-fraction', withEquation: false, withMultiplication: 0},
-            {operandProfile: 'whole-by-whole', withEquation: false, withMultiplication: false}
+            null, {}, {operandProfile: 'fraction-by-fraction-proper'},
+            {operandProfile: 'fraction-by-fraction-proper', withEquation: false},
+            {operandProfile: 'fraction-by-fraction-proper', withEquation: null, withMultiplication: false},
+            {operandProfile: 'fraction-by-fraction-proper', withEquation: 'false', withMultiplication: false},
+            {operandProfile: 'fraction-by-fraction-proper', withEquation: false, withMultiplication: 0},
+            {operandProfile: 'whole-by-whole', withEquation: false, withMultiplication: false},
+            {operandProfile: 'toString', withEquation: false, withMultiplication: false}
         ]) {
             expect(() => generator.generate(config as never)).toThrow();
         }
@@ -45,7 +46,8 @@ describe('FractionDivisionRelationsGenerator', () => {
         const problems = new Set<string>();
         for (let seed = 0; seed < 500; seed++) {
             setSeed(seed);
-            const stub = generator.generate({operandProfile, withEquation: false, withMultiplication: false});
+            const selectedProfile = `${operandProfile}-${seed % 2 ? 'proper' : 'improper'}` as const;
+            const stub = generator.generate({operandProfile: selectedProfile, withEquation: false, withMultiplication: false});
             expect(Object.keys(stub)).toEqual(['data']);
             const {data} = stub;
             expect(data.kind).toBe('fraction-division-relation');
@@ -155,9 +157,10 @@ describe('FractionDivisionRelationsGenerator', () => {
             for (const operandProfile of operandProfiles) {
                 for (let seed = 0; seed < 40; seed++) {
                     setSeed(seed);
-                    const data = generator.generate({operandProfile, withEquation, withMultiplication}).data;
+                    const selectedProfile = `${operandProfile}-${seed % 2 ? 'proper' : 'improper'}` as const;
+                    const data = generator.generate({operandProfile: selectedProfile, withEquation, withMultiplication}).data;
                     setSeed(seed);
-                    const baseline = generator.generate({operandProfile, withEquation: false, withMultiplication: false}).data;
+                    const baseline = generator.generate({operandProfile: selectedProfile, withEquation: false, withMultiplication: false}).data;
                     const {equationWitness, multiplicationWitness, ...relation} = data;
                     expect(relation).toEqual(baseline);
                     expect(!!equationWitness).toBe(withEquation);
@@ -182,7 +185,7 @@ describe('FractionDivisionRelationsGenerator', () => {
     );
 
     it('replays identical original forms, physical context and model groups', () => {
-        const config = {operandProfile: 'fraction-by-fraction', withEquation: true, withMultiplication: true} as const;
+        const config = {operandProfile: 'fraction-by-fraction-proper', withEquation: true, withMultiplication: true} as const;
         setSeed(123);
         const first: FractionDivisionRelationProblem = generator.generate(config).data;
         setSeed(123);

@@ -4,6 +4,12 @@ import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {FractionDivisionRelationsGenerator} from './generator.ts';
 import {spec} from './spec.ts';
+import type {FractionDivisionRelationProblem} from '../../../types/problems.ts';
+
+const magnitudeOf = (data: FractionDivisionRelationProblem): Scope => {
+    const operand = data.operandProfile === 'integer-by-fraction' ? data.divisor : data.dividend;
+    return operand.numerator < operand.denominator ? Scope.ProperFractions : Scope.ImproperFractions;
+};
 
 const profiles = [
     [[Scope.FractionDividend, Scope.FractionDivisor], 'fraction-by-fraction'],
@@ -21,7 +27,7 @@ describe('fraction-division-relations capabilities', () => {
             Area.Division, Scope.NumbersWithoutNegatives, ...labels, Ability.ProcedureExecution
         ])!;
         expect(problem.data.operandProfile).toBe(operandProfile);
-        expect(new Set(problem.labels)).toEqual(new Set(labels));
+        expect(new Set(problem.labels)).toEqual(new Set([...labels, magnitudeOf(problem.data)]));
         expect(problem.data).not.toHaveProperty('equationWitness');
         expect(problem.data).not.toHaveProperty('multiplicationWitness');
     });
@@ -32,7 +38,7 @@ describe('fraction-division-relations capabilities', () => {
         ] as const) {
             const problem = generateWithLabels(new FractionDivisionRelationsGenerator(), [...labels, mathematicalLabel])!;
             expect(problem.data[field]).toBeDefined();
-            expect(new Set(problem.labels)).toEqual(new Set([...labels, mathematicalLabel]));
+            expect(new Set(problem.labels)).toEqual(new Set([...labels, mathematicalLabel, magnitudeOf(problem.data)]));
         }
     });
 
@@ -41,7 +47,7 @@ describe('fraction-division-relations capabilities', () => {
         const problem = generateWithLabels(new FractionDivisionRelationsGenerator(), labels)!;
         expect(problem.data.equationWitness).toBeDefined();
         expect(problem.data.multiplicationWitness).toBeDefined();
-        expect(new Set(problem.labels)).toEqual(new Set(labels));
+        expect(new Set(problem.labels)).toEqual(new Set([...labels, magnitudeOf(problem.data)]));
     });
 
     it('rejects conflicting original role bundles', () => {
@@ -51,6 +57,18 @@ describe('fraction-division-relations capabilities', () => {
             [Scope.FractionDividend, Scope.FractionDivisor, Scope.IntegerDivisor]
         ]) {
             expect(() => generateWithLabels(new FractionDivisionRelationsGenerator(), labels)).toThrow();
+        }
+    });
+
+    it.each([Scope.ProperFractions, Scope.ImproperFractions])('supports a preselected evidenced %s operand', magnitude => {
+        for (const [roles, operandProfile] of profiles) {
+            for (let seed = 0; seed < 20; seed++) {
+                setSeed(seed);
+                const generated = generateWithLabels(new FractionDivisionRelationsGenerator(), [...roles, magnitude])!;
+                expect(generated.data.operandProfile).toBe(operandProfile);
+                expect(generated.labels).toContain(magnitude);
+                expect(magnitudeOf(generated.data)).toBe(magnitude);
+            }
         }
     });
 

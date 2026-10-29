@@ -3,8 +3,30 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {FractionDivisionContext, FractionDivisionRelationProblem, FractionQuotientValue} from '../../../types/problems.ts';
 import {greatestCommonDivisor, pick, randomInteger, rational} from '../../ratio/helpers.ts';
 import {FractionDivisionRelationsGeneratorSchema, type FractionDivisionRelationsGeneratorConfig} from './spec.ts';
+import {random} from '../../../lib/random.ts';
 
 const fractionDenominators = [2, 3, 4, 6] as const;
+
+const operandProfiles = {
+    'fraction-by-fraction-proper': {kind: 'fraction-by-fraction', proper: true},
+    'fraction-by-fraction-improper': {kind: 'fraction-by-fraction', proper: false},
+    'fraction-by-integer-proper': {kind: 'fraction-by-integer', proper: true},
+    'fraction-by-integer-improper': {kind: 'fraction-by-integer', proper: false},
+    'integer-by-fraction-proper': {kind: 'integer-by-fraction', proper: true},
+    'integer-by-fraction-improper': {kind: 'integer-by-fraction', proper: false}
+} as const;
+
+/** Retain the old denominator law conditional on the selected explicit operand's magnitude. */
+function magnitudeDenominator(proper: boolean, dividend: boolean): number {
+    const weights = fractionDenominators.map(denominator => {
+        const total = 4 * denominator + (dividend ? 1 : 0);
+        const properCount = denominator - (dividend ? 0 : 1);
+        return (proper ? properCount : total - properCount) / total;
+    });
+    let position = random() * weights.reduce((sum, weight) => sum + weight, 0);
+    return fractionDenominators.find((_, index) => (position -= weights[index]!) < 0)
+        ?? fractionDenominators[fractionDenominators.length - 1];
+}
 
 function commonUnitModel(
     dividend: FractionQuotientValue, divisor: FractionQuotientValue
@@ -64,18 +86,22 @@ export class FractionDivisionRelationsGenerator implements ProblemGenerator<
 
     generate(config: FractionDivisionRelationsGeneratorConfig): ProblemStub<FractionDivisionRelationProblem> {
         validateConfigFields('fraction-division-relations', config, ['operandProfile', 'withEquation', 'withMultiplication']);
-        const operandProfile = config.operandProfile;
-        if (operandProfile !== 'fraction-by-fraction' && operandProfile !== 'fraction-by-integer'
-            && operandProfile !== 'integer-by-fraction') {
+        if (!Object.hasOwn(operandProfiles, config.operandProfile!)) {
             throw new GeneratorValidationError('fraction-division-relations', 'Unsupported original operand profile.');
         }
+        const selectedProfile = operandProfiles[config.operandProfile!];
         if (typeof config.withEquation !== 'boolean' || typeof config.withMultiplication !== 'boolean') {
             throw new GeneratorValidationError('fraction-division-relations', 'Mathematical witness choices must be resolved booleans.');
         }
-        const firstDenominator = operandProfile === 'integer-by-fraction' ? 1 : pick(fractionDenominators);
-        const secondDenominator = operandProfile === 'fraction-by-integer' ? 1 : pick(fractionDenominators);
-        const dividend = {numerator: randomInteger(0, 4 * firstDenominator), denominator: firstDenominator};
-        const divisor = {numerator: randomInteger(1, 4 * secondDenominator), denominator: secondDenominator};
+        const {kind: operandProfile, proper} = selectedProfile;
+        const classifyDividend = operandProfile !== 'integer-by-fraction';
+        const firstDenominator = classifyDividend ? magnitudeDenominator(proper, true) : 1;
+        const secondDenominator = operandProfile === 'fraction-by-integer' ? 1
+            : classifyDividend ? pick(fractionDenominators) : magnitudeDenominator(proper, false);
+        const dividend = {numerator: randomInteger(classifyDividend && !proper ? firstDenominator : 0,
+            classifyDividend && proper ? firstDenominator - 1 : 4 * firstDenominator), denominator: firstDenominator};
+        const divisor = {numerator: randomInteger(!classifyDividend && !proper ? secondDenominator : 1,
+            !classifyDividend && proper ? secondDenominator - 1 : 4 * secondDenominator), denominator: secondDenominator};
         const reciprocal = {numerator: divisor.denominator, denominator: divisor.numerator};
         const reciprocalProduct = {
             numerator: dividend.numerator * reciprocal.numerator,

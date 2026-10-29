@@ -4,9 +4,12 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const operandProfiles = [
-    [[Scope.FractionDividend, Scope.FractionDivisor], 'fraction-by-fraction'],
-    [[Scope.FractionDividend, Scope.IntegerDivisor], 'fraction-by-integer'],
-    [[Scope.IntegerDividend, Scope.FractionDivisor], 'integer-by-fraction']
+    [[Scope.FractionDividend, Scope.FractionDivisor, Scope.ProperFractions], 'fraction-by-fraction-proper'],
+    [[Scope.FractionDividend, Scope.FractionDivisor, Scope.ImproperFractions], 'fraction-by-fraction-improper'],
+    [[Scope.FractionDividend, Scope.IntegerDivisor, Scope.ProperFractions], 'fraction-by-integer-proper'],
+    [[Scope.FractionDividend, Scope.IntegerDivisor, Scope.ImproperFractions], 'fraction-by-integer-improper'],
+    [[Scope.IntegerDividend, Scope.FractionDivisor, Scope.ProperFractions], 'integer-by-fraction-proper'],
+    [[Scope.IntegerDividend, Scope.FractionDivisor, Scope.ImproperFractions], 'integer-by-fraction-improper']
 ] as const;
 
 export const spec: GeneratorSpec = {
@@ -16,7 +19,8 @@ export const spec: GeneratorSpec = {
 
 export const FractionDivisionRelationsGeneratorSchema = {
     operandProfile: [
-        [Scope.FractionDividend, Scope.FractionDivisor, Scope.IntegerDividend, Scope.IntegerDivisor],
+        [Scope.FractionDividend, Scope.FractionDivisor, Scope.IntegerDividend, Scope.IntegerDivisor,
+            Scope.ProperFractions, Scope.ImproperFractions],
         selectExactLabelSetMap(operandProfiles),
         operandProfiles.map(([labels]) => labels)
     ],
