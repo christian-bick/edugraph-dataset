@@ -41,8 +41,9 @@ records preserved target coverage and the resulting annotation repairs.
 
 Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
 matching-capable mathematical profiles. The
-[label-dependency continuation](docs/plan/label-dependency-graph.md#autonomous-continuation-2026-10-29)
-records verified repairs and the remaining contracts requiring a further design.
+[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
+record separates verified repairs from concrete questions about content, annotation contracts
+and rare module splits. Source readiness remains separate from stored-dataset acceptance.
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 

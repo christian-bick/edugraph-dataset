@@ -37,7 +37,7 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
     });
 
     it.each(variants)('resolves the %s target to the correlated relation', (
-        relation, area, scope, comparisonKind
+        relation, area, scope, _comparisonKind
     ) => {
         const labels = [...commonLabels, area, scope];
         setSeed(`decimal-place-comparison-labels-${relation}`);

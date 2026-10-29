@@ -84,9 +84,15 @@ The current content modules also use finite mathematical profiles for operand wi
 fraction magnitudes and settled coefficient/endpoint/sign distinctions. Their samplers
 partition the previous supported exercises before generation; labels remain ordinary
 matching capabilities. The
-[continuation record](docs/plan/label-dependency-graph.md#autonomous-continuation-2026-10-29)
-documents conditional sampling, new matches and deliberately deferred ownership/projection
-contracts. Source audit closure remains separate from regeneration and stored-dataset acceptance.
+[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
+record documents conditional sampling, verified repairs and concrete ownership/projection
+questions. Source audit closure remains separate from regeneration and stored-dataset acceptance.
+
+Dependent schema fields can read declared earlier resolved choices in the direct path, as they
+already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
+of broad requests. Both are explicit schema contracts; the existing inference callbacks remain
+independent additional annotations. See [SPEC-6](docs/spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
+for authoring details and the repair plan for each deterministic owner resolver's proof.
 
 After type and positive-capability matching, the planner admits only valid joint schema-label
 selections. Every tuple carries a versioned plan. Generation selects from it without increasing

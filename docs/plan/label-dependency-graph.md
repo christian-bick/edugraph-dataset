@@ -26,12 +26,13 @@ the same magnitude. Engineering must prove each asserted presence from actual re
 
 ### Exclusive starting allocation after ownership review
 
-**208 requirements are autonomous engineering/evidence work; 55 are input-dependent.** The
-initial provisional allocation was 231/32. Concrete ownership review transfers 23 baseline
-requirements to the user's standing confirmation requirement for rare module splits; it does
-not close or introduce any gap. Most binary zero repairs remain autonomous. The
-input-dependent count includes 14 sign/zero requirements sharing the hidden-domain issue with
-seven number-kind requirements. They are counted once, not as 14 additional decisions. If
+**216 requirements are autonomous engineering/evidence work; 47 are input-dependent.** The
+initial provisional allocation was 231/32. Concrete ownership review identifies the rare splits,
+while independent evidence review recovers the name-writing case and seven integer-literal
+presence declarations as autonomous. These transfers do not close or introduce any gap.
+Most binary zero repairs remain autonomous. The
+input-dependent algebra count is 14 sign/zero requirements; integer-literal presence does not
+establish the unbound variables' domain or restrictions. If
 subsequent evidence proves an independent repair, transfer that requirement with audit lineage.
 
 | Existing owner | Autonomous | Input-dependent | Autonomous work / decision dependency |
@@ -44,9 +45,9 @@ subsequent evidence proves an independent repair, transfer that requirement with
 | RB-A9-D1: place-value/rounding zero | 19 | 0 | Joint flag/endpoint availability and current zero-selector migration. |
 | RB-A9-D2: place-value widths | 4 | 0 | Joint compatibility and direct/planned fallback migration. |
 | RB-A10-D1: algorithms | 10 | 0 | Define and constrain the actual visible/required procedure trace. |
-| RB-D1-D1: algebra | 14 | 21 | Numeric substitution profiles are engineering. Seven symbolic domain findings and 14 related sign/zero findings depend on Q-DOMAIN. |
+| RB-D1-D1: algebra | 21 | 14 | Numerical profiles and seven integer-literal presence claims are engineering; 14 variable sign/zero findings depend on Q-DOMAIN. |
 | RB-D2-D1: powers | 10 | 0 | Ordinary sign/zero profiles; preserve the single/mixed structure contract and visible/required values. |
-| RB-F1-D1: decimal writing | 0 | 3 | Q-SPLIT-DECIMAL; reading alternatives and source-only writing have different evidence. |
+| RB-F1-D1: decimal writing | 1 | 2 | The distinct name-writing family is autonomous; reading and numeral-writing share the unresolved projection boundary in Q-SPLIT-DECIMAL. |
 | RB-F2-D1: decimal comparison/arithmetic | 4 | 0 | Condition the existing joint sampler/trace rather than independent digits. |
 | RB-F3-D1: fraction arithmetic/benchmarks | 21 | 0 | Existing proper operands/components and finite conditioned profiles; mixed descriptors are allowed. |
 | RB-F4-D1: division zero | 17 | 15 | Quotient numeric profiles are engineering; 12 shared-model selections need Q-SPLIT-DIVISION and three stories need Q-ARTIFACT. |
@@ -58,7 +59,7 @@ subsequent evidence proves an independent repair, transfer that requirement with
 | RB-F9-D2: contextual zero | 2 | 0 | Review actual reference text and then constrain the corresponding profiles. |
 | RB-M2-D1: unrestricted clock minutes | 3 | 0 | Migrate precision/zero/five-minute choices together. |
 | RB-M3-D1: elapsed/interval time | 0 | 6 | Q-ARTIFACT. |
-| **Total** | **208** | **55** | Separate reasoning content defect is outside these 263 requirements. |
+| **Total** | **216** | **47** | Separate reasoning content defect is outside these 263 requirements. |
 
 ### Concrete questions for the user
 
@@ -83,7 +84,8 @@ and its solution can carry different justified zero annotations?**
 **Q-DOMAIN — May the affected symbolic algebra exercises state their intended variable domain and
 any relevant sign/zero restrictions explicitly, instead of relying on hidden generator metadata?**
 
-- **Affected:** seven number-kind omissions and 14 linked sign/zero omissions. The tasks are the six
+- **Affected:** 14 sign/zero omissions across seven symbolic contexts. Their number-kind omissions
+  are repaired through visible integer literals, without claiming a domain for x. The tasks are the six
   `6.EE.A.2b-identify-expression-parts` permutations ending `1e4efe3a`, `23730034`, `2757a785`,
   `5b9920c0`, `a8e2818d`, `ca60b333`, plus `6.EE.A.2b-interpret-subexpressions~8c63bf94`.
 - **Example:** `3+x` does not expose the payload's declared rational domain or constrain x away from
@@ -113,7 +115,8 @@ whole-number marking, reusing the existing mathematical engines and renderers?**
   `2.MD.B.6-number-line-arithmetic~1f825b34` and `~234144c4`, plus
   `2.MD.B.6-number-line-representation~5cfb1e4b`.
 - **Recommendation:** make the numerical origin part of a canonical reference-frame payload owned
-  by a dedicated producer. Narrow the two existing number-line consumers to that contract; retain
+  by proposed `arithmetic-number-line-relations` and `whole-number-line-values` producers. Narrow
+  the two existing number-line consumers to those contracts; retain
   the ordinary binary and writing producers for their other consumers. Origin zero then has one
   positive owner. Reuse the current arithmetic/value samplers and unchanged layouts.
 - **Why input is needed:** the user reserves rare generator/view splits for confirmation. Adding a
@@ -127,6 +130,7 @@ shared scalar counting producer?**
 - **Affected:** two current requirements, `2.OA.C.3-object-group-parity~d636d951` and `~f27b02b3`,
   through `counting-objects-parity`.
 - **Recommendation:** expose total, pair count and remainder in a mathematical grouping payload.
+  Use a proposed `parity-grouping` producer and keep the existing view ID.
   Select singleton/even/larger-odd support before generation, retaining every old count. The existing
   parity renderer consumes that payload. Count 1 exposes pair count 0, even counts expose remainder 0,
   and larger odd counts have neither; oddness alone does not establish zero absence.
@@ -150,15 +154,26 @@ IDs retained for quotient models?**
   producer ownership statically. Existing configuration inference cannot bypass that rule. A new
   conditional cross-role ownership contract would be a broader architectural alternative.
 
+| Existing ID retained for quotient models | Proposed general-only ID | General target suffixes migrated |
+|---|---|---|
+| `fractions-division-execution` | `fractions-general-division-execution` | `064ac4c6`, `72b2ca86`, `cda9b2f2` |
+| `fractions-division-interpretation` | `fractions-general-division-interpretation` | `34d90295`, `4d864771`, `9e277231` |
+| `fractions-division-inverse-explanation` | `fractions-general-division-inverse-explanation` | `51fbbd3a`, `572c5cfa`, `aa5b012e` |
+| `fractions-division-story-creation` | `fractions-general-division-story-creation` | `45259c35`, `71f3fc19`, `ca219375` |
+
 **Q-SPLIT-DECIMAL — Approve a separate decimal-reading relation producer for the existing
 multiple-choice reading view, retaining the current producer for the two writing views?**
 
-- **Affected:** three current requirements: decimal reading `~d058a881`, number-name writing
-  `~dda779d5`, and numeral writing `~8cee5f30` under `5.NBT.A.3a`.
+- **Affected:** two current requirements: decimal reading `~d058a881` and numeral writing
+  `~8cee5f30` under `5.NBT.A.3a`. Number-name writing `~dda779d5` is already repaired through its
+  distinct existing `NumberNameNotation` configuration.
 - **Recommendation:** expose the reading source and its three alternative values canonically, then
   partition those mathematical relations by their complete zero evidence. The two writing views
-  keep their source-only mathematical contract and receive source coefficient profiles. Reuse the
+  keep their source-only mathematical contract; extend the existing name-writing coefficient
+  profiles to numeral writing after separating the reading relation. Reuse the
   same alternative-value formula and renderers; retain every original source/alternative set.
+  A proposed `decimal-reading-relations` producer can own that relation while `decimal-writing`
+  retains the two source-writing consumers.
 - **Counterexample:** source `5.199` has no zero coefficient, but the reading alternatives include
   `5.209`; the numeral-writing task has no such alternative. Reading and numeral-writing currently share
   the same `DecimalNotation` configuration, so a common source-only absence declaration is unsafe.
@@ -185,6 +200,143 @@ Each checkpoint must retain target coverage, validate both configuration paths, 
 support and any conditional probabilities claimed, reconcile original versus inherited gaps, and commit
 on this branch. The graph/evaluator stays annotation-only. Source closures still do not repair stored
 dataset rows; regeneration and VQA wait for all required source/content decisions and implementations.
+
+### Autonomous repair acceptance
+
+The refined autonomous allocation is implemented. **216 starting requirements and 12 subsequently
+exposed requirements close through verified repairs.** Profile refinement exposes 28 requirements
+in total, so **263 − 228 + 28 = 63** remain across 56 selections and eight dependency owners.
+The 16 still-open inherited requirements are 12 additional shared-division model variants, three
+division-story variants and one product-story variant. None is hidden or counted as a repair.
+There are no policy retirements, reopened requirements or new policy requirements in this run.
+
+| Owner / checkpoint | Verified closures, including inherited | Exposed requirements | Commit(s) |
+|---|---:|---:|---|
+| Unspecified safe-integer operand widths | 8 | 8 zero | `57d469ac` |
+| Ordinary binary zero absence | 69 | 0 | `f9380116` |
+| Large-number writing coefficients | 3 | 0 | `edab9e66`, `d9ef1e4c`, `67b30287` |
+| Decimal name-writing coefficients | 1 | 0 | `63a5c983` |
+| Place-value widths and coefficient zero | 23 | 4 zero | `5fceb4c3`, `c33486ef`, `3a3479e8` |
+| Integer rounding endpoints | 4 | 0 | `274cfea1` |
+| Single and mixed numerical powers | 10 | 0 | `b7d5d60d`, `f07456c2` |
+| Clock precision and zero minutes | 3 | 0 | `7a8d9a8f` |
+| Rational-axis proper step | 4 | 0 | `ef95f09b` |
+| Decimal comparison profiles | 2 | 0 | `88af4e28` |
+| Fraction-product magnitude | 3 | 1 zero | `0925b817` |
+| Fraction arithmetic and benchmarks | 21 | 0 | `45f9ea24` |
+| General fraction-division magnitude | 18 | 15 zero | `603eac14`, `072ce50f` |
+| Whole-sharing kind and quotient numeric profiles | 19 | 0 | `1496ba77`, `f8cdb523` |
+| Visible numerical algebra frames | 14 | 0 | `31f646fe` |
+| Symbolic-frame integer literals | 7 | 0 | `0f08912c` |
+| Decimal unit-count arithmetic | 2 | 0 | `25cf6253` |
+| Multiplication row invariants | 2 | 0 | `334d61ef` |
+| Decimal algorithm zero trace | 2 | 0 | `d5b93f0f` |
+| Integer division zero traces | 6 | 0 | `bf0fec38` |
+| Directed rational contexts | 2 | 0 | `9d830533` |
+| Canonical equation claims | 1 | 0 | `1a43aef4` |
+| Canonical estimation proposals | 4 | 0 | `83a51a3b` |
+| **Total** | **228** | **28** | **63 outstanding** |
+
+Two small schema extensions support ordinary declarations. `2eef813a` lets an explicitly opted-in
+alternative realize a broad request through equal or more-specific descriptors; unmarked fields
+retain exact-request behavior. `48839faa` lets direct resolvers read only declared labels selected
+by prior fields, as planned resolution already does. Neither changes target requests, fallback
+scoring, undeclared context, inference independence or the matching direction. Their unit tests
+cover contradictory requests, prior-versus-later context, entropy and legacy behavior. Deterministic
+owner resolvers use the existing exact-identity proof registry; copied metadata does not certify
+another function. Clock, place-value, rounding and writing proofs establish each finite admitted
+binding without randomness, payload access or graph-driven completion.
+
+The mathematical repairs retain every old supported case. Unspecified binary bounds use constant-size
+conditioning and safe integer arithmetic instead of an arbitrary cap. Fraction magnitude declarations
+use an actual proper/improper operand or component; another fraction of the opposite class does not
+invalidate a presence claim. Clock precision, rounding endpoints and place-value widths/coefficients
+are joint feasibility problems. Place-value retains original explicit result-zero intent separately,
+so a broad subtraction does not silently gain equality. The large-number writing rank/count sampler
+partitions the old uniform integer domain, including singleton boundaries and scalar zero support;
+tighter and unspecified bounds retain their legacy defaults.
+
+The seven symbolic frames already display integral constants or coefficients, so their canonical
+relation bundles now declare `IntegerNumbers`. This is a presence claim about those visible objects,
+not a restriction on x. Original `RationalNumbers` requests retain their exact rational routes;
+successful direct requests preserve configuration, payload and random continuation. No operand-count
+or width descriptor is added, and the digit rule gains no obligation. The 14 unknown variable
+sign/zero contexts remain Q-DOMAIN. Structural identification of an expression does not itself ask
+the learner to evaluate every variable assignment or state its admissible domain.
+
+Decimal name-writing has a distinct existing notation family, so it receives ordinary source-zero
+profiles without a split. All 10,080 original raw draw paths (9,990 decimals, including duplicate
+hundredths weights) survive, with conditional masses 0.6724/0.3276. Unused fractional padding does
+not count as an active coefficient. The two shared `DecimalNotation` consumers retain an explicit
+legacy profile and their old payload/random behavior. Reading additionally requires that generator
+family, so a new broad request cannot route a name-writing absence profile into zero-bearing reading
+alternatives. This is a compatibility guarantee, not a claim that zero-free reading is impossible.
+
+Procedure annotations cover required work under ONT-E1, even when question mode leaves that work
+blank. They exclude hidden initialization flags. In decimal subtraction, `31.1 − 11.2 = 19.9`
+depletes the ones column to zero before replenishing it; the profile includes that required quantity.
+Integer division covers quotient places, actual partial dividends/products/remainders and explicit
+decomposition coefficients. A partial-quotient magnitude such as 200 is positive; its zero glyphs alone
+do not establish extra zero coefficients unless that model decomposes them. Multiplication's displayed
+shifted row or explicit zero place-shift supplies its invariant evidence. Signed-context metadata,
+conversely, does not establish a displayed zero datum: the two directed-pair cases declare absence.
+
+Equation judgment and estimation keep their dedicated producers and extend their canonical
+mathematical relations with a claimed value/proposal. Truth and plausibility remain consumer
+judgments; generators add no learner action or answer prose. Strict consumers validate the required
+numeric fields and reuse the same layouts. This surgical contract extension uses IMPL-G6/IMPL-G8;
+it needs no module split, cross-owner inference context, adapter or completion mechanism.
+All old expression/proposal cases survive, with per-value question/solution rendering comparisons.
+
+Sampling changes are explicit. Ordinary profiles change mixtures and seeded outcomes. Joint equation
+profiles also let broad targets select already supported zero cases; explicit absence constrains the
+claim as well as operands/result. Estimation weights the old operand hierarchy and exact reachable
+proposal orbits. Its proposal weights use a uniform unsigned-32 seed reference measure, not a claim
+about frequencies of deterministic sample-key hashes; moving proposals into generation changes their
+old correlation with presentation seeds. This is a recorded sampling migration, not a balancing goal.
+Finite arithmetic pool proofs retain overlapping draw weights where applicable. Rejection samplers
+retain the original conditional law given success and return `null` on bounded exhaustion for the
+existing pipeline retry. Stress tests supplement support proofs; they are not exhaustive seed proofs
+or an unproved guarantee that retry exhaustion is negligible.
+
+Safe-integer conditional probabilities describe the mathematical integer domain. The existing PRNG
+has a finite 32-bit state, so these proofs do not assert exhaustive reachability of every integer or
+preservation of the old seed orbit at `Number.MAX_SAFE_INTEGER`. Bounded and legacy-path entropy
+comparisons are reported separately from the accepted profile/seed migration.
+
+The final matching comparison retains **all 1,013 targets and all 1,213 tuples**, with no added tuple.
+Admitted selections increase **1,455 → 1,578** through explicit profiles. All seven target files,
+the graph/evaluator, Area allowlist, integer qualification and range-policy exclusion are unchanged.
+The final report has zero conflicts, invalid contexts, contract errors, incomplete enumerations or
+pending/invalid inference. A changed audit implementation identity reflects source/resolver changes,
+not a graph-policy revision. Source readiness is still blocked by the 63 requirements below and
+Q-REASONING; no canonical regeneration, stored-label rewrite or VQA has been run.
+
+| Approval topic | Current requirements | Owner(s) |
+|---|---:|---|
+| Q-ARTIFACT | 15 | Product stories 3, division stories 6, elapsed/interval time 6 |
+| Q-DOMAIN | 14 | Seven symbolic algebra contexts × sign/zero |
+| Q-SPLIT-AXES | 6 | Arithmetic number lines 5, whole-number marking 1 |
+| Q-SPLIT-PARITY | 2 | Parity grouping |
+| Q-SPLIT-DIVISION | 24 | Four shared general-division model tasks |
+| Q-SPLIT-DECIMAL | 2 | Shared decimal reading/numeral-writing projections |
+| **Total input-dependent** | **63** | **No autonomous repair remains queued** |
+
+Q-REASONING is a separate correctness approval with zero dependency requirements. Approval does not
+close any of these gaps: the approved contract/migration must be implemented and verified first.
+Stored findings remain **2,542 raw / 2,528 distinct** across 1,282 affected samples; the snapshot has
+2,808 image rows at the same stored generation. Current counts and cumulative lineage are maintained in the
+[progress ledger](label-dependency-progress.md). Local reproducibility evidence is in
+`temp/autonomous-design-split/`: baseline snapshots, owner proofs, reconciliation, matching,
+source preservation, render/replay comparisons and validation logs.
+
+Final verification passes **878 suites / 7,073 tests** with `npm run test:coverage`, including every
+generator coverage threshold. Types, labels, generator/view contracts and documentation references
+pass; the documentation check retains five external-fetch warnings. The audit has **69 exhaustive
+inference selections**, zero pending/invalid inference and zero conflicts, invalid contexts, contract
+errors or incomplete enumerations. All 2,959 unowned source files are byte-identical to the captured
+working-tree baseline; all 44 new source files are owned by these checkpoints. The 189 pre-existing
+dirty paths and four overlapping source edits remain unstaged and preserved.
 
 ## Autonomous continuation (2026-10-29)
 
@@ -1917,6 +2069,11 @@ The committed tables are the durable work inventory; these scratch artifacts are
 dependencies. Earlier implementation checkpoints below retain their historical verification counts.
 
 ## Algebra and parity decision note
+
+Historical pre-repair note. Numerical profiles and the seven integer-literal presence declarations
+are now implemented. The current remainder is Q-DOMAIN's 14 sign/zero requirements and
+Q-SPLIT-PARITY's two grouping requirements; see the [current questions](#concrete-questions-for-the-user).
+The counts and recommendations below preserve the earlier review, not the current backlog.
 
 Status: recommendations for review; no semantic policy, schema or generator change has been
 implemented by this note. The current algebra-expression work comprises 14 eligible
