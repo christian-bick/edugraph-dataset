@@ -36,8 +36,8 @@ The source baseline is **391** unresolved selection/facet requirements. `produce
 possible-output declaration, so introducing a callback closes no finding by itself. Unknown
 configuration outcomes remain pending; sampled checks cannot be presented as exhaustive proof.
 The completed third inference checkpoint established six closures, leaving **385** source gaps.
-The subsequent measurement split closes 21 more; the two subtraction-width fixes below
-reduce the current total to **362**. The known
+The subsequent measurement split closes 21 more; two subtraction-width fixes and the
+21 zero-absence repairs below reduce the current total to **341**. The known
 reasoning-view content defect remains separately open. Dataset regeneration and VQA still wait
 for source readiness under the existing agreement.
 
@@ -99,7 +99,7 @@ narrowed policy, compared with 4,146 raw / 4,012 distinct under the preceding po
 
 The autonomous declaration pass and necessary-evidence re-review have triaged all 26 original
 source scopes, followed by the six configuration-inference acceptance cases:
-**982 requirements repaired, 75 newly exposed, 38 retired by policy, 362 remaining**.
+**1,003 requirements repaired, 75 newly exposed, 38 retired by policy, 341 remaining**.
 All remaining gaps have exact owners in **25 decision batches**; the reasoning-view content
 defect remains a separate open scope even though its numeral requirement is retired.
 No independent declaration repair remains queued. The Area allowlist, integer-only
@@ -175,6 +175,133 @@ readiness and the separately tracked reasoning content defect.
 Verification evidence is retained under `temp/place-value-width-fixes/`. The
 [progress ledger](label-dependency-progress.md#place-value-subtraction-width-acceptance-2026-10-29)
 records the preservation checks and updated totals.
+
+## Conditional zero-absence batches (2026-10-29)
+
+Four separately reviewed batches close **21** source zero requirements, **362 → 341**,
+without changing targets, matching choices, mathematical schemas, sampling or rendering.
+These are configuration guarantees, not classifications of generated payloads. Each owner
+uses `inferredLabels` only after review of the matching-capable alternatives under SPEC-12.
+
+| Owner | Existing configuration guard | Universal evidence and excluded cases | Closures |
+|---|---|---|---:|
+| `integer-rounding` | `range.max > 1000` and magnitude 10, 100 or 1000 | The sampler clamps its minimum to at least 1000; each permitted magnitude divides 1000, so the lower endpoint is positive. The number lies strictly between endpoints, making both distances, midpoint and rounded answer positive. The sole consumer displays only those positive values/ticks. Legacy intervals and magnitudes 10,000/100,000 may expose endpoint zero and remain unannotated. | 3 |
+| `writing` | `!requireZero` and `100 < range.max <= 1000` | Every successful payload contains a positive `number` without a high-range coefficient strip. Numeral/name/trace/count consumers expose that number or necessarily require its answer; empty block groups are omitted. The number-line consumer requires `NumbersSmaller100`, which forces `max <= 100`, excluding its zero origin from this guard. Explicit zero and larger coefficient-strip configurations remain unchanged. | 7 |
+| `time` | `!requireZero` and either half-hour intervals, or minute intervals with `requireMultipleOf5` | All four clock projections use hours 1–12 and omit seconds at these precisions. Minutes are 30 or one of 5, 15, 25, 35, 45, 55. Stored midnight bookkeeping and omitted seconds are not participating zero values; leading zero glyphs do not create another number. Whole-hour, unrestricted-minute and explicit-zero configurations remain outside the addition. | 10 |
+| `place-value-arithmetic` | Subtraction, `requireMultipleOf10`, no regrouping or conflicting width flags, and `!requireZero` | The finite pair list contains positive whole-tens operands with a strictly positive difference. All three consumers use the existing tens-only presentation, omit empty place counts and expose positive tens counts/results. Explicit zero-result subtraction and addition remain outside the guard. | 1 |
+
+Matching-capable alternatives were considered first. None of these is a module invariant.
+An unconditional label on one contributing choice overclaims another supported configuration:
+rounding magnitude ignores its endpoint range; writing range ignores explicit zero; clock
+interval ignores the existing zero selector; and whole tens alone includes addition and zero
+results. A blanket false-zero default also reaches zero origins, coefficients or components.
+Conditional equivalent bundles have the direct-resolution fallback/context limitations recorded
+in the preceding width checkpoint. New profiles would introduce a mathematical selection or
+sampling decision; no different payload/task contract warrants a module split here.
+
+Inference is therefore an additional-annotation fallback. It adds no matching capability or
+participation condition. Existing matching-capable zero selectors are preserved and same-owner
+duplicate outputs are deduplicated. The graph, complete Area allowlist, integer qualification,
+range-policy exclusion and representation-completeness separation are unchanged.
+
+The integrated audit enumerates all 1,284 selections. All 66 affected owner selections have
+exhaustive configuration outcomes; exactly 21 gain a label. Across all inference owners there
+are 78 exhaustive selections, zero pending and zero invalid. The source now has **341** gaps
+across **263** selections, with zero conflicts, invalid contexts, contract errors or incomplete
+enumerations. Remaining facets are zero **152**, operand digits **109**, fraction magnitude
+**49**, sign **23**, and number kind **8**. Four rounding cases, four writing cases, seven clock
+cases and the other place-value zero cases retain their existing decision owners.
+
+All **1,013 targets**, **1,209 tuples**, and complete plan domains, correlations and ordering
+are unchanged. Before/after probes preserve configurations, payloads and random continuation
+for 396 planned draws and 558 direct requests, including 537 non-null direct results.
+All 132 question/solution SSR comparisons are byte-identical; 396 replay checks pass and 66
+stale source plans are rejected. These probes are sampled checks, supplementary to exhaustive
+configuration-domain equality and the mathematical/source proofs. All seven target files and
+3,050 unowned source files are unchanged.
+
+The audit identity remains `042ad7dd13ca396a6d49306974725c71fd4e6f12f82c655dd71d78fa8bf5adad`.
+Stored data still has **2,542 raw / 2,528 distinct** non-range findings across 1,282 samples;
+source closures do not rewrite that snapshot. Canonical regeneration and VQA still wait for
+source readiness and the separately tracked reasoning content defect.
+
+Evidence: `temp/remaining-zero-batches/` contains source snapshots, four-owner preservation,
+exact audit reconciliation, individual proof reviews and validation logs. The
+[progress ledger](label-dependency-progress.md#conditional-zero-absence-acceptance-2026-10-29)
+records the current owners and acceptance checks.
+
+### Next decision: positive binary widths within 20
+
+**Proposed; not implemented or approved.** Of the 102 remaining `arithmetic-ops-pairs`
+width findings, a bounded first slice contains 30 positive, zero-free selections within the
+existing inclusive maximum 20: 14 ordinary addition, 14 subtraction, and two equal-addend
+selections. The other 72 cover wider or unspecified bounds and multiplication/division.
+
+The same complete current configuration can produce `1 + 1` or `10 + 10`, and `2 - 1` or
+`20 - 10`. Configuration inference cannot distinguish those draws. Reinterpreting the bound
+or labeling the sampled payload would violate the agreed scope.
+
+Propose two ordinary matching-capable profiles: largest primary operand at most 9
+(`SingleDigitLargestOperand`), or between 10 and 99 (`TwoDigitLargestOperand`). They partition
+the existing positive within-20 cases without removing any concrete problem. Inversion views
+retain the original operation's operands, including a necessarily required missing operand.
+Existing targets remain unchanged; broad requests may admit both profiles, and explicit width
+requests can match the corresponding capability.
+
+The current planner selects alternatives uniformly. This requires an explicit sampling decision:
+
+| Existing positive configuration | Current single-digit-largest share | Proposed single-/two-digit share |
+|---|---:|---:|
+| Ordinary addition | 29.310224% | 50% / 50% |
+| Ordinary subtraction | 11.544814% | 50% / 50% |
+| Equal addends | 90% | 50% / 50% |
+
+These current shares are analytical consequences of the sampler: addition uses
+`sum(a=1..9, 9/(20-a))/19`; subtraction uses `sum(s=1..8, (9-s)/(20-s))/19`; equal addends
+draw uniformly from 1 through 10. They are not empirical estimates.
+
+**Recommendation:** accept the balanced profile mixture for this 30-selection slice, preserving
+all old supported pairs and their conditional distribution within each chosen width. Seeded
+outcomes and random continuation may change inside the slice. Keep signed, zero, whole-tens,
+wider-bound and unspecified-bound configurations on their existing paths. Preserve all target
+coverage, rendered task contracts, the Area allowlist and range-policy exclusion.
+
+The alternative is a broader weighted-profile selection design that preserves the old mixture;
+it still would not promise old seed-by-seed outcomes. Keeping these findings deferred is also
+valid if sampling must remain strictly unchanged. No generator/view split is proposed.
+
+Before implementation acceptance, resolve the existing small-width aliases in
+`requireMultipleOf10` and the direct-resolution conditional-fallback contract. Prove each
+profile is nonempty and their supports are disjoint/exhaustive; preserve the existing
+conditional pair probabilities rather than replacing them with a uniform pair sampler.
+Verify unchanged behavior outside this slice, all targets, newly admitted matches, and every
+compatible projection. Rematching may multiply existing non-width findings, so reconcile
+actual introduced requirements; do not assume a net reduction of 30 before the audit.
+Use separate addition, subtraction and equal-addend checkpoints.
+
+This decision is reserved to the user by the
+[autonomous execution agreement](#autonomous-execution-agreement-2026-10-28), which places a
+"mathematical schema distinction, or sampling/rendering change" in a decision batch.
+Local selection inventory and derivation: `temp/remaining-zero-batches/next-width-decision.md`
+and `next-width-inventory.json`.
+
+The next evidence review also reconfirmed that ten decimal-zero and ten numerical-power
+sign/zero requirements vary within their current complete configurations. Examples include
+decimal expanded form `0.103` versus `917.785` (the same six-coefficient chart), decimal
+rounding intervals `[0,100]` versus `[220,230]`, and single powers `0^1`, `2^2`, and `(-1)^3`.
+These are counterexamples to a universal current-config label, not sampled completeness proofs.
+A small future decimal batch could expose the actual zero-coefficient distinction before
+generation; it needs a matching/sampling design rather than an inference callback over `{}`.
+
+For the two tenths-equivalence findings, the ontology already defines improper fractions to
+include numerator magnitude equal to denominator. Thus `10/10 = 100/100` is improper; no new
+ontology interpretation is required. The blocker is a shared empty configuration that draws
+proper and equal-whole cases with a 90/10 mixture. An ordinary magnitude profile must preserve
+numerator ten and explicitly address that distribution. Three nonmixed-product findings also
+have both all-proper and all-improper represented operands/partition measures under the same
+configuration, so neither constant magnitude label is justified. These five findings remain
+in their existing owners. Detailed counterexamples are in `fraction-next-review.md` and
+`time-next-zero-review.md` under the same evidence directory.
 
 ## Proposed measurement generator/view split (2026-10-29)
 
