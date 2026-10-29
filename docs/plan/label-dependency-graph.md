@@ -24,9 +24,12 @@ Proper and improper fractions can coexist in one artifact. There is no outstandi
 whether magnitude is exclusively about the primary input, or whether every fraction must have
 the same magnitude. Engineering must prove each asserted presence from actual required evidence.
 
-### Exclusive starting allocation
+### Exclusive starting allocation after ownership review
 
-**231 requirements are autonomous engineering/evidence work; 32 are input-dependent.** The
+**208 requirements are autonomous engineering/evidence work; 55 are input-dependent.** The
+initial provisional allocation was 231/32. Concrete ownership review transfers 23 baseline
+requirements to the user's standing confirmation requirement for rare module splits; it does
+not close or introduce any gap. Most binary zero repairs remain autonomous. The
 input-dependent count includes 14 sign/zero requirements sharing the hidden-domain issue with
 seven number-kind requirements. They are counted once, not as 14 additional decisions. If
 subsequent evidence proves an independent repair, transfer that requirement with audit lineage.
@@ -34,19 +37,19 @@ subsequent evidence proves an independent repair, transfer that requirement with
 | Existing owner | Autonomous | Input-dependent | Autonomous work / decision dependency |
 |---|---:|---:|---|
 | RB-A1-D1: unspecified operand widths | 8 | 0 | Constant-size conditioning and safe-integer arithmetic; preserve bounded requests. |
-| RB-A2-D1: binary zero ownership | 66 | 0 | Design a producer/view ownership migration; do not duplicate claims or assume origin absence. Any actual module split still needs its own concrete confirmation. |
-| RB-A3-D2: writing zero | 4 | 0 | Separate number-zero, coefficient-zero and number-line-origin contracts without changing the content. |
+| RB-A2-D1: binary zero ownership | 61 | 5 | Declare ordinary positive branches; retain the five number-line variants for Q-SPLIT-AXES. |
+| RB-A3-D2: writing zero | 3 | 1 | Coefficient profiles are engineering; the origin requires Q-SPLIT-AXES. |
 | RB-A6-D1: judgment/estimation | 5 | 0 | Joint mathematical/proposal profiles using the already settled necessary-evidence rule. |
-| RB-A7-D1: parity grouping | 2 | 0 | Model count and grouping components explicitly; preserve singleton/even/odd support. |
+| RB-A7-D1: parity grouping | 0 | 2 | Q-SPLIT-PARITY; preserve singleton/even/odd support. |
 | RB-A9-D1: place-value/rounding zero | 19 | 0 | Joint flag/endpoint availability and current zero-selector migration. |
 | RB-A9-D2: place-value widths | 4 | 0 | Joint compatibility and direct/planned fallback migration. |
 | RB-A10-D1: algorithms | 10 | 0 | Define and constrain the actual visible/required procedure trace. |
 | RB-D1-D1: algebra | 14 | 21 | Numeric substitution profiles are engineering. Seven symbolic domain findings and 14 related sign/zero findings depend on Q-DOMAIN. |
 | RB-D2-D1: powers | 10 | 0 | Ordinary sign/zero profiles; preserve the single/mixed structure contract and visible/required values. |
-| RB-F1-D1: decimal writing | 3 | 0 | Correlate existing notation/projection families with their actual coefficient evidence. |
+| RB-F1-D1: decimal writing | 0 | 3 | Q-SPLIT-DECIMAL; reading alternatives and source-only writing have different evidence. |
 | RB-F2-D1: decimal comparison/arithmetic | 4 | 0 | Condition the existing joint sampler/trace rather than independent digits. |
 | RB-F3-D1: fraction arithmetic/benchmarks | 21 | 0 | Existing proper operands/components and finite conditioned profiles; mixed descriptors are allowed. |
-| RB-F4-D1: division zero | 29 | 3 | Union/profile ownership migration is engineering; three word-problem projections depend on Q-ARTIFACT. |
+| RB-F4-D1: division zero | 17 | 15 | Quotient numeric profiles are engineering; 12 shared-model selections need Q-SPLIT-DIVISION and three stories need Q-ARTIFACT. |
 | RB-F4-D2: division magnitude | 19 | 0 | Condition original fractions and preserve carefully repaired aliases/fallbacks. |
 | RB-F4-D3: whole-sharing kind | 1 | 0 | Preserve original routing through a joint choice migration. |
 | RB-F7-D1: product magnitude | 3 | 0 | Match evidenced multiplier magnitudes; retain mixed-number routing. |
@@ -55,7 +58,7 @@ subsequent evidence proves an independent repair, transfer that requirement with
 | RB-F9-D2: contextual zero | 2 | 0 | Review actual reference text and then constrain the corresponding profiles. |
 | RB-M2-D1: unrestricted clock minutes | 3 | 0 | Migrate precision/zero/five-minute choices together. |
 | RB-M3-D1: elapsed/interval time | 0 | 6 | Q-ARTIFACT. |
-| **Total** | **231** | **32** | Separate reasoning content defect is outside these 263 requirements. |
+| **Total** | **208** | **55** | Separate reasoning content defect is outside these 263 requirements. |
 
 ### Concrete questions for the user
 
@@ -102,6 +105,73 @@ preservation constraint?**
 - **Recommendation:** authorize a bounded correctness repair and its target/claim tests, retaining the
   layout and target coverage. A concrete patch can then be prepared; no scope disposition is assumed.
 - **Alternative:** retain the defect as explicitly unresolved. It continues to block dataset readiness.
+
+**Q-SPLIT-AXES — Approve two small reference-frame producers for arithmetic number lines and
+whole-number marking, reusing the existing mathematical engines and renderers?**
+
+- **Affected:** six current requirements: five arithmetic width selections under
+  `2.MD.B.6-number-line-arithmetic~1f825b34` and `~234144c4`, plus
+  `2.MD.B.6-number-line-representation~5cfb1e4b`.
+- **Recommendation:** make the numerical origin part of a canonical reference-frame payload owned
+  by a dedicated producer. Narrow the two existing number-line consumers to that contract; retain
+  the ordinary binary and writing producers for their other consumers. Origin zero then has one
+  positive owner. Reuse the current arithmetic/value samplers and unchanged layouts.
+- **Why input is needed:** the user reserves rare generator/view splits for confirmation. Adding a
+  view invariant today duplicates the compatible producer's zero capability (SPEC-8/SPEC-11).
+  The autonomous binary repair already closes 69 ordinary-view requirements and leaves only these
+  five arithmetic selections; the writing coefficient repair leaves only its one origin selection.
+
+**Q-SPLIT-PARITY — Approve a dedicated canonical parity-grouping producer instead of adapting the
+shared scalar counting producer?**
+
+- **Affected:** two current requirements, `2.OA.C.3-object-group-parity~d636d951` and `~f27b02b3`,
+  through `counting-objects-parity`.
+- **Recommendation:** expose total, pair count and remainder in a mathematical grouping payload.
+  Select singleton/even/larger-odd support before generation, retaining every old count. The existing
+  parity renderer consumes that payload. Count 1 exposes pair count 0, even counts expose remainder 0,
+  and larger odd counts have neither; oddness alone does not establish zero absence.
+- **Why input is needed:** this is a rare producer/type split, not a question about the meaning of zero.
+  Scalar counting's existing zero owner cannot safely describe all grouping components, and view
+  inference cannot inspect another owner's configuration or a generated payload.
+
+**Q-SPLIT-DIVISION — Approve four general-division-only view leaves, with the existing shared leaf
+IDs retained for quotient models?**
+
+- **Affected:** 24 current zero requirements descended from 12 baseline general-division selections.
+  The four leaves are execution, interpretation, inverse explanation and story creation. Each has
+  three old general-generator target tuples, now proper/improper variants, and four quotient tuples;
+  there are 20 distinct target IDs across these leaves.
+- **Recommendation:** give each general-only leaf its invariant evidenced origin-zero claim and
+  reuse its current core/layout. Narrow the original leaf's accepted payload to quotient models,
+  which now have complete producer-owned numeric profiles. Preserve all 12 general and 16 quotient
+  target/task routes through an explicit migration map. The construction leaf is already separate;
+  the word-problem leaf belongs to Q-ARTIFACT instead.
+- **Why input is needed:** a conditional invariant on the current union still overlaps quotient
+  producer ownership statically. Existing configuration inference cannot bypass that rule. A new
+  conditional cross-role ownership contract would be a broader architectural alternative.
+
+**Q-SPLIT-DECIMAL — Approve a separate decimal-reading relation producer for the existing
+multiple-choice reading view, retaining the current producer for the two writing views?**
+
+- **Affected:** three current requirements: decimal reading `~d058a881`, number-name writing
+  `~dda779d5`, and numeral writing `~8cee5f30` under `5.NBT.A.3a`.
+- **Recommendation:** expose the reading source and its three alternative values canonically, then
+  partition those mathematical relations by their complete zero evidence. The two writing views
+  keep their source-only mathematical contract and receive source coefficient profiles. Reuse the
+  same alternative-value formula and renderers; retain every original source/alternative set.
+- **Counterexample:** source `5.199` has no zero coefficient, but the reading alternatives include
+  `5.209`; the numeral-writing task has no such alternative. Reading and numeral-writing currently share
+  the same `DecimalNotation` configuration, so a common source-only absence declaration is unsafe.
+- **Why input is needed:** full closure requires a rare producer/type boundary split, or a separately
+  designed cross-owner annotation context. A source-zero profile alone would leave residual gaps;
+  declaring its possible outputs is not proof that every configuration is complete.
+
+The four split proposals are independent confirmations. For each, the alternative is to retain
+the affected gaps and current module boundaries. Approval would authorize a separate three-stage
+contract/migration/acceptance batch, with exact target-route successors, complete mathematical
+support, matching review, unchanged same-math rendering, and replay/cache identity updates. New
+IDs change sample keys and seeds, as in the earlier approved measurement split. No split has been
+implemented here, and none changes the Area allowlist, graph policy or range-policy exclusion.
 
 ### Execution order and acceptance
 
