@@ -51,6 +51,13 @@ separates these completed local migrations from the ongoing zero-applicability d
 Question and solution evaluation remain independent: each judgement receives one image and may
 reason through the competency required by that image.
 
+Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
+matching-capable mathematical profiles. The latest
+[numerical-zero review](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
+removes zero-digit proxies while preserving target coverage and retaining the authored visual-model
+requirements. The
+[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
+record separates verified repairs from concrete questions about content, annotation contracts
 and rare module splits. Source readiness remains separate from stored-dataset acceptance.
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**

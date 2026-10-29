@@ -30,13 +30,46 @@ repairs. Representation completeness remains a separate, unestimated design topi
 
 ## Two-step competency review and current backlog (2026-10-29)
 
+The [numerical-zero correction and falsification review](label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
+supersedes digit/coefficient proxies and the proposed removal of both word-problem models. Four
+producer families now use numerical evidence: scalar integer writing, required zero-whole naming,
+standard division values and the actual instructed integer column calculations. All seven explicit
+WithZero targets remain justified and unchanged. These are semantic truth repairs, not newly closed
+missing-dependency requirements. The original 63-gap audit and its cumulative closure ledger retain
+their separate meanings.
+
+The source-standard/history review found the division word-problem supporting model was deliberately
+required in its original reviewed TODO. It is retained; the Grade-5 product's original equation-or-model
+choice also does not justify removing an implemented model merely from absence of a label. No target,
+model, view/checklist, evaluation input or dependency policy changes in this checkpoint. Earlier
+claims that standard column `10.2 + 1.1` and `23 * 14` proved false WithZero labels are withdrawn:
+their required arithmetic includes actual zero addends. The borrowing claim is specifically supported
+by the illustrated `1 - 1 + 10 - 4 = 6` path, not every possible subtraction method.
+
+All 1,013 targets and 1,213 matching tuples remain identical. Three incorrect Grade-4 writing WithZero
+alternatives disappear, reducing admitted configurations 1,578 to 1,575 without retiring a graph-policy
+requirement or removing mathematical support. Corrected conditional partitions change sampling and
+replay within the repaired slices; the unconditioned decimal sampler and same-value rendering remain.
+Checkpoints are `e1a5808c`, `901ecde0` and `8f7c6314`; current evidence is under
+`temp/zero-rule-corrections/`. The outer Area allowlist and range-policy exclusion are preserved;
+SetTheory remains excluded from the proposed zero-specific positive list.
+
+Fresh audit reconciliation confirms **63 source requirements** (56 zero, seven sign) and **2,542 raw /
+2,528 distinct stored findings** remain unchanged. The graph policy hash is unchanged. Exhaustive
+inference outcomes reduce **69 to 66** solely with the three removed empty-output writing alternatives;
+pending/invalid outcomes, conflicts, invalid contexts, contract errors and incomplete tuples are zero.
+Full coverage passes **885 suites / 7,143 tests** and every generator threshold. Types, label/spec
+contracts and documentation checks pass (five external-fetch warnings). All seven target files,
+15 dependency implementation files, 3,367 unowned baseline files and 189 pre-existing dirty paths
+are preserved. No dataset regeneration or live VQA has run for these changes.
+
 The approved local producers are implemented: `parity-grouping` supplies the grouping relation,
 and `decimal-reading-relations` supplies the source and its three exact alternative values.
 Question and solution VQA remain independent, each receiving one image and no other verdict.
 The prompt now expressly permits reasoning through the question. No exercise hints, artifact-mode
 annotations or automatic completion are added.
 
-All **1,013 targets / 1,213 tuples / 1,578 selections** remain. Exactly three tuples migrate producer
+At the producer-migration checkpoint, all **1,013 targets / 1,213 tuples / 1,578 selections** were retained. Exactly three tuples migrate producer
 ID: both parity routes and the decimal-reading route. The other 1,210 tuple identities are
 unchanged, with no extra matches. Source findings remain **63**; stored findings remain **2,542 raw /
 2,528 distinct**, across 1,282 samples and 2,808 image rows. Graph/evaluator policy is unchanged.

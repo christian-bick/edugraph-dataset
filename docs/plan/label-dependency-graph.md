@@ -10,6 +10,118 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Numerical-zero repairs and model falsification (2026-10-29)
+
+This section supersedes the earlier digit/coefficient interpretations and the proposal to remove
+both word-problem models. The user confirmed that NumbersWithZero/NumbersWithoutZero describe
+numerical zero, never a zero character in a numeral. A labelled digit column alone is not sufficient
+proof. Conversely, a zero operand/result in a clearly elicited or illustrated calculation remains
+numerical evidence even when represented by a single column entry.
+
+The fresh target review retains all seven explicit WithZero targets: zero numeral/cardinality,
+three zero-result subtraction tasks, contextual zero and zero's opposite. None asks for a zero
+digit. Confirmed digit-only misuse belongs to provider declarations and their sampling predicates;
+the repair does not remove or rewrite targets.
+
+### Implemented numerical repairs
+
+- Integer writing uses the scalar value at every magnitude. The old `>1000` digit partition and
+  counting/ranking machinery are removed. Positive Grade-4 ranges retain every positive value,
+  including 1005, and admit only WithoutZero; the existing Kindergarten scalar-zero cases remain.
+- Decimal number-name writing retains matching-capable profiles, but WithZero requires the zero
+  whole quantity that the actual prompt asks the learner to name. `2.05` is supported by WithoutZero;
+  `0.205`, whose requested name includes zero wholes, remains WithZero. The raw decimal sampler is
+  unchanged; unused padding and internal zero digits are not witnesses.
+- Standard integer division tests the numerical values of operands, quotient, partial dividends,
+  products and required remainders. `102 / 7` belongs to WithoutZero; `65 / 3` retains WithZero from
+  its required intermediate `6 - 6 = 0`. Initialization flags and numeral strings are excluded.
+- Standard integer addition/subtraction retains its existing WithoutZero capability but now checks
+  the actual elicited column calculations. It accepts `125 + 185 = 310`, whose zero result digit
+  records the positive sum `5 + 5 = 10`, and rejects the illustrated zero-depletion path for
+  `815 - 349`. A zero arithmetic operand or result remains disallowed; unused carry flags do not
+  create an operand. The old numeral-string exclusion is removed.
+
+Checkpoints: `e1a5808c` (division), `901ecde0` (writing), and `8f7c6314` (column arithmetic).
+These are pre-generation constraints
+on existing matching-capable declarations, not adapters or label completion after sampling.
+Correcting the profile partitions changes conditional sampling and seeded replay; preserving
+incorrect partitions would preserve false claims. Payload contracts and same-value rendering remain.
+
+### Falsified algorithm claims and the borrowing question
+
+The actual standard-subtraction question requires work from ones to the left and recording each
+borrow/calculation/result digit. For 815 - 349, its solution explicitly prints
+`1 - 1 + 10 - 4 = 6`. The initial subtraction in that illustrated path has value zero. This is
+stronger evidence than a hidden backend state; it does not imply that every valid solution method
+must name zero. Direct regrouping to seven hundreds, ten tens and fifteen ones is a different path.
+
+Adversarial review also withdraws the earlier claims that `10.2 + 1.1` and `23 * 14` were proven
+false WithZero examples. Their specified column calculations supply numerical zero addends
+(`0 + 1 = 1` and `2 + 0 = 2`). Whole operands/products alone did not cover the required mathematical
+domain. The old three-mechanism/11-selection summary is not a confirmed-defect count. Do not remove
+those labels or change their samplers merely because the underlying fields are named digits.
+
+### Standard-to-task review: keep the visual models
+
+The absence of a model label in the current five word-target permutations did not prove that their
+models were optional. The canonical standard nodes, original target TODOs and implementation
+contracts provide independent evidence:
+
+| Family | Source and original intent | Disposition |
+|---|---|---|
+| Grade-5 fraction-product word problems, 5.NF.B.6 | The [official source](https://www.thecorestandards.org/Math/Content/5/NF/B/6/) allows visual fraction models or equations. Authoring commit `36f42e905d499090e65eacd29474f3483601258d` likewise planned an equation or model; implementation `6231e34bfe0f55a6b9f5abf8866c5d4fa54f6764` deliberately added the Solution model. | An equation-only realization could fit the source and original plan, but changing the current view remains a deliberate content choice. No model is removed in this checkpoint. |
+| Grade-6 fraction-division word problems, 6.NS.A.1 | The [official examples](https://www.thecorestandards.org/Math/Content/6/NS/A/1/) combine visual fraction models and equations. Authoring commit `e703c6d54096a70632814515cd216424dd930659` explicitly requires an equation and a coherent supporting model; implementation `ea5c8604bea24227ebd27425e331290f4866e159` preserves it. | Retain the model. Removing it would change the authored competency realization rather than merely remove an arbitrary decoration. |
+
+The Grade-6 example marker alone does not require both representations in every possible worksheet;
+the stronger local requirement is the authored TODO and current checklist. The root is fully traced:
+18 targets / 28 tuples / 69 selections across execution, interpretation, inverse explanation, model
+construction, story creation and word solving. A model-construction sibling does not substitute for
+model-supported word solving. Grade-5 partition/area siblings also belong to different source leaves.
+
+No missing model label has been established solely from the presence of a Solution diagram. Adding
+VisualArticulation would change the claimed learner action unless the question actually asks for
+visual production. The model requirement must not be discarded simply because current matching
+labels underdescribe the realization. Question and Solution evaluation remain independent.
+
+A safer design candidate is to preserve the fraction/group models and test removing only redundant
+numerical rulers from word-problem Solutions. That candidate needs a model-preservation probe;
+neither removing an entire model nor hiding a zero tick is implemented here. Required-model tasks,
+all target requirements, the outer Area allowlist and the range-policy exclusion remain unchanged.
+SetTheory stays outside the proposed zero-specific positive list; no global gate expansion occurs.
+
+Evidence is under `temp/zero-rule-corrections/`: baseline snapshots, notation preservation/adoption,
+division tests, actual borrowing/column renderings and `standard-model-falsification.md`. The latter
+records exact canonical standard nodes and historical commits; the earlier removal proposal is
+withdrawn. These semantic truth repairs are separate from missing-dependency accounting.
+
+### Verification and accounting
+
+Full verification passes **885 suites / 7,143 tests** with `npm run test:coverage`, including every
+generator threshold. Writing, decimal writing and standard division have 100% generator statement
+and branch coverage; standard add/subtract has 97.36% / 97.14%, and its new helper has 100% coverage.
+Types, labels, generator/view contracts and documentation checks pass (five external-fetch warnings).
+
+The independent before/after catalog comparison preserves all **1,013 target IDs and complete label
+sets, and all 1,213 matching tuples**, with no added, removed or migrated route. Selections change
+**1,578 to 1,575** only because three false Grade-4 writing WithZero alternatives disappear. The
+three surviving writer receipts change from `coefficient-nonzero` to boolean `false`; their labels
+are unchanged. Exhaustive inference accounting changes **69 to 66** because the removed alternatives
+had evaluated empty inference outputs. No pending/invalid inference, conflicts, invalid contexts,
+contract errors or incomplete tuples remain in the audit.
+
+Source missing requirements remain **63: 56 zero and seven sign across 56 selections**. Stored
+findings remain **2,542 raw / 2,528 distinct**, with unchanged canonical stored evidence. No graph
+policy retirement or missing-requirement closure is claimed for a correction to an already-present
+but false annotation. The graph/evaluator policy hash is unchanged. Dataset regeneration and live
+VQA wait for source/content readiness; this checkpoint does not rewrite stored labels or claim
+that old artifacts are refreshed.
+
+All seven target files, 15 dependency implementation files and 3,367 unowned baseline files are
+byte-identical. All 189 pre-existing dirty paths, including unrelated README/DOCS changes, are
+preserved. The only new source files are the standard add/subtract numerical guard and its tests.
+`temp/zero-rule-corrections/final-verification.ts/json`, `preservation.mjs/json` and validation logs
+record the exact independent assertions and their results.
+
 ## Two-step competency review (2026-10-29)
 
 The user's latest annotations supersede the artifact-mode and algebra-domain-text proposals below.

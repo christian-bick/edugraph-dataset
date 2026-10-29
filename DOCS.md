@@ -104,6 +104,13 @@ matching capabilities. The
 record documents conditional sampling, verified repairs and concrete ownership/projection
 questions. Source audit closure remains separate from regeneration and stored-dataset acceptance.
 
+The [numerical-zero correction](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
+removes numeral-character partitions from writing and division, and checks the numerical work of
+the specified algorithms. Claims still come from preselected matching capabilities. Corrected
+partitions change conditional sampling and replay outcomes through the existing content identities;
+they do not add post-generation labeling. The standard-to-task review retains the authored fraction
+models and the independent Question/Solution evaluation inputs.
+
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
 of broad requests. Both are explicit schema contracts; the existing inference callbacks remain
