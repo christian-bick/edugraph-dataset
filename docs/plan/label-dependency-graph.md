@@ -10,6 +10,112 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Autonomous work and decisions requiring input (2026-10-29)
+
+The user requested an executable split of the remaining backlog and continued autonomous
+implementation. The starting audit is **263 requirements across 22 scopes**, at `a03dbddb`.
+The previous deferral list combined engineering work with actual changes to the agreed scope.
+It is superseded by this classification; difficulty or a new local algorithm is not a user decision.
+
+The pinned ontology already settles the evidence rules: ONT-E1 permits accessible and necessarily
+required evidence, ONT-E4 requires absence over the involved domain, and ONT-E5 allows multiple
+evidenced descriptors together. A displayed numerical origin counts; hidden metadata does not.
+Proper and improper fractions can coexist in one artifact. There is no outstanding vote on
+whether magnitude is exclusively about the primary input, or whether every fraction must have
+the same magnitude. Engineering must prove each asserted presence from actual required evidence.
+
+### Exclusive starting allocation
+
+**231 requirements are autonomous engineering/evidence work; 32 are input-dependent.** The
+input-dependent count includes 14 sign/zero requirements sharing the hidden-domain issue with
+seven number-kind requirements. They are counted once, not as 14 additional decisions. If
+subsequent evidence proves an independent repair, transfer that requirement with audit lineage.
+
+| Existing owner | Autonomous | Input-dependent | Autonomous work / decision dependency |
+|---|---:|---:|---|
+| RB-A1-D1: unspecified operand widths | 8 | 0 | Constant-size conditioning and safe-integer arithmetic; preserve bounded requests. |
+| RB-A2-D1: binary zero ownership | 66 | 0 | Design a producer/view ownership migration; do not duplicate claims or assume origin absence. Any actual module split still needs its own concrete confirmation. |
+| RB-A3-D2: writing zero | 4 | 0 | Separate number-zero, coefficient-zero and number-line-origin contracts without changing the content. |
+| RB-A6-D1: judgment/estimation | 5 | 0 | Joint mathematical/proposal profiles using the already settled necessary-evidence rule. |
+| RB-A7-D1: parity grouping | 2 | 0 | Model count and grouping components explicitly; preserve singleton/even/odd support. |
+| RB-A9-D1: place-value/rounding zero | 19 | 0 | Joint flag/endpoint availability and current zero-selector migration. |
+| RB-A9-D2: place-value widths | 4 | 0 | Joint compatibility and direct/planned fallback migration. |
+| RB-A10-D1: algorithms | 10 | 0 | Define and constrain the actual visible/required procedure trace. |
+| RB-D1-D1: algebra | 14 | 21 | Numeric substitution profiles are engineering. Seven symbolic domain findings and 14 related sign/zero findings depend on Q-DOMAIN. |
+| RB-D2-D1: powers | 10 | 0 | Ordinary sign/zero profiles; preserve the single/mixed structure contract and visible/required values. |
+| RB-F1-D1: decimal writing | 3 | 0 | Correlate existing notation/projection families with their actual coefficient evidence. |
+| RB-F2-D1: decimal comparison/arithmetic | 4 | 0 | Condition the existing joint sampler/trace rather than independent digits. |
+| RB-F3-D1: fraction arithmetic/benchmarks | 21 | 0 | Existing proper operands/components and finite conditioned profiles; mixed descriptors are allowed. |
+| RB-F4-D1: division zero | 29 | 3 | Union/profile ownership migration is engineering; three word-problem projections depend on Q-ARTIFACT. |
+| RB-F4-D2: division magnitude | 19 | 0 | Condition original fractions and preserve carefully repaired aliases/fallbacks. |
+| RB-F4-D3: whole-sharing kind | 1 | 0 | Preserve original routing through a joint choice migration. |
+| RB-F7-D1: product magnitude | 3 | 0 | Match evidenced multiplier magnitudes; retain mixed-number routing. |
+| RB-F7-D2: product-story zero | 0 | 2 | Q-ARTIFACT. |
+| RB-F8-D1: rational axes | 4 | 0 | Every fractional axis shows a proper step 1/d; other improper ticks do not invalidate that claim. |
+| RB-F9-D2: contextual zero | 2 | 0 | Review actual reference text and then constrain the corresponding profiles. |
+| RB-M2-D1: unrestricted clock minutes | 3 | 0 | Migrate precision/zero/five-minute choices together. |
+| RB-M3-D1: elapsed/interval time | 0 | 6 | Q-ARTIFACT. |
+| **Total** | **231** | **32** | Separate reasoning content defect is outside these 263 requirements. |
+
+### Concrete questions for the user
+
+These questions remain pending; technical design and independent implementations continue.
+Recommendations are proposals, not authorization. The Area allowlist, range-policy exclusion,
+target preservation, no adapters and no automatic completion remain fixed.
+
+**Q-ARTIFACT — May the annotation contract receive artifact mode before generation, so a question
+and its solution can carry different justified zero annotations?**
+
+- **Affected:** 11 baseline requirements: two product-story selections, three general fraction-division
+  stories, and six elapsed/interval-time selections. Example: the question has positive quantities,
+  while its solution adds a model origin 0 or the intermediate time 2:00.
+- **Recommendation:** allow a narrowly specified pre-generation mode context. Keep matching unchanged;
+  declarations remain explicit and deterministic, with no generated-payload inspection, graph completion
+  or randomness. Identity/replay and static readiness would validate both modes independently.
+- **Alternative:** retain the current config-only/shared-annotation contract and keep these gaps open
+  until a separately approved content change makes the evidence consistent across both images.
+- **Why input is needed:** the agreed `infer(config)` design currently has no artifact-mode input.
+  This is a change to that accepted contract, not an ontology ambiguity about whether displayed zero counts.
+
+**Q-DOMAIN — May the affected symbolic algebra exercises state their intended variable domain and
+any relevant sign/zero restrictions explicitly, instead of relying on hidden generator metadata?**
+
+- **Affected:** seven number-kind omissions and 14 linked sign/zero omissions. The tasks are the six
+  `6.EE.A.2b-identify-expression-parts` permutations ending `1e4efe3a`, `23730034`, `2757a785`,
+  `5b9920c0`, `a8e2818d`, `ca60b333`, plus `6.EE.A.2b-interpret-subexpressions~8c63bf94`.
+- **Example:** `3+x` does not expose the payload's declared rational domain or constrain x away from
+  zero/negative values. Explicit negative/zero literals can prove presence; their absence cannot
+  establish a hidden restriction on an unbound variable.
+- **Recommendation:** permit a small explicit statement of the existing intended domain, with concrete
+  profile text reviewed before changing exercises. Preserve target conjunctions and supported mathematical
+  cases; do not silently pick a narrower domain just to satisfy a label.
+- **Alternative:** preserve current rendering and retain these input-dependent findings. The independent
+  numeric-substitution profiles remain autonomous.
+- **Why input is needed:** visible domain/restriction text changes the content under the current rendering
+  preservation constraint. ONT-E1 already rules out asserting the hidden metadata as evidence.
+
+**Q-REASONING — May the known reasoning-view correctness defect be repaired despite the rendering
+preservation constraint?**
+
+- **Affected:** RB-A3-D3, a separate content defect with zero current dependency requirements.
+  The recorded bounded example produces `23+32+45=100` but the reasoning projection introduces 200.
+- **Recommendation:** authorize a bounded correctness repair and its target/claim tests, retaining the
+  layout and target coverage. A concrete patch can then be prepared; no scope disposition is assumed.
+- **Alternative:** retain the defect as explicitly unresolved. It continues to block dataset readiness.
+
+### Execution order and acceptance
+
+Start with unspecified widths, clock precision, single-power profiles, decimal inequality profiles
+and the proper step on rational axes. Continue with the joint place-value/rounding migrations and
+fraction evidence/profile repairs. Treat the remaining autonomous rows as queued engineering,
+not as requests awaiting user approval. A design may reveal a genuinely new content or contract
+choice; record the precise dependency and continue independent work.
+
+Each checkpoint must retain target coverage, validate both configuration paths, prove old mathematical
+support and any conditional probabilities claimed, reconcile original versus inherited gaps, and commit
+on this branch. The graph/evaluator stays annotation-only. Source closures still do not repair stored
+dataset rows; regeneration and VQA wait for all required source/content decisions and implementations.
+
 ## Autonomous continuation (2026-10-29)
 
 The user requested continuation through the remaining batches using existing solution
@@ -86,10 +192,11 @@ references pass; the documentation check retains five external-fetch warnings. T
 audit has **1,455 selections**, zero conflicts, invalid contexts, contract errors or incomplete
 enumerations, and **82 exhaustive / zero pending / zero invalid** inference selections.
 
-### Cases skipped because the existing approach is insufficient
+### Earlier continuation deferrals (superseded by the autonomous/decision split)
 
-These are retained obligations, not policy retirements. Each requires the concrete contract
-review below before further implementation; difficulty alone is not the reason for deferral.
+These were retained obligations, not policy retirements. The split above now identifies which
+are engineering work and which depend on input. This table preserves the preceding review;
+it must not be read as 22 questions awaiting user decisions.
 
 | Owner | Required further design and counterexample |
 |---|---|
