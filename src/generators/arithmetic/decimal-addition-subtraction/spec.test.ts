@@ -1,9 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {DecimalAdditionSubtractionGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {DecimalAdditionSubtractionGeneratorSchema, spec} from './spec.ts';
 
 const commonLabels = [
     Area.PlaceValue,
@@ -42,10 +42,13 @@ describe('DecimalAdditionSubtractionGenerator spec integration', () => {
         const stub = generateWithLabels(generator, labels);
         expect(stub).not.toBeNull();
         expect(stub!.data.operation).toBe(operation);
-        expect(stub!.labels).toEqual([area]);
+        expect(stub!.labels).toContain(area);
+        expect(stub!.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never))).toHaveLength(1);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
 
         setSeed(`decimal-add-subtract-labels-${operation}`);
-        expect(generator.generate({operation})?.data).toEqual(stub!.data);
+        const configured = extractConfig(DecimalAdditionSubtractionGeneratorSchema, labels);
+        expect(configured.config.operation).toBe(operation);
+        expect(generator.generate(configured.config)?.data).toEqual(stub!.data);
     });
 });

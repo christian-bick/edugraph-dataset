@@ -210,9 +210,9 @@ describe('createDecimalAddSubtractProblem', () => {
 describe('DecimalAdditionSubtractionGenerator', () => {
     it('validates the exact operation configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('operation');
-        expect(() => generator.generate({operation: 'multiplication'} as never))
+        expect(() => generator.generate({operation: 'multiplication', zeroPresence: true} as never))
             .toThrow('Addition or Subtraction');
-        expect(() => generator.generate({operation: 'addition', extra: true} as never))
+        expect(() => generator.generate({operation: 'addition', zeroPresence: true, extra: true} as never))
             .toThrow('unexpected field');
     });
 
@@ -223,7 +223,7 @@ describe('DecimalAdditionSubtractionGenerator', () => {
             let zeroCascade = 0;
             for (let seed = 0; seed < 400; seed++) {
                 setSeed(`decimal-add-subtract-${operation}-${seed}`);
-                const problem = generator.generate({operation})?.data;
+                const problem = generator.generate({operation, zeroPresence: true})?.data;
                 expect(problem).toBeDefined();
                 expectExactProblem(problem!);
                 expect(problem!.operation).toBe(operation);
@@ -254,8 +254,8 @@ describe('DecimalAdditionSubtractionGenerator', () => {
 
     it('replays the same instance from the same seed', () => {
         setSeed('decimal-add-subtract-replay');
-        const first = generator.generate({operation: 'subtraction'});
+        const first = generator.generate({operation: 'subtraction', zeroPresence: true});
         setSeed('decimal-add-subtract-replay');
-        expect(generator.generate({operation: 'subtraction'})).toEqual(first);
+        expect(generator.generate({operation: 'subtraction', zeroPresence: true})).toEqual(first);
     });
 });

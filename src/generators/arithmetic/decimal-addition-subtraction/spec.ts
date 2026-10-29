@@ -20,7 +20,10 @@ const resolveOperation = selectExactLabelMap([
 ] as const);
 
 export const DecimalAdditionSubtractionGeneratorSchema = {
-    operation: [[Area.Addition, Area.Subtraction], resolveOperation]
+    operation: [[Area.Addition, Area.Subtraction], resolveOperation],
+    zeroPresence: [[Scope.NumbersWithZero, Scope.NumbersWithoutZero], selectExactLabelMap([
+        [Scope.NumbersWithZero, true], [Scope.NumbersWithoutZero, false]
+    ] as const)]
 } as const;
 
 export type DecimalAdditionSubtractionGeneratorConfig = ConfigFromSchema<

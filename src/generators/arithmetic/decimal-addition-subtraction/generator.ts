@@ -13,6 +13,7 @@ import {
     DecimalAdditionSubtractionGeneratorSchema,
     type DecimalAdditionSubtractionGeneratorConfig
 } from './spec.ts';
+import {hasDecimalUnitZero} from './zero-profile.ts';
 
 type Operation = DecimalAddSubtractProblem['operation'];
 type Pair = readonly [number, number];
@@ -238,6 +239,37 @@ for (let first = 1; first <= MAX_OPERAND; first++) {
     }
 }
 
+interface ZeroPool {
+    readonly profile: string;
+    readonly pairs: readonly Pair[];
+    readonly originalCount: number;
+    readonly weight: number;
+}
+const zeroPools = new Map<string, readonly ZeroPool[]>();
+
+/** Condition the original uniform-scenario/uniform-pair law, retaining overlap weights. */
+export function decimalZeroPools(operation: Operation, presence: boolean): readonly ZeroPool[] {
+    const key = `${operation}:${presence}`;
+    const cached = zeroPools.get(key);
+    if (cached) return cached;
+    const original = operation === 'addition' ? ADDITION_PROFILES.map(profile => ({profile, pairs: additionPools[profile]}))
+        : SUBTRACTION_PROFILES.map(profile => ({profile, pairs: subtractionPools[profile]}));
+    const pools = original.map(pool => {
+        const pairs = pool.pairs.filter(pair => hasDecimalUnitZero(createDecimalAddSubtractProblem(operation, pair[0], pair[1])!) === presence);
+        return {profile: pool.profile, pairs, originalCount: pool.pairs.length,
+            weight: pairs.length / pool.pairs.length / original.length};
+    }).filter(pool => pool.pairs.length > 0);
+    zeroPools.set(key, pools);
+    return pools;
+}
+
+const sampleZeroPair = (operation: Operation, presence: boolean): Pair => {
+    const pools = decimalZeroPools(operation, presence);
+    let position = random() * pools.reduce((sum, pool) => sum + pool.weight, 0);
+    const pool = pools.find(candidate => (position -= candidate.weight) < 0) ?? pools[pools.length - 1]!;
+    return randomItem(pool.pairs);
+};
+
 export class DecimalAdditionSubtractionGenerator implements ProblemGenerator<
     DecimalAddSubtractProblem,
     DecimalAdditionSubtractionGeneratorConfig
@@ -248,8 +280,8 @@ export class DecimalAdditionSubtractionGenerator implements ProblemGenerator<
     generate(
         config: DecimalAdditionSubtractionGeneratorConfig
     ): ProblemStub<DecimalAddSubtractProblem> | null {
-        validateConfigFields('decimal-addition-subtraction', config, ['operation']);
-        if (Object.keys(config).some(key => key !== 'operation')) {
+        validateConfigFields('decimal-addition-subtraction', config, ['operation', 'zeroPresence']);
+        if (Object.keys(config).some(key => key !== 'operation' && key !== 'zeroPresence')) {
             throw new GeneratorValidationError(
                 'decimal-addition-subtraction', 'The configuration contains an unexpected field.'
             );
@@ -259,9 +291,10 @@ export class DecimalAdditionSubtractionGenerator implements ProblemGenerator<
                 'decimal-addition-subtraction', 'The operation must be Addition or Subtraction.'
             );
         }
-        const pair = config.operation === 'addition'
-            ? randomItem(additionPools[randomItem(ADDITION_PROFILES)])
-            : randomItem(subtractionPools[randomItem(SUBTRACTION_PROFILES)]);
+        if (typeof config.zeroPresence !== 'boolean') {
+            throw new GeneratorValidationError('decimal-addition-subtraction', 'Zero presence must be a boolean.');
+        }
+        const pair = sampleZeroPair(config.operation, config.zeroPresence);
         const data = createDecimalAddSubtractProblem(config.operation, pair[0], pair[1]);
         return data === null ? null : {data};
     }
