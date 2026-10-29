@@ -2,12 +2,13 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-eng
 import {WritingProblem} from "../../types/problems.ts";
 import {random} from "../../lib/random.ts";
 import {createWholeNumberPlaceValues} from '../../lib/whole-number-notation.ts';
-import {WritingGeneratorConfig, WritingGeneratorSchema} from "./spec.ts";
+import {WritingGeneratorConfig, WritingGeneratorSchema, spec} from "./spec.ts";
 import {validateConfigFields} from "../../lib/errors.ts";
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem, WritingGeneratorConfig> {
     type: AbstractProblem['type'] = 'writing';
     schema = WritingGeneratorSchema;
+    readonly spec = spec;
 
     generate(config: WritingGeneratorConfig): ProblemStub<WritingProblem> | null {
         validateConfigFields('writing', config, ['notationFamily', 'range', 'requireZero']);
