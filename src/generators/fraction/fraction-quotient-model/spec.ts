@@ -4,6 +4,8 @@ import type {GeneratorCompatibilityRule} from '../../../types/compatibility.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {numericProfileLabels, numericProfiles, resolveNumericProfile} from './numeric-profiles.ts';
 
 const relationProfiles = [
     [[Scope.FractionNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient'],
@@ -68,7 +70,15 @@ const fractionNotationRole: GeneratorCompatibilityRule = {
 export const spec: GeneratorSpec = {
     generatorId: 'fraction-quotient-model',
     generalLabels: [Area.Division],
-    compatibility: [fractionNotationRole]
+    compatibility: [fractionNotationRole, generatorLabelRule('fraction-quotient-numeric-profile',
+        [Scope.FractionNumbers, Scope.FractionDividend, Scope.IntegerDividend, ...numericProfileLabels], selected => {
+            const proper = selected(Scope.ProperFractions), improper = selected(Scope.ImproperFractions);
+            const withoutZero = selected(Scope.NumbersWithoutZero), withZero = selected(Scope.NumbersWithZero);
+            if (withoutZero === withZero) return false;
+            if (selected(Scope.FractionNumbers)) return proper !== improper && withoutZero;
+            if (proper || improper) return false;
+            return !selected(Scope.FractionDividend) || withoutZero;
+        })]
 };
 
 export const FractionQuotientModelGeneratorSchema = {
@@ -87,7 +97,8 @@ export const FractionQuotientModelGeneratorSchema = {
         Scope.UnitFractions,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero
-    ], resolveRelationProfile, canonicalProfiles.map(([labels]) => labels)]
+    ], resolveRelationProfile, canonicalProfiles.map(([labels]) => labels)],
+    numericProfile: [numericProfileLabels, resolveNumericProfile, numericProfiles.map(([labels]) => labels)]
 } as const;
 
 export type FractionQuotientModelGeneratorConfig = ConfigFromSchema<

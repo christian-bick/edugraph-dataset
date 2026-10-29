@@ -6,6 +6,7 @@ import {
     FractionQuotientModelGeneratorConfig,
     FractionQuotientModelGeneratorSchema
 } from './spec.ts';
+import {fractionNotationPairs, numericProfiles, type QuotientNumericProfile} from './numeric-profiles.ts';
 
 type Profile = FractionQuotientModelGeneratorConfig['relationProfile'];
 type Common = Pick<FractionQuotientProblem,
@@ -52,9 +53,13 @@ function common(
     };
 }
 
-function wholeByWhole(withEquation: boolean, asNotation: boolean): FractionQuotientProblem {
-    const wholeUnitCount = integer(asNotation ? 1 : 0, 6);
-    const recipientCount = integer(asNotation ? 2 : 1, 6);
+function wholeByWhole(withEquation: boolean, numericProfile: QuotientNumericProfile): FractionQuotientProblem {
+    const notationPairs = numericProfile === 'proper' || numericProfile === 'improper'
+        ? fractionNotationPairs(numericProfile) : undefined;
+    const pair = notationPairs?.[integer(0, notationPairs.length - 1)];
+    const wholeUnitCount = pair?.[0] ?? integer(numericProfile === 'nonzero' ? 1 : 0,
+        numericProfile === 'zero' ? 0 : 6);
+    const recipientCount = pair?.[1] ?? integer(1, 6);
     return {
         ...common(value(wholeUnitCount), value(recipientCount),
             value(wholeUnitCount, recipientCount), 'sharing', withEquation, false),
@@ -86,8 +91,9 @@ function unitFractionByWhole(withEquation: boolean, withMultiplication: boolean)
     };
 }
 
-function wholeByUnitFraction(withEquation: boolean, withMultiplication: boolean): FractionQuotientProblem {
-    const wholeUnitCount = integer(0, 6);
+function wholeByUnitFraction(withEquation: boolean, withMultiplication: boolean,
+    numericProfile: QuotientNumericProfile): FractionQuotientProblem {
+    const wholeUnitCount = integer(numericProfile === 'nonzero' ? 1 : 0, numericProfile === 'zero' ? 0 : 6);
     const partsPerWhole = integer(2, 6);
     const groupCount = wholeUnitCount * partsPerWhole;
     return {
@@ -113,20 +119,30 @@ export class FractionQuotientModelGenerator implements ProblemGenerator<
     schema = FractionQuotientModelGeneratorSchema;
 
     generate(config: FractionQuotientModelGeneratorConfig): ProblemStub<FractionQuotientProblem> {
-        validateConfigFields('fraction-quotient-model', config, ['relationProfile']);
+        validateConfigFields('fraction-quotient-model', config, ['relationProfile', 'numericProfile']);
         if (!config.relationProfile || !PROFILE_VALUES.includes(config.relationProfile)) {
             throw new GeneratorValidationError('fraction-quotient-model',
                 `Unsupported relation profile "${config.relationProfile}".`);
         }
+        const numericProfile = config.numericProfile!;
+        if (!numericProfiles.some(([, value]) => value === numericProfile)
+            || (config.relationProfile === 'fraction-as-quotient'
+                ? numericProfile !== 'proper' && numericProfile !== 'improper'
+                : config.relationProfile.startsWith('unit-dividend-')
+                    ? numericProfile !== 'nonzero'
+                    : numericProfile !== 'zero' && numericProfile !== 'nonzero')) {
+            throw new GeneratorValidationError('fraction-quotient-model',
+                `Numeric profile "${numericProfile}" is incompatible with "${config.relationProfile}".`);
+        }
         switch (config.relationProfile) {
-            case 'fraction-as-quotient': return {data: wholeByWhole(false, true)};
-            case 'whole-sharing-equation': return {data: wholeByWhole(true, false)};
+            case 'fraction-as-quotient': return {data: wholeByWhole(false, numericProfile)};
+            case 'whole-sharing-equation': return {data: wholeByWhole(true, numericProfile)};
             case 'unit-dividend-basic': return {data: unitFractionByWhole(false, false)};
             case 'unit-dividend-inverse': return {data: unitFractionByWhole(false, true)};
             case 'unit-dividend-equation': return {data: unitFractionByWhole(true, false)};
-            case 'unit-divisor-basic': return {data: wholeByUnitFraction(false, false)};
-            case 'unit-divisor-inverse': return {data: wholeByUnitFraction(false, true)};
-            case 'unit-divisor-equation': return {data: wholeByUnitFraction(true, false)};
+            case 'unit-divisor-basic': return {data: wholeByUnitFraction(false, false, numericProfile)};
+            case 'unit-divisor-inverse': return {data: wholeByUnitFraction(false, true, numericProfile)};
+            case 'unit-divisor-equation': return {data: wholeByUnitFraction(true, false, numericProfile)};
         }
     }
 }

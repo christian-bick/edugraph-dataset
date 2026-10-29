@@ -52,7 +52,9 @@ describe('fraction quotient leaf contracts', () => {
         for (const relationProfile of profiles) {
             for (let seed = 0; seed < 12; seed++) {
                 setSeed(`fraction-quotient-leaf-${relationProfile}-${seed}`);
-                const data = generator.generate({relationProfile}).data;
+                const numericProfile = relationProfile === 'fraction-as-quotient' ? seed % 2 ? 'proper' : 'improper'
+                    : relationProfile.startsWith('unit-dividend-') ? 'nonzero' : seed % 2 ? 'zero' : 'nonzero';
+                const data = generator.generate({relationProfile, numericProfile}).data;
                 for (const id of leafIds) {
                     expect(() => render(id, data, false)).not.toThrow();
                     expect(() => render(id, data, true)).not.toThrow();
@@ -63,7 +65,7 @@ describe('fraction quotient leaf contracts', () => {
 
     it('rejects an invalid inverse in every leaf', () => {
         setSeed('fraction-quotient-invalid-leaf');
-        const data = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-dividend-inverse'}).data;
+        const data = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-dividend-inverse', numericProfile: 'nonzero'}).data;
         const invalid = {...data, inverse: {...data.inverse,
             reconstructedDividend: {numerator: 25, denominator: 1}}};
         for (const id of leafIds) expect(() => render(id, invalid, false)).toThrow(/Validation Error/);

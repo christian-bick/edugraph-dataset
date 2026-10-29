@@ -13,6 +13,7 @@ const unitDividendRoles = [Scope.FractionDividend, Scope.IntegerDivisor,
     Scope.UnitFractions, Scope.NumbersWithoutNegatives];
 const unitDivisorRoles = [Scope.IntegerDividend, Scope.FractionDivisor,
     Scope.UnitFractions, Scope.NumbersWithoutNegatives];
+const relationSchema = {relationProfile: FractionQuotientModelGeneratorSchema.relationProfile};
 
 const targetCases = [
     ['5.NF.B.3-interpret-quotient', [Area.FractionNotation, Scope.FractionNumbers,
@@ -57,11 +58,11 @@ const unchangedZeroAbsenceRequests = [
 describe('fraction-quotient-model schema integration', () => {
     it.each(unchangedZeroAbsenceRequests)('completes the unchanged %s request without adding profile choices',
         (relationProfile, requested) => {
-            const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, requested, 'generator');
+            const [domain] = normalizeSchemaChoices(relationSchema, requested, 'generator');
             expect(domain.alternatives).toHaveLength(1);
             const selected = domain.alternatives[0].labels;
             expect(selected).toContain(Scope.NumbersWithoutZero);
-            expect(resolveSchemaChoices(FractionQuotientModelGeneratorSchema, requested,
+            expect(resolveSchemaChoices(relationSchema, requested,
                 {relationProfile: selected}).config).toEqual({relationProfile});
 
             for (let seed = 0; seed < 16; seed++) {
@@ -71,16 +72,16 @@ describe('fraction-quotient-model schema integration', () => {
                 setSeed(seed);
                 const canonical = extractConfig(FractionQuotientModelGeneratorSchema, [...selected]);
                 expect(unchanged).toEqual(canonical);
-                expect(unchanged.config).toEqual({relationProfile});
+                expect(unchanged.config.relationProfile).toBe(relationProfile);
                 expect(getRandomState()).toBe(continuation);
             }
         });
 
     it('keeps eight unrequested mathematical profiles without duplicate alias choices', () => {
-        const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, [], 'generator');
+        const [domain] = normalizeSchemaChoices(relationSchema, [], 'generator');
         expect(domain.alternatives).toHaveLength(8);
         const profiles = domain.alternatives.map(({labels}) => resolveSchemaChoices(
-            FractionQuotientModelGeneratorSchema, [], {relationProfile: labels}).config.relationProfile);
+            relationSchema, [], {relationProfile: labels}).config.relationProfile);
         expect(new Set(profiles).size).toBe(8);
     });
 
@@ -95,15 +96,21 @@ describe('fraction-quotient-model schema integration', () => {
     it.each(targetCases)('resolves %s to the exact mathematical profile', (_name, requested,
         selected, relationProfile) => {
         const labels = [Area.Division, ...requested];
+        setSeed(_name);
         const resolved = extractConfig(FractionQuotientModelGeneratorSchema, labels);
-        expect(resolved.config).toEqual({relationProfile});
+        expect(resolved.config.relationProfile).toBe(relationProfile);
+        const numeric = resolved.config.numericProfile;
         const expectedLabels: readonly string[] = [...selected,
             ...(relationProfile === 'fraction-as-quotient'
                 ? [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
                 : relationProfile.startsWith('unit-dividend-') ? [Scope.NumbersWithoutZero]
                     : relationProfile === 'whole-sharing-equation'
-                        ? [Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand] : [])];
+                        ? [Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand] : []),
+            ...(numeric === 'proper' ? [Scope.ProperFractions, Scope.NumbersWithoutZero]
+                : numeric === 'improper' ? [Scope.ImproperFractions, Scope.NumbersWithoutZero]
+                    : [numeric === 'zero' ? Scope.NumbersWithZero : Scope.NumbersWithoutZero])];
         expect(new Set<string>(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
+        setSeed(_name);
         const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
         expect(new Set<string>(problem.labels)).toEqual(new Set<string>(expectedLabels));
         expect(problem.data.equationWitness !== undefined).toBe(relationProfile.endsWith('-equation'));
@@ -112,7 +119,7 @@ describe('fraction-quotient-model schema integration', () => {
 
     it('grounds whole-sharing integer presence and width in the explicit original operands', () => {
         const labels = [Area.Equation, ...wholeRoles];
-        const [domain] = normalizeSchemaChoices(FractionQuotientModelGeneratorSchema, labels, 'generator');
+        const [domain] = normalizeSchemaChoices(relationSchema, labels, 'generator');
         expect(domain.alternatives).toHaveLength(1);
         expect(domain.alternatives[0].labels).toEqual(expect.arrayContaining([
             Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand, Scope.FractionQuotient

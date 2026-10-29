@@ -7,14 +7,15 @@ import {FractionQuotientBody} from './fraction-quotient-view.tsx';
 const generator = new FractionQuotientModelGenerator();
 const sample = (relationProfile: Parameters<FractionQuotientModelGenerator['generate']>[0]['relationProfile']) => {
     setSeed(`quotient-render-${relationProfile}`);
-    return generator.generate({relationProfile}).data;
+    return generator.generate({relationProfile, numericProfile: relationProfile === 'fraction-as-quotient'
+        ? 'proper' : 'nonzero'}).data;
 };
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('fraction quotient task projections', () => {
     it('replays the zero-dividend failure with an empty amount and a separate correct partition reference', () => {
         setSeed(1130970508);
-        const data = generator.generate({relationProfile: 'unit-divisor-inverse'}).data;
+        const data = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
         expect(data.orientation).toBe('whole-by-unit-fraction');
         expect(data.dividend).toEqual({numerator: 0, denominator: 1});
         expect(data.divisor).toEqual({numerator: 1, denominator: 3});
@@ -51,7 +52,7 @@ describe('fraction quotient task projections', () => {
 
     it('keeps the zero-reference and execution check changes out of other legacy task identities', () => {
         setSeed(1130970508);
-        const data = generator.generate({relationProfile: 'unit-divisor-inverse'}).data;
+        const data = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
         for (const task of ['division-interpretation', 'division-story-creation', 'division-inverse-explanation', 'division-word-problem'] as const) {
             const markup = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView />);
             expect(markup).not.toContain('One-meter partition reference');
