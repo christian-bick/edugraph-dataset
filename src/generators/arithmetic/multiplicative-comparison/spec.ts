@@ -18,12 +18,14 @@ export const spec: GeneratorSpec = {
 
 const operationProfiles = [
     [[Area.Multiplication, Scope.SingleDigitSmallestOperand], 'multiplication'],
-    [[Area.Division], 'division']
+    [[Area.Division, Scope.SingleDigitLargestOperand], 'division-single'],
+    [[Area.Division, Scope.TwoDigitLargestOperand], 'division-two']
 ] as const;
 
 export const MultiplicativeComparisonGeneratorSchema = {
     operation: [
-        [Area.Multiplication, Area.Division, Scope.SingleDigitSmallestOperand],
+        [Area.Multiplication, Area.Division, Scope.SingleDigitSmallestOperand,
+            Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand],
         selectExactLabelSetMap(operationProfiles),
         operationProfiles.map(([labels]) => labels)
     ]

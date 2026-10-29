@@ -18,6 +18,19 @@ describe('MultiplicativeComparisonGenerator spec integration', () => {
         ]));
     });
 
+    it.each([Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand])(
+        'honors the matching-capable division width %s', width => {
+            for (let seed = 0; seed < 30; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, [Area.Division, width]);
+                expect(stub).not.toBeNull();
+                expect(stub!.labels).toContain(width);
+                expect(stub!.data.operation).toBe('division');
+                expect(stub!.data.comparedQuantity < 10).toBe(width === Scope.SingleDigitLargestOperand);
+            }
+        }
+    );
+
     it.each([
         [Area.Multiplication, 'multiplication'],
         [Area.Division, 'division']
