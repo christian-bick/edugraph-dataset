@@ -3,6 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {getRandomState, setSeed} from '../../lib/random.ts';
 import {extractConfig, findSchemaFallbackContractIssues} from '../../lib/utils.ts';
 import {hasStaticResolution} from '../../lib/static-resolvers.ts';
+import {normalizeSchemaChoices} from '../../lib/schema-choices.ts';
 import {WritingGenerator} from './generator.ts';
 import {spec, WritingGeneratorSchema} from './spec.ts';
 import {hasWritingZero, resolveWritingZero, writingProfileCount, writingProfileValue} from './zero-profile.ts';
@@ -88,6 +89,14 @@ describe('writing coefficient-zero profiles', () => {
             setSeed(7);
             const stub = generator.generate(original)!;
             expect(stub.data.number === 0).toBe(requireZero);
+        }
+    });
+
+    it('keeps unspecified and tighter scalar bounds on the original empty planned default', () => {
+        for (const labels of [[Scope.NumbersLarger1000],
+            [Scope.NumbersSmaller1000, Scope.NumbersSmaller10000]]) {
+            const choices = normalizeSchemaChoices(WritingGeneratorSchema, labels, 'generator');
+            expect(choices.find(choice => choice.field === 'requireZero')!.alternatives.map(choice => choice.labels)).toEqual([[]]);
         }
     });
 });

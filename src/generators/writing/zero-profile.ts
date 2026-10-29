@@ -10,6 +10,7 @@ const finiteCoefficientBounds = writingRangeLabels.filter(label => {
     const {max} = resolveRangeFromLabels([label]);
     return max > 1000 && max <= 1_000_000;
 });
+const scalarBounds = writingRangeLabels.filter(label => resolveRangeFromLabels([label]).max <= 1000);
 
 /** Positive values through 1000 use the old scalar contract; larger values expose each coefficient. */
 export const hasWritingZero = (value: number): boolean => value === 0 || value > 1000 && String(value).includes('0');
@@ -76,6 +77,7 @@ export const resolveWritingZero = registerStaticResolver(withLabelChoices(exactR
     kind: 'alternatives', alternatives: [[], [Scope.NumbersWithZero], [Scope.NumbersWithoutZero]],
     contextLabels: writingZeroContext,
     defaults: [
+        ...scalarBounds.map(label => ({whenAll: [label], labels: []})),
         {whenNone: finiteCoefficientBounds, labels: []}
     ]
 }));
