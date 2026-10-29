@@ -14,7 +14,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'fraction-benchmark-arithmetic',
     generalLabels: [
         Area.FractionReferenceComparison,
-        Scope.FractionNumbers,
+        Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.NumbersWithoutNegatives
     ]

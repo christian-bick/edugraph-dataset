@@ -1,9 +1,9 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {FractionArithmeticGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {FractionArithmeticGeneratorSchema, spec} from './spec.ts';
 
 describe('FractionArithmeticGenerator spec integration', () => {
     const generator = new FractionArithmeticGenerator();
@@ -329,11 +329,8 @@ describe('FractionArithmeticGenerator spec integration', () => {
                 expect(stub!.labels).not.toContain(Scope.CommonDenominator);
 
                 setSeed(seed);
-                expect(generator.generate({
-                    task: expectedTask,
-                    operation,
-                    usesCommonDenominator: false
-                }).data).toEqual(stub!.data);
+                const resolved = extractConfig(FractionArithmeticGeneratorSchema, labels);
+                expect(generator.generate(resolved.config).data).toEqual(stub!.data);
             }
         }
     });

@@ -451,10 +451,30 @@ for (const firstDenominator of DENOMINATORS) {
     }
 }
 
+/** Preserve overlapping original pool paths when conditioning on an evidenced input class. */
+export function unlikeFractionMagnitudeRows(operation: FractionArithmeticOperation, magnitude: 'proper' | 'improper') {
+    return FRACTION_PROFILES.map(profile => {
+            const original = fractionPools[operation][profile];
+            const retained = original.filter(candidate => {
+                const proper = candidate.first.numerator < candidate.first.denominator
+                    || candidate.second.numerator < candidate.second.denominator;
+                return proper === (magnitude === 'proper');
+            });
+            return {profile, originalCount: original.length, retained, weight: retained.length / original.length};
+        }).filter(pool => pool.retained.length > 0);
+}
+
 const generateUnlikeFractionOperation = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation,
+    magnitude?: 'proper' | 'improper'
 ): UnlikeFractionOperationProblem => {
-    const sample = pick(fractionPools[operation][pick(FRACTION_PROFILES)]);
+    let sample: UnlikeFractionSample;
+    if (magnitude) {
+        const pools = unlikeFractionMagnitudeRows(operation, magnitude);
+        let position = random() * pools.reduce((sum, pool) => sum + pool.weight, 0);
+        const pool = pools.find(candidate => (position -= candidate.weight) < 0) ?? pools[pools.length - 1]!;
+        sample = pick(pool.retained);
+    } else sample = pick(fractionPools[operation][pick(FRACTION_PROFILES)]);
     return createUnlikeFractionOperationProblem(
         operation, sample.first, sample.second, sample.commonDenominator
     )!;
@@ -508,16 +528,21 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
             );
         }
         if (config.task === 'unlike-fraction-operation'
-            || config.task === 'unlike-mixed-operation') {
+            || config.task === 'unlike-fraction-operation-proper'
+            || config.task === 'unlike-fraction-operation-improper'
+            || config.task === 'unlike-fraction-operation-proper-equivalence'
+            || config.task === 'unlike-fraction-operation-improper-equivalence'
+            || config.task === 'unlike-mixed-operation'
+            || config.task === 'unlike-mixed-operation-equivalence') {
             if (config.usesCommonDenominator) {
                 throw new GeneratorValidationError(
                     'fraction-arithmetic',
                     'Unlike original denominators cannot also request CommonDenominator.'
                 );
             }
-            return {data: config.task === 'unlike-fraction-operation'
-                ? generateUnlikeFractionOperation(operation)
-                : generateUnlikeMixedOperation(operation)};
+            return {data: config.task.startsWith('unlike-mixed-operation') ? generateUnlikeMixedOperation(operation)
+                : generateUnlikeFractionOperation(operation, config.task === 'unlike-fraction-operation' ? undefined
+                    : config.task.includes('-proper') ? 'proper' : 'improper')};
         }
         if (!config.usesCommonDenominator) {
             throw new GeneratorValidationError(
