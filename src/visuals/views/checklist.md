@@ -14,8 +14,10 @@
 
 - **Mathematical coherence:** Every visible value, equation, ordering, count, measurement, relation, and completed answer is internally correct.
 - **Label support:** Evaluate every supplied ontology label against its definition. A label does not need to be uniquely determined.
+  - Reason through the stated exercise in Question Mode and the shown work in Solution Mode. A competency can be supported by mathematics necessary to solve the visible task even when the answer is intentionally withheld; missing solution text alone is not a label defect.
+  - Evaluate each mode independently. Ground inference in the stated task; do not invent variable domains or restrictions, or assume that a merely possible method is required.
   - A name, caption, or assertion is not by itself evidence for a label whose definition requires a visible object, representation, relation, method, or mathematical structure. Judge the complete rendered witness.
-  - `defendable`: the image provides reasonable visible evidence.
+  - `defendable`: the image and necessary mathematical reasoning from the visible task provide reasonable evidence.
   - `uncertain`: the evidence is indirect or ambiguous, or the judgment is unsure.
   - `not_defendable`: the image clearly contradicts the definition or clearly lacks a required feature.
   - `defendable` and `uncertain` pass; `not_defendable` fails.

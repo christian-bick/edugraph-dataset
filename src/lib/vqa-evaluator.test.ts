@@ -112,6 +112,45 @@ describe('vqa-evaluator', () => {
             .toThrow('Missing global view checklist');
     });
 
+    it('keeps question and solution judgments separate, with one image and no shared verdict', async () => {
+        const questionBytes = Buffer.from('question-image-only');
+        const solutionBytes = Buffer.from('solution-image-only');
+        mockGenerateContent.mockImplementation(async request => {
+            const question = (request.contents[0] as string).startsWith('Mode: Question Mode');
+            return {text: JSON.stringify({pass: !question,
+                general_checks: {no_overlaps: true, no_placeholders: true, sane_padding: true,
+                    task_identifiable: true, mode_valid: true, text_minimal: true, math_coherent: true},
+                label_checks: [{label: 'NumbersWithZero', verdict: question ? 'not_defendable' : 'defendable',
+                    evidence: question ? 'question-specific-error' : 'solution-specific-evidence'}],
+                reasoning: question ? 'question-specific-error' : ''})};
+        });
+        const cacheManager = new VqaCacheManager(tmpCacheDir, 'dataset-mode-test', 'gen');
+        const evaluateMode = (modeName: 'question' | 'solution', imageBuffer: Buffer) => evaluateSampleVqa({
+            imagePath: tmpImgPath, imageBuffer, sampleKey: `mode-test#gen#view#train#${modeName}#inst:0`,
+            targetId: 'mode-test', generatorId: 'gen', viewId: testViewId, modeName,
+            instanceIdx: 0, attempt: 1, seed: 123, fileName: `${modeName}.png`,
+            labels: ['NumbersWithZero'], apiKey: 'test-api-key', cacheManager});
+        const question = await evaluateMode('question', questionBytes);
+        const solution = await evaluateMode('solution', solutionBytes);
+        expect(question!.entry.mode).toBe('question');
+        expect(question!.entry.evaluation.pass).toBe(false);
+        expect(solution!.entry.mode).toBe('solution');
+        expect(solution!.entry.evaluation.pass).toBe(true);
+        expect(cacheManager.entries()).toHaveLength(2);
+        expect(mockGenerateContent).toHaveBeenCalledTimes(3);
+        for (const [request] of mockGenerateContent.mock.calls) {
+            const prompt = request.contents[0] as string;
+            expect(request.contents).toHaveLength(2);
+            expect(request.contents[1].inlineData.data).toBe((prompt.startsWith('Mode: Question Mode')
+                ? questionBytes : solutionBytes).toString('base64'));
+            expect(prompt).not.toContain('question-specific-error');
+            expect(prompt).not.toContain('solution-specific-evidence');
+            expect(request.config.systemInstruction).toContain('infer the work needed to solve it');
+            expect(request.config.systemInstruction).toContain('Do not assume access to another image');
+            expect(prompt).toContain('missing solution text alone is not a label defect');
+        }
+    });
+
     it('rejects a missing leaf view checklist', () => {
         const viewsRoot = resolve(tmpDir, 'views');
         mkdirSync(resolve(viewsRoot, 'category', 'sample-view'), { recursive: true });
