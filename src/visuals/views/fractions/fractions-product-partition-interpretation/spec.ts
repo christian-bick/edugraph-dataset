@@ -4,7 +4,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-product-partition-interpretation',
-    generalLabels: [Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.NumbersWithZero]
+    generalLabels: [Ability.Interpretation, Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.BarModel, Scope.NumbersWithZero]
 };
 
 export const FractionsProductPartitionInterpretationViewSchema = {} as const;

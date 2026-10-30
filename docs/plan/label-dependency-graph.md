@@ -89,7 +89,11 @@ report-only audit has the same assessments and summary, including **63 non-range
 allowlist and range-policy exclusion are unchanged. Its ontology-bound policy identity refreshes
 from `fe531bf775d9274b7189920e3786608c10dd089980c32ff062bf7da76fb33d9f`
 to `b1074c6c2c3db6b9c093424259a54cc23e578a42460ff2c57df4ca58eb3ba70e`;
-this is a semantic-input identity refresh, not a policy retirement or a closed dependency gap.
+The refresh records the new package provenance without retiring a policy or closing a dependency gap.
+Independent decomposition confirms that the inner evaluator semantic hash remains
+`87a92ce3164e7f9876bcc61a83c5760300a7d328e774e75955ed2bf18a4d8859`.
+Only the outer audit identity changes, because its ontology provenance records the new package
+version, dependency URL, resolved URL and integrity; implementation digests are identical.
 Stored dataset regeneration and VQA remain deferred to source/content readiness.
 
 Package effects are recorded under `temp/model-scope-adoption/`: `release.json`,
@@ -98,10 +102,11 @@ Package effects are recorded under `temp/model-scope-adoption/`: `release.json`,
 The pre-existing package pin is deliberately superseded; other dependency entries and unrelated
 work remain intact. Earlier v0.32 migration artifacts retain their original version and provenance.
 
-### Five approved declarations
+### Implemented: five model declarations
 
-The complete producer and Question/Solution review identifies these five straightforward
-invariant candidates. They require no target, renderer, sampling or payload changes:
+The complete producer and Question/Solution review supports these five invariant declarations,
+now added to the existing views' `generalLabels`. They change no target, renderer, sampler or
+payload. Schemas remain empty, and existing `Numberline` annotations remain:
 
 | View | Additional Scope | Evidence across its supported domain |
 |---|---|---|
@@ -111,23 +116,53 @@ invariant candidates. They require no target, renderer, sampling or payload chan
 | `fractions-area-tiling-understanding` | `AreaModel` | Both modes show the measured rectangle, congruent unit-fraction square tiles and their area unit. |
 | `fractions-rectangle-area` | `AreaModel` | Both modes show the fractional rectangle and ask for or reveal its side-length product and area in square units. |
 
-Adoption should first pin and inspect the exact published library, then verify eligibility,
-ownership, complete matching and resolved configuration choices before committing declarations.
-The release comparison from the current preview changes only the two added Scopes and the
-definition/comment of `SpatialNumbers` in the authored ontology; Areas, Abilities and schema
-sources are unchanged. No new target is needed merely because the vocabulary is available.
+The package adoption was committed separately as `ca298bbd` after package-only verification.
+These ordinary matching-capable declarations are view-owned under SPEC-V5, use eligible specific
+descriptors under SPEC-2/SPEC-3, and need no inference, adapter or completion. No `SpatialNumbers`
+ancestor, `NumberArray`, dimensional Scope or new Ability is automatically appended.
 Construction frames, mixed zero-text branches and Solution-only model contexts retain the
 separate review boundaries below. The Area allowlist, range-policy exclusion and zero/sign
-dependency policy are unaffected by this proposed batch.
+dependency policy are unaffected by this batch.
+
+The independent three-phase comparison (old package, new package alone, then new declarations)
+retains all **1,013 targets, 1,213 tuples and 1,575 joint choices**. Exactly **24 selections**
+across **nine targets / eleven tuples** gain one label: **22 `BarModel` and two `AreaModel`**.
+Only those eleven plan identities and 24 variant identities change at the declaration checkpoint;
+all selected schema receipts and mathematical configuration domains are identical. Every one of
+the **132 paired draws / 264 Question/Solution SSR outputs** remains identical in payload,
+configuration, random continuation, content/task fingerprint and rendered markup. All 1,728
+protected implementation, target and graph files remain byte-identical.
+
+Focused verification passes **nine tests across three files**. Tests retain the Numberline checks
+and examine proportional bar lengths and selected parts, the complete general/legacy division
+profiles including zero's separate one-meter reference, measured rectangle proportions and
+congruent unit-fraction tiles in both modes. Types, eligibility and generator/view contracts pass.
+The final report-only audit preserves every existing assessment and inference outcome, all
+**63 non-range source requirements** and **2,542 raw stored requirements**. It introduces no
+conflict, invalid context, row/contract error or incomplete tuple. Its hash agrees with the
+package-only audit. No stored annotations, images, VQA records or dataset pointer are rewritten.
+
+Evidence: `temp/model-scope-adoption/independent-verification.md`, the three capture JSONs and
+comparison reports, `final-audit-verification.json`, and the final validation logs.
+
+The final **`npm run test:coverage` passes 885 files / 7,143 tests**, including every generator
+coverage threshold. Aggregate generator coverage is **98.35% statements, 96.99% branches,
+100% functions and 99.44% lines**. Full results are in `full-coverage.log` and
+`full-coverage-summary.json` under that evidence directory. All seven target files, 15 dependency
+implementation files and 3,372 unowned baseline files are byte-preserved. All 185 pre-existing
+dirty paths outside the task-owned package/documentation files are byte-preserved; unrelated
+README/DOCS edits remain unstaged. The only dependency change is the explicitly approved ontology
+pin and provenance. The two checkpoints validate the current working tree without publishing
+a dataset or claiming that its stored labels have been refreshed.
 
 ### Remaining declaration boundaries
 
 | Case | Suggested Scope(s) | What remains before declaring them |
 |---|---|---|
 | General numerical division models | Existing `Numberline`; released `BarModel` for the proportional bars, or the optional grouping subtype if adopted. | Four other both-mode leaves share their spec with legacy strip producers. `Numberline` is true for the general branch, not the whole shared view. Construction's blank frame needs a distinct review against the required representation. |
-| Legacy quotient/sharing strips | Existing `SpatialNumbers`; released `BarModel`. | Positive strips support these claims. Several zero branches show only text, so a blanket invariant would overclaim. Execution's separate unit-reference diagram supports the `BarModel` candidate across its supported branches. |
-| Product partition models | Existing `Numberline` now implemented in interpretation/story creation; released `BarModel` for the strip representation itself. | Adopt the new descriptor after pinning the preview package. Existing `EqualShares` describes equal partitioning and remains generator-owned; it is not a substitute model name. |
-| Fractional rectangle tiling/area models | Released `AreaModel`; existing `VisualNumbers` for actual diagrams. | The two fixed rectangle views are candidates above. Do not transfer this claim to length-only strips. |
+| Legacy quotient/sharing strips | Existing `SpatialNumbers`; released `BarModel`. | Positive strips support these claims. Several zero branches show only text, so a blanket invariant would overclaim. Execution now declares `BarModel` across its supported branches, including its separate unit-reference diagram. |
+| Product partition models | Existing `Numberline` and released `BarModel`, now implemented in interpretation/story creation. | Existing `EqualShares` describes equal partitioning and remains generator-owned; it is not a substitute model name. Other task projections still need their own complete evidence review. |
+| Fractional rectangle tiling/area models | Released `AreaModel`; existing `VisualNumbers` for actual diagrams. | `AreaModel` is now declared in the two fixed rectangle views above. Do not transfer this claim to length-only strips or automatically extend it to construction. |
 | Product/division word-problem Solution models | Released `BarModel`, with existing `Numberline` only where there is a numbered axis. | Current Questions do not supply or require that specific representation. A new ontology term alone does not resolve the shared Question/Solution declaration boundary or the division view's mixed producer forms. Retain the authored models. |
 
 `Numberline` and `EqualShares` remain independent properties of a bar model: an unnumbered strip

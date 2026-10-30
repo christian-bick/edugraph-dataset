@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'fractions-rectangle-area',
-    generalLabels: [Ability.ProcedureExecution],
+    generalLabels: [Ability.ProcedureExecution, Scope.AreaModel],
     compatibility: [requireTargetLabels('fractional-rectangle-execution-scope', [Scope.FractionNumbers])]
 };
 

@@ -39,10 +39,12 @@ const render = (id: LeafId, data: FractionProductProblem, isSolutionView: boolea
     }}));
 
 describe('fraction product leaf contracts', () => {
-    it('accepts every producer profile and evidences the declared number lines in both modes', () => {
+    it('evidences the declared bars and number lines for every producer profile in both modes', () => {
         const generator = new FractionProductsGenerator();
         expect(interpretationSpec.generalLabels).toContain(Scope.Numberline);
         expect(storySpec.generalLabels).toContain(Scope.Numberline);
+        expect(interpretationSpec.generalLabels).toContain(Scope.BarModel);
+        expect(storySpec.generalLabels).toContain(Scope.BarModel);
         for (const productProfile of ['fraction-partition-proper', 'fraction-partition-improper',
             'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const) {
             for (let seed = 0; seed < 20; seed++) {
@@ -55,6 +57,14 @@ describe('fraction product leaf contracts', () => {
                             expect(markup).toContain('<line x1="132" y1="60" x2="692" y2="60"');
                             expect(markup).toMatch(/<text x="132"[^>]*>0 m<\/text>/);
                             expect(markup).toMatch(/<text[^>]*>1 m<\/text>/);
+                            const parts = [...markup.matchAll(/<rect[^>]* width="([^"]+)" height="34" fill="([^"]+)"/g)];
+                            expect(parts).toHaveLength(data.partition.equalPartsPerCopy * data.partition.copyCount);
+                            expect(parts.filter(part => part[2] === '#7dd3fc')).toHaveLength(data.partition.selectedPartCount);
+                            const quantity = data.quantityValue.numerator / data.quantityValue.denominator;
+                            const wholeRowWidth = 560 * quantity / Math.ceil(quantity);
+                            for (const part of parts) {
+                                expect(Number(part[1])).toBeCloseTo(wholeRowWidth / data.partition.equalPartsPerCopy, 12);
+                            }
                         }
                     }
                 }

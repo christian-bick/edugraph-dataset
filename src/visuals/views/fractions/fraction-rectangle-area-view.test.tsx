@@ -5,6 +5,9 @@ import {FractionRectangleAreaGenerator} from '../../../generators/fraction/fract
 import {formatRectangleRational} from './fraction-rectangle-area-helpers.ts';
 import {FractionRectangleAreaBody} from './fraction-rectangle-area-view.tsx';
 import type {FractionRectangleTask} from './fraction-rectangle-area-view.tsx';
+import {spec as tilingSpec} from './fractions-area-tiling-understanding/spec.ts';
+import {spec as areaSpec} from './fractions-rectangle-area/spec.ts';
+import {Scope} from 'edugraph-ts';
 
 const generator = new FractionRectangleAreaGenerator();
 const profiles = ['fraction-side-product', 'square-tile-proof'] as const;
@@ -24,6 +27,23 @@ describe('fraction rectangle task projections', () => {
             expect(visible(question)).not.toContain('Side product:');
             expect(visible(question)).not.toContain('Tile count:');
             expect(visible(solution)).toContain(`${area} square units`);
+            if (task !== 'product-construction') {
+                expect((task === 'tiling-understanding' ? tilingSpec : areaSpec).generalLabels).toContain(Scope.AreaModel);
+                const {length, width} = data.outerRectangle;
+                const sideRatio = length.numerator * width.denominator / (length.denominator * width.numerator);
+                for (const markup of [question, solution]) {
+                    const outer = markup.match(/<rect data-outer-rectangle="true"[^>]* width="([^"]+)" height="([^"]+)"/);
+                    expect(outer).not.toBeNull();
+                    expect(Number(outer![1]) / Number(outer![2])).toBeCloseTo(sideRatio, 12);
+                    if (task === 'tiling-understanding') {
+                        const tiles = [...markup.matchAll(/<rect data-square-tile="true"[^>]* width="([^"]+)" height="([^"]+)"/g)];
+                        expect(tiles).toHaveLength(data.tileGrid.tileCount);
+                        for (const tile of tiles) expect(Number(tile[1])).toBe(Number(tile[2]));
+                        expect(visible(markup)).toContain(`area ${formatRectangleRational(data.tileGrid.squareTile.areaSquareUnits)} square unit`);
+                    }
+                }
+                expect(visible(solution)).toContain(`${formatRectangleRational(length)} × ${formatRectangleRational(width)}`);
+            }
             if (task === 'tiling-understanding') {
                 expect(question).toContain('data-square-tile="true"');
                 expect(question).toContain('data-outer-rectangle="true"');

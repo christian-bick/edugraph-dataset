@@ -6,6 +6,7 @@ import {FractionDivisionRelationsGenerator} from '../../../generators/fraction/f
 import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
 import {FractionQuotientBody, type FractionQuotientTask} from './fraction-quotient-view.tsx';
 import {spec as modelSpec} from './fractions-division-model-construction/spec.ts';
+import {spec as executionSpec} from './fractions-division-execution/spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 
 const leafIds = [
@@ -62,6 +63,20 @@ describe('general fraction division leaf contracts', () => {
                             const solution = render(id, data, true);
                             expect(question).not.toContain('Validation Error');
                             expect(solution).not.toContain('Validation Error');
+                            if (id === 'fractions-division-execution') {
+                                expect(executionSpec.generalLabels).toContain(Scope.BarModel);
+                                for (const markup of [question, solution]) {
+                                    const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
+                                    expect(parts).toHaveLength(data.model.coverageTicks);
+                                    expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
+                                    for (const part of parts) {
+                                        expect(Number(part[1])).toBeCloseTo(700 / data.model.coverageTicks, 12);
+                                    }
+                                    expect(markup.match(/ y="219" width="[^"]+" height="27"/g))
+                                        .toHaveLength(data.model.divisorTicks);
+                                    expect(markup).toContain('All rows use the same numerical scale.');
+                                }
+                            }
                             if (id === 'fractions-division-model-construction') {
                                 // The invariant Numberline claim holds for the blank and completed frames.
                                 for (const markup of [question, solution]) {
@@ -126,6 +141,27 @@ describe('general fraction division leaf contracts', () => {
                         const task = id.replace('fractions-', '') as FractionQuotientTask;
                         const original = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView={isSolutionView} />);
                         expect(render(id, data, isSolutionView)).toBe(original);
+                        if (id === 'fractions-division-execution') {
+                            // Even scalar zero retains a proportional one-meter reference bar.
+                            // The empty dividend text alone would not evidence BarModel.
+                            expect(original).toContain('<svg');
+                            if (data.orientation !== 'unit-fraction-by-whole' && data.model.wholeUnitCount === 0) {
+                                expect(original).toContain('One-meter partition reference');
+                                const parts = [...original.matchAll(/<rect[^>]* y="137" width="([^"]+)" height="42"/g)];
+                                expect(parts).toHaveLength(data.model.partsPerWhole);
+                                for (const part of parts) {
+                                    expect(Number(part[1])).toBeCloseTo(570 / data.model.partsPerWhole, 12);
+                                }
+                            } else if (data.orientation === 'unit-fraction-by-whole') {
+                                expect(original).toContain('all cuts use the same one-meter whole.');
+                                expect(original.match(/<rect[^>]* y="42"/g)).toHaveLength(data.model.wholePartitionCount);
+                                expect(original.match(/<rect[^>]* y="128"/g)).toHaveLength(data.model.refinedPartitionCount);
+                            } else {
+                                const parts = [...original.matchAll(/<rect[^>]* height="24"/g)];
+                                expect(parts).toHaveLength(data.model.wholeUnitCount * data.model.partsPerWhole);
+                                expect(original).toContain('Each meter is cut into');
+                            }
+                        }
                     }
                 }
                 expect(() => render('fractions-division-model-construction', data, false)).toThrow(/Validation Error/);
