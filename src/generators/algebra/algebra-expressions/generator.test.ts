@@ -1,6 +1,7 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
+import * as randomness from '../../../lib/random.ts';
 import type {AlgebraicExpressionProblem, AlgebraicScalar, ExactSymbolicExpressionNode} from '../../../types/problems.ts';
 import {isAlgebraicExpressionProblem} from '../algebra-expression-helpers.ts';
 import {AlgebraExpressionsGenerator} from './generator.ts';
@@ -39,6 +40,7 @@ const relations: NonNullable<AlgebraExpressionsGeneratorConfig['relation']>[] = 
     'numeric-quotient', 'symbolic-quotient', 'numeric-grouped', 'symbolic-grouped', 'substitution', 'modeling'];
 
 describe('canonical algebra expression mathematics', () => {
+    afterEach(() => vi.restoreAllMocks());
     it.each(relations)('constructs a coherent uniform %s relation with exact independent evaluation', relation => {
         const generator = new AlgebraExpressionsGenerator();
         const examples = new Set<string>();
@@ -143,5 +145,34 @@ describe('canonical algebra expression mathematics', () => {
         expect(ordinary.substitution.bindings[0].value.numerator).toBe(0);
         expect(ordinary.restrictions).toEqual([]);
         expect(ordinary.symbols[0].domain.excludedValues).toEqual([]);
+    });
+
+    it('preserves both original writer conditional samplers after moving their equal mixture into mathematics', () => {
+        const generator = new AlgebraExpressionsGenerator();
+        const originalDraw = randomness.random;
+        for (const numericProfile of [3, 4] as const) for (let seed = 0; seed < 32; seed++) {
+            setSeed(seed);
+            const original = generator.generate({relation: 'plain', power: 'none', numericProfile});
+            const continuation = randomness.getRandomState();
+            setSeed(seed);
+            // Hold the private mixture choice fixed to compare the complete
+            // subsequent raw stream with the original conditional sampler.
+            const draw = vi.spyOn(randomness, 'random').mockImplementation(originalDraw)
+                .mockImplementationOnce(() => numericProfile === 3 ? 0.25 : 0.75);
+            expect(generator.generate({relation: 'plain', power: 'none', numericProfile: 0})).toEqual(original);
+            expect(randomness.getRandomState()).toBe(continuation);
+            draw.mockRestore();
+        }
+    });
+
+    it('selects division on exactly the lower half of the private writer draw domain', () => {
+        const generator = new AlgebraExpressionsGenerator(), originalDraw = randomness.random;
+        for (const mixtureDraw of [0, 0.25, 0.5, 0.75, 1 - 2 ** -32]) {
+            setSeed(17);
+            const draw = vi.spyOn(randomness, 'random').mockImplementation(originalDraw).mockReturnValueOnce(mixtureDraw);
+            const data = generator.generate({relation: 'plain', power: 'none', numericProfile: 0})!.data;
+            expect(data.expression.kind === 'binary' && data.expression.operation === 'division').toBe(mixtureDraw < 0.5);
+            draw.mockRestore();
+        }
     });
 });

@@ -113,11 +113,16 @@ export class AlgebraExpressionsGenerator implements ProblemGenerator<AlgebraicEx
         }
         const complete = {relation: config.relation, power: config.power, numericProfile: config.numericProfile!};
         if (config.relation === 'modeling') return {data: mathematicalInstance(complete)};
+        // The writer formerly selected its two conditional samplers through
+        // sign/zero annotations. Keep their 50/50 mathematical mixture private
+        // now that algebraic examples do not carry those classification labels.
+        const numericProfile = config.relation === 'plain' && config.numericProfile === 0
+            ? random() < 0.5 ? 3 : 4 : config.numericProfile!;
         // Condition the original raw draws before constructing a payload. The complete
         // finite parameter-domain proof establishes acceptance >= 1/100 for every profile.
         for (let attempt = 0; attempt < 4096; attempt++) {
             const inputs = drawInputs(config.relation);
-            if (inputsMeetNumericProfile(config.relation, inputs, config.numericProfile!)) {
+            if (inputsMeetNumericProfile(config.relation, inputs, numericProfile)) {
                 return {data: mathematicalInstance(complete, inputs)};
             }
         }

@@ -33,6 +33,39 @@ for the required method. The annotation addition is NumbersWithZero. Five focuse
 15 tests pass. This closes six source zero requirements without claiming stored-data acceptance.
 Evidence: `temp/remaining-resolution/clock-preservation.json` and `clock-after.json`.
 
+### Checkpoint: algebra classification cutoff and authored migration
+
+**[IMPLEMENTED]** `LD-ALGEBRA-POLARITY-01` excludes the sign/zero facets when any individual Area
+is within AlgebraicExpression, or within Algebra without Arithmetic ancestry. The graph's
+`exclusions` suppress only those facets' completeness checks and reject their supplied labels,
+even outside the existing completeness allowlist. Other facets, shared arithmetic-law contexts,
+exponent scopes and range semantics remain unchanged. The pure evaluator never changes labels.
+
+The authored algebra contracts now resolve without generic polarity claims. Numeric
+ArithmeticExpression branches retain their matching-capable profiles. The symbolic quotient's
+old zero-absence claim is removed. The writer's private mathematical sampler retains its original
+50/50 division/nondivision mixture; removing its label profiles moves that draw inside generation,
+so writer seeded payloads and continuation change and old replay identities must refresh.
+
+Two explicit rational-equation target permutations remove only NumbersWithoutNegatives:
+
+| Operation | Old suffix | Successor suffix |
+|---|---|---|
+| Addition | `0f9218a9` | `4386bac7` |
+| Multiplication | `ad0abe2b` | `89a2fa61` |
+
+Both competencies and their existing nonnegative mathematical domains, including zero, are
+preserved. This is an explicit classifier-policy target migration, not lost coverage or a reason
+to broaden the exercises. The 13 old omission requirements are **policy retirements**; removing
+the seven previously emitted assertions across five choices is separate existing-claim cleanup.
+
+Verification: 48 focused algebra tests and 242 evaluator/gate/audit tests pass. **1,408 fixed-seed
+nonwriter probes** preserve configurations, mathematics and RNG; all 64 measured writer probes
+change as disclosed. **256 same-value writer Q/S render comparisons** are identical. The four
+stored algebra claims remain conflicts until ordinary regeneration; there is no export filter.
+Evidence and own-only patches: `temp/remaining-resolution/algebra-preservation.json` and
+`algebra-own-zero-context.patch`.
+
 ## Strategy refinement: conclusions and open design (2026-10-30)
 
 This section records the user's latest review and supersedes conflicting recommendations in the

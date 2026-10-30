@@ -2,10 +2,12 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planCompatibility} from '../../../lib/compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
+import {matchTarget} from '../../../lib/matching.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
-import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {extractSchemaLabels, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {implementationTodos, spec as activeTargets} from '../../../spec/ccss/grade-06.ts';
+import type {AlgebraicEquationProblem} from '../../../types/problems.ts';
 import {spec as checkView, AlgebraSubstitutionCheckViewSchema} from '../../../visuals/views/operations/algebra-substitution-check/spec.ts';
 import {spec as meaningView, AlgebraSolutionMeaningViewSchema} from '../../../visuals/views/operations/algebra-solution-meaning/spec.ts';
 import {spec as modelView, AlgebraEquationModelSolveViewSchema} from '../../../visuals/views/operations/algebra-equation-model-solve/spec.ts';
@@ -40,6 +42,41 @@ describe('elementary equation mathematical capability ownership', () => {
                     sampleKey: `${target.id}#${spec.generatorId}#${entry[0].viewId}#train#question#inst:0`, seed, attempt: 1});
                 expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.ExpressionOnOneSide]));
                 expect(draw.stub?.data.kind).toBe('algebra-equations');
+                expect(draw.labels.filter(label => [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives,
+                    Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as Scope))).toEqual([]);
+                if (entry[0] === modelView) {
+                    const data = draw.stub!.data as AlgebraicEquationProblem;
+                    expect(data.ambientDomain.kind).toBe('numeric');
+                    if (data.ambientDomain.kind === 'numeric') {
+                        expect(data.ambientDomain.values.lower).toEqual({value: {numerator: 0, denominator: 1}, inclusive: true});
+                        expect(data.ambientDomain.values.upper).toBeNull();
+                    }
+                    expect(data.candidateUniverse.every(candidate => candidate.value.numerator >= 0)).toBe(true);
+                    expect(data.form.total.numerator).toBeGreaterThanOrEqual(0);
+                    if (data.form.kind === 'multiplicative') expect(data.form.coefficient.numerator).toBeGreaterThan(0);
+                    else expect(data.form.addend.numerator).toBeGreaterThanOrEqual(0);
+                }
+            }
+        }
+    });
+
+    it('migrates only the two modeling target polarity requirements while retaining their canonical nonnegative relations', () => {
+        const targets = activeTargets.filter(target => target.id.startsWith('6.EE.B.7-model-and-solve-rational-equations~'));
+        expect(targets).toHaveLength(2);
+        const generator = {generatorId: spec.generatorId, spec, schema: AlgebraEquationsGeneratorSchema,
+            labels: [...spec.generalLabels, ...extractSchemaLabels(AlgebraEquationsGeneratorSchema)],
+            generalLabels: spec.generalLabels, problemType: 'AlgebraicEquationProblem'};
+        const view = {viewId: modelView.viewId, spec: modelView, schema: AlgebraEquationModelSolveViewSchema,
+            supportedLabels: [...modelView.generalLabels], generalLabels: modelView.generalLabels, problemType: 'AlgebraicEquationProblem'};
+        for (const target of targets) {
+            expect(target.labels).not.toContain(Scope.NumbersWithoutNegatives);
+            expect(['6.EE.B.7-model-and-solve-rational-equations~0f9218a9',
+                '6.EE.B.7-model-and-solve-rational-equations~ad0abe2b']).not.toContain(target.id);
+            expect(matchTarget(target, generator, view).matched).toBe(true);
+            for (const label of [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
+                expect(matchTarget({...target, labels: [...target.labels, label]}, generator, view))
+                    .toEqual({matched: false, reason: 'unsupported-label', label});
             }
         }
     });

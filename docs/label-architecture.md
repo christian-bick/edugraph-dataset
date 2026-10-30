@@ -191,6 +191,21 @@ in static reports; strict completeness applies to actual artifact annotations. S
 and invalid contexts still fail. Targets remain partial requests, and matching never evaluates a payload.
 Range-presence findings remain report-only; range policy is unchanged.
 
+Generic sign/zero classification has a contextual algebra cutoff. If any resolved Area is
+structurally within `AlgebraicExpression`, or within `Algebra` without also being within
+`Arithmetic`, the `NumericSign` and `NumericZero` families are neither assessed for completeness
+nor allowed as annotations. Evaluate the exception per Area: an additional `Addition` label must
+not mask an algebraic modeling or equation-solving claim. Shared elementary arithmetic laws retain
+their arithmetic classification. `ArithmeticExpression` alone does not trigger the cutoff.
+
+The graph declares this through `exclusions` containing a trigger and facet names. Activated
+exclusions suppress only those facets' completeness assessments and report every supplied family
+member as an annotation conflict, including contexts outside the outer completeness allowlist.
+Targets and module declarations must express this cutoff before generation; validation does not
+filter labels or classify payloads. Positive/negative exponent scopes and numeric range scopes
+are separate families and retain their semantics. The optional `areaWithin` object selector's
+`ignore` branches filter individual Areas for qualification only; they never remove Area labels.
+
 Numeric contexts do not universally require a numeral system or base. Base completeness
 applies when annotations establish positional representation: `RodNumerals`, `BaseTenBlocks`,
 `ScientificExponentNotation`, or an Area within `PlaceValue` or `DecimalNotation`. The separate

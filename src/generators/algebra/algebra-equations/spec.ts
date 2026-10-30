@@ -6,8 +6,10 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 const relations = [
     [[Area.AlgebraicSubstitution, Area.RelationSatisfaction], 'instantiated-predicate'],
     [[Area.SolutionSet, Area.EquationSolving], 'finite-extension'],
-    [[Area.AlgebraicModeling, Area.EquationSolving, Area.Addition, Scope.NumbersWithoutNegatives], 'nonnegative-sum-preimage'],
-    [[Area.AlgebraicModeling, Area.EquationSolving, Area.Multiplication, Scope.NumbersWithoutNegatives], 'nonnegative-product-preimage']
+    // These relations retain their nonnegative mathematical domain. Algebraic
+    // examples intentionally omit generic sign/zero classification labels.
+    [[Area.AlgebraicModeling, Area.EquationSolving, Area.Addition], 'nonnegative-sum-preimage'],
+    [[Area.AlgebraicModeling, Area.EquationSolving, Area.Multiplication], 'nonnegative-product-preimage']
 ] as const;
 
 export const spec: GeneratorSpec = {

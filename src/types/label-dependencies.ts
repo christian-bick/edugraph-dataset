@@ -2,7 +2,11 @@
 export type DependencyTrigger = {readonly family: string}
     | {readonly any: readonly DependencyTrigger[]}
     | {readonly all: readonly DependencyTrigger[]}
-    | {readonly areaWithin: string}
+    | {readonly areaWithin: string | {
+        readonly root: string;
+        /** Ignore these branches per Area, so an unrelated arithmetic Area cannot mask an algebraic one. */
+        readonly ignore?: readonly string[];
+    }}
     /** After ignoring optional structural branches, requires a nonempty family entirely beneath root. */
     | {readonly familyWithin: {
         readonly family: string;
@@ -28,6 +32,12 @@ export interface LabelDependencyGraph {
         readonly id: string;
         readonly facet: string;
         readonly labels: readonly string[];
+    }[];
+    /** These families are unassessed and forbidden in the selected Area context, even outside completeness scope. */
+    readonly exclusions?: readonly {
+        readonly id: string;
+        readonly when: DependencyTrigger;
+        readonly facets: readonly string[];
     }[];
 }
 

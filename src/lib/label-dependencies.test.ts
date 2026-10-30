@@ -119,7 +119,10 @@ describe('annotation dependency assessment', () => {
     ])('detects contradictory %s annotations', (facet, left, right) => {
         expect(core([left, right, left]).conflicts).toEqual([expect.objectContaining({facet, labels: [left, right].sort()})]);
         expect(core([left]).conflicts).toEqual([]);
-        expect(evaluator.evaluate([Area.EquationSolving, left, right]).conflicts).toEqual([]);
+        const outside = evaluator.evaluate([Area.EquationSolving, left, right]).conflicts;
+        expect(outside).toEqual(facet === 'referenceFrames' ? [] : [expect.objectContaining({
+            ruleId: 'LD-ALGEBRA-POLARITY-01', facet, labels: [left, right].sort()
+        })]);
     });
 
     it('permits legitimate mixed labels outside explicitly exclusive groups', () => {
@@ -166,6 +169,62 @@ describe('annotation dependency assessment', () => {
         (value as any).facets.zero = {labels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero]};
         expect(createLabelDependencyEvaluator(value).evaluate([Area.Addition, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).conflicts)
             .toHaveLength(1);
+    });
+});
+
+describe('algebra annotation cutoff', () => {
+    it.each([Area.AlgebraicExpression, Area.NumericSubstitution, Area.AlgebraicModeling, Area.EquationSolving])(
+        'rejects either polarity family within %s, including a mixed arithmetic context', area => {
+            const labels = [area, Area.Addition, Scope.IntegerNumbers];
+            const result = evaluator.evaluate(labels);
+            expect(result.conflicts).toEqual([]);
+            expect(result.assessments.some(item => item.facet === 'sign' || item.facet === 'zero')).toBe(false);
+            for (const [facet, claim] of [
+                ['sign', Scope.NumbersWithNegatives], ['sign', Scope.NumbersWithoutNegatives],
+                ['zero', Scope.NumbersWithZero], ['zero', Scope.NumbersWithoutZero]
+            ]) {
+                const annotations = [...labels, claim];
+                const before = [...annotations];
+                expect(evaluator.evaluate(annotations).conflicts).toContainEqual({
+                    ruleId: 'LD-ALGEBRA-POLARITY-01', facet, labels: [claim],
+                    reason: 'This annotation family is excluded in the resolved Area context.'
+                });
+                expect(annotations).toEqual(before);
+            }
+        });
+
+    it.each([Area.ArithmeticExpression, Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw])(
+        'retains numeric completeness and claims for the arithmetic/shared role %s', area => {
+            const missing = evaluator.evaluate([area, Scope.IntegerNumbers]);
+            expect(missing.assessments.filter(item => item.facet === 'sign' || item.facet === 'zero'))
+                .toHaveLength(2);
+            const labeled = evaluator.evaluate([area, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
+            expect(labeled.conflicts).toEqual([]);
+        });
+
+    it('uses the full authoritative Area context and preserves non-polarity facets', () => {
+        const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands], [Area.AlgebraicExpression]);
+        expect(result.assessments.map(item => item.facet).sort())
+            .toEqual(['numberKind', 'operandCount', 'operandDigits', 'range']);
+        const forbidden = evaluator.evaluate([Area.Addition, Scope.NumbersWithoutZero], [Area.EquationSolving]);
+        expect(forbidden.context.status).toBe('outside_policy_scope');
+        expect(forbidden.conflicts).toEqual([expect.objectContaining({facet: 'zero'})]);
+    });
+
+    it('preserves exponent and range scopes outside the two families', () => {
+        expect(evaluator.evaluate([Area.AlgebraicExpression, Scope.PositiveExponent, Scope.NegativeExponent,
+            Scope.NumbersLargerZero]).conflicts).toEqual([]);
+    });
+
+    it('normalizes exclusion and ignored-branch order and binds them to policy identity', () => {
+        const value = graph();
+        (value as any).exclusions[0].facets.reverse();
+        (value as any).exclusions[0].when.any.reverse();
+        expect(createLabelDependencyEvaluator(value).policyHash).toBe(evaluator.policyHash);
+        (value as any).exclusions = [];
+        expect(createLabelDependencyEvaluator(value).policyHash).not.toBe(evaluator.policyHash);
+        expect(createLabelDependencyEvaluator(value).evaluate([Area.AlgebraicExpression, Scope.IntegerNumbers])
+            .assessments.some(item => item.facet === 'zero')).toBe(true);
     });
 });
 
@@ -447,6 +506,12 @@ describe('graph integrity', () => {
         ['unknown Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: 'unknown'};}],
         ['non-Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: Scope.IntegerNumbers};}],
         ['empty Area qualifier', (value: any) => {value.rules[0].when = {areaWithin: ''};}],
+        ['null Area selector', (value: any) => {value.rules[0].when = {areaWithin: null};}],
+        ['missing Area selector root', (value: any) => {value.rules[0].when = {areaWithin: {}};}],
+        ['unknown Area selector field', (value: any) => {value.rules[0].when = {areaWithin: {root: Area.Algebra, other: true}};}],
+        ['empty ignored Areas', (value: any) => {value.rules[0].when = {areaWithin: {root: Area.Algebra, ignore: []}};}],
+        ['non-array ignored Areas', (value: any) => {value.rules[0].when = {areaWithin: {root: Area.Algebra, ignore: null}};}],
+        ['non-Area ignored root', (value: any) => {value.rules[0].when = {areaWithin: {root: Area.Algebra, ignore: [Scope.IntegerNumbers]}};}],
         ['invalid family qualifier', (value: any) => {value.rules[0].when = {familyWithin: null};}],
         ['unknown family qualifier fields', (value: any) => {
             value.rules[0].when = {familyWithin: {family: 'numberKind', root: Scope.IntegerNumbers, other: true}};
@@ -472,7 +537,16 @@ describe('graph integrity', () => {
         ['unknown conflict descriptor', (value: any) => {value.conflicts[0].labels[0] = 'unknown';}],
         ['ineligible conflict descriptor', (value: any) => {value.conflicts[0].labels[0] = Scope.NumericAbstraction;}],
         ['conflict outside root family', (value: any) => {value.conflicts[0].labels[0] = Scope.Base10;}],
-        ['conflict outside explicit family', (value: any) => {value.conflicts[0].facet = 'fractionMagnitude';}]
+        ['conflict outside explicit family', (value: any) => {value.conflicts[0].facet = 'fractionMagnitude';}],
+        ['invalid exclusions', (value: any) => {value.exclusions = null;}],
+        ['null exclusion', (value: any) => {value.exclusions = [null];}],
+        ['empty exclusion ID', (value: any) => {value.exclusions[0].id = '';}],
+        ['duplicate exclusion ID', (value: any) => {value.exclusions[0].id = value.rules[0].id;}],
+        ['unknown exclusion fields', (value: any) => {value.exclusions[0].other = true;}],
+        ['invalid exclusion trigger', (value: any) => {value.exclusions[0].when = null;}],
+        ['empty exclusion facets', (value: any) => {value.exclusions[0].facets = [];}],
+        ['non-array exclusion facets', (value: any) => {value.exclusions[0].facets = null;}],
+        ['unknown exclusion facet', (value: any) => {value.exclusions[0].facets = ['unknown'];}]
     ])('rejects %s', (_name, mutate) => {
         const value = graph();
         mutate(value);
@@ -573,5 +647,26 @@ describe('ontology-bound evaluation identity', () => {
             {...statement(ignored, 'http://www.w3.org/2000/01/rdf-schema#comment', 'Clarified ignored branch.'), objectKind: 'Literal'}]));
         expect(clarified.policyHash).not.toBe(after.policyHash);
         expect(clarified.evaluate(labels)).toEqual(after.evaluate(labels));
+    });
+
+    it('binds per-Area exclusions and catches future eligible family members', () => {
+        const kind = iri('kind'), claim = iri('claim');
+        const base = [...fixture(), ...[kind, claim].map(label => statement(label,
+            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://edugraph.io/edu#Scope')),
+            statement(claim, RELATION_IRIS.partOf, kind)];
+        const policy: LabelDependencyGraph = {...fixtureGraph,
+            facets: {candidate: {root: kind}}, rules: [],
+            exclusions: [{id: 'exclude', when: {areaWithin: {root: iri('root'), ignore: [iri('outside')]}},
+                facets: ['candidate']}]};
+        const before = createLabelDependencyEvaluator(policy, createOntologyContext(base));
+        expect(before.evaluate([iri('allowed'), claim]).conflicts).toEqual([
+            expect.objectContaining({ruleId: 'exclude', facet: 'candidate', labels: [claim]})
+        ]);
+        expect(before.evaluate([iri('mixed'), claim]).conflicts).toEqual([]);
+        expect(before.evaluate([iri('allowed'), iri('mixed'), claim]).conflicts).toHaveLength(1);
+        const changed = createLabelDependencyEvaluator(policy, createOntologyContext([...base,
+            {...statement(iri('outside'), 'http://www.w3.org/2000/01/rdf-schema#comment', 'Clarified ignored Area.'), objectKind: 'Literal'}]));
+        expect(changed.policyHash).not.toBe(before.policyHash);
+        expect(changed.evaluate([iri('allowed'), claim])).toEqual(before.evaluate([iri('allowed'), claim]));
     });
 });

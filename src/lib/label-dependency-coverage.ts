@@ -38,7 +38,7 @@ export interface LabelDependencyCoverageResult {
 
 const facetKey = (ruleId: string, facet: string) => `${ruleId}/${facet}`;
 
-/** Checks the same annotation rules for every eligible sample, without inspecting its payload. */
+/** Checks annotation contracts without payloads; contextual exclusions also apply outside completeness scope. */
 export function assessLabelDependencyCoverage(input: LabelDependencyCoverageInput): LabelDependencyCoverageResult {
     // Supplied audit objects cannot override policy scope or dependency completeness.
     const evaluation = evaluator.evaluate(input.labels, input.resolvedAreas);
@@ -54,12 +54,12 @@ export function assessLabelDependencyCoverage(input: LabelDependencyCoverageInpu
         fail('context', 'The complete resolved Area context is invalid.');
         return result;
     }
+    for (const conflict of evaluation.conflicts) fail('contradiction',
+        `${conflict.ruleId}/${conflict.facet}: ${conflict.reason}`, {ruleId: conflict.ruleId, facet: conflict.facet});
     if (evaluation.context.status === 'outside_policy_scope') {
         result.status = 'outside_policy_scope';
         return result;
     }
-    for (const conflict of evaluation.conflicts) fail('contradiction',
-        `${conflict.ruleId}/${conflict.facet}: ${conflict.reason}`, {ruleId: conflict.ruleId, facet: conflict.facet});
     for (const assessment of evaluation.assessments) {
         const key = facetKey(assessment.ruleId, assessment.facet);
         const reportOnly = !completenessEnforced || (labelDependencyCoverage.reportOnlyFacets as readonly string[]).includes(assessment.facet);

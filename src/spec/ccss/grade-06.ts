@@ -687,7 +687,6 @@ const modelAndSolveRationalEquationsBuilder = new DatasetPermutationBuilder()
         Area.Equation,
         Area.EquationSolving,
         Scope.RationalNumbers,
-        Scope.NumbersWithoutNegatives,
         Scope.ExpressionOnOneSide,
         Scope.ArabicNumerals,
         Ability.TextualReception,

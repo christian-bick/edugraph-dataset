@@ -92,24 +92,23 @@ describe('algebra numeric-frame and visible-domain profiles', () => {
         expect(unresolved.resolvedLabels).not.toContain(Scope.NumbersWithZero);
     });
 
-    it('admits only zero absence for a symbolic quotient and does not infer a sign', () => {
+    it('excludes generic polarity claims in every algebraic context, including the writer and quotient', () => {
         const quotient = [Area.AlgebraicExpression, Area.Division];
-        expect(resolveNumericProfile([Scope.NumbersWithoutZero])).toBe(0);
-        expect(resolveNumericProfile(quotient)).toBeUndefined();
-        expect(resolveNumericProfile([...quotient, Scope.NumbersWithoutZero])).toBe(0);
-        for (const claims of [[Scope.NumbersWithZero], [Scope.NumbersWithNegatives],
-            [Scope.NumbersWithoutNegatives], ...numericProfileBundles]) {
-            expect(resolveNumericProfile([...quotient, ...claims])).toBeUndefined();
-        }
+        expect(resolveNumericProfile([Scope.NumbersWithoutZero])).toBeUndefined();
+        expect(resolveNumericProfile(quotient)).toBe(0);
         for (const context of [[Area.AlgebraicExpression, Area.Term],
-            [Area.AlgebraicExpression, Scope.RationalNumbers],
-            [Area.ArithmeticExpression, Area.Division, Scope.RationalNumbers],
+            [Area.AlgebraicExpression, Scope.RationalNumbers], quotient,
             [Area.AlgebraicExpression, Area.NumericSubstitution],
-            [Area.AlgebraicExpression, Area.AlgebraicModeling]]) {
-            expect(resolveNumericProfile([...context, Scope.NumbersWithoutZero])).toBeUndefined();
+            [Area.AlgebraicExpression, Area.AlgebraicModeling],
+            [Area.AlgebraicExpression, Area.ArithmeticExpression, Area.Addition]]) {
+            expect(resolveNumericProfile(context)).toBe(0);
+            for (const claims of [[Scope.NumbersWithZero], [Scope.NumbersWithNegatives],
+                [Scope.NumbersWithoutNegatives], [Scope.NumbersWithoutZero], ...numericProfileBundles]) {
+                expect(resolveNumericProfile([...context, ...claims])).toBeUndefined();
+            }
         }
         setSeed('pure-symbolic-quotient'); const state = getRandomState();
-        expect(resolveNumericProfile([...quotient, Scope.NumbersWithoutZero])).toBe(0);
+        expect(resolveNumericProfile(quotient)).toBe(0);
         expect(getRandomState()).toBe(state);
     });
 

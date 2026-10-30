@@ -51,5 +51,11 @@ export const labelDependencies = {
         {id: 'LD-SIGN-CONFLICT-01', facet: 'sign', labels: [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives]},
         {id: 'LD-FRAME-CONFLICT-01', facet: 'referenceFrames',
             labels: [Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]}
+    ],
+    exclusions: [
+        {id: 'LD-ALGEBRA-POLARITY-01', when: {any: [
+            {areaWithin: Area.AlgebraicExpression},
+            {areaWithin: {root: Area.Algebra, ignore: [Area.Arithmetic]}}
+        ]}, facets: ['sign', 'zero']}
     ]
 } as const satisfies LabelDependencyGraph;

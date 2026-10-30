@@ -156,12 +156,23 @@ describe('universal annotation dependency enforcement', () => {
             .toEqual(expect.arrayContaining([expect.objectContaining({code: 'missing', facet: 'base'})]));
     });
 
-    it('preserves the complete positive Area allowlist and outside contexts', () => {
+    it('preserves the complete positive Area allowlist and enforces algebra exclusions outside it', () => {
         expect(assess({labels: [...labels, Area.AlgebraicExpression]}).status).toBe('checked');
         const outside = assess({labels: [...labels, Area.EquationSolving, Scope.NumbersWithZero]});
         expect(outside.status).toBe('outside_policy_scope');
-        expect(outside.failures).toEqual([]);
+        expect(outside.failures.map(item => [item.ruleId, item.facet])).toEqual([
+            ['LD-ALGEBRA-POLARITY-01', 'sign'], ['LD-ALGEBRA-POLARITY-01', 'zero']
+        ]);
         expect(assess({resolvedAreas: [Area.EquationSolving]}).status).toBe('outside_policy_scope');
+    });
+
+    it.each(['sample', 'selection'] as const)('rejects algebra polarity claims in %s annotations', kind => {
+        const annotations = [Area.AlgebraicExpression, Scope.RationalNumbers];
+        expect(assess({kind, labels: annotations}).failures).toEqual([]);
+        expect(assess({kind, labels: [...annotations, Scope.NumbersWithoutZero]}).failures)
+            .toEqual([expect.objectContaining({code: 'contradiction', ruleId: 'LD-ALGEBRA-POLARITY-01', facet: 'zero'})]);
+        expect(() => assertLabelDependencyCoverage(input({kind, labels: [Area.EquationSolving, Scope.NumbersWithoutNegatives]})))
+            .toThrow('LD-ALGEBRA-POLARITY-01/sign');
     });
 
     it('fails unknown annotations and missing or malformed Area context', () => {
