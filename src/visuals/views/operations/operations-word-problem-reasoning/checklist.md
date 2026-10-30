@@ -1,2 +1,2 @@
-- **Identity:** The story asks the learner to evaluate a proposed result through a visible rounding procedure.
+- **Identity:** The story asks the learner to evaluate a proposed result through a visible rounding procedure. Exact, proposed and rounded quantities respect the same numerical context.
 - **Modes:** Question Mode withholds the verdict; Solution Mode reveals the exact steps, compares rounded results, and explains the reasonableness decision.

@@ -629,12 +629,16 @@ export type ArithmeticWordProblemLetterEquation = {
 
 export type ArithmeticWordProblemRounding = {
     kind: 'rounding';
+    /** Inclusive positive-integer domain for all exact, proposed and rounded quantities. */
+    numberDomain: {min: number; max: number};
     operands: readonly [number, number, number];
     operations: readonly [ArithmeticOperation, ArithmeticOperation];
     intermediate: number;
     answer: number;
     roundingPlace: 10 | 100 | 1000 | 10000 | 100000;
     roundedAnswer: number;
+    /** Canonical mathematical proposal; the consumer evaluates its rounded equality. */
+    proposal: {proposedAnswer: number; roundedProposedAnswer: number};
 };
 
 export type ArithmeticWordProblemGrade4 =

@@ -183,7 +183,7 @@ export function buildLetterEquation(
 export function buildRounding(
     values: Values,
     operations: NamedOperations
-): ArithmeticWordProblemRounding {
+): Omit<ArithmeticWordProblemRounding, 'numberDomain' | 'proposal'> {
     const roundingPlace = roundingPlaceFor(values.answer);
     return {
         kind: 'rounding',

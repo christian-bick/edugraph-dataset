@@ -240,7 +240,9 @@ function validateRounding(data: ArithmeticWordProblemRounding) {
         'intermediate',
         'answer',
         'roundingPlace',
-        'roundedAnswer'
+        'roundedAnswer',
+        'numberDomain',
+        'proposal'
     ]);
     if (!Array.isArray(data.operands) || data.operands.length !== 3) {
         fail('The rounding relation requires exactly three operands.');
@@ -535,12 +537,11 @@ function LetterEquationProblem({data, isSolutionView}: {
     );
 }
 
-function ReasonablenessProblem({data, isSolutionView, seed}: {
+function ReasonablenessProblem({data, isSolutionView}: {
     data: ArithmeticWordProblemRounding;
     isSolutionView: boolean;
-    seed: number;
 }) {
-    const claim = resolveRoundingClaim(data, seed);
+    const claim = resolveRoundingClaim(data);
     const firstSymbol = operationSymbol(data.operations[0]);
     const secondSymbol = operationSymbol(data.operations[1]);
     const exactEquations = [
@@ -613,7 +614,7 @@ function renderProblem(
     }
     if (data.kind === 'rounding') {
         validateRounding(data);
-        return <ReasonablenessProblem data={data} isSolutionView={isSolutionView} seed={seed} />;
+        return <ReasonablenessProblem data={data} isSolutionView={isSolutionView} />;
     }
     return fail('Unsupported word-problem discriminant.');
 }

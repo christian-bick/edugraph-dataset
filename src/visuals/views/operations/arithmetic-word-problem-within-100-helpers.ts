@@ -5,55 +5,38 @@ import {
     ArithmeticWordProblemTwoStep,
     ArithmeticWordProblem
 } from '../../../types/problems.ts';
+import {ViewValidationError} from '../../helpers/validation.ts';
 
 export type WordProblemPart = 'num1' | 'num2' | 'num3' | 'intermediate' | 'answer';
 
-export type RoundingClaim = {
-    proposedAnswer: number;
-    roundedProposedAnswer: number;
+export type RoundingClaim = ArithmeticWordProblemRounding['proposal'] & {
     isReasonable: boolean;
 };
 
-/** Derives a bounded learner-facing claim from the canonical result-rounding relation. */
-export function resolveRoundingClaim(
-    data: ArithmeticWordProblemRounding,
-    seed: number
-): RoundingClaim {
-    const normalizedSeed = Number.isFinite(seed) ? Math.abs(Math.trunc(seed)) : 0;
-    const shouldBeReasonable = normalizedSeed % 2 === 0;
-    const preferredDirection = Math.floor(normalizedSeed / 2) % 2 === 0 ? 1 : -1;
-    const fineStep = Math.max(1, data.roundingPlace / 10);
-    const baseDistances = shouldBeReasonable
-        ? [1, fineStep, 2 * fineStep]
-        : [data.roundingPlace, 2 * data.roundingPlace];
-    const distances = [...new Set(baseDistances)];
-    const rotation = Math.floor(normalizedSeed / 4) % distances.length;
-    const rotatedDistances = [...distances.slice(rotation), ...distances.slice(0, rotation)];
-    const maximumProposal = 10 * data.roundingPlace - 1;
-    const candidates = rotatedDistances.flatMap(distance => [
-        data.answer + preferredDirection * distance,
-        data.answer - preferredDirection * distance
-    ]);
-    const proposedAnswer = candidates.find(candidate => {
-        if (!Number.isInteger(candidate) || candidate < 1 || candidate > maximumProposal) {
-            return false;
-        }
-        const roundedCandidate = Math.round(candidate / data.roundingPlace) * data.roundingPlace;
-        return roundedCandidate > 0
-            && (roundedCandidate === data.roundedAnswer) === shouldBeReasonable;
-    });
-
-    if (proposedAnswer === undefined) {
-        throw new Error('The rounded answer has no bounded reasonableness proposal.');
+/** Validate generator-owned mathematical evidence; only the verdict is derived by the view. */
+export function resolveRoundingClaim(data: ArithmeticWordProblemRounding): RoundingClaim {
+    const fail = (message: string): never => {throw new ViewValidationError('operations-word-problem-reasoning', message);};
+    const domain = data.numberDomain;
+    if (!domain || !Number.isSafeInteger(domain.min) || !Number.isSafeInteger(domain.max)
+        || domain.min < 1 || domain.max > 1_000_000 || domain.min > domain.max) {
+        return fail('Expected a bounded positive-integer rounding domain.');
     }
-
-    const roundedProposedAnswer = Math.round(proposedAnswer / data.roundingPlace)
-        * data.roundingPlace;
-    return {
-        proposedAnswer,
-        roundedProposedAnswer,
-        isReasonable: roundedProposedAnswer === data.roundedAnswer
-    };
+    const inDomain = (value: number) => Number.isSafeInteger(value) && value >= domain.min && value <= domain.max;
+    if (!Array.isArray(data.operands) || data.operands.length !== 3
+        || ![...data.operands, data.intermediate, data.answer, data.roundedAnswer].every(inDomain)
+        || ![10, 100, 1000, 10000, 100000].includes(data.roundingPlace)
+        || Math.round(data.answer / data.roundingPlace) * data.roundingPlace !== data.roundedAnswer) {
+        return fail('The exact and rounded quantities must lie in their declared number domain.');
+    }
+    const proposal = data.proposal;
+    if (!proposal || typeof proposal !== 'object' || Object.keys(proposal)
+        .some(key => key !== 'proposedAnswer' && key !== 'roundedProposedAnswer')
+        || !inDomain(proposal.proposedAnswer) || !inDomain(proposal.roundedProposedAnswer)
+        || proposal.proposedAnswer === data.answer
+        || Math.round(proposal.proposedAnswer / data.roundingPlace) * data.roundingPlace !== proposal.roundedProposedAnswer) {
+        return fail('Expected a canonical bounded proposal and its consistent rounding.');
+    }
+    return {...proposal, isReasonable: proposal.roundedProposedAnswer === data.roundedAnswer};
 }
 
 export function isTwoStepProblem(

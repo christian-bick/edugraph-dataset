@@ -10,6 +10,94 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Reasoning proposal domain repair (2026-10-30)
+
+The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical
+proposal in the generator's declared domain, select only feasible proposal classes without a
+per-problem balance requirement, test boundaries and preserve matching/target coverage.
+Implementation starts from `07ae4606`. Targets, the Area allowlist, algebra cutoff and range-policy
+exclusion remain unchanged. This repairs the concrete values carrying existing numeric claims;
+it does not add a dependency range policy or new inferred annotations.
+
+### Mathematical contract and adoption
+
+The old shared view helper generated proposals from its presentation seed and a guessed maximum
+`10 * roundingPlace - 1`. For `23 + 32 + 45 = 100` in a 1..100 context it could propose 200.
+An existing Grade-3 route also fails: generator seed 749 produces `10 × 10 × 10 = 1000`, while
+view seed 1 proposes 2000. Independent replay reproduces a native current-route failure at
+`3.OA.D.8-answer-reasonableness~68d068eb`, train/question instance 2066.
+
+| Owner / actual consumer | Adopted contract | Verification |
+|---|---|---|
+| `arithmetic-word-problems-rounding` → `operations-word-problem-reasoning` | ArithmeticWordProblemRounding now requires inclusive positive-integer `numberDomain` and a canonical numeric `proposal` with proposed/rounded values. The payload carries no verdict, prompt or Ability choice. | All eight existing tuples/bindings, exact triple preservation where feasible, boundary and proposal-domain tests. |
+| Shared `buildRounding` helper | Keeps constructing the same exact/rounded relation; its return type explicitly omits the new producer-owned evidence. Other mathematical families are unchanged. | Shared-helper control producers/consumers, fixed-seed payload/RNG and rendering checks. |
+| Shared reasoning renderer/helper | Validates canonical exact, proposed and rounded quantities against their domain, evaluates rounded equality and renders the existing task. It never selects a replacement from the view seed. | Independent Question/Solution tests, stale/malformed evidence rejection and presentation-seed invariance. |
+
+This follows the existing canonical evidence boundary (IMPL-G8 / IMPL-V8); no producer/view split,
+schema capability, target guard or graph rule is introduced. The eight current reasoning routes
+remain integer, positive and zero-free: four Grade-3 contexts have an upper bound of 1000 and four
+Grade-4 contexts have an upper bound of 1,000,000. They have no operand-width claims or decimal
+contexts. The number-domain upper bound retains the declared million capacity, independently of
+the unchanged 999,999 cap on underlying arithmetic sampling.
+
+### Feasible proposal selection
+
+For a rounding place `P`, integers rounding to multiple `R` occupy `[R - P/2, R + P/2)`.
+The producer intersects the union of buckets with rounded values inside the declared domain,
+then excludes the exact answer. It samples uniformly among those remaining integers in constant
+time. Class probabilities follow their feasible candidate counts; no seed-parity verdict, quota
+or forced balance is used. The generator returns no instance only if the exact rounded relation
+is out of domain or there is no distinct feasible proposal. It does not discard a valid underlying
+problem merely because one verdict class is unavailable.
+
+For the original 1..100 boundary, only proposals **50..99**, all rounding to 100, are feasible.
+The thousand-boundary analogue supports **500..999**. A singleton containing only the exact answer
+has no proposal; an answer 99 rounding to 100 is invalid when the context ends at 99. The inclusive
+million boundary remains valid. Zero-rounded alternatives are excluded by the existing positive
+number contract, not by inspecting zero digits.
+
+Proposal probabilities and RNG continuation change: one generator draw replaces presentation-seed
+selection. Uniform feasible values do **not** preserve verdict proportions; wide contexts with
+small answers may yield overwhelmingly unreasonable proposals, while some boundary contexts admit
+only reasonable ones. No verdict-class coverage or balance is claimed for a finite dataset batch.
+The exact underlying arithmetic is retained whenever its evidence admits a valid proposal.
+
+Focused verification covers the two original/native boundary regressions, every candidate/bin in
+independent small-domain and million-boundary oracles, lower bounds, rounding ties, singleton and
+empty support, invalid integer/sign/zero contexts, deterministic entropy use and canonical view
+validation. The affected suite passes **74 tests across six files**. Full-catalog, artifact/replay,
+coverage and foreign-workspace checks are recorded after the verification freeze below.
+Evidence is under `temp/reasoning-domain-fix/`.
+
+### Implementation checkpoint and matching/replay verification
+
+**[IMPLEMENTED]** Canonical proposals are generated before rendering, and the shared view rejects
+stale or inconsistent evidence rather than creating substitute mathematics. The existing task,
+wording/layout and Ability conjunction remain; proposed values now follow the feasible-domain law.
+
+Independent comparison preserves all **1,013 target records**, **1,222 tuples**, **1,621 choices**
+and **1,222 semantic plans**, with every target covered. All 1,621 old semantic choice receipts
+remain valid. Source-input hashes refresh for 1,111 plans because the canonical type/source closure
+changes; this is cache provenance, not a lost match or changed semantic binding.
+
+Across **264 affected native/forced draws**, configurations, labels and all exact/rounded base
+arithmetic are unchanged. Each gains exactly one generator PRNG draw and new proposal evidence;
+content/task fingerprints and Q/S markup refresh as intended. All **24 shared-helper sibling
+routes / 216 native/forced control draws** preserve configurations, payloads, labels, RNG,
+fingerprints and **432 Q/S markup hashes**.
+
+Artifact lineage is checked separately from semantic receipt validity. The actual dataset-manifest
+pair input identity changes (`75f584c7e7783d18` → `c36cbb882015a311`), including the new proposal
+source dependency. Real `generateSampleByKey` rejects an old recorded source plan as stale, while
+its semantic receipt works with the current source plan. No artificial schema field is added
+solely to invalidate replay.
+
+The fresh resolved source audit retains **zero non-range omissions/conflicts, incomplete
+enumeration, pending/invalid inference or contract errors**. The Area allowlist, algebra cutoff,
+annotation graph and range-policy files remain unchanged. Stored outputs are not rewritten by
+these checks. Proofs: `independent-comparison.json`, `artifact-lineage.json` and
+`independent-final-audit/` under the evidence directory.
+
 ## Approved final-seven migrations (2026-10-30)
 
 The user explicitly approved both follow-up decisions: the exceptional rooted-length producer

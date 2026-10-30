@@ -31,12 +31,14 @@ describe('operations-word-problem-within-100 helpers', () => {
     };
     const rounding: ArithmeticWordProblemRounding = {
         kind: 'rounding',
+        numberDomain: {min: 1, max: 1000},
         operands: [31, 27, 5],
         operations: ['addition', 'addition'],
         intermediate: 58,
         answer: 63,
         roundingPlace: 10,
-        roundedAnswer: 60
+        roundedAnswer: 60,
+        proposal: {proposedAnswer: 64, roundedProposedAnswer: 60}
     };
 
     it('distinguishes pair and connected two-step payloads', () => {
@@ -145,54 +147,52 @@ describe('operations-word-problem-within-100 helpers', () => {
             .toEqual(['+', '−', '×', '÷']);
     });
 
-    it('derives deterministic reasonable and unreasonable rounding claims', () => {
-        const reasonable = resolveRoundingClaim(rounding, 0);
-        const unreasonable = resolveRoundingClaim(rounding, 1);
-
-        expect(resolveRoundingClaim(rounding, 0)).toEqual(reasonable);
-        expect(reasonable).toMatchObject({isReasonable: true});
-        expect(reasonable.roundedProposedAnswer).toBe(rounding.roundedAnswer);
-        expect(unreasonable).toMatchObject({isReasonable: false});
-        expect(unreasonable.roundedProposedAnswer).not.toBe(rounding.roundedAnswer);
-        expect([reasonable.proposedAnswer, unreasonable.proposedAnswer])
-            .not.toContain(rounding.answer);
+    it('evaluates canonical proposals without selecting or mutating their mathematics', () => {
+        const before = structuredClone(rounding);
+        expect(resolveRoundingClaim(rounding)).toEqual({...rounding.proposal, isReasonable: true});
+        expect(resolveRoundingClaim({...rounding, proposal: {proposedAnswer: 74, roundedProposedAnswer: 70}}))
+            .toEqual({proposedAnswer: 74, roundedProposedAnswer: 70, isReasonable: false});
+        expect(rounding).toEqual(before);
     });
 
-    it.each([
-        {answer: 5, roundingPlace: 10, roundedAnswer: 10},
-        {answer: 99, roundingPlace: 10, roundedAnswer: 100},
-        {answer: 999_999, roundingPlace: 100_000, roundedAnswer: 1_000_000}
-    ] as const)('keeps both claim classes bounded for answer $answer', edge => {
-        const edgeProblem: ArithmeticWordProblemRounding = {...rounding, ...edge};
-        for (const seed of [0, 1]) {
-            const claim = resolveRoundingClaim(edgeProblem, seed);
-            expect(claim.proposedAnswer).toBeGreaterThan(0);
-            expect(claim.proposedAnswer).toBeLessThan(10 * edge.roundingPlace);
-            expect(claim.roundedProposedAnswer).toBeGreaterThan(0);
-            expect(claim.isReasonable).toBe(seed === 0);
+    it('keeps the original upper-bound example valid without inventing the infeasible class', () => {
+        const edge: ArithmeticWordProblemRounding = {...rounding, numberDomain: {min: 1, max: 100},
+            operands: [23, 32, 45], intermediate: 55, answer: 100, roundingPlace: 100, roundedAnswer: 100,
+            proposal: {proposedAnswer: 99, roundedProposedAnswer: 100}};
+        expect(resolveRoundingClaim(edge).isReasonable).toBe(true);
+        for (const proposal of [{proposedAnswer: 200, roundedProposedAnswer: 200},
+            {proposedAnswer: 1, roundedProposedAnswer: 0}, {proposedAnswer: 100, roundedProposedAnswer: 100}]) {
+            expect(() => resolveRoundingClaim({...edge, proposal})).toThrow('canonical bounded proposal');
         }
     });
 
-    it('keeps unreasonable proposals away from zero at a leading-place boundary', () => {
-        const boundary = {...rounding, answer: 128, roundingPlace: 100 as const, roundedAnswer: 100};
-        for (let seed = 0; seed < 40; seed++) {
-            const claim = resolveRoundingClaim(boundary, seed);
-            expect(claim.roundedProposedAnswer).toBeGreaterThan(0);
-            expect(claim.isReasonable).toBe(seed % 2 === 0);
-        }
+    it('accepts the declared million boundary and positive lower bound', () => {
+        const large: ArithmeticWordProblemRounding = {...rounding, numberDomain: {min: 1, max: 1_000_000},
+            operands: [333333, 333333, 333333], intermediate: 666666, answer: 999999,
+            roundingPlace: 100000, roundedAnswer: 1000000,
+            proposal: {proposedAnswer: 999998, roundedProposedAnswer: 1000000}};
+        expect(resolveRoundingClaim(large).isReasonable).toBe(true);
+        expect(resolveRoundingClaim({...rounding, numberDomain: {min: 5, max: 70},
+            proposal: {proposedAnswer: 5, roundedProposedAnswer: 10}}).isReasonable).toBe(false);
     });
 
-    it('rejects a zero-rounded relation outside the positive rounding contract', () => {
-        expect(() => resolveRoundingClaim({...rounding, answer: 1, roundedAnswer: 0}, 0))
-            .toThrow('no bounded reasonableness proposal');
+    it.each([undefined, {min: 0, max: 1000}, {min: 1, max: 1000001}, {min: 10, max: 9},
+        {min: 1.5, max: 1000}, {min: 1, max: Infinity}])('rejects invalid number domain %j', numberDomain => {
+        expect(() => resolveRoundingClaim({...rounding, numberDomain} as ArithmeticWordProblemRounding))
+            .toThrow('positive-integer rounding domain');
     });
 
-    it('normalizes non-finite and signed seeds without using global randomness', () => {
-        expect(resolveRoundingClaim(rounding, Number.NaN)).toEqual(
-            resolveRoundingClaim(rounding, 0)
-        );
-        expect(resolveRoundingClaim(rounding, -3)).toEqual(
-            resolveRoundingClaim(rounding, 3)
-        );
+    it.each([{operands: [31, 27]}, {operands: [0, 27, 5]}, {intermediate: 1001}, {answer: 0},
+        {roundedAnswer: 70}, {roundingPlace: 5}])('rejects out-of-domain or inconsistent base evidence %j', change => {
+        expect(() => resolveRoundingClaim({...rounding, ...change} as ArithmeticWordProblemRounding))
+            .toThrow('exact and rounded quantities');
+    });
+
+    it.each([undefined, {proposedAnswer: 0, roundedProposedAnswer: 0},
+        {proposedAnswer: 1001, roundedProposedAnswer: 1000}, {proposedAnswer: 1.5, roundedProposedAnswer: 0},
+        {proposedAnswer: 64, roundedProposedAnswer: 70}, {proposedAnswer: 63, roundedProposedAnswer: 60},
+        {proposedAnswer: 64, roundedProposedAnswer: 60, isReasonable: true}])('rejects invalid canonical proposal %j', proposal => {
+        expect(() => resolveRoundingClaim({...rounding, proposal} as ArithmeticWordProblemRounding))
+            .toThrow('canonical bounded proposal');
     });
 });
