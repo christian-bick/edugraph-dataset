@@ -12,7 +12,7 @@ import {Ability, Scope} from 'edugraph-ts';
 const leafIds = [
     'fractions-general-division-execution', 'fractions-general-division-interpretation',
     'fractions-general-division-inverse-explanation', 'fractions-general-division-story-creation',
-    'fractions-division-word-problem', 'fractions-division-model-construction'
+    'fractions-general-division-word-problem', 'fractions-division-model-construction'
 ] as const;
 const legacyLeafIds = ['fractions-division-execution', 'fractions-division-interpretation',
     'fractions-division-inverse-explanation', 'fractions-division-story-creation', 'fractions-division-word-problem'] as const;
@@ -23,7 +23,7 @@ let cores: Record<LeafId, Core>;
 beforeAll(async () => {
     vi.stubGlobal('window', {});
     const [execution, generalExecution, interpretation, generalInterpretation, inverse, generalInverse,
-        story, generalStory, word, model] = await Promise.all([
+        story, generalStory, word, generalWord, model] = await Promise.all([
         import('./fractions-division-execution/view.tsx'),
         import('./fractions-general-division-execution/view.tsx'),
         import('./fractions-division-interpretation/view.tsx'),
@@ -33,6 +33,7 @@ beforeAll(async () => {
         import('./fractions-division-story-creation/view.tsx'),
         import('./fractions-general-division-story-creation/view.tsx'),
         import('./fractions-division-word-problem/view.tsx'),
+        import('./fractions-general-division-word-problem/view.tsx'),
         import('./fractions-division-model-construction/view.tsx')
     ]);
     cores = {
@@ -45,6 +46,7 @@ beforeAll(async () => {
         'fractions-division-story-creation': story.FractionsDivisionStoryCreationCore as unknown as Core,
         'fractions-general-division-story-creation': generalStory.FractionsGeneralDivisionStoryCreationCore as unknown as Core,
         'fractions-division-word-problem': word.FractionsDivisionWordProblemCore as unknown as Core,
+        'fractions-general-division-word-problem': generalWord.FractionsGeneralDivisionWordProblemCore as unknown as Core,
         'fractions-division-model-construction': model.FractionsDivisionModelConstructionCore as unknown as Core
     };
 });
@@ -96,7 +98,7 @@ describe('general fraction division leaf contracts', () => {
                                     expect(markup).toMatch(/<text[^>]*>1<\/text>/);
                                 }
                             }
-                            if (id === 'fractions-division-word-problem') {
+                            if (id === 'fractions-general-division-word-problem') {
                                 expect(question).toContain('Equation: ____________________');
                                 expect(question).not.toContain('data-evidence="product-relation"');
                                 expect(question).not.toContain('×');

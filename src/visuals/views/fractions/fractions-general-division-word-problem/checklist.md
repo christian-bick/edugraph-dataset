@@ -1,0 +1,2 @@
+- **Identity:** A real-world sharing, measured-group, or missing-rectangle-side story supplies the division quantities in prose. The learner uses a common-part bar model on a number-line scale to find the quotient with units.
+- **Modes:** Question Mode provides an unsolved common-part frame and requires the model method, leaving the story quantities, equation, and answer unfilled. Solution Mode shows the completed proportional model, original division equation, exact quotient, and contextual answer on the same numerical scale.

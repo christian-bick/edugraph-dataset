@@ -51,7 +51,8 @@ the architecture document's review order whenever a match, payload, or rendered 
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
 Shared annotation validation reports missing label groups and conflicting claims within the
-label-dependency Area allowlist. Labels come from the matched declarations and resolved schema
+label-dependency Area allowlist. The contextual algebra sign/zero exclusion also rejects forbidden
+claims outside that completeness scope. Labels come from matched declarations and resolved schema
 choices. Generation does not append or replace labels based on sampled data. The contract is
 documented in [label architecture](docs/label-architecture.md).
 
@@ -117,14 +118,14 @@ invariants provide matching capabilities and annotations without changing mathem
 or rendering. The adoption record separates package verification, declaration changes and deferred
 contexts whose model form is not consistently supplied or required in both modes.
 
-Four `fractions-general-division-*` leaves accept `FractionDivisionRelationProblem` for execution,
-interpretation, inverse explanation and story creation. The corresponding `fractions-division-*`
-IDs accept `FractionQuotientProblem` and retain the legacy quotient capabilities. Fixed general
-projections invariantly supply the displayed zero origin, Numberline and BarModel; both families
-reuse their original rendering bodies. The word-problem union and construction contract remain
-unchanged. The [split record](docs/plan/label-dependency-graph.md#approved-fraction-division-view-split-implementation-2026-10-30)
-documents exact target-route successors, preserved mathematical sampling and changed view/sample
-identities. No matching, annotation or replay machinery changes are needed.
+Five `fractions-general-division-*` leaves accept `FractionDivisionRelationProblem` for execution,
+interpretation, inverse explanation, story creation and word problems. The corresponding
+`fractions-division-*` IDs accept `FractionQuotientProblem` and retain legacy quotient capabilities.
+The general word task requires the common-part model through an unsolved frame and necessary
+prose; its zero ownership remains a separate review. The four supplied-model projections retain
+their displayed zero-origin annotations, and construction remains unchanged. Both families reuse
+their original rendering bodies. The [remaining-batch record](docs/plan/label-dependency-graph.md#remaining-batch-implementation-2026-10-30)
+documents exact successors, preserved mathematical support and changed view/sample identities.
 
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations

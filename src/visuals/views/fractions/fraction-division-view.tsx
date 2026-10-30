@@ -161,6 +161,10 @@ function StoryTask({data, isSolutionView}: TaskProps) {
 function WordProblemTask({data, isSolutionView}: TaskProps) {
     return <>
         <p className="rounded-xl bg-indigo-50 p-4 text-lg leading-relaxed">{fractionDivisionStory(data)}</p>
+        {!isSolutionView && <>
+            <p className="mt-3 text-lg">Use a common-part bar model on the number-line frame to solve the story. Find the quotient and answer with units.</p>
+            <NumericalGroupModel data={data} blankFrame={true} constructed={false} />
+        </>}
         {isSolutionView ? <>
             <DivisionExpression data={data} showQuotient={true} solution={true} />
             <NumericalGroupModel data={data} blankFrame={false} constructed={true} />

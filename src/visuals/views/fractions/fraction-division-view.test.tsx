@@ -64,7 +64,17 @@ describe('general fraction division task projections', () => {
         const question = render('division-word-problem', false);
         const solution = render('division-word-problem', true);
         expect(text(question)).toContain('7/6 liters of juice make 3/4 batches');
-        expect(question).not.toContain('<svg');
+        expect(question).toContain('Use a common-part bar model on the number-line frame to solve the story.');
+        expect(question).toContain('Blank numerical model frame');
+        expect(question).toContain('<svg');
+        expect(question).not.toContain('Dividend:');
+        expect(question).not.toContain('Divisor-sized groups');
+        expect(question).not.toContain('One divisor-sized group:');
+        expect(question).not.toContain('y="83"');
+        expect(question).not.toContain('y="147"');
+        const frame = question.match(/<svg[\s\S]*?<\/svg>/)![0];
+        expect(frame).not.toContain('7/6');
+        expect(frame).not.toContain('3/4');
         expect(question).not.toContain('14/9');
         expect(text(question)).toContain('Equation: ____________________');
         expect(text(question)).toContain('Check by multiplication: ____________________');
@@ -121,7 +131,7 @@ describe('general fraction division task projections', () => {
         expect(text(inverseQuestion)).toContain('(7/6) ÷ (3/4) = 14/9');
     });
 
-    it('adds no answer boxes to solved relations or the prose-only word question', () => {
+    it('adds no answer boxes to solved relations or the unsolved word question', () => {
         const tasks: readonly GeneralFractionDivisionTask[] = ['division-execution', 'division-interpretation',
             'division-inverse-explanation', 'division-story-creation', 'division-word-problem', 'division-model-construction'];
         for (const task of tasks) {

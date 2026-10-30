@@ -5690,7 +5690,8 @@ export interface ViewTypeMap {
     'fractions-general-division-story-creation': FractionDivisionRelationProblem;
     'fractions-division-inverse-explanation': FractionQuotientProblem;
     'fractions-general-division-inverse-explanation': FractionDivisionRelationProblem;
-    'fractions-division-word-problem': FractionDivisionProblem;
+    'fractions-division-word-problem': FractionQuotientProblem;
+    'fractions-general-division-word-problem': FractionDivisionRelationProblem;
     'fractions-division-model-construction': FractionDivisionRelationProblem;
     'fractions-product-partition-interpretation': FractionProductProblem;
     'fractions-product-story-creation': FractionProductProblem;
