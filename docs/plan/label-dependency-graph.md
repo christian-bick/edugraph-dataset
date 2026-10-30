@@ -28,17 +28,25 @@ under SPEC-2 and SPEC-3. No ancestor representation label is added. The schemas 
 there is no inference, adapter, completion or change to a target, payload, renderer or sampler.
 The dependency graph, its Area allowlist and range-policy exclusion remain unchanged.
 
-### Suggested ontology additions for the remaining model forms
+### Released ontology additions for the remaining model forms
 
-The installed ontology (`0.31.0-pre.58.9231304124e9`) has broad eligible representation Scopes,
-but no dedicated bar/tape or numerical area-model descriptor. The user will author the ontology
-additions. The following names and definitions are proposals, not available enum members or
-implemented declarations:
+The user has implemented both descriptors. The published
+[preview `0.32.0-pre.1.00409a39c911`](https://github.com/christian-bick/edugraph-ontology/releases/tag/preview-0.32.0-pre.1.00409a39c911)
+was verified on 2026-10-30 against release commit `00409a39c911fa79adb911bf6b724a9d34473588`.
+The current content package pin remains `0.31.0-pre.58.9231304124e9`; this review does not yet
+adopt the preview or add these declarations to content.
 
-| Proposed Scope | Suggested definition | Specialization parent | Current application |
+| Released Scope | Meaning | Specialization parent | Current application |
 |---|---|---|---|
-| `BarModel` | Numerical quantities and their relationships represented by proportional lengths of one or more bars or strips, with an identified unit or reference whole. | `SpatialNumbers` | Product partition strips, general division's common-unit grouping bars, and positive legacy quotient/sharing strips. Treat strip model and tape diagram as synonyms, not separate labels. |
-| `AreaModel` | Numerical quantities and arithmetic relationships represented through the areas of regions, with an identified area unit or reference whole; partitions or tiles show the represented measures. | `NumberRepresentation` | Fractional rectangle tiling and area/product models. The definition can cover drawn or physical representations; an actual diagram may separately support `VisualNumbers`. |
+| `BarModel` | Numerical values, quantities and arithmetic relationships encoded by proportional bar or strip lengths against an identified unit or reference whole. | `SpatialNumbers` | Product partition strips, general division's common-unit grouping bars, and positive legacy quotient/sharing strips. Strip model and tape diagram are names for this form rather than separate requested labels. |
+| `AreaModel` | Numerical values, quantities and arithmetic relationships encoded by two-dimensional region areas against an identified area unit or reference whole. | `SpatialNumbers` | Fractional rectangle tiling and area/product models. An actual diagram may separately support `VisualNumbers`. |
+
+The preview broadens `SpatialNumbers` to positions or extents across one or more dimensions,
+so `AreaModel` now has a more specific parent than our original `NumberRepresentation` proposal.
+It also records `BarModel translates OneDimensional`, `AreaModel translates TwoDimensional`,
+and `AreaModel expands BarModel, NumberArray`. These are not extra inherited annotations:
+matching substitution still follows only `specializes`. A drawn area model does not automatically
+claim a bar model or rectangular array.
 
 These descriptors describe representations, so `specializes` expresses a true substitutable
 capability. They need no new organizational parent or constituent children. A rectangle is an
@@ -52,15 +60,37 @@ partitioned into one shared unit and grouped into divisor-sized portions, includ
 final group, to express a quotient. The first two descriptors suffice for the current model-form
 inventory; this extra subtype is not necessary merely to record that a bar model is used.
 
+### Next declaration batch after package adoption
+
+The complete producer and Question/Solution review identifies these five straightforward
+invariant candidates. They require no target, renderer, sampling or payload changes:
+
+| View | Additional Scope | Evidence across its supported domain |
+|---|---|---|
+| `fractions-product-partition-interpretation` | `BarModel` | Both modes retain proportional measured strips, their reference quantity and equal-part structure. |
+| `fractions-product-story-creation` | `BarModel` | Both modes retain the same measured strip model used to formulate the story. |
+| `fractions-division-execution` | `BarModel` | General inputs have proportional common-unit/group bars. Legacy inputs have sharing strips; the zero-dividend execution case retains an explicit unit-partition reference strip in both modes. |
+| `fractions-area-tiling-understanding` | `AreaModel` | Both modes show the measured rectangle, congruent unit-fraction square tiles and their area unit. |
+| `fractions-rectangle-area` | `AreaModel` | Both modes show the fractional rectangle and ask for or reveal its side-length product and area in square units. |
+
+Adoption should first pin and inspect the exact published library, then verify eligibility,
+ownership, complete matching and resolved configuration choices before committing declarations.
+The release comparison from the current preview changes only the two added Scopes and the
+definition/comment of `SpatialNumbers` in the authored ontology; Areas, Abilities and schema
+sources are unchanged. No new target is needed merely because the vocabulary is available.
+Construction frames, mixed zero-text branches and Solution-only model contexts retain the
+separate review boundaries below. The Area allowlist, range-policy exclusion and zero/sign
+dependency policy are unaffected by this proposed batch.
+
 ### Remaining declaration boundaries
 
 | Case | Suggested Scope(s) | What remains before declaring them |
 |---|---|---|
-| General numerical division models | Existing `Numberline`; proposed `BarModel` for the proportional bars, or the optional grouping subtype if adopted. | Four other both-mode leaves share their spec with legacy strip producers. `Numberline` is true for the general branch, not the whole shared view. |
-| Legacy quotient/sharing strips | Existing `SpatialNumbers`; proposed `BarModel`. | Positive strips support these claims. Several zero branches show only text, so a blanket invariant would overclaim. Execution's separate unit-reference diagram supports the existing `SpatialNumbers` candidate across its supported branches. |
-| Product partition models | Existing `Numberline` now implemented in interpretation/story creation; proposed `BarModel` for the strip representation itself. | Adopt the new descriptor after the ontology package supplies it. Existing `EqualShares` describes equal partitioning and remains generator-owned; it is not a substitute model name. |
-| Fractional rectangle tiling/area models | Proposed `AreaModel`; existing `VisualNumbers` for actual diagrams. | Verify the particular view's complete contract when adopting the new descriptor. Do not transfer this claim to length-only strips. |
-| Product/division word-problem Solution models | Proposed `BarModel`, with existing `Numberline` only where there is a numbered axis. | Current Questions do not supply or require that specific representation. A new ontology term alone does not resolve the shared Question/Solution declaration boundary or the division view's mixed producer forms. Retain the authored models. |
+| General numerical division models | Existing `Numberline`; released `BarModel` for the proportional bars, or the optional grouping subtype if adopted. | Four other both-mode leaves share their spec with legacy strip producers. `Numberline` is true for the general branch, not the whole shared view. Construction's blank frame needs a distinct review against the required representation. |
+| Legacy quotient/sharing strips | Existing `SpatialNumbers`; released `BarModel`. | Positive strips support these claims. Several zero branches show only text, so a blanket invariant would overclaim. Execution's separate unit-reference diagram supports the `BarModel` candidate across its supported branches. |
+| Product partition models | Existing `Numberline` now implemented in interpretation/story creation; released `BarModel` for the strip representation itself. | Adopt the new descriptor after pinning the preview package. Existing `EqualShares` describes equal partitioning and remains generator-owned; it is not a substitute model name. |
+| Fractional rectangle tiling/area models | Released `AreaModel`; existing `VisualNumbers` for actual diagrams. | The two fixed rectangle views are candidates above. Do not transfer this claim to length-only strips. |
+| Product/division word-problem Solution models | Released `BarModel`, with existing `Numberline` only where there is a numbered axis. | Current Questions do not supply or require that specific representation. A new ontology term alone does not resolve the shared Question/Solution declaration boundary or the division view's mixed producer forms. Retain the authored models. |
 
 `Numberline` and `EqualShares` remain independent properties of a bar model: an unnumbered strip
 does not imply a numerical axis, and proportional bars need not partition a whole into equal
