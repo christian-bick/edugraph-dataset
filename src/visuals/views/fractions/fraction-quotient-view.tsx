@@ -172,6 +172,20 @@ function InterpretationTask({data, isSolutionView}: Omit<Props, 'task'>) {
     </>;
 }
 
+function ExecutionEquation({data, showAnswer}: {data: FractionQuotientProblem; showAnswer: boolean}) {
+    const witness = data.equationWitness;
+    if (!witness) return null;
+    const unknownGroupCount = data.orientation === 'whole-by-unit-fraction';
+    return <div className="mt-2" data-evidence="execution-equation">
+        <div className="text-sm font-semibold">Group count × length per group = total length</div>
+        <div className="mt-1 font-mono font-bold">
+            {!showAnswer && unknownGroupCount ? '______' : formatQuotientValue(witness.groupCount)}
+            {' × '}{!showAnswer && !unknownGroupCount ? '______' : formatQuotientValue(witness.measurePerGroup)}
+            {' m = '}{formatQuotientValue(witness.totalMeasure)} m
+        </div>
+    </div>;
+}
+
 function ExecutionTask({data, isSolutionView}: Omit<Props, 'task'>) {
     return <>
         <p className="text-base text-slate-700">Use the equal parts in the model to find the quotient.</p>
@@ -181,12 +195,17 @@ function ExecutionTask({data, isSolutionView}: Omit<Props, 'task'>) {
             : <Model data={data} />}</div>
         {isSolutionView && <Answer>
             {modelExplanation(data)}
+            <ExecutionEquation data={data} showAnswer />
             {data.multiplicationWitness && <div className="mt-2 font-mono font-bold" data-evidence="execution-multiplication-check">
                 {displayedQuotient(data)} × {formatQuotientValue(data.divisor)} = {formatOriginalFraction(data.multiplicationWitness.unreducedProduct)} = {formatQuotientValue(data.multiplicationWitness.reconstructedDividend)}
             </div>}
         </Answer>}
         {!isSolutionView && data.multiplicationWitness && <Blank>
             <span className="font-mono" data-evidence="execution-multiplication-check">______ × {formatQuotientValue(data.divisor)} = {formatQuotientValue(data.dividend)}</span>
+        </Blank>}
+        {!isSolutionView && data.equationWitness && <Blank>
+            Complete the equation for the same groups.
+            <ExecutionEquation data={data} showAnswer={false} />
         </Blank>}
     </>;
 }

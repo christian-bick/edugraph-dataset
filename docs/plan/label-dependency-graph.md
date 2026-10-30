@@ -40,6 +40,40 @@ before generation resumes. Current dataset acceptance still requires regenerated
 annotation checks, live VQA, strict cache/image checks, split/churn review and union rebuild.
 The Area allowlist, algebra cutoff and range-policy exclusion remain unchanged.
 
+### Initial regenerated snapshot and equation-witness projection
+
+After browser repair commit `5fa29653`, canonical preflight passes all 336 matched views.
+The complete coverage gate passes **7,293 tests in 900 files**, with every generator above
+its statement/branch thresholds. Canonical regeneration publishes
+`e74e297db4401e9153a16273cd553488b5d6f01e92de1927c24c7ebd51bf4429`: **2,918 images**,
+2,416 train and 502 validation, in 508 shards. Every current target (1,013) and matched
+tuple (1,222) has stored training evidence. Split leakage and configured-task redundancy
+are zero; 54 validation allocation gaps remain warnings under the existing policy.
+
+The strict dependency audit passes all 2,918 samples: **zero non-range omissions or
+conflicts**, compared with 2,502 omissions and four conflicts in the preserved baseline.
+The 1,680 raw remaining assessments are all excluded range diagnostics (618 source
+selections plus 1,062 stored-sample assessments). No range-policy work is undertaken.
+Every PNG verifies. All old/new replay receipts reproduce the unchanged seed formula;
+22 different winning attempts change their draw seeds as expected, with no seed drift
+for the same identity and attempt.
+
+The byte audit additionally finds an execution-image conflict: two zero-dividend quotient
+solutions have identical pixels, but only one owns `Area.Equation`. Their mathematical
+payloads differ by an existing `equationWitness`, which the execution projection ignored.
+Following IMPL-V11, the local repair displays that canonical group-count/length equality
+with meaningful quantity roles and units. Question Mode blanks the quotient's factor;
+Solution Mode completes it inside the existing answer styling. No labels, declarations,
+targets, sampling or mathematical payloads change. Other quotient task projections and
+non-equation execution remain unchanged. Focused projection/consumer tests pass **63 tests
+across six files**, plus types and whitespace checks.
+
+The second duplicate group has identical annotations and differs only in unused story
+material. It remains a same-training-split warning under the existing byte-audit policy;
+no incidental watermark or fingerprint-policy change is introduced to hide it. Gemini VQA
+begins on the 330 unaffected arithmetic-pair samples while the fraction projection repair
+is verified. The final full validation will reuse their current passing keys.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical
