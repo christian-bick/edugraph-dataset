@@ -91,7 +91,7 @@ a labeling defect. For example, the measurement plot's reported quarter-fraction
 is an independently verified glyph-reading error: Pencil is 3¼ and Key is 3¾, with the
 correct one mark at each of six distinct values.
 
-**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION: D-NUMERIC-STRUCTURE]** Two numeric-expression classification
+**[IMPLEMENTED; RE-EVALUATED; ZERO-SCOPE REVIEW OPEN: D-NUMERIC-STRUCTURE]** Two numeric-expression classification
 solutions claim zero only through an optional calculation that their task never requires.
 One expression is `2 × (−3/2) − 2 × (−3/2) + 4`; classifying its marked term does not require
 evaluating the hidden cancellation subtotal. These are numeric `ArithmeticExpression`
@@ -130,7 +130,7 @@ profiles; these source proofs do not claim empirical acceptance.
 
 ### Autonomous projection repairs after the first pass
 
-**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION]** A view-only checkpoint repairs the
+**[IMPLEMENTED; RE-EVALUATED UNDER THE CURRENT POLICY]** A view-only checkpoint repairs the
 independently supported presentation defects without changing specifications, targets,
 labels, configuration, mathematical support or sampling:
 
@@ -158,7 +158,7 @@ with unchanged source, image and annotations: the quarter-fraction line plot and
 decimal number line. Their original failed judgments remain in the preserved first-pass
 cache/report. No verdict is edited by hand and no evaluator instruction is weakened.
 
-**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION]** A second view-only checkpoint projects
+**[IMPLEMENTED; RE-EVALUATED UNDER THE CURRENT POLICY]** A second view-only checkpoint projects
 the existing standard-algorithm evidence. Questions explicitly require the column method;
 solutions show canonical multiplication, aligned-row addition and decimal addition/subtraction
 calculations with place-unit roles. The genuine shifted zero in `88 × 94` appears as
@@ -207,7 +207,7 @@ seven files**. A final full coverage run and canonical VQA remain required.
 
 ### Decimal column-zero predicate correction
 
-**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
+**[IMPLEMENTED; RE-EVALUATED; ZERO-SCOPE REVIEW OPEN: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
 the settled numerical-zero rule. `12.5 + 18.5 = 31.0` currently claims zero solely because
 the positive column sum `5 + 5 = 10` writes a zero digit. The supported seed-105 example
 `3779.7 + 3825.5 = 7605.2` has the same defect. Conversely, `122.5 − 111.4 = 11.1` omits
@@ -240,7 +240,7 @@ the approved resampling consequences will be checked on the next canonical snaps
 
 ### Persistent question-mode review: explicit given unit captions
 
-**[NEEDS EXPERT INPUT: D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
+**[ON HOLD: ZERO-SCOPE REVIEW; D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
 `527a18fa77957be99a1efc79695dbc036b456068fb966753da28af223f5a8353` with all 2,918 identities,
 1,013 targets and 1,222 tuples intact. Six images change; exactly one mathematical draw
 changes through the approved decimal predicate. Its positive tens sum `1 + 8 + 1 = 10`
@@ -286,9 +286,33 @@ structure and image integrity have zero errors. The documented same-annotation i
 duplicate remains one warning. `npm run check -- --spec=ccss`, strict dependency and
 architecture audits, and split integrity pass; the 1,675 remaining dependency assessments
 are exclusively the excluded range facet (613 source / 1,062 stored). The cache is saved
-as an evaluated checkpoint, not as clean dataset acceptance. The two-worker final coverage
-attempt ended without a completion report and is not counted as passing; a bounded
-three-worker rerun retains verbose progress in the acceptance evidence directory.
+as an evaluated checkpoint, not as clean dataset acceptance. Two preliminary final coverage
+attempts ended without completion reports and are not counted as passing. Their logs contain
+no completed failure report; the separate durable run below supplies the accepted result.
+
+**Scope clarification after image review:** the user expected zero/non-zero labeling to
+be limited to integer contexts. The current implementation only applies its integer-only
+qualification to operand-digit completeness (`LD-OPERANDS-02`); `LD-NUM-01` still assesses
+zero for broader numeric contexts within the unchanged Area allowlist. The actual failing
+exercise has nonintegral operands, and its generator declares decimal representation without
+`IntegerNumbers`. Integer-valued column counts do not turn it into an integer arithmetic
+context. Under the intended integer-only boundary, defending its zero label is the wrong
+repair. Earlier discussion of a judge false negative describes the broader implemented
+rule, not proof that this exercise belongs in the intended labeling scope.
+
+The proposed cell captions were not implemented. They are on hold pending a zero-scope
+impact review, including existing declarations, unnecessary zero profiles and explicit
+target requirements. No graph, target, declaration or sampling change is inferred from
+the user's question. The current source/cache checkpoint remains evaluated but unaccepted;
+the remaining VQA finding now exposes this scope discrepancy.
+
+Independent full verification completes successfully on the committed production source:
+**906 suites / 7,458 tests pass**, and every generator passes the repository coverage gate.
+Aggregate generator coverage is **98.36% statements, 97.05% branches, 100% functions and
+99.46% lines**. The hidden durable runner records test and coverage-check exit codes of
+zero, with no runner error. Evidence: `full-coverage-durable.log` and
+`full-coverage-durable-status.json` under the acceptance directory. This validates the
+current implementation, not alignment with the newly clarified integer-only zero scope.
 
 ## Reasoning proposal domain repair (2026-10-30)
 
