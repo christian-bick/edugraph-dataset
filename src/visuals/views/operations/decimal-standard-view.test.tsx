@@ -29,10 +29,10 @@ describe('given decimal operand unit captions', () => {
         for (const solution of [false, true]) {
             const markup = add(data, solution);
             expect(unitCaptions(markup, 'aligned-top-units')).toEqual({
-                2: 'hundreds', 1: 'tens', 0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+                2: '6 hundreds', 1: '6 tens', 0: '0 ones', '-1': '0 tenths', '-2': '0 hundredths', '-3': '5 thousandths'
             });
             expect(unitCaptions(markup, 'aligned-bottom-units')).toEqual({
-                0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+                0: '0 ones', '-1': '0 tenths', '-2': '9 hundredths', '-3': '2 thousandths'
             });
             expect(markup.match(/data-role="aligned-(?:top|bottom)-units"/g)).toHaveLength(2);
             expect(markup).not.toContain('rotate(-55deg)');
@@ -48,13 +48,13 @@ describe('given decimal operand unit captions', () => {
     it('leaves unwritten fractional and leading places uncaptioned in Question', () => {
         const data = addSubtract('subtraction', '5.20', '0.004');
         expect(unitCaptions(add(data, false), 'aligned-top-units')).toEqual({
-            0: 'ones', '-1': 'tenths', '-2': 'hundredths'
+            0: '5 ones', '-1': '2 tenths', '-2': '0 hundredths'
         });
         expect(unitCaptions(add(data, true), 'aligned-top-units')).toEqual({
-            0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+            0: '5 ones', '-1': '2 tenths', '-2': '0 hundredths', '-3': '0 thousandths'
         });
         expect(unitCaptions(add(data, false), 'aligned-bottom-units')).toEqual({
-            0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+            0: '0 ones', '-1': '0 tenths', '-2': '0 hundredths', '-3': '4 thousandths'
         });
     });
 
@@ -78,20 +78,33 @@ describe('given decimal operand unit captions', () => {
         expect(add({...data, result: unrelated.result, columns: []}, false)).toBe(add(data, false));
     });
 
+    it('keeps complete count-and-unit phrases separated at the horizontal layout threshold', () => {
+        const tenPlaces = addSubtract('addition', '0.0000000001', '0');
+        const elevenPlaces = addSubtract('addition', '0.00000000001', '0');
+        expect(add(tenPlaces, false)).toContain('rotate(-55deg)');
+        expect(add(tenPlaces, true)).not.toContain('rotate(-55deg)');
+        for (const solution of [false, true]) {
+            const markup = add(elevenPlaces, solution);
+            expect(markup).toContain('rotate(-55deg)');
+            expect(markup).toContain('height:128px');
+            expect(unitCaptions(markup, 'aligned-top-units')['-11']).toBe('1 hundred-billionth');
+        }
+    });
+
     it('supports the supplied safe-integer and fifteen-place fractional boundaries', () => {
         for (const solution of [false, true]) {
             const largestMarkup = add(addSubtract('addition', '9007199254740991', '0'), solution);
             const largest = unitCaptions(largestMarkup, 'aligned-top-units');
             expect(Object.keys(largest)).toHaveLength(16);
-            expect(largest['15']).toBe('quadrillions');
+            expect(largest['15']).toBe('9 quadrillions');
             expect(largest).not.toHaveProperty('16');
             expect(largestMarkup).toContain('rotate(-55deg)');
             expect(largestMarkup).toContain('absolute whitespace-nowrap');
             const smallest = unitCaptions(add(addSubtract('addition', '0.000000000000001', '0'), solution), 'aligned-top-units');
             expect(Object.keys(smallest)).toHaveLength(16);
-            expect(smallest['-15']).toBe('quadrillionths');
+            expect(smallest['-15']).toBe('1 quadrillionth');
             expect(unitCaptions(add(addSubtract('addition', '0.000000000000001', '0'), false), 'aligned-bottom-units'))
-                .toEqual({0: 'ones'});
+                .toEqual({0: '0 ones'});
         }
     });
 });

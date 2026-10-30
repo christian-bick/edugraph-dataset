@@ -349,6 +349,23 @@ caption rows. The focused 66 tests and types still pass. Independent native-brow
 screenshots of the safe-integer and fifteen-place fractional boundaries verify full
 labels, separation, viewport containment and question withholding in both modes.
 
+VQA on unit names alone retains the same single question-mode zero finding. Its report
+and original cache are preserved; no cached verdict is overridden. The final local
+refinement therefore states each given quantity explicitly, for example `6 hundreds`,
+`0 ones` and `0 hundredths`, with singular unit names for a count of one. Every caption
+uses the same original digit or already displayed Solution alignment zero. The row is
+named "Given counts"; it does not expose any arithmetic answer or calculated column.
+Results and carries remain uncaptioned. The broader rule review is still deferred.
+
+The preferred 64-pixel columns retain horizontal captions. Any narrower column uses
+unbroken diagonal phrases in a 128-pixel band. Final focused verification passes **67
+tests in six files**, plus types and independent review. Twelve native browser previews
+cover both modes, safe-integer and precision extremes, the 60-pixel threshold and the
+original disputed exercise. The longest caption is 99.79 pixels high within its 128-pixel
+band; ordinary captions fit within 24 of the available 36 pixels. No collisions,
+clipping, invented zero quantities or answer leakage are found. Canonical re-evaluation
+of this explicit-count refinement is the remaining acceptance step.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical

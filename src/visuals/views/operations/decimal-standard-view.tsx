@@ -43,7 +43,7 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
     const highest = isSolutionView ? data.columns[data.columns.length - 1]!.placeExponent : highestGiven + 1;
     const places = Array.from({length: highest + scale + 1}, (_, index) => highest - index);
     const width = Math.min(64, Math.max(18, 720 / places.length));
-    const narrowUnits = width < 60;
+    const narrowUnits = width < 64;
     const columnByPlace = new Map(data.columns.map(column => [column.placeExponent, column]));
     const symbol = data.operation === 'addition' ? '+' : '−';
 
@@ -69,14 +69,16 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
                 <span className={changed ? 'line-through decoration-slate-400' : ''}>{original === null ? appended ? 0 : null : original}</span>
             </Cell>;
         }} />
-            <Row label="Units" role={top ? 'aligned-top-units' : 'aligned-bottom-units'} point={null} cell={place => {
-                const given = decimalDigitAt(value, place) !== null;
+            <Row label="Given counts" role={top ? 'aligned-top-units' : 'aligned-bottom-units'} point={null} cell={place => {
+                const given = decimalDigitAt(value, place);
                 const aligned = isSolutionView && place < -value.scale;
+                const count = given !== null ? given : aligned ? 0 : null;
+                const unit = count !== null ? columnUnit(place) : null;
                 return <div data-place={place} className="relative flex shrink-0 items-center justify-center px-0.5 text-center font-sans text-[10px] font-medium leading-3 text-slate-600"
-                    style={{width, height: narrowUnits ? 100 : 36}}>
+                    style={{width, height: narrowUnits ? 128 : 36}}>
                     <span className={narrowUnits ? 'absolute whitespace-nowrap' : 'min-w-0'}
                         style={narrowUnits ? {left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(-55deg)'} : undefined}>
-                        {given || aligned ? columnUnit(place) : null}
+                        {count !== null && unit !== null ? `${count} ${count === 1 ? unit.slice(0, -1) : unit}` : null}
                     </span>
                 </div>;
             }} />
