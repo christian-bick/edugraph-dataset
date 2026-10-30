@@ -6,9 +6,9 @@ export const prismFormulaEvidence: ViewCompatibilityRule = {
     id: 'prism-volume-formula-evidence',
     description: 'Formula premises show physical measurements without the packing or cube-scale model.',
     dependencies: [
-        {scope: 'generator', label: Area.MeasuringVolumes},
+        {scope: 'generator', label: Area.MeasuringVolume},
         {scope: 'generator', label: Scope.CubeScale}
     ],
-    predicate: labels => !labels.has('generator', Area.MeasuringVolumes)
+    predicate: labels => !labels.has('generator', Area.MeasuringVolume)
         && !labels.has('generator', Scope.CubeScale)
 };

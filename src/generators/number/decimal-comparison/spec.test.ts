@@ -7,7 +7,7 @@ import {spec} from './spec.ts';
 
 const commonLabels = [
     Area.NumerationWithDecimals,
-    Area.DecimalPrecission,
+    Area.DecimalPrecision,
     Scope.DecimalNumbers,
     Scope.SingleFrameOfReference,
     Scope.VisualNumbers,
@@ -15,9 +15,9 @@ const commonLabels = [
 ] as const;
 
 const targets = [
-    ['greater', [Area.NumericInequality, ...commonLabels, Scope.Greater], '291ce780'],
-    ['equal', [Area.NumericEquality, ...commonLabels, Scope.Equal], 'e4ebc223'],
-    ['less', [Area.NumericInequality, ...commonLabels, Scope.Less], '3df4e9ef']
+    ['greater', [Area.NumericInequality, ...commonLabels, Scope.Greater], '9c965827'],
+    ['equal', [Area.NumericEquality, ...commonLabels, Scope.Equal], '6e941094'],
+    ['less', [Area.NumericInequality, ...commonLabels, Scope.Less], 'a944a5b2']
 ] as const;
 
 describe('DecimalComparisonGenerator spec integration', () => {
@@ -28,7 +28,7 @@ describe('DecimalComparisonGenerator spec integration', () => {
             generatorId: 'decimal-comparison',
             generalLabels: [
                 Area.NumerationWithDecimals,
-                Area.DecimalPrecission,
+                Area.DecimalPrecision,
                 Scope.DecimalNumbers,
                 Scope.NumbersWithoutNegatives
             ]

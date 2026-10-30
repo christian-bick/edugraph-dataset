@@ -13,6 +13,9 @@ function SourceAdjacency({data}: {data: Problem}) {
 
 export function PolyhedralNetBody({data, task, story, isSolutionView, seed}: {data: Problem; task: PolyhedralNetTask; story: boolean; isSolutionView: boolean; seed: number}) {
     const construction = task === 'construction';
+    const triangleMeasures = data.net.faces.flatMap(face => face.measure.kind === 'triangle' ? [face.measure] : []);
+    const hasBaseExtensions = triangleMeasures.some(({baseOffset, base}) => baseOffset.numerator < 0
+        || BigInt(baseOffset.numerator) * BigInt(base.denominator) > BigInt(base.numerator) * BigInt(baseOffset.denominator));
     return <main className="w-[780px] max-w-full space-y-5 rounded-2xl bg-white p-7 font-sans text-[17px] text-slate-800 shadow-sm">
         <p className="text-xl font-semibold">{construction ? 'Draw a connected net for this solid.' : 'Find the surface area of the solid from this net.'}</p>
         <NetDimensionPremises data={data} story={story} construction={construction} />
@@ -24,7 +27,7 @@ export function PolyhedralNetBody({data, task, story, isSolutionView, seed}: {da
         </>}
         {!construction && <>
             <NetPlanarDiagram data={data} solved={false} />
-            <p className="text-sm text-slate-600">Dashed shared edges are folds. Short-dashed perpendiculars mark triangle face heights; supporting-line extensions are dotted.</p>
+            <p className="text-sm text-slate-600">Dashed shared edges are folds.{triangleMeasures.length > 0 && ' Short-dashed perpendiculars mark triangle face heights.'}{hasBaseExtensions && ' Supporting-line extensions are dotted.'}</p>
         </>}
         {construction ? isSolutionView ? <section className="rounded-lg border border-emerald-300 p-3 text-emerald-700" data-role="net-construction-answer">
             <p className="font-semibold">One connected net</p><NetPlanarDiagram data={data} solved />

@@ -340,7 +340,7 @@ const linePlotFractionProblemsBuilder = new DatasetPermutationBuilder()
 const unitCubeSpecificationBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Cube,
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Scope.CubeScale,
         Ability.ConceptSpecification
     ]);
@@ -348,14 +348,14 @@ const unitCubeSpecificationBuilder = new DatasetPermutationBuilder()
 const volumeFromPackingBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Cube,
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Scope.CubeScale,
         Ability.Interpretation
     ]);
 
 const countUnitCubesBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Area.Numeration,
         Area.Cube,
         Scope.CubeScale,
@@ -371,7 +371,7 @@ const countUnitCubesBuilder = new DatasetPermutationBuilder()
 
 const packingProductConnectionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Area.VolumeCalculation,
         Area.RectangularPrism,
         Area.Multiplication,

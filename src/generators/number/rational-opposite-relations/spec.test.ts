@@ -9,14 +9,14 @@ const invariants = [Area.SignNotation, Scope.RationalNumbers, Scope.NumbersWithZ
 const targets = [
     ['double-opposite', [Area.RulesOfSigns, Area.SignNotation, Scope.RationalNumbers, Ability.Interpretation], 'iterated-negation', [Area.RulesOfSigns]],
     ['opposite-line-locations', [Area.SignNotation, Scope.RationalNumbers, Scope.NumbersWithNegatives, Scope.Numberline, Ability.Interpretation], 'nonzero-opposition', []],
-    ['zero-opposite', [Area.ZeroConcept, Area.SignNotation, Scope.NumbersWithZero, Scope.Numberline, Ability.Interpretation], 'zero-fixed-point', [Area.ZeroConcept]]
+    ['zero-opposite', [Area.Zero, Area.SignNotation, Scope.NumbersWithZero, Scope.Numberline, Ability.Interpretation], 'zero-fixed-point', [Area.Zero]]
 ] as const;
 
 describe('opposite relation capability ownership', () => {
     it('keeps always-present zero/negative reference values invariant and claims no learner action', () => {
         expect(spec.generalLabels).toEqual(invariants);
         for (const label of Object.values(Ability)) expect(spec.generalLabels).not.toContain(label);
-        expect(RationalOppositeRelationsGeneratorSchema.relation[0]).toEqual([Area.RulesOfSigns, Area.ZeroConcept]);
+        expect(RationalOppositeRelationsGeneratorSchema.relation[0]).toEqual([Area.RulesOfSigns, Area.Zero]);
     });
 
     it.each(targets)('resolves the real 6.NS.C.6a-%s target without a magnitude label', (_name, target, relation, selected) => {
@@ -45,7 +45,7 @@ describe('opposite relation capability ownership', () => {
 
     it('supports the explicit accounted no-Area fallback and rejects competing Area bundles', () => {
         expect(RationalOppositeRelationsGeneratorSchema.relation[1]([])).toBe('nonzero-opposition');
-        expect(() => RationalOppositeRelationsGeneratorSchema.relation[1]([Area.RulesOfSigns, Area.ZeroConcept])).toThrow('Unsupported exact label combination');
+        expect(() => RationalOppositeRelationsGeneratorSchema.relation[1]([Area.RulesOfSigns, Area.Zero])).toThrow('Unsupported exact label combination');
     });
 
     it('keeps canonical mathematics independent of learner Ability', () => {

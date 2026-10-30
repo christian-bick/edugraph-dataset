@@ -89,6 +89,7 @@ const unitRateProblemsBuilder = new DatasetPermutationBuilder().addLabels([
 
 // 6.RP.A.3c: calculate a percent of a quantity as a rate per hundred.
 const percentOfQuantityBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.PercentageRateApplication,
     Area.PercentageEquivalence,
     Area.ProportionalScaling,
     Scope.RationalNumbers,
@@ -98,6 +99,7 @@ const percentOfQuantityBuilder = new DatasetPermutationBuilder().addLabels([
 
 // 6.RP.A.3c: recover the whole from its part and percent.
 const wholeFromPercentBuilder = new DatasetPermutationBuilder().addLabels([
+    Area.PercentageRateApplication,
     Area.PercentageEquivalence,
     Area.ProportionalScaling,
     Scope.RationalNumbers,
@@ -292,7 +294,7 @@ const leastCommonMultipleBuilder = new DatasetPermutationBuilder().addLabels([
 
 // 6.NS.C.5: explain the reference meaning of zero.
 const contextualZeroBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.ZeroConcept,
+    Area.Zero,
     Scope.RationalNumbers,
     Scope.NumbersWithZero,
     Ability.Interpretation,
@@ -335,7 +337,7 @@ const oppositeLineLocationsBuilder = new DatasetPermutationBuilder().addLabels([
 
 // 6.NS.C.6a: zero is its own opposite.
 const zeroOppositeBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.ZeroConcept,
+    Area.Zero,
     Area.SignNotation,
     Scope.NumbersWithZero,
     Scope.Numberline,
@@ -598,7 +600,7 @@ const interpretSubexpressionsBuilder = new DatasetPermutationBuilder()
 const evaluateVariableExpressionsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.AlgebraicExpression,
-        Area.AlgebraicSubstitution,
+        Area.NumericSubstitution,
         Area.OrderOfOperations,
         Scope.ArabicNumerals,
         Ability.ProcedureExecution
@@ -638,7 +640,7 @@ const identifyEquivalentExpressionsBuilder = new DatasetPermutationBuilder().add
 // 6.EE.B.5: Check whether a supplied candidate satisfies an equation or inequality.
 const checkSubstitutionBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.AlgebraicSubstitution,
+        Area.NumericSubstitution,
         Area.RelationSatisfaction,
         Scope.ArabicNumerals,
         Ability.ProcedureExecution,
@@ -805,7 +807,7 @@ const polygonAreaDissectionBuilder = new DatasetPermutationBuilder()
 
 // 6.G.A.2: Find prism volume from unit-fraction cube packing.
 const fractionalCubePackingBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.MeasuringVolumes,
+    Area.MeasuringVolume,
     Area.VolumeCalculation,
     Area.RectangularPrism,
     Area.Multiplication,
@@ -816,7 +818,7 @@ const fractionalCubePackingBuilder = new DatasetPermutationBuilder().addLabels([
 
 // 6.G.A.2: Explain why fractional cube packing agrees with the edge product.
 const fractionalPackingProductConnectionBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.MeasuringVolumes,
+    Area.MeasuringVolume,
     Area.VolumeCalculation,
     Area.RectangularPrism,
     Area.Multiplication,

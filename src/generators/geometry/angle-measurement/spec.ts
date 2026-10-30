@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'angle-measurement',
-    generalLabels: [Area.AngleConcept, Scope.DegreeScale]
+    generalLabels: [Area.Angle, Scope.DegreeScale]
 };
 
 export const AngleMeasurementGeneratorSchema = {

@@ -45,7 +45,7 @@ describe('algebra expression capability ownership and composition', () => {
             const labels = [...relation, ...power];
             const config = {relation: AlgebraExpressionsGeneratorSchema.relation[1](labels),
                 power: AlgebraExpressionsGeneratorSchema.power[1](labels)};
-            if (power.length && !relation.includes(Area.AlgebraicSubstitution as never)) continue;
+            if (power.length && !relation.includes(Area.NumericSubstitution as never)) continue;
             for (const numericProfile of profilesForRelation(config.relation!)) {
                 values.add(JSON.stringify({...config, numericProfile}));
                 const stub = new AlgebraExpressionsGenerator().generate({...config, numericProfile})!;
@@ -193,7 +193,7 @@ describe('algebra expression capability ownership and composition', () => {
         if (!result.supported) throw new Error(result.reason);
         expect(result.plan.domains.filter(domain => domain.owner === 'generator').map(domain => domain.alternatives.length)).toEqual([1, 1, 1]);
         for (const extra of [Area.Term, Area.Factor, Area.Coefficient, Area.Addition, Area.Multiplication, Area.Division,
-            Area.GroupingSymbol, Area.Operand, Area.AlgebraicSubstitution, Area.OrderOfOperations, Area.AlgebraicModeling, Area.Exponentiation]) {
+            Area.GroupingSymbol, Area.Operand, Area.NumericSubstitution, Area.OrderOfOperations, Area.AlgebraicModeling, Area.Exponentiation]) {
             expect(plan(`phrase-${extra}`, [...labels, extra], viewEntries[0]).supported).toBe(false);
         }
     });
@@ -225,9 +225,24 @@ describe('algebra expression capability ownership and composition', () => {
     });
 
     it('keeps seeded concrete mathematics independent of the requested learner action', () => {
-        const labels = [Area.AlgebraicExpression, Area.AlgebraicSubstitution, Area.OrderOfOperations, Area.Exponentiation, Scope.IntegerExponent];
+        const labels = [Area.AlgebraicExpression, Area.NumericSubstitution, Area.OrderOfOperations, Area.Exponentiation, Scope.IntegerExponent];
         setSeed(41); const first = generateWithLabels(new AlgebraExpressionsGenerator(), [...labels, Ability.ProcedureExecution]);
         setSeed(41); expect(generateWithLabels(new AlgebraExpressionsGenerator(), [...labels, Ability.Interpretation])).toEqual(first);
         expect(() => new AlgebraExpressionsGenerator().generate({})).toThrow();
     });
+
+    it.each([Area.NumericSubstitution, Area.AlgebraicSubstitution])(
+        'emits the numeric specialization while satisfying a %s request', substitution => {
+            const labels = [Area.AlgebraicExpression, substitution, Area.OrderOfOperations,
+                Scope.ArabicNumerals, Ability.ProcedureExecution];
+            const result = plan('numeric-substitution', labels, viewEntries[3]);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error(result.reason);
+            const draw = generatePlannedDraw({generator: new AlgebraExpressionsGenerator(), viewSchema: evaluateSchema,
+                plan: result.plan, sampleKey: `numeric-substitution#${spec.generatorId}#${evaluate.viewId}#train#question#inst:0`, seed: 7, attempt: 1});
+            expect(draw.labels).toContain(Area.NumericSubstitution);
+            expect(draw.labels).not.toContain(Area.AlgebraicSubstitution);
+            expect(draw.stub!.data.substitution.bindings.length).toBeGreaterThan(0);
+        }
+    );
 });

@@ -4,7 +4,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'measurement-liquid-volume-estimation',
-    generalLabels: [Area.Estimation, Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale]
+    generalLabels: [Area.Estimation, Area.MeasuringVolume, Scope.LiquidVolumes, Scope.LiterScale]
 };
 
 export const MeasurementLiquidVolumeEstimationGeneratorSchema = {} as const;

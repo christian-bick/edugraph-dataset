@@ -158,7 +158,7 @@ export function primitiveGuideScene(kind: GeometryPrimitiveKind): GeometryPrimit
     }
     if (kind === 'right-angle' || kind === 'acute-angle' || kind === 'obtuse-angle') {
         return {
-            points: [point('O', 'O', 20, 75, 12, 84), point('A', 'A', 85, 75, 89, 83)],
+            points: [point('O', 'O', 20, 75, 12, 84), point('A', 'A', 85, 75, 89, 87)],
             strokes: [stroke('OA', 20, 75, 90, 75, false, true)],
             markers: []
         };
@@ -210,7 +210,7 @@ export function completedPrimitiveScene(kind: GeometryPrimitiveKind): GeometryPr
         return {
             points: [
                 point('O', 'O', 20, 75, 12, 84),
-                point('A', 'A', 85, 75, 89, 83),
+                point('A', 'A', 85, 75, 89, 87),
                 point('B', 'B', 20, 15, 10, 13)
             ],
             strokes: [
@@ -224,8 +224,8 @@ export function completedPrimitiveScene(kind: GeometryPrimitiveKind): GeometryPr
         return {
             points: [
                 point('O', 'O', 20, 75, 12, 84),
-                point('A', 'A', 85, 75, 89, 83),
-                point('B', 'B', 65, 30, 69, 24)
+                point('A', 'A', 85, 75, 89, 87),
+                point('B', 'B', 65, 30, 60, 23)
             ],
             strokes: [
                 stroke('OA', 20, 75, 90, 75, false, true),
@@ -238,8 +238,8 @@ export function completedPrimitiveScene(kind: GeometryPrimitiveKind): GeometryPr
         return {
             points: [
                 point('O', 'O', 50, 75, 46, 85),
-                point('A', 'A', 90, 75, 92, 83),
-                point('B', 'B', 20, 45, 11, 41)
+                point('A', 'A', 90, 75, 92, 87),
+                point('B', 'B', 20, 45, 12, 55)
             ],
             strokes: [
                 stroke('OA', 50, 75, 94, 75, false, true),

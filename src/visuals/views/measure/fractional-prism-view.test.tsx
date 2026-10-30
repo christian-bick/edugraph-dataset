@@ -168,11 +168,11 @@ describe('fractional prism consumers', () => {
             exact: (scope, label) => scope === 'generator' && selected.includes(label)
         });
         expect(predicate([Area.Equation, Scope.FractionNumbers])).toBe(true);
-        expect(predicate([Area.Equation, Area.MeasuringVolumes])).toBe(false);
+        expect(predicate([Area.Equation, Area.MeasuringVolume])).toBe(false);
         expect(predicate([Area.Equation, Scope.CubeScale])).toBe(false);
-        expect(predicate([Area.Equation, Area.MeasuringVolumes, Scope.CubeScale])).toBe(false);
+        expect(predicate([Area.Equation, Area.MeasuringVolume, Scope.CubeScale])).toBe(false);
         expect(prismFormulaEvidence.dependencies).toEqual([
-            {scope: 'generator', label: Area.MeasuringVolumes}, {scope: 'generator', label: Scope.CubeScale}
+            {scope: 'generator', label: Area.MeasuringVolume}, {scope: 'generator', label: Scope.CubeScale}
         ]);
     });
 });

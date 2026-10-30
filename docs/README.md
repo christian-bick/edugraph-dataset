@@ -33,6 +33,8 @@ equivalence, content, regression, and maintenance work.
 
 ## Completed plans and verification records
 
+- [Ontology v0.32 candidate adoption](history/ontology-v032-adoption.md) — exact preview provenance,
+  identifier and semantic migration, current branch integration, and historical dataset verification.
 - [Automated rule checks](history/automated-rule-checks.md) — completed dataset consolidation,
   shared validation entry points, and separately deferred semantic reviews.
 - [Label-variant matching and constrained generation](history/label-variant-matching.md) — completed

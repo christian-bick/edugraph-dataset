@@ -21,7 +21,7 @@ const relations = [
     [[Area.AlgebraicExpression, Area.Division], 'symbolic-quotient'],
     [[Area.ArithmeticExpression, Area.GroupingSymbol, Area.Operand, Scope.RationalNumbers], 'numeric-grouped'],
     [[Area.AlgebraicExpression, Area.GroupingSymbol, Area.Operand], 'symbolic-grouped'],
-    [[Area.AlgebraicExpression, Area.AlgebraicSubstitution, Area.OrderOfOperations], 'substitution'],
+    [[Area.AlgebraicExpression, Area.NumericSubstitution, Area.OrderOfOperations], 'substitution'],
     [[Area.AlgebraicExpression, Area.AlgebraicModeling], 'modeling']
 ] as const;
 // These symbolic frames all display integral constants or coefficients. Integer
@@ -53,8 +53,8 @@ export const spec: GeneratorSpec = {
     compatibility: [{
         id: 'algebra-power-substitution',
         description: 'Powered calculations belong to the substitution and precedence relation.',
-        dependencies: [{scope: 'generator', label: Area.Exponentiation}, {scope: 'generator', label: Area.AlgebraicSubstitution}],
-        predicate: labels => !labels.has('generator', Area.Exponentiation) || labels.has('generator', Area.AlgebraicSubstitution)
+        dependencies: [{scope: 'generator', label: Area.Exponentiation}, {scope: 'generator', label: Area.NumericSubstitution}],
+        predicate: labels => !labels.has('generator', Area.Exponentiation) || labels.has('generator', Area.NumericSubstitution)
     }, generatorLabelRule('algebra-expression-evidenced-numeric-profile',
         [...numericContextLabels, ...numericProfileLabels], selected => numericProfileForLabels(selected) !== undefined), {
         id: 'algebra-original-rational-context',

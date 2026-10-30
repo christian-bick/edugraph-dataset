@@ -16,9 +16,9 @@ const cases = [
         generatorLabels: [Area.AngleCalculation]
     },
     {
-        expectedHash: 'e4c3895a',
+        expectedHash: '6aa57328',
         labels: [
-            Area.AngleConcept,
+            Area.Angle,
             Scope.DegreeScale,
             Ability.ConceptSpecification,
             Ability.VisualArticulation
@@ -30,7 +30,7 @@ const cases = [
 describe('AngleMeasurementGenerator spec integration', () => {
     it('declares only invariant angle mathematics as general labels', () => {
         expect(spec.generalLabels).toEqual([
-            Area.AngleConcept,
+            Area.Angle,
             Scope.DegreeScale
         ]);
     });

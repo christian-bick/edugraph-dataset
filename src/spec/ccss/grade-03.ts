@@ -382,7 +382,7 @@ const timeIntervalWordProblemsBuilder = new DatasetPermutationBuilder()
 
 const measureLiquidVolumeBuilder = new DatasetPermutationBuilder()
     .addLabels([
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Scope.LiquidVolumes,
         Scope.LiterScale,
         Ability.ProcedureExecution
@@ -391,7 +391,7 @@ const measureLiquidVolumeBuilder = new DatasetPermutationBuilder()
 const estimateLiquidVolumeBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.Estimation,
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Scope.LiquidVolumes,
         Scope.LiterScale,
         Ability.ProcedureExecution

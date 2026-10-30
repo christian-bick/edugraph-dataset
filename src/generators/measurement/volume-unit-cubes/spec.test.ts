@@ -29,7 +29,7 @@ describe('volume-unit-cubes schema integration', () => {
     });
 
     it('resolves the two generic concept paths and four count-unit label combinations', () => {
-        const volumeLabels = [Area.Cube, Area.MeasuringVolumes, Scope.CubeScale];
+        const volumeLabels = [Area.Cube, Area.MeasuringVolume, Scope.CubeScale];
         const countLabels = [...volumeLabels, Area.Numeration, Scope.IntegerNumbers, Ability.ProcedureExecution];
         const labelSets = [
             [...volumeLabels, Ability.ConceptSpecification],
@@ -58,7 +58,7 @@ describe('volume-unit-cubes schema integration', () => {
     });
 
     it('selects count capabilities together through the mathematical enumeration branch', () => {
-        expect(spec.generalLabels).toEqual([Area.Cube, Area.MeasuringVolumes, Scope.CubeScale]);
+        expect(spec.generalLabels).toEqual([Area.Cube, Area.MeasuringVolume, Scope.CubeScale]);
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
         const resolution = extractConfig(VolumeUnitCubesGeneratorSchema, [Area.Numeration, Scope.IntegerNumbers]);
         expect(resolution.config.countingModel).toBe('enumerated');

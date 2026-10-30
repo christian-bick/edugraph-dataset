@@ -55,8 +55,22 @@ describe('strict inequality mathematical capability ownership', () => {
     it('does not let ray interpretations silently select finite solving or contextual evidence', () => {
         const base = [Area.Inequality, Area.SolutionSet, Scope.NoExpressions, Scope.Less, Scope.ArabicNumerals, Ability.Interpretation];
         expect(plan(base, views[3]).supported).toBe(true);
-        for (const extra of [Area.InequalitySolving, Area.AlgebraicModeling, Area.AlgebraicSubstitution, Area.RelationSatisfaction]) expect(plan([...base, extra], views[3]).supported).toBe(false);
+        for (const extra of [Area.InequalitySolving, Area.AlgebraicModeling, Area.NumericSubstitution, Area.RelationSatisfaction]) expect(plan([...base, extra], views[3]).supported).toBe(false);
         setSeed(31); const first = generateWithLabels(new AlgebraInequalitiesGenerator(), [Area.SolutionSet, Scope.Less, Ability.VisualArticulation]);
         setSeed(31); expect(generateWithLabels(new AlgebraInequalitiesGenerator(), [Area.SolutionSet, Scope.Less, Ability.Interpretation])).toEqual(first);
     });
+
+    it.each([Area.NumericSubstitution, Area.AlgebraicSubstitution])(
+        'emits numeric candidate substitution for a %s request', substitution => {
+            const labels = [Area.Inequality, substitution, Area.RelationSatisfaction, Scope.ArabicNumerals,
+                Ability.ProcedureExecution, Ability.CorrectnessEvaluation];
+            const result = plan(labels, views[0]);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error(result.reason);
+            const draw = generatePlannedDraw({generator: new AlgebraInequalitiesGenerator(), viewSchema: AlgebraSubstitutionCheckViewSchema,
+                plan: result.plan, sampleKey: `strict-predicate#${spec.generatorId}#${checkView.viewId}#train#question#inst:0`, seed: 7, attempt: 1});
+            expect(draw.labels).toContain(Area.NumericSubstitution);
+            expect(draw.labels).not.toContain(Area.AlgebraicSubstitution);
+        }
+    );
 });

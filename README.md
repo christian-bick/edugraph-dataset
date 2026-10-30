@@ -18,6 +18,10 @@ Development currently pins ontology preview `0.32.0-pre.1.00409a39c911`.
 The [model-scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
 records package verification and the additive fraction-model declarations.
 
+Its [adoption record](docs/history/ontology-v032-adoption.md#branch-integration-2026-10-30)
+separates current source integration from historical dataset validation; published dataset
+versions remain independently versioned.
+
 ## General Concepts
 
 The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates training artifacts that satisfy those labels and expose the visual or necessary textual clues a classifier needs to defend them.
@@ -43,10 +47,6 @@ integer/decimal equalities, with dedicated one-way and bidirectional execution v
 [split verification](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
 records preserved target coverage and the resulting annotation repairs.
 
-Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
-matching-capable mathematical profiles. The
-[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
-record separates verified repairs from concrete questions about content, annotation contracts
 Parity grouping and decimal reading now have dedicated canonical producers. Their existing views
 consume the grouping relation or source/comparison values, preserving every target route and the
 original mathematical sampling law. The

@@ -7,7 +7,7 @@ import {
     resolveDistanceScale,
     resolveRangeFromLabels
 } from './ontology.ts';
-import { Scope, Area } from 'edugraph-ts';
+import { Scope, Area, bundledContext } from 'edugraph-ts';
 
 describe('Ontology Helper', () => {
     describe('capabilitySatisfies', () => {
@@ -49,6 +49,84 @@ describe('Ontology Helper', () => {
             expect(getStructuralAncestors(Scope.Tapemeter).has(Scope.LengthMeasurement)).toBe(true);
             expect(getStructuralAncestors(Scope.CentimeterScale)
                 .has(Scope.MetricDistanceScale)).toBe(true);
+        });
+    });
+
+    describe('adopted ontology boundaries', () => {
+        it.each([Area.EvenDivisibility, Area.UnevenDivisibility])(
+            'keeps collection parity %s separate from executed division', label => {
+                expect(capabilitySatisfies(label, Area.DivisibilityOfCollections)).toBe(true);
+                expect(capabilitySatisfies(label, Area.DivisionOfCollections)).toBe(false);
+            }
+        );
+
+        it.each([Area.PerfectDivisibility, Area.ImperfectDivisibility])(
+            'does not infer a collection-division claim from numeric %s', label => {
+                expect(getStructuralAncestors(label).has(Area.DivisibilityRules)).toBe(true);
+                expect(capabilitySatisfies(label, Area.DivisionOfCollections)).toBe(false);
+            }
+        );
+
+        it.each([
+            [Area.DivisionOfCollections, Area.PartitionOfCollections],
+            [Area.NumericSubstitution, Area.AlgebraicSubstitution],
+            [Area.AssociativeLaw, Area.OperationAssociativity],
+            [Area.CommutativeLaw, Area.OperationCommutativity],
+            [Area.DistributiveLaw, Area.OperationDistributivity],
+            [Area.FractionSimplification, Area.FractionEquivalence],
+            [Area.FractionReferenceDistanceComparison, Area.FractionReferenceComparison],
+            [Area.EquilateralTriangle, Area.AcuteTriangle],
+            [Area.EquilateralTriangle, Area.IsoscelesTriangle],
+            [Area.Square, Area.Rhombus],
+            [Area.Parallelogram, Area.Trapezoid],
+            [Area.CoordinateDistance, Area.LengthCalculation],
+            [Area.PerimeterCalculation, Area.LengthCalculation],
+            [Area.SurfaceAreaCalculation, Area.AreaCalculation],
+            [Area.Sphere, Area.SolidOfRevolution],
+            [Area.UnitFactorScaling, Area.UnitConversion],
+            [Area.UnitMagnitudeScaling, Area.UnitConversion],
+            [Area.ArithmeticMean, Area.CentralTendencyMeasure],
+            [Area.Median, Area.CentralTendencyMeasure],
+            [Area.Mode, Area.CentralTendencyMeasure]
+        ])('matches adopted specialization %s to %s in one direction', (specific, broader) => {
+            expect(capabilitySatisfies(specific, broader)).toBe(true);
+            expect(capabilitySatisfies(broader, specific)).toBe(false);
+        });
+
+        it('does not promote interval organization or translated rates to capabilities', () => {
+            expect(getStructuralAncestors(Area.NumberIntervals).has(Area.NumberSense)).toBe(true);
+            expect(capabilitySatisfies(Area.NumberIntervals, Area.Numeration)).toBe(false);
+            expect(capabilitySatisfies(Area.AverageRateOfChange, Area.FunctionSlope)).toBe(false);
+            expect(capabilitySatisfies(Area.InstantaneousRateOfChange, Area.FunctionSlope)).toBe(false);
+        });
+
+        it.each([
+            Area.DivisibilityRules,
+            Area.GeometricFoundations,
+            Area.FunctionInterpretation,
+            Area.FunctionStructure,
+            Area.ComplexNumberFoundations,
+            Area.MarkovChainAbsorption,
+            Area.SequenceTheorems,
+            Area.SetOperations,
+            Area.SetProperties,
+            Area.SetRelations,
+            Area.StatisticalInference
+        ])('keeps organizer %s out of annotation vocabularies', label => {
+            expect(bundledContext.inspectLabel(label)).toMatchObject({status: 'known', eligible: false});
+        });
+
+        it.each([
+            Area.FunctionSlope,
+            Area.MathematicalNotation,
+            Area.SetCardinality,
+            Area.CentralTendencyMeasure,
+            Area.Cone,
+            Area.Cylinder,
+            Area.Iteration,
+            Area.IteratedOperation
+        ])('retains eligible descriptor %s without forcing a narrower label', label => {
+            expect(bundledContext.inspectLabel(label)).toMatchObject({status: 'known', eligible: true});
         });
     });
 

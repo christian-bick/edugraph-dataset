@@ -43,10 +43,10 @@ export function PrimitiveScene({
     return (
         <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden="true">
             <defs>
-                <marker id={`${markerId}-start`} markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <marker id={`${markerId}-start`} markerUnits="userSpaceOnUse" viewBox="0 0 6 6" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
                     <path d="M6,0 L6,6 L0,3 z" fill={accent} />
                 </marker>
-                <marker id={`${markerId}-end`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <marker id={`${markerId}-end`} markerUnits="userSpaceOnUse" viewBox="0 0 6 6" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
                     <path d="M0,0 L0,6 L6,3 z" fill={accent} />
                 </marker>
             </defs>

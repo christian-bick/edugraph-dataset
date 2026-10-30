@@ -5,8 +5,8 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 const relationProfiles = [
-    [[Area.MeasuringVolumes, Scope.CubeScale], 'packing-count'],
-    [[Area.MeasuringVolumes, Area.Equation, Scope.CubeScale], 'packing-equivalence'],
+    [[Area.MeasuringVolume, Scope.CubeScale], 'packing-count'],
+    [[Area.MeasuringVolume, Area.Equation, Scope.CubeScale], 'packing-equivalence'],
     [[Scope.CubeScale, Scope.ThreeOperands], 'triple-product'],
     [[Scope.CubeScale, Scope.ThreeOperands, Area.AssociativeLaw], 'associative-triple-product'],
     [[Area.Equation, Scope.ThreeOperands], 'edge-formula'],
@@ -24,13 +24,13 @@ export const spec: GeneratorSpec = {
         Area.Multiplication
     ],
     compatibility: [generatorLabelRule('fractional-prism-bare-packing-domain',
-        [Area.MeasuringVolumes, Area.Equation, Scope.FractionNumbers],
-        selected => !selected(Area.MeasuringVolumes) || selected(Area.Equation) || selected(Scope.FractionNumbers))]
+        [Area.MeasuringVolume, Area.Equation, Scope.FractionNumbers],
+        selected => !selected(Area.MeasuringVolume) || selected(Area.Equation) || selected(Scope.FractionNumbers))]
 };
 
 export const VolumeRectangularPrismGeneratorSchema = {
     relationProfile: [[
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Area.Equation,
         Area.AssociativeLaw,
         Scope.CubeScale,

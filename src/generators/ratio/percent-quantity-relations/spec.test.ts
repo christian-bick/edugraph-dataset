@@ -1,18 +1,39 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {planCompatibility} from '../../../lib/compatibility.ts';
+import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {spec as activeTargets} from '../../../spec/ccss/grade-06.ts';
+import {spec as forwardView} from '../../../visuals/views/ratio/percent-of-quantity/spec.ts';
+import {spec as inverseView} from '../../../visuals/views/ratio/percent-whole-inversion/spec.ts';
 import {PercentQuantityRelationsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {PercentQuantityRelationsGeneratorSchema, spec} from './spec.ts';
 
 const mathematicalLabels = [
-    Area.PercentageEquivalence, Area.ProportionalScaling,
+    Area.PercentageRateApplication, Area.PercentageEquivalence, Area.ProportionalScaling,
     Scope.RationalNumbers, Scope.NumbersWithoutNegatives
 ];
 
 describe('percent-quantity-relations capabilities', () => {
     it('owns only the reviewed invariant percent and scaling mathematics', () => {
         expect(spec.generalLabels).toEqual([...mathematicalLabels, Scope.NumbersWithoutZero]);
+    });
+
+    it('preserves application and inverse target projections with their independent equivalence and scaling claims', () => {
+        const targets = activeTargets.filter(target => target.id.startsWith('6.RP.A.3c-'));
+        expect(targets).toHaveLength(2);
+        for (const target of targets) {
+            expect(target.labels).toEqual(expect.arrayContaining(mathematicalLabels));
+            for (const view of [forwardView, inverseView]) {
+                const result = planCompatibility({
+                    identity: {targetId: target.id, generatorId: spec.generatorId, viewId: view.viewId},
+                    targetLabels: target.labels, generatorLabels: spec.generalLabels, viewLabels: view.generalLabels,
+                    fields: normalizeSchemaChoices(PercentQuantityRelationsGeneratorSchema, target.labels, 'generator')
+                });
+                expect(result.supported).toBe(target.labels.includes(view.generalLabels[0]!));
+            }
+        }
     });
 
     it.each([Ability.ProcedureExecution, Ability.ProcedureInversion])(

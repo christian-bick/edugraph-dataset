@@ -6,7 +6,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'numbers-contextual-zero',
     generalLabels: [Ability.Interpretation, Ability.TextualArticulation, Scope.ArabicNumerals, Scope.Base10],
-    compatibility: [requireTargetLabels('numbers-contextual-zero-task', [Area.ZeroConcept, Ability.TextualArticulation])]
+    compatibility: [requireTargetLabels('numbers-contextual-zero-task', [Area.Zero, Ability.TextualArticulation])]
 };
 export const NumbersContextualZeroViewSchema = {} as const;
 export type NumbersContextualZeroViewConfig = ConfigFromSchema<typeof NumbersContextualZeroViewSchema>;

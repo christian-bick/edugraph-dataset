@@ -14,7 +14,7 @@ export const spec: GeneratorSpec = {
         : selected(Area.NumericInequality) && (selected(Scope.Greater) || selected(Scope.Less)))],
     generalLabels: [
         Area.NumerationWithDecimals,
-        Area.DecimalPrecission,
+        Area.DecimalPrecision,
         Scope.DecimalNumbers,
         Scope.NumbersWithoutNegatives
     ]

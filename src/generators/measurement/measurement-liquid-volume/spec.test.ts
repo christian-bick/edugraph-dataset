@@ -6,7 +6,7 @@ import {spec} from './spec.ts';
 
 describe('measurement-liquid-volume spec', () => {
     it('declares the invariant measurement family', () => {
-        expect(spec.generalLabels).toEqual([Area.MeasuringVolumes, Scope.LiquidVolumes, Scope.LiterScale]);
+        expect(spec.generalLabels).toEqual([Area.MeasuringVolume, Scope.LiquidVolumes, Scope.LiterScale]);
     });
 
     it('cannot fall back to another payload family when the target omits its area', () => {

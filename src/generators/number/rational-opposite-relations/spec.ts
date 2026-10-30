@@ -10,10 +10,10 @@ export const spec: GeneratorSpec = {
 };
 
 export const RationalOppositeRelationsGeneratorSchema = {
-    relation: [[Area.RulesOfSigns, Area.ZeroConcept], selectExactLabelSetMap([
+    relation: [[Area.RulesOfSigns, Area.Zero], selectExactLabelSetMap([
         [[], 'nonzero-opposition'],
         [[Area.RulesOfSigns], 'iterated-negation'],
-        [[Area.ZeroConcept], 'zero-fixed-point']
+        [[Area.Zero], 'zero-fixed-point']
     ] as const)],
     range: [[Scope.NumbersSmaller5, Scope.NumbersSmaller10], resolveRangeFromLabels]
 } as const;

@@ -380,16 +380,16 @@ const fractionLinePlotArithmeticBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
 
 const recognizeAngleArcBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.AngleConcept,
-    Area.RayConcept,
-    Area.ArchConcept,
+    Area.Angle,
+    Area.Ray,
+    Area.Arc,
     Area.Circle,
     Area.FractionDenominatorInterpretation,
     Ability.Interpretation
 ]);
 
 const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.AngleConcept,
+    Area.Angle,
     Area.Circle,
     Area.FractionDenominatorInterpretation,
     Scope.DegreeScale,
@@ -398,7 +398,7 @@ const deriveOneDegreeBuilder = new DatasetPermutationBuilder().addLabels([
 ]);
 
 const interpretDegreeIterationBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.AngleConcept,
+    Area.Angle,
     Area.AngleCalculation,
     Area.Iteration,
     Scope.DegreeScale,
@@ -413,7 +413,7 @@ const measureAnglesBuilder = new DatasetPermutationBuilder().addLabels([
 ]);
 
 const sketchAnglesBuilder = new DatasetPermutationBuilder().addLabels([
-    Area.AngleConcept,
+    Area.Angle,
     Scope.DegreeScale,
     Ability.ConceptSpecification,
     Ability.VisualArticulation
@@ -443,10 +443,10 @@ const unknownAnglesBuilder = new DatasetPermutationBuilder()
 // ==========================================
 
 const geometricPrimitiveVariants = [
-    [Area.PointConcept],
-    [Area.LineConcept],
+    [Area.Point],
+    [Area.Line],
     [Area.LineSegment],
-    [Area.RayConcept],
+    [Area.Ray],
     [Area.RightAngle],
     [Area.AcuteAngle],
     [Area.ObtuseAngle],
@@ -455,10 +455,10 @@ const geometricPrimitiveVariants = [
 ];
 
 const geometricPrimitiveDrawingVariants = [
-    [Area.PointConcept],
-    [Area.LinearDrawing, Area.LineConcept],
+    [Area.Point],
+    [Area.LinearDrawing, Area.Line],
     [Area.LinearDrawing, Area.LineSegment],
-    [Area.LinearDrawing, Area.RayConcept],
+    [Area.LinearDrawing, Area.Ray],
     [Area.LinearDrawing, Area.RightAngle],
     [Area.LinearDrawing, Area.AcuteAngle],
     [Area.LinearDrawing, Area.ObtuseAngle],
@@ -668,7 +668,7 @@ const decimalMeasurementNotationBuilder = new DatasetPermutationBuilder().addLab
 const compareDecimalsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.NumerationWithDecimals,
-        Area.DecimalPrecission,
+        Area.DecimalPrecision,
         Scope.DecimalNumbers,
         Scope.SingleFrameOfReference,
         Scope.VisualNumbers,

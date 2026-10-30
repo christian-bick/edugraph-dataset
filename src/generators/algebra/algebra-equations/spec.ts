@@ -4,7 +4,7 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const relations = [
-    [[Area.AlgebraicSubstitution, Area.RelationSatisfaction], 'instantiated-predicate'],
+    [[Area.NumericSubstitution, Area.RelationSatisfaction], 'instantiated-predicate'],
     [[Area.SolutionSet, Area.EquationSolving], 'finite-extension'],
     // These relations retain their nonnegative mathematical domain. Algebraic
     // examples intentionally omit generic sign/zero classification labels.

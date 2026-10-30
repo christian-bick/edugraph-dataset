@@ -4,10 +4,10 @@ import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const GEOMETRY_PRIMITIVE_LABELS = [
-    Area.PointConcept,
-    Area.LineConcept,
+    Area.Point,
+    Area.Line,
     Area.LineSegment,
-    Area.RayConcept,
+    Area.Ray,
     Area.RightAngle,
     Area.AcuteAngle,
     Area.ObtuseAngle,

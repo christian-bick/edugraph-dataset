@@ -18,7 +18,7 @@ import {VolumeRectangularPrismGenerator} from './generator.ts';
 import {VolumeRectangularPrismGeneratorSchema, spec} from './spec.ts';
 
 const profileCases = [
-    [[Area.MeasuringVolumes, Area.Equation, Scope.CubeScale], 'packing-equivalence'],
+    [[Area.MeasuringVolume, Area.Equation, Scope.CubeScale], 'packing-equivalence'],
     [[Scope.CubeScale, Scope.ThreeOperands], 'triple-product'],
     [[Scope.CubeScale, Scope.ThreeOperands, Area.AssociativeLaw], 'associative-triple-product'],
     [[Area.Equation, Scope.ThreeOperands], 'edge-formula'],
@@ -85,10 +85,10 @@ describe('volume-rectangular-prism schema integration', () => {
     it('declares complete number-domain and mathematical-relation alternatives',()=>{
         expect(Object.keys(VolumeRectangularPrismGeneratorSchema)).toEqual(['relationProfile','numberDomain']);
         expect(findSchemaFallbackContractIssues(VolumeRectangularPrismGeneratorSchema)).toEqual([]);
-        expect(VolumeRectangularPrismGeneratorSchema.relationProfile[2]).toEqual([[Area.MeasuringVolumes,Scope.CubeScale],...profileCases.map(([labels])=>labels)]);
+        expect(VolumeRectangularPrismGeneratorSchema.relationProfile[2]).toEqual([[Area.MeasuringVolume,Scope.CubeScale],...profileCases.map(([labels])=>labels)]);
         expect(VolumeRectangularPrismGeneratorSchema.numberDomain[2]).toEqual([[Scope.IntegerNumbers],[Scope.FractionNumbers]]);
         for(const [numberLabel,numberDomain] of [[Scope.IntegerNumbers,'integer'],[Scope.FractionNumbers,'fractional']] as const) {
-            for(const [relations,profile] of [[[Area.MeasuringVolumes,Scope.CubeScale],'packing-count'],...profileCases] as const) {
+            for(const [relations,profile] of [[[Area.MeasuringVolume,Scope.CubeScale],'packing-count'],...profileCases] as const) {
                 const labels=[...commonLabels,numberLabel,...relations,Ability.ProcedureExecution];
                 const result=plan(labels,{viewId:'prism-domain-probe',generalLabels:[Ability.ProcedureExecution]});
                 expect(result.supported).toBe(numberDomain!=='integer'||profile!=='packing-count');
@@ -107,7 +107,7 @@ describe('volume-rectangular-prism schema integration', () => {
         for(const target of [...old,...fresh]) {
             const expected=target.labels.includes(Ability.VisualArticulation)?productModel
                 :target.labels.includes(Ability.Formalization)?packingExplanation
-                    :target.labels.includes(Area.MeasuringVolumes)?packingCount
+                    :target.labels.includes(Area.MeasuringVolume)?packingCount
                         :target.labels.includes(Ability.TextualReception)?formulaStory:formulaExecution;
             for(const view of leaves) {
                 const result=plan(target.labels,view,target.id);
@@ -122,7 +122,7 @@ describe('volume-rectangular-prism schema integration', () => {
     });
 
     it('keeps mathematical generation independent of learner Ability',()=>{
-        for(const [relations] of [[[Area.MeasuringVolumes,Scope.CubeScale],'packing-count'],...profileCases] as const) {
+        for(const [relations] of [[[Area.MeasuringVolume,Scope.CubeScale],'packing-count'],...profileCases] as const) {
             const labels=[...commonLabels,Scope.FractionNumbers,...relations];
             setSeed(912);const first=generateWithLabels(new VolumeRectangularPrismGenerator(),[...labels,Ability.ProcedureExecution]);
             setSeed(912);expect(generateWithLabels(new VolumeRectangularPrismGenerator(),[...labels,Ability.Formalization,Ability.TextualReception])).toEqual(first);
@@ -134,9 +134,9 @@ describe('volume-rectangular-prism schema integration', () => {
             const base=[...commonLabels,Scope.FractionNumbers,Area.Equation,Ability.ProcedureExecution,
                 ...(view===formulaStory?[Ability.TextualReception]:[])];
             expect(plan([...base,Scope.ThreeOperands],view).supported).toBe(true);
-            expect(plan([...base,Area.MeasuringVolumes,Scope.CubeScale],view).supported).toBe(false);
+            expect(plan([...base,Area.MeasuringVolume,Scope.CubeScale],view).supported).toBe(false);
             expect(plan([...base,Scope.CubeScale,Scope.ThreeOperands],view).supported).toBe(false);
         }
-        expect(plan([...commonLabels,Scope.FractionNumbers,Area.MeasuringVolumes,Scope.CubeScale,Ability.ProcedureExecution],formulaExecution).supported).toBe(false);
+        expect(plan([...commonLabels,Scope.FractionNumbers,Area.MeasuringVolume,Scope.CubeScale,Ability.ProcedureExecution],formulaExecution).supported).toBe(false);
     });
 });

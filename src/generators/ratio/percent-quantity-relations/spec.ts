@@ -6,7 +6,7 @@ import type {ConfigFromSchema} from '../../../types/schema.ts';
 export const spec: GeneratorSpec = {
     generatorId: 'percent-quantity-relations',
     generalLabels: [
-        Area.PercentageEquivalence, Area.ProportionalScaling,
+        Area.PercentageRateApplication, Area.PercentageEquivalence, Area.ProportionalScaling,
         Scope.RationalNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
     ]
 };

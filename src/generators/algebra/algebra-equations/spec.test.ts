@@ -81,12 +81,26 @@ describe('elementary equation mathematical capability ownership', () => {
         }
     });
     it('rejects hidden satisfaction, solving and model fallbacks in sibling projections', () => {
-        const check = [Area.Equation, Area.AlgebraicSubstitution, Area.RelationSatisfaction, Scope.ArabicNumerals, Ability.ProcedureExecution, Ability.CorrectnessEvaluation];
+        const check = [Area.Equation, Area.NumericSubstitution, Area.RelationSatisfaction, Scope.ArabicNumerals, Ability.ProcedureExecution, Ability.CorrectnessEvaluation];
         const meaning = [Area.Equation, Area.EquationSolving, Area.SolutionSet, Scope.ArabicNumerals, Ability.ProcedureUnderstanding];
         for (const extra of [Area.SolutionSet, Area.EquationSolving, Area.AlgebraicModeling]) expect(plan([...check, extra], views[0]).supported).toBe(false);
-        for (const extra of [Area.AlgebraicSubstitution, Area.RelationSatisfaction, Area.AlgebraicModeling]) expect(plan([...meaning, extra], views[1]).supported).toBe(false);
+        for (const extra of [Area.NumericSubstitution, Area.RelationSatisfaction, Area.AlgebraicModeling]) expect(plan([...meaning, extra], views[1]).supported).toBe(false);
         expect(plan([Area.Equation, Scope.ArabicNumerals, Ability.ProcedureExecution], views[0]).supported).toBe(false);
-        setSeed(29); const first = generateWithLabels(new AlgebraEquationsGenerator(), [Area.AlgebraicSubstitution, Area.RelationSatisfaction, Ability.ProcedureExecution]);
-        setSeed(29); expect(generateWithLabels(new AlgebraEquationsGenerator(), [Area.AlgebraicSubstitution, Area.RelationSatisfaction, Ability.CorrectnessEvaluation])).toEqual(first);
+        setSeed(29); const first = generateWithLabels(new AlgebraEquationsGenerator(), [Area.NumericSubstitution, Area.RelationSatisfaction, Ability.ProcedureExecution]);
+        setSeed(29); expect(generateWithLabels(new AlgebraEquationsGenerator(), [Area.NumericSubstitution, Area.RelationSatisfaction, Ability.CorrectnessEvaluation])).toEqual(first);
     });
+
+    it.each([Area.NumericSubstitution, Area.AlgebraicSubstitution])(
+        'emits numeric candidate substitution for a %s request', substitution => {
+            const labels = [Area.Equation, substitution, Area.RelationSatisfaction, Scope.ArabicNumerals,
+                Ability.ProcedureExecution, Ability.CorrectnessEvaluation];
+            const result = plan(labels, views[0]);
+            expect(result.supported).toBe(true);
+            if (!result.supported) throw new Error(result.reason);
+            const draw = generatePlannedDraw({generator: new AlgebraEquationsGenerator(), viewSchema: AlgebraSubstitutionCheckViewSchema,
+                plan: result.plan, sampleKey: `elementary-equation#${spec.generatorId}#${checkView.viewId}#train#question#inst:0`, seed: 7, attempt: 1});
+            expect(draw.labels).toContain(Area.NumericSubstitution);
+            expect(draw.labels).not.toContain(Area.AlgebraicSubstitution);
+        }
+    );
 });

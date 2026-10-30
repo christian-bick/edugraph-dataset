@@ -2,9 +2,8 @@ import {Ability, Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planCompatibility} from '../../../lib/compatibility.ts';
 import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
-import {setSeed} from '../../../lib/random.ts';
-import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
-import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
+import {findSchemaFallbackContractIssues} from '../../../lib/utils.ts';
 import {implementationTodos, spec as activeTargets} from '../../../spec/ccss/grade-06.ts';
 import {spec as composition, PolygonAreaCompositionViewSchema} from '../../../visuals/views/shape/polygon-area-composition/spec.ts';
 import {spec as compositionStory, PolygonAreaCompositionStoryViewSchema} from '../../../visuals/views/shape/polygon-area-composition-story/spec.ts';
@@ -66,18 +65,21 @@ describe('polygon-area ownership, complete alternatives and actual reviewed plan
 
     it('uses mathematical shape/method labels independently of learner Ability',()=>{
         for(const [shape,method] of families) {
-            const first=resolveSchemaChoices(PolygonAreaDissectionGeneratorSchema,[shape,method,Ability.SpatialGeneration],{family:[shape,method]});
-            const second=resolveSchemaChoices(PolygonAreaDissectionGeneratorSchema,[shape,method,Ability.VisualDecomposition,Ability.TextualReception],{family:[shape,method]});
-            expect(second).toEqual(first);
-            setSeed(991);const model=new PolygonAreaDissectionGenerator().generate(first.config);
-            setSeed(991);expect(new PolygonAreaDissectionGenerator().generate(second.config)).toEqual(model);
-            // The diagnostic utility also covers the seven specific families. Its legacy
-            // fallback merger tries descendant+Polygon combinations for a generic request;
-            // the production admission above selects the exact generic alternative instead.
-            if(shape!==Area.Polygon) {
-                setSeed(991);const diagnostic=generateWithLabels(new PolygonAreaDissectionGenerator(),[shape,method,Ability.SpatialGeneration]);
-                setSeed(991);expect(generateWithLabels(new PolygonAreaDissectionGenerator(),[shape,method,Ability.VisualDecomposition,Ability.TextualReception])).toEqual(diagnostic);
-            }
+            // The planner binds one admitted correlated alternative. A Trapezoid
+            // request also admits Rhombus; merging them into an exact resolver is
+            // not a production draw. Both learner projections retain the same math.
+            const draws=leaves.filter(([, , ,synthesis])=>synthesis===(method===Area.ShapeSynthesis))
+                .map(([view,schema,story])=>{
+                    const target=activeTargets.find(candidate=>candidate.id.startsWith('6.G.A.1-polygon-area-dissection~')
+                        &&candidate.labels.includes(shape)&&candidate.labels.includes(method)
+                        &&candidate.labels.includes(Ability.TextualReception)===story)!;
+                    const result=plan(target.labels,view,target.id);
+                    expect(result.supported).toBe(true);if(!result.supported)throw Error(result.reason);
+                    return generatePlannedDraw({generator:new PolygonAreaDissectionGenerator(),viewSchema:schema,plan:result.plan,
+                        sampleKey:`${target.id}#${spec.generatorId}#${view.viewId}#train#question#inst:0`,seed:991,attempt:1});
+                });
+            expect(draws).toHaveLength(2);
+            expect(draws[1]!.stub).toEqual(draws[0]!.stub);
         }
     });
 });

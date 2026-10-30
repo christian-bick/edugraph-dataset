@@ -74,7 +74,7 @@ describe('MeasurementCompareGenerator', () => {
 
     it('rejects unsupported resolved labels instead of defaulting them', () => {
         expect(generator.generate({
-            attribute: Area.MeasuringVolumes,
+            attribute: Area.MeasuringVolume,
             relation: Scope.Greater
         } as any)).toBeNull();
         expect(generator.generate({

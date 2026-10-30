@@ -75,6 +75,25 @@ describe('polyhedral net fixed projections', () => {
         expect(question).not.toMatch(/net-area-work|net-area-answer|net-surface-addition|emerald|#047857/);
         expect(text(question)).not.toContain('13/2'); expect(text(question)).not.toContain('16 m²');
     });
+    it('explains only the fold, height and extension markings actually present in each area net', () => {
+        const cases = [
+            {input: literalCubeInput, faces: 6, triangles: 0, extensions: false, total: '6 cm²'},
+            {input: literalTetrahedronInput, faces: 4, triangles: 4, extensions: false, total: '16 m²'},
+            {input: literalExternalFootPyramidInput, faces: 5, triangles: 4, extensions: true, total: '140 m²'}
+        ];
+        for (const {input, faces, triangles, extensions, total} of cases) {
+            const data = build(input);
+            for (const id of [ids[2], ids[3]]) for (const solution of [false, true]) {
+                const markup = render(id, data, solution), visible = text(markup);
+                expect(visible).toContain('Dashed shared edges are folds.');
+                expect(visible.includes('Short-dashed perpendiculars mark triangle face heights.')).toBe(triangles > 0);
+                expect(visible.includes('Supporting-line extensions are dotted.')).toBe(extensions);
+                expect((markup.match(/data-role="net-planar-face"/g) ?? []).length).toBe(faces);
+                expect((markup.match(/data-role="net-face-altitude"/g) ?? []).length).toBe(triangles);
+                expect(visible.includes(`Surface area = ${total}`)).toBe(solution);
+            }
+        }
+    });
     it('ties every base and rectangle height premise unambiguously to named edges', () => {
         const data = build(literalCubeInput), plain = text(render(ids[2], data, false)), story = text(render(ids[3], data, false));
         expect(plain).toContain('B1 (AD) = 1 cm; H1 (DC) = 1 cm');

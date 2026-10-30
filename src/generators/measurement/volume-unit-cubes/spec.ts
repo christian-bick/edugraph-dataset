@@ -19,7 +19,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'volume-unit-cubes',
     generalLabels: [
         Area.Cube,
-        Area.MeasuringVolumes,
+        Area.MeasuringVolume,
         Scope.CubeScale
     ]
 };

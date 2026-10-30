@@ -4,7 +4,7 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const relationProfiles = [
-    [[Area.ZeroConcept, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives], 'reference-zero'],
+    [[Area.Zero, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives], 'reference-zero'],
     [[Area.SignNotation, Scope.NumbersWithNegatives], 'directed-pair']
 ] as const;
 const canonicalProfiles = relationProfiles.map(([labels, value]) => [
@@ -18,7 +18,8 @@ export const spec: GeneratorSpec = {
 
 export const SignedRationalContextsGeneratorSchema = {
     relation: [
-        [Area.ZeroConcept, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Area.SignNotation, Scope.NumbersWithNegatives, Scope.NumbersWithoutZero],
+        [Area.Zero, Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Area.SignNotation, Scope.NumbersWithNegatives,
+            Scope.NumbersWithoutZero],
         selectExactLabelSetMap([...canonicalProfiles, relationProfiles[1]]),
         canonicalProfiles.map(([labels]) => labels)
     ]

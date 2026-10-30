@@ -10,10 +10,10 @@ import {
 const generator = new GeometryPrimitivesGenerator();
 
 const CASES = [
-    [Area.PointConcept, 'point'],
-    [Area.LineConcept, 'line'],
+    [Area.Point, 'point'],
+    [Area.Line, 'line'],
     [Area.LineSegment, 'line-segment'],
-    [Area.RayConcept, 'ray'],
+    [Area.Ray, 'ray'],
     [Area.RightAngle, 'right-angle'],
     [Area.AcuteAngle, 'acute-angle'],
     [Area.ObtuseAngle, 'obtuse-angle'],

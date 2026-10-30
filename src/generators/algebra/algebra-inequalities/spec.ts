@@ -4,7 +4,7 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
 const relations = [
-    [[Area.AlgebraicSubstitution, Area.RelationSatisfaction], 'instantiated-predicate'],
+    [[Area.NumericSubstitution, Area.RelationSatisfaction], 'instantiated-predicate'],
     [[Area.SolutionSet, Area.InequalitySolving], 'finite-extension'],
     [[Area.SolutionSet], 'rational-half-line'],
     [[Area.AlgebraicModeling], 'quantitative-threshold']

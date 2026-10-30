@@ -5,7 +5,7 @@ import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib
 import {SignedRationalContextsGenerator} from './generator.ts';
 import {SignedRationalContextsGeneratorSchema, spec} from './spec.ts';
 
-const zeroBundle = [Area.ZeroConcept, Scope.NumbersWithZero];
+const zeroBundle = [Area.Zero, Scope.NumbersWithZero];
 const resolvedZeroBundle = [...zeroBundle, Scope.NumbersWithoutNegatives];
 const signedBundle = [Area.SignNotation, Scope.NumbersWithNegatives];
 const resolvedSignedBundle = [...signedBundle, Scope.NumbersWithoutZero];
@@ -25,10 +25,10 @@ describe('signed rational context capability ownership', () => {
         expect(resolveRelation(zeroBundle)).toBeUndefined();
         expect(resolveRelation(signedBundle)).toBe('directed-pair');
         expect(resolveRelation([])).toBeUndefined();
-        expect(resolveRelation([Area.ZeroConcept])).toBeUndefined();
+        expect(resolveRelation([Area.Zero])).toBeUndefined();
         expect(resolveRelation([Scope.NumbersWithNegatives])).toBeUndefined();
         expect(() => resolveRelation([...zeroBundle, ...signedBundle])).toThrow('Unsupported exact label combination');
-        expect(() => resolveRelation([Area.ZeroConcept, Scope.NumbersWithNegatives])).toThrow('Unsupported exact label combination');
+        expect(() => resolveRelation([Area.Zero, Scope.NumbersWithNegatives])).toThrow('Unsupported exact label combination');
     });
 
     it.each([

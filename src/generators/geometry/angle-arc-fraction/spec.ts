@@ -5,7 +5,7 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'angle-arc-fraction',
-    generalLabels: [Area.AngleConcept, Area.RayConcept, Area.ArchConcept, Area.Circle,
+    generalLabels: [Area.Angle, Area.Ray, Area.Arc, Area.Circle,
         Scope.UnitFractions, Scope.DegreeScale]
 };
 
