@@ -148,6 +148,11 @@ of broad requests. Both are explicit schema contracts; the existing inference ca
 independent additional annotations. See [SPEC-6](docs/spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
 for authoring details and the repair plan for each deterministic owner resolver's proof.
 
+Browser-loaded shared resolvers use the pure `schema-resolution-key.ts` value helper directly.
+The server utility module re-exports that helper for compatibility; its inference, ownership and
+content-identity dependencies stay outside the browser resolver import closure. Canonical
+renderer preflight checks this boundary at runtime before publishing a dataset.
+
 After type and positive-capability matching, the planner admits only valid joint schema-label
 selections. Every tuple carries a versioned plan. Generation selects from it without increasing
 sample counts; rendering, retry,

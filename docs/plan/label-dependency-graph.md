@@ -10,6 +10,36 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Canonical acceptance and browser import repair (2026-10-30)
+
+The user authorized canonical regeneration and VQA after ontology integration commit
+`7102a782`. The preserved starting snapshot is `cada54596eb7b8fd3dc3dd293c5576d9ec8d6fa0f952134a356e1b462058f4c2`:
+2,808 images, all byte hashes verified, with 2,502 non-range missing assessments and four
+annotation conflicts under the current graph. Baseline images, rows, manifest and cache
+digests are recorded under `temp/canonical-acceptance-2026-10-30/`.
+
+The first canonical `--rebuild-graph` reconstructs 1,013 targets and 365 compatible pairs,
+then stops in browser preflight. View specs importing shared resolvers transitively import
+`utils` → `inferred-labels` → `spec-ownership` → server-only `content-identity`, which
+accesses `node:crypto`. The previous build and server-side tests did not prove browser
+execution. No replacement dataset was published and no Gemini requests were made.
+
+The repair extracts the unchanged pure `schemaResolutionKey` into its own browser-safe
+module. Shared resolvers import it directly; `utils` imports and re-exports the same function
+for existing server callers. Inference validation and ownership checks remain on their
+existing server path. Matching capabilities, configuration values, random continuation,
+targets, graph policy and mathematical/rendering code are unchanged. Authored source/replay
+identities refresh normally because the import closure changes.
+
+Focused resolver, inference, ownership, static-resolution and value-key regressions pass
+**138 tests across eight files**. The extracted helper has **100%** statement, branch,
+function and line coverage. Types and documentation checks pass. Browser regressions cover
+all 341 production view specs and construct real resolver choices with Node crypto made
+unavailable. Canonical preflight additionally verifies the actual renderer entry paths
+before generation resumes. Current dataset acceptance still requires regenerated
+annotation checks, live VQA, strict cache/image checks, split/churn review and union rebuild.
+The Area allowlist, algebra cutoff and range-policy exclusion remain unchanged.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical

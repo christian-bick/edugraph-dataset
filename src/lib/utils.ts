@@ -5,7 +5,9 @@ import { ProblemGenerator, ResolvedProblemStub } from '../types/ml-engine.ts';
 import type {ModuleSpec, AnyModuleSpec} from '../types/module-spec.ts';
 import {resolveInferredLabels} from './inferred-labels.ts';
 import {validateSchemaChoiceContracts} from './schema-choices.ts';
+import {schemaResolutionKey} from './schema-resolution-key.ts';
 export {extractSchemaLabels} from '../types/schema.ts';
+export {schemaResolutionKey} from './schema-resolution-key.ts';
 
 export type SchemaResolutionContractIssue = {
     field: string;
@@ -43,15 +45,6 @@ const fallbackLabelSets = (schemaValue: readonly unknown[], supportedLabels: rea
     schemaValue.length >= 3
         ? schemaValue[2] as readonly (readonly string[])[]
         : supportedLabels.map(label => [label] as const);
-
-export const schemaResolutionKey = (value: unknown): string => {
-    if (value === null || typeof value !== 'object') return JSON.stringify(value);
-    if (Array.isArray(value)) return `[${value.map(schemaResolutionKey).join(',')}]`;
-    const record = value as Record<string, unknown>;
-    return `{${Object.keys(record).sort().map(key =>
-        `${JSON.stringify(key)}:${schemaResolutionKey(record[key])}`
-    ).join(',')}}`;
-};
 
 /**
  * Finds unresolved conjunction candidates: multiple non-ancestor labels which

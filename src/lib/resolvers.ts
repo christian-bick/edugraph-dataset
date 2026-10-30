@@ -7,7 +7,7 @@ import {
     withLabelChoices
 } from '../types/schema.ts';
 import { capabilitySatisfies } from './ontology.ts';
-import {schemaResolutionKey} from './utils.ts';
+import {schemaResolutionKey} from './schema-resolution-key.ts';
 import {registerStaticResolver} from './static-resolvers.ts';
 
 /** Mapping values are authored constants; discovering their equivalence never calls a resolver. */
