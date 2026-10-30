@@ -240,7 +240,7 @@ the approved resampling consequences will be checked on the next canonical snaps
 
 ### Persistent question-mode review: explicit given unit captions
 
-**[LOCAL REPAIR APPROVED; BROADER ZERO REVIEW DEFERRED: D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
+**[LOCAL REPAIR COMPLETE; BROADER ZERO REVIEW DEFERRED: D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
 `527a18fa77957be99a1efc79695dbc036b456068fb966753da28af223f5a8353` with all 2,918 identities,
 1,013 targets and 1,222 tuples intact. Six images change; exactly one mathematical draw
 changes through the approved decimal predicate. Its positive tens sum `1 + 8 + 1 = 10`
@@ -364,7 +364,42 @@ cover both modes, safe-integer and precision extremes, the 60-pixel threshold an
 original disputed exercise. The longest caption is 99.79 pixels high within its 128-pixel
 band; ordinary captions fit within 24 of the available 36 pixels. No collisions,
 clipping, invented zero quantities or answer leakage are found. Canonical re-evaluation
-of this explicit-count refinement is the remaining acceptance step.
+of this explicit-count refinement is recorded below.
+
+#### Local repair acceptance
+
+Canonical snapshot `0033577ecaebb56f7ca184c92aa7d9587c76d1d54d0b68f26b64da750ec05084`,
+from source commit `b27663f4`, renders eight shared-family images, reuses 507 shards and
+replaces one shard. Exactly four decimal addition/subtraction PNGs change; the other
+2,914 images are byte-identical to the pre-repair snapshot. All 2,918 sample identities,
+labels, content/task fingerprints, seeds, attempts, prepared views, replay receipts,
+resolved configurations, mathematical payloads and generator random continuations are
+preserved. Exact coverage remains **1,013 targets / 1,222 tuples**. Generator, library,
+validation, target and ontology hashes are unchanged, preserving the Area allowlist,
+algebra cutoff and range exclusion.
+
+The full live Gemini run reuses 2,914 current passing judgments and evaluates the four
+changed images. It finishes **2,918 passing / zero failing**, with zero uncached samples,
+pending reviews or request errors. The formerly failing question passes the existing
+independent review process with its explicit given quantities. The evaluator, checklists,
+ontology definitions and passing policy are unchanged; original failed judgments remain
+in the earlier reports and saved cache evidence. The final report is
+`temp/validation-reports/dataset-ccss/2026-10-30T22-19-28-813Z__full.md`. Its 26 uncertain
+label judgments retain the pre-existing passing policy.
+
+The strict offline cache audit passes exact coverage for all 2,918 images with no failing,
+stale, missing-key, malformed, duplicate or obsolete-module records. Full repository checks,
+split integrity and strict annotation dependencies pass. The 1,675 remaining dependency
+assessments are the excluded range facet only; no range policy changes are made. Image
+audits have zero errors and the one pre-existing same-annotation redundant-image warning.
+Churn reports four render changes with no added/removed identities, changed attempts or
+seed-scheme changes. The local union rebuild succeeds with **2,416 train / 502 validation
+images**, and its image audit passes with the same warning. No release is published.
+
+This closes the local presentation/VQA repair under the existing rules. It does not close
+the deferred review of integer-only zero applicability, existing zero declarations/profiles
+or target implications. Verification and comparison evidence is retained under
+`temp/local-decimal-unit-captions-2026-10-30/`.
 
 ## Reasoning proposal domain repair (2026-10-30)
 
