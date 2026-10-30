@@ -4,6 +4,7 @@ import type {
     DecimalStandardMultiplicationProblem, ExactDecimalValue
 } from '../../../types/problems.ts';
 import {alignedIntegerDigits, decimalDigitAt, decimalPartialDigits} from './decimal-standard-helpers.ts';
+import {ColumnCalculations, columnUnit, MultiplicationColumnCalculations, sumEquation} from './standard-column-calculations.tsx';
 
 const GREEN = 'text-emerald-800';
 const NEUTRAL = 'text-slate-900';
@@ -70,7 +71,7 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
     }
 
     return <Card title={`Standard decimal ${data.operation}`} expression={<>{data.top.numeral} {symbol} {data.bottom.numeral}</>}>
-        <p className="mb-4 text-sm text-slate-600">Align the decimal points. Calculate from right to left and record regrouping.</p>
+        <p className="mb-4 text-sm text-slate-600">Align the decimal points. Work from right to left, recording each column calculation and its regrouping.</p>
         <WorkFrame>
             {isSolutionView && <Row label={data.operation === 'addition' ? 'Carries' : 'Regrouped top'} role="regrouping" point={null} cell={place => {
                 const column = columnByPlace.get(place)!;
@@ -84,6 +85,19 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
             {isSolutionView ? <Row label="Result" role="decimal-result" point="." pointGreen={true} cell={place =>
                 <Cell width={width} green={true}>{place < integerWidth(data.result) ? columnByPlace.get(place)!.resultDigit : null}</Cell>} /> : <BlankWork />}
         </WorkFrame>
+        {isSolutionView && <ColumnCalculations title="Column arithmetic in place units"
+            calculations={data.columns.map(column => {
+                const topPresent = column.placeExponent < integerWidth(data.top);
+                const bottomPresent = column.placeExponent < integerWidth(data.bottom);
+                const operands = [...(topPresent ? [column.topDigit] : []), ...(bottomPresent ? [column.bottomDigit] : [])];
+                if (data.operation === 'addition') return {unit: columnUnit(column.placeExponent),
+                    equation: sumEquation(operands, column.regroupIn, column.workingValue)};
+                const takeFirst = column.regroupIn > 0 && column.topDigit >= column.regroupIn;
+                const top = takeFirst ? `(${column.topDigit} − ${column.regroupIn})` : String(column.topDigit);
+                const regrouped = `${top}${column.regroupOut > 0 ? ` + ${data.base}` : ''}${column.regroupIn > 0 && !takeFirst ? ` − ${column.regroupIn}` : ''}`;
+                return {unit: columnUnit(column.placeExponent),
+                    equation: `${regrouped}${bottomPresent ? ` − ${column.bottomDigit}` : ''} = ${column.resultDigit}`};
+            })} />}
         <Answer solution={isSolutionView}><span className={NEUTRAL}>{data.top.numeral} {symbol} {data.bottom.numeral}</span> = {isSolutionView ? data.result.numeral : '________'}</Answer>
     </Card>;
 }
@@ -99,7 +113,7 @@ export function DecimalStandardMultiplicationBody({data, isSolutionView}: {data:
         </div>;
     }
     return <Card title="Standard decimal multiplication" expression={<>{data.multiplicand.numeral} × {data.multiplier.numeral}</>}>
-        <p className="mb-4 text-sm text-slate-600">Multiply the coefficient digits, then place the decimal point using both factors’ decimal places.</p>
+        <p className="mb-4 text-sm text-slate-600">Record each coefficient-column multiplication and carry. Begin the ones row with {data.partialRows[0].shiftPlaces} place shifts, align each later row by its place, and add the rows column by column. Then place the decimal point using both factors’ decimal places.</p>
         {isSolutionView ? <>
             <WorkFrame>
                 <Row label="Coefficient" role="coefficient-top" values={alignedIntegerDigits(data.multiplicand.coefficient, columns - 1, columns)} />
@@ -119,6 +133,8 @@ export function DecimalStandardMultiplicationBody({data, isSolutionView}: {data:
                     place < data.sumColumns.length && data.sumColumns[place]!.carryIn > 0 ? data.sumColumns[place]!.carryIn : null)} />
                 <Row label="Unscaled product" role="unscaled-product" values={alignedIntegerDigits(data.unscaledProduct, columns - 1, columns)} />
             </WorkFrame>
+            <MultiplicationColumnCalculations partialRows={data.partialRows} sumColumns={data.sumColumns}
+                displayedRows={data.partialRows.map((_row, index) => decimalPartialDigits(data, index, columns))} coefficient />
             <Answer solution={true}>
                 <div>{data.multiplicand.scale} + {data.multiplier.scale} = {data.decimalPlacement.totalScale} decimal places</div>
                 <div className="mt-2 flex flex-wrap items-center justify-center" data-role="decimal-placement">

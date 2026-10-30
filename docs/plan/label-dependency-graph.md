@@ -158,6 +158,27 @@ with unchanged source, image and annotations: the quarter-fraction line plot and
 decimal number line. Their original failed judgments remain in the preserved first-pass
 cache/report. No verdict is edited by hand and no evaluator instruction is weakened.
 
+**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION]** A second view-only checkpoint projects
+the existing standard-algorithm evidence. Questions explicitly require the column method;
+solutions show canonical multiplication, aligned-row addition and decimal addition/subtraction
+calculations with place-unit roles. The genuine shifted zero in `88 × 94` appears as
+`2 + 0 = 2`; `5 + 5 = 10` remains a positive result, without an invented zero operand.
+Absent leading row positions and initialized carry-zero sentinels are excluded. A carry-only
+final column is shown as `1 = 1`, and a single partial row has no redundant sum panel.
+
+The previously settled decimal-multiplication shift-count contract is explicit in both
+modes: the ones row starts with the canonical zero place shifts. This is the prescribed
+mathematical alignment quantity, not a row index or a zero digit proxy. The existing grids,
+canonical arithmetic traces, decimal placement, specifications, labels, sampling and targets
+are unchanged. Focused tests pass **33 tests in six files**, including all five original
+algorithm failures and boundary controls. Independent review, types and whitespace checks pass.
+
+The time-interval projection also names the existing whole-hour reference as, for example,
+`8:00 (0 minutes into the hour)` in both modes. It retains the same interval, normalized
+equation, unknowns and clock geometry; `SingleStep` remains the original target claim.
+Its **13 tests in four files** and type check pass. Neither repair introduces inference,
+adapters, payload fields, policy changes or an unrelated evaluation subtask.
+
 ### Decimal column-zero predicate correction
 
 **[NEEDS SAMPLING APPROVAL: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts

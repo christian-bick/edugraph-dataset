@@ -71,4 +71,28 @@ describe('standard multiplication task projection', () => {
         expect(solution).toContain('9,999 × 999 = 9,989,001');
         expect(solution).not.toContain('Unresolved digit');
     });
+
+    it('requires the full column method but withholds the failing 4288 × 855 calculation in Question', () => {
+        const data = multiplicationCase(4288, 855);
+        const question = render(data, false);
+        expect(visible(question)).toContain('recording every digit multiplication and carry');
+        expect(visible(question)).toContain('record each column sum');
+        expect(question).not.toContain('3,666,240');
+        expect(question).not.toContain('21,440');
+        expect(question).not.toContain('column-calculations');
+        const solution = visible(render(data, true));
+        expect(solution).toContain('ones 0 + 0 + 0 = 0');
+        // A positive multiplication yielding a zero digit is still the quantity 40.
+        expect(solution).toContain('ones 8 × 5 = 40');
+        expect(solution).not.toContain('8 × 5 = 0');
+    });
+
+    it('makes the zero addend in 88 × 94 visible without initialized or missing-place zeros', () => {
+        const solution = render(multiplicationCase(88, 94), true);
+        expect(solution).toContain('text-emerald-950');
+        expect(visible(solution)).toContain('ones 2 + 0 = 2');
+        expect(visible(solution)).toContain('thousands 7 + 1 = 8');
+        expect(visible(solution)).not.toContain('0 + 7 + 1 = 8');
+        expect(visible(solution)).not.toContain('8 × 4 + 0');
+    });
 });

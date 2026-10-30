@@ -73,7 +73,7 @@ function DigitalClock({time, label, reveal}: {time: string; label: string; revea
     );
 }
 
-const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
+export const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('time-interval-word-problem', data, [
@@ -106,6 +106,7 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
     const right = data.operation === 'addition' ? data.elapsedMinutes : data.startOffsetMinutes;
     const result = data.operation === 'addition' ? data.endOffsetMinutes : data.elapsedMinutes;
     const reference = `${data.referenceHour}:00`;
+    const referenceDescription = `${reference} (0 minutes into the hour)`;
 
     return (
         <div className="w-[780px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
@@ -123,12 +124,12 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
 
             <div className={`mt-5 rounded-xl border-2 px-5 py-4 text-center ${isSolutionView ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-300 text-slate-400'}`}>
                 {isSolutionView ? <>
-                    <div className="text-sm font-semibold">Count minutes after {reference}.</div>
+                    <div className="text-sm font-semibold">Count minutes after {referenceDescription}.</div>
                     <div className="mt-1 font-mono text-2xl font-bold">{left} {symbol} {right} = {result}</div>
                     <div className="mt-1 text-lg font-bold">Answer: {unknown === 'end-time' ? displayTime(data.endTime) : `${data.elapsedMinutes} minutes`}</div>
                 </> : <>
                     <div className="text-sm font-semibold text-slate-600">
-                        Count minutes after {reference}, then write the {data.operation} equation.
+                        Count minutes after {referenceDescription}, then write the {data.operation} equation.
                     </div>
                     <div className="mt-1 text-xl font-bold">Answer: __________</div>
                 </>}

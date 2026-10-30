@@ -67,6 +67,59 @@ describe('decimal written-algorithm projections', () => {
         }
     });
 
+    it('requires column arithmetic without exposing the decimal-subtraction solution in Question', () => {
+        const data = addSubtract('subtraction', '660.005', '0.092');
+        const question = add(data, false);
+        expect(text(question)).toContain('recording each column calculation and its regrouping');
+        expect(question).not.toContain('659.913');
+        expect(question).not.toContain('column-calculations');
+        expect(question).not.toContain('emerald');
+        const solution = text(add(data, true));
+        expect(solution).toContain('hundredths 0 + 10 − 9 = 1');
+        expect(solution).toContain('tenths 0 + 10 − 1 − 0 = 9');
+        expect(solution).not.toContain('0 − 1 + 10');
+        // A missing leading bottom place is not a numerical-zero operand.
+        expect(solution).toContain('tens (6 − 1) = 5');
+        expect(solution).not.toContain('(6 − 1) − 0 = 5');
+    });
+
+    it('shows positive working sums as quantities and handles carry-only leading addition places', () => {
+        const positive = text(add(addSubtract('addition', '12.5', '18.5'), true));
+        expect(positive).toContain('tenths 5 + 5 = 10');
+        expect(positive).not.toContain('5 + 5 + 0');
+        const overflow = text(add(decimalAdditionOracle, true));
+        expect(overflow).toContain('tens 1 = 1');
+        expect(overflow).not.toContain('0 + 0 + 1 = 1');
+    });
+
+    it('makes the supplied zero place shift an explicit method instruction without calculated Question answers', () => {
+        const data = multiply('110', '748.2');
+        const question = mul(data, false);
+        expect(text(question)).toContain('Record each coefficient-column multiplication and carry');
+        expect(text(question)).toContain('Begin the ones row with 0 place shifts');
+        expect(question).not.toContain('82302.0');
+        expect(question).not.toContain('column-calculations');
+        expect(question).not.toContain('multiplication-pass');
+        expect(question).not.toContain('emerald');
+        const solution = text(mul(multiply('10.2', '24.15'), true));
+        expect(solution).toContain('Coefficient ones row: ×5, 0 place shifts');
+        expect(solution).toContain('tens 0 × 5 + 1 = 1');
+        expect(solution).toContain('tens 0 × 1 = 0');
+        expect(solution).toContain('tens 0 × 4 = 0');
+        expect(solution).toContain('tens 0 × 2 = 0');
+        expect(solution).not.toContain('2 × 5 + 0');
+    });
+
+    it('keeps a one-pass decimal multiplication concise and projects zero-product rows', () => {
+        const single = mul(multiply('3764.16', '0.2'), true);
+        expect(text(single)).toContain('Coefficient ones row: ×2, 0 place shifts');
+        expect(single).not.toContain('Add the aligned rows by place');
+        const zero = text(mul(multiply('0.00', '1005.0'), true));
+        expect(zero).toContain('ones 0 × 0 = 0');
+        expect(zero).toContain('ones 0 × 5 = 0');
+        expect(zero).not.toContain('0 × 5 + 0');
+    });
+
     it('shows both normalization equations and all original/extension division steps with aligned quotient point', () => {
         const solution = div(decimalDivisionOracle, true);
         expect(text(solution)).toContain('12.345 × 10 = 123.45');

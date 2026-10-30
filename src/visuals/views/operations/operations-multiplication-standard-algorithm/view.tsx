@@ -6,6 +6,7 @@ import {withConfig} from '../../withConfig.tsx';
 import {digitAt, formatMultiplicationNumeral, partialRowDigits, PLACE_NAMES, validStandardMultiplication, workColumnCount} from './helpers.ts';
 import type {OperationsMultiplicationStandardAlgorithmViewConfig} from './spec.ts';
 import {OperationsMultiplicationStandardAlgorithmViewSchema} from './spec.ts';
+import {MultiplicationColumnCalculations} from '../standard-column-calculations.tsx';
 import '../../../../tailwind.css';
 
 const VIEW_ID = 'operations-multiplication-standard-algorithm';
@@ -100,8 +101,10 @@ export const OperationsMultiplicationStandardAlgorithmCore = ({payload}: CorePro
     return <main className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm" style={{width: 780, maxWidth: '95vw'}}>
         <div className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">Standard multiplication algorithm</div>
         <h1 className="mt-2 text-xl font-bold text-slate-900">Multiply {formatMultiplicationNumeral(data.multiplicand)} × {formatMultiplicationNumeral(data.multiplier)}.</h1>
-        <p className="mb-4 mt-2 text-sm text-slate-600">Work from right to left; align each partial product by the multiplier digit’s place.</p>
+        <p className="mb-4 mt-2 text-sm text-slate-600">Work from right to left, recording every digit multiplication and carry. Align each partial product by the multiplier digit’s place, then record each column sum.</p>
         <AlgorithmWork data={data} isSolutionView={isSolutionView} />
+        {isSolutionView && <MultiplicationColumnCalculations partialRows={data.partialRows} sumColumns={data.sumColumns}
+            displayedRows={data.partialRows.map((_row, index) => partialRowDigits(data, index))} coefficient={false} />}
         <div className={`mt-4 rounded-xl border-2 px-5 py-3 text-center font-mono text-lg font-bold ${isSolutionView
             ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
             : 'border-dashed border-slate-300 bg-slate-50 text-slate-700'}`}>
