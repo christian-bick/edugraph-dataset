@@ -15,7 +15,7 @@ const multiplication = (data: FractionProductProblem): string =>
 const unitWord = (data: FractionProductProblem): string =>
     data.product.numerator <= data.product.denominator ? 'meter' : 'meters';
 
-function PartitionModel({data}: {data: FractionProductProblem}) {
+function PartitionModel({data, showZeroReference = true}: {data: FractionProductProblem; showZeroReference?: boolean}) {
     const x = 132;
     const rulerWidth = 560;
     const value = data.quantityValue.numerator / data.quantityValue.denominator;
@@ -29,7 +29,7 @@ function PartitionModel({data}: {data: FractionProductProblem}) {
             Each row is the complete {formatProductOperand(data.quantity)}-meter quantity.
         </text>
         <line x1={x} y1="60" x2={x + rulerWidth} y2="60" stroke="#475569" strokeWidth="2" />
-        {Array.from({length: rulerUnits + 1}, (_, index) => <g key={index}>
+        {Array.from({length: rulerUnits + 1}, (_, index) => index).filter(index => showZeroReference || index !== 0).map(index => <g key={index}>
             <line x1={x + index * rulerWidth / rulerUnits} y1="54"
                 x2={x + index * rulerWidth / rulerUnits} y2="67" stroke="#475569" strokeWidth="2" />
             <text x={x + index * rulerWidth / rulerUnits} y="48" textAnchor="middle"
@@ -127,8 +127,10 @@ function storyProblem(data: FractionProductProblem): string {
 function WordProblemTask({data, isSolutionView}: Omit<Props, 'task'>) {
     return <>
         <p className="rounded-xl bg-indigo-50 p-5 text-lg leading-relaxed text-indigo-950">{storyProblem(data)}</p>
+        <p className="mt-3 text-base text-slate-700">Use an equal-parts bar model with a measured number line to solve the story.
+            {' '}Divide each full reference length into equal parts and use the selected parts to find the length.</p>
         {isSolutionView ? <>
-            <div className="mt-3"><PartitionModel data={data} /></div>
+            <div className="mt-3"><PartitionModel data={data} showZeroReference={false} /></div>
             <Answer>
                 <div className="font-mono font-bold">{multiplication(data)} = {formatProductValue(data.product)} {unitWord(data)}</div>
                 <div className="mt-2">The project uses {measureProductValue(data.product)} of {data.context.material}.</div>

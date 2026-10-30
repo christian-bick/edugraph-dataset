@@ -44,10 +44,13 @@ describe('fraction product task projections', () => {
 
             expect(visible(wordQ)).toContain('reference');
             expect(visible(wordQ)).toContain('Equation: ____________________');
+            expect(visible(wordQ)).toContain('equal-parts bar model with a measured number line');
             expect(visible(wordQ)).not.toContain('×');
             expect(wordQ).not.toContain('<svg');
             expect(visible(wordS)).toContain('×');
             expect(wordS).toContain('<svg');
+            expect(wordS).not.toContain('>0 m</text>');
+            expect(storyS).toContain('>0 m</text>');
             expect(visible(wordS)).toContain('meters');
         }
     );

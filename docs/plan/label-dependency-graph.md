@@ -88,6 +88,93 @@ The arithmetic leaf now has 11 routes / 19 choices. A synthetic unbounded-target
 is recorded separately as existing view-domain hardening, outside these active gaps; no graph
 range rules are changed. Evidence: `temp/remaining-resolution/arithmetic-preservation.json`.
 
+### Checkpoint: three fraction-product word requirements
+
+**[IMPLEMENTED]** Question explicitly requires the existing equal-parts bar model with a measured
+number line. The necessary prose still supplies the factors; no completed answer diagram is
+added to Question. Solution retains its proportional partitions while omitting the unnecessary
+zero reference tick/numeral. Its other quantities are positive. Ordinary view invariants supply
+Numberline, BarModel and NumbersWithoutZero; there is no mathematical profile or sampler change.
+
+All four product-family tuples / seven choices remain. **135 paired draws**, including all seven
+admitted bindings, preserve configurations, mathematics, fingerprints and RNG. The 67 word Q/S
+pairs change only for the required method/zero reference; all 68 other product pairs keep both
+markup hashes and annotations unchanged. Four focused files / 26 tests pass. Three source zero
+requirements close, with no added/lost product routes. Evidence:
+`temp/remaining-resolution/product-and-catalog-proof.json`.
+
+### Checkpoint: approved general division word-view split
+
+**[IMPLEMENTED]** The fifth general-only leaf, `fractions-general-division-word-problem`, accepts
+FractionDivisionRelationProblem. The existing word ID accepts FractionQuotientProblem. Both reuse
+their existing renderer bodies; the new general Question supplies an unsolved common-part frame
+and requires that model method. Its quantities remain necessary prose and its quotient remains
+unresolved. General Numberline and BarModel scopes are ordinary invariants. No zero claim is
+invented: the six zero requirements remain until the owner migration decision below.
+
+The **five legacy tuples / eight choices** and all six target records are preserved; **three
+general tuples / six choices** have exact view successors. **256 native pairs plus all 14 admitted
+bindings** preserve same-seed configurations, mathematics, fingerprints and RNG. All 168 legacy
+Q/S pairs and 102 general Solution projections are byte-identical; 102 general Questions change
+as intended. Native new-view seeds/cache identities change, and old general replay receipts
+correctly reject the new view ID. Tests cover the narrow contracts, actual matching/replay,
+required frame, prose necessity and withheld quotient. The adjacent older no-SVG test was updated
+to this approved unsolved-frame contract. Evidence: `temp/remaining-resolution/division-preservation.json`.
+
+### Two concrete follow-up decisions for the last seven requirements
+
+**[DECISION NEEDED: one rooted marking requirement]** The standard's length-from-zero task
+cannot become zero-free without changing its competency. Selecting `writing.requireZero: true`
+would instead collapse every endpoint to zero; adding view-owned zero would overlap the scalar
+writer's existing ownership. Neither is a valid repair.
+
+The smallest genuine producer proposal is `whole-number-lengths`, returning a named
+`WholeNumberLengthProblem` such as `{kind: 'whole-number-length', origin: 0, endpoint: n, unit: 1}`.
+Its ordinary invariants would include IntegerNumbers, Base10, NumbersWithoutNegatives,
+NumbersWithZero and NumerationWithIntegers. A bounded endpoint choice preserves the existing
+uniform 1..100 one-draw law; declare only range capabilities true of the complete rooted relation,
+including its zero reference. Reuse the numerical sampler rather than duplicate it. The existing
+`operations-number-line-representation` ID accepts this precise payload and renders the same task.
+The exact target `2.MD.B.6-number-line-representation~5cfb1e4b` has a producer successor; no target
+label or endpoint is removed. Same-value Q/S pixels must remain identical. A new generator ID
+changes native sample keys, seeds and replay/cache identities. Verify the global matching diff,
+full endpoint domain and sampler continuation before acceptance.
+
+**Question:** approve this one exceptional mathematical producer boundary? The user's earlier
+instruction, “Split like this should be rare and require confirmation”, applies; the superseded
+two-producer default is not treated as authorization for this specific exception.
+
+**[DECISION NEEDED: six general division word requirements]** A duplicate word producer would
+currently have the same mathematical model, so prefer reviewing one coordinated owner migration.
+The existing `fraction-division-relations` already supplies all required mathematical data. Move
+zero ownership from the four supplied-model views **and construction** (30 existing choices /
+15 tuples) to ordinary generator profiles, then include the six word choices / three tuples.
+Retain every target, operand-role/magnitude domain, legacy quotient route and supported operand
+pair. Remove unnecessary zero origins consistently; retain genuine zero quantities. This changes
+some existing annotations/rendering and configuration/replay identities, beyond the fifth-view
+split. Conditional profile selection can also change sampling probabilities and continuation.
+
+First settle the common model's quantity contract across all six general projections. A positive
+`1/2 ÷ 3/2 = 1/3` has **zero complete groups**, explicitly printed by the existing execution,
+interpretation and construction solutions. A dividend-only zero profile would be false there.
+If the required common-part model assesses complete-group count in every projection, use finite
+pre-generation profiles for **zero complete groups (`quotient < 1`)** and **positive complete
+groups (`quotient >= 1`)**, including actual zero dividend/quotient in the first. Make that model
+contract visible in Question and Solution; an internal zero remainder alone is insufficient.
+The proper-fraction-by-integer domain has only the first outcome; the other five operand profiles
+admit both. That yields 11 possible profile conjunctions per complete six-profile leaf, subject to
+actual matching verification. Do not claim closure merely from adding these declarations.
+
+**Question:** should the required model consistently assess complete-group count, and may this
+coordinated family migration replace the existing view-owned zero declarations? If that model
+contract is unwanted for inverse/story/word tasks, retain the six findings while reviewing a
+genuinely distinct mathematical model boundary. No duplicate producer, new global ownership
+exception, inferred completion or post-draw label classifier is authorized by this proposal.
+
+Read-only contract/route evidence: `temp/remaining-resolution/numberline-and-fraction-ownership.md`.
+Both decisions are separated from the completed repairs; deferral does not establish source
+readiness or authorize regeneration. Representation completeness remains separate.
+
 ## Strategy refinement: conclusions and open design (2026-10-30)
 
 This section records the user's latest review and supersedes conflicting recommendations in the
