@@ -10,6 +10,173 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Remaining zero/sign review (2026-10-30)
+
+Current baseline: `09485d7c`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit
+confirms **63 non-range source requirements: 56 zero and seven sign**, across **56 selections,
+37 target/generator/view tuples, 15 producer/view pairs and ten producers**. Its complete JSON is
+byte-identical to the model-scope adoption's final audit. The following allocation supersedes the
+historical statement that all 63 require user decisions: **five now have a supported autonomous
+repair path; 58 remain conditional on the decisions below**. This review implements no repair,
+changes no policy and credits no closure or retirement.
+
+Of the 58 conditional requirements, **24 already have an approved structural repair path**;
+they await the final zero-scope disposition rather than another split approval. The other **34**
+need the concrete semantic or ownership choices below. Do not describe all 58 as new approvals.
+
+| Current family | Zero | Sign | Autonomous next work | Decision-dependent remainder |
+|---|---:|---:|---:|---:|
+| Parity grouping | 2 | 0 | 2 | 0 |
+| Decimal reading / numeral writing | 2 | 0 | 2 | 0 |
+| Structural algebra | 7 | 7 | 1 | 13 |
+| Arithmetic / whole-number number lines | 6 | 0 | 0 | 6 |
+| Four supplied general-division model tasks | 24 | 0 | 0 | 24 |
+| Product / division word problems | 9 | 0 | 0 | 9 |
+| Elapsed time / interval stories | 6 | 0 | 0 | 6 |
+| **Total** | **56** | **7** | **5** | **58** |
+
+### Proposed next batch: five zero repairs in two checkpoints
+
+All five use ordinary matching-capable declarations or the already reviewed finite-profile
+method. They need no new ontology, producer/view split, ownership mechanism, evidence adapter,
+payload classification, automatic completion or change to independent Question/Solution judging.
+Preserve every existing target and its coverage, the Area allowlist and range-policy exclusion.
+The finite-profile continuation agreement already covers settled mathematical partitions and
+their disclosed incidental sampling effects; do not request another architecture approval merely
+because a profile is needed. This analysis request does not implement those profiles.
+
+**ZS-A1 — Two repairs with unchanged mathematical sampling.**
+
+| Repair | Requirement | Proof and minimal approach |
+|---|---:|---|
+| Even parity | 1 | Every even count 2..20 has remainder zero, shown as “None” in both modes. Add `NumbersWithZero` to the dedicated producer's existing even choice, retaining its resolved parity value and scalar sampler. Keep the shared counting schema's other consumers unchanged. |
+| Symbolic quotient | 1 | Target `6.EE.A.2b-identify-expression-parts~2757a785` represents `a/(x)`, with a in 2..9 and the mathematically required x != 0. The numerator, admissible denominator and quotient are all nonzero. Add a relation-qualified zero-only `NumbersWithoutZero` capability bundle equivalent to existing `numericProfile: 0`. |
+
+The quotient's existing resolver/compatibility contract assumes complete sign-plus-zero bundles.
+Extend that assumption narrowly to express the partial zero claim; do not assign a sign, duplicate
+the Scope between schema fields or introduce rejection sampling. Preserve direct and planned
+configuration resolution and the existing raw draws. Sign remains open because x and a/x can
+be positive or negative. Prefer this existing owner-schema extension to `inferredLabels`, whose
+matching caveat would be unnecessary here.
+
+Expected original-lineage accounting after verification: **63 to 61** (54 zero, seven sign).
+
+**ZS-A2 — Three repairs through settled finite mathematical profiles.**
+
+| Repair | Requirements | Supported partition |
+|---|---:|---|
+| Odd parity | 1 | Count 1 has two empty groups and remainder 1: WithZero. Counts 3..19 have positive equal-group sizes and remainder 1: WithoutZero. The canonical grouping producer already exists; no further producer approval is needed. |
+| Decimal reading | 1 | The source and all three comparison names share the same whole quantity. Select numerical zero-whole versus positive-whole profiles before generating the complete relation. |
+| Decimal numeral writing | 1 | Extend the existing writer's corrected numerical zero profiles to its `DecimalNotation` choice. The given number name explicitly identifies the whole quantity in both modes. |
+
+For decimals the settled predicate is `wholePart === 0`, as already used by number-name writing.
+`0.205` names zero wholes; `2.05` names two wholes and five hundredths, with no numerical zero
+introduced by its internal digit. Reading's offsets cannot create a zero fractional quantity:
+for f in 1..999 and d in {1,10,100}, use f+d when it fits, otherwise f-d; the latter is strictly
+positive. No digit-string test or implicit decomposition into every possible place is justified.
+
+Preserve all supported odd counts, decimals and comparison relations, and same-value rendering.
+These profiles can change configurations, seeded payloads, random continuation and mixture
+probabilities. In a simple equally sampled two-profile implementation, singleton odd counts and
+zero-whole decimals each move from their raw 1/10 share to 1/2; verify the actual planner mixture
+and record it. Do not add balancing machinery solely to restore the former mix. Existing
+number-name profiles and their truthful matching capabilities must remain intact.
+
+Expected further original-lineage accounting: **61 to 58** (51 zero, seven sign). These are five
+proposed repairs, not guaranteed net totals before implementation: enumerate all resulting choices,
+retain every old route, inspect any valid new routes and account separately for new obligations.
+
+For each checkpoint, capture matching/choice and replay baselines; prove the complete mathematical
+domain and both modes; test owner/resolver contracts and direct/planned paths; re-audit with zero
+new conflicts, invalid contexts, contract errors or incomplete enumerations; preserve unrelated
+work and commit the coherent change. Count the quotient's remaining sign finding only once.
+
+### Decisions and conditional work after that batch
+
+**ZS-D1 — Structural algebra: 13 requirements (six zero, seven sign).** Should automatic
+sign/zero completeness apply to unassigned structural expressions, and which implicit numerical
+components are assessed? For `a+x`, x=-a gives a zero result while x=1 need not; neither image
+assigns x. Rebinding seven fixed frames to 34 admissible values leaves all 68 Question/Solution
+renderings unchanged. A hidden binding cannot justify the visible task's polarity.
+
+Recommendation: refine applicability around the assessed numerical competency rather than
+restrict x, add domain hints or change evaluation inputs. Retain provable explicit claims such as
+the quotient repair. This would be a separately approved policy change, with retirements counted
+apart from repairs. Two narrower questions remain within this topic: does the implicit coefficient
+-b count in a Term task that shows `-(bx)` without assessing that coefficient; and how should
+explicit zero/negative coefficients be retained? Coefficient 0 and -3/-1 give real presence evidence,
+but the current configuration mixes all six coefficient values. Future preselected categories can
+support partial claims; they do not justify inventing the other polarity or claiming full closure.
+
+**ZS-D2 — Number-line ownership: six zero requirements.** The represented numerical origin 0 is
+already proven in both modes. This is an ownership/design question, not doubt about a zero glyph.
+Adding a view invariant conflicts with the generic producers' supported zero ownership under
+SPEC-8/SPEC-11; forcing their current `requireZero` would constrain operands or the marked scalar
+for the wrong reason. Recommendation: approve the two previously proposed narrow origin/reference
+producers, reusing the existing samplers and views. Prepare exact route successors and disclose
+new producer/sample identities and seeded outcomes. A rare new producer migration still needs
+confirmation; no cross-owner inference or global ownership exception is proposed.
+
+**ZS-D3 — Supplied fraction models: 24 zero requirements.** Four general-division projections
+show numerical origin 0 in both modes, but their shared leaves also admit **28 legacy WithoutZero
+selections**. A blanket view claim would conflict with those valid cases. The four general-only
+projection leaves were already approved; that approval is not requested again. The remaining
+choice is whether these origins remain within the final zero-completeness scope. Recommendation:
+if they do, execute the already approved split and invariant declarations with a full migration
+review; if a narrower competency qualification removes the obligation, record policy retirements
+and reassess the split's necessity first. Keep current models and targets in either case.
+
+**ZS-D4 — Open fraction word problems: nine zero requirements.** Three product and six general
+division selections have a reference model's zero origin in Solution, while Question does not
+supply or require that specific model. Decide whether the representation is part of the required
+competency or a particular reference solution. Recommendation: preserve the authored models and
+make that competency boundary consistent before adding a common annotation. If a fixed model is
+required, its genuine task requirement must be unambiguous in Question; otherwise completeness
+needs a reviewed treatment of the unassessed illustration. Neither option licenses a false
+WithoutZero: general proper-division profiles can also generate an actual zero dividend. Do not
+remove entire models, add mode-specific labels or supply the paired Solution to the question judge.
+
+**ZS-D5 — Clock references: six zero requirements.** Decide whether a positive timestamp such
+as `9:00` in the required solution assesses a separate zero-minute quantity, or merely anchors
+positive elapsed counts. All canonical duration addends, elapsed values and interval offsets are
+strictly positive; padding digits and hidden clock seconds are not numerical-zero evidence.
+Recommendation: assess elapsed quantities, with an explicit zero-minute reference counted only
+when it is part of the competency, not from the timestamp glyphs alone. Under that interpretation
+six WithoutZero invariants are available. If the whole-hour reference itself is assessed as a
+zero-minute origin, agree one consistent Question/Solution competency treatment instead.
+
+### The proposed field rule does not close this backlog
+
+The positive test “every Area is beneath Arithmetic, IntuitiveMathematics, FormalMathematics or
+NumberTheory” is compatible with all **154 explicit-zero targets**, their **380 admitted selections**,
+and every currently asserted-zero source selection: **1,065 selections / 585 targets / 731 tuples**.
+SetTheory remains excluded. This is an exhaustive current-catalog result, not a promise about
+future contexts, and does not expand the existing outer Area allowlist.
+
+It nevertheless retires **zero** of these 63 requirements: the current outer three roots are a
+subset of that four-root list. FormalMathematics also contains AlgebraicExpression, so the field
+test alone does not exempt structural algebra. Adding an all-number-kinds integer test would
+retire 35 zero requirements but leave 21 zero and all seven sign requirements, including structural
+cases caught by integer literals. That is a policy alternative needing a semantic decision, not
+an automatic repair or the settled integer-only operand-digit rule. Do not silently add it.
+If such a narrower policy is chosen, revisit the affected proposed profiles before implementing
+them solely to satisfy an obligation being retired. Keep repair, retirement and structural
+migration accounting separate.
+
+### Evidence and acceptance status
+
+Evidence is in `temp/remaining-zero-sign-review/`: the fresh audit, exact `inventory.json`,
+`allocation.json` (all 63 assigned once), `algebra.md` and its probe, `foundations.md` and its
+exhaustive current-target test, and `fractions.md` with actual model counterexamples. Mathematical
+construction proofs and finite enumeration establish universal claims; rendered probes are
+counterexamples/preservation evidence, not exhaustive classifier or random-stream validation.
+
+No production code, targets, ontology, Area allowlist, range policy, payload, renderer or sampler
+changes in this review. Stored findings remain **2,542 raw / 2,528 distinct**; no dataset generation
+or live VQA runs. The separate recorded reasoning-view correctness item is outside these 63 and
+retains its readiness requirement. The next implementation recommendation is **ZS-A1 then ZS-A2**,
+while the concrete decisions above remain separate from verified additive closures.
+
 ## Fraction-model representation Scopes (2026-10-30)
 
 ### Implemented: three Numberline declarations
