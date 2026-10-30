@@ -3,7 +3,7 @@ import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {exactResolver, withLabelChoices, type ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
-import {allowedNumericProfiles, numericContextLabels, numericProfileBundles, numericProfileLabels,
+import {numericContextLabels, numericProfileChoices, numericProfileForLabels, numericProfileLabels,
     resolveNumericProfile} from './numeric-profiles.ts';
 
 const relations = [
@@ -56,14 +56,7 @@ export const spec: GeneratorSpec = {
         dependencies: [{scope: 'generator', label: Area.Exponentiation}, {scope: 'generator', label: Area.AlgebraicSubstitution}],
         predicate: labels => !labels.has('generator', Area.Exponentiation) || labels.has('generator', Area.AlgebraicSubstitution)
     }, generatorLabelRule('algebra-expression-evidenced-numeric-profile',
-        [...numericContextLabels, ...numericProfileLabels], selected => {
-            const chosen = numericProfileLabels.filter(selected);
-            const index = numericProfileBundles.findIndex(bundle => bundle.length === chosen.length
-                && bundle.every(selected));
-            const profile = chosen.length ? index + 1 : 0;
-            return index >= 0 || !chosen.length
-                ? allowedNumericProfiles(selected).some(value => value === profile) : false;
-        }), {
+        [...numericContextLabels, ...numericProfileLabels], selected => numericProfileForLabels(selected) !== undefined), {
         id: 'algebra-original-rational-context',
         dependencies: [{scope: 'target', label: Scope.RationalNumbers},
             {scope: 'generator', label: Scope.RationalNumbers}],
@@ -76,6 +69,6 @@ export const AlgebraExpressionsGeneratorSchema = {
     relation: [[...new Set(canonicalRelations.flatMap<string>(([labels]) => labels))],
         resolveRelation, canonicalRelations.map(([labels]) => labels)],
     power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)],
-    numericProfile: [numericProfileLabels, resolveNumericProfile, [[], ...numericProfileBundles]]
+    numericProfile: [numericProfileLabels, resolveNumericProfile, numericProfileChoices]
 } as const;
 export type AlgebraExpressionsGeneratorConfig = ConfigFromSchema<typeof AlgebraExpressionsGeneratorSchema>;

@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {planCompatibility} from '../../../lib/compatibility.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {countingQuantitySchema} from '../counting-quantity-schema.ts';
 import {ParityGroupingGenerator} from './generator.ts';
 import {ParityGroupingGeneratorSchema, spec} from './spec.ts';
 
@@ -19,19 +21,44 @@ describe('parity-grouping declarations', () => {
         }
     );
 
-    it('does not introduce a zero label, selector or inference policy in the structural migration', () => {
+    it('completes even remainders without changing the shared scalar schema or adding inference', () => {
         expect(Object.keys(ParityGroupingGeneratorSchema)).toEqual(['parity', 'range']);
         expect(spec).not.toHaveProperty('inferredLabels');
         for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
             expect(spec.generalLabels).not.toContain(zero);
-            expect(Object.values(ParityGroupingGeneratorSchema).flatMap(value => value[0])).not.toContain(zero);
+            expect(countingQuantitySchema.parity[0]).not.toContain(zero);
+        }
+        for (const labels of countingQuantitySchema.parity[2]) {
+            setSeed(1234);
+            const before = extractConfig(countingQuantitySchema, [...labels, Scope.NumbersSmaller20]);
+            const continuation = getRandomState();
+            setSeed(1234);
+            const after = extractConfig(ParityGroupingGeneratorSchema, [...labels, Scope.NumbersSmaller20]);
+            expect(after.config).toEqual(before.config);
+            expect(getRandomState()).toBe(continuation);
+            expect(after.resolvedLabels.includes(Scope.NumbersWithZero)).toBe(before.config.parity === 'even');
+            expect(after.resolvedLabels).not.toContain(Scope.NumbersWithoutZero);
         }
     });
 
     it('rejects conflicting parity requests and preserves unqualified scalar resolution', () => {
         expect(() => extractConfig(ParityGroupingGeneratorSchema,
-            [Area.EvenDivisibility, Scope.OddNumbers, Scope.NumbersSmaller20])).toThrow(/both even and odd/);
+            [Area.EvenDivisibility, Scope.OddNumbers, Scope.NumbersSmaller20])).toThrow(/Unsupported exact label combination/);
         expect(extractConfig(ParityGroupingGeneratorSchema, [Scope.NumbersSmaller20]).config.parity).toBe('any');
+        expect(() => extractConfig(ParityGroupingGeneratorSchema,
+            [Scope.OddNumbers, Scope.NumbersWithZero])).toThrow(/Unsupported exact label combination/);
+    });
+
+    it('requires the completed zero claim in every planned even alias', () => {
+        for (const labels of countingQuantitySchema.parity[2].slice(0, 3)) {
+            const domain = normalizeSchemaChoices(ParityGroupingGeneratorSchema, [...labels], 'generator')
+                .find(field => field.field === 'parity')!;
+            expect(domain.alternatives.length).toBeGreaterThan(0);
+            for (const choice of domain.alternatives) {
+                expect(choice.labels).toContain(Scope.NumbersWithZero);
+                expect(ParityGroupingGeneratorSchema.parity[1]([...choice.labels])).toBe('even');
+            }
+        }
     });
 
     it.each([

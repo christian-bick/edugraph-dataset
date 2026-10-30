@@ -10,6 +10,42 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Autonomous zero/sign implementation (2026-10-30)
+
+The five repairs below were approved in two checkpoints, including the finite profiles'
+incidental sampling changes. Targets, the outer Area allowlist and range-policy exclusion remain
+unchanged. These are matching-capable declarations; no inference, adapters, automatic completion
+or dependency-policy changes are introduced. The preceding 63-requirement analysis is retained
+below as the baseline and decision record.
+
+### ZS-A1 — Even remainder and symbolic quotient
+
+Implemented two additive zero declarations. The dedicated grouping producer completes its existing
+even aliases with `NumbersWithZero`, since every even grouping has remainder zero. The shared
+counting schema and all samplers remain unchanged. The algebra producer supports a relation-qualified
+zero-only bundle resolving to the existing `numericProfile: 0`: a positive literal divided by a
+valid nonzero variable has no zero quantity. The quotient's sign remains unresolved; the bundle
+does not invent a sign claim. Empty quotient bundles are rejected before generation, while other
+symbolic contexts retain their existing unresolved claims.
+
+The fresh report-only audit reduces non-range source requirements **63 to 61: 54 zero and seven
+sign**. All **1,013 targets / 1,213 tuples / 1,575 choices** remain covered, with no new routes.
+Exactly two choices gain their expected zero label. Across 832 planned draws, configurations,
+mathematics, random continuation, content/task fingerprints and 1,664 Question/Solution SSR outputs
+remain identical. Source provenance refreshes the owning plans' input identities; unaffected
+semantic plan hashes and assignments are unchanged. Direct/planned resolver tests cover the
+zero-only claim and reject invented signs or zero presence.
+
+The audit has no conflicts, invalid contexts, row/contract errors, incomplete enumeration or
+pending inference. Stored findings remain unchanged until regeneration. Evidence is under
+`temp/zero-sign-autonomous/` (`before.json`, `a1.json`, comparisons, audit and validation logs).
+Types, spec ownership, label eligibility, standards and documentation checks pass. The complete
+suite passed 7,144 tests and exposed two obsolete parity assertions; after correcting those
+assertions, both pass in their focused rerun. The second checkpoint reruns the complete coverage
+gate against the combined implementation.
+The three profile repairs are the second checkpoint; no deferred semantic decision is credited
+as closed by this checkpoint.
+
 ## Remaining zero/sign review (2026-10-30)
 
 Current baseline: `09485d7c`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit

@@ -1,10 +1,10 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planCompatibility} from '../../../lib/compatibility.ts';
-import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
+import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {implementationTodos, spec as activeTargets} from '../../../spec/ccss/grade-06.ts';
@@ -81,7 +81,8 @@ describe('algebra expression capability ownership and composition', () => {
                     expect(new Set(draw.labels.filter(label => !numericProfileLabels.includes(label as never))))
                         .toEqual(new Set([...target.labels, ...supportedLabels]));
                     expect(draw.labels.filter(label => numericProfileLabels.includes(label as never)))
-                        .toHaveLength(target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId ? 2 : 0);
+                        .toHaveLength(target.labels.includes(Area.ArithmeticExpression) || intendedViewId === write.viewId ? 2
+                            : target.labels.includes(Area.Division) ? 1 : 0);
                     const data = draw.stub!.data as AlgebraicExpressionProblem;
                     if (target.labels.includes(Area.AlgebraicModeling)) expect(data.context.kind).toBe('quantitative-system');
                     if (target.labels.includes(Area.OrderOfOperations)) expect(data.substitution.precedenceWitness).not.toBeNull();
@@ -92,7 +93,7 @@ describe('algebra expression capability ownership and composition', () => {
         }
     });
 
-    it('annotates explicit integer literals in every symbolic frame without claiming a variable domain or sign/zero', () => {
+    it('annotates integer literals and only the proved quotient zero absence without claiming a variable domain or sign', () => {
         const roles = [[Area.Term], [Area.Factor], [Area.Coefficient], [Area.Addition],
             [Area.Multiplication], [Area.Division], [Area.GroupingSymbol, Area.Operand]];
         const evaluator = createLabelDependencyEvaluator();
@@ -102,7 +103,8 @@ describe('algebra expression capability ownership and composition', () => {
             expect(resolved.resolvedLabels).toContain(Scope.IntegerNumbers);
             expect(resolved.resolvedLabels).not.toContain(Scope.RationalNumbers);
             expect(resolved.config.numericProfile).toBe(0);
-            expect(resolved.resolvedLabels.filter(label => numericProfileLabels.includes(label as never))).toEqual([]);
+            expect(resolved.resolvedLabels.filter(label => numericProfileLabels.includes(label as never)))
+                .toEqual(role.includes(Area.Division) ? [Scope.NumbersWithoutZero] : []);
             const evaluated = evaluator.evaluate([...resolved.resolvedLabels, Scope.ArabicNumerals, Scope.Base10]);
             expect(evaluated.assessments.find(item => item.facet === 'numberKind')?.status).toBe('satisfied');
             expect(evaluated.assessments.filter(item => ['operandCount', 'operandDigits'].includes(item.facet))).toEqual([]);
@@ -114,6 +116,58 @@ describe('algebra expression capability ownership and composition', () => {
                         : node.kind === 'negation' ? literals(node.operand)
                             : node.kind === 'power' ? literals(node.base) : [];
             expect(literals(stub.data.structuralExpression.expression).length).toBeGreaterThan(0);
+        }
+    });
+
+    it('completes the actual symbolic quotient route in matching, direct and planned resolution without changing mathematics or entropy', () => {
+        const target = [...activeTargets, ...implementationTodos].find(item => item.id === '6.EE.A.2b-identify-expression-parts~2757a785')!;
+        expect(target).toBeDefined();
+        const result = plan(target.id, target.labels, viewEntries[1]);
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error(result.reason);
+        const selections = enumerateDependencyAuditSelections(result.plan).selections;
+        expect(selections).toHaveLength(1);
+        expect(selections[0].labels.filter(label => numericProfileLabels.includes(label as never)))
+            .toEqual([Scope.NumbersWithoutZero]);
+        expect(plan('explicit-quotient-zero-absence', [...target.labels, Scope.NumbersWithoutZero], viewEntries[1]).supported).toBe(true);
+        for (const claim of [Scope.NumbersWithZero, Scope.NumbersWithoutNegatives, Scope.NumbersWithNegatives]) {
+            expect(plan(`unsupported-quotient-${claim}`, [...target.labels, claim], viewEntries[1]).supported).toBe(false);
+        }
+        expect(plan('unsupported-term-zero-absence', [Area.AlgebraicExpression, Area.Term,
+            Scope.NumbersWithoutZero, Ability.ConceptClassification], viewEntries[1]).supported).toBe(false);
+        const generator = new AlgebraExpressionsGenerator();
+        const originalConfig = {relation: 'symbolic-quotient', power: 'none', numericProfile: 0} as const;
+        for (let seed = 0; seed < 32; seed++) {
+            setSeed(seed); const originalState = getRandomState();
+            const originalStub = generator.generate(originalConfig)!;
+            const continuation = getRandomState();
+            for (const labels of [target.labels, [...target.labels, Scope.NumbersWithoutZero]]) {
+                setSeed(seed);
+                const direct = extractConfig(AlgebraExpressionsGeneratorSchema, labels);
+                expect(direct.config).toEqual(originalConfig);
+                expect(direct.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+                expect(getRandomState()).toBe(originalState);
+                expect(generator.generate(direct.config)).toEqual(originalStub);
+                expect(getRandomState()).toBe(continuation);
+            }
+            const input = {generatorSchema: AlgebraExpressionsGeneratorSchema, viewSchema: partsSchema, plan: result.plan,
+                sampleKey: `${target.id}#${spec.generatorId}#${parts.viewId}#train#question#inst:0`, seed, attempt: 1};
+            const resolved = resolvePlannedConfigurations(input);
+            expect(resolved.generatorConfig).toEqual(originalConfig);
+            expect(resolved.generatorRandomState).toBe(originalState);
+            const draw = generatePlannedDraw({...input, generator});
+            expect(draw.stub!.data).toEqual(originalStub.data);
+            expect(getRandomState()).toBe(continuation);
+            expect(originalStub.data.restrictions).toEqual([
+                {kind: 'nonzero-expression', expressionNodeId: 'input-group', reason: 'division-denominator'}
+            ]);
+            const expression = originalStub.data.structuralExpression.expression;
+            expect(expression.kind).toBe('binary');
+            if (expression.kind !== 'binary' || expression.left.kind !== 'number') throw new Error('Expected literal numerator');
+            expect(expression.operation).toBe('division');
+            expect(expression.left.value.numerator).toBeGreaterThan(0);
+            expect(expression.left.value.denominator).toBe(1);
+            expect(expression.right).toMatchObject({kind: 'group', expression: {kind: 'variable'}});
         }
     });
 

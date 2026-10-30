@@ -10,6 +10,7 @@ export const numericProfileBundles = [
 ] as const;
 export type AlgebraNumericProfile = 0 | 1 | 2 | 3 | 4;
 export const numericProfileLabels = [...new Set(numericProfileBundles.flat())];
+export const numericProfileChoices = [[], [Scope.NumbersWithoutZero], ...numericProfileBundles] as const;
 export const numericContextLabels = [Area.ArithmeticExpression, Area.AlgebraicExpression, Scope.RationalNumbers,
     Area.Term, Area.Factor, Area.Coefficient, Area.Addition, Area.Multiplication, Area.Division,
     Area.GroupingSymbol, Area.Operand, Area.NumericSubstitution, Area.AlgebraicModeling] as const;
@@ -25,14 +26,29 @@ export function allowedNumericProfiles(selected: (label: string) => boolean): re
     return selected(Area.AlgebraicExpression) && selected(Scope.RationalNumbers) && !structural ? [3, 4] : [0];
 }
 
-export const resolveNumericProfile = withLabelChoices(exactResolver((labels: string[]): AlgebraNumericProfile | undefined => {
-    const chosen = numericProfileLabels.filter(label => labels.includes(label));
+/** A nonzero numerator divided by a valid symbolic denominator cannot involve zero. */
+function isSymbolicQuotient(selected: (label: string) => boolean): boolean {
+    return selected(Area.AlgebraicExpression) && selected(Area.Division)
+        && !selected(Area.ArithmeticExpression);
+}
+
+/** Decode evidence claims without turning a zero-only claim into an invented sign. */
+export function numericProfileForLabels(selected: (label: string) => boolean): AlgebraNumericProfile | undefined {
+    const chosen = numericProfileLabels.filter(selected);
+    const quotient = isSymbolicQuotient(selected);
+    if (chosen.length === 1 && chosen[0] === Scope.NumbersWithoutZero) {
+        return quotient || !numericContextLabels.some(selected) ? 0 : undefined;
+    }
+    if (!chosen.length && quotient) return undefined;
     const index = numericProfileBundles.findIndex(bundle => bundle.length === chosen.length
         && bundle.every(label => chosen.includes(label)));
     const profile = chosen.length ? index < 0 ? undefined : (index + 1) as AlgebraNumericProfile : 0;
-    return profile !== undefined && allowedNumericProfiles(label => labels.includes(label)).includes(profile)
+    return profile !== undefined && allowedNumericProfiles(selected).includes(profile)
         ? profile : undefined;
-}), {kind: 'alternatives', alternatives: [[], ...numericProfileBundles],
+}
+
+export const resolveNumericProfile = withLabelChoices(exactResolver((labels: string[]) =>
+    numericProfileForLabels(label => labels.includes(label))), {kind: 'alternatives', alternatives: numericProfileChoices,
     contextLabels: numericContextLabels, resolvedContext: true});
 
 export interface ExpressionInputs {

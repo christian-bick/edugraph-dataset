@@ -35,14 +35,15 @@ describe('counting-objects-parity capabilities', () => {
             Scope.Base10, Scope.PhysicalNumbers]));
         expect(resolved.view.config).toEqual({});
         expect(generatorSpec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
-        for (const zero of [Scope.NumbersWithoutZero, Scope.NumbersWithZero]) {
-            expect(resolved.labels).not.toContain(zero);
-            expect(matchTarget({...target, labels: [...target.labels, zero]}, generator, view))
-                .toMatchObject({matched: false, reason: 'unsupported-label', label: zero});
-        }
+        expect(resolved.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithoutZero]}, generator, view))
+            .toMatchObject({matched: false, reason: 'unsupported-label', label: Scope.NumbersWithoutZero});
+        expect(resolved.labels.includes(Scope.NumbersWithZero)).toBe(parity === Scope.EvenNumbers);
+        expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithZero]}, generator, view).matched)
+            .toBe(parity === Scope.EvenNumbers);
         const assessment = createLabelDependencyEvaluator().evaluate(resolved.labels)
             .assessments.find(item => item.facet === 'zero');
-        expect(assessment?.status).toBe('missing');
+        expect(assessment?.status).toBe(parity === Scope.EvenNumbers ? 'satisfied' : 'missing');
 
         for (const mode of ['question', 'solution'] as const) {
             const draw = generatePlannedDraw({generator: new ParityGroupingGenerator(), viewSchema: CountingObjectsParityViewSchema,
