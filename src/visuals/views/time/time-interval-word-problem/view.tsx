@@ -126,7 +126,12 @@ const TimeIntervalWordProblemCore = ({config, payload}: CoreProps) => {
                     <div className="text-sm font-semibold">Count minutes after {reference}.</div>
                     <div className="mt-1 font-mono text-2xl font-bold">{left} {symbol} {right} = {result}</div>
                     <div className="mt-1 text-lg font-bold">Answer: {unknown === 'end-time' ? displayTime(data.endTime) : `${data.elapsedMinutes} minutes`}</div>
-                </> : <div className="text-xl font-bold">Answer: __________</div>}
+                </> : <>
+                    <div className="text-sm font-semibold text-slate-600">
+                        Count minutes after {reference}, then write the {data.operation} equation.
+                    </div>
+                    <div className="mt-1 text-xl font-bold">Answer: __________</div>
+                </>}
             </div>
         </div>
     );

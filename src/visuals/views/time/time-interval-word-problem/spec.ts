@@ -8,6 +8,7 @@ export const spec: ViewSpec = {
     generalLabels: [
         Scope.ArabicNumerals,
         Scope.Base10,
+        Scope.NumbersWithZero,
         Ability.ProcedureExecution,
         Ability.TextualReception
     ]

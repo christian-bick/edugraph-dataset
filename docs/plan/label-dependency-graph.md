@@ -10,6 +10,29 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Remaining-batch implementation (2026-10-30)
+
+The user authorized the settled strategies below. Implementation starts from `bac52e15`, with
+34 non-range source requirements and all 1,013 targets covered. Checkpoints distinguish additive
+repairs, policy retirements and target-label migrations. Stored outputs are not accepted until
+ordinary regeneration, annotation checks and independent Question/Solution VQA have completed.
+The Arithmetic / IntuitiveMathematics / FormalMathematics Area allowlist and range-policy
+exclusion remain unchanged; no adapters or automatic completion are introduced.
+
+### Checkpoint: six whole-hour clock requirements
+
+**[IMPLEMENTED]** The two existing elapsed/interval story views declare NumbersWithZero because
+their required whole-hour method assesses its zero-minute component. Question now explicitly
+requires the same reference method already shown in Solution. No generator, mathematical schema,
+sampling or target changes are needed.
+
+Verification preserves exactly **six targets / six tuples / six choices**. Across **192 native
+draws plus six forced bindings**, every configuration, payload, content/task fingerprint and PRNG
+state is unchanged. All 198 Solution markup hashes are identical; Question markup changes only
+for the required method. The annotation addition is NumbersWithZero. Five focused test files /
+15 tests pass. This closes six source zero requirements without claiming stored-data acceptance.
+Evidence: `temp/remaining-resolution/clock-preservation.json` and `clock-after.json`.
+
 ## Strategy refinement: conclusions and open design (2026-10-30)
 
 This section records the user's latest review and supersedes conflicting recommendations in the

@@ -5,7 +5,7 @@ import {ViewSpec} from '../../../../types/view-spec.ts';
 
 export const spec: ViewSpec = {
     viewId: 'time-elapsed',
-    generalLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.Base10]
+    generalLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersWithZero]
 };
 
 export const TimeElapsedViewSchema = {

@@ -89,6 +89,9 @@ const TimeElapsedCore = ({config, payload}: CoreProps) => {
         <div className="w-[760px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_32px_rgba(15,23,42,0.08)]">
             <div className="text-sm font-bold uppercase tracking-[0.16em] text-sky-700">Measure elapsed time</div>
             <div className="mt-1 text-[1.35rem] font-bold text-slate-800">How many minutes pass from start to end?</div>
+            {!isSolutionView && <div className="mt-2 text-base font-semibold text-slate-600">
+                Split the interval at {nextHour}, then add the two minute intervals.
+            </div>}
 
             <div className="mt-5 flex items-center justify-center gap-12">
                 <Clock time={data.startMinutesSinceMidnight} label="Start" />
