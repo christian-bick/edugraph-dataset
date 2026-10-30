@@ -10,18 +10,21 @@ import {spec as executionSpec} from './fractions-division-execution/spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 
 const leafIds = [
-    'fractions-division-execution', 'fractions-division-interpretation',
+    'fractions-general-division-execution', 'fractions-division-interpretation',
     'fractions-division-inverse-explanation', 'fractions-division-story-creation',
     'fractions-division-word-problem', 'fractions-division-model-construction'
 ] as const;
-type LeafId = typeof leafIds[number];
+const legacyLeafIds = ['fractions-division-execution', 'fractions-division-interpretation',
+    'fractions-division-inverse-explanation', 'fractions-division-story-creation', 'fractions-division-word-problem'] as const;
+type LeafId = typeof leafIds[number] | typeof legacyLeafIds[number];
 type Core = ComponentType<{payload: unknown}>;
 let cores: Record<LeafId, Core>;
 
 beforeAll(async () => {
     vi.stubGlobal('window', {});
-    const [execution, interpretation, inverse, story, word, model] = await Promise.all([
+    const [execution, generalExecution, interpretation, inverse, story, word, model] = await Promise.all([
         import('./fractions-division-execution/view.tsx'),
+        import('./fractions-general-division-execution/view.tsx'),
         import('./fractions-division-interpretation/view.tsx'),
         import('./fractions-division-inverse-explanation/view.tsx'),
         import('./fractions-division-story-creation/view.tsx'),
@@ -30,6 +33,7 @@ beforeAll(async () => {
     ]);
     cores = {
         'fractions-division-execution': execution.FractionsDivisionExecutionCore as unknown as Core,
+        'fractions-general-division-execution': generalExecution.FractionsGeneralDivisionExecutionCore as unknown as Core,
         'fractions-division-interpretation': interpretation.FractionsDivisionInterpretationCore as unknown as Core,
         'fractions-division-inverse-explanation': inverse.FractionsDivisionInverseExplanationCore as unknown as Core,
         'fractions-division-story-creation': story.FractionsDivisionStoryCreationCore as unknown as Core,
@@ -63,7 +67,7 @@ describe('general fraction division leaf contracts', () => {
                             const solution = render(id, data, true);
                             expect(question).not.toContain('Validation Error');
                             expect(solution).not.toContain('Validation Error');
-                            if (id === 'fractions-division-execution') {
+                            if (id === 'fractions-general-division-execution') {
                                 expect(executionSpec.generalLabels).toContain(Scope.BarModel);
                                 for (const markup of [question, solution]) {
                                     const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
@@ -136,7 +140,7 @@ describe('general fraction division leaf contracts', () => {
             for (const numericProfile of numericProfiles) {
                 setSeed(`legacy-division-regression-${relationProfile}-${numericProfile}`);
                 const {data} = generator.generate({relationProfile, numericProfile});
-                for (const id of leafIds.slice(0, 5)) {
+                for (const id of legacyLeafIds) {
                     for (const isSolutionView of [false, true]) {
                         const task = id.replace('fractions-', '') as FractionQuotientTask;
                         const original = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView={isSolutionView} />);

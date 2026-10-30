@@ -10,6 +10,40 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Approved fraction-division view split implementation (2026-10-30)
+
+The user approved implementing the 24-case batch below on the existing branch. The migration
+preserves targets, canonical producer data and sampling, the outer Area allowlist and the
+range-policy exclusion. It uses the existing named payloads and rendering bodies; no dependency
+policy, inferred annotations, adapters or automatic completion are introduced. Word-problem and
+construction projections remain outside this split.
+
+### Checkpoint 1: general execution
+
+`fractions-division-execution` now accepts only `FractionQuotientProblem`, retaining its existing
+BarModel capability and quotient rendering. The new `fractions-general-division-execution`
+accepts only `FractionDivisionRelationProblem` and declares WithZero, Numberline and BarModel
+alongside its existing task/numeral/base claims. Both wrappers validate their own payload before
+calling the unchanged shared rendering body. The new leaf has its own minimal checklist and
+module-directory entry; runtime rejection and static type matching enforce the same boundary.
+
+The report-only audit reduces non-range source requirements **58 to 52: 45 zero and seven sign**.
+There are no conflicts, invalid contexts, row/contract errors, incomplete enumeration or pending
+inference. Existing target identities, the 1,213-tuple count and 1,578-choice count are preserved;
+the three general execution routes have explicit new-view successors. New IDs change sample keys,
+native seeds and replay/cache identities, while fixed-seed mathematical support and same-value
+rendering remain the preservation criteria. Evidence is under `temp/fraction-division-split/`.
+
+All 1,578 assignments retain their intended route or exact execution successor; all 16 legacy
+tuples / 42 choices remain unchanged. Across 1,280 planned and 88 forced-binding comparisons,
+fixed-seed configurations, mathematical payloads, random continuation, fingerprints and 2,736
+Question/Solution SSR outputs are identical. Only three semantic plans and six variant identities
+change. The central type-map edit refreshes 1,103 matching input-provenance identities; assignments
+and semantic plans outside the three migrated routes remain unchanged. Ordinary dependency planning
+will determine actual regeneration work at readiness. Old replay receipts reject the three migrated
+routes, while all 37 control routes still accept them. Eleven focused tests, types, ownership,
+labels, standards and documentation checks pass.
+
 ## Next batch after the five autonomous repairs (2026-10-30)
 
 Baseline: `67155e9a`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit is

@@ -5683,7 +5683,8 @@ export interface ViewTypeMap {
     'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
     'fractions-quotient-interpretation': FractionQuotientProblem;
     'fractions-division-interpretation': FractionDivisionProblem;
-    'fractions-division-execution': FractionDivisionProblem;
+    'fractions-division-execution': FractionQuotientProblem;
+    'fractions-general-division-execution': FractionDivisionRelationProblem;
     'fractions-division-story-creation': FractionDivisionProblem;
     'fractions-division-inverse-explanation': FractionDivisionProblem;
     'fractions-division-word-problem': FractionDivisionProblem;
