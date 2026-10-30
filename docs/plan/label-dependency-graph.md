@@ -27,32 +27,77 @@ Tags distinguish an agreed conclusion from implementation acceptance:
 
 | Topic / current findings | Conclusion tags | Remaining design work |
 |---|---|---|
-| Structural algebra / 13 | **[OPEN]** necessity and exact scope; **[CONCLUDED]** definite assessed quantities if retained | Separate sign/zero qualification from broad numeric presence and audit the proposed positive contexts. |
+| Algebra / 13 existing omission findings, plus existing-label cleanup | **[CONCLUDED]** no generic sign/zero labels on algebraic examples | Implement and audit the context cutoff, migrate existing declarations and review the two explicit target-label conflicts. |
 | Integer number lines / 6 | **[CONCLUDED]** avoid an unnecessary displayed zero; **[SUPERSEDED]** two new producers as the default remedy | Plan the five arithmetic choices using the existing data/component; resolve the one explicit length-from-zero task separately. |
 | Fraction word problems / 9 | **[CONCLUDED]** Question requires Solution's particular model; **[CONCLUDED]** fifth general-division word leaf approved | Specify the actual model/reference behavior, complete zero-quantity partition and nonoverlapping label ownership. |
 | Elapsed / interval time / 6 | **[CONCLUDED]** a whole-hour reference assesses zero minutes; **[SUPERSEDED]** the WithoutZero recommendation | Implement truthful WithZero declarations and consistent Question evidence for the required whole-hour method. |
 
-### Algebra: challenge applicability before adding more polarity profiles
+### Algebra: a classification cutoff, not merely a completeness exemption
 
-**[OPEN]** FormalMathematics membership is an eligibility path, not the direct trigger. The
-unchanged outer gate admits these Area conjunctions because AlgebraicExpression is beneath
-FormalMathematics. Within that gate, `LD-NUM-01` is activated independently by the declared Arabic
-numerals and numeric descriptors such as Base10 and IntegerNumbers; it then requires sign and zero.
-IntegerNumbers describes explicit constants here and does not give the variable an integer domain.
+**[CONCLUDED]** The user wants the classifier never to receive generic sign/zero labels on
+algebraic examples. Both presence and absence claims are excluded: NumbersWithNegatives,
+NumbersWithoutNegatives, NumbersWithZero and NumbersWithoutZero, and any members of their
+NumericSign/NumericZero families. This applies to existing truthful annotations too, including
+the symbolic quotient's zero absence and explicit coefficient evidence. Numerical evaluation or
+substitution within an algebraic task is not an exception. The mathematical values and exercises
+can remain negative or zero; the classification labels follow the agreed contextual cutoff.
 
-Investigate separating sign/zero assessment from the general number-kind/range-presence rule.
-Review a positive list of concrete numerical competencies, including relevant ArithmeticExpression
-and NumericSubstitution contexts, rather than changing the outer Area allowlist or making formal
-membership itself sufficient. The exact list remains open: an arithmetic-operation-plus-integer
-condition still catches the symbolic addition/multiplication/division contexts, including five of
-these 13 requirements. A complete target and resolved-annotation audit must establish the boundary.
+**[SUPERSEDED]** The earlier proposal only relaxed missing-facet checks and retained justified
+algebraic polarity labels. The earlier conditional "if retained in scope" strategy no longer
+applies to algebra. Do not add coefficient profiles solely to supply the
+newly excluded annotations. Omission under this cutoff means out of scope, never WithoutZero or
+WithoutNegatives.
 
-**[CONCLUDED]** If these facets remain in scope, they describe definite quantities and calculations
-required by the competency. Hidden assignments, possible evaluations of a free variable and optional
-calculations cannot supply missing claims. Preserve supported claims already made, such as the
-symbolic quotient's zero absence, and keep explicit coefficient evidence available. A removed
-obligation is a policy retirement, not an additive labeling repair. Do not credit all 13 as retired
-before the actual qualification is agreed and verified.
+The implementation needs both a completeness qualification and an explicit prohibition on
+emitted algebraic sign/zero annotations. Merely skipping `LD-NUM-01` leaves the existing claims
+in training data and does not meet this goal. Validate the cutoff independently of the existing
+outer gate, since genuine algebra contexts can lie outside it. Keep the outer Area allowlist,
+other numeric facets and range-policy exclusion unchanged. Apply the contract to authored
+declarations/resolved annotations, both image modes and dataset splits, and final released labels;
+do not hide an inconsistent source contract with an export-only filter or payload classifier.
+
+The policy concerns these generic number-context families. PositiveExponent, NegativeExponent
+and NumbersLargerZero are not members of either family in the pinned ontology and must not be
+removed by name matching. Other role-specific scopes retain their existing semantics.
+
+**[OPEN: engineering and migration review]** Use the complete resolved Area conjunction to
+identify an algebraic task. FormalMathematics membership alone is too broad: ArithmeticExpression
+and AlgebraicExpression are sibling mathematical-expression types, and a numerical expression
+remains arithmetic. A literal Algebra-subtree ban is also too broad for the intended contextual
+distinction: elementary CommutativeLaw, AssociativeLaw and DistributiveLaw have shared Arithmetic
+and Algebra ancestry. A reviewed candidate is: at least one Area is within AlgebraicExpression,
+or within Algebra without Arithmetic ancestry. A genuine EquationSolving/AlgebraicModeling/
+NumericSubstitution Area still triggers the cutoff when Addition or Multiplication is present.
+Shared concrete arithmetic-law descriptors alone do not. Keep this ontology boundary visible in
+the migration review rather than classifying by generator names or curriculum chapter titles.
+
+Read-only audit at `4a6546d3` reproduces all **1,013 targets / 1,213 tuples / 1,578 choices** and
+the current source annotations. The contextual candidate covers **38 choices / 35 tuples / 35
+targets**. **Five choices across four targets** currently carry excluded labels: the expression
+writer's two profiles, the symbolic quotient and two rational-equation modeling choices. All
+13 current algebra omission findings fall inside it, but retiring those checks and cleaning
+existing claims are separate accounting steps, not 13 additive labeling repairs.
+
+There are **two explicit target-contract conflicts**: the addition and multiplication permutations
+of `6.EE.B.7-model-and-solve-rational-equations`, suffixes `0f9218a9` and `ad0abe2b`, currently request
+NumbersWithoutNegatives. Those exact label sets cannot simultaneously remain unchanged and obey
+the cutoff under the current emission/matching contract. Prepare a concrete target/declaration
+migration that preserves the competencies, supported mathematical domain and target coverage;
+record any required label/ID changes explicitly. Do not drop these competencies or quietly broaden
+their mathematics to make a classifier-policy change easier.
+
+The same contextual candidate covers **86 of 2,808 stored rows**; **four rows** carry the excluded
+WithoutNegatives claim and correspond to those two targets. A naive Algebra-or-AlgebraicExpression
+subtree cutoff instead affects **32 source choices, 11 explicit target label sets and 70 stored
+rows**, including elementary numeric-law examples. The contextual boundary preserves those 66
+arithmetic rows and their 90 sign/zero claims. Treat these counts as migration evidence, not as
+an implemented ban or refreshed dataset. Stored/published outputs must pass the final cutoff
+audit after the ordinary regeneration/validation readiness work.
+
+Evidence is in `temp/algebra-label-cutoff/`: complete source/owner and explicit-target inventories,
+contextual versus literal-subtree comparisons, and stored/public-union projections with their
+freshness limitations. No source declarations, targets, evaluator, images or labels change in this
+strategy checkpoint. The current audit therefore still reports 34 findings.
 
 ### Number lines: configurable reference display, with a rooted-task exception
 
@@ -322,8 +367,9 @@ and range-policy exclusion remain unchanged. Dataset regeneration/VQA still wait
 
 Historical framing: the current tags and conclusions are in
 [strategy refinement](#strategy-refinement-conclusions-and-open-design-2026-10-30). The default
-two-number-line-producer and clock WithoutZero recommendations below are superseded; the fifth
-general-division word leaf and required-model principle are now agreed.
+two-number-line-producer, clock WithoutZero and algebraic-polarity preservation recommendations
+below are superseded. Algebra now has a generic sign/zero classification cutoff; the fifth
+general-division word leaf and required-model principle are agreed.
 
 1. **Structural algebra: 13.** Should an unassigned structural expression require a whole-frame
    sign/zero classification, or should completeness follow the numerical quantities actually
