@@ -10,6 +10,122 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Next batch after the five autonomous repairs (2026-10-30)
+
+Baseline: `67155e9a`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit is
+byte-identical to the second checkpoint's final report: **58 non-range source requirements,
+51 zero and seven sign, across 52 selections / 33 tuples / 12 producer-view pairs / seven
+producers**. All 1,013 targets remain covered by 1,213 tuples and 1,578 choices. There are no
+conflicts, invalid contexts, row/contract errors, incomplete enumeration or pending/invalid
+inference. This is an analysis checkpoint: no labeling repair or policy retirement is implemented.
+
+| Remaining work | Zero | Sign | Approval and next action |
+|---|---:|---:|---|
+| Four supplied general-division model projections | 24 | 0 | **Already approved.** Execute the four general-only view splits under the unchanged current policy. |
+| Unassigned structural algebra | 6 | 7 | **Decision needed.** Set the assessed numerical context for structural tasks before completing sign/zero annotations. |
+| Arithmetic / whole-number number lines | 6 | 0 | **Decision needed.** Approve two narrow origin/reference producers; the mathematical zero witness itself is settled. |
+| Product / division word problems | 9 | 0 | **Decision needed.** Resolve the required-model versus reference-solution boundary. |
+| Elapsed / interval time | 6 | 0 | **Decision needed.** Resolve whether the whole-hour reference's minute component is an assessed zero quantity. |
+| **Total** | **51** | **7** | **24 already approved; 34 need the four decisions below.** |
+
+### Recommended next batch: the approved 24 supplied division cases
+
+The existing approval of four general-model-only leaves remains valid. The later request to
+reassess necessity and check targets is now satisfied: all four tasks have current production
+targets, and the origin is an actual represented numerical 0 in both Question and Solution.
+Current policy requires this distinction; no narrower qualification has been adopted. The earlier
+phrase "await the final zero-scope disposition" therefore does not block this already approved
+batch while the current policy remains in force. No new split approval or global zero-policy
+decision is required to implement it. The nine open word cases remain outside this batch.
+
+| Existing ID retained for quotient models | New general-only ID | Requirements |
+|---|---|---:|
+| `fractions-division-execution` | `fractions-general-division-execution` | 6 |
+| `fractions-division-interpretation` | `fractions-general-division-interpretation` | 6 |
+| `fractions-division-inverse-explanation` | `fractions-general-division-inverse-explanation` | 6 |
+| `fractions-division-story-creation` | `fractions-general-division-story-creation` | 6 |
+
+Each new leaf accepts the existing `FractionDivisionRelationProblem`, reuses its rendering body,
+and invariantly declares the evidenced `NumbersWithZero`, `Numberline` and `BarModel`. The drawn
+proportional bars are one-dimensional; a rectangle story does not turn that diagram into an
+`AreaModel`. Each original leaf narrows to `FractionQuotientProblem`, retaining its existing
+capabilities and all legacy zero/nonzero cases. Do not add WithZero to the shared union leaf or
+the general generator: the former conflicts with legacy ownership, and the latter would also
+claim it for the unresolved open word task.
+
+A complete in-memory catalog migration verifies **12 general tuples to 12 exact successors**,
+with no missing successor or unexpected match. All **16 legacy tuples / 42 choices** retain their
+existing IDs and labels: **28 WithoutZero and 14 WithZero**. Total targets, tuples and choices stay
+**1,013 / 1,213 / 1,578**. The unchanged evaluator finds no non-range omission or conflict in any
+of the 24 projected new annotation sets. These are migration/design proofs, not implemented
+closures; implementation must reproduce them with the real source catalog and a fresh full audit.
+
+Proposed coherent checkpoints:
+
+1. **Execution and contract migration: six requirements.** Add the general execution leaf and
+   narrow its existing quotient counterpart atomically with typed mappings and tests. Retain the
+   three exact general successors and four legacy execution routes. Expected findings: **58 to 52**.
+2. **Other three projections: 18 requirements.** Apply the same narrow migration to interpretation,
+   inverse explanation and story creation. Leave construction and word-problem contracts intact.
+   Expected findings: **52 to 34**, comprising **27 zero and seven sign**.
+3. **Full acceptance and backlog record.** Compare all target-route successors and assignments;
+   check ownership, eligibility and payload rejection; verify model witnesses in both modes,
+   same-value rendering, unchanged producer support/sampling/random continuation and correct new
+   replay/cache identities; run the required checks and full coverage, then commit the acceptance
+   record on this branch. Reconcile any newly exposed findings separately from the 24 old lineages.
+
+No target, generator mathematics or sampling law needs changing. Same-value rendering can remain
+identical. New view IDs deliberately change sample keys, seeds, concrete seeded exercises, replay
+receipts and affected cache identities, as already disclosed for this approved split. No graph,
+ownership exception, inference adapter or automatic completion is needed. The outer Area allowlist
+and range-policy exclusion remain unchanged. Dataset regeneration/VQA still wait for source readiness.
+
+### Four decisions for the other 34 requirements
+
+1. **Structural algebra: 13.** Should an unassigned structural expression require a whole-frame
+   sign/zero classification, or should completeness follow the numerical quantities actually
+   assessed? Recommendation: qualify structural applicability around the assessed competency,
+   retaining explicit supported coefficient claims, rather than restricting variable domains or
+   adding hints. The quotient's settled WithoutZero claim remains valid. Explicit coefficient
+   zero/negative profiles can add truthful presence labels, but positive coefficients do not prove
+   absence for an unassigned variable. Splitting the current coefficient case into zero / negative /
+   positive profiles would leave four unresolved profile facets in place of two, increasing the
+   global raw count from 58 to 60 under the current interpretation. Do not add that complexity as
+   a gap-closing batch before settling applicability. A policy retirement must be recorded separately
+   from a labeling repair. Two concrete boundary examples are the implicit coefficient `-b` when
+   identifying the signed term `-(bx)`, and the negative root `0*x-b=-b` that the coefficient task
+   never asks to evaluate. Counting the former as assessed would support one invariant sign repair;
+   do not derive a negative term value from a subtraction symbol or an unknown variable binding.
+2. **Number-line ownership: six.** Approve two dedicated canonical number-line reference producers,
+   reusing the existing arithmetic/scalar samplers and consuming views? Recommendation: yes. Their
+   actual numerical origin is already visible in both modes; the missing decision is the rare
+   producer/type migration. A view zero invariant overlaps generic producer zero capabilities under
+   SPEC-8/SPEC-11, while forcing an operand or marked scalar to zero changes the wrong mathematics.
+   Preserve exact target-route successors and disclose new producer/sample identities and seeds.
+3. **Open fraction word problems: nine.** Is the particular solution model required competency
+   evidence, or one reference method? Recommendation: retain the authored models and make any
+   genuinely required model expectation unambiguous in Question; otherwise review how the common
+   competency annotation treats an unassessed solution illustration. Neither choice permits a
+   blanket WithoutZero: some supported division cases have an actual zero dividend. This is not
+   permission to remove models, add mode-specific labels or give the paired Solution to the judge.
+4. **Elapsed/interval time: six.** Do the tasks assess positive timestamps, elapsed durations and
+   counts, with `h:00` serving as a reference instant, or also assess its zero-minute component?
+   Recommendation: use the duration/count interpretation; it supports six WithoutZero invariants
+   without changing sampling or rendering. All relevant operands and results are strictly positive.
+   That numerical proof needs the stated competency premise: existing minute-reading tasks do
+   assess minute=0, so "zero is not a digit" alone does not resolve this reserved choice. One
+   decision covers all six; it is not six architectural approvals.
+
+No additional complete autonomous closure is established for these 34 under the unchanged
+contracts. Partial coefficient evidence and positive clock arithmetic are documented above without
+silently choosing their unresolved competency interpretation. The 24 approved cases can proceed
+independently of these decisions. Stored findings remain **2,542 raw / 2,528 distinct**; this review
+does not regenerate data, run VQA or claim dataset acceptance.
+
+Evidence is under `temp/remaining-58-review/`: fresh audit and exact inventory, fraction migration
+and unchanged-evaluator projection, algebra/coefficient probes, and time/number-line review. The
+existing exact target suffix map in the historical split proposal remains the migration reference.
+
 ## Autonomous zero/sign implementation (2026-10-30)
 
 The five repairs below were approved in two checkpoints, including the finite profiles'
