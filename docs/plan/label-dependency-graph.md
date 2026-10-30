@@ -179,9 +179,35 @@ equation, unknowns and clock geometry; `SingleStep` remains the original target 
 Its **13 tests in four files** and type check pass. Neither repair introduces inference,
 adapters, payload fields, policy changes or an unrelated evaluation subtask.
 
+### Question unit counts and second canonical review
+
+Snapshot `2ba340c7b8c1ed563eccfce48c79d4ef4fe88a7d4d6c47181927fe5d9d1a3d7a`
+renders 218 affected images, reuses 481 shards and retains all 2,918 identities. There is no
+seed, attempt, prepared-configuration, random-continuation or target-association change.
+The six mathematical/label changes are confined to the approved numeric-profile migration;
+the other 46 algebra rows retain their mathematics. Ninety-five PNGs change through the
+reviewed projections and numeric draws; no unrelated renderer changes occur. All 1,013
+targets and 1,222 tuples retain evidence, and all image hashes verify.
+
+VQA reuses 2,823 current passing records and evaluates 95 changed records, finishing
+**2,916 passing / two failing**, with no uncached samples or request errors. Both remaining
+failures are algorithm questions. Their numerical-zero rejections overlook the prescribed
+column quantities: zero hundredths in subtraction and `0 + 0 + 0 = 0` in multiplication.
+The additional claim that multiplication carry boxes are shifted is disproved by the grid
+and actual PNG: first-pass centers 462/506/550 correspond to thousands/hundreds/tens; the
+ones center is 594 and has no carry box. No carry-layout repair or label removal is justified.
+
+The narrow follow-up makes the existing required method's unit-count roles explicit in
+both question and solution instructions. It adds no calculated answer, extra operation,
+zero badge, payload field or classification hint. The original empty working and answers
+remain withheld. The first full test run passes 905 suites and finds four outdated
+whole-hour caption assertions in one suite; updating them preserves all its unknown,
+equation and random-state checks. The combined focused suite now passes **38 tests in
+seven files**. A final full coverage run and canonical VQA remain required.
+
 ### Decimal column-zero predicate correction
 
-**[NEEDS SAMPLING APPROVAL: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
+**[APPROVED; IMPLEMENTATION IN PROGRESS: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
 the settled numerical-zero rule. `12.5 + 18.5 = 31.0` currently claims zero solely because
 the positive column sum `5 + 5 = 10` writes a zero digit. The supported seed-105 example
 `3779.7 + 3825.5 = 7605.2` has the same defect. Conversely, `122.5 − 111.4 = 11.1` omits
@@ -200,7 +226,7 @@ probabilities, seeded outcomes, continuation and replay identities can change in
 operations/profiles. A temporary counterfactual completes/replays all 6,000 stress draws;
 972 differ from their old seeded draw. These finite checks supplement the support proof;
 they are not exhaustive seed or distribution claims. The correction follows the already
-agreed semantics, but these additional sampling consequences await acknowledgment.
+agreed semantics. The user has approved its incidental resampling/replay consequences.
 Concrete predicate and evidence: `temp/canonical-acceptance-2026-10-30/decimal-column-zero-proposal-note.md`.
 
 ## Reasoning proposal domain repair (2026-10-30)

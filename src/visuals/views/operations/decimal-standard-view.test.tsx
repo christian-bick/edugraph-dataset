@@ -70,7 +70,7 @@ describe('decimal written-algorithm projections', () => {
     it('requires column arithmetic without exposing the decimal-subtraction solution in Question', () => {
         const data = addSubtract('subtraction', '660.005', '0.092');
         const question = add(data, false);
-        expect(text(question)).toContain('recording each column calculation and its regrouping');
+        expect(text(question)).toContain('recording the counts of place-value units in each column calculation and any regrouping');
         expect(question).not.toContain('659.913');
         expect(question).not.toContain('column-calculations');
         expect(question).not.toContain('emerald');

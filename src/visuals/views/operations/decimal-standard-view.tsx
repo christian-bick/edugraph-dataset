@@ -71,7 +71,7 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
     }
 
     return <Card title={`Standard decimal ${data.operation}`} expression={<>{data.top.numeral} {symbol} {data.bottom.numeral}</>}>
-        <p className="mb-4 text-sm text-slate-600">Align the decimal points. Work from right to left, recording each column calculation and its regrouping.</p>
+        <p className="mb-4 text-sm text-slate-600">Align the decimal points. Work from right to left, recording the counts of place-value units in each column calculation and any regrouping.</p>
         <WorkFrame>
             {isSolutionView && <Row label={data.operation === 'addition' ? 'Carries' : 'Regrouped top'} role="regrouping" point={null} cell={place => {
                 const column = columnByPlace.get(place)!;

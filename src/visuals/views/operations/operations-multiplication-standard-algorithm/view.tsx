@@ -101,7 +101,7 @@ export const OperationsMultiplicationStandardAlgorithmCore = ({payload}: CorePro
     return <main className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm" style={{width: 780, maxWidth: '95vw'}}>
         <div className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">Standard multiplication algorithm</div>
         <h1 className="mt-2 text-xl font-bold text-slate-900">Multiply {formatMultiplicationNumeral(data.multiplicand)} × {formatMultiplicationNumeral(data.multiplier)}.</h1>
-        <p className="mb-4 mt-2 text-sm text-slate-600">Work from right to left, recording every digit multiplication and carry. Align each partial product by the multiplier digit’s place, then record each column sum.</p>
+        <p className="mb-4 mt-2 text-sm text-slate-600">Work from right to left, recording every digit multiplication and carry. Align each partial product by the multiplier digit’s place, then record and add the unit counts in each column.</p>
         <AlgorithmWork data={data} isSolutionView={isSolutionView} />
         {isSolutionView && <MultiplicationColumnCalculations partialRows={data.partialRows} sumColumns={data.sumColumns}
             displayedRows={data.partialRows.map((_row, index) => partialRowDigits(data, index))} coefficient={false} />}

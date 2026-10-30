@@ -88,10 +88,10 @@ describe.each([Scope.AnalogClock, Scope.DigitalClock] as const)('whole-hour refe
         const question = text(renderToStaticMarkup(<TimeIntervalWordProblemView payload={payload(false)} />));
         const solution = text(renderToStaticMarkup(<TimeIntervalWordProblemView payload={payload(true)} />));
 
-        expect(question).toContain(`Count minutes after 8:00, then write the ${operation} equation.`);
+        expect(question).toContain(`Count minutes after 8:00 (0 minutes into the hour), then write the ${operation} equation.`);
         expect(question).toContain('Answer: __________');
         expect(question).not.toContain('87');
-        expect(solution).toContain('Count minutes after 8:00.');
+        expect(solution).toContain('Count minutes after 8:00 (0 minutes into the hour).');
         if (operation === 'addition') {
             expect(question).not.toContain('9:27');
             expect(solution).toContain('35 + 52 = 87');

@@ -76,7 +76,7 @@ describe('standard multiplication task projection', () => {
         const data = multiplicationCase(4288, 855);
         const question = render(data, false);
         expect(visible(question)).toContain('recording every digit multiplication and carry');
-        expect(visible(question)).toContain('record each column sum');
+        expect(visible(question)).toContain('record and add the unit counts in each column');
         expect(question).not.toContain('3,666,240');
         expect(question).not.toContain('21,440');
         expect(question).not.toContain('column-calculations');
