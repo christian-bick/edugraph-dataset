@@ -238,6 +238,58 @@ matching and whitespace checks pass; all ten protected target/policy/specificati
 generator hashes remain unchanged. The implementation changes the admission predicate only;
 the approved resampling consequences will be checked on the next canonical snapshot.
 
+### Persistent question-mode review: explicit given unit captions
+
+**[NEEDS EXPERT INPUT: D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
+`527a18fa77957be99a1efc79695dbc036b456068fb966753da28af223f5a8353` with all 2,918 identities,
+1,013 targets and 1,222 tuples intact. Six images change; exactly one mathematical draw
+changes through the approved decimal predicate. Its positive tens sum `1 + 8 + 1 = 10`
+writes a zero digit and correctly retains `NumbersWithoutZero`. Before/after receipts,
+fingerprints and the ten protected control hashes verify.
+
+Live VQA finishes **2,917 passing / one failing**, with no uncached samples or request
+errors. The only failure is the question `660.005 − 0.092`, despite the required instruction
+to record counts of place-value units. Independent canonical/image review confirms the
+involved zero hundredths and zero subtrahend-unit counts. The judgment instead considers
+only whole operands and the whole result. One normal, review-backed retry of the unchanged
+image retains that failure. Both judgments are preserved; no further retry or manual pass
+is proposed, and the standard is not yet claimed to have clean VQA acceptance.
+
+The recommended local presentation alternative follows the already used decimal
+place-comparison strategy: caption the **given operand cells** with their place-unit names.
+The same givens would visibly communicate these counts:
+
+| Given numeral | Hundreds | Tens | Ones | Tenths | Hundredths | Thousandths |
+|---|---:|---:|---:|---:|---:|---:|
+| `660.005` | 6 | 6 | 0 | 0 | 0 | 5 |
+| `0.092` | — | — | 0 | 0 | 9 | 2 |
+
+The implementation would put small unit captions directly beneath the existing aligned
+operand cells in both modes, preserving all numeral forms and withholding every calculated
+column/result in question mode. Unused leading places remain blank. It reuses the existing
+canonical digits, active-cell selection and unit formatter; it derives no new mathematics.
+Result digits do **not** gain zero-unit captions merely for writing a zero after a positive
+sum. Questions/solutions acquire the same given-representation clarification; labels,
+specifications, matching, targets, sampling and the Area/range policies remain unchanged.
+Layout/PNG/cache identities change and need scoped generation, visual review and VQA.
+
+The alternative is to retain the current mathematically supported question and document
+the unresolved judge false negative. That does not edit or bypass the VQA gate; its one
+failure would remain open. Repeated method-wording attempts have not resolved the judge's
+interpretation, so this one presentation decision is returned for expert input under the
+repository's instruction to ask after repeated unsuccessful attempts. All independent
+validation and the final coverage run continue.
+
+The strict offline cache audit confirms this same single failing record and no stale,
+missing-key, malformed, duplicate or obsolete-module cache entries. Dataset/renderer
+structure and image integrity have zero errors. The documented same-annotation image
+duplicate remains one warning. `npm run check -- --spec=ccss`, strict dependency and
+architecture audits, and split integrity pass; the 1,675 remaining dependency assessments
+are exclusively the excluded range facet (613 source / 1,062 stored). The cache is saved
+as an evaluated checkpoint, not as clean dataset acceptance. The two-worker final coverage
+attempt ended without a completion report and is not counted as passing; a bounded
+three-worker rerun retains verbose progress in the acceptance evidence directory.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical
