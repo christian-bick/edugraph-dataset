@@ -240,7 +240,7 @@ the approved resampling consequences will be checked on the next canonical snaps
 
 ### Persistent question-mode review: explicit given unit captions
 
-**[ON HOLD: ZERO-SCOPE REVIEW; D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
+**[LOCAL REPAIR APPROVED; BROADER ZERO REVIEW DEFERRED: D-DECIMAL-QUESTION-UNITS]** The final refresh publishes
 `527a18fa77957be99a1efc79695dbc036b456068fb966753da28af223f5a8353` with all 2,918 identities,
 1,013 targets and 1,222 tuples intact. Six images change; exactly one mathematical draw
 changes through the approved decimal predicate. Its positive tens sum `1 + 8 + 1 = 10`
@@ -300,11 +300,11 @@ context. Under the intended integer-only boundary, defending its zero label is t
 repair. Earlier discussion of a judge false negative describes the broader implemented
 rule, not proof that this exercise belongs in the intended labeling scope.
 
-The proposed cell captions were not implemented. They are on hold pending a zero-scope
-impact review, including existing declarations, unnecessary zero profiles and explicit
-target requirements. No graph, target, declaration or sampling change is inferred from
-the user's question. The current source/cache checkpoint remains evaluated but unaccepted;
-the remaining VQA finding now exposes this scope discrepancy.
+The proposed cell captions were initially held for a zero-scope impact review, including
+existing declarations, unnecessary zero profiles and explicit target requirements. The
+user subsequently authorized the local repair and deferred the broader labeling-rule
+review; its implementation is recorded below. No graph, target, declaration or sampling
+change is part of that local authorization.
 
 Independent full verification completes successfully on the committed production source:
 **906 suites / 7,458 tests pass**, and every generator passes the repository coverage gate.
@@ -313,6 +313,31 @@ Aggregate generator coverage is **98.36% statements, 97.05% branches, 100% funct
 zero, with no runner error. Evidence: `full-coverage-durable.log` and
 `full-coverage-durable-status.json` under the acceptance directory. This validates the
 current implementation, not alignment with the newly clarified integer-only zero scope.
+
+### Local given-unit caption repair (2026-10-30)
+
+The user approved completing the local presentation repair before the broader rule review.
+The shared decimal addition/subtraction renderer now captions the existing given operand
+cells with their place-unit names in both modes. It reuses the canonical numeral digits,
+the original-given eligibility check and the existing unit formatter. Unwritten fractional
+places remain blank in Question; Solution captions only its already displayed alignment
+zeros. Absent leading places, carries and calculated result digits acquire no captions.
+The original numerals, arithmetic, learner action, unknowns and all answer withholding
+remain intact (IMPL-V5, IMPL-V8, IMPL-V11).
+
+This changes two view source/test files. No specification, generator, target, schema,
+matching capability, inferred annotation, random draw or labeling-rule change is made.
+The Area allowlist, algebra cutoff and range-policy exclusion remain unchanged. The
+broader integer-only zero-scope review remains open and is not resolved by this repair.
+
+Focused verification passes **66 tests in six files**, plus types and whitespace checks.
+Independent review passes the 16 decimal-view tests and finds no mode, eligibility or
+alignment issue. Controls cover the original disputed exercise, mixed precision, leading
+padding, positive carry sums that merely write a zero digit, hidden-result independence,
+the safe-integer boundary and fifteen-place fractional precision. The previous complete
+coverage gate remains the baseline for unchanged generator/library code; this view-only
+repair requires its own canonical image/VQA and snapshot-preservation checks. Evidence is
+under `temp/local-decimal-unit-captions-2026-10-30/`.
 
 ## Reasoning proposal domain repair (2026-10-30)
 

@@ -13,6 +13,85 @@ const add = (data: typeof decimalAdditionOracle, solution: boolean) => renderToS
 const mul = (data: typeof decimalMultiplicationOracle, solution: boolean) => renderToStaticMarkup(<DecimalStandardMultiplicationBody data={data} isSolutionView={solution} />);
 const div = (data: typeof decimalDivisionOracle, solution: boolean) => renderToStaticMarkup(<DecimalStandardDivisionBody data={data} isSolutionView={solution} />);
 
+const unitCaptions = (markup: string, role: 'aligned-top-units' | 'aligned-bottom-units') => {
+    const marker = `data-role="${role}"`;
+    const start = markup.indexOf(marker);
+    if (start < 0) throw new Error(`Missing operand unit row: ${role}`);
+    const next = markup.indexOf('data-role=', start + marker.length);
+    const row = markup.slice(start, next < 0 ? markup.length : next);
+    return Object.fromEntries([...row.matchAll(/<div[^>]*data-place="(-?\d+)"[^>]*>([\s\S]*?)<\/div>/g)]
+        .map(match => [match[1], text(match[2]!).trim()]).filter(([, unit]) => unit !== ''));
+};
+
+describe('given decimal operand unit captions', () => {
+    it('identifies the original zero-unit counts without revealing the disputed subtraction answer', () => {
+        const data = addSubtract('subtraction', '660.005', '0.092');
+        for (const solution of [false, true]) {
+            const markup = add(data, solution);
+            expect(unitCaptions(markup, 'aligned-top-units')).toEqual({
+                2: 'hundreds', 1: 'tens', 0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+            });
+            expect(unitCaptions(markup, 'aligned-bottom-units')).toEqual({
+                0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+            });
+            expect(markup.match(/data-role="aligned-(?:top|bottom)-units"/g)).toHaveLength(2);
+            if (!solution) {
+                expect(markup).not.toContain('659.913');
+                expect(markup).not.toContain('column-calculations');
+                expect(markup).not.toContain('data-role="regrouping"');
+                expect(markup).not.toContain('emerald');
+            }
+        }
+    });
+
+    it('leaves unwritten fractional and leading places uncaptioned in Question', () => {
+        const data = addSubtract('subtraction', '5.20', '0.004');
+        expect(unitCaptions(add(data, false), 'aligned-top-units')).toEqual({
+            0: 'ones', '-1': 'tenths', '-2': 'hundredths'
+        });
+        expect(unitCaptions(add(data, true), 'aligned-top-units')).toEqual({
+            0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+        });
+        expect(unitCaptions(add(data, false), 'aligned-bottom-units')).toEqual({
+            0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
+        });
+    });
+
+    it('does not turn written result digits or carry-only leading places into captioned zero quantities', () => {
+        for (const data of [addSubtract('addition', '12.5', '18.5'), decimalAdditionOracle]) {
+            const markup = add(data, true);
+            expect(markup.match(/data-role="aligned-(?:top|bottom)-units"/g)).toHaveLength(2);
+            expect(markup).not.toContain('decimal-result-units');
+            expect(markup).not.toContain('regrouping-units');
+        }
+        const positive = add(addSubtract('addition', '12.5', '18.5'), true);
+        expect(text(positive)).toContain('tenths 5 + 5 = 10');
+        expect(positive).not.toContain('5 + 5 + 0');
+        expect(unitCaptions(add(decimalAdditionOracle, true), 'aligned-top-units')).not.toHaveProperty('1');
+    });
+
+    it('keeps Question captions and all givens independent of hidden results and regrouping traces', () => {
+        const data = addSubtract('subtraction', '660.005', '0.092');
+        const unrelated = addSubtract('addition', '999', '1');
+        // The leaf rejects inconsistent payloads; a Question projection still must not leak their hidden work.
+        expect(add({...data, result: unrelated.result, columns: []}, false)).toBe(add(data, false));
+    });
+
+    it('supports the supplied safe-integer and fifteen-place fractional boundaries', () => {
+        for (const solution of [false, true]) {
+            const largest = unitCaptions(add(addSubtract('addition', '9007199254740991', '0'), solution), 'aligned-top-units');
+            expect(Object.keys(largest)).toHaveLength(16);
+            expect(largest['15']).toBe('quadrillions');
+            expect(largest).not.toHaveProperty('16');
+            const smallest = unitCaptions(add(addSubtract('addition', '0.000000000000001', '0'), solution), 'aligned-top-units');
+            expect(Object.keys(smallest)).toHaveLength(16);
+            expect(smallest['-15']).toBe('quadrillionths');
+            expect(unitCaptions(add(addSubtract('addition', '0.000000000000001', '0'), false), 'aligned-bottom-units'))
+                .toEqual({0: 'ones'});
+        }
+    });
+});
+
 describe('decimal written-algorithm projections', () => {
     it('keeps original decimal forms and alignment while withholding all calculated work in Question', () => {
         for (const question of [add(decimalAdditionOracle, false), add(decimalAlignmentOracle, false), mul(decimalMultiplicationOracle, false), div(decimalDivisionOracle, false)]) {

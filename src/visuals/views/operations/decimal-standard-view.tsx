@@ -57,7 +57,7 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
     }
 
     function Operand({value, top}: {value: ExactDecimalValue; top: boolean}) {
-        return <Row label={top ? '' : symbol} role={top ? 'aligned-top' : 'aligned-bottom'} point={value.scale > 0 || isSolutionView ? '.' : null}
+        return <><Row label={top ? '' : symbol} role={top ? 'aligned-top' : 'aligned-bottom'} point={value.scale > 0 || isSolutionView ? '.' : null}
             pointGreen={isSolutionView && value.scale === 0} cell={place => {
             const original = decimalDigitAt(value, place);
             const column = columnByPlace.get(place);
@@ -67,7 +67,16 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
             return <Cell width={width} green={appended}>
                 <span className={changed ? 'line-through decoration-slate-400' : ''}>{original === null ? appended ? 0 : null : original}</span>
             </Cell>;
-        }} />;
+        }} />
+            <Row label="Units" role={top ? 'aligned-top-units' : 'aligned-bottom-units'} point={null} cell={place => {
+                const given = decimalDigitAt(value, place) !== null;
+                const aligned = isSolutionView && place < -value.scale;
+                return <div data-place={place} className="flex shrink-0 items-center justify-center break-words px-0.5 text-center font-sans text-[10px] font-medium leading-3 text-slate-600"
+                    style={{width, height: 36}}>
+                    <span className="min-w-0">{given || aligned ? columnUnit(place) : null}</span>
+                </div>;
+            }} />
+        </>;
     }
 
     return <Card title={`Standard decimal ${data.operation}`} expression={<>{data.top.numeral} {symbol} {data.bottom.numeral}</>}>
