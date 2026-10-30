@@ -207,7 +207,7 @@ seven files**. A final full coverage run and canonical VQA remain required.
 
 ### Decimal column-zero predicate correction
 
-**[APPROVED; IMPLEMENTATION IN PROGRESS: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
+**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
 the settled numerical-zero rule. `12.5 + 18.5 = 31.0` currently claims zero solely because
 the positive column sum `5 + 5 = 10` writes a zero digit. The supported seed-105 example
 `3779.7 + 3825.5 = 7605.2` has the same defect. Conversely, `122.5 − 111.4 = 11.1` omits
@@ -228,6 +228,15 @@ operations/profiles. A temporary counterfactual completes/replays all 6,000 stre
 they are not exhaustive seed or distribution claims. The correction follows the already
 agreed semantics. The user has approved its incidental resampling/replay consequences.
 Concrete predicate and evidence: `temp/canonical-acceptance-2026-10-30/decimal-column-zero-proposal-note.md`.
+
+The two-file implementation passes **40 tests in three files**, with **100%** statement,
+branch, function and line coverage across its generator, specification and zero predicate.
+Regressions retain the seed-105 mathematical frame in the corrected zero-free profile,
+verify native replay and both profile witnesses at every cap, and distinguish actual
+working/subtraction zeros from carry digits, padding and initialization sentinels. Types,
+matching and whitespace checks pass; all ten protected target/policy/specification/proposal
+generator hashes remain unchanged. The implementation changes the admission predicate only;
+the approved resampling consequences will be checked on the next canonical snapshot.
 
 ## Reasoning proposal domain repair (2026-10-30)
 
