@@ -280,3 +280,81 @@ generated dataset or source files. The committed-source gate consists of reposit
 checks, the full coverage suite, application build, strict label-architecture audit, and
 a source dependency audit that inspects resolved omissions separately from strict exit
 status. Stored-dataset acceptance remains a later regeneration/VQA step.
+
+## Stable v0.33.0 adoption (2026-10-30)
+
+**Status: stable pin, repository checks, full coverage and dataset verification pass.**
+
+The stable [release `v0.33.0`](https://github.com/christian-bick/edugraph-ontology/releases/tag/v0.33.0)
+was published on 2026-10-30 at 22:48:52 UTC from ontology commit
+`b0d81eed9b3dc3f9f9a1799b9b080151d36bd8f5`. Its only source change from parent
+`00409a39c911fa79adb911bf6b724a9d34473588` is the release note. The tag workflow passed;
+all eight published assets were downloaded and matched their GitHub SHA-256 digests, and
+the four Turtle assets match the tagged source. The dirty sibling ontology working tree
+was not used as the package source.
+
+The content baseline is `f665267ff18da0cf5499bc5afa18cef4d4fa87dc`. Its installed package,
+complete ontology records, classifier involvement text and eligibility, generated enum
+mappings, CCSS usage closure, stored sample identities and VQA cache hashes are retained
+under `temp/stable-ontology-pin-2026-10-30/`. The baseline contains **1,491 descriptors**,
+**7,626 semantic relation records**, a CCSS closure of **420 roots / 603 entities /
+603 structural relations**, and **2,918 stored samples**.
+
+Both dependency manifests pin the exact published
+[`edugraph-ts.tgz`](https://github.com/christian-bick/edugraph-ontology/releases/download/v0.33.0/edugraph-ts.tgz)
+asset, and the installed version is `0.33.0`. The asset SHA-256 is
+`18ae5de668b1ac1fc96f4bcfbf27c446108e13e3f68c99a10cb3e932a0c6183f`.
+The lockfile integrity is
+`sha512-Ma4ri3BpB6uvx95qVtpW5e6aiTTSAC7vFh4RNWOFzQ9dChzXxL/mnHpK7VK6UJ7T8WY1MIJ8Ycs99YqU56MiQw==`.
+The dependency URL, lock resolution/version/integrity and installed package agree.
+
+Comparison with the retained installed preview finds **zero entity, relation, descriptor
+text, eligibility, enum or CCSS-closure differences**. There are no runtime file changes.
+Only package metadata and the packaged
+[v0.33.0 release note](https://github.com/christian-bick/edugraph-ontology/blob/v0.33.0/docs/releases/v0.33.0.md)
+differ. The full package comparison is
+`temp/stable-ontology-pin-2026-10-30/candidate-comparison.json`; installed provenance is in
+`installed-stable-pin.json` in the same directory. Published-release checks are retained
+under `temp/ontology-stable-release-2026-10-30/`.
+
+| Evidence | State |
+| --- | --- |
+| Published stable tag, release commit and asset URL | Verified, including all eight asset digests and the four tagged Turtle sources |
+| Asset SHA-256 and lockfile SHA-512 integrity | Recorded above |
+| Installed stable version and dependency-manifest agreement | Verified `0.33.0` with the exact published asset |
+| Complete entity identities, eligibility, relations, classifier text and enum comparison | Identical to preview `0.32.0-pre.1.00409a39c911`; no runtime changes |
+| Repository checks, types and application build | Pass, each exits 0 |
+| Complete tests and generator coverage gate | Pass, 906 files / 7,464 tests; every generator meets its thresholds |
+| Authoritative graph reconstruction and artifact-preservation comparison | Pass, metadata-only refresh with zero image bytes or shards written |
+| Strict current-key dataset/cache audit | Pass, all 2,918 samples have exact passing coverage |
+
+Canonical `--rebuild-graph` publishes snapshot
+`b73ff2111380a3f86594a79b9b6087a6f9e7d288a2459721b9b5985502916cb2`.
+Only **five non-render nodes** are affected; **16,740 nodes** and **508 shards** are
+reused, with **zero shards written and zero image bytes written**. Strict dataset audit
+confirms source freshness, canonical image integrity, zero annotation-dependency failures
+and exact passing VQA coverage for **2,918/2,918 images**, with no missing, stale, failing,
+duplicate or malformed cache records. No new VQA requests were required.
+
+The independent post-pin comparison preserves all **2,918 complete stored rows and actual
+PNG files**, all **175 VQA cache files**, all **1,013 target IDs and label sets**, and all
+**1,222 matched routes**. Rows include complete plans/replay receipts, annotations,
+fingerprints, configuration/seed/continuation data, ownership and associations. The union
+merge retains **2,416 training and 502 validation images**; its byte audit passes with
+zero errors and the same single warning for redundant copies with identical annotations.
+
+Evidence is under `temp/stable-ontology-pin-2026-10-30/` in
+`repository-check-status.json`, `canonical-generation.log`, `dataset-audit.log`,
+`dataset-invariance-post-pin.json`, `merge.log` and `union-images.log`.
+
+The complete coverage run passes **906 test files / 7,464 tests**. Generator coverage is
+**98.36% statements, 97.05% branches, 100% functions and 99.46% lines**; every generator
+passes the existing thresholds. Both test and coverage-check exit codes are zero, recorded
+in `full-coverage-durable-status.json` with the complete output in
+`full-coverage-durable.log` in the same evidence directory.
+
+This adoption authorizes a dependency/provenance update. It preserves targets, matching
+contracts, rendering, sampling, the Area allowlist, the range-policy exclusion and the
+existing label-dependency/inference boundaries. It does not publish a dataset release or
+change the separately deferred broader zero-label review. Earlier preview provenance and
+validation records above remain historical evidence for their recorded source states.

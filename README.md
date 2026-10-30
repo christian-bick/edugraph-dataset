@@ -14,13 +14,13 @@ Explore its standards coverage and generated tasks:
 
 > **Version Alignment:** The dataset version is strictly tied to the version of the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology) it was generated with. This ensures that the semantic labels stay consistent with the training data. For example v0.6.0-02 refers to the second dataset revision for ontology version 0.6.0. 
 
-Development currently pins ontology preview `0.32.0-pre.1.00409a39c911`.
+Development pins stable ontology `0.33.0`. Its
+[adoption record](docs/history/ontology-v032-adoption.md#stable-v0330-adoption-2026-10-30)
+confirms semantic equivalence with the preceding preview and a graph-only refresh
+preserving all 2,918 images and their exact passing VQA coverage.
 The [model-scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
-records package verification and the additive fraction-model declarations.
-
-Its [adoption record](docs/history/ontology-v032-adoption.md#branch-integration-2026-10-30)
-separates current source integration from historical dataset validation; published dataset
-versions remain independently versioned.
+retains the earlier package verification and additive fraction-model declarations.
+Published dataset versions remain independently versioned.
 
 ## General Concepts
 
