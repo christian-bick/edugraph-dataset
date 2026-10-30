@@ -15,7 +15,7 @@ matching capabilities; representation completeness remains separate.
 The five repairs below were approved in two checkpoints, including the finite profiles'
 incidental sampling changes. Targets, the outer Area allowlist and range-policy exclusion remain
 unchanged. These are matching-capable declarations; no inference, adapters, automatic completion
-or dependency-policy changes are introduced. The preceding 63-requirement analysis is retained
+or dependency-policy changes are introduced. The following 63-requirement analysis is retained
 below as the baseline and decision record.
 
 ### ZS-A1 — Even remainder and symbolic quotient
@@ -43,8 +43,75 @@ Types, spec ownership, label eligibility, standards and documentation checks pas
 suite passed 7,144 tests and exposed two obsolete parity assertions; after correcting those
 assertions, both pass in their focused rerun. The second checkpoint reruns the complete coverage
 gate against the combined implementation.
-The three profile repairs are the second checkpoint; no deferred semantic decision is credited
-as closed by this checkpoint.
+Checkpoint commit: `6453df63`. No deferred semantic decision is credited as closed.
+
+### ZS-A2 — Odd grouping and decimal whole quantities
+
+Implemented the other three repairs with finite, matching-capable mathematical profiles:
+
+- The existing grouping field resolves to `even`, `singleton-odd` or `positive-odd`. Count 1
+  has zero-sized groups and is WithZero; odd counts 3..19 are WithoutZero. Payload parity remains
+  ordinary `even`/`odd`. Bare odd requests complete to one of the two declared profiles before
+  generation. There is no unlabelled `any` default left in this dedicated producer; the shared
+  scalar-counting schema is unchanged. Bounds and parity/zero compatibility reject empty domains
+  before sampling. A feasible singleton still consumes the scalar sampler's one draw.
+- Decimal reading selects zero-whole or positive-whole source values, then builds the same three
+  neighboring comparison values. Every comparison retains the source's whole quantity and a
+  strictly positive fraction.
+- Decimal numeral writing now uses the writer's existing corrected zero-whole profiles, just
+  like number-name writing. Both use one shared conditional sampler. The unconditioned source
+  sampler, its precision/internal-placeholder probabilities and comparison construction are
+  unchanged. Existing number-name profiles retain their configurations and random continuation.
+
+The zero predicate is numerical `wholePart === 0`, never the presence of the digit `0`:
+`0.205` names zero wholes, whereas `2.05` does not introduce numerical zero. The finite profiles
+preserve every supported value, all 20 parity collections, all 9,990 canonical source decimals
+and their comparison relations. No payload contract, view, rendering instruction or target changes.
+
+For each of the three affected targets, the authoritative plan has two equally selected profiles.
+The singleton odd share changes from 1/10 to 1/2; each other odd count changes from 1/10 to 1/18.
+Zero-whole decimals likewise change from a raw 1/10 share to a 1/2 profile share. Conditional
+decimal precision/digit-pattern probabilities retain their original law. These are plan/sampler
+probabilities, not a balancing guarantee for a deduplicated dataset. Seeded payloads, configuration
+and random continuation may change in these three slices, as approved; same-value rendering does
+not. Broad unqualified direct grouping requests now select complete profiles instead of `any`.
+
+The combined batch closes **five original zero requirements: 63 to 61 to 58**, leaving **51 zero
+and seven sign requirements**. There are no policy retirements. The outstanding work remains
+**24 requirements with a previously approved conditional split path, plus 34 requiring the semantic
+or ownership decisions in the review below**. Source readiness remains blocked by those findings
+and the separately recorded reasoning-view correctness item. Stored-dataset acceptance still needs
+the later readiness regeneration and validation; this source batch does not regenerate it.
+
+Complete matching retains **1,013 targets / 1,213 tuples**, with no added or lost route. Choices
+increase **1,575 to 1,578**, exactly one extra choice for each of the three profile targets. All
+736 unaffected planned probes retain configurations, payloads and random continuation, including
+even parity and existing name-writing profiles. The 96 accepted profile probes all carry truthful
+zero claims; all 1,664 original same-value Question/Solution SSR comparisons remain identical.
+Direct API comparisons separately preserve 368 unaffected probes and validate 48 profile probes.
+
+Finite proofs exhaust all 20 collection counts and the decimal sampler's 10,080 weighted raw paths
+(9,990 canonical values), including every comparison offset. Parity tests independently compare
+4,400 bound/parity/zero combinations and 1,728 interval/profile domains with concrete count sets.
+Replay tests preserve actual admitted aliases rather than using `produces` or sampled outcomes as
+source-completeness proof. Ordinary source/configuration identities invalidate affected replay
+receipts; matching and replay machinery are unchanged.
+
+The final audit has **58 requirements across 52 selections**, with zero conflicts, invalid
+contexts, row/contract errors, incomplete enumeration or pending/invalid inference. Stored findings
+remain **2,542 raw / 2,528 distinct** and the stored generation is unchanged. Source report-only
+range findings increase **587 to 589** because the two decimal profiles each add a choice with an
+existing range omission; range policy and its exclusion remain unchanged. These are recorded
+separately from the five closed non-range lineages. Evidence is under
+`temp/zero-sign-autonomous/` (`a2.json`, `a2-comparison.json`, final audit, preservation and independent
+verification); the independent checks retain the original baseline and first checkpoint.
+
+Final gates pass: **885 test files / 7,152 tests**, all generator coverage thresholds, types,
+spec ownership, label eligibility, standards and documentation. Coverage is **98.34% statements,
+97.00% branches, 100% functions and 99.44% lines**. All seven target files, all 15 dependency
+implementation files, the package pin, renderer sources and unrelated working changes are
+preserved. The two pre-existing algebra-file patches remain unstaged and unchanged; the first
+checkpoint stages only its own additive repair.
 
 ## Remaining zero/sign review (2026-10-30)
 

@@ -53,8 +53,9 @@ describe('DecimalWritingGenerator', () => {
             for (let seed = 0; seed < 240; seed++) {
                 setSeed(seed);
                 const {data} = generator.generate({notationFamily,
-                    zeroProfile: notationFamily === Area.DecimalNotation ? 'legacy' : 'with-zero'})!;
+                    zeroProfile: seed % 2 === 0 ? 'with-zero' : 'without-zero'})!;
                 verifyExactValue(data);
+                expect(data.wholePart === 0).toBe(seed % 2 === 0);
                 precisions.add(data.fractionalPart.precision);
                 if (data.fractionalPart.precision === 'thousandths'
                     && data.fractionalPart.digits[0] === 0
@@ -69,9 +70,9 @@ describe('DecimalWritingGenerator', () => {
 
     it('replays the same decimal under the same seed', () => {
         setSeed('decimal-writing-replay');
-        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'legacy'});
+        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero'});
         setSeed('decimal-writing-replay');
-        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'legacy'})).toEqual(first);
+        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero'})).toEqual(first);
     });
 
     it('can represent five and eight thousandths with both zero placeholders', () => {

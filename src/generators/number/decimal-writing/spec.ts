@@ -1,4 +1,4 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
@@ -8,7 +8,7 @@ export const spec: GeneratorSpec = {
     generatorId: 'decimal-writing',
     compatibility: [generatorLabelRule('decimal-name-zero-profile', [...decimalNotationLabels, ...decimalZeroLabels], selected => {
         const withZero = selected(Scope.NumbersWithZero), withoutZero = selected(Scope.NumbersWithoutZero);
-        return selected(Area.NumberNameNotation) ? withZero !== withoutZero : !withZero && !withoutZero;
+        return withZero !== withoutZero;
     })],
     generalLabels: [
         Scope.ThousandthDecimals,
@@ -19,7 +19,7 @@ export const spec: GeneratorSpec = {
 
 export const DecimalWritingGeneratorSchema = {
     notationFamily: [decimalNotationLabels, resolveDecimalNotation, decimalNotationLabels.map(label => [label])],
-    zeroProfile: [decimalZeroLabels, resolveDecimalZeroProfile, [[], ...decimalZeroLabels.map(label => [label])]]
+    zeroProfile: [decimalZeroLabels, resolveDecimalZeroProfile, decimalZeroLabels.map(label => [label])]
 } as const;
 
 export type DecimalWritingGeneratorConfig = ConfigFromSchema<

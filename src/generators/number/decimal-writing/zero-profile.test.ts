@@ -1,4 +1,4 @@
-import {Ability, Area, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import * as random from '../../../lib/random.ts';
 import {extractConfig, findSchemaFallbackContractIssues} from '../../../lib/utils.ts';
@@ -8,9 +8,8 @@ import type {DecimalWritingProblem} from '../../../types/problems.ts';
 import {DecimalWritingGenerator} from './generator.ts';
 import {DecimalWritingGeneratorSchema, spec} from './spec.ts';
 import {decimalWritingHasZero, resolveDecimalNotation, resolveDecimalZeroProfile} from './zero-profile.ts';
-import {spec as readingSpec} from '../../../visuals/views/numbers/numbers-decimal-numeral-reading/spec.ts';
 import {decimalReadingChoices} from '../../../visuals/views/numbers/decimal-writing-helpers.ts';
-import {buildDecimalReadingRelation} from '../decimal-reading-relations/generator.ts';
+import {buildDecimalReadingRelation, DecimalReadingRelationsGenerator} from '../decimal-reading-relations/generator.ts';
 
 afterEach(() => vi.restoreAllMocks());
 const generator = new DecimalWritingGenerator();
@@ -42,40 +41,43 @@ describe('decimal number-name whole-quantity zero profiles', () => {
         expect(resolveDecimalNotation([])).toBeUndefined();
         expect(resolveDecimalNotation([Area.DecimalNotation])).toBe(Area.DecimalNotation);
         expect(resolveDecimalNotation([Scope.NumbersWithZero])).toBe(Area.NumberNameNotation);
-        expect(resolveDecimalNotation([Area.DecimalNotation, Scope.NumbersWithZero])).toBeUndefined();
+        expect(resolveDecimalNotation([Area.DecimalNotation, Scope.NumbersWithZero])).toBe(Area.DecimalNotation);
         expect(resolveDecimalNotation([Area.DecimalNotation, Area.NumberNameNotation])).toBeUndefined();
         expect(resolveDecimalNotation([Scope.NumbersWithZero, Scope.NumbersWithoutZero])).toBeUndefined();
-        expect(resolveDecimalZeroProfile([])).toBe('legacy');
+        expect(resolveDecimalZeroProfile([])).toBeUndefined();
         expect(resolveDecimalZeroProfile([Area.NumberNameNotation])).toBeUndefined();
-        expect(resolveDecimalZeroProfile([Area.DecimalNotation])).toBe('legacy');
-        expect(resolveDecimalZeroProfile([Area.DecimalNotation, Scope.NumbersWithoutZero])).toBeUndefined();
+        expect(resolveDecimalZeroProfile([Area.DecimalNotation])).toBeUndefined();
+        expect(resolveDecimalZeroProfile([Area.DecimalNotation, Scope.NumbersWithoutZero])).toBe('without-zero');
         expect(resolveDecimalZeroProfile([Area.DecimalNotation, Area.NumberNameNotation])).toBeUndefined();
         expect(resolveDecimalZeroProfile([Scope.NumbersWithZero, Scope.NumbersWithoutZero])).toBeUndefined();
         for (const label of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
             expect(plan([label]).supported).toBe(true);
-            expect(plan([Area.DecimalNotation, label]).supported).toBe(false);
-            const result = plan([Area.NumberNameNotation, label]);
-            expect(result.supported).toBe(true);
-            if (!result.supported) continue;
-            for (let seed = 0; seed < 64; seed++) {
-                random.setSeed(seed);
-                const direct = extractConfig(DecimalWritingGeneratorSchema, [label]);
-                expect(direct.config.notationFamily).toBe(Area.NumberNameNotation);
-                expect(direct.resolvedLabels).toContain(label);
-                const data = generator.generate(direct.config)!.data;
-                expect(decimalWritingHasZero(data)).toBe(label === Scope.NumbersWithZero);
-                const planned = resolvePlannedConfigurations({generatorSchema: generator.schema, viewSchema: {},
-                    plan: result.plan, sampleKey: 'decimal-zero#decimal-writing#decimal-zero-test#train#question#inst:0', seed, attempt: 1});
-                expect(decimalWritingHasZero(generator.generate(planned.generatorConfig)!.data))
-                    .toBe(label === Scope.NumbersWithZero);
+            expect(extractConfig(DecimalWritingGeneratorSchema, [label]).config.notationFamily).toBe(Area.NumberNameNotation);
+            for (const notationFamily of [Area.DecimalNotation, Area.NumberNameNotation] as const) {
+                const result = plan([notationFamily, label]);
+                expect(result.supported).toBe(true);
+                if (!result.supported) throw new Error('Expected both zero profiles for each notation family.');
+                for (let seed = 0; seed < 64; seed++) {
+                    random.setSeed(seed);
+                    const direct = extractConfig(DecimalWritingGeneratorSchema, [notationFamily, label]);
+                    expect(direct.config.notationFamily).toBe(notationFamily);
+                    expect(direct.resolvedLabels).toContain(label);
+                    const data = generator.generate(direct.config)!.data;
+                    expect(decimalWritingHasZero(data)).toBe(label === Scope.NumbersWithZero);
+                    const planned = resolvePlannedConfigurations({generatorSchema: generator.schema, viewSchema: {},
+                        plan: result.plan, sampleKey: 'decimal-zero#decimal-writing#decimal-zero-test#train#question#inst:0', seed, attempt: 1});
+                    expect(decimalWritingHasZero(generator.generate(planned.generatorConfig)!.data))
+                        .toBe(label === Scope.NumbersWithZero);
+                }
             }
         }
-        const legacy = plan([Area.DecimalNotation]);
-        expect(legacy.supported).toBe(true);
-        if (legacy.supported) expect(legacy.plan.domains.find(domain => domain.field === 'zeroProfile')!
-            .alternatives.map(choice => choice.labels)).toEqual([[]]);
+        const numeral = plan([Area.DecimalNotation]);
+        expect(numeral.supported).toBe(true);
+        if (numeral.supported) expect(numeral.plan.domains.find(domain => domain.field === 'zeroProfile')!
+            .alternatives.map(choice => choice.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
         expect(plan([Area.NumberNameNotation, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).supported).toBe(false);
-        expect(() => extractConfig(generator.schema, [Area.DecimalNotation, Scope.NumbersWithZero])).toThrow();
+        expect(extractConfig(generator.schema, [Area.DecimalNotation, Scope.NumbersWithZero]).config)
+            .toEqual({notationFamily: Area.DecimalNotation, zeroProfile: 'with-zero'});
     });
 
     it('retains every old raw precision/pattern path and its duplicate probability mass', () => {
@@ -86,13 +88,20 @@ describe('decimal number-name whole-quantity zero profiles', () => {
             return next;
         });
         const masses = new Map<string, number>();
+        const reader = new DecimalReadingRelationsGenerator();
         let paths = 0, zeroMass = 0, nonzeroMass = 0;
         const check = (data: DecimalWritingProblem, draws: number[], mass: number) => {
-            queue = draws;
             const zero = decimalWritingHasZero(data);
-            const generated = generator.generate({notationFamily: Area.NumberNameNotation,
-                zeroProfile: zero ? 'with-zero' : 'without-zero'});
-            expect(generated?.data).toEqual(data);
+            const zeroProfile = zero ? 'with-zero' : 'without-zero';
+            for (const notationFamily of [Area.DecimalNotation, Area.NumberNameNotation] as const) {
+                queue = [...draws];
+                expect(generator.generate({notationFamily, zeroProfile})?.data).toEqual(data);
+                expect(queue).toEqual([]);
+            }
+            queue = [...draws];
+            const relation = reader.generate({zeroProfile})!.data;
+            expect(relation).toEqual(buildDecimalReadingRelation(data));
+            expect(relation.comparisonValues.every(value => Math.floor(value / 1000) === data.wholePart)).toBe(true);
             expect(queue).toEqual([]);
             masses.set(data.canonicalNumeral, (masses.get(data.canonicalNumeral) ?? 0) + mass);
             if (zero) zeroMass += mass; else nonzeroMass += mass;
@@ -130,25 +139,24 @@ describe('decimal number-name whole-quantity zero profiles', () => {
 
     it('requires the scoped profile and terminates a hostile incompatible source', () => {
         expect(() => generator.generate({notationFamily: Area.DecimalNotation})).toThrow('zeroProfile');
-        expect(() => generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'legacy'})).toThrow('declared zero');
-        expect(() => generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'with-zero'})).toThrow('legacy');
+        for (const notationFamily of [Area.NumberNameNotation, Area.DecimalNotation]) {
+            expect(() => generator.generate({notationFamily, zeroProfile: 'legacy'} as never)).toThrow('declared zero');
+        }
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
         expect(generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero'})).toBeNull();
         expect(draw).toHaveBeenCalledTimes(256 * 3);
     });
 
-    it('keeps reading distractors outside the name-source zero guarantee for broad requests too', () => {
+    it('keeps all reading quantities in the same numerical zero-whole context', () => {
         const source = decimal(5, [1, 9, 9], 3);
         expect(decimalWritingHasZero(source)).toBe(false);
         // Both values have positive wholes; a zero digit in an alternative
         // does not change the name-source numerical-zero classification.
         expect(decimalReadingChoices(buildDecimalReadingRelation(source), 0).some(choice => choice.valueInThousandths === 5209)).toBe(true);
-        const readingPlan = (labels: string[]) => planModelCompatibility({id: 'reading-zero', labels},
-            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},
-            {viewId: readingSpec.viewId, generalLabels: readingSpec.generalLabels, schema: {}, spec: readingSpec});
-        expect(readingPlan([Scope.NumbersWithoutZero, Ability.TextualReception]).supported).toBe(false);
-        expect(readingPlan([Area.NumberNameNotation, Ability.TextualReception]).supported).toBe(false);
-        expect(readingPlan([Area.DecimalNotation, Ability.TextualReception]).supported).toBe(true);
-        expect(readingPlan([Ability.TextualReception]).supported).toBe(true);
+        expect(decimalReadingChoices(buildDecimalReadingRelation(source), 0)
+            .every(choice => choice.name.startsWith('five and '))).toBe(true);
+        const zeroWholes = decimal(0, [2, 0, 5], 3);
+        expect(decimalReadingChoices(buildDecimalReadingRelation(zeroWholes), 0)
+            .every(choice => choice.name.startsWith('zero and '))).toBe(true);
     });
 });

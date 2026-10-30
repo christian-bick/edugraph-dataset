@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {ParityGroupingGeneratorSchema, spec as generatorSpec} from '../../../../generators/counting/parity-grouping/spec.ts';
 import {matchTarget} from '../../../../lib/matching.ts';
+import {enumerateDependencyAuditSelections} from '../../../../lib/label-dependency-audit.ts';
 import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../../lib/planned-generation.ts';
 import {ParityGroupingGenerator} from '../../../../generators/counting/parity-grouping/generator.ts';
 import {extractSchemaLabels} from '../../../../lib/utils.ts';
@@ -35,15 +36,24 @@ describe('counting-objects-parity capabilities', () => {
             Scope.Base10, Scope.PhysicalNumbers]));
         expect(resolved.view.config).toEqual({});
         expect(generatorSpec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
-        expect(resolved.labels).not.toContain(Scope.NumbersWithoutZero);
+        expect(resolved.labels.includes(Scope.NumbersWithZero)).toBe(resolved.generatorConfig.parity !== 'positive-odd');
+        expect(resolved.labels.includes(Scope.NumbersWithoutZero)).toBe(resolved.generatorConfig.parity === 'positive-odd');
         expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithoutZero]}, generator, view))
-            .toMatchObject({matched: false, reason: 'unsupported-label', label: Scope.NumbersWithoutZero});
-        expect(resolved.labels.includes(Scope.NumbersWithZero)).toBe(parity === Scope.EvenNumbers);
+            .toMatchObject({matched: parity === Scope.OddNumbers});
         expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithZero]}, generator, view).matched)
-            .toBe(parity === Scope.EvenNumbers);
+            .toBe(true);
         const assessment = createLabelDependencyEvaluator().evaluate(resolved.labels)
             .assessments.find(item => item.facet === 'zero');
-        expect(assessment?.status).toBe(parity === Scope.EvenNumbers ? 'satisfied' : 'missing');
+        expect(assessment?.status).toBe('satisfied');
+        const variants = enumerateDependencyAuditSelections(matched.plan);
+        expect(variants.status).toBe('complete');
+        const zeroLabels: readonly string[] = [Scope.NumbersWithZero, Scope.NumbersWithoutZero];
+        for (const variant of variants.selections) {
+            expect(variant.labels.filter(label => zeroLabels.includes(label)))
+                .toHaveLength(1);
+            expect(createLabelDependencyEvaluator().evaluate(variant.labels)
+                .assessments.find(item => item.facet === 'zero')?.status).toBe('satisfied');
+        }
 
         for (const mode of ['question', 'solution'] as const) {
             const draw = generatePlannedDraw({generator: new ParityGroupingGenerator(), viewSchema: CountingObjectsParityViewSchema,
@@ -52,6 +62,8 @@ describe('counting-objects-parity capabilities', () => {
             expect(draw.stub).not.toBeNull();
             expect(draw.labels).toEqual(resolved.labels);
             expect(draw.view).toEqual(resolved.view);
+            expect(draw.labels.includes(Scope.NumbersWithZero)).toBe(draw.stub!.data.groupSize === 0 || draw.stub!.data.remainder === 0);
+            expect(draw.labels.includes(Scope.NumbersWithoutZero)).toBe(draw.stub!.data.groupSize > 0 && draw.stub!.data.remainder > 0);
         }
     });
 });

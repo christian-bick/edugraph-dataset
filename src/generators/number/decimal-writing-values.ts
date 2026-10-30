@@ -46,3 +46,12 @@ export function sampleDecimalWriting(): DecimalWritingProblem {
     return {kind: 'decimal-writing', base: 10, wholePart, valueInThousandths,
         canonicalNumeral, fractionalPart: fraction};
 }
+
+/** Condition the unchanged source law on the whole quantity, never its digits. */
+export function sampleDecimalWritingWithWholeZero(requireZeroWhole: boolean): DecimalWritingProblem | null {
+    for (let attempt = 0; attempt < 256; attempt++) {
+        const data = sampleDecimalWriting();
+        if ((data.wholePart === 0) === requireZeroWhole) return data;
+    }
+    return null;
+}

@@ -13,13 +13,14 @@ export class ParityGroupingGenerator implements ProblemGenerator<ParityGroupingP
         validateConfigFields('parity-grouping', config, ['range', 'parity']);
         const range = config.range!;
         if (typeof range !== 'object' || range === null || !Number.isSafeInteger(range.min)
-            || !Number.isSafeInteger(range.max) || !['any', 'even', 'odd'].includes(config.parity!)) {
+            || !Number.isSafeInteger(range.max) || !['even', 'singleton-odd', 'positive-odd'].includes(config.parity!)) {
             throw new GeneratorValidationError('parity-grouping', 'Expected integer quantity bounds and a supported parity.');
         }
-        // The existing parity task has a 1..20 collection domain. Reuse its exact
-        // scalar sampler, so each eligible count keeps its former probability.
-        const quantity = sampleCountingQuantity({min: Math.max(1, range.min), max: Math.min(20, range.max)},
-            config.parity!, random);
+        // Preserve the existing scalar draw within each mathematical profile.
+        // A feasible singleton still consumes that same one draw.
+        const quantity = sampleCountingQuantity({min: Math.max(config.parity === 'positive-odd' ? 3 : 1, range.min),
+            max: Math.min(config.parity === 'singleton-odd' ? 1 : 20, range.max)},
+            config.parity === 'even' ? 'even' : 'odd', random);
         if (!quantity) return null;
         const remainder = quantity.numObjects % 2 as 0 | 1;
         return {data: {kind: 'parity-grouping', numObjects: quantity.numObjects,

@@ -1,10 +1,22 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import * as random from '../../lib/random.ts';
-import {sampleDecimalWriting} from './decimal-writing-values.ts';
+import {sampleDecimalWriting, sampleDecimalWritingWithWholeZero} from './decimal-writing-values.ts';
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('shared exact decimal source sampler', () => {
+    it('conditions only on zero wholes while preserving accepted raw draws and fractional zero digits', () => {
+        const draws = [0.55, 0.18, 0.25, 0.5, 0.05, 0.06, 0.5];
+        const spy = vi.spyOn(random, 'random').mockImplementation(() => {
+            const draw = draws.shift();
+            if (draw === undefined) throw new Error('Unexpected conditional draw');
+            return draw;
+        });
+        expect(sampleDecimalWritingWithWholeZero(false)?.canonicalNumeral).toBe('5.05');
+        expect(spy).toHaveBeenCalledTimes(4);
+        expect(sampleDecimalWritingWithWholeZero(true)?.canonicalNumeral).toBe('0.5');
+        expect(draws).toEqual([]);
+    });
     it.each([
         [[0.55, 0.06, 0.5], '5.5', 5500],
         [[0.55, 0.18, 0.25, 0.5], '5.05', 5050],

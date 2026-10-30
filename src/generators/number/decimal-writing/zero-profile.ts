@@ -5,17 +5,17 @@ import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
 export const decimalNotationLabels = [Area.DecimalNotation, Area.NumberNameNotation] as const;
 export const decimalZeroLabels = [Scope.NumbersWithZero, Scope.NumbersWithoutZero] as const;
-export type DecimalZeroProfile = 'legacy' | 'with-zero' | 'without-zero';
+export type DecimalZeroProfile = 'with-zero' | 'without-zero';
 
-/** The name-writing task requires both whole and fractional quantities. Zero
- * wholes are numerical zero; a zero digit inside a positive fraction is not. */
+/** Both writing tasks require the whole and fractional quantities. Zero wholes
+ * are numerical zero; a zero digit inside a positive fraction is not. */
 export const decimalWritingHasZero = (data: DecimalWritingProblem): boolean => data.wholePart === 0;
 
-/** A new zero request can only use the existing number-name mathematical family. */
+/** Keep the existing number-name default for a zero request without notation. */
 export const resolveDecimalNotation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
     const notation = decimalNotationLabels.filter(label => labels.includes(label));
     const zero = decimalZeroLabels.filter(label => labels.includes(label));
-    if (notation.length > 1 || zero.length > 1 || notation[0] === Area.DecimalNotation && zero.length) return undefined;
+    if (notation.length > 1 || zero.length > 1) return undefined;
     return notation[0] ?? (zero.length ? Area.NumberNameNotation : undefined);
 }), {
     kind: 'alternatives', alternatives: decimalNotationLabels.map(label => [label]),
@@ -28,12 +28,10 @@ export const resolveDecimalZeroProfile = registerStaticResolver(withLabelChoices
         const notation = decimalNotationLabels.filter(label => labels.includes(label));
         const zero = decimalZeroLabels.filter(label => labels.includes(label));
         if (notation.length > 1 || zero.length > 1) return undefined;
-        if (notation[0] === Area.DecimalNotation) return zero.length ? undefined : 'legacy';
         if (zero.length) return zero[0] === Scope.NumbersWithZero ? 'with-zero' : 'without-zero';
-        return notation[0] === Area.NumberNameNotation ? undefined : 'legacy';
+        return undefined;
     }
 ), {
-    kind: 'alternatives', alternatives: [[], ...decimalZeroLabels.map(label => [label])],
-    contextLabels: decimalNotationLabels, resolvedContext: true,
-    defaults: [{whenAll: [Area.DecimalNotation], labels: []}]
+    kind: 'alternatives', alternatives: decimalZeroLabels.map(label => [label]),
+    contextLabels: decimalNotationLabels, resolvedContext: true
 }));

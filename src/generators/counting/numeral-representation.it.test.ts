@@ -96,11 +96,12 @@ describe('counting numeral representation ownership', () => {
         }
     );
 
-    it('does not advertise zero absence for parity classification', () => {
+    it('matches zero absence only through a complete positive-odd grouping capability', () => {
         const generator = generators.find(entry => entry.generatorId === 'parity-grouping')!;
         const view = views.find(entry => entry.viewId === 'counting-objects-parity')!;
-        expect(matchesTarget([...quantityLabels, Ability.ConceptClassification], generator, view))
-            .toEqual({matched: false, reason: 'unsupported-label', label: Scope.NumbersWithoutZero});
+        expect(matchesTarget([...quantityLabels, Ability.ConceptClassification], generator, view)).toEqual({matched: true});
+        expect(matchesTarget([...quantityLabels, Scope.EvenNumbers, Ability.ConceptClassification], generator, view))
+            .toEqual({matched: false, reason: 'empty-label-domain'});
     });
 
     it('keeps the scalar counting producer outside the canonical grouping payload contract', () => {
