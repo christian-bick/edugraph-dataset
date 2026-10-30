@@ -1,0 +1,2 @@
+- **Identity:** A division expression and common-part model with proportional bars on a numerical scale starting at zero are supplied; the learner writes a real-world story preserving the quantities, units, and division roles.
+- **Modes:** Question Mode leaves the story unwritten. Solution Mode gives a coherent sharing, measured-group, or rectangle story with the same operands, units, and quotient meaning.

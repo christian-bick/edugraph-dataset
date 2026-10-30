@@ -1,0 +1,2 @@
+- **Identity:** The original division, quotient, and common-part model with proportional bars on a numerical scale starting at zero are shown; the learner explains how multiplying the quotient by the divisor rebuilds the dividend.
+- **Modes:** Question Mode leaves the reconstruction and reason blank. Solution Mode shows the exact inverse multiplication and links the divisor-sized groups to the original amount.

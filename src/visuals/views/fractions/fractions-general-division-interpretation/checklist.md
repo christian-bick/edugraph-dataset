@@ -1,0 +1,2 @@
+- **Identity:** The original division and a common-part model with proportional bars on a numerical scale starting at zero are visible; the learner interprets the quotient as a share size, quantity of equal groups, or rectangle side.
+- **Modes:** Question Mode withholds the quotient's meaning. Solution Mode explains the share size, groups-worth, or side length and gives the exact quotient with its contextual unit.

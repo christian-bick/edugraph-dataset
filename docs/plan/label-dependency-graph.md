@@ -44,6 +44,38 @@ will determine actual regeneration work at readiness. Old replay receipts reject
 routes, while all 37 control routes still accept them. Eleven focused tests, types, ownership,
 labels, standards and documentation checks pass.
 
+Checkpoint commit: `1b6a9c10`.
+
+### Checkpoint 2: interpretation, inverse explanation and story creation
+
+The other three `fractions-general-division-*` leaves now accept only the existing general
+relation payload and declare the same evidenced WithZero, Numberline and BarModel invariants.
+Their corresponding original IDs accept quotient payloads only. All four original specs and
+checklists retain their legacy capabilities; the word-problem union and construction-only mapping
+remain unchanged. No shared rendering body, mathematical helper, generator or sampler changes.
+
+The real catalog and fresh audit reproduce the design proof: **12 general tuples / 24 choices**
+have exact successors, with **1,013 targets / 1,213 tuples / 1,578 choices** overall and no unexpected
+route. All **16 legacy tuples / 42 choices** survive unchanged, including **28 WithoutZero and
+14 WithZero** choices. The second checkpoint closes another 18 requirements: **58 to 52 to 34**,
+leaving **27 zero and seven sign** across **28 selections / 21 tuples / eight pairs / seven
+producers**. All 24 original zero lineages close; no new non-range requirement or conflict appears.
+Range findings remain 589; the graph, evaluator and exact policy identities are unchanged.
+
+All 1,280 planned and 88 forced-binding fixed-seed comparisons preserve configurations, producer
+random continuation, mathematical payloads, content/task fingerprints and **2,736 Question/Solution
+SSR outputs**. Native sample identities deliberately change for the 12 migrated routes; all 384
+native probe seeds/payloads change, while native paths outside those routes remain identical.
+Receipt tests reject stale origins for all migrated routes and retain them for the 28 control
+routes. No old receipt is silently relabeled or rerouted.
+
+Twenty-two focused tests and types pass, including all four typed/runtime payload boundaries,
+every operand profile and optional witness state, both modes, origin/bar evidence, real matching
+and replay. Ownership, label and standards checks pass. Full coverage and final acceptance follow
+in the third checkpoint. Stored data is untouched: **2,542 raw / 2,528 distinct** findings remain.
+The other 34 source findings still require the four recorded decisions; their interpretation and
+the separate reasoning-view correctness item are not changed or credited as repairs here.
+
 ## Next batch after the five autonomous repairs (2026-10-30)
 
 Baseline: `67155e9a`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit is

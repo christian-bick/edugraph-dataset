@@ -5682,11 +5682,14 @@ export interface ViewTypeMap {
     'fractions-benchmark-estimate': FractionBenchmarkArithmeticProblem;
     'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
     'fractions-quotient-interpretation': FractionQuotientProblem;
-    'fractions-division-interpretation': FractionDivisionProblem;
+    'fractions-division-interpretation': FractionQuotientProblem;
+    'fractions-general-division-interpretation': FractionDivisionRelationProblem;
     'fractions-division-execution': FractionQuotientProblem;
     'fractions-general-division-execution': FractionDivisionRelationProblem;
-    'fractions-division-story-creation': FractionDivisionProblem;
-    'fractions-division-inverse-explanation': FractionDivisionProblem;
+    'fractions-division-story-creation': FractionQuotientProblem;
+    'fractions-general-division-story-creation': FractionDivisionRelationProblem;
+    'fractions-division-inverse-explanation': FractionQuotientProblem;
+    'fractions-general-division-inverse-explanation': FractionDivisionRelationProblem;
     'fractions-division-word-problem': FractionDivisionProblem;
     'fractions-division-model-construction': FractionDivisionRelationProblem;
     'fractions-product-partition-interpretation': FractionProductProblem;

@@ -10,8 +10,8 @@ import {spec as executionSpec} from './fractions-division-execution/spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 
 const leafIds = [
-    'fractions-general-division-execution', 'fractions-division-interpretation',
-    'fractions-division-inverse-explanation', 'fractions-division-story-creation',
+    'fractions-general-division-execution', 'fractions-general-division-interpretation',
+    'fractions-general-division-inverse-explanation', 'fractions-general-division-story-creation',
     'fractions-division-word-problem', 'fractions-division-model-construction'
 ] as const;
 const legacyLeafIds = ['fractions-division-execution', 'fractions-division-interpretation',
@@ -22,12 +22,16 @@ let cores: Record<LeafId, Core>;
 
 beforeAll(async () => {
     vi.stubGlobal('window', {});
-    const [execution, generalExecution, interpretation, inverse, story, word, model] = await Promise.all([
+    const [execution, generalExecution, interpretation, generalInterpretation, inverse, generalInverse,
+        story, generalStory, word, model] = await Promise.all([
         import('./fractions-division-execution/view.tsx'),
         import('./fractions-general-division-execution/view.tsx'),
         import('./fractions-division-interpretation/view.tsx'),
+        import('./fractions-general-division-interpretation/view.tsx'),
         import('./fractions-division-inverse-explanation/view.tsx'),
+        import('./fractions-general-division-inverse-explanation/view.tsx'),
         import('./fractions-division-story-creation/view.tsx'),
+        import('./fractions-general-division-story-creation/view.tsx'),
         import('./fractions-division-word-problem/view.tsx'),
         import('./fractions-division-model-construction/view.tsx')
     ]);
@@ -35,8 +39,11 @@ beforeAll(async () => {
         'fractions-division-execution': execution.FractionsDivisionExecutionCore as unknown as Core,
         'fractions-general-division-execution': generalExecution.FractionsGeneralDivisionExecutionCore as unknown as Core,
         'fractions-division-interpretation': interpretation.FractionsDivisionInterpretationCore as unknown as Core,
+        'fractions-general-division-interpretation': generalInterpretation.FractionsGeneralDivisionInterpretationCore as unknown as Core,
         'fractions-division-inverse-explanation': inverse.FractionsDivisionInverseExplanationCore as unknown as Core,
+        'fractions-general-division-inverse-explanation': generalInverse.FractionsGeneralDivisionInverseExplanationCore as unknown as Core,
         'fractions-division-story-creation': story.FractionsDivisionStoryCreationCore as unknown as Core,
+        'fractions-general-division-story-creation': generalStory.FractionsGeneralDivisionStoryCreationCore as unknown as Core,
         'fractions-division-word-problem': word.FractionsDivisionWordProblemCore as unknown as Core,
         'fractions-division-model-construction': model.FractionsDivisionModelConstructionCore as unknown as Core
     };
@@ -123,7 +130,9 @@ describe('general fraction division leaf contracts', () => {
             {...data, equationWitness: {...data.equationWitness, product: {numerator: 99, denominator: 1}}},
             {...data, multiplicationWitness: {...data.multiplicationWitness, reconstructedDividend: {numerator: 99, denominator: 1}}}
         ]) {
-            for (const id of leafIds) expect(() => render(id, invalid, false)).toThrow(/Validation Error/);
+            for (const id of leafIds) for (const solution of [false, true]) {
+                expect(() => render(id, invalid, solution)).toThrow(/Validation Error/);
+            }
         }
     });
 
