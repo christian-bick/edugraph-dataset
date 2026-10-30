@@ -19,8 +19,8 @@ export const numericContextLabels = [Area.ArithmeticExpression, Area.AlgebraicEx
 export function allowedNumericProfiles(selected: (label: string) => boolean): readonly AlgebraNumericProfile[] {
     if (!numericContextLabels.some(selected)) return [0, 1, 2, 3, 4];
     if (selected(Area.AlgebraicExpression) || selected(Area.NumericSubstitution) || selected(Area.AlgebraicModeling)) return [0];
-    if (selected(Area.ArithmeticExpression)) return selected(Area.Term) ? [2, 3, 4]
-        : selected(Area.Division) ? [1, 3] : [1, 2, 3, 4];
+    if (selected(Area.ArithmeticExpression)) return selected(Area.Term) ? [2, 3]
+        : selected(Area.Division) ? [1, 3] : [1, 2, 3];
     return [0];
 }
 
@@ -46,19 +46,18 @@ export interface ExpressionInputs {
     operation?: ArithmeticOperation;
 }
 
-/** Exact signs/zeros of the visible numeric frame and its signed additive components. */
+/** Classify displayed literals and complete signed terms, never unused evaluation subtotals. */
 export function inputsMeetNumericProfile(relation: string, inputs: ExpressionInputs, profile: AlgebraNumericProfile): boolean {
     if (profile === 0) return true;
     // The writer displays the rational domain; its quotient additionally excludes zero.
     if (relation === 'plain') return profile === (inputs.operation === 'division' ? 3 : 4);
     const {a, b, c} = inputs;
-    let {numerator: n, denominator: d} = inputs.input;
-    if (relation === 'numeric-quotient' && n === 0) { n = -1; d = 2; }
-    const values = relation === 'numeric-terms' ? [a, b, c, n, a * n, b * n,
-        (a - b) * n, (a - b) * n + c * d, -b * n]
-        : relation === 'numeric-sum' ? [a, n, a * d + n]
-            : relation === 'numeric-quotient' ? [a, n, n < 0 ? -a * d : a * d]
-                : [a, b, n, n + b * d, a * (n + b * d)];
+    let {numerator: n} = inputs.input;
+    if (relation === 'numeric-quotient' && n === 0) n = -1;
+    // Denominators and the declared coefficients are positive. For terms, the
+    // complete second signed component is -b*q even when every literal is positive.
+    const values = relation === 'numeric-terms' ? [a, b, c, n, a * n, -b * n]
+        : relation === 'numeric-sum' || relation === 'numeric-quotient' ? [a, n] : [a, b, n];
     return values.some(value => value < 0) === (profile > 2)
         && values.some(value => value === 0) === (profile % 2 === 0);
 }
@@ -66,6 +65,6 @@ export function inputsMeetNumericProfile(relation: string, inputs: ExpressionInp
 export function profilesForRelation(relation: string): readonly AlgebraNumericProfile[] {
     // The public writer resolves 0. Retain the two existing conditional configs
     // for direct mathematical replay; neither exports a polarity annotation.
-    return relation === 'plain' ? [0, 3, 4] : relation === 'numeric-terms' ? [2, 3, 4]
-        : relation === 'numeric-quotient' ? [1, 3] : relation.startsWith('numeric-') ? [1, 2, 3, 4] : [0];
+    return relation === 'plain' ? [0, 3, 4] : relation === 'numeric-terms' ? [2, 3]
+        : relation === 'numeric-quotient' ? [1, 3] : relation.startsWith('numeric-') ? [1, 2, 3] : [0];
 }

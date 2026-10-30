@@ -52,7 +52,8 @@ describe('algebra expression capability ownership and composition', () => {
                 expect(stub.data.structuralExpression.kind).toBe(relation.includes(Area.ArithmeticExpression as never) ? 'numeric' : 'symbolic');
             }
         }
-        expect(values.size).toBe(35);
+        // Twenty-eight public configurations plus the two retained private writer replay variants.
+        expect(values.size).toBe(30);
     });
 
     it('executes all 21 reviewed actual target plans with exactly their observable claims', () => {
@@ -90,6 +91,25 @@ describe('algebra expression capability ownership and composition', () => {
                 }
             }
         }
+    });
+
+    it('keeps every numeric target and its independent polarity capabilities without an unsupported negative-plus-zero conjunction', () => {
+        const targets = [...activeTargets, ...implementationTodos].filter(target => sourcePrefixes.some(prefix => target.id.startsWith(prefix))
+            && target.labels.includes(Area.ArithmeticExpression));
+        expect(targets).toHaveLength(6);
+        let numericChoices = 0;
+        for (const target of targets) {
+            const entry = target.id.startsWith(sourcePrefixes[2]) ? viewEntries[2] : viewEntries[1];
+            const existing = plan(target.id, target.labels, entry);
+            expect(existing.supported).toBe(true);
+            if (!existing.supported) throw new Error(existing.reason);
+            numericChoices += enumerateDependencyAuditSelections(existing.plan).selections.length;
+            expect(plan('independent-negative', [...target.labels, Scope.NumbersWithNegatives], entry).supported).toBe(true);
+            expect(plan('independent-zero', [...target.labels, Scope.NumbersWithZero], entry).supported)
+                .toBe(!target.labels.includes(Area.Division));
+            expect(plan('unsupported-joint', [...target.labels, Scope.NumbersWithNegatives, Scope.NumbersWithZero], entry).supported).toBe(false);
+        }
+        expect(numericChoices).toBe(16);
     });
 
     it('annotates symbolic integer literals without exporting generic sign/zero classifications', () => {

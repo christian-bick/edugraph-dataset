@@ -165,6 +165,23 @@ describe('canonical algebra expression mathematics', () => {
         }
     });
 
+    it('retains the original numeric term frame with its unused zero subtotal under the supported negative/nonzero profile', () => {
+        vi.spyOn(randomness, 'random').mockReturnValueOnce(0).mockReturnValueOnce(1 / 6)
+            .mockReturnValueOnce(3 / 5).mockReturnValueOnce(5 / 17).mockReturnValueOnce(1 / 4);
+        const data = new AlgebraExpressionsGenerator().generate({relation: 'numeric-terms', power: 'none', numericProfile: 3})!.data;
+        const expression = data.structuralExpression.expression;
+        expect(nodes(expression).filter(node => node.kind === 'number').map(node => fraction(node.value)))
+            .toEqual([[2n, 1n], [-3n, 2n], [2n, 1n], [-3n, 2n], [4n, 1n]]);
+        expect(expression.kind).toBe('binary');
+        if (expression.kind !== 'binary') throw new Error('Expected the original sum');
+        expect(evaluate(expression.left, data.substitution.bindings)).toEqual([0n, 1n]);
+        expect(evaluate(expression, data.substitution.bindings)).toEqual([4n, 1n]);
+        const terms = data.structuralRelations[0];
+        expect(terms.kind).toBe('additive-components');
+        if (terms.kind !== 'additive-components') throw new Error('Expected the original terms');
+        expect(terms.terms.map(term => evaluate(term.signedExpression, data.substitution.bindings))).toEqual([[-3n, 1n], [3n, 1n], [4n, 1n]]);
+    });
+
     it('selects division on exactly the lower half of the private writer draw domain', () => {
         const generator = new AlgebraExpressionsGenerator(), originalDraw = randomness.random;
         for (const mixtureDraw of [0, 0.25, 0.5, 0.75, 1 - 2 ** -32]) {

@@ -91,7 +91,7 @@ a labeling defect. For example, the measurement plot's reported quarter-fraction
 is an independently verified glyph-reading error: Pencil is 3¼ and Key is 3¾, with the
 correct one mark at each of six distinct values.
 
-**[NEEDS SAMPLING APPROVAL: D-NUMERIC-STRUCTURE]** Two numeric-expression classification
+**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION: D-NUMERIC-STRUCTURE]** Two numeric-expression classification
 solutions claim zero only through an optional calculation that their task never requires.
 One expression is `2 × (−3/2) − 2 × (−3/2) + 4`; classifying its marked term does not require
 evaluating the hidden cancellation subtotal. These are numeric `ArithmeticExpression`
@@ -119,8 +119,14 @@ affects seven targets, 23 source assignments and 18 stored samples. Removing tha
 invariant absence claims globally would open eight source requirements on four other
 choices. This is a wider policy/ownership change, not the recommended local correction.
 Detailed counterfactuals are in `temp/canonical-acceptance-2026-10-30/numeric-structural-decision-note.md`.
-The profile correction is not implemented until sampling approval arrives; independent
-projection and layout repairs continue.
+The user approved the local correction and its sampling consequences during canonical
+acceptance. Its four-file implementation passes **40 tests in three files**, including
+the complete 97,920-path migration and the original cancellation expression. Every real
+target and tuple is unchanged, with no pending/invalid annotation resolutions. All **512**
+writer, quotient, symbolic, substitution and modeling control draws preserve payloads and
+random continuation. Protected target/policy/inference file hashes are unchanged. Independent
+review finds no actionable issue. Canonical generation and VQA must still accept the new
+profiles; these source proofs do not claim empirical acceptance.
 
 ### Autonomous projection repairs after the first pass
 
@@ -151,6 +157,30 @@ Both independently verified judge reading errors pass a normal scoped failed-rev
 with unchanged source, image and annotations: the quarter-fraction line plot and the `0.4`
 decimal number line. Their original failed judgments remain in the preserved first-pass
 cache/report. No verdict is edited by hand and no evaluator instruction is weakened.
+
+### Decimal column-zero predicate correction
+
+**[NEEDS SAMPLING APPROVAL: D-DECIMAL-COLUMN-ZERO]** A separate source bug contradicts
+the settled numerical-zero rule. `12.5 + 18.5 = 31.0` currently claims zero solely because
+the positive column sum `5 + 5 = 10` writes a zero digit. The supported seed-105 example
+`3779.7 + 3825.5 = 7605.2` has the same defect. Conversely, `122.5 − 111.4 = 11.1` omits
+the genuine hundreds-column calculation `1 − 1 = 0` because the result numeral is trimmed.
+
+The minimal correction retains active operand/alignment zeros and exhausted pre-borrow
+quantities, and tests actual working values/subtraction results on operand-active columns.
+It excludes hidden carry sentinels, absent leading places and positive addition totals
+merely writing zero. Existing profiles/schema, proposal sampler, mathematics and renderer
+remain; no new inference, adapter, graph condition or target change is required.
+
+Both profiles retain explicit positive-probability witnesses at every admitted cap. Full
+matching stays at **1,013 targets / 1,222 tuples**, including the same two family routes.
+The unchanged proposal support is repartitioned, preserving its union. Conditional
+probabilities, seeded outcomes, continuation and replay identities can change in both
+operations/profiles. A temporary counterfactual completes/replays all 6,000 stress draws;
+972 differ from their old seeded draw. These finite checks supplement the support proof;
+they are not exhaustive seed or distribution claims. The correction follows the already
+agreed semantics, but these additional sampling consequences await acknowledgment.
+Concrete predicate and evidence: `temp/canonical-acceptance-2026-10-30/decimal-column-zero-proposal-note.md`.
 
 ## Reasoning proposal domain repair (2026-10-30)
 
