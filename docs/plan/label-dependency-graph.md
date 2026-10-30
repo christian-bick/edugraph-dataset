@@ -59,6 +59,47 @@ tests verify every 1..100 draw bin. **11 focused files / 62 tests** and typechec
 the one rooted marking requirement. Evidence: `temp/final-seven-resolution/rooted-preservation.json`
 and `rooted-catalog.json`.
 
+### Checkpoint: common-part model quantity profiles and owner migration
+
+**[IMPLEMENTED]** All six general division tasks consistently assess complete-group count and
+any fractional last group. Question requires that reasoning; Solution explicitly states the
+complete-group count. The four supplied-model leaves and construction no longer own zero claims.
+The existing producer owns the ordinary matching-capable zero/positive group profile; the word
+leaf participates in the same contract. Its mathematical payload type and every target remain
+unchanged. Legacy quotient producers, declarations and rendering are unchanged.
+
+The six original operand-role/magnitude profiles now have **11 feasible conjunctions**. A proper
+fraction divided by an integer admits only zero complete groups. The finite sampler preserves
+all **4,396 original expressed operand pairs** in disjoint zero/positive classes, and every pair
+has a reachable positive-width draw cell. Weights preserve the original operand probabilities
+conditional on the selected magnitude/group class. The default mixture across new classes,
+seeded operands and RNG continuation intentionally change as approved; no balancing policy is
+introduced. Frozen candidate tables do not escape into mutable payloads.
+
+All genuine zero dividends are included in the zero-group class. Positive `1/2 ÷ 3/2 = 1/3` also
+has zero complete groups, while an exact positive quotient can have an internal zero remainder
+without an assessed zero quantity. Both are tested across every task and mode. Positive-group
+projections omit unnecessary zero scale markers; the common numerical coordinates and proportional
+bars remain coherent. No label is derived from a generated payload: the configured profile
+constrains generation, and the view projects the canonical mathematical group count.
+
+The existing **18 general routes** retain their exact targets and grow from **36 to 66 choices**,
+closing all six word requirements. This includes the 30 prior supplied/construction choices; it
+is the explicitly approved family migration, rather than a rollback hidden in a local word fix.
+All 4,396-pair support/probability/reachability assertions are exhaustive; rendered probes are
+supplementary. The enlarged consumer matrices retain every context/witness branch. Scoped
+30-second limits replace default five-second limits only where the exhaustive matrices need
+more time; no assertions are weakened. Focused generator tests pass (30), as do all 21 shared
+renderer/leaf tests and 19 split/integration tests.
+
+Local visual verification renders **28 Question/Solution screenshots** covering positive dividend
+with zero groups, actual zero dividend, positive exact/fractional quotients, construction and
+the rooted endpoint boundaries. No browser errors occur; inspected examples retain clear models,
+required count evidence, necessary word-problem prose and withheld Question answers. These are
+development checks, not a claim of canonical dataset/VQA acceptance. Evidence:
+`temp/final-seven-resolution/fraction-domain-proof.json`, `global-verification.json`,
+`draw-preservation.json` and `visual/`.
+
 ## Remaining-batch implementation (2026-10-30)
 
 The user authorized the settled strategies below. Implementation starts from `bac52e15`, with

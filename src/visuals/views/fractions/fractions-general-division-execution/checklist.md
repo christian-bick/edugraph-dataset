@@ -1,2 +1,2 @@
-- **Identity:** The learner calculates the exact quotient from the original division and a supplied common-part model, with proportional dividend and divisor-sized bars sharing a numerical scale that starts at zero.
-- **Modes:** Question Mode leaves the quotient blank while retaining the operands and model. Solution Mode gives the exact quotient, including any fractional group, and relates it to the visible groups and inverse multiplication.
+- **Identity:** The learner calculates the exact quotient from the original division and a common-part model, using the count of complete divisor-sized groups and any fractional last group on one numerical scale.
+- **Modes:** Question Mode leaves the quotient blank while retaining the operands and model. Solution Mode states the complete-group count and exact quotient, including any fractional group, and relates them to inverse multiplication. An unnecessary zero reference is omitted when the complete-group count is positive.

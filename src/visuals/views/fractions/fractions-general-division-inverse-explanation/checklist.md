@@ -1,2 +1,2 @@
-- **Identity:** The original division, quotient, and common-part model with proportional bars on a numerical scale starting at zero are shown; the learner explains how multiplying the quotient by the divisor rebuilds the dividend.
-- **Modes:** Question Mode leaves the reconstruction and reason blank. Solution Mode shows the exact inverse multiplication and links the divisor-sized groups to the original amount.
+- **Identity:** The original division, quotient and common-part model are shown; the learner uses the complete divisor-sized groups and any fractional last group to explain how multiplying the quotient by the divisor rebuilds the dividend.
+- **Modes:** Question Mode leaves the reconstruction and reason blank. Solution Mode states the complete-group count and links the exact inverse multiplication to the original amount. An unnecessary zero reference is omitted when the complete-group count is positive.

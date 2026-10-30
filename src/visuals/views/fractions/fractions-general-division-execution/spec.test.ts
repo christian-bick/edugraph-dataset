@@ -34,10 +34,10 @@ const render = (data: FractionDivisionRelationProblem, solution: boolean) =>
     renderToStaticMarkup(createElement(GeneralCore, {payload: generalPayload(data, solution)}));
 
 describe('general division execution split', () => {
-    it('declares one general-model task with an invariant numerical origin and proportional bars', () => {
+    it('declares the numerical scale and proportional bars while leaving zero ownership to the producer', () => {
         expect(FractionsGeneralDivisionExecutionViewSchema).toEqual({});
         expect(spec.generalLabels).toEqual([Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.Base10,
-            Scope.Numberline, Scope.BarModel, Scope.NumbersWithZero]);
+            Scope.Numberline, Scope.BarModel]);
         expect(spec).not.toHaveProperty('inferredLabels');
         expect(spec.compatibility).toBeUndefined();
     });
@@ -46,10 +46,12 @@ describe('general division execution split', () => {
         const generator = new FractionDivisionRelationsGenerator();
         const contexts = new Set<string>();
         const dividends = new Set<string>();
-        for (const operandProfile of profiles) for (const withEquation of [false, true]) {
+        for (const operandProfile of profiles) for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+            ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
             for (const withMultiplication of [false, true]) for (let seed = 0; seed < 8; seed++) {
                 setSeed(`general-execution-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = generator.generate({operandProfile, withEquation, withMultiplication});
+                const {data} = generator.generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
+                expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
                 contexts.add(data.context.kind);
                 dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
                 for (const solution of [false, true]) {
@@ -57,8 +59,10 @@ describe('general division execution split', () => {
                     expect(markup).toBe(renderToStaticMarkup(createElement(GeneralFractionDivisionBody,
                         {data, isSolutionView: solution, task: 'division-execution'})));
                     expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                    expect(markup).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                    expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup)).toBe(groupCountProfile === 'zero');
                     expect(markup).toMatch(/<text[^>]*>1<\/text>/);
+                    expect(markup).toContain(solution ? `The numerical model has ${data.model.completeGroups} complete divisor-sized`
+                        : 'Use the count of complete divisor-sized groups');
                     const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
                     expect(parts).toHaveLength(data.model.coverageTicks);
                     expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
@@ -75,7 +79,7 @@ describe('general division execution split', () => {
 
     it('rejects the other valid payload family statically and at runtime in both directions', () => {
         const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
-            withEquation: false, withMultiplication: false}).data;
+            groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
         const quotient = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {
             // @ts-expect-error The new leaf accepts the named general relation, never a legacy quotient problem.

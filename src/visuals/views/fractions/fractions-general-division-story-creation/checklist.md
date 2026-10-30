@@ -1,2 +1,2 @@
-- **Identity:** A division expression and common-part model with proportional bars on a numerical scale starting at zero are supplied; the learner writes a real-world story preserving the quantities, units, and division roles.
-- **Modes:** Question Mode leaves the story unwritten. Solution Mode gives a coherent sharing, measured-group, or rectangle story with the same operands, units, and quotient meaning.
+- **Identity:** A division expression and common-part model are supplied; the learner uses complete divisor-sized groups and any fractional last group to write a real-world story preserving the quantities, units and division roles.
+- **Modes:** Question Mode leaves the story unwritten. Solution Mode states the complete-group count and gives a coherent sharing, measured-group or rectangle story with the same operands, units and quotient meaning. An unnecessary zero reference is omitted when the complete-group count is positive.

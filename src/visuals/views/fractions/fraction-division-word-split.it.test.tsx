@@ -58,9 +58,11 @@ describe('fraction division word-problem family separation', () => {
         for (const operandProfile of ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
             'fraction-by-integer-proper', 'fraction-by-integer-improper',
             'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const) {
+            for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+                ? ['zero'] as const : ['zero', 'positive'] as const)
             for (const withMultiplication of [false, true]) for (let seed = 0; seed < 12; seed++) {
                 setSeed(`word-division-split-${operandProfile}-${withMultiplication}-${seed}`);
-                const data = new FractionDivisionRelationsGenerator().generate({operandProfile,
+                const data = new FractionDivisionRelationsGenerator().generate({operandProfile, groupCountProfile,
                     withEquation: true, withMultiplication}).data;
                 contexts.add(data.context.kind);
                 const randomState = getRandomState();
@@ -69,6 +71,7 @@ describe('fraction division word-problem family separation', () => {
                 expect(getRandomState()).toBe(randomState);
                 expect(question).toContain('Use a common-part bar model on the number-line frame to solve the story.');
                 expect(question).toContain('Blank numerical model frame');
+                expect(question).toContain('Use the count of complete divisor-sized groups');
                 expect(question).toContain('Equation: ____________________');
                 expect(question).toContain('Answer with units: ____________________');
                 expect(question).not.toContain('Dividend:');
@@ -79,17 +82,18 @@ describe('fraction division word-problem family separation', () => {
                 expect(question.includes('Check by multiplication:')).toBe(withMultiplication);
                 for (const markup of [question, solution]) {
                     expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                    expect(markup).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                    expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup)).toBe(groupCountProfile === 'zero');
                     expect(markup).toContain('All rows use the same numerical scale.');
                 }
                 expect(solution).toContain('Divisor-sized groups');
+                expect(solution).toContain(`The numerical model has ${data.model.completeGroups} complete divisor-sized`);
                 expect(solution.match(/ y="219" width="[^"]+" height="27"/g)).toHaveLength(data.model.divisorTicks);
             }
         }
         expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
     });
 
-    it('migrates only the three general targets and their six exhaustive bindings to the new leaf', () => {
+    it('retains the three general targets with eleven exhaustive zero/positive complete-group bindings', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === generalId)!;
         const quotientView = views.find(candidate => candidate.viewId === quotientId)!;
@@ -103,12 +107,12 @@ describe('fraction division word-problem family separation', () => {
             if (!result.matched) throw new Error(result.reason);
             const selections = enumerateDependencyAuditSelections(result.plan);
             expect(selections.status).toBe('complete');
-            expect(selections.selections).toHaveLength(2);
+            expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 3 : 4);
             for (const selection of selections.selections) {
                 bindings++;
                 const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
                 expect(evaluation.conflicts).toEqual([]);
-                expect(evaluation.assessments.find(assessment => assessment.facet === 'zero')?.status).toBe('missing');
+                expect(evaluation.assessments.find(assessment => assessment.facet === 'zero')?.status).toBe('satisfied');
                 const sampleKey = `${target.id}#fraction-division-relations#${generalId}#train#question#inst:0`;
                 const replay = {version: 1 as const, sampleKey, seed: 17, attempt: 1,
                     selection: createGenerationSelectionReceipt(result.plan, selection.choices)};
@@ -117,16 +121,17 @@ describe('fraction division word-problem family separation', () => {
                 const draw = generatePlannedDraw(input);
                 expect(draw.stub?.data.kind).toBe('fraction-division-relation');
                 expect(draw.labels).toEqual(expect.arrayContaining([Scope.Numberline, Scope.BarModel]));
-                expect(draw.labels).not.toContain(Scope.NumbersWithZero);
-                expect(draw.labels).not.toContain(Scope.NumbersWithoutZero);
+                const zero = draw.stub!.data.model.completeGroups === 0;
+                expect(draw.labels).toContain(zero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero);
+                expect(draw.labels).not.toContain(zero ? Scope.NumbersWithoutZero : Scope.NumbersWithZero);
                 expect(draw.replay).toEqual(replay);
                 expect(generatePlannedDraw(input)).toEqual(draw);
                 expect(() => generatePlannedDraw({...input,
                     sampleKey: sampleKey.replace(generalId, quotientId)})).toThrow(/does not belong/);
             }
         }
-        expect(bindings).toBe(6);
-    });
+        expect(bindings).toBe(11);
+    }, 30_000);
 
     it('retains all five legacy target routes and eight zero/nonzero bindings on the original ID', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-quotient-model')!;
@@ -149,7 +154,7 @@ describe('fraction division word-problem family separation', () => {
         expect({tuples, withZero, withoutZero}).toEqual({tuples: 5, withZero: 3, withoutZero: 5});
         const data = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-equation', numericProfile: 'zero'}).data;
         const generalData = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
-            withEquation: true, withMultiplication: false}).data;
+            groupCountProfile: 'zero', withEquation: true, withMultiplication: false}).data;
         for (const isSolutionView of [false, true]) {
             expect(renderToStaticMarkup(quotientCore({payload: quotientPayload(data, isSolutionView)})))
                 .toBe(renderToStaticMarkup(<FractionQuotientBody data={data} task="division-word-problem" isSolutionView={isSolutionView} />));

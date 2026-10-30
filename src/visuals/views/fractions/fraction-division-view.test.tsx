@@ -21,7 +21,52 @@ const render = (task: GeneralFractionDivisionTask, solution: boolean, problem = 
 const text = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 const answerBlanks = (markup: string): number => [...markup.matchAll(/data-response="answer-blank"/g)].length;
 
+const belowOne: FractionDivisionRelationProblem = {
+    kind: 'fraction-division-relation', operandProfile: 'fraction-by-fraction',
+    dividend: {numerator: 1, denominator: 2}, divisor: {numerator: 3, denominator: 2},
+    quotient: {numerator: 1, denominator: 3}, reciprocal: {numerator: 2, denominator: 3},
+    reciprocalProduct: {numerator: 2, denominator: 6},
+    inverse: {quotientFactor: {numerator: 1, denominator: 3}, divisorFactor: {numerator: 3, denominator: 2},
+        reconstructedDividend: {numerator: 1, denominator: 2}},
+    model: {kind: 'common-unit-groups', ticksPerWhole: 2, dividendTicks: 1, divisorTicks: 3,
+        completeGroups: 0, remainderTicks: 1, fractionalGroup: {numerator: 1, denominator: 3}, coverageTicks: 3,
+        groups: [{startTick: 0, endTick: 3, filledTicks: 1}]},
+    context: {kind: 'sharing', material: 'juice', measureUnit: 'liter', groupUnit: 'batch',
+        totalMeasure: {numerator: 1, denominator: 2}, groupCount: {numerator: 3, denominator: 2},
+        measurePerGroup: {numerator: 1, denominator: 3}}
+};
+
+const exactPositive: FractionDivisionRelationProblem = {
+    kind: 'fraction-division-relation', operandProfile: 'fraction-by-fraction',
+    dividend: {numerator: 4, denominator: 2}, divisor: {numerator: 2, denominator: 2},
+    quotient: {numerator: 2, denominator: 1}, reciprocal: {numerator: 2, denominator: 2},
+    reciprocalProduct: {numerator: 8, denominator: 4},
+    inverse: {quotientFactor: {numerator: 2, denominator: 1}, divisorFactor: {numerator: 2, denominator: 2},
+        reconstructedDividend: {numerator: 4, denominator: 2}},
+    model: {kind: 'common-unit-groups', ticksPerWhole: 2, dividendTicks: 4, divisorTicks: 2,
+        completeGroups: 2, remainderTicks: 0, fractionalGroup: {numerator: 0, denominator: 1}, coverageTicks: 4,
+        groups: [{startTick: 0, endTick: 2, filledTicks: 2}, {startTick: 2, endTick: 4, filledTicks: 2}]},
+    context: {kind: 'sharing', material: 'juice', measureUnit: 'liter', groupUnit: 'batch',
+        totalMeasure: {numerator: 4, denominator: 2}, groupCount: {numerator: 2, denominator: 2},
+        measurePerGroup: {numerator: 2, denominator: 1}}
+};
+
 describe('general fraction division task projections', () => {
+    it.each(['division-execution', 'division-interpretation', 'division-inverse-explanation',
+        'division-story-creation', 'division-word-problem', 'division-model-construction'] as const)(
+        '%s assesses complete-group count and omits a needless zero reference', task => {
+            expect(render(task, false)).toContain('Use the count of complete divisor-sized groups');
+            expect(text(render(task, true))).toContain('1 complete divisor-sized group');
+            for (const solution of [false, true]) {
+                expect(render(task, solution)).not.toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                expect(render(task, solution, belowOne)).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                expect(render(task, solution, exactPositive)).not.toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+            }
+            expect(text(render(task, true, belowOne))).toContain('0 complete divisor-sized groups');
+            expect(text(render(task, true, exactPositive))).toContain('2 complete divisor-sized groups');
+            expect(text(render(task, true, exactPositive))).not.toContain('0 of');
+        });
+
     it('shows a truthful fractional last group without rounding it into a complete group', () => {
         const question = render('division-execution', false);
         const solution = render('division-execution', true);

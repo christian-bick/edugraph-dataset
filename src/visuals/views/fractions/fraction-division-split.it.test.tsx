@@ -92,17 +92,19 @@ describe('supplied general division model migrations', () => {
         expect(view.problemType).toBe('FractionDivisionRelationProblem');
         expect(view.schema).toEqual({});
         expect(view.generalLabels).toEqual([entry.ability, Scope.ArabicNumerals, Scope.Base10,
-            Scope.Numberline, Scope.BarModel, Scope.NumbersWithZero]);
+            Scope.Numberline, Scope.BarModel]);
         expect(view.spec).not.toHaveProperty('inferredLabels');
         const profiles = ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
             'fraction-by-integer-proper', 'fraction-by-integer-improper',
             'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const;
         const contexts = new Set<string>();
         const dividends = new Set<string>();
-        for (const operandProfile of profiles) for (const withEquation of [false, true]) {
+        for (const operandProfile of profiles) for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+            ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
             for (const withMultiplication of [false, true]) for (let seed = 0; seed < 4; seed++) {
                 setSeed(`division-model-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = new FractionDivisionRelationsGenerator().generate({operandProfile, withEquation, withMultiplication});
+                const {data} = new FractionDivisionRelationsGenerator().generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
+                expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
                 contexts.add(data.context.kind);
                 dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
                 for (const solution of [false, true]) {
@@ -110,8 +112,10 @@ describe('supplied general division model migrations', () => {
                     expect(markup).toBe(renderToStaticMarkup(createElement(GeneralFractionDivisionBody,
                         {data, isSolutionView: solution, task: entry.task})));
                     expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                    expect(markup).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
+                    expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup)).toBe(groupCountProfile === 'zero');
                     expect(markup).toMatch(/<text[^>]*>1<\/text>/);
+                    expect(markup).toContain(solution ? `The numerical model has ${data.model.completeGroups} complete divisor-sized`
+                        : 'Use the count of complete divisor-sized groups');
                     const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
                     expect(parts).toHaveLength(data.model.coverageTicks);
                     expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
@@ -126,7 +130,7 @@ describe('supplied general division model migrations', () => {
 
     it.each(cases)('$newId and $oldId reject the other valid named payload family in both modes', entry => {
         const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
-            withEquation: false, withMultiplication: false}).data;
+            groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
         const quotient = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {
             // @ts-expect-error An adversarial legacy fixture violates the general-only adapter contract.
@@ -136,7 +140,7 @@ describe('supplied general division model migrations', () => {
         }
     });
 
-    it.each(cases)('$newId retains three real targets, six complete selections and replay ownership', entry => {
+    it.each(cases)('$newId retains three real targets, eleven complete profile selections and replay ownership', entry => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === entry.newId)!;
         const quotientView = views.find(candidate => candidate.viewId === entry.oldId)!;
@@ -151,7 +155,7 @@ describe('supplied general division model migrations', () => {
             if (!result.matched) throw new Error(result.reason);
             const selections = enumerateDependencyAuditSelections(result.plan);
             expect(selections.status).toBe('complete');
-            expect(selections.selections).toHaveLength(2);
+            expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 3 : 4);
             for (const selection of selections.selections) {
                 checked++;
                 const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
@@ -166,7 +170,8 @@ describe('supplied general division model migrations', () => {
                     const draw = generatePlannedDraw(input);
                     expect(draw.stub).not.toBeNull();
                     expect(draw.stub!.data.kind).toBe('fraction-division-relation');
-                    expect(draw.labels).toEqual(expect.arrayContaining([Scope.Numberline, Scope.BarModel, Scope.NumbersWithZero]));
+                    expect(draw.labels).toEqual(expect.arrayContaining([Scope.Numberline, Scope.BarModel,
+                        draw.stub!.data.model.completeGroups === 0 ? Scope.NumbersWithZero : Scope.NumbersWithoutZero]));
                     expect(draw.replay).toEqual(replay);
                     expect(generatePlannedDraw(input)).toEqual(draw);
                     expect(() => generatePlannedDraw({...input,
@@ -174,8 +179,8 @@ describe('supplied general division model migrations', () => {
                 }
             }
         }
-        expect(checked).toBe(6);
-    });
+        expect(checked).toBe(11);
+    }, 30_000);
 
     it('retains 42 legacy selections on the four original IDs, including 14 zero and 28 nonzero choices', () => {
         const generator = generators.find(entry => entry.generatorId === 'fraction-quotient-model')!;

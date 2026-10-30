@@ -5,7 +5,7 @@ import type {ViewSpec} from '../../../../types/view-spec.ts';
 export const spec: ViewSpec = {
     viewId: 'fractions-general-division-execution',
     generalLabels: [Ability.ProcedureExecution, Scope.ArabicNumerals, Scope.Base10,
-        Scope.Numberline, Scope.BarModel, Scope.NumbersWithZero]
+        Scope.Numberline, Scope.BarModel]
 };
 
 export const FractionsGeneralDivisionExecutionViewSchema = {} as const;

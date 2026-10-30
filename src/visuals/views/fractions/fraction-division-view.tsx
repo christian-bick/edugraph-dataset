@@ -58,6 +58,8 @@ function NumericalGroupModel({data, blankFrame, constructed}: {data: FractionDiv
     const x = (tick: number) => x0 + tick * width / model.coverageTicks;
     const tickWidth = width / model.coverageTicks;
     const ticks = Array.from({length: model.coverageTicks + 1}, (_, index) => index);
+    // A zero complete-group count is assessed; a coordinate origin alone is not.
+    const scaleTicks = ticks.filter(tick => model.completeGroups === 0 || tick !== 0);
     const fill = constructed ? '#86efac' : '#a5b4fc';
     const alternateFill = constructed ? '#bbf7d0' : '#c7d2fe';
     return <section className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
@@ -65,7 +67,7 @@ function NumericalGroupModel({data, blankFrame, constructed}: {data: FractionDiv
         <svg viewBox={`0 0 770 ${blankFrame ? 165 : 290}`} className="w-full" role="img"
             aria-label={blankFrame ? 'Blank common-tick frame for constructing the numerical division model' : 'Dividend partitioned into divisor-sized groups on one numerical scale'}>
             <line x1={x0} x2={x(model.coverageTicks)} y1="38" y2="38" stroke="#475569" strokeWidth="2" />
-            {ticks.map(tick => <g key={tick}>
+            {scaleTicks.map(tick => <g key={tick}>
                 <line x1={x(tick)} x2={x(tick)} y1="34" y2={tick % model.ticksPerWhole === 0 ? 47 : 42} stroke="#475569" />
                 {tick % model.ticksPerWhole === 0 && <text x={x(tick)} y="25" textAnchor="middle" fontSize="14" fill="#334155">{tick / model.ticksPerWhole}</text>}
             </g>)}
@@ -141,6 +143,7 @@ function InverseTask({data, isSolutionView}: TaskProps) {
                 {data.multiplicationWitness && <> = {originalDivisionFraction(data.multiplicationWitness.unreducedProduct)}</>}
                 {' '}= {originalDivisionOperand(data.inverse.reconstructedDividend)}</p>
             <p className="mt-2">The exact quotient times the divisor is the original amount, including the last fractional group.</p>
+            <ModelSummary data={data} />
         </Answer> : <Blank><span className="font-mono">{divisionFactor(data.quotient)} × {divisionFactor(data.divisor)} = <AnswerBlank /></span>
             <p className="mt-3">Why does this reconstruct the dividend? ____________________</p></Blank>}
     </>;
@@ -152,7 +155,8 @@ function StoryTask({data, isSolutionView}: TaskProps) {
         <DivisionExpression data={data} showQuotient={isSolutionView} solution={isSolutionView} />
         <NumericalGroupModel data={data} blankFrame={false} constructed={false} />
         {isSolutionView ? <Answer><p>One possible story: {fractionDivisionStory(data)}</p>
-            <p className="mt-2 font-semibold">Answer: {divisionNumber(data.quotient)} {fractionDivisionAnswerUnit(data.context)}.</p></Answer>
+            <p className="mt-2 font-semibold">Answer: {divisionNumber(data.quotient)} {fractionDivisionAnswerUnit(data.context)}.</p>
+            <ModelSummary data={data} /></Answer>
             : <Blank>My story: ________________________________________________<div className="mt-4 h-6 border-b border-slate-300" /></Blank>}
         <AdditionalRelation data={data} solution={isSolutionView} />
     </>;
@@ -169,7 +173,7 @@ function WordProblemTask({data, isSolutionView}: TaskProps) {
             <DivisionExpression data={data} showQuotient={true} solution={true} />
             <NumericalGroupModel data={data} blankFrame={false} constructed={true} />
             <Answer><p className="font-semibold">{divisionNumber(data.quotient)} {fractionDivisionAnswerUnit(data.context)}</p>
-                <p className="mt-2">{fractionDivisionMeaning(data)}</p></Answer>
+                <p className="mt-2">{fractionDivisionMeaning(data)}</p><ModelSummary data={data} /></Answer>
         </> : <Blank>Equation: ____________________<p className="mt-3">Answer with units: ____________________</p>
             <p className="mt-3">Show your work: _______________________________________</p>
             {data.multiplicationWitness && <p className="mt-3">Check by multiplication: ____________________</p>}
@@ -192,6 +196,7 @@ export function GeneralFractionDivisionBody({data, isSolutionView, task}: TaskPr
     const props = {data, isSolutionView};
     return <main className="w-[870px] max-w-[95vw] rounded-3xl border border-slate-200 bg-white p-6 font-sans text-slate-900 shadow-sm">
         <h1 className="mb-4 text-2xl font-bold text-indigo-950">{titles[task]}</h1>
+        {!isSolutionView && <p className="mb-3 text-lg">Use the count of complete divisor-sized groups and any fractional last group in your work with the common-part model.</p>}
         {task === 'division-execution' ? <ExecutionTask {...props} />
             : task === 'division-interpretation' ? <InterpretationTask {...props} />
                 : task === 'division-inverse-explanation' ? <InverseTask {...props} />

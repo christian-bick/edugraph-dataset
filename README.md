@@ -58,9 +58,13 @@ reason through the competency required by that image.
 General fraction-division models now use five dedicated task views, while the original view IDs
 retain quotient models. Both families reuse their existing rendering bodies. The
 [remaining-batch record](docs/plan/label-dependency-graph.md#remaining-batch-implementation-2026-10-30)
-documents preserved coverage, required story-model methods and the remaining zero-ownership review.
-Generic sign/zero annotations are excluded from algebraic tasks through an explicit contextual
-validation rule; elementary arithmetic-law examples retain their classification.
+documents preserved coverage and required story-model methods. General fraction models now use
+generator-owned profiles for zero or positive complete-group counts. A dedicated rooted-length
+producer preserves the existing number-line marking task while owning its required origin zero.
+The [final migrations](docs/plan/label-dependency-graph.md#approved-final-seven-migrations-2026-10-30)
+close the remaining source dependency gaps. Generic sign/zero annotations are excluded from
+algebraic tasks through an explicit contextual validation rule; elementary arithmetic-law examples
+retain their classification.
 
 Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
 matching-capable mathematical profiles. The latest

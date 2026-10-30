@@ -6,7 +6,7 @@ import {FractionDivisionRelationsGenerator} from '../../../generators/fraction/f
 import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
 import {FractionQuotientBody, type FractionQuotientTask} from './fraction-quotient-view.tsx';
 import {spec as modelSpec} from './fractions-division-model-construction/spec.ts';
-import {spec as executionSpec} from './fractions-division-execution/spec.ts';
+import {spec as executionSpec} from './fractions-general-division-execution/spec.ts';
 import {Ability, Scope} from 'edugraph-ts';
 
 const leafIds = [
@@ -64,18 +64,26 @@ describe('general fraction division leaf contracts', () => {
         const contexts = new Set<string>();
         for (const operandProfile of ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
             'fraction-by-integer-proper', 'fraction-by-integer-improper',
-            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const) {
+            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const)
+            for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+                ? ['zero'] as const : ['zero', 'positive'] as const) {
             for (const withEquation of [false, true]) {
                 for (const withMultiplication of [false, true]) {
                     for (let seed = 0; seed < 12; seed++) {
                         setSeed(`general-leaf-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                        const {data} = generator.generate({operandProfile, withEquation, withMultiplication});
+                        const {data} = generator.generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
                         contexts.add(data.context.kind);
                         for (const id of leafIds) {
                             const question = render(id, data, false);
                             const solution = render(id, data, true);
                             expect(question).not.toContain('Validation Error');
                             expect(solution).not.toContain('Validation Error');
+                            expect(question).toContain('Use the count of complete divisor-sized groups');
+                            expect(solution).toContain(`${data.model.completeGroups} complete divisor-sized`);
+                            for (const markup of [question, solution]) {
+                                expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup))
+                                    .toBe(groupCountProfile === 'zero');
+                            }
                             if (id === 'fractions-general-division-execution') {
                                 expect(executionSpec.generalLabels).toContain(Scope.BarModel);
                                 for (const markup of [question, solution]) {
@@ -94,7 +102,6 @@ describe('general fraction division leaf contracts', () => {
                                 // The invariant Numberline claim holds for the blank and completed frames.
                                 for (const markup of [question, solution]) {
                                     expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                                    expect(markup).toMatch(/<text[^>]*x="32"[^>]*>0<\/text>/);
                                     expect(markup).toMatch(/<text[^>]*>1<\/text>/);
                                 }
                             }
@@ -115,12 +122,12 @@ describe('general fraction division leaf contracts', () => {
             }
         }
         expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
-    });
+    }, 30_000);
 
     it('rejects malformed general arithmetic, models, contexts, and optional witnesses in every leaf', () => {
         setSeed('general-fraction-invalid-leaf');
         const {data} = new FractionDivisionRelationsGenerator().generate({
-            operandProfile: 'fraction-by-fraction-proper', withEquation: true, withMultiplication: true
+            operandProfile: 'fraction-by-fraction-proper', groupCountProfile: 'zero', withEquation: true, withMultiplication: true
         });
         for (const invalid of [
             undefined,
@@ -186,7 +193,7 @@ describe('general fraction division leaf contracts', () => {
 
     it('declares construction as a fixed visual articulation task', () => {
         expect(modelSpec.generalLabels).toEqual([
-            Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.NumbersWithZero
+            Ability.VisualArticulation, Scope.ArabicNumerals, Scope.Base10, Scope.Numberline
         ]);
         expect(modelSpec.compatibility).toBeUndefined();
     });

@@ -122,10 +122,17 @@ Five `fractions-general-division-*` leaves accept `FractionDivisionRelationProbl
 interpretation, inverse explanation, story creation and word problems. The corresponding
 `fractions-division-*` IDs accept `FractionQuotientProblem` and retain legacy quotient capabilities.
 The general word task requires the common-part model through an unsolved frame and necessary
-prose; its zero ownership remains a separate review. The four supplied-model projections retain
-their displayed zero-origin annotations, and construction remains unchanged. Both families reuse
-their original rendering bodies. The [remaining-batch record](docs/plan/label-dependency-graph.md#remaining-batch-implementation-2026-10-30)
-documents exact successors, preserved mathematical support and changed view/sample identities.
+prose. All six general projections, including construction, assess complete-group count and any
+fractional last group. The generator's ordinary schema profiles own zero presence/absence;
+positive-group projections omit unnecessary zero references. Both families reuse their rendering
+bodies. The [final migrations](docs/plan/label-dependency-graph.md#approved-final-seven-migrations-2026-10-30)
+document exhaustive operand support, target preservation and changed sampling/replay identities.
+
+`whole-number-lengths` supplies the canonical origin, endpoint and unit for the existing number-line
+marking view. Its invariant zero claim belongs to the rooted relation independently of its positive
+endpoint. Scalar writing retains its other consumers; both producers share the same positive
+inclusive-integer sampler. This mathematical contract replaces the former scalar-only route while
+preserving the marking competency and same-value rendering.
 
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
