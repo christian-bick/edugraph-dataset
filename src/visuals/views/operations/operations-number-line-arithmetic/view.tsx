@@ -1,5 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import {ViewRenderPayload} from '../../../../types/ml-engine.ts';
+import {validateProblemData} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
 import {OperationsNumberLineView} from '../operations-number-line-view.tsx';
 import {
@@ -15,13 +16,16 @@ interface CoreProps {
     payload: ViewRenderPayload<typeof VIEW_ID>;
 }
 
-const Core = ({payload}: CoreProps) => (
-    <OperationsNumberLineView mode="arithmetic" payload={payload} viewId={VIEW_ID} />
-);
+export const OperationsNumberLineArithmeticCore = ({payload}: CoreProps) => {
+    validateProblemData(VIEW_ID, payload.problem.data, ['num1', 'num2', 'answer', 'operation']);
+    const {num1, num2, answer} = payload.problem.data;
+    return <OperationsNumberLineView mode="arithmetic" payload={payload} viewId={VIEW_ID}
+        showZeroReference={[num1, num2, answer].includes(0)} />;
+};
 
 export const OperationsNumberLineArithmetic = withConfig(
     OperationsNumberLineArithmeticViewSchema,
-    Core
+    OperationsNumberLineArithmeticCore
 );
 
 let root: ReturnType<typeof createRoot> | null = null;

@@ -66,6 +66,28 @@ stored algebra claims remain conflicts until ordinary regeneration; there is no 
 Evidence and own-only patches: `temp/remaining-resolution/algebra-preservation.json` and
 `algebra-own-zero-context.patch`.
 
+### Checkpoint: five zero-free arithmetic number-line choices
+
+**[IMPLEMENTED]** The shared number-line component accepts an explicit zero-reference
+presentation option. The arithmetic leaf derives it solely from canonical operands/result.
+Zero-free operations omit the unnecessary zero tick and numeral; true zero operands/results
+retain it. The mathematical coordinates, equal integer spacing and inclusive support through
+100 are unchanged. The marking-from-zero leaf keeps its existing rooted projection.
+
+The arithmetic generator's obsolete Numberline-specific neutral alias is removed: its existing
+false zero choice now truthfully supplies NumbersWithoutZero. The view's corresponding absence
+rejection and zero-origin compatibility veto are removed. No sampler or payload changes are made.
+All original five choices preserve configuration, mathematics and exact PRNG continuation in
+**160 forced and 64 native comparisons**. The **320 paired arithmetic renders** differ only by
+the omitted zero reference and corresponding accessible description. All **202 marking renders**
+for 0..100 in both modes are unchanged. Six focused files / 59 tests pass.
+
+Existing target coverage is preserved. Truthful absence capability additionally admits **nine
+bounded arithmetic routes / 14 choices**; their explicit upper bounds are 5, 10, 20 or 100.
+The arithmetic leaf now has 11 routes / 19 choices. A synthetic unbounded-target admission hole
+is recorded separately as existing view-domain hardening, outside these active gaps; no graph
+range rules are changed. Evidence: `temp/remaining-resolution/arithmetic-preservation.json`.
+
 ## Strategy refinement: conclusions and open design (2026-10-30)
 
 This section records the user's latest review and supersedes conflicting recommendations in the

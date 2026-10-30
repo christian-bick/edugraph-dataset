@@ -12,13 +12,13 @@ describe('operations-number-line-arithmetic view spec', () => {
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual(expect.arrayContaining([
             Area.Multiplication,
-            Area.Division,
-            Scope.NumbersWithoutZero
+            Area.Division
         ]));
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).not.toContain(Scope.NumbersWithoutZero);
         expect(OperationsNumberLineArithmeticViewSchema).toEqual({});
     });
 
-    it('preserves requested number lines and rejects incompatible zero-free producer selections', () => {
+    it('supports actual zero and zero-free producer branches on the corresponding number-line context', () => {
         const plan = (labels: string[]) => planModelCompatibility({id: 'line-zero', labels},
             {generatorId: generatorSpec.generatorId, generalLabels: generatorSpec.generalLabels,
                 schema: ArithmeticOpsPairsGeneratorSchema, spec: generatorSpec},
@@ -27,9 +27,8 @@ describe('operations-number-line-arithmetic view spec', () => {
         const labels = [Area.Addition, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20];
         expect(plan([...labels, Scope.Numberline]).supported).toBe(true);
         expect(plan([...labels, Scope.Numberline, Scope.NumbersWithZero]).supported).toBe(true);
-        expect(plan([...labels, Scope.Numberline, Scope.NumbersWithoutZero]).supported).toBe(false);
-        // Broad future targets must not silently pair a completed zero-absence claim
-        // with this view's zero reference origin.
-        expect(plan(labels).supported).toBe(false);
+        expect(plan([...labels, Scope.Numberline, Scope.NumbersWithoutZero]).supported).toBe(true);
+        expect(plan(labels).supported).toBe(true);
+        expect(plan([...labels, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).supported).toBe(false);
     });
 });

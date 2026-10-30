@@ -10,15 +10,9 @@ export const spec: ViewSpec = {
         rejectTargetLabels('additive-number-line-domain', [
             Area.Multiplication,
             Area.Division,
-            Scope.NumbersWithoutZero,
             ...deductAdmitting([Scope.NumbersWithNegatives]),
             ...deductAdmitting([Scope.NumbersLarger100])
-        ]),
-        {
-            id: 'number-line-zero-origin',
-            dependencies: [{scope: 'generator', label: Scope.NumbersWithoutZero}],
-            predicate: labels => !labels.exact('generator', Scope.NumbersWithoutZero)
-        }
+        ])
     ]
 };
 

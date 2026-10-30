@@ -1,6 +1,6 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
@@ -231,24 +231,26 @@ describe('ArithmeticOpsPairsGenerator Spec Integration', () => {
         }
     });
 
-    it.each([Area.Addition, Area.Subtraction])('keeps the unannotated %s branch for requested number lines', operation => {
+    it.each([Area.Addition, Area.Subtraction])('declares the unchanged zero-free %s mathematics on requested number lines', operation => {
         const labels = [operation, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller20, Scope.Numberline];
         const zeroDomain = normalizeSchemaChoices(ArithmeticOpsPairsGeneratorSchema, labels, 'generator')
             .find(domain => domain.field === 'requireZero');
-        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[]]);
+        expect(zeroDomain?.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithoutZero]]);
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const ordinary = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels.filter(label => label !== Scope.Numberline));
             const ordinaryData = generator.generate(ordinary.config)?.data;
+            const ordinaryContinuation = getRandomState();
             setSeed(seed);
             const numberLine = extractConfig(ArithmeticOpsPairsGeneratorSchema, labels);
             expect(numberLine.config).toEqual(ordinary.config);
             expect(generator.generate(numberLine.config)?.data).toEqual(ordinaryData);
+            expect(getRandomState()).toBe(ordinaryContinuation);
             expect(numberLine.resolvedLabels).not.toContain(Scope.NumbersWithZero);
-            expect(numberLine.resolvedLabels).not.toContain(Scope.NumbersWithoutZero);
+            expect(numberLine.resolvedLabels).toContain(Scope.NumbersWithoutZero);
         }
-        expect(() => extractConfig(ArithmeticOpsPairsGeneratorSchema, [...labels, Scope.NumbersWithoutZero]))
-            .toThrow('cannot complete');
+        expect(extractConfig(ArithmeticOpsPairsGeneratorSchema, [...labels, Scope.NumbersWithoutZero]).config.requireZero)
+            .toBe(false);
     });
 
     it.each(operations)('preserves the explicitly requested zero branch for %s', operation => {

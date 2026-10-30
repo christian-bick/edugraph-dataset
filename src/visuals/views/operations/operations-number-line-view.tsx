@@ -18,6 +18,8 @@ interface Props {
     mode: OperationsNumberLineMode;
     payload: ViewRenderPayload<OperationsNumberLineViewId>;
     viewId: OperationsNumberLineViewId;
+    /** A zero-free operation can use an unrooted scale without introducing a zero reference. */
+    showZeroReference?: boolean;
 }
 
 const isWritingProblem = (
@@ -71,7 +73,7 @@ const validateArithmetic = (
     return data;
 };
 
-export const OperationsNumberLineView = ({mode, payload, viewId}: Props) => {
+export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReference = true}: Props) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data as WritingProblem | ArithmeticPairProblem;
     const representation = mode === 'representation';
@@ -88,7 +90,8 @@ export const OperationsNumberLineView = ({mode, payload, viewId}: Props) => {
         );
     const maximum = roundedMaximum(largestValue);
     const toX = (value: number) => LEFT + (value / maximum) * (RIGHT - LEFT);
-    const ticks = Array.from({length: 11}, (_, index) => (maximum / 10) * index);
+    const ticks = Array.from({length: 11}, (_, index) => (maximum / 10) * index)
+        .filter(value => showZeroReference || value !== 0);
 
     const writing = representation ? resolved as WritingProblem : null;
     const arithmetic = representation ? null : resolved as ArithmeticPairProblem;
@@ -127,7 +130,7 @@ export const OperationsNumberLineView = ({mode, payload, viewId}: Props) => {
     return (
         <div className="w-[820px] rounded-2xl bg-white p-6 font-sans shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="mb-2 text-center text-[1.55rem] font-semibold text-slate-800">{prompt}</div>
-            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-[210px] w-full" role="img" aria-label="Number line beginning at zero">
+            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-[210px] w-full" role="img" aria-label={showZeroReference ? 'Number line beginning at zero' : 'Number line with a positive numerical scale'}>
                 <defs>
                     <marker id="number-line-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
                         <path d="M 0 0 L 8 4 L 0 8 z" fill="#2563eb" />
