@@ -10,6 +10,143 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Strategy refinement: conclusions and open design (2026-10-30)
+
+This section records the user's latest review and supersedes conflicting recommendations in the
+historical decision sections below. It changes strategy only. Production labels, graph conditions,
+targets, rendering, sampling and the current **34 findings (27 zero / seven sign)** are unchanged.
+The outer Area allowlist and range-policy exclusion remain fixed.
+
+Tags distinguish an agreed conclusion from implementation acceptance:
+
+- **[CONCLUDED]** — the semantic direction or requested local split is agreed; implementation and
+  verification may still be pending.
+- **[OPEN]** — a precise applicability rule, task-contract exception or declaration-owner design
+  still needs resolution. Routine engineering details do not require another semantic approval.
+- **[SUPERSEDED]** — an earlier proposed strategy no longer represents the agreed direction.
+
+| Topic / current findings | Conclusion tags | Remaining design work |
+|---|---|---|
+| Structural algebra / 13 | **[OPEN]** necessity and exact scope; **[CONCLUDED]** definite assessed quantities if retained | Separate sign/zero qualification from broad numeric presence and audit the proposed positive contexts. |
+| Integer number lines / 6 | **[CONCLUDED]** avoid an unnecessary displayed zero; **[SUPERSEDED]** two new producers as the default remedy | Plan the five arithmetic choices using the existing data/component; resolve the one explicit length-from-zero task separately. |
+| Fraction word problems / 9 | **[CONCLUDED]** Question requires Solution's particular model; **[CONCLUDED]** fifth general-division word leaf approved | Specify the actual model/reference behavior, complete zero-quantity partition and nonoverlapping label ownership. |
+| Elapsed / interval time / 6 | **[CONCLUDED]** a whole-hour reference assesses zero minutes; **[SUPERSEDED]** the WithoutZero recommendation | Implement truthful WithZero declarations and consistent Question evidence for the required whole-hour method. |
+
+### Algebra: challenge applicability before adding more polarity profiles
+
+**[OPEN]** FormalMathematics membership is an eligibility path, not the direct trigger. The
+unchanged outer gate admits these Area conjunctions because AlgebraicExpression is beneath
+FormalMathematics. Within that gate, `LD-NUM-01` is activated independently by the declared Arabic
+numerals and numeric descriptors such as Base10 and IntegerNumbers; it then requires sign and zero.
+IntegerNumbers describes explicit constants here and does not give the variable an integer domain.
+
+Investigate separating sign/zero assessment from the general number-kind/range-presence rule.
+Review a positive list of concrete numerical competencies, including relevant ArithmeticExpression
+and NumericSubstitution contexts, rather than changing the outer Area allowlist or making formal
+membership itself sufficient. The exact list remains open: an arithmetic-operation-plus-integer
+condition still catches the symbolic addition/multiplication/division contexts, including five of
+these 13 requirements. A complete target and resolved-annotation audit must establish the boundary.
+
+**[CONCLUDED]** If these facets remain in scope, they describe definite quantities and calculations
+required by the competency. Hidden assignments, possible evaluations of a free variable and optional
+calculations cannot supply missing claims. Preserve supported claims already made, such as the
+symbolic quotient's zero absence, and keep explicit coefficient evidence available. A removed
+obligation is a policy retirement, not an additive labeling repair. Do not credit all 13 as retired
+before the actual qualification is agreed and verified.
+
+### Number lines: configurable reference display, with a rooted-task exception
+
+**[CONCLUDED]** Number lines need not start at or display zero. When zero is absent from the
+required mathematics, use a positive displayed window or omit the unnecessary zero reference in
+the shared visual component. When a genuine operand, result, required intermediate quantity or
+required reference is zero, preserve its evidence. Keep Question and Solution on the same declared
+mathematical context; do not hide a result merely to manufacture WithoutZero.
+
+For the **five arithmetic choices**, the existing zero-free generator branch already supplies
+positive operands/results. A configurable component can consume their canonical values. Reconcile
+the ordinary generator zero declarations and Numberline-specific neutral aliases with the view's
+current WithoutZero rejection only after its reference display is consistent. This is a candidate
+existing-module repair path, not another producer split or an annotation adapter. Preserve supported
+mathematics, width choices and conditional sampling; verify any new target matches after the
+truthful zero-free capability is restored. Rendering will change where the unnecessary origin was
+previously shown.
+
+One data-flow correction is needed in the implementation plan: views currently receive canonical
+`problem.data` and their own `preparedView.config`, not the generator's private configuration.
+Pass explicit presentation options from the view to the component using those mathematical facts
+or a legitimate owning view configuration. Do not parse `problem.labels`, pass an arbitrary
+generator-config object through the browser contract, or append annotations after inspecting a
+draw. If required mathematical evidence is absent, review a small typed payload extension first.
+
+**[OPEN]** The **one marking choice** is different: its prompt explicitly says "Mark ... as a
+length from 0", its solution segment begins there, and canonical local `2.MD.B.6` explicitly
+requires representing whole numbers as lengths from zero. Hiding the numeral alone leaves the
+zero-based competency intact. Preserve this target/standard intent while resolving its display
+and zero-ownership contract; do not silently turn it into a different marking task. The two-new-
+producer proposal is **[SUPERSEDED]** as the default solution, not reintroduced as an assumed
+approval for this exception.
+
+### Word problems: required model agreed; zero remains quantity-dependent
+
+**[CONCLUDED]** When Solution uses a particular model, Question must require that model, so its
+competency can be judged independently. Retain the authored models and make their actual method
+unambiguous; generic "use a visual model" does not identify a particular number line/partition model.
+Preserve the need to read the story and solve the problem. If constructing/submitting a diagram
+is added as a learner action, review its Ability and task identity; supplying an unsolved reference
+need not add that action. No paired-image judge or mode-specific annotation mechanism is proposed.
+
+**[CONCLUDED]** The fifth `fractions-general-division-word-problem` leaf is approved in principle,
+retaining the existing word ID for quotient models. Preserve the three general tuple successors
+and all eight legacy choices (five WithoutZero / three WithZero). This is a distinct approval
+from the four completed supplied-model leaves; it no longer needs to be asked again.
+
+The user's number-line conclusion applies here too: a required model does not automatically
+require a zero origin. **[OPEN]** Establish every actual zero quantity in the model before choosing
+label values. Four of the six general word choices can generate dividend zero: the two proper
+FractionDividend choices and both IntegerDividend choices. A positive quotient below one can also
+have zero complete groups if that group count is part of the required model. An internal digit
+zero or an unnecessary reference tick remains insufficient evidence by itself.
+
+The **three product choices** have positive canonical quantities. Specifying the intended model
+and removing an unnecessary numerical zero reference offers a simpler ordinary WithoutZero path,
+subject to checking all quantities that the retained model actually assesses. No product producer
+split or mathematical sampling change is indicated by that route; Question/Solution rendering and
+annotations change and matching must be checked.
+
+The **six general division choices** still need a pre-generation declaration-owner design. The
+fifth leaf alone does not partition their mixed zero/nonzero mathematics. Adding zero profiles to
+the current producer would overlap the four completed general views' WithZero ownership; a view
+cannot choose a mathematical profile. Review a narrow word-relation producer boundary or a
+coordinated family ownership/reference-display migration if necessary. Neither is silently
+approved by the fifth-view agreement. Do not reintroduce payload classification, cross-owner
+inference or graph completion. The completed 24 repairs remain truthful while their zero origins
+are displayed/required; any later family-wide simplification needs an explicit migration review.
+
+### Clock references: zero minutes is an assessed numerical quantity
+
+**[CONCLUDED]** A reference such as `9:00` involves its zero-minute component. The earlier proposal
+to treat these six cases as WithoutZero is **[SUPERSEDED]**. Positive elapsed durations and equation
+operands do not cancel an additional assessed zero quantity in their required time reference.
+This follows the same numerical-value interpretation as minute-zero clock-reading tasks.
+
+Plan ordinary WithZero declarations at the module owning the fixed whole-hour reference, with
+current view invariants as the direct local candidate and an ownership check before adoption.
+Require the intended whole-hour method in Question consistently with the demonstrated Solution
+where necessary for independent competency judgement. Existing samplers/configurations can remain
+unchanged; question wording, annotations and validation identities may change. Check newly admitted
+zero-involving matches and preserve every existing target. No new zero selector or automatic
+completion is needed for an invariant already guaranteed by this family.
+
+### Follow-up order and accounting
+
+Draft the concluded clock and arithmetic-reference-display batches independently of the algebra
+scope review. Prepare the approved fifth word leaf alongside the required-model contract, keeping
+the unresolved general-division quantity/ownership design visible. Review the rooted marking task
+and the precise algebra qualifier as separate open items. Do not treat an approved direction as
+proof that all associated findings are closed: only implemented declarations/policy and a fresh
+audit can change the **34** baseline. Preserve target coverage, range exclusion, the Area allowlist,
+and separate annotation repairs, policy retirements and structural migrations in the accounting.
+
 ## Approved fraction-division view split implementation (2026-10-30)
 
 The user approved implementing the 24-case batch below on the existing branch. The migration
@@ -182,6 +319,11 @@ ownership exception, inference adapter or automatic completion is needed. The ou
 and range-policy exclusion remain unchanged. Dataset regeneration/VQA still wait for source readiness.
 
 ### Four decisions for the other 34 requirements
+
+Historical framing: the current tags and conclusions are in
+[strategy refinement](#strategy-refinement-conclusions-and-open-design-2026-10-30). The default
+two-number-line-producer and clock WithoutZero recommendations below are superseded; the fifth
+general-division word leaf and required-model principle are now agreed.
 
 1. **Structural algebra: 13.** Should an unassigned structural expression require a whole-frame
    sign/zero classification, or should completeness follow the numerical quantities actually
