@@ -14,6 +14,10 @@ Explore its standards coverage and generated tasks:
 
 > **Version Alignment:** The dataset version is strictly tied to the version of the [EduGraph Ontology](https://github.com/christian-bick/edugraph-ontology) it was generated with. This ensures that the semantic labels stay consistent with the training data. For example v0.6.0-02 refers to the second dataset revision for ontology version 0.6.0. 
 
+Development currently pins ontology preview `0.32.0-pre.1.00409a39c911`.
+The [model-scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
+records package verification and the additive fraction-model declarations.
+
 ## General Concepts
 
 The pipeline is built on a **Label-Driven Generation** paradigm. Instead of generating a math problem and attempting to label it, the system receives a set of constraints (e.g., "Must include zero", "Uses addition") and generates training artifacts that satisfy those labels and expose the visual or necessary textual clues a classifier needs to defend them.

@@ -33,8 +33,8 @@ The dependency graph, its Area allowlist and range-policy exclusion remain uncha
 The user has implemented both descriptors. The published
 [preview `0.32.0-pre.1.00409a39c911`](https://github.com/christian-bick/edugraph-ontology/releases/tag/preview-0.32.0-pre.1.00409a39c911)
 was verified on 2026-10-30 against release commit `00409a39c911fa79adb911bf6b724a9d34473588`.
-The current content package pin remains `0.31.0-pre.58.9231304124e9`; this review does not yet
-adopt the preview or add these declarations to content.
+The content package previously pinned `0.31.0-pre.58.9231304124e9`. The adoption checkpoint below
+records the explicit upgrade and keeps package effects separate from declaration effects.
 
 | Released Scope | Meaning | Specialization parent | Current application |
 |---|---|---|---|
@@ -60,7 +60,45 @@ partitioned into one shared unit and grouped into divisor-sized portions, includ
 final group, to express a quotient. The first two descriptors suffice for the current model-form
 inventory; this extra subtype is not necessary merely to record that a bar model is used.
 
-### Next declaration batch after package adoption
+### Ontology preview adoption checkpoint
+
+The user approved upgrading the package and implementing the five reviewed declarations on
+2026-10-30. `package.json`, `package-lock.json` and the installed package now agree on
+`0.32.0-pre.1.00409a39c911`, pinned to the exact release asset above. Its SHA-256 is
+`02d5e6288451cb60510636e3b874d3f9c0d2a6bad9428468a87e59d298c18b08`; the locked integrity is
+`sha512-8r5icjE1wcIiNcnTLQ63W8oev2oMxB7RybblCrecv6+KLykTul4E00gDTf4Bv0bQbpLtIvSxc95tDD6G1PqPeg==`.
+No other dependency entry changes. Lifecycle scripts were disabled during installation.
+
+Independent inspection of both complete packaged snapshots finds **1,489 to 1,491 descriptors**
+and **7,934 to 7,948 authored assertions**. The only changed subjects are the two new Scopes
+and `SpatialNumbers`' definition/comment. All Areas, Abilities, schema contracts, package exports
+and executable library files are unchanged; generated Scope exports and the bundled snapshot
+are the only changed `dist` files. Both new labels are eligible and specialize `SpatialNumbers`.
+Explicit negative checks confirm that `expands` and `translates` provide no matching substitution.
+
+Before any view declaration changes, the full comparison preserves **1,013 target IDs and complete
+label sets, 1,213 tuples and 1,575 exact joint choices**. No plan, variant or annotation changes
+at this package-only checkpoint. Across the five-view slice (**nine targets / eleven tuples**),
+**132 paired planned draws** retain configurations, all random continuation, payloads, content/task
+fingerprints and **264 exact Question/Solution SSR outputs**. All 1,728 protected implementation,
+target and dependency source files remain byte-identical.
+
+Types, label eligibility, generator/view contracts and CCSS standards validation pass. The fresh
+report-only audit has the same assessments and summary, including **63 non-range source findings
+(56 zero, seven sign)** and the same stored generation. The authored dependency graph, Area
+allowlist and range-policy exclusion are unchanged. Its ontology-bound policy identity refreshes
+from `fe531bf775d9274b7189920e3786608c10dd089980c32ff062bf7da76fb33d9f`
+to `b1074c6c2c3db6b9c093424259a54cc23e578a42460ff2c57df4ca58eb3ba70e`;
+this is a semantic-input identity refresh, not a policy retirement or a closed dependency gap.
+Stored dataset regeneration and VQA remain deferred to source/content readiness.
+
+Package effects are recorded under `temp/model-scope-adoption/`: `release.json`,
+`semantic-verification.json`, `before.json`, `package-only.json`,
+`package-only-comparison.json`, `package-audit/` and the adoption validation logs.
+The pre-existing package pin is deliberately superseded; other dependency entries and unrelated
+work remain intact. Earlier v0.32 migration artifacts retain their original version and provenance.
+
+### Five approved declarations
 
 The complete producer and Question/Solution review identifies these five straightforward
 invariant candidates. They require no target, renderer, sampling or payload changes:

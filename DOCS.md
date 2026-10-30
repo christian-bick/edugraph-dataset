@@ -111,6 +111,12 @@ partitions change conditional sampling and replay outcomes through the existing 
 they do not add post-generation labeling. The standard-to-task review retains the authored fraction
 models and the independent Question/Solution evaluation inputs.
 
+The [fraction-model Scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
+pins the exact ontology preview containing `BarModel` and `AreaModel`. Their ordinary view
+invariants provide matching capabilities and annotations without changing mathematical sampling
+or rendering. The adoption record separates package verification, declaration changes and deferred
+contexts whose model form is not consistently supplied or required in both modes.
+
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
 of broad requests. Both are explicit schema contracts; the existing inference callbacks remain
