@@ -117,6 +117,15 @@ invariants provide matching capabilities and annotations without changing mathem
 or rendering. The adoption record separates package verification, declaration changes and deferred
 contexts whose model form is not consistently supplied or required in both modes.
 
+Four `fractions-general-division-*` leaves accept `FractionDivisionRelationProblem` for execution,
+interpretation, inverse explanation and story creation. The corresponding `fractions-division-*`
+IDs accept `FractionQuotientProblem` and retain the legacy quotient capabilities. Fixed general
+projections invariantly supply the displayed zero origin, Numberline and BarModel; both families
+reuse their original rendering bodies. The word-problem union and construction contract remain
+unchanged. The [split record](docs/plan/label-dependency-graph.md#approved-fraction-division-view-split-implementation-2026-10-30)
+documents exact target-route successors, preserved mathematical sampling and changed view/sample
+identities. No matching, annotation or replay machinery changes are needed.
+
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
 of broad requests. Both are explicit schema contracts; the existing inference callbacks remain

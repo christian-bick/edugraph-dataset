@@ -55,6 +55,11 @@ separates these completed local migrations from the ongoing zero-applicability d
 Question and solution evaluation remain independent: each judgement receives one image and may
 reason through the competency required by that image.
 
+General fraction-division models now use four dedicated task views, while the original view IDs
+retain quotient models. Both families reuse their existing rendering bodies. The
+[division split record](docs/plan/label-dependency-graph.md#approved-fraction-division-view-split-implementation-2026-10-30)
+documents preserved target coverage and the new general views' zero-origin and model annotations.
+
 Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
 matching-capable mathematical profiles. The latest
 [numerical-zero review](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)

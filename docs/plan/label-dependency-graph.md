@@ -76,6 +76,41 @@ in the third checkpoint. Stored data is untouched: **2,542 raw / 2,528 distinct*
 The other 34 source findings still require the four recorded decisions; their interpretation and
 the separate reasoning-view correctness item are not changed or credited as repairs here.
 
+Checkpoint commit: `e0e69a92`.
+
+### Checkpoint 3: split acceptance and current backlog
+
+Final acceptance verifies all **2,245 production source/package inputs** are byte-identical to
+the second checkpoint's paired-render/RNG proof. A fresh full catalog comparison retains every
+target, route, assignment and provenance record from that checkpoint. The verified release
+ontology, authored graph, evaluator and policy identities are unchanged. The 2,736 exact paired
+Question/Solution SSR comparisons therefore remain applicable without rerunning identical probes.
+The production Vite build succeeds and emits all four new view HTML pages.
+
+Final gates pass: **887 test files / 7,168 tests**, all generator coverage thresholds, types,
+ownership/spec contracts, label eligibility, standards and documentation. Coverage is **98.34%
+statements, 97.00% branches, 100% functions and 99.44% lines**. The final report-only audit is
+byte-identical to the second checkpoint's report, with the same 34 source requirements, zero
+conflicts or validation errors, and unchanged stored annotations/assessments.
+
+Only the reviewed split implementation, tests, module/type mappings and documentation change.
+All seven target files, all 15 dependency implementation files, every generator/helper and both
+shared rendering bodies are preserved. All **187 pre-existing foreign changes** remain intact:
+185 dirty files are byte-identical, and the original README/DOCS working content is recovered
+exactly by removing each owned additive overview paragraph. Those paragraphs are staged separately
+from the unrelated existing edits. No target, range policy or Area allowlist adjustment is hidden
+in this migration.
+
+The remaining **34 source requirements** are the previously recorded **13 structural algebra,
+six number-line ownership, nine open fraction-word and six elapsed/interval-time** cases. There
+is no policy retirement. Dataset generation, live VQA and stored-dataset acceptance still wait
+for source readiness and the separately recorded content-correctness item. This split repairs
+source annotations; it does not rewrite stored rows or infer labels from a generated payload.
+
+Reproducible evidence is under `temp/fraction-division-split/`: immutable baseline, phase captures,
+exact target-successor and all-choice comparisons, same-seed/native-seed and replay checks, audit
+lineage reconciliation, production-freeze acceptance, preservation proofs, build and gate logs.
+
 ## Next batch after the five autonomous repairs (2026-10-30)
 
 Baseline: `67155e9a`, ontology `0.32.0-pre.1.00409a39c911`. A fresh report-only audit is
