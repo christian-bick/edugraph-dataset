@@ -98,6 +98,42 @@ annotation graph and range-policy files remain unchanged. Stored outputs are not
 these checks. Proofs: `independent-comparison.json`, `artifact-lineage.json` and
 `independent-final-audit/` under the evidence directory.
 
+### Acceptance and readiness
+
+**[COMPLETE]** The reasoning content defect is resolved; `Q-REASONING` / `RB-A3-D3` no longer
+blocks source readiness. The original hundred-boundary and existing thousand-boundary arithmetic
+remain supported without manufacturing an impossible verdict class. No target, capability,
+annotation policy or schema binding is removed or broadened.
+
+- `npm run test:coverage`: **898 files / 7,281 tests pass**; generator statement/branch/function/
+  line coverage **98.35% / 97.02% / 100% / 99.44%**, with every generator threshold passing.
+  The affected rounding generator and new proposal sampler each have 100% coverage. The focused
+  shared-helper coverage is 91.3% of lines; uncovered lines belong to other story branches.
+- Build, types, label validation, generator/view specification checks, CCSS targets and documentation
+  references pass. Documentation retains the same two external-link 404 warnings.
+- Independent oracle verification checks **47,478 small-domain/boundary contexts** and **2,019,988
+  candidate cells**, including the inclusive million edge. Exhaustiveness applies to those
+  enumerated cases; the constant-time bucket derivation explains the general selection rule.
+- **528 same-payload Q/S render checks** are invariant to view seed and consume no presentation
+  RNG. Six stale/malformed payload probes reject. Six local screenshots were rendered with no
+  browser errors; inspected Question/Solution images keep the verdict distinction and correct
+  numeric evidence. The temporary preview server was stopped afterward.
+- Observed verdicts among 264 affected draws are **two reasonable / 262 unreasonable**. This is
+  measured sampling evidence, not a guarantee or target quota. The changed proportions are the
+  disclosed consequence of uniform feasible values and the current wide numeric domains.
+- All **187 pre-existing dirty changes** remain intact and unstaged; all seven target files and
+  five graph/coverage policy files are byte-identical to baseline. **3,165 source/test/package
+  files** stay frozen after verification. README/DOCS commit only their owned overview additions.
+
+Implementation checkpoint: `ce8d6cb4`. Final evidence is under `temp/reasoning-domain-fix/`:
+`full-coverage.log`, `helper-coverage/`, `independent-domain-proof.json`, `independent-comparison.json`,
+`artifact-lineage.json`, `boundary-render-proof.json`, `preservation-final.json` and `visual/`.
+
+**Next acceptance work:** canonical dataset regeneration, stored-label checks and independent
+Question/Solution VQA. The existing stored/public outputs and Gemini caches have not been
+refreshed by this fix. Their outstanding findings are not claimed closed by source verification;
+source dependency closure and the separate reasoning-content prerequisite are now both satisfied.
+
 ## Approved final-seven migrations (2026-10-30)
 
 The user explicitly approved both follow-up decisions: the exceptional rooted-length producer
@@ -158,9 +194,9 @@ the 28 local screenshots.
 **Stored-dataset acceptance remains separate.** The unchanged 2,808-row snapshot still has 2,502
 missing non-range assessments and four obsolete algebra claims. No dataset/public-union rewrite
 or Gemini VQA was performed. Source dependency readiness is now achieved; the independently
-recorded reasoning-view content defect (`Q-REASONING` / `RB-A3-D3`) remains the separate prerequisite
-before canonical regeneration, stored-label validation and independent-mode VQA. Neither these
-two approvals nor source closure is presented as resolving that unrelated content defect.
+recorded reasoning-view content defect (`Q-REASONING` / `RB-A3-D3`) remained a separate prerequisite
+at this checkpoint. It is subsequently resolved by the reasoning repair above; these two earlier
+approvals alone were not presented as resolving that content defect.
 
 ### Contract and consumer adoption matrix
 
@@ -1810,6 +1846,9 @@ any relevant sign/zero restrictions explicitly, instead of relying on hidden gen
 
 **Q-REASONING — May the known reasoning-view correctness defect be repaired despite the rendering
 preservation constraint?**
+
+**[APPROVED AND IMPLEMENTED]** The later explicit reasoning repair authorization and acceptance
+are recorded at the top of this plan. The following bullets preserve the original decision context.
 
 - **Affected:** RB-A3-D3, a separate content defect with zero current dependency requirements.
   The recorded bounded example produces `23+32+45=100` but the reasoning projection introduces 200.

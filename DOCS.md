@@ -97,6 +97,14 @@ mathematical work required by a question; solution mode evaluates the shown work
 Mode-specific verdicts and cache entries remain separate. Prompt/checklist edits change evaluation
 identities without themselves changing rendered pixels or proving empirical model accuracy.
 
+Rounding word problems carry their inclusive mathematical number domain and a canonical proposed
+result with its rounded value. The generator selects a feasible distinct integer before rendering;
+the view validates the evidence and derives only the rounded-equality verdict. Proposal sampling
+does not force a class balance. Existing matching declarations remain unchanged, while source,
+content/task and rendered-artifact identities refresh. The
+[reasoning repair](docs/plan/label-dependency-graph.md#reasoning-proposal-domain-repair-2026-10-30)
+records boundary support, shared-consumer controls and stale-source replay rejection.
+
 The current content modules also use finite mathematical profiles for operand widths,
 fraction magnitudes and settled coefficient/endpoint/sign distinctions. Their samplers
 partition the previous supported exercises before generation; labels remain ordinary

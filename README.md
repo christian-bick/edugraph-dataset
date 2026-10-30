@@ -66,6 +66,12 @@ close the remaining source dependency gaps. Generic sign/zero annotations are ex
 algebraic tasks through an explicit contextual validation rule; elementary arithmetic-law examples
 retain their classification.
 
+Rounding reasonableness exercises receive their proposed value from the mathematical generator,
+within the same numeric domain as the exact and rounded quantities. The view evaluates that
+canonical proposal. Selection uses feasible values without imposing a verdict balance; the
+[reasoning repair](docs/plan/label-dependency-graph.md#reasoning-proposal-domain-repair-2026-10-30)
+records preserved target coverage and the boundary regressions.
+
 Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
 matching-capable mathematical profiles. The latest
 [numerical-zero review](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
