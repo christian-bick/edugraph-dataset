@@ -1,9 +1,10 @@
 import {describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {getRandomState, setSeed} from '../../lib/random.ts';
-import {extractConfig, generateWithLabels} from '../../lib/utils.ts';
+import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../lib/utils.ts';
+import {matchTarget} from '../../lib/matching.ts';
 import {planModelCompatibility} from '../../lib/model-compatibility.ts';
-import {generatePlannedDraw, resolvePlannedConfigurations} from '../../lib/planned-generation.ts';
+import {generatePlannedDraw} from '../../lib/planned-generation.ts';
 import {resolveInferredLabels} from '../../lib/inferred-labels.ts';
 import {spec as numberLineSpec} from '../../visuals/views/operations/operations-number-line-representation/spec.ts';
 import {spec as readingSpec} from '../../visuals/views/numbers/numbers-read-standard/spec.ts';
@@ -50,26 +51,15 @@ describe('WritingGenerator Spec Integration', () => {
         expect(existing!.labels.filter(label => label === Scope.NumbersWithoutZero)).toHaveLength(1);
     });
 
-    it('excludes the number-line origin even when a target also requests Arabic numerals and a broader bound', () => {
-        const consumer = {viewId: numberLineSpec.viewId, generalLabels: numberLineSpec.generalLabels,
-            schema: {}, spec: numberLineSpec};
-        const common = [Area.DigitNotation, Scope.Numberline, Scope.ArabicNumerals, Ability.VisualArticulation];
-        expect(planModelCompatibility({id: 'unbounded-line',
-            labels: [...common, Scope.NumbersSmaller120]}, model, consumer).supported).toBe(false);
-        expect(planModelCompatibility({id: 'mixed-bounds-line',
-            labels: [...common, Scope.NumbersSmaller100, Scope.NumbersSmaller120]}, model, consumer).supported).toBe(false);
-        for (const bounds of [[Scope.NumbersSmaller100], [Scope.NumbersSmaller100, Scope.NumbersSmaller20]]) {
-            const target = {id: 'bounded-line', labels: [...common, ...bounds]};
-            const result = planModelCompatibility(target, model, consumer);
-            expect(result.supported).toBe(true);
-            if (!result.supported) throw new Error('Expected the existing bounded line to remain admitted.');
-            const resolved = resolvePlannedConfigurations({generatorSchema: WritingGeneratorSchema,
-                generatorSpec: spec, viewSchema: {}, viewSpec: numberLineSpec, plan: result.plan,
-                sampleKey: 'bounded-line#writing#operations-number-line-representation#train#question#inst:0',
-                attempt: 1, seed: 17});
-            expect(resolved.generatorConfig).toHaveProperty('range.max', bounds.length === 1 ? 100 : 20);
-            expect(resolved.labels).not.toContain(Scope.NumbersWithoutZero);
-        }
+    it('does not substitute a scalar-writing payload for a rooted length relation', () => {
+        const target = {id: 'bounded-line', labels: [Area.NumerationWithIntegers, Scope.Numberline,
+            Scope.ArabicNumerals, Ability.VisualArticulation, Scope.NumbersSmaller100]};
+        const result = matchTarget(target,
+            {...model, problemType: 'WritingProblem', labels: [...spec.generalLabels, ...extractSchemaLabels(generator.schema)]},
+            {viewId: numberLineSpec.viewId, problemType: 'WholeNumberLengthProblem',
+                supportedLabels: [...numberLineSpec.generalLabels], generalLabels: numberLineSpec.generalLabels,
+                schema: {}, spec: numberLineSpec});
+        expect(result).toEqual({matched: false, reason: 'incompatible-type'});
     });
 
     it('preserves complete direct configurations, payloads and random continuation', () => {

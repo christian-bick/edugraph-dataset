@@ -1,6 +1,6 @@
 import {getTargetPolicyLabels} from '../../../../lib/compatibility.ts';
 import {planModelCompatibility} from '../../../../lib/model-compatibility.ts';
-import {WritingGeneratorSchema, spec as writingSpec} from '../../../../generators/writing/spec.ts';
+import {WholeNumberLengthsGeneratorSchema, spec as lengthSpec} from '../../../../generators/number/whole-number-lengths/spec.ts';
 import {spec as gradeTwoTargets} from '../../../../spec/ccss/grade-02.ts';
 import {implementationTodos, spec as gradeSixTargets} from '../../../../spec/ccss/grade-06.ts';
 import type {CompetencyTarget} from '../../../../types/ml-engine.ts';
@@ -9,8 +9,8 @@ import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {OperationsNumberLineRepresentationViewSchema, spec} from './spec.ts';
 
-const generator = {generatorId: writingSpec.generatorId, generalLabels: writingSpec.generalLabels,
-    schema: WritingGeneratorSchema, spec: writingSpec};
+const generator = {generatorId: lengthSpec.generatorId, generalLabels: lengthSpec.generalLabels,
+    schema: WholeNumberLengthsGeneratorSchema, spec: lengthSpec};
 const view = (declaration: ViewSpec) => ({viewId: declaration.viewId, generalLabels: declaration.generalLabels,
     schema: OperationsNumberLineRepresentationViewSchema, spec: declaration});
 const unguarded = {...spec, compatibility: spec.compatibility?.filter(rule => rule.id !== 'number-line-bounded-domain')};
@@ -29,7 +29,7 @@ describe('operations-number-line-representation view spec', () => {
         expect(OperationsNumberLineRepresentationViewSchema).toEqual({});
     });
 
-    it('preserves the actual bounded Grade 2 target and its exact prior generation plan', () => {
+    it('admits the unchanged bounded Grade 2 target with its rooted relation producer', () => {
         const target = actualTarget(gradeTwoTargets, '2.MD.B.6-number-line-representation~5cfb1e4b');
         expect(target.labels).toContain(Scope.NumbersSmaller100);
         const previous = planModelCompatibility(target, generator, view(unguarded));

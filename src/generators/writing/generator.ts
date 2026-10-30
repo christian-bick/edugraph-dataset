@@ -1,6 +1,6 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../types/ml-engine.ts";
 import {WritingProblem} from "../../types/problems.ts";
-import {random} from "../../lib/random.ts";
+import {samplePositiveWholeNumber} from '../number/whole-number-values.ts';
 import {createWholeNumberPlaceValues} from '../../lib/whole-number-notation.ts';
 import {WritingGeneratorConfig, WritingGeneratorSchema, spec} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
@@ -22,12 +22,8 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
             return {data: {number: 0}};
         }
 
-        const minNum = Math.max(1, Math.ceil(resolvedRange.min));
-        const maxNum = Math.floor(resolvedRange.max);
-        
-        if (maxNum - minNum < 0) return null;
-
-        const currentNum = Math.floor(random() * (maxNum - minNum + 1)) + minNum;
+        const currentNum = samplePositiveWholeNumber(resolvedRange);
+        if (currentNum === null) return null;
         
         if (currentNum <= 1000) return {data: {number: currentNum}};
 

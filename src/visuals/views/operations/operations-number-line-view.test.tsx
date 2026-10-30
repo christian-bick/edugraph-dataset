@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import {ArithmeticPairProblem, WritingProblem} from '../../../types/problems.ts';
+import {ArithmeticPairProblem, WholeNumberLengthProblem} from '../../../types/problems.ts';
 import {
     OperationsNumberLineMode,
     OperationsNumberLineView,
@@ -10,7 +10,7 @@ import {
 
 const payload = (
     viewId: OperationsNumberLineViewId,
-    data: WritingProblem | ArithmeticPairProblem,
+    data: WholeNumberLengthProblem | ArithmeticPairProblem,
     isSolutionView: boolean
 ): ViewRenderPayload<OperationsNumberLineViewId> => ({
     problem: {type: 'arithmetic', data, labels: []},
@@ -23,7 +23,7 @@ const payload = (
 const render = (
     mode: OperationsNumberLineMode,
     viewId: OperationsNumberLineViewId,
-    data: WritingProblem | ArithmeticPairProblem,
+    data: WholeNumberLengthProblem | ArithmeticPairProblem,
     isSolutionView: boolean
 ) => renderToStaticMarkup(<OperationsNumberLineView
     mode={mode}
@@ -36,7 +36,7 @@ describe('operations number line view family', () => {
         const representation = render(
             'representation',
             'operations-number-line-representation',
-            {number: 37},
+            {kind: 'whole-number-length', origin: 0, endpoint: 37, unit: 1},
             false
         );
         const arithmetic = render(

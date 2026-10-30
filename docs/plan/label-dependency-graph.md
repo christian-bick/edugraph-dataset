@@ -10,6 +10,55 @@ The approved [configuration-inference extension](#configuration-inference-checkp
 adds a narrowly scoped fallback for additional annotations. Its output inventory never supplies
 matching capabilities; representation completeness remains separate.
 
+## Approved final-seven migrations (2026-10-30)
+
+The user explicitly approved both follow-up decisions: the exceptional rooted-length producer
+and the coordinated common-part-model quantity contract/ownership migration. Their implementation
+starts from `a414e585`, with seven non-range source requirements. The preceding Area allowlist,
+algebra cutoff and range-policy exclusion are fixed. Targets and supported mathematical domains
+are preserved; sampling/replay changes inherent in the approved profiles and new producer are
+recorded separately from closure. No annotation adapter, inferred completion or graph change is
+needed.
+
+### Contract and consumer adoption matrix
+
+| Mathematical owner / consumer | Canonical contract or adopted evidence | Verification |
+|---|---|---|
+| `whole-number-lengths` → `operations-number-line-representation` | Named rooted relation with origin 0, positive endpoint and unit 1. Generator owns WithZero; existing marking view keeps its task/ID. Reuse the writer's positive inclusive-integer sampler. Range capabilities must include the origin truthfully. | Exact old target successor, every 1..100 endpoint, same-value Q/S markup, sampler continuation, full matching diff. |
+| `writing` → its remaining consumers | Existing scalar and place-value payloads unchanged; only the positive integer draw is factored into a shared helper. | Fixed-seed configurations, payloads, RNG and unaffected render comparisons. |
+| `fraction-division-relations` → general execution, interpretation, inverse explanation, story creation, word problem and model construction | Same complete canonical division relation; new required `groupCountProfile: 'zero' \| 'positive'` selects zero or positive complete groups before generation. Full operand support retained across 11 legal conjunctions. | Exhaustive finite operand-domain partition, ordinary matching/annotation claims, schema compatibility and deterministic generation. |
+| All six general fraction projections | Question requires reasoning with complete-group count and any fractional last group; Solution states that count. Remove view-owned zero claims from the four supplied-model leaves and construction. Omit unnecessary origin numerals for positive group counts; retain genuine zero witnesses. | Both modes, all profiles/witness/context cases, exact positive quotient with hidden zero remainder, scoped matching/replay tests. |
+| Legacy quotient producer and five legacy quotient leaves | No mathematical, declaration or renderer changes. | Retain all legacy targets/routes/choices and same-value Q/S markup. |
+
+A proper-fraction dividend divided by a positive integer can never reach one whole group;
+its positive-group conjunction is unsupported. All other operand profiles admit both quantities.
+Zero complete groups includes actual zero dividend/quotient and positive quotients below one.
+An internal zero remainder alone is outside the assessed quantity domain. This is an ordinary
+mathematical configuration contract, not a classifier over generated annotations.
+
+### Checkpoint: rooted whole-number lengths
+
+**[IMPLEMENTED]** `whole-number-lengths` now owns the complete rooted relation and its WithZero
+invariant. The existing marking view accepts WholeNumberLengthProblem; its ID, question, target
+labels and supported positive endpoints are preserved. Its scalar writer counterpart retains its
+other consumers. Both producers reuse `number/whole-number-values.ts` for the same inclusive
+positive-integer draw. The new producer exposes upper-bound capabilities true of origin and
+endpoint, without claiming a positive lower bound for the zero-inclusive relation.
+
+The only route migration is `2.MD.B.6-number-line-representation~5cfb1e4b`:
+`writing` → `whole-number-lengths`, with `operations-number-line-representation` unchanged.
+No extra route is admitted. The schema keeps the range and removes the old scalar notation/zero
+selectors; the payload maps `number` to `endpoint` and explicitly supplies origin 0 and unit 1.
+New producer/sample/content/replay identities refresh as approved.
+
+All **19 remaining writer routes / 627 native and forced probes** preserve configuration,
+mathematics and RNG. **33 migrated same-old-seed probes** preserve endpoint and continuation.
+All **202 marking Q/S renders for endpoints 0..100** are byte-identical; production retains its
+uniform 1..100 endpoint domain. The shared one-draw law agrees across 1,024 seeds, and helper
+tests verify every 1..100 draw bin. **11 focused files / 62 tests** and typecheck pass. This closes
+the one rooted marking requirement. Evidence: `temp/final-seven-resolution/rooted-preservation.json`
+and `rooted-catalog.json`.
+
 ## Remaining-batch implementation (2026-10-30)
 
 The user authorized the settled strategies below. Implementation starts from `bac52e15`, with

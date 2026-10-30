@@ -15,13 +15,13 @@ interface CoreProps {
     payload: ViewRenderPayload<typeof VIEW_ID>;
 }
 
-const Core = ({payload}: CoreProps) => (
+export const OperationsNumberLineRepresentationCore = ({payload}: CoreProps) => (
     <OperationsNumberLineView mode="representation" payload={payload} viewId={VIEW_ID} />
 );
 
 export const OperationsNumberLineRepresentation = withConfig(
     OperationsNumberLineRepresentationViewSchema,
-    Core
+    OperationsNumberLineRepresentationCore
 );
 
 let root: ReturnType<typeof createRoot> | null = null;

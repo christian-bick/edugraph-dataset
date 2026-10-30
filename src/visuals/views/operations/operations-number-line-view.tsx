@@ -1,6 +1,6 @@
 import {createElement, Fragment, ReactNode} from 'react';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import {ArithmeticPairProblem, WritingProblem} from '../../../types/problems.ts';
+import {ArithmeticPairProblem, NumberLineProblem, WholeNumberLengthProblem} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 
 const WIDTH = 760;
@@ -22,38 +22,36 @@ interface Props {
     showZeroReference?: boolean;
 }
 
-const isWritingProblem = (
-    data: WritingProblem | ArithmeticPairProblem
-): data is WritingProblem => 'number' in data;
+const isWholeNumberLength = (
+    data: NumberLineProblem
+): data is WholeNumberLengthProblem => 'kind' in data && data.kind === 'whole-number-length';
 
 const roundedMaximum = (largestValue: number) =>
     Math.max(10, Math.ceil(largestValue / 10) * 10);
 
 const validateRepresentation = (
-    data: WritingProblem | ArithmeticPairProblem,
+    data: NumberLineProblem,
     viewId: OperationsNumberLineViewId
-): WritingProblem => {
-    if (!isWritingProblem(data)) {
-        throw new ViewValidationError(viewId, 'Representation requires a writing payload.');
-    }
-    validateProblemData(viewId, data, ['number']);
-    if (!Number.isInteger(data.number) || data.number < 0 || data.number > 100) {
+): WholeNumberLengthProblem => {
+    validateProblemData(viewId, data, ['kind', 'origin', 'endpoint', 'unit']);
+    if (!isWholeNumberLength(data) || data.origin !== 0 || data.unit !== 1
+        || !Number.isInteger(data.endpoint) || data.endpoint < 0 || data.endpoint > 100) {
         throw new ViewValidationError(
             viewId,
-            'The represented number must be an integer from 0 through 100.'
+            'A whole-number length requires origin 0, unit 1 and an integer endpoint from 0 through 100.'
         );
     }
     return data;
 };
 
 const validateArithmetic = (
-    data: WritingProblem | ArithmeticPairProblem,
+    data: NumberLineProblem,
     viewId: OperationsNumberLineViewId
 ): ArithmeticPairProblem => {
-    if (isWritingProblem(data)) {
+    validateProblemData(viewId, data, ['num1', 'num2', 'answer', 'operation']);
+    if (isWholeNumberLength(data)) {
         throw new ViewValidationError(viewId, 'Arithmetic requires an arithmetic-pair payload.');
     }
-    validateProblemData(viewId, data, ['num1', 'num2', 'answer', 'operation']);
     if (data.operation !== 'addition' && data.operation !== 'subtraction') {
         throw new ViewValidationError(viewId, `Unsupported operation: ${data.operation}`);
     }
@@ -75,14 +73,15 @@ const validateArithmetic = (
 
 export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReference = true}: Props) => {
     const {problem, isSolutionView} = payload;
-    const data = problem.data as WritingProblem | ArithmeticPairProblem;
+    const data = problem.data;
     const representation = mode === 'representation';
+    const showOrigin = representation || showZeroReference;
     const resolved = representation
         ? validateRepresentation(data, viewId)
         : validateArithmetic(data, viewId);
 
     const largestValue = representation
-        ? (resolved as WritingProblem).number
+        ? (resolved as WholeNumberLengthProblem).endpoint
         : Math.max(
             (resolved as ArithmeticPairProblem).num1,
             (resolved as ArithmeticPairProblem).num2,
@@ -91,15 +90,15 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
     const maximum = roundedMaximum(largestValue);
     const toX = (value: number) => LEFT + (value / maximum) * (RIGHT - LEFT);
     const ticks = Array.from({length: 11}, (_, index) => (maximum / 10) * index)
-        .filter(value => showZeroReference || value !== 0);
+        .filter(value => showOrigin || value !== 0);
 
-    const writing = representation ? resolved as WritingProblem : null;
+    const length = representation ? resolved as WholeNumberLengthProblem : null;
     const arithmetic = representation ? null : resolved as ArithmeticPairProblem;
-    const start = writing ? 0 : arithmetic!.num1;
-    const end = writing ? writing.number : arithmetic!.answer;
+    const start = length ? length.origin : arithmetic!.num1;
+    const end = length ? length.endpoint : arithmetic!.answer;
     const symbol = arithmetic?.operation === 'addition' ? '+' : '−';
-    const prompt = writing
-        ? `Mark ${writing.number} as a length from 0.`
+    const prompt = length
+        ? `Mark ${length.endpoint} as a length from ${length.origin}.`
         : `Use the number line: ${arithmetic!.num1} ${symbol} ${arithmetic!.num2} = ${isSolutionView ? arithmetic!.answer : '□'}`;
     const startX = toX(start);
     const endX = toX(end);
@@ -130,7 +129,7 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
     return (
         <div className="w-[820px] rounded-2xl bg-white p-6 font-sans shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="mb-2 text-center text-[1.55rem] font-semibold text-slate-800">{prompt}</div>
-            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-[210px] w-full" role="img" aria-label={showZeroReference ? 'Number line beginning at zero' : 'Number line with a positive numerical scale'}>
+            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-[210px] w-full" role="img" aria-label={showOrigin ? 'Number line beginning at zero' : 'Number line with a positive numerical scale'}>
                 <defs>
                     <marker id="number-line-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
                         <path d="M 0 0 L 8 4 L 0 8 z" fill="#2563eb" />
@@ -144,11 +143,11 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
                         <text x={startX} y={AXIS_Y + 58} textAnchor="middle" className="fill-slate-900 text-[16px] font-bold">start {start}</text>
                     </Fragment>
                 )}
-                {isSolutionView && writing && (
+                {isSolutionView && length && (
                     <Fragment>
-                        <line x1={LEFT} y1={AXIS_Y - 2} x2={endX} y2={AXIS_Y - 2} stroke="#059669" strokeWidth="7" strokeLinecap="round" />
+                        <line x1={startX} y1={AXIS_Y - 2} x2={endX} y2={AXIS_Y - 2} stroke="#059669" strokeWidth="7" strokeLinecap="round" />
                         <circle cx={endX} cy={AXIS_Y} r="9" fill="#059669" />
-                        <text x={endX} y={AXIS_Y - 24} textAnchor="middle" className="fill-emerald-700 text-[18px] font-bold">{writing.number}</text>
+                        <text x={endX} y={AXIS_Y - 24} textAnchor="middle" className="fill-emerald-700 text-[18px] font-bold">{length.endpoint}</text>
                     </Fragment>
                 )}
                 {isSolutionView && arithmetic && (

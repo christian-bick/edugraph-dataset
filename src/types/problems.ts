@@ -1908,8 +1908,16 @@ export type WritingProblem =
     | LegacyWritingProblem
     | MultiDigitWritingProblem;
 
+/** A whole-number length measured from a zero origin in unit intervals. */
+export type WholeNumberLengthProblem = Readonly<{
+    kind: 'whole-number-length';
+    origin: 0;
+    endpoint: number;
+    unit: 1;
+}>;
+
 /** Shared payload accepted by the number-line view for representation and pair arithmetic. */
-export type NumberLineProblem = WritingProblem | ArithmeticPairProblem;
+export type NumberLineProblem = WholeNumberLengthProblem | ArithmeticPairProblem;
 
 export type TimeIntervalSeconds = 1 | 60 | 1800 | 3600;
 
@@ -5512,7 +5520,7 @@ export interface ViewTypeMap {
     'operations-number-array-equation-formalization': NumberArrayProblem;
     'operations-number-array-interpretation': NumberArrayProblem;
     'operations-equal-groups': EqualGroupsCollectionProblem;
-    'operations-number-line-representation': WritingProblem;
+    'operations-number-line-representation': WholeNumberLengthProblem;
     'operations-number-line-arithmetic': ArithmeticPairProblem;
     'place-value-compose-teen': PlaceValueTeenProblem;
     'place-value-decompose-teen': PlaceValueTeenProblem;
