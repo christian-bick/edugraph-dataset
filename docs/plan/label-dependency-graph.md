@@ -19,6 +19,70 @@ ordinary regeneration, annotation checks and independent Question/Solution VQA h
 The Arithmetic / IntuitiveMathematics / FormalMathematics Area allowlist and range-policy
 exclusion remain unchanged; no adapters or automatic completion are introduced.
 
+### Consolidated result and remaining work
+
+The fresh resolved-annotation source audit has **seven open non-range requirements**, with no
+source conflicts, invalid contexts, row/contract errors, incomplete enumeration or pending/invalid
+inference. All 66 configuration-inference selections are exhaustively resolved. Raw pre-inference
+selection declarations are not substituted for this resolved audit and potential outputs do not
+count as emitted labels.
+
+| Original requirements | Outcome | Count |
+|---|---|---:|
+| Whole-hour clock references | Declaration/method repairs | 6 |
+| Zero-free arithmetic number lines | Declaration/reference repairs | 5 |
+| Fraction-product word models | Declaration/method repairs | 3 |
+| Structural algebra sign/zero completeness | Policy retirements, plus separate existing-claim cleanup | 13 |
+| Explicit rooted length marking | Needs the exceptional producer decision below | 1 |
+| General division word models | Needs the coordinated model/owner decision below | 6 |
+| **Total** | **14 repaired + 13 retired + seven open** | **34** |
+
+The approved fifth word-view split is implemented but does **not** count the remaining six zero
+requirements as closed. **Two decision batches** remain; their implementation may need separate
+engineering checkpoints. The unrelated previously recorded reasoning-view correctness defect
+also remains outside these dependency counts.
+
+All **1,013 targets** have supported routes after the two explicit algebra label/ID migrations.
+Every original tuple has a mapped successor. There are **1,222 tuples / 1,591 choices**: nine new
+bounded arithmetic routes add 14 choices and the writer's two label profiles collapse to one,
+explaining the net change from 1,213 / 1,578. Source range findings are report-only and excluded;
+their count changes from 589 to 588 solely because that duplicate writer choice collapses.
+No range policy or bounds are redefined.
+
+The unchanged stored snapshot still has **2,808 rows**, **2,502 missing non-range assessments**
+and **four algebra cutoff conflicts**. Its 40 fewer missing assessments are policy retirements,
+not regenerated repairs. Regeneration and independent Question/Solution VQA still await source
+readiness and the separate reasoning-view content item. No dataset, public union or VQA cache
+was refreshed by these checkpoints. Representation completeness remains separate.
+
+Verification evidence is under `temp/remaining-resolution/`: `independent-final-audit/`,
+`final-catalogue.json`, `product-and-catalog-proof.json`, the per-batch preservation reports and
+`independent-policy-review.json`. The independent cutoff probe checks all 1,578 baseline choices,
+152 forbidden-claim injections through 304 sample/selection gates, future descendants and an actual
+generation rejection before retry/render/store. The remaining two decisions are pending explicit
+user input, rather than hidden by label filtering or counted as deferred successes.
+
+Final verification at the frozen implementation:
+
+- `npm run test:coverage`: **890 files / 7,220 tests pass**; generator statement/branch/function/
+  line coverage is **98.35% / 97.01% / 100% / 99.44%**, with every generator threshold passing.
+  The first run exposed one stale no-SVG word-question expectation; its replacement verifies the
+  approved unsolved-frame behavior, and the complete rerun passes.
+- Additional focused coverage of the modified evaluator, strict gate and audit libraries:
+  **98.72% statements / 97.72% branches / 98.41% functions / 99.4% lines**; strict gate coverage is
+  100% across all four measures. Focused library tests pass (242).
+- Build, types, label eligibility, generator/view specifications, CCSS target validation and
+  documentation references pass. Documentation retains two existing external-link 404 warnings.
+- Independent preservation verifies **all 187 pre-existing dirty paths** remain unstaged and
+  intact, including foreign hunks in the three shared algebra files, Grade 6 and overview docs.
+  All six other target files are byte-identical. **3,151 source/test/package files** remain
+  unchanged since the verification freeze; only acceptance documentation is edited afterward.
+
+Implementation checkpoints on `codex/label-dependency-audit`: `fc1dfa03` (clock), `4db6f7c5`
+(algebra), `1e000ca9` (arithmetic lines), `5c84d4a9` (product stories), and `15c9fa93` (division
+word-view split). Full acceptance evidence: `full-coverage-final.log`, `library-coverage/`,
+`preservation-final.json` and `production-preservation-final.json` under the evidence directory.
+
 ### Checkpoint: six whole-hour clock requirements
 
 **[IMPLEMENTED]** The two existing elapsed/interval story views declare NumbersWithZero because
@@ -176,6 +240,9 @@ Both decisions are separated from the completed repairs; deferral does not estab
 readiness or authorize regeneration. Representation completeness remains separate.
 
 ## Strategy refinement: conclusions and open design (2026-10-30)
+
+Historical preimplementation decision record at `bac52e15`; the current implementation and
+seven-requirement backlog are recorded above.
 
 This section records the user's latest review and supersedes conflicting recommendations in the
 historical decision sections below. It changes strategy only. Production labels, graph conditions,
