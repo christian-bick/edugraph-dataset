@@ -42,7 +42,8 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
     const highestGiven = Math.max(integerWidth(data.top), integerWidth(data.bottom)) - 1;
     const highest = isSolutionView ? data.columns[data.columns.length - 1]!.placeExponent : highestGiven + 1;
     const places = Array.from({length: highest + scale + 1}, (_, index) => highest - index);
-    const width = Math.min(44, Math.max(18, 720 / places.length));
+    const width = Math.min(64, Math.max(18, 720 / places.length));
+    const narrowUnits = width < 60;
     const columnByPlace = new Map(data.columns.map(column => [column.placeExponent, column]));
     const symbol = data.operation === 'addition' ? '+' : '−';
 
@@ -71,9 +72,12 @@ export function DecimalStandardAddSubtractBody({data, isSolutionView}: {data: De
             <Row label="Units" role={top ? 'aligned-top-units' : 'aligned-bottom-units'} point={null} cell={place => {
                 const given = decimalDigitAt(value, place) !== null;
                 const aligned = isSolutionView && place < -value.scale;
-                return <div data-place={place} className="flex shrink-0 items-center justify-center break-words px-0.5 text-center font-sans text-[10px] font-medium leading-3 text-slate-600"
-                    style={{width, height: 36}}>
-                    <span className="min-w-0">{given || aligned ? columnUnit(place) : null}</span>
+                return <div data-place={place} className="relative flex shrink-0 items-center justify-center px-0.5 text-center font-sans text-[10px] font-medium leading-3 text-slate-600"
+                    style={{width, height: narrowUnits ? 100 : 36}}>
+                    <span className={narrowUnits ? 'absolute whitespace-nowrap' : 'min-w-0'}
+                        style={narrowUnits ? {left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(-55deg)'} : undefined}>
+                        {given || aligned ? columnUnit(place) : null}
+                    </span>
                 </div>;
             }} />
         </>;

@@ -339,6 +339,16 @@ coverage gate remains the baseline for unchanged generator/library code; this vi
 repair requires its own canonical image/VQA and snapshot-preservation checks. Evidence is
 under `temp/local-decimal-unit-captions-2026-10-30/`.
 
+The first canonical comparison preserves all 2,918 identities and all mathematical,
+annotation, configuration, seed, replay, target and policy invariants; only the four
+decimal addition/subtraction Question/Solution images change. Visual review finds that
+44-pixel cells split ordinary unit names awkwardly, so a second local presentation
+checkpoint widens ordinary columns to at most 64 pixels within the same total width
+budget. At high precision, narrow columns show whole unit names diagonally in taller
+caption rows. The focused 66 tests and types still pass. Independent native-browser
+screenshots of the safe-integer and fifteen-place fractional boundaries verify full
+labels, separation, viewport containment and question withholding in both modes.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical

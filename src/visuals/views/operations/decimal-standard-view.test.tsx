@@ -35,6 +35,7 @@ describe('given decimal operand unit captions', () => {
                 0: 'ones', '-1': 'tenths', '-2': 'hundredths', '-3': 'thousandths'
             });
             expect(markup.match(/data-role="aligned-(?:top|bottom)-units"/g)).toHaveLength(2);
+            expect(markup).not.toContain('rotate(-55deg)');
             if (!solution) {
                 expect(markup).not.toContain('659.913');
                 expect(markup).not.toContain('column-calculations');
@@ -79,10 +80,13 @@ describe('given decimal operand unit captions', () => {
 
     it('supports the supplied safe-integer and fifteen-place fractional boundaries', () => {
         for (const solution of [false, true]) {
-            const largest = unitCaptions(add(addSubtract('addition', '9007199254740991', '0'), solution), 'aligned-top-units');
+            const largestMarkup = add(addSubtract('addition', '9007199254740991', '0'), solution);
+            const largest = unitCaptions(largestMarkup, 'aligned-top-units');
             expect(Object.keys(largest)).toHaveLength(16);
             expect(largest['15']).toBe('quadrillions');
             expect(largest).not.toHaveProperty('16');
+            expect(largestMarkup).toContain('rotate(-55deg)');
+            expect(largestMarkup).toContain('absolute whitespace-nowrap');
             const smallest = unitCaptions(add(addSubtract('addition', '0.000000000000001', '0'), solution), 'aligned-top-units');
             expect(Object.keys(smallest)).toHaveLength(16);
             expect(smallest['-15']).toBe('quadrillionths');
