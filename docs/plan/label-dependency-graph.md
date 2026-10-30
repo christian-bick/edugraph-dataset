@@ -20,6 +20,60 @@ are preserved; sampling/replay changes inherent in the approved profiles and new
 recorded separately from closure. No annotation adapter, inferred completion or graph change is
 needed.
 
+### Final source closure and acceptance
+
+**[COMPLETE: source dependencies]** Both approved migrations are implemented and verified.
+The fresh audit exhaustively checks **1,621 resolved source choices** and reports **zero non-range
+omissions, zero conflicts, zero invalid contexts/contract errors, zero incomplete enumeration and
+zero pending/invalid inference**. The remaining 65 inference selections are exhaustive; the former
+scalar marking inference occurrence is replaced by the rooted producer's ordinary invariants.
+No new inference mechanism or evaluator rule is introduced.
+
+All **1,013 target records and labels are byte-identical** to `a414e585`, and all remain covered.
+The **1,222 tuples** have no lost or added routes after mapping the single approved rooted producer
+successor. General fraction choices grow 36 → 66, explaining the whole-catalog 1,591 → 1,621 count.
+The original 34-requirement checkpoint is now **21 repairs + 13 policy retirements + zero open**;
+this turn closes its last seven requirements through authored mathematical declarations.
+
+All **1,554 old receipts for unchanged plans** remain valid; all **37 receipts for the 19 migrated
+plans** reject stale replay. The extended shared type/source closure changes matching input
+identities on 1,093 otherwise-identical plans, so matching caches refresh without changing those
+plans' semantic hashes. The complete operand support and other facets' bindings are preserved.
+Measured fraction sampling changes are disclosed: 572 of 576 native payloads and all 576 RNG
+continuations change, with 292 operand-magnitude choices changing. All 642 native/forced new
+fraction draws agree with their configured zero/positive claims. These sampled counts supplement
+the exhaustive domain proof; they do not replace it.
+
+Range-presence findings remain excluded and report-only. Their source count rises 588 → 618 solely
+from the 30 additional fractional choices. The Area allowlist, algebra cutoff, evaluator/coverage
+policy files and graph identity are unchanged (`b53a8a1dffc4d5b90f573447ba7d5f3287b8256c819e4e2f77f3caf076a3d2bb`).
+
+Final checks:
+
+- `npm run test:coverage`: **896 files / 7,240 tests pass**; generator statement/branch/function/
+  line coverage **98.34% / 97.02% / 100% / 99.44%**; every generator threshold passes.
+- The new operand sampler, group-profile resolver and shared positive-integer helper have **100%
+  statement, branch, function and line coverage** in the supplementary 41-test coverage run.
+- Build, types, labels, generator/view specifications, CCSS target validation and documentation
+  references pass. The two existing external documentation 404 warnings remain unchanged.
+- Independent preservation verifies all **187 pre-existing dirty changes** remain intact and
+  unstaged. All seven target files and five policy files are byte-identical to baseline; all
+  **3,162 frozen source/test/package files** are unchanged after verification. README/DOCS contain
+  only the approved owned paragraph changes in their commits.
+
+Implementation checkpoints: `906986d4` (rooted lengths) and `75702960` (fraction group profiles).
+Evidence under `temp/final-seven-resolution/`: `global-verification.json`, `draw-preservation.json`,
+`fraction-domain-proof.json`, `preservation-final.json`, `full-coverage.log`, `helper-coverage/`
+and the fresh `independent-final-audit/` report. The temporary visual preview server was stopped after
+the 28 local screenshots.
+
+**Stored-dataset acceptance remains separate.** The unchanged 2,808-row snapshot still has 2,502
+missing non-range assessments and four obsolete algebra claims. No dataset/public-union rewrite
+or Gemini VQA was performed. Source dependency readiness is now achieved; the independently
+recorded reasoning-view content defect (`Q-REASONING` / `RB-A3-D3`) remains the separate prerequisite
+before canonical regeneration, stored-label validation and independent-mode VQA. Neither these
+two approvals nor source closure is presented as resolving that unrelated content defect.
+
 ### Contract and consumer adoption matrix
 
 | Mathematical owner / consumer | Canonical contract or adopted evidence | Verification |
@@ -101,6 +155,9 @@ development checks, not a claim of canonical dataset/VQA acceptance. Evidence:
 `draw-preservation.json` and `visual/`.
 
 ## Remaining-batch implementation (2026-10-30)
+
+Historical checkpoint at `a414e585`; its seven open requirements and two pending decisions are
+resolved by the approved final-seven implementation above.
 
 The user authorized the settled strategies below. Implementation starts from `bac52e15`, with
 34 non-range source requirements and all 1,013 targets covered. Checkpoints distinguish additive
@@ -277,7 +334,7 @@ to this approved unsolved-frame contract. Evidence: `temp/remaining-resolution/d
 
 ### Two concrete follow-up decisions for the last seven requirements
 
-**[DECISION NEEDED: one rooted marking requirement]** The standard's length-from-zero task
+**[APPROVED AND IMPLEMENTED: one rooted marking requirement]** The standard's length-from-zero task
 cannot become zero-free without changing its competency. Selecting `writing.requireZero: true`
 would instead collapse every endpoint to zero; adding view-owned zero would overlap the scalar
 writer's existing ownership. Neither is a valid repair.
@@ -294,11 +351,11 @@ label or endpoint is removed. Same-value Q/S pixels must remain identical. A new
 changes native sample keys, seeds and replay/cache identities. Verify the global matching diff,
 full endpoint domain and sampler continuation before acceptance.
 
-**Question:** approve this one exceptional mathematical producer boundary? The user's earlier
+**Recorded question (subsequently approved):** approve this one exceptional mathematical producer boundary? The user's earlier
 instruction, “Split like this should be rare and require confirmation”, applies; the superseded
 two-producer default is not treated as authorization for this specific exception.
 
-**[DECISION NEEDED: six general division word requirements]** A duplicate word producer would
+**[APPROVED AND IMPLEMENTED: six general division word requirements]** A duplicate word producer would
 currently have the same mathematical model, so prefer reviewing one coordinated owner migration.
 The existing `fraction-division-relations` already supplies all required mathematical data. Move
 zero ownership from the four supplied-model views **and construction** (30 existing choices /
@@ -319,15 +376,15 @@ The proper-fraction-by-integer domain has only the first outcome; the other five
 admit both. That yields 11 possible profile conjunctions per complete six-profile leaf, subject to
 actual matching verification. Do not claim closure merely from adding these declarations.
 
-**Question:** should the required model consistently assess complete-group count, and may this
+**Recorded question (subsequently approved):** should the required model consistently assess complete-group count, and may this
 coordinated family migration replace the existing view-owned zero declarations? If that model
 contract is unwanted for inverse/story/word tasks, retain the six findings while reviewing a
 genuinely distinct mathematical model boundary. No duplicate producer, new global ownership
 exception, inferred completion or post-draw label classifier is authorized by this proposal.
 
 Read-only contract/route evidence: `temp/remaining-resolution/numberline-and-fraction-ownership.md`.
-Both decisions are separated from the completed repairs; deferral does not establish source
-readiness or authorize regeneration. Representation completeness remains separate.
+Both decisions were explicitly approved and implemented in the final-seven checkpoints above.
+Representation completeness and stored-dataset acceptance remain separate.
 
 ## Strategy refinement: conclusions and open design (2026-10-30)
 
