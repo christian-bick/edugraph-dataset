@@ -32,7 +32,91 @@ const render = (data: ArithmeticPairProblem, solution: boolean) =>
 const tickValues = (markup: string) => [...markup.matchAll(/<text[^>]* y="156"[^>]*>(\d+)<\/text>/g)]
     .map(match => Number(match[1]));
 
+type Bounds = {left: number; right: number; top: number; bottom: number};
+const attributes = (source: string): Record<string, string> =>
+    Object.fromEntries([...source.matchAll(/([\w:-]+)="([^"]*)"/g)].map(match => [match[1], match[2]]));
+const numbers = (source: string): number[] => source.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+const separated = (left: Bounds, right: Bounds): boolean =>
+    left.right < right.left || right.right < left.left || left.bottom < right.top || right.bottom < left.top;
+const textBounds = (element: {attributes: Record<string, string>; text: string}): Bounds => {
+    const x = Number(element.attributes.x), y = Number(element.attributes.y);
+    const size = Number(element.attributes.class.match(/text-\[(\d+)px\]/)![1]);
+    // Conservative bands contain the bold glyphs, including their descenders.
+    const halfWidth = [...element.text].length * size * 0.7 / 2;
+    return {left: x - halfWidth, right: x + halfWidth, top: y - size, bottom: y + size / 4};
+};
+
+function jumpGeometry(markup: string) {
+    const marker = attributes(markup.match(/<marker\b([^>]*)>/)![1]);
+    const arc = attributes(markup.match(/<path\b([^>]*marker-end="url\(#number-line-arrow\)"[^>]*)>/)![1]);
+    const [startX, startY, controlX, controlY, endX, endY] = numbers(arc.d);
+    const angle = Math.atan2(endY - controlY, endX - controlX);
+    const scale = marker.markerUnits === 'userSpaceOnUse' ? 1 : Number(arc['stroke-width']);
+    const points = numbers(markup.match(/<marker\b[^>]*><path\b[^>]*d="([^"]*)"/)![1]);
+    const triangle = [0, 2, 4].map(index => {
+        const x = (points[index] - Number(marker.refX)) * scale;
+        const y = (points[index + 1] - Number(marker.refY)) * scale;
+        return {x: endX + x * Math.cos(angle) - y * Math.sin(angle),
+            y: endY + x * Math.sin(angle) + y * Math.cos(angle)};
+    });
+    const arrow: Bounds = {left: Math.min(...triangle.map(point => point.x)), right: Math.max(...triangle.map(point => point.x)),
+        top: Math.min(...triangle.map(point => point.y)), bottom: Math.max(...triangle.map(point => point.y))};
+    const text = [...markup.matchAll(/<text\b([^>]*)>([^<]*)<\/text>/g)]
+        .map(match => ({attributes: attributes(match[1]), text: match[2]}));
+    const result = text.find(element => element.attributes.class?.includes('fill-emerald-700'))!;
+    const jump = text.find(element => element.attributes.class?.includes('fill-blue-700'))!;
+    const [, , width, height] = numbers(attributes(markup.match(/<svg\b([^>]*)>/)![1]).viewBox);
+    return {arrow, result, jump, resultBounds: textBounds(result), jumpBounds: textBounds(jump),
+        startX, startY, endX, endY, width, height};
+}
+
 describe('arithmetic number-line references', () => {
+    it.each([
+        {num1: 15, num2: 1, answer: 16, operation: 'addition'},
+        {num1: 16, num2: 1, answer: 15, operation: 'subtraction'},
+        {num1: 99, num2: 1, answer: 100, operation: 'addition'},
+        {num1: 1, num2: 1, answer: 0, operation: 'subtraction'},
+        {num1: 0, num2: 0, answer: 0, operation: 'addition'},
+        {num1: 20, num2: 0, answer: 20, operation: 'addition'},
+        {num1: 20, num2: 0, answer: 20, operation: 'subtraction'},
+        {num1: 0, num2: 100, answer: 100, operation: 'addition'},
+        {num1: 100, num2: 100, answer: 0, operation: 'subtraction'},
+        {num1: 100, num2: 99, answer: 1, operation: 'subtraction'}
+    ] satisfies ArithmeticPairProblem[])('separates labels from the arrow for $num1 $operation $num2', data => {
+        const solution = render(data, true);
+        const geometry = jumpGeometry(solution);
+        expect(geometry.result.text).toBe(String(data.answer));
+        expect(geometry.jump.text).toBe(`${data.operation === 'addition' ? '+' : '−'}${data.num2}`);
+        expect(Number(geometry.result.attributes.x)).toBe(geometry.endX);
+        expect(Math.sign(geometry.endX - geometry.startX)).toBe(Math.sign(data.answer - data.num1));
+        expect(geometry.endY).toBe(geometry.startY);
+        for (const [first, second] of [[geometry.resultBounds, geometry.arrow],
+            [geometry.jumpBounds, geometry.arrow], [geometry.resultBounds, geometry.jumpBounds]]) {
+            expect(separated(first, second)).toBe(true);
+        }
+        for (const bounds of [geometry.resultBounds, geometry.jumpBounds, geometry.arrow]) {
+            expect(bounds.left).toBeGreaterThanOrEqual(0);
+            expect(bounds.right).toBeLessThanOrEqual(geometry.width);
+            expect(bounds.top).toBeGreaterThanOrEqual(0);
+            expect(bounds.bottom).toBeLessThanOrEqual(geometry.height);
+        }
+        expect(tickValues(solution).includes(0)).toBe([data.num1, data.num2, data.answer].includes(0));
+        const question = render(data, false);
+        expect(question).toContain(' = □');
+        expect(question).not.toContain('marker-end="url(#number-line-arrow)"');
+        expect(question).not.toContain('fill-emerald-700');
+    });
+
+    it('detects the original short-jump collision instead of checking only fixed coordinates', () => {
+        const markup = render({num1: 15, num2: 1, answer: 16, operation: 'addition'}, true);
+        const original = markup.replace('markerUnits="userSpaceOnUse"', 'markerUnits="strokeWidth"')
+            .replace(/(<text[^>]* y=")24("[^>]*class="fill-emerald-700)/,
+                (_match, prefix, suffix) => `${prefix}98${suffix}`);
+        const geometry = jumpGeometry(original);
+        expect(separated(geometry.resultBounds, geometry.arrow)).toBe(false);
+        expect(separated(geometry.jumpBounds, geometry.arrow)).toBe(false);
+    });
+
     it.each([
         {num1: 1, num2: 1, answer: 2, operation: 'addition'},
         {num1: 31, num2: 24, answer: 55, operation: 'addition'},

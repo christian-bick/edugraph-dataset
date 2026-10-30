@@ -18,6 +18,13 @@ const estimationTargets = [Area.Addition, Area.Subtraction, Area.Multiplication,
     id: `rounded-${operation.split('/').at(-1)}`,
     labels: [operation, Area.IntegerRounding, Scope.NumbersSmaller1000, Ability.PlausibilityEvaluation]
 }));
+const zeroRoundingTarget = {
+    id: '3.OA.D.8-answer-reasonableness~4ec714b8',
+    labels: [Area.Division, Area.IntegerRounding, Scope.NumbersSmaller1000, Ability.PlausibilityEvaluation]
+};
+const text = (markup: string) => markup.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const symbols = {addition: '+', subtraction: '−', multiplication: '×', division: '÷'} as const;
+const comparisonMethod = 'Round the proposed answer and the estimate to the nearest ten.';
 
 let OperationsAnswerReasonableness: typeof import('./view.tsx')['OperationsAnswerReasonableness'];
 beforeAll(async () => {
@@ -52,12 +59,50 @@ describe('answer reasonableness domain rendering', () => {
             const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
             const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
             expect(question).toContain('Round to the nearest ten');
+            expect(text(question)).toContain(comparisonMethod);
+            const data = payload.problem.data;
+            const roundedCalculation = `${data.roundedNum1} ${symbols[data.operation]} ${data.roundedNum2} = ${data.estimatedAnswer}`;
+            expect(text(question)).toContain(roundedCalculation);
+            expect(text(solution)).toContain(roundedCalculation);
             expect(question).not.toContain('rounds to');
             expect(solution).toContain(`${claim.proposedAnswer} rounds to ${claim.roundedProposedAnswer}`);
             expect(solution).toContain(claim.isReasonable ? 'which matches' : 'which does not match');
             expect(question).not.toContain('Validation Error');
             expect(solution).not.toContain('Validation Error');
         }
+    });
+
+    it('requires the zero-producing comparison method for the original division failure without revealing its answer', () => {
+        const payload = prepare(zeroRoundingTarget, 1789219894);
+        expect(payload.problem.data).toEqual({
+            numberDomain: {min: 0, max: 1000}, num1: 384, num2: 16, operation: 'division',
+            roundedNum1: 380, roundedNum2: 20, roundingPlace: 10, exactAnswer: 24, estimatedAnswer: 19,
+            proposal: {proposedAnswer: 2, roundedProposedAnswer: 0}
+        });
+        expect(payload.problem.labels).toContain(Scope.NumbersWithZero);
+        const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
+        const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
+        expect(text(question)).toContain(comparisonMethod);
+        expect(text(question)).toContain('Matching rounded values mean the answer is reasonable.');
+        expect(text(question)).toContain('384 ÷ 16 = ?');
+        expect(text(question)).toContain('380 ÷ 20 = 19');
+        expect(text(question)).not.toMatch(/\b(?:0|24)\b/);
+        expect(question).not.toContain('rounds to');
+        expect(question).not.toContain('bg-emerald-50');
+        expect(text(solution)).toContain('384 ÷ 16 = 24');
+        expect(text(solution)).toContain('2 rounds to 0, which does not match 19 rounded to 20.');
+        expect(solution).toContain('bg-emerald-50');
+    });
+
+    it.each([0, 1, 2, 3, 4])('preserves the canonical zero rounding for boundary proposal %i', proposedAnswer => {
+        const payload = prepare(zeroRoundingTarget, 1789219894);
+        payload.problem.data = {...payload.problem.data, proposal: {proposedAnswer, roundedProposedAnswer: 0}};
+        const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
+        const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
+        expect(text(question)).toContain(comparisonMethod);
+        expect(question).not.toContain('rounds to');
+        expect(question).not.toContain('bg-emerald-50');
+        expect(text(solution)).toContain(`${proposedAnswer} rounds to 0, which does not match 19 rounded to 20.`);
     });
 
     it.each([

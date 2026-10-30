@@ -9,6 +9,10 @@ export const COMPARISON_PLACES: readonly DecimalPlaceComparisonPlace[] = [
     'hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'
 ];
 
+/** Name the actual place-value unit counted by an aligned chart entry. */
+export const comparisonPlaceUnit = (place: DecimalPlaceComparisonPlace, count: number): string =>
+    count === 1 ? place.slice(0, -1) : place;
+
 export function alignedComparisonDigits(operand: DecimalPlaceComparisonOperand): readonly number[] {
     return [...operand.wholeDigits, ...operand.fractionalDigits];
 }

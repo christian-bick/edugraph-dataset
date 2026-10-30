@@ -16,7 +16,7 @@ interface CoreProps {
     payload: ViewRenderPayload<'place-value-arithmetic-explanation'>;
 }
 
-const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CoreProps) => {
+export const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('place-value-arithmetic-explanation', data, [
@@ -37,6 +37,11 @@ const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CorePro
         );
     }
     const symbol = data.operation === 'addition' ? '+' : '−';
+    const resultCounts = [
+        {count: data.result.hundreds, unit: 'hundred'},
+        {count: data.result.tens, unit: 'ten'},
+        {count: data.result.ones, unit: 'one'}
+    ].map(({count, unit}) => `${count} ${unit}${count === 1 ? '' : 's'}`).join(', ');
 
     return (
         <div className="w-[720px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -82,6 +87,11 @@ const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CorePro
                                             <div className="mt-1 text-sm font-medium leading-relaxed">
                                                 {presentation.explanation}
                                             </div>
+                                            {step.kind === 'result' && !usesWholeTensPresentation(data) && (
+                                                <div className="mt-2 text-sm font-semibold text-emerald-900" data-role="place-value-result-counts">
+                                                    Result by place: {resultCounts}.
+                                                </div>
+                                            )}
                                         </div>
                                     </li>
                                 );
@@ -89,7 +99,11 @@ const PlaceValueArithmeticExplanationCore = ({config: _config, payload}: CorePro
                         </ol>
                     </div>
                 ) : (
-                    <div className="text-slate-500">Explain how the place values combine or separate, whether a ten is regrouped, and how the strategy reaches the answer.</div>
+                    <div className="text-slate-500">
+                        {usesWholeTensPresentation(data)
+                            ? 'Explain how the tens are subtracted and how they give the result.'
+                            : 'Explain how the hundreds, tens and ones combine or separate, including empty places and any regrouping. Then explain how they make the result.'}
+                    </div>
                 )}
             </div>
         </div>

@@ -2,7 +2,8 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import type {DecimalPlaceComparisonProblem} from '../../../types/problems.ts';
-import {assertDecimalPlaceComparison, COMPARISON_PLACES} from './decimal-place-comparison-helpers.ts';
+import {createDecimalPlaceComparison} from '../../../generators/number/decimal-place-comparison/generator.ts';
+import {assertDecimalPlaceComparison, COMPARISON_PLACES, comparisonPlaceUnit} from './decimal-place-comparison-helpers.ts';
 
 const less: DecimalPlaceComparisonProblem = {
     kind: 'decimal-place-comparison', base: 10,
@@ -61,12 +62,16 @@ beforeAll(async () => {
 });
 afterAll(() => vi.unstubAllGlobals());
 
-function render(data: DecimalPlaceComparisonProblem, isSolutionView: boolean): string {
+function renderMarkup(data: DecimalPlaceComparisonProblem, isSolutionView: boolean): string {
     const payload: ViewRenderPayload<'numbers-decimal-place-comparison'> = {
         problem: {type: 'arithmetic', data, labels: []},
         viewId: 'numbers-decimal-place-comparison', targetLabels: [], isSolutionView, seed: 4
     };
-    return renderToStaticMarkup(<Core payload={payload} />)
+    return renderToStaticMarkup(<Core payload={payload} />);
+}
+
+function render(data: DecimalPlaceComparisonProblem, isSolutionView: boolean): string {
+    return renderMarkup(data, isSolutionView)
         .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')
         .replace(/&gt;/g, '>').replace(/&lt;/g, '<');
 }
@@ -81,7 +86,7 @@ describe('decimal place comparison view', () => {
         expect(question).not.toContain('At the thousandths place');
         const solution = render(less, true);
         expect(solution).toContain('3.407 < 3.408');
-        expect(solution).toContain('At the thousandths place, 7 < 8');
+        expect(solution).toContain('At the thousandths place, 7 thousandths < 8 thousandths');
     });
 
     it('treats 2.3 and 2.300 as equal while preserving their distinct numeral strings', () => {
@@ -98,7 +103,7 @@ describe('decimal place comparison view', () => {
     it('uses the first differing hundredths digit after equal higher places for greater-than', () => {
         expect(() => assertDecimalPlaceComparison('test', greater)).not.toThrow();
         const solution = render(greater, true);
-        expect(solution).toContain('At the hundredths place, 3 > 2');
+        expect(solution).toContain('At the hundredths place, 3 hundredths > 2 hundredths');
         expect(solution).toContain('4.83 > 4.82');
     });
 
@@ -111,5 +116,44 @@ describe('decimal place comparison view', () => {
             ...equal,
             right: {...equal.right, valueInThousandths: 2301}
         })).toThrow('exact, aligned');
+    });
+
+    it('shows actual zero thousandths as a count while withholding the deciding relation in Question', () => {
+        const data = createDecimalPlaceComparison(
+            {wholePart: 410, fractionalDigits: [6, 7, 8], displayPrecision: 3},
+            {wholePart: 410, fractionalDigits: [6, 7, 0], displayPrecision: 2}
+        )!;
+        expect(data.witness).toMatchObject({kind: 'first-difference', decidingPlace: 'thousandths', leftDigit: 8, rightDigit: 0});
+        const question = render(data, false);
+        const solution = render(data, true);
+        expect(question).toContain('Compare the counts of matching place-value units from left to right.');
+        expect(question).toContain('8 thousandths');
+        expect(question).toContain('0 thousandths');
+        expect(question).toContain('Pale entries show zero units in an unwritten fractional place.');
+        expect(question).not.toContain('410.678 > 410.67');
+        expect(question).not.toContain('At the thousandths place');
+        expect(renderMarkup(data, false)).not.toContain('bg-amber-100');
+        expect(renderMarkup(data, false)).not.toContain('ring-emerald-400');
+        expect(solution).toContain('8 thousandths > 0 thousandths');
+        expect(solution).toContain('410.678 > 410.67');
+    });
+
+    it('does not introduce zero quantities into a complete nonzero place-unit comparison', () => {
+        const data = createDecimalPlaceComparison(
+            {wholePart: 876, fractionalDigits: [5, 4, 3], displayPrecision: 3},
+            {wholePart: 876, fractionalDigits: [5, 4, 2], displayPrecision: 3}
+        )!;
+        for (const isSolution of [false, true]) {
+            const rendered = render(data, isSolution);
+            expect(rendered).not.toMatch(/\b0\b/);
+            expect(rendered).not.toContain('zero units');
+        }
+        expect(render(data, true)).toContain('3 thousandths > 2 thousandths');
+    });
+
+    it.each(COMPARISON_PLACES)('names the canonical unit count at %s', place => {
+        expect(comparisonPlaceUnit(place, 0)).toBe(place);
+        expect(comparisonPlaceUnit(place, 1)).toBe(place.slice(0, -1));
+        expect(comparisonPlaceUnit(place, 8)).toBe(place);
     });
 });

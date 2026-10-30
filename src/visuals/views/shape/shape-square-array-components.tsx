@@ -77,16 +77,16 @@ export const SquareGridDiagram = ({
                         {showCount && (
                             <text
                                 x={x + column * CELL_SIZE + CELL_SIZE / 2}
-                                y={y + row * CELL_SIZE + CELL_SIZE / 2 + 6}
+                                y={y + row * CELL_SIZE + (showCountingPath ? 24 : CELL_SIZE / 2 + 6)}
                                 textAnchor="middle"
                                 className="fill-slate-700 text-[15px] font-bold"
                             >
-                                {index + 1}
+                                {showCountingPath ? pathIndex + 1 : index + 1}
                             </text>
                         )}
-                        {showCountingPath && !showCount && (
+                        {showCountingPath && (
                             <>
-                                {pathIndex === 0 && (
+                                {!showCount && pathIndex === 0 && (
                                     <text
                                         x={x + column * CELL_SIZE + CELL_SIZE / 2}
                                         y={y + row * CELL_SIZE + 15}
@@ -99,9 +99,11 @@ export const SquareGridDiagram = ({
                                 {pathArrow && (
                                     <text
                                         x={x + column * CELL_SIZE + CELL_SIZE / 2}
-                                        y={y + row * CELL_SIZE + CELL_SIZE / 2 + 9}
+                                        y={y + row * CELL_SIZE + (showCount ? 41 : CELL_SIZE / 2 + 9)}
                                         textAnchor="middle"
-                                        className="fill-blue-700 text-[23px] font-black"
+                                        className={showCount
+                                            ? 'fill-blue-700 text-[14px] font-black'
+                                            : 'fill-blue-700 text-[23px] font-black'}
                                     >
                                         {pathArrow}
                                     </text>

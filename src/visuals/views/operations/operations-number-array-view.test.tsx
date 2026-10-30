@@ -18,6 +18,10 @@ const addition: NumberArrayProblem = {
     answer: 12,
     addends: [4, 4, 4]
 };
+const fiveByThree: NumberArrayProblem = {
+    operation: 'multiplication', groupCount: 5, groupSize: 3, rows: 5, columns: 3,
+    total: 15, answer: 15, addends: [3, 3, 3, 3, 3]
+};
 
 const payload = (
     viewId: OperationsNumberArrayViewId,
@@ -43,6 +47,41 @@ const render = (
 />);
 
 describe('operations number array view family', () => {
+    it('withholds the five-by-three interpretation while keeping the complete array visible', () => {
+        const viewId = 'operations-number-array-interpretation';
+        const question = render('interpretation', viewId, fiveByThree, false);
+        const solution = render('interpretation', viewId, fiveByThree, true);
+        const questionText = question.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+        expect(questionText).toContain('What does 5 × 3 mean for the whole set shown?');
+        expect(questionText).toContain('Explain what each factor and the product represent.');
+        expect(questionText).not.toContain('15');
+        expect(questionText).not.toMatch(/5 equal rows|rows of 3|5 × 3 = 15|The whole set is partitioned/);
+        expect(question).not.toContain('text-emerald-700');
+        expect(solution).toMatch(/class="[^"]*text-emerald-700[^"]*"[^>]*>The whole set is partitioned into 5 equal rows of 3, so 5 × 3 = 15\./);
+        for (const markup of [question, solution]) {
+            expect(markup).toContain('aria-label="5 rows by 3 columns"');
+            expect(markup.match(/class="size-6 rounded-full bg-indigo-500"/g)).toHaveLength(15);
+        }
+        const array = (markup: string) => markup.slice(markup.indexOf('<div class="grid gap-3"'),
+            markup.indexOf('<div class="mt-5'));
+        expect(array(question)).toBe(array(solution));
+    });
+
+    it.each([
+        ['addition', 15, '5 equal rows of 3 can be added as 3 + 3 + 3 + 3 + 3 to make 15.'],
+        ['multiplication', 15, 'The whole set is partitioned into 5 equal rows of 3, so 5 × 3 = 15.'],
+        ['partitive-division', 3, '15 ÷ 5 = 3 objects in each row.'],
+        ['quotative-division', 5, '15 ÷ 3 = 5 equal rows.']
+    ] as const)('styles only the completed %s interpretation in green and preserves its explanation', (operation, answer, interpretation) => {
+        const data: NumberArrayProblem = {...fiveByThree, operation, answer};
+        const question = render('interpretation', 'operations-number-array-interpretation', data, false);
+        const solution = render('interpretation', 'operations-number-array-interpretation', data, true);
+        const answerSpan = solution.match(/<span class="[^"]*text-emerald-700[^"]*">([^<]*)<\/span>/);
+        expect(answerSpan?.[1]).toBe(interpretation);
+        expect(question).not.toContain('text-emerald-700');
+        expect(question).not.toContain(interpretation);
+    });
+
     it('withholds the complete equation in formalization Question Mode', () => {
         const viewId = 'operations-number-array-equation-formalization';
         const question = render('formalization', viewId, addition, false);

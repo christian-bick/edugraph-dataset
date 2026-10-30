@@ -106,6 +106,12 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
             <div className="mt-1 text-xl font-bold text-slate-800">
                 Does the estimate support the proposed answer?
             </div>
+            {!isSolutionView && (
+                <p className="mt-2 text-base leading-relaxed text-slate-600">
+                    Round the proposed answer and the estimate to the nearest ten.
+                    {' '}Matching rounded values mean the answer is reasonable.
+                </p>
+            )}
 
             <div className="mt-6 grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
@@ -129,7 +135,7 @@ const OperationsAnswerReasonablenessCore = ({config: _config, payload}: CoreProp
                     <span>{data.num2} → {data.roundedNum2}</span>
                 </div>
                 <div className="mt-4 border-t border-sky-200 pt-4 text-center font-mono text-[1.9rem] font-bold text-sky-900">
-                    {data.roundedNum1} {symbol} {data.roundedNum2} ≈ {data.estimatedAnswer}
+                    {data.roundedNum1} {symbol} {data.roundedNum2} = {data.estimatedAnswer}
                 </div>
             </div>
 

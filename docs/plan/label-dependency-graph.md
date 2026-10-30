@@ -74,6 +74,84 @@ no incidental watermark or fingerprint-policy change is introduced to hide it. G
 begins on the 330 unaffected arithmetic-pair samples while the fraction projection repair
 is verified. The final full validation will reuse their current passing keys.
 
+### First complete VQA pass and numeric-structure decision
+
+**[EVALUATED; NOT YET ACCEPTED]** After equation projection commit `8e804c9c`, the affected
+canonical run renders 50 images across six quotient views, reusing 507 shards and writing
+one replacement shard. Snapshot `1d43f1eb247714bb0d6b5ee0bbf3ab55af09791abbf442a5cf72897d39bb2dbe`
+retains 2,918 images. The byte audit has zero errors and the one documented same-annotation
+warning; the strict dependency gate still has zero failures.
+
+The first complete Gemini pass finishes **2,896 passing / 22 failing**, with zero uncached
+samples or request errors and 92 independent HIGH reviews. The immutable report is
+`temp/validation-reports/dataset-ccss/2026-10-30T20-33-38-885Z__full.md`.
+Initial judgments are retained before repair/re-evaluation. Failures are triaged against
+actual images, canonical replay and the ontology; a model verdict alone does not establish
+a labeling defect. For example, the measurement plot's reported quarter-fraction mismatch
+is an independently verified glyph-reading error: Pencil is 3¼ and Key is 3¾, with the
+correct one mark at each of six distinct values.
+
+**[NEEDS SAMPLING APPROVAL: D-NUMERIC-STRUCTURE]** Two numeric-expression classification
+solutions claim zero only through an optional calculation that their task never requires.
+One expression is `2 × (−3/2) − 2 × (−3/2) + 4`; classifying its marked term does not require
+evaluating the hidden cancellation subtotal. These are numeric `ArithmeticExpression`
+tasks, so the existing symbolic-algebra cutoff does not apply. Adding an evaluation task
+merely to expose zero would change the competency and is not proposed.
+
+The recommended local correction classifies numeric structural profiles from the quantities
+actually supplied to that task, excluding unused evaluation totals/subtotals. Existing
+negative-with-zero profile 4 merges into negative-without-zero profile 3 for five
+non-quotient numeric relations. Their mathematical input frames remain supported; the
+quotient relation and symbolic-algebra exclusion stay unchanged. Ordinary declarations and
+profiles supply matching capabilities; no inference adapter or automatic completion is added.
+
+An exhaustive analysis of 97,920 raw input paths and full-catalog probes preserves all
+**1,013 targets / 1,222 matching tuples**. Six affected numeric targets request no sign/zero
+label. Source assignments for this generator fall **36 to 31**: five unsupported joint
+negative+zero alternatives disappear, while individual zero and negative capabilities
+remain. Target labels/IDs, graph policy, Area allowlist and range exclusion remain unchanged.
+Sampling, winning attempts and replay outcomes can change, which is why this batch awaits
+the user's decision under the agreed execution protocol.
+
+The alternative is a new cutoff for numeric structural classification/interpretation. It
+also reaches the Grade-5 numerical-expression interpretation producer: a broad selector
+affects seven targets, 23 source assignments and 18 stored samples. Removing that producer's
+invariant absence claims globally would open eight source requirements on four other
+choices. This is a wider policy/ownership change, not the recommended local correction.
+Detailed counterfactuals are in `temp/canonical-acceptance-2026-10-30/numeric-structural-decision-note.md`.
+The profile correction is not implemented until sampling approval arrives; independent
+projection and layout repairs continue.
+
+### Autonomous projection repairs after the first pass
+
+**[IMPLEMENTED; AWAITING CANONICAL RE-EVALUATION]** A view-only checkpoint repairs the
+independently supported presentation defects without changing specifications, targets,
+labels, configuration, mathematical support or sampling:
+
+- Counting and measurement comparison solutions retain the existing attribute/relation
+  question, so the selected answer has an identifiable meaning in either mode.
+- Arithmetic number lines use correctly sized arrowheads and a separate result-label band.
+  The actual `15 + 1` failure and short, stationary and boundary jumps have geometry tests.
+- Unit-square counting retains the same snake path in question and solution, with solution
+  ordinals following that path. Singleton prompts no longer refer to nonexistent arrows.
+- Array interpretation asks what the factors/product represent without supplying that
+  interpretation in the question; the existing solution gains the required answer styling.
+- Estimation explicitly requires the existing nearest-ten comparison of proposal and
+  estimate. Decimal place comparison names the canonical place-unit counts. Place-value
+  arithmetic explanation retains complete result counts, including an empty result place;
+  its existing whole-tens exception is preserved. These are required-method projections,
+  not a claim that every zero digit is a numerical zero.
+
+The combined independent review passes **261 tests in 20 files** and finds no mode leak,
+ownership violation or entropy change. Unchanged question markup and other shared-consumer
+controls are recorded under `temp/canonical-acceptance-2026-10-30/`. These tests do not
+establish acceptance of images that have not yet been regenerated.
+
+Both independently verified judge reading errors pass a normal scoped failed-review retry
+with unchanged source, image and annotations: the quarter-fraction line plot and the `0.4`
+decimal number line. Their original failed judgments remain in the preserved first-pass
+cache/report. No verdict is edited by hand and no evaluator instruction is weakened.
+
 ## Reasoning proposal domain repair (2026-10-30)
 
 The user explicitly authorized closing `Q-REASONING` / `RB-A3-D3`: construct the mathematical

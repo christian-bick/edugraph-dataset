@@ -7,6 +7,7 @@ import {
     alignedComparisonDigits,
     assertDecimalPlaceComparison,
     COMPARISON_PLACES,
+    comparisonPlaceUnit,
     comparisonSymbol
 } from '../decimal-place-comparison-helpers.ts';
 import {NumbersDecimalPlaceComparisonViewSchema} from './spec.ts';
@@ -33,8 +34,9 @@ function AlignedRow({operand, label, decidingPlace, equal, isSolution}: {
                 const color = selected
                     ? equal ? 'bg-emerald-100 text-emerald-950 ring-2 ring-inset ring-emerald-400' : 'bg-amber-100 text-amber-950 ring-2 ring-inset ring-amber-400'
                     : implicit ? 'bg-slate-50 text-slate-400' : 'bg-white text-slate-900';
-                return <div key={COMPARISON_PLACES[index]} className={`flex items-center justify-center border-r border-slate-300 font-mono text-3xl font-black last:border-r-0 ${index === 3 ? 'border-l-4 border-l-indigo-400' : ''} ${color}`}>
-                    {digit}
+                return <div key={COMPARISON_PLACES[index]} className={`flex flex-col items-center justify-center border-r border-slate-300 py-2 font-mono text-3xl font-black last:border-r-0 ${index === 3 ? 'border-l-4 border-l-indigo-400' : ''} ${color}`}>
+                    <span>{digit}</span>
+                    <span className="mt-1 font-sans text-xs font-semibold">{comparisonPlaceUnit(COMPARISON_PLACES[index]!, digit)}</span>
                 </div>;
             })}
         </div>
@@ -55,7 +57,7 @@ export const NumbersDecimalPlaceComparisonCore = ({payload}: {
     return <main className="rounded-3xl border border-slate-200 bg-white p-7 text-slate-800 shadow-sm" style={{width: 875, maxWidth: '95vw'}}>
         <div className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600">Compare decimals by place value</div>
         <h1 className="mt-2 text-2xl font-bold text-slate-950">Compare the two decimals</h1>
-        <p className="mt-2 text-base">Compare matching places from left to right. Write &gt;, =, or &lt;.</p>
+        <p className="mt-2 text-base">Compare the counts of matching place-value units from left to right. Write &gt;, =, or &lt;.</p>
         <div className="mt-5 flex items-center justify-center gap-5 rounded-xl border border-slate-200 bg-slate-50 px-5 py-5 font-mono text-4xl font-black text-slate-950">
             <span>{data.left.displayNumeral}</span>
             <span className={`flex h-16 w-20 items-center justify-center rounded-xl border-2 ${isSolution ? 'border-emerald-400 bg-emerald-50 text-emerald-900' : 'border-dashed border-slate-400 bg-white'}`}>
@@ -73,11 +75,11 @@ export const NumbersDecimalPlaceComparisonCore = ({payload}: {
             <AlignedRow operand={data.left} label="First" decidingPlace={decidingPlace} equal={equal} isSolution={isSolution} />
             <AlignedRow operand={data.right} label="Second" decidingPlace={decidingPlace} equal={equal} isSolution={isSolution} />
         </div>
-        {hasImplicitZeros && <p className="mt-3 text-center text-sm text-slate-500">Pale zeros extend a shorter numeral for place-by-place comparison.</p>}
+        {hasImplicitZeros && <p className="mt-3 text-center text-sm text-slate-500">Pale entries show zero units in an unwritten fractional place.</p>}
         {isSolution && <div className="mt-5 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-5 py-4 text-base font-semibold leading-relaxed text-emerald-950">
             {equal
-                ? <>Every aligned place has the same digit. {data.left.displayPrecision !== data.right.displayPrecision && <>Adding trailing zeros does not change the value. </>}So {data.left.displayNumeral} = {data.right.displayNumeral}.</>
-                : <>All higher places match. At the {data.witness.decidingPlace} place, {data.witness.leftDigit} {comparisonSymbol(data.relation)} {data.witness.rightDigit}, so {data.left.displayNumeral} {comparisonSymbol(data.relation)} {data.right.displayNumeral}.</>}
+                ? <>Every aligned place has the same unit count. {data.left.displayPrecision !== data.right.displayPrecision && <>Adding trailing zeros does not change the value. </>}So {data.left.displayNumeral} = {data.right.displayNumeral}.</>
+                : <>All higher place-value counts match. At the {data.witness.decidingPlace} place, {data.witness.leftDigit} {comparisonPlaceUnit(data.witness.decidingPlace, data.witness.leftDigit)} {comparisonSymbol(data.relation)} {data.witness.rightDigit} {comparisonPlaceUnit(data.witness.decidingPlace, data.witness.rightDigit)}, so {data.left.displayNumeral} {comparisonSymbol(data.relation)} {data.right.displayNumeral}.</>}
         </div>}
     </main>;
 };

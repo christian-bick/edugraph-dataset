@@ -48,7 +48,7 @@ const interpretationPrompt = (data: NumberArrayProblem): string => {
         return 'Explain how the equal rows represent repeated addition.';
     }
     if (data.operation === 'multiplication') {
-        return `This set of ${data.total} objects is partitioned into ${data.groupCount} equal rows of ${data.groupSize}. What does ${data.groupCount} × ${data.groupSize} mean?`;
+        return `What does ${data.groupCount} × ${data.groupSize} mean for the whole set shown? Explain what each factor and the product represent.`;
     }
     if (data.operation === 'partitive-division') {
         return `${data.total} objects are shared into ${data.groupCount} equal rows. How many are in each row?`;
@@ -161,7 +161,7 @@ export const OperationsNumberArrayView = ({
 
             <div className="mt-5 flex min-h-20 items-center justify-center rounded-xl border border-slate-200 px-5 py-4 font-mono text-2xl font-bold text-slate-700">
                 {mode === 'interpretation' ? (
-                    <span className="text-center font-sans text-xl">
+                    <span className={`text-center font-sans text-xl${isSolutionView ? ' text-emerald-700' : ''}`}>
                         {isSolutionView
                             ? interpretationFor(data)
                             : 'Use the rows and objects in each row to explain.'}

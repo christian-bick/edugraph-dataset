@@ -8,6 +8,8 @@ const HEIGHT = 210;
 const LEFT = 48;
 const RIGHT = 712;
 const AXIS_Y = 122;
+// Separate result text from jump text and arrowheads, even on short or stationary jumps.
+const ARITHMETIC_RESULT_Y = 24;
 
 export type OperationsNumberLineMode = 'representation' | 'arithmetic';
 export type OperationsNumberLineViewId =
@@ -131,7 +133,7 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
             <div className="mb-2 text-center text-[1.55rem] font-semibold text-slate-800">{prompt}</div>
             <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-[210px] w-full" role="img" aria-label={showOrigin ? 'Number line beginning at zero' : 'Number line with a positive numerical scale'}>
                 <defs>
-                    <marker id="number-line-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                    <marker id="number-line-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
                         <path d="M 0 0 L 8 4 L 0 8 z" fill="#2563eb" />
                     </marker>
                 </defs>
@@ -157,7 +159,7 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
                             {symbol}{arithmetic.num2}
                         </text>
                         <circle cx={endX} cy={AXIS_Y} r="9" fill="#059669" />
-                        <text x={endX} y={AXIS_Y - 24} textAnchor="middle" className="fill-emerald-700 text-[18px] font-bold">{arithmetic.answer}</text>
+                        <text x={endX} y={ARITHMETIC_RESULT_Y} textAnchor="middle" className="fill-emerald-700 text-[18px] font-bold">{arithmetic.answer}</text>
                     </Fragment>
                 )}
             </svg>

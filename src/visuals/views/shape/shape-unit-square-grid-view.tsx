@@ -82,7 +82,9 @@ export const UnitSquareGridView = ({
                 : `Count one row at a time, adding ${data.columns} unit squares for each row. What does the repeated count tell you about area?`
             : isUnderstanding
                 ? 'Why does multiplying the side lengths give the area of this tiled rectangle?'
-                : getAreaTilePrompt(data.unitId);
+                : isSingleUnit
+                    ? `Count the unit-square tile once. It measures ${units.singular}. What is its area?`
+                    : getAreaTilePrompt(data.unitId);
     const solution = isInterpretation
         ? isSingleUnit
             ? '1 unit × 1 unit = 1 square unit'
