@@ -6,21 +6,25 @@ These items are not newly scheduled by the archive move.
 
 - **Local label dependencies:** the [dependency graph plan](label-dependency-graph.md)
   records the implemented graph, evaluator, strict annotation gate and report-only audit
-  with the agreed Area allowlist. The [refreshed backlog](label-dependency-graph.md#consolidated-declaration-backlog-2026-10-28)
-  records the 1,307-gap execution baseline after the measurement word-problem and currency repairs;
-  the [batch roadmap](label-dependency-graph.md#remaining-batch-roadmap) separates repairs,
-  semantic decisions and dataset refresh. The [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
-  and [progress ledger](label-dependency-progress.md) track autonomous declaration repairs,
-  exact gap accounting and separate decision batches. All 26 original scopes are triaged;
-  six configuration-inference acceptance cases are complete, leaving 385 gaps in 26 dependency
-  decision batches. One known reasoning content defect also remains open, followed by two acceptance
-  batches (29 remaining scopes). Inference is a fallback for additional annotations and supplies
-  no matching capability; matching-capable alternatives remain preferred.
+  with the agreed Area allowlist. The
+  [stable ontology acceptance](../history/ontology-v032-adoption.md#stable-v0330-adoption-2026-10-30)
+  verifies 1,013 targets, 1,222 matching routes and all 2,918 stored images with exact passing
+  VQA coverage. Non-range dependency omissions and conflicts are closed. The
+  [execution agreement](label-dependency-graph.md#autonomous-execution-agreement-2026-10-28)
+  and [progress ledger](label-dependency-progress.md) preserve the repair history and decision
+  batches. Inference remains a fallback without matching capabilities.
   The [agreed conditional-dependency direction](label-dependency-graph.md#agreed-direction-conditional-notation-dependencies)
   is implemented: narrowing numeral/base obligations retires 38 source requirements without
   claiming annotation repairs. Representation completeness remains a separate, unestimated
   design question.
-  Range-policy redesign remains excluded.
+  Range was excluded from that initiative and remains report-only in the current gate.
+
+- **Canonical numeric ranges:** the [range-labeling plan](canonical-range-labeling.md) starts
+  the separately agreed review of tightest bounds, relevant target-band expansion and generator
+  guarantees. Its [inventory](canonical-range-inventory.csv) describes current competency
+  definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
+  permutations and sampling changes are accepted, while lower-bound and singleton semantics
+  remain explicit decisions. Production targets and range validation have not changed yet.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO
