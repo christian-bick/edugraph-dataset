@@ -1,35 +1,50 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 import {UnitDimensionRelationsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {UnitDimensionRelationsGeneratorSchema as schema, spec} from './spec.ts';
+import {dimensionRelationCaseCount, dimensionRelationRangeProfiles} from './numeric-domain.ts';
+import {spec as viewSpec} from '../../../visuals/views/measure/measure-unit-composition/spec.ts';
 
 describe('unit-dimension-relations capabilities', () => {
-    it('owns dimensional composition and rational mathematics without a learner action', () => {
+    it('keeps dimensional composition and rational mathematics in the generator and positive claims in the view', () => {
         expect(spec.generalLabels).toEqual([Area.UnitDimensionality, Scope.RationalNumbers]);
+        expect(viewSpec.generalLabels).toEqual(expect.arrayContaining([Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]));
     });
 
-    it.each([[Area.Multiplication, 'multiplication'], [Area.Division, 'division']] as const)(
-        'resolves the required real-standard operation %s', (label, operation) => {
-            setSeed(25);
-            const problem = generateWithLabels(new UnitDimensionRelationsGenerator(), [
-                Area.UnitDimensionality, Scope.RationalNumbers, label,
-                Ability.ProcedureExecution, Ability.ProcedureUnderstanding
-            ])!;
-            expect(problem.data.kind).toBe('unit-dimension-relation');
-            expect(problem.data.operation).toBe(operation);
-            expect(problem.labels).toEqual([label]);
+    it('resolves every relation-aware finite profile in direct and planned paths', () => {
+        const evaluator = createLabelDependencyEvaluator();
+        let cells = 0;
+        for (const [label, operation] of [[Area.Multiplication, 'multiplication'], [Area.Division, 'division']] as const) {
+            let count = 0;
+            for (const profile of dimensionRelationRangeProfiles) {
+                const cases = dimensionRelationCaseCount(operation, profile.range);
+                count += cases;
+                if (!cases) continue;
+                cells++;
+                const labels = [label, ...profile.labels];
+                expect(extractConfig(schema, labels).config).toEqual({operation, range: profile.range});
+                expect(resolveSchemaChoices(schema, labels, {operation: [label], range: profile.labels}).config)
+                    .toEqual({operation, range: profile.range});
+                const result = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...labels]);
+                expect(result.errors).toEqual([]);
+                expect(result.conflicts).toEqual([]);
+                expect(result.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            }
+            expect(count).toBe(operation === 'multiplication' ? 9216 : 13824);
         }
-    );
-
-    it('rejects conflicting operation capabilities', () => {
-        expect(() => generateWithLabels(new UnitDimensionRelationsGenerator(), [Area.Multiplication, Area.Division])).toThrow();
+        expect(cells).toBe(15);
+        expect(generateWithLabels(new UnitDimensionRelationsGenerator(), [Area.UnitDimensionality])).not.toBeNull();
     });
 
-    it('records an admitted operation capability when the target leaves it unspecified', () => {
-        const problem = generateWithLabels(new UnitDimensionRelationsGenerator(), [Area.UnitDimensionality])!;
-        expect(problem.labels).toEqual([problem.data.operation === 'multiplication' ? Area.Multiplication : Area.Division]);
+    it('rejects competing operations and unsupported positive-floor division', () => {
+        for (const labels of [[Area.Multiplication, Area.Division],
+            [Area.Division, Scope.NumbersSmaller100, Scope.NumbersLarger5]]) {
+            expect(() => generateWithLabels(new UnitDimensionRelationsGenerator(), labels)).toThrow();
+        }
     });
 
     it('keeps explanation and execution requests out of the canonical relation', () => {

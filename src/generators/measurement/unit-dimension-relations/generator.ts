@@ -1,29 +1,14 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import type {DimensionedRational, DimensionUnitPowers, DimensionUnitSymbol, UnitDimensionRelationProblem} from '../../../types/problems.ts';
-import {pick, randomInteger, rational} from '../../ratio/helpers.ts';
+import type {DimensionedRational, DimensionUnitPowers, DimensionUnitSymbol, RatioRational, UnitDimensionRelationProblem} from '../../../types/problems.ts';
+import {rational} from '../../ratio/helpers.ts';
+import {random} from '../../../lib/random.ts';
+import {dimensionRelationCaseCount, dimensionRelationFrameAt} from './numeric-domain.ts';
 import {UnitDimensionRelationsGeneratorSchema, type UnitDimensionRelationsGeneratorConfig} from './spec.ts';
 
 const symbols: readonly DimensionUnitSymbol[] = ['m', 's', 'kg'];
-type UnitPair = readonly [DimensionUnitPowers, DimensionUnitPowers];
-const length: DimensionUnitPowers = {m: 1, s: 0, kg: 0};
-const area: DimensionUnitPowers = {m: 2, s: 0, kg: 0};
-const time: DimensionUnitPowers = {m: 0, s: 1, kg: 0};
-const speed: DimensionUnitPowers = {m: 1, s: -1, kg: 0};
-const mass: DimensionUnitPowers = {m: 0, s: 0, kg: 1};
-const massRate: DimensionUnitPowers = {m: 0, s: -1, kg: 1};
-const density: DimensionUnitPowers = {m: -3, s: 0, kg: 1};
-const volume: DimensionUnitPowers = {m: 3, s: 0, kg: 0};
-
-const multiplicationPairs: readonly UnitPair[] = [
-    [length, length], [speed, time], [massRate, time], [density, volume]
-];
-const divisionPairs: readonly UnitPair[] = [
-    [length, time], [area, length], [length, length], [speed, speed], [mass, time], [mass, density]
-];
-
-const quantity = (units: DimensionUnitPowers): DimensionedRational => ({
-    value: rational(randomInteger(1, 12), randomInteger(1, 4)),
+const quantity = (units: Readonly<DimensionUnitPowers>, value: RatioRational): DimensionedRational => ({
+    value,
     units: {...units},
     dimensions: {length: units.m, time: units.s, mass: units.kg}
 });
@@ -54,9 +39,12 @@ export class UnitDimensionRelationsGenerator implements ProblemGenerator<UnitDim
         if (operation !== 'multiplication' && operation !== 'division') {
             throw new GeneratorValidationError('unit-dimension-relations', 'Operation must be multiplication or division.');
         }
-        const [firstUnits, secondUnits] = pick(operation === 'multiplication' ? multiplicationPairs : divisionPairs);
-        const left = quantity(firstUnits);
-        const right = quantity(secondUnits);
+        validateConfigFields('unit-dimension-relations', config, ['range']);
+        const count = dimensionRelationCaseCount(operation, config.range!);
+        if (count === 0) throw new GeneratorValidationError('unit-dimension-relations', 'Unsupported canonical range for this operation.');
+        const frame = dimensionRelationFrameAt(operation, config.range!, Math.floor(random() * count));
+        const left = quantity(frame.units[0], frame.leftValue);
+        const right = quantity(frame.units[1], frame.rightValue);
         const sign = operation === 'multiplication' ? 1 : -1;
         const resultUnits: DimensionUnitPowers = {
             m: left.units.m + sign * right.units.m,

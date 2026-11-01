@@ -1,98 +1,84 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import type {DimensionUnitPowers, DimensionUnitSymbol, RatioRational} from '../../../types/problems.ts';
-import {greatestCommonDivisor} from '../../ratio/helpers.ts';
+import {describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {rational} from '../../ratio/helpers.ts';
+import {isUnitDimensionRelation} from '../../../visuals/views/measure/measurement-ratio-presentation.ts';
 import {UnitDimensionRelationsGenerator} from './generator.ts';
+import {dimensionRelationCaseCount, dimensionRelationFrameAt, dimensionRelationRangeProfiles} from './numeric-domain.ts';
 
-const generator = new UnitDimensionRelationsGenerator();
-const symbols: DimensionUnitSymbol[] = ['m', 's', 'kg'];
-const unitSignature = (units: DimensionUnitPowers) => `${units.m},${units.s},${units.kg}`;
-const exactPositive = (value: RatioRational) => {
-    expect(Number.isSafeInteger(value.numerator)).toBe(true);
-    expect(value.numerator).toBeGreaterThan(0);
-    expect(Number.isSafeInteger(value.denominator)).toBe(true);
-    expect(value.denominator).toBeGreaterThan(0);
-    expect(greatestCommonDivisor(value.numerator, value.denominator)).toBe(1);
+const signatures = {
+    multiplication: ['1,0,0|1,0,0', '1,-1,0|0,1,0', '0,-1,1|0,1,0', '-3,0,1|3,0,0'],
+    division: ['1,0,0|0,1,0', '2,0,0|1,0,0', '1,0,0|1,0,0', '1,-1,0|1,-1,0', '0,0,1|0,1,0', '0,0,1|-3,0,1']
 };
+const fractionKey = (value: {numerator: number; denominator: number}) => `${value.numerator}/${value.denominator}`;
 
 describe('UnitDimensionRelationsGenerator', () => {
-    it('rejects absent and invalid operations rather than choosing a fallback', () => {
-        for (const config of [null, {}, {operation: null}, {operation: ''}, {operation: 'addition'}, {operation: []}]) {
-            expect(() => generator.generate(config as never)).toThrow();
+    it('preserves every original unit-pair and rational draw, counting identity1 only for required cancellation', () => {
+        const expected = new Map<string, number>(), seen = new Map<string, number>();
+        for (const operation of ['multiplication', 'division'] as const) for (const units of signatures[operation]) {
+            for (let ln = 1; ln <= 12; ln++) for (let ld = 1; ld <= 4; ld++) for (let rn = 1; rn <= 12; rn++) for (let rd = 1; rd <= 4; rd++) {
+                const key = [operation, units, fractionKey(rational(ln, ld)), fractionKey(rational(rn, rd))].join(':');
+                expected.set(key, (expected.get(key) ?? 0) + 1);
+            }
         }
+        const generator = new UnitDimensionRelationsGenerator(), draw = vi.spyOn(rng, 'random');
+        let cases = 0;
+        try {
+            for (const operation of ['multiplication', 'division'] as const) for (const {range} of dimensionRelationRangeProfiles) {
+                const count = dimensionRelationCaseCount(operation, range);
+                for (let index = 0; index < count; index++) {
+                    draw.mockClear().mockReturnValue((index + 0.5) / count);
+                    const {data} = generator.generate({operation, range});
+                    expect(isUnitDimensionRelation(data)).toBe(true);
+                    const signature = [data.left.units, data.right.units].map(unit => [unit.m, unit.s, unit.kg].join(',')).join('|');
+                    const key = [operation, signature, fractionKey(data.left.value), fractionKey(data.right.value)].join(':');
+                    seen.set(key, (seen.get(key) ?? 0) + 1);
+                    const values = [data.left.value, data.right.value, data.result.value].map(value => value.numerator / value.denominator);
+                    expect(hasCanonicalRangeWitness([...values, ...(data.cancellations.length ? [1] : [])], range),
+                        JSON.stringify({key, range, values, cancellations: data.cancellations})).toBe(true);
+                    if (range.min > 0) {
+                        expect(operation).toBe('multiplication');
+                        expect(signature).toBe('1,0,0|1,0,0');
+                        expect(data.cancellations).toEqual([]);
+                    }
+                    expect(draw).toHaveBeenCalledTimes(1);
+                    cases++;
+                }
+            }
+            expect(seen).toEqual(expected);
+            expect(cases).toBe(23040);
+        } finally { draw.mockRestore(); }
+    }, 30000);
+
+    it('rejects absent, invalid and infeasible configurations or case indices before drawing', () => {
+        const generator = new UnitDimensionRelationsGenerator(), draw = vi.spyOn(rng, 'random');
+        const range = dimensionRelationRangeProfiles[0]!.range;
+        try {
+            for (const config of [null, {}, {operation: null}, {operation: ''}, {operation: 'addition'},
+                {operation: 'division'}, {operation: 'division', range: {min: 0, max: 5}},
+                {operation: 'division', range: dimensionRelationRangeProfiles.at(-1)!.range}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            expect(dimensionRelationCaseCount('addition', range)).toBe(0);
+            for (const index of [-1, 0.5, dimensionRelationCaseCount('division', range)]) {
+                expect(() => dimensionRelationFrameAt('division', range, index)).toThrow();
+            }
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 
-    it.each(['multiplication', 'division'] as const)('provides exact values, composed factors and complete cancellation for %s', operation => {
-        const cases = new Set<string>();
-        const results = new Set<string>();
-        let fractionalOperands = 0;
-        let withCancellation = 0;
-        let withoutCancellation = 0;
-        let repeatedCancellation = 0;
-        for (let seed = 0; seed < 160; seed++) {
-            setSeed(seed);
-            const stub = generator.generate({operation});
-            expect(Object.keys(stub)).toEqual(['data']);
-            const {data} = stub;
-            expect(data.kind).toBe('unit-dimension-relation');
-            expect(data.operation).toBe(operation);
-            const {left, right, result, unitFactors, cancellations} = data;
-            for (const quantity of [left, right, result]) {
-                exactPositive(quantity.value);
-                expect(quantity.dimensions).toEqual({length: quantity.units.m, time: quantity.units.s, mass: quantity.units.kg});
-            }
-            if (operation === 'multiplication') {
-                expect(result.value.numerator * left.value.denominator * right.value.denominator)
-                    .toBe(result.value.denominator * left.value.numerator * right.value.numerator);
-            } else {
-                expect(result.value.numerator * left.value.denominator * right.value.numerator)
-                    .toBe(result.value.denominator * left.value.numerator * right.value.denominator);
-            }
-            const numeratorIndices = cancellations.map(pair => pair.numeratorIndex);
-            const denominatorIndices = cancellations.map(pair => pair.denominatorIndex);
-            expect(new Set(numeratorIndices).size).toBe(cancellations.length);
-            expect(new Set(denominatorIndices).size).toBe(cancellations.length);
-            for (const pair of cancellations) {
-                expect(pair.numeratorIndex).toBeGreaterThanOrEqual(0);
-                expect(pair.numeratorIndex).toBeLessThan(unitFactors.numerator.length);
-                expect(pair.denominatorIndex).toBeGreaterThanOrEqual(0);
-                expect(pair.denominatorIndex).toBeLessThan(unitFactors.denominator.length);
-                expect(unitFactors.numerator[pair.numeratorIndex]).toBe(unitFactors.denominator[pair.denominatorIndex]);
-            }
-            for (const symbol of symbols) {
-                const numeratorCount = unitFactors.numerator.filter(unit => unit === symbol).length;
-                const denominatorCount = unitFactors.denominator.filter(unit => unit === symbol).length;
-                const rightPower = (operation === 'multiplication' ? 1 : -1) * right.units[symbol];
-                expect(numeratorCount).toBe(Math.max(0, left.units[symbol]) + Math.max(0, rightPower));
-                expect(denominatorCount).toBe(Math.max(0, -left.units[symbol]) + Math.max(0, -rightPower));
-                expect(result.units[symbol]).toBe(left.units[symbol] + rightPower);
-                const cancelledCount = cancellations.filter(pair => unitFactors.numerator[pair.numeratorIndex] === symbol).length;
-                expect(cancelledCount).toBe(Math.min(numeratorCount, denominatorCount));
-                expect(numeratorCount - cancelledCount).toBe(Math.max(0, result.units[symbol]));
-                expect(denominatorCount - cancelledCount).toBe(Math.max(0, -result.units[symbol]));
-            }
-            if (left.value.denominator > 1 || right.value.denominator > 1) fractionalOperands++;
-            if (cancellations.length > 0) withCancellation++;
-            else withoutCancellation++;
-            if (cancellations.length > 1) repeatedCancellation++;
-            cases.add(`${unitSignature(left.units)}|${unitSignature(right.units)}`);
-            results.add(unitSignature(result.units));
-            expect(Object.keys(data).sort()).toEqual(['cancellations', 'kind', 'left', 'operation', 'result', 'right', 'unitFactors']);
-        }
-        expect(fractionalOperands).toBeGreaterThan(50);
-        expect(withCancellation).toBeGreaterThan(20);
-        expect(withoutCancellation).toBeGreaterThan(20);
-        expect(repeatedCancellation).toBeGreaterThan(10);
-        expect(cases).toEqual(operation === 'multiplication'
-            ? new Set(['1,0,0|1,0,0', '1,-1,0|0,1,0', '0,-1,1|0,1,0', '-3,0,1|3,0,0'])
-            : new Set(['1,0,0|0,1,0', '2,0,0|1,0,0', '1,0,0|1,0,0', '1,-1,0|1,-1,0', '0,0,1|0,1,0', '0,0,1|-3,0,1']));
-        expect(results).toContain(operation === 'multiplication' ? '2,0,0' : '0,0,0');
-    });
-
-    it('replays values and unit witnesses from the same seed', () => {
-        setSeed(456);
-        const expected = generator.generate({operation: 'division'});
-        setSeed(456);
-        expect(generator.generate({operation: 'division'})).toEqual(expected);
+    it('replays values and continuation while isolating mutable output from the domain', () => {
+        const generator = new UnitDimensionRelationsGenerator();
+        const config = {operation: 'division', range: dimensionRelationRangeProfiles[0]!.range} as const;
+        rng.setSeed(456);
+        const first = generator.generate(config), continuation = rng.random();
+        rng.setSeed(456);
+        expect(generator.generate(config)).toEqual(first);
+        expect(rng.random()).toBe(continuation);
+        const original = JSON.stringify(first);
+        first.data.left.units.m = 99;
+        first.data.left.value.numerator = 999;
+        rng.setSeed(456);
+        expect(JSON.stringify(generator.generate(config))).toBe(original);
     });
 });

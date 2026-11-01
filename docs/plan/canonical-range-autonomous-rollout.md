@@ -536,3 +536,18 @@ range omissions close. Both direct and planned configs agree throughout the owne
 no targets, payloads, renderers, Area qualification or range policy change. Legacy direct clock
 configurations remain available. Evidence: `temp/range-autonomous/batch3/measurement-time/`
 (clock support, consumer, route and source verification reports).
+
+## Third batch: unit-dimension operations
+
+Fifteen operation/range cells over eleven annotation bundles preserve all23,040 original unit
+pair/numerator/denominator draws. Explicit cancellation quotient1 is required mathematical work;
+an empty unit denominator written1 is notation and is excluded. Length×length therefore retains
+truthful strongest lower5/10 profiles where feasible. Exact integer cross-products establish
+fractional threshold feasibility, avoiding floating comparison errors such as(5/3)÷(1/3).
+
+Both old routes remain,2→15 selections, closing two baseline source omissions. Eighteen focused
+tests/four files, types and ownership pass. The combined measurement/time proof checks all21
+owned routes/125 admitted selections through dependency evaluation and both resolution paths,
+with no missing facets or conflicts. No target, view, payload or policy changes occur.
+Evidence: `temp/range-autonomous/batch3/measurement-time/` (unit-dimension finite support and
+combined source verification reports).
