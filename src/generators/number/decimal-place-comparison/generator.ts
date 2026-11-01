@@ -10,6 +10,7 @@ import {
     DecimalPlaceComparisonGeneratorSchema,
     type DecimalPlaceComparisonGeneratorConfig
 } from './spec.ts';
+import {decimalComparisonRangeCases, decimalEqualityRangeBlocks} from './domain.ts';
 
 type OperandInput = Readonly<Pick<
     DecimalPlaceComparisonOperand,
@@ -19,11 +20,9 @@ type OperandInput = Readonly<Pick<
 const PLACES: readonly DecimalPlaceComparisonPlace[] = [
     'hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'
 ];
-const DECIDING_PLACE_SAMPLE = [0, 1, 2, 3, 4, 5, 5, 5, 5, 5] as const;
 
 const randomInteger = (minimum: number, maximum: number): number =>
     minimum + Math.floor(random() * (maximum - minimum + 1));
-const nonzeroDigit = (): number => randomInteger(1, 9);
 const wholeDigits = (wholePart: number): readonly [number, number, number] => [
     Math.floor(wholePart / 100),
     Math.floor(wholePart / 10) % 10,
@@ -94,11 +93,16 @@ const sampleDisplayPrecision = (fractionalDigits: readonly number[]): 1 | 2 | 3 
     return randomInteger(minimum, 3) as 1 | 2 | 3;
 };
 
-const sampleEqualityPair = (): readonly [OperandInput, OperandInput] => {
-    const wholePart = randomInteger(1, 999);
-    const fraction = random() < 0.6
-        ? [nonzeroDigit(), 0, 0] as const
-        : [randomInteger(0, 9), nonzeroDigit(), 0] as const;
+const weightedChoice = <T extends {weight: number}>(choices: readonly T[]): T => {
+    if (!choices.length) throw new GeneratorValidationError('decimal-place-comparison', 'No operand pairs support this range and zero profile.');
+    let remaining = random() * choices.reduce((sum, choice) => sum + choice.weight, 0);
+    return choices.find(choice => (remaining -= choice.weight) < 0) ?? choices[choices.length - 1]!;
+};
+const uniformChoice = (values: readonly number[]): number => values[Math.floor(random() * values.length)]!;
+const sampleEqualityPair = (config: DecimalPlaceComparisonGeneratorConfig): readonly [OperandInput, OperandInput] => {
+    const block = weightedChoice(decimalEqualityRangeBlocks(config.range!));
+    const wholePart = uniformChoice(block.wholes);
+    const fraction = [uniformChoice(block.tenths), uniformChoice(block.hundredths), 0] as const;
     const shorterPrecision = fraction[1] === 0 ? 1 : 2;
     const shorter: OperandInput = {
         wholePart, fractionalDigits: fraction, displayPrecision: shorterPrecision
@@ -118,52 +122,13 @@ const inputFromDigits = (digits: readonly number[]): OperandInput => {
     };
 };
 
-const sampleInequalityPair = (
-    relation: 'greater' | 'less'
-): readonly [OperandInput, OperandInput] => {
-    const decidingIndex = DECIDING_PLACE_SAMPLE[randomInteger(0, DECIDING_PLACE_SAMPLE.length - 1)]!;
-    const sharedWhole = wholeDigits(randomInteger(1, 999));
-    const lowDigits = [...sharedWhole, randomInteger(0, 9), randomInteger(0, 9), randomInteger(0, 9)];
-    const highDigits = [...lowDigits];
-    const noHigherWholeDigit = decidingIndex < 3
-        && lowDigits.slice(0, decidingIndex).every(digit => digit === 0);
-    const lowerDigit = randomInteger(noHigherWholeDigit ? 1 : 0, 8);
-    const higherDigit = randomInteger(lowerDigit + 1, 9);
-    lowDigits[decidingIndex] = lowerDigit;
-    highDigits[decidingIndex] = higherDigit;
-    for (let index = decidingIndex + 1; index < PLACES.length; index++) {
-        lowDigits[index] = randomInteger(0, 9);
-        highDigits[index] = randomInteger(0, 9);
-    }
-
-    // The shorter numeral can end before the thousandths place. The opposite
-    // operand still exposes a genuine thousandths contribution in every pair.
-    if (decidingIndex < 5 && random() < 0.5) {
-        if (decidingIndex < 4) lowDigits[4] = 0;
-        lowDigits[5] = 0;
-        highDigits[5] = nonzeroDigit();
-    } else if (lowDigits[5] === 0 && highDigits[5] === 0) {
-        highDigits[5] = nonzeroDigit();
-    }
-
+const sampleInequalityPair = (config: DecimalPlaceComparisonGeneratorConfig): readonly [OperandInput, OperandInput] => {
+    const block = weightedChoice(decimalComparisonRangeCases(config.relation!.endsWith('-zero'), config.range!));
+    const [lowDigits, highDigits] = block.sample(random);
     const low = inputFromDigits(lowDigits);
     const high = inputFromDigits(highDigits);
-    return relation === 'less' ? [low, high] : [high, low];
+    return config.relation!.startsWith('less') ? [low, high] : [high, low];
 };
-
-/** Constrain the original correlated sampler after the mathematical profile is selected.
- * Each profile has positive acceptance probability: at least 1/18 for zero and
- * (1/2)*(729/999)*(9/10)^2*(8/9) for nonzero (thousandths-first cases alone).
- * Truncation can return null, but never changes the conditional law of successful draws.
- */
-function sampleProfiledInequalityPair(relation: 'greater' | 'less', requireZero: boolean) {
-    for (let attempt = 0; attempt < 4096; attempt++) {
-        const pair = sampleInequalityPair(relation);
-        const hasZero = pair.some(input => [...wholeDigits(input.wholePart), ...input.fractionalDigits].includes(0));
-        if (hasZero === requireZero) return pair;
-    }
-    return null;
-}
 
 export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
     DecimalPlaceComparisonProblem,
@@ -175,8 +140,8 @@ export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
     generate(
         config: DecimalPlaceComparisonGeneratorConfig
     ): ProblemStub<DecimalPlaceComparisonProblem> | null {
-        validateConfigFields('decimal-place-comparison', config, ['comparisonKind', 'relation']);
-        if (Object.keys(config).some(key => key !== 'comparisonKind' && key !== 'relation')) {
+        validateConfigFields('decimal-place-comparison', config, ['comparisonKind', 'relation', 'range']);
+        if (Object.keys(config).some(key => !['comparisonKind', 'relation', 'range'].includes(key))) {
             throw new GeneratorValidationError(
                 'decimal-place-comparison', 'The configuration contains an unexpected field.'
             );
@@ -195,10 +160,8 @@ export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
         }
 
         const pair = config.relation === 'equal'
-            ? sampleEqualityPair()
-            : sampleProfiledInequalityPair(config.relation!.startsWith('greater') ? 'greater' : 'less',
-                config.relation!.endsWith('-zero'));
-        if (!pair) return null;
+            ? sampleEqualityPair(config)
+            : sampleInequalityPair(config);
         const [left, right] = pair;
         const data = createDecimalPlaceComparison(left, right);
         return data === null ? null : {data};

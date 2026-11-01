@@ -706,3 +706,10 @@ Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `scaling-tests.log`,
 Twelve profiles include input, rounded value, interval endpoints/midpoint and required distances. Zero-endpoint cases admit upper5/10/100; nonzero cases admit all six uppers through1000, plus lower5/10/20 only with upper1000. Products of interval progressions and offset spans prove complete original support and conditional probability, retaining all18/24 zero/nonzero place/scenarios. Rank selection skips exactly the old rejected whole-number inputs. The old route remains,2→12 selections, closing two omissions. Thirty-two tests/seven files cover analytic partitions, both resolution paths and question/solution projections. No endpoint retirement, source or renderer changes.
 
 Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `rounding-tests.log`, `rounding-matching.log` and neighboring analytic proof records.
+
+
+## Fourth batch: decimal place comparison
+
+Twenty-four relation/zero/range profiles preserve the original conditional source law through a local six-position digit DP. It retains deciding-place weights, shared-whole prefixes, triangular unequal digits, short-format overrides and the corrected final-digit pair mass. Equality retains all98,901 original values. Analytic finite-state probability partition and independent enumeration of4,495,500 final-place paths verify the law; this is not a brute-force claim over every full inequality pair. Every explicitly compared place-unit count participates in the range. Three old routes remain,5→24 selections, closing five omissions. Thirty-eight tests/five files cover profiles, both resolution paths and projections. Constructive successful-profile sampling removes the old4096-retry null outcome without changing mathematical support, precision sampling, payloads, sources or rendering.
+
+Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `comparison-tests.log`, `comparison-matching.log` and neighboring probability proof records.

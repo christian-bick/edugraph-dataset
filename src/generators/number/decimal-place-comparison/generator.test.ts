@@ -1,4 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import * as rng from '../../../lib/random.ts';
 import type {
@@ -18,9 +19,9 @@ const PLACES: readonly DecimalPlaceComparisonPlace[] = [
     'hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'
 ];
 const configs = {
-    greater: {comparisonKind: 'inequality', relation: 'greater-zero'},
-    equal: {comparisonKind: 'equality', relation: 'equal'},
-    less: {comparisonKind: 'inequality', relation: 'less-zero'}
+    greater: {comparisonKind: 'inequality', relation: 'greater-zero', range: createCanonicalNumericRange(1000)},
+    equal: {comparisonKind: 'equality', relation: 'equal', range: createCanonicalNumericRange(1000)},
+    less: {comparisonKind: 'inequality', relation: 'less-zero', range: createCanonicalNumericRange(1000)}
 } as const satisfies Record<DecimalPlaceComparisonProblem['relation'],
     DecimalPlaceComparisonGeneratorConfig>;
 
@@ -151,15 +152,16 @@ describe('DecimalPlaceComparisonGenerator', () => {
     it.each(['greater-nonzero', 'less-nonzero'] as const)('proves coefficient absence for %s', relation => {
         for (let seed = 0; seed < 64; seed++) {
             setSeed(seed);
-            const problem = generator.generate({comparisonKind: 'inequality', relation})!.data;
+            const problem = generator.generate({comparisonKind: 'inequality', relation, range: createCanonicalNumericRange(1000)})!.data;
             expectExactProblem(problem);
             expect([...digitsOf(problem.left), ...digitsOf(problem.right)].every(digit => digit > 0)).toBe(true);
         }
     });
 
-    it('bounds numeric rejection without changing the requested profile', () => {
+    it('constructs the narrow positive-count band without numeric rejection', () => {
         vi.spyOn(rng, 'random').mockReturnValue(0.9);
-        expect(generator.generate({comparisonKind: 'inequality', relation: 'greater-nonzero'})).toBeNull();
+        const data = generator.generate({comparisonKind: 'inequality', relation: 'greater-nonzero', range: createCanonicalNumericRange(1000, 5)})!.data;
+        expect([...digitsOf(data.left), ...digitsOf(data.right)].every(digit => digit >= 5)).toBe(true);
     });
     it('rejects missing, extra, and incompatible relation configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('comparisonKind');

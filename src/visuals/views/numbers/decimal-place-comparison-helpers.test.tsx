@@ -2,7 +2,9 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import type {DecimalPlaceComparisonProblem} from '../../../types/problems.ts';
-import {createDecimalPlaceComparison} from '../../../generators/number/decimal-place-comparison/generator.ts';
+import {createDecimalPlaceComparison, DecimalPlaceComparisonGenerator} from '../../../generators/number/decimal-place-comparison/generator.ts';
+import {comparisonRangeMappings} from '../../../generators/number/decimal-place-comparison/range-profile.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {assertDecimalPlaceComparison, COMPARISON_PLACES, comparisonPlaceUnit} from './decimal-place-comparison-helpers.ts';
 
 const less: DecimalPlaceComparisonProblem = {
@@ -77,6 +79,24 @@ function render(data: DecimalPlaceComparisonProblem, isSolutionView: boolean): s
 }
 
 describe('decimal place comparison view', () => {
+    it('keeps the assessed unit counts and decimal values in every supported range in both modes', () => {
+        const generator = new DecimalPlaceComparisonGenerator();
+        for (const relation of ['equal', 'less-zero', 'greater-zero', 'less-nonzero', 'greater-nonzero'] as const)
+            for (const [, range] of comparisonRangeMappings) {
+                const nonzero = relation.endsWith('-nonzero');
+                if (nonzero ? range.max < 120 : range.min !== 0) continue;
+                const data = generator.generate({comparisonKind: relation === 'equal' ? 'equality' : 'inequality', relation, range})!.data;
+                expect(hasCanonicalRangeWitness([data.left, data.right].flatMap(operand =>
+                    [operand.valueInThousandths / 1000, ...operand.wholeDigits, ...operand.fractionalDigits]), range)).toBe(true);
+                for (const solution of [false, true]) {
+                    const text = render(data, solution);
+                    expect(text).toContain(data.left.displayNumeral);
+                    expect(text).toContain(data.right.displayNumeral);
+                    expect(text).toContain('Compare the counts of matching place-value units');
+                }
+            }
+    });
+
     it('asks for a symbol without hinting at the first differing thousandths place', () => {
         expect(() => assertDecimalPlaceComparison('test', less)).not.toThrow();
         const question = render(less, false);
