@@ -9,7 +9,7 @@ export class NumbersPrimeClassificationGenerator implements ProblemGenerator<Pri
     schema = NumbersPrimeClassificationGeneratorSchema;
 
     generate(config: NumbersPrimeClassificationGeneratorConfig): ProblemStub<PrimeClassificationProblem> {
-        validateConfigFields('numbers-prime-classification', config, []);
-        return {data: generatePrimeClassification()};
+        validateConfigFields('numbers-prime-classification', config, ['range']);
+        return {data: generatePrimeClassification(config.range!)};
     }
 }

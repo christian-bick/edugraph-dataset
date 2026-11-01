@@ -9,7 +9,7 @@ export class NumbersCompositeClassificationGenerator implements ProblemGenerator
     schema = NumbersCompositeClassificationGeneratorSchema;
 
     generate(config: NumbersCompositeClassificationGeneratorConfig): ProblemStub<CompositeClassificationProblem> {
-        validateConfigFields('numbers-composite-classification', config, []);
-        return {data: generateCompositeClassification()};
+        validateConfigFields('numbers-composite-classification', config, ['range']);
+        return {data: generateCompositeClassification(config.range!)};
     }
 }

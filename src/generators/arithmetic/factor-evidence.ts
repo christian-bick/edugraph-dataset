@@ -1,4 +1,6 @@
 import {random} from '../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
+import {GeneratorValidationError} from '../../lib/errors.ts';
 import {FactorPairsProblem, OneDigitMultipleTestProblem, PrimeClassificationProblem, CompositeClassificationProblem, PositiveFactorEvidence, PositiveFactorPair} from '../../types/problems.ts';
 
 const MINIMUM_FACTOR_PAIR_NUMBER = 1;
@@ -79,14 +81,26 @@ export const generateMultipleTest = (): OneDigitMultipleTestProblem => {
     };
 };
 
-export const generatePrimeClassification = (): PrimeClassificationProblem => ({
+/** The required factor evidence always includes1; only the largest classified number varies by band. */
+const classificationCandidates = (numbers: readonly number[], range: CanonicalNumericRange): number[] => {
+    if (!range || range.min !== 0 || ![5, 10, 20, 100].includes(range.max)) {
+        throw new GeneratorValidationError('factor-classification', 'Expected a reviewed canonical upper band without a positive lower.');
+    }
+    const expected = createCanonicalNumericRange(range.max);
+    if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
+        throw new GeneratorValidationError('factor-classification', 'Invalid canonical range witnesses.');
+    }
+    return numbers.filter(number => number > range.maximumAbove && number <= range.max);
+};
+
+export const generatePrimeClassification = (range: CanonicalNumericRange): PrimeClassificationProblem => ({
     kind: 'prime-classification',
     classification: 'prime',
-    ...buildFactorEvidence(randomItem(primeNumbers))
+    ...buildFactorEvidence(randomItem(classificationCandidates(primeNumbers, range)))
 });
 
-export const generateCompositeClassification = (): CompositeClassificationProblem => ({
+export const generateCompositeClassification = (range: CanonicalNumericRange): CompositeClassificationProblem => ({
     kind: 'composite-classification',
     classification: 'composite',
-    ...buildFactorEvidence(randomItem(compositeNumbers))
+    ...buildFactorEvidence(randomItem(classificationCandidates(compositeNumbers, range)))
 });

@@ -96,13 +96,13 @@ const primeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PrimeNumbers,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
-]);
+]).applyUpperRangeVariants({bands: [5, 10, 20, 100]});
 
 const compositeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.CompositeNumbers,
     Scope.NumbersSmaller100,
     Ability.ConceptClassification
-]);
+]).applyUpperRangeVariants({bands: [5, 10, 20, 100]});
 
 const generateNumberPatternBuilder = new DatasetPermutationBuilder()
     .addLabels([Area.PatternGeneration, Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution])

@@ -203,3 +203,20 @@ These entries do not block work in other families.
   projection contract before adoption.
 - Existing currency mixed-unit and five-row conversion-projection cases remain separate, as
   recorded in the remaining-family review. They are not assigned invented range annotations.
+
+## Second batch: prime/composite classification
+
+The two classification producers now partition their complete original2..99 support into ordinary
+upper5/10/20/100 profiles. Required factor evidence includes1, so no positive lower applies.
+All98 values (25 primes,73 composites) and their proof structures remain. The original two-digit
+cap remains; the rollout does not silently add100. Six reviewed smaller-band source variants
+extend4.OA.B.4 while retaining both original target IDs and matching routes. There are now eight
+classification routes/selections. Conditional sampling changes within the accepted range rollout.
+
+All28 focused tests/six files and196 exhaustive question/solution projections pass. Thirty-two
+planned draws/replays pass canonical witnesses, target coverage and strict annotation checks.
+Two hundred same-seed controls preserve unaffected factor-pair/multiple-test sibling values and
+PRNG continuation. These families already had range labels: this repairs tightness and adds
+source-band coverage, rather than closing range-presence findings. Evidence:
+`temp/range-autonomous/batch2/arithmetic/classification-review.md` and
+`verify-classification.json`.

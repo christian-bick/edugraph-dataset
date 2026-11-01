@@ -1,5 +1,6 @@
 import {NumbersPrimeClassificationGenerator} from '../numbers-prime-classification/generator.ts';
 import {NumbersCompositeClassificationGenerator} from '../numbers-composite-classification/generator.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -46,8 +47,8 @@ describe('FactorMultipleRelationsGenerator', () => {
     const generator = new FactorMultipleRelationsGenerator();
 
     const generateFamily = (task: 'factor-pairs' | 'one-digit-multiple-test' | 'prime-classification' | 'composite-classification') =>
-        task === 'prime-classification' ? new NumbersPrimeClassificationGenerator().generate({})
-            : task === 'composite-classification' ? new NumbersCompositeClassificationGenerator().generate({})
+        task === 'prime-classification' ? new NumbersPrimeClassificationGenerator().generate({range: createCanonicalNumericRange(100)})
+            : task === 'composite-classification' ? new NumbersCompositeClassificationGenerator().generate({range: createCanonicalNumericRange(100)})
                 : generator.generate({task});
 
     it('strictly validates its configuration', () => {
