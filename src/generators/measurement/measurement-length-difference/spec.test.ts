@@ -5,8 +5,23 @@ import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {MeasurementLengthDifferenceGenerator} from './generator.ts';
 import {MeasurementLengthDifferenceGeneratorSchema as schema} from './spec.ts';
 import {lengthDifferenceRangeProfiles} from './numeric-domain.ts';
+import {spec} from './spec.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 
 describe('measurement-length-difference schema', () => {
+    it('declares positive integer quantities and satisfies every activated dependency', () => {
+        expect(spec.generalLabels).toEqual(expect.arrayContaining([
+            Scope.IntegerNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
+        ]));
+        const evaluator = createLabelDependencyEvaluator();
+        for (const profile of lengthDifferenceRangeProfiles) {
+            const result = evaluator.evaluate([...spec.generalLabels!, ...profile.labels, Ability.ProcedureExecution]);
+            expect(result.errors).toEqual([]);
+            expect(result.conflicts).toEqual([]);
+            expect(result.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            expect(result.assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+        }
+    });
     it('retains the existing task and resolves every feasible profile in both paths', () => {
         const task = [Area.Difference, Scope.CentimeterScale, Scope.DirectRelation, Ability.ProcedureExecution];
         expect(generateWithLabels(new MeasurementLengthDifferenceGenerator(), task)).not.toBeNull();

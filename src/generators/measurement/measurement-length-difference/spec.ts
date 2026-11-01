@@ -4,7 +4,11 @@ import {ConfigFromSchema} from '../../../types/schema.ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {withLabelChoices} from '../../../types/schema.ts';
 import {lengthDifferenceRangeProfiles} from './numeric-domain.ts';
-export const spec: GeneratorSpec = {generatorId:'measurement-length-difference',generalLabels:[Area.Difference,Scope.CentimeterScale,Scope.DirectRelation]};
+export const spec: GeneratorSpec = {
+    generatorId: 'measurement-length-difference',
+    generalLabels: [Area.Difference, Scope.CentimeterScale, Scope.DirectRelation,
+        Scope.IntegerNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]
+};
 const rangeChoices = lengthDifferenceRangeProfiles.map(profile => profile.labels);
 export const MeasurementLengthDifferenceGeneratorSchema = {
     range: [[...new Set(rangeChoices.flat())], withLabelChoices(selectExactLabelSetMap(

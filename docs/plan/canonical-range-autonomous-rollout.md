@@ -49,12 +49,18 @@ lower/upper `(0,10)`, `(5,10)`, `(0,20)`, `(5,20)` and `(5,100)`, containing res
 9, 1, 24, 44 and 10 tuples. These disjoint cells preserve all 88 original shorter/difference/longer
 triples. All three quantities are required by the sole `measure-length-difference` projection;
 no payload or view change is needed. The one existing target/route remains, with five admitted
-selections replacing one unbounded selection. This closes one baseline source-presence finding.
+selections replacing one unbounded selection. This family had no baseline numeric dependency
+assessment. Adding a numeric range activates the number-kind/sign/zero obligations; invariant
+positive-integer declarations now satisfy all three for every profile. No new operand-width
+obligation is triggered, and no baseline range-presence closure is claimed for this family.
 
 The time and length-difference focused gate passes 11 tests across four files, including complete
 finite support and canonical witnesses. Exact owned route comparison and TypeScript pass.
 Evidence: `temp/range-autonomous/measurement-time/route-verification.json`, `first-focused.log`
 and `types-first.log`. The invariant checkpoint is `4e556963`.
+The additive declarations pass all five profile evaluations with no missing facets, errors or
+conflicts; the generator/view ownership audit and five focused tests pass. Evidence:
+`length-additive-fix.log` and `length-ownership-check.log` in the same directory.
 
 ## Decomposition and make-ten profiles
 
