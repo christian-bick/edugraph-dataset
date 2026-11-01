@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {
     DecimalAddSubtractNumber,
     DecimalAddSubtractProblem,
@@ -210,9 +211,9 @@ describe('createDecimalAddSubtractProblem', () => {
 describe('DecimalAdditionSubtractionGenerator', () => {
     it('validates the exact operation configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('operation');
-        expect(() => generator.generate({operation: 'multiplication', zeroPresence: true} as never))
+        expect(() => generator.generate({operation: 'multiplication', zeroPresence: true, range: createCanonicalNumericRange(20)} as never))
             .toThrow('Addition or Subtraction');
-        expect(() => generator.generate({operation: 'addition', zeroPresence: true, extra: true} as never))
+        expect(() => generator.generate({operation: 'addition', zeroPresence: true, range: createCanonicalNumericRange(20), extra: true} as never))
             .toThrow('unexpected field');
     });
 
@@ -223,7 +224,7 @@ describe('DecimalAdditionSubtractionGenerator', () => {
             let zeroCascade = 0;
             for (let seed = 0; seed < 400; seed++) {
                 setSeed(`decimal-add-subtract-${operation}-${seed}`);
-                const problem = generator.generate({operation, zeroPresence: true})?.data;
+                const problem = generator.generate({operation, zeroPresence: true, range: createCanonicalNumericRange(seed % 2 ? 10 : 20)})?.data;
                 expect(problem).toBeDefined();
                 expectExactProblem(problem!);
                 expect(problem!.operation).toBe(operation);
@@ -254,8 +255,8 @@ describe('DecimalAdditionSubtractionGenerator', () => {
 
     it('replays the same instance from the same seed', () => {
         setSeed('decimal-add-subtract-replay');
-        const first = generator.generate({operation: 'subtraction', zeroPresence: true});
+        const first = generator.generate({operation: 'subtraction', zeroPresence: true, range: createCanonicalNumericRange(20)});
         setSeed('decimal-add-subtract-replay');
-        expect(generator.generate({operation: 'subtraction', zeroPresence: true})).toEqual(first);
+        expect(generator.generate({operation: 'subtraction', zeroPresence: true, range: createCanonicalNumericRange(20)})).toEqual(first);
     });
 });

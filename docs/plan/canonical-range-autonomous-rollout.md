@@ -474,3 +474,17 @@ Nine tests,48 representative boundary projections and28 planned draws/replays pa
 correspondence default remains; no source, renderer or global-policy change is used. Evidence:
 `temp/range-autonomous/batch3/arithmetic/paired-pattern-review.md` and
 `verify-paired-pattern.json`.
+
+## Third batch: decimal column addition/subtraction
+
+Ordinary upper10/20 profiles include the explicitly requested base-ten unit counts before/after
+exchanges, alongside the decimal operands/results. Required10-for-1 exchanges make upper5
+infeasible, while zero-free cases necessarily use upper20. No positive lower applies. Every
+original scenario path and its conditional per-pair probability remains; the generator's payload
+and both projections are unchanged. The two old routes now admit six selections, closing four
+source range omissions. The existing positive target-domain policy requires `DecimalNumbers`,
+preventing newly admitted non-decimal Grade1 fluency tasks without changing their targets.
+
+All23 tests/five files pass, including exhaustive scenario membership, canonical maxima and
+conditional probability checks. Evidence: `temp/range-autonomous/batch3/fraction-decimal/`
+(column profile tests, route comparison and type checks).

@@ -65,20 +65,21 @@ describe('decimal arithmetic unit zero', () => {
             schema: DecimalAdditionSubtractionGeneratorSchema, spec};
         const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
         for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
-            const labels = [operation, zero, ...view.generalLabels];
+            const labels = [operation, zero, Scope.HundredthDecimals, ...view.generalLabels];
             const match = planModelCompatibility({id: 'decimal', labels}, model, consumer);
             expect(match.supported).toBe(true);
             if (!match.supported) throw new Error(match.reason);
             const selections = enumerateDependencyAuditSelections(match.plan);
-            expect(selections.selections).toHaveLength(1);
-            for (let seed = 0; seed < 20; seed++) {
+            expect(selections.selections).toHaveLength(zero === Scope.NumbersWithZero ? 2 : 1);
+            for (const selected of selections.selections) for (let seed = 0; seed < 20; seed++) {
+                const bound = selected.labels.find(label => label === Scope.NumbersSmaller10 || label === Scope.NumbersSmaller20)!;
                 setSeed(seed);
-                const direct = generateWithLabels(generator, labels)!;
+                const direct = generateWithLabels(generator, [...labels, bound])!;
                 expect(hasDecimalUnitZero(direct.data)).toBe(zero === Scope.NumbersWithZero);
                 const sampleKey = `decimal#${spec.generatorId}#${view.viewId}#train#question#inst:0`;
                 const input = {generator, generatorSpec: spec, viewSchema: {}, viewSpec: view, plan: match.plan,
                     sampleKey, seed, attempt: 1, replay: {version: 1 as const, sampleKey, seed, attempt: 1,
-                        selection: createGenerationSelectionReceipt(match.plan, selections.selections[0]!.choices)}};
+                        selection: createGenerationSelectionReceipt(match.plan, selected.choices)}};
                 const planned = generatePlannedDraw(input);
                 expect(planned.stub!.data).toEqual(direct.data);
                 expect(generatePlannedDraw(input)).toEqual(planned);

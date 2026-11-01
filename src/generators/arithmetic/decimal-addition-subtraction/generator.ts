@@ -1,5 +1,6 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {
     DecimalAddSubtractColumnStep,
@@ -263,8 +264,33 @@ export function decimalZeroPools(operation: Operation, presence: boolean): reado
     return pools;
 }
 
-const sampleZeroPair = (operation: Operation, presence: boolean): Pair => {
-    const pools = decimalZeroPools(operation, presence);
+const rangePools = new Map<string, readonly ZeroPool[]>();
+
+/** Unit exchanges are required work. The decimal operands themselves are below
+ * five; the largest actual piece count therefore fixes upper10 or upper20. */
+export function decimalColumnRangePools(operation: Operation, presence: boolean, range: CanonicalNumericRange): readonly ZeroPool[] {
+    if (!range || range.min !== 0 || ![10, 20].includes(range.max)) throw new Error('Unsupported decimal column range.');
+    const expected = createCanonicalNumericRange(range.max);
+    if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
+        throw new Error('Invalid decimal column range witnesses.');
+    const key = `${operation}:${presence}:${range.max}`;
+    const cached = rangePools.get(key);
+    if (cached) return cached;
+    const pools = decimalZeroPools(operation, presence).map(pool => {
+        const pairs = pool.pairs.filter(([first, second]) => {
+            const data = createDecimalAddSubtractProblem(operation, first, second)!;
+            const maximum = Math.max(10, ...data.model.steps.flatMap(step => [...Object.values(step.before), ...Object.values(step.after)]));
+            return maximum <= range.max && maximum > range.maximumAbove;
+        });
+        return {...pool, pairs, weight: pool.weight * pairs.length / pool.pairs.length};
+    }).filter(pool => pool.pairs.length > 0);
+    rangePools.set(key, pools);
+    return pools;
+}
+
+const sampleRangePair = (operation: Operation, presence: boolean, range: CanonicalNumericRange): Pair => {
+    const pools = decimalColumnRangePools(operation, presence, range);
+    if (!pools.length) throw new GeneratorValidationError('decimal-addition-subtraction', 'No unit-exchange case supports this range and zero profile.');
     let position = random() * pools.reduce((sum, pool) => sum + pool.weight, 0);
     const pool = pools.find(candidate => (position -= candidate.weight) < 0) ?? pools[pools.length - 1]!;
     return randomItem(pool.pairs);
@@ -280,8 +306,8 @@ export class DecimalAdditionSubtractionGenerator implements ProblemGenerator<
     generate(
         config: DecimalAdditionSubtractionGeneratorConfig
     ): ProblemStub<DecimalAddSubtractProblem> | null {
-        validateConfigFields('decimal-addition-subtraction', config, ['operation', 'zeroPresence']);
-        if (Object.keys(config).some(key => key !== 'operation' && key !== 'zeroPresence')) {
+        validateConfigFields('decimal-addition-subtraction', config, ['operation', 'zeroPresence', 'range']);
+        if (Object.keys(config).some(key => !['operation', 'zeroPresence', 'range'].includes(key))) {
             throw new GeneratorValidationError(
                 'decimal-addition-subtraction', 'The configuration contains an unexpected field.'
             );
@@ -294,7 +320,7 @@ export class DecimalAdditionSubtractionGenerator implements ProblemGenerator<
         if (typeof config.zeroPresence !== 'boolean') {
             throw new GeneratorValidationError('decimal-addition-subtraction', 'Zero presence must be a boolean.');
         }
-        const pair = sampleZeroPair(config.operation, config.zeroPresence);
+        const pair = sampleRangePair(config.operation, config.zeroPresence, config.range!);
         const data = createDecimalAddSubtractProblem(config.operation, pair[0], pair[1]);
         return data === null ? null : {data};
     }
