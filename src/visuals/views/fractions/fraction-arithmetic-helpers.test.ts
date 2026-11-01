@@ -1,3 +1,6 @@
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {originalFractionArithmeticRange} from '../../../generators/fraction/fraction-arithmetic/spec.ts';
+import {fractionArithmeticUpperBounds} from '../../../generators/fraction/fraction-arithmetic/numeric-domain.ts';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {
@@ -16,7 +19,7 @@ const generate = (
     operation: NonNullable<FractionArithmeticGeneratorConfig['operation']>
 ): FractionArithmeticProblem => {
     setSeed(seed);
-    return generator.generate({
+    return generator.generate({range: task.startsWith('unlike-') ? originalFractionArithmeticRange : createCanonicalNumericRange(fractionArithmeticUpperBounds(task).at(-1)!),
         task,
         usesCommonDenominator: operation !== 'multiplication',
         operation

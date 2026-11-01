@@ -1,3 +1,4 @@
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
@@ -21,7 +22,11 @@ describe('FractionArithmeticGenerator spec integration', () => {
         Scope.CommonDenominator,
         Area.Addition,
         Area.Subtraction,
-        Area.Multiplication
+        Area.Multiplication,
+        Scope.NumbersSmaller5,
+        Scope.NumbersSmaller10,
+        Scope.NumbersSmaller20,
+        Scope.NumbersSmaller100
     ];
 
     it('declares exactly the invariant mathematical capabilities', () => {
@@ -244,6 +249,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
 
     it('keeps deterministic label extraction on the direct generator RNG path', () => {
         const legacyLabels = [
+            Scope.NumbersSmaller10,
             Area.Addition,
             Scope.FractionNumbers,
             Scope.CommonDenominator,
@@ -253,7 +259,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
         setSeed('fraction-arithmetic-label-path');
         const resolvedLegacy = generateWithLabels(generator, legacyLabels);
         setSeed('fraction-arithmetic-label-path');
-        const directLegacy = generator.generate({
+        const directLegacy = generator.generate({range: createCanonicalNumericRange(10),
             task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: 'addition'
@@ -261,6 +267,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
         expect(resolvedLegacy!.data).toEqual(directLegacy.data);
 
         const multiplicationLabels = [
+            Scope.NumbersSmaller10,
             Area.Multiplication,
             Area.IteratedOperation,
             Area.Equation,
@@ -272,7 +279,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
         setSeed('fraction-multiplication-label-path');
         const resolvedMultiplication = generateWithLabels(generator, multiplicationLabels);
         setSeed('fraction-multiplication-label-path');
-        const directMultiplication = generator.generate({
+        const directMultiplication = generator.generate({range: createCanonicalNumericRange(10),
             task: 'unit-fraction-multiple',
             usesCommonDenominator: false,
             operation: 'multiplication'
@@ -291,7 +298,7 @@ describe('FractionArithmeticGenerator spec integration', () => {
         setSeed('tenths-hundredths-label-path');
         const resolvedTenthsHundredths = generateWithLabels(generator, tenthsHundredthsLabels);
         setSeed('tenths-hundredths-label-path');
-        const directTenthsHundredths = generator.generate({
+        const directTenthsHundredths = generator.generate({range: createCanonicalNumericRange(100),
             task: 'tenths-hundredths-addition',
             usesCommonDenominator: true,
             operation: 'addition'

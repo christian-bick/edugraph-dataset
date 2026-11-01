@@ -1,3 +1,6 @@
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {originalFractionArithmeticRange} from './spec.ts';
+import {fractionArithmeticUpperBounds} from './numeric-domain.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {
@@ -25,7 +28,7 @@ const generate = (
     usesCommonDenominator = operation !== 'multiplication'
 ): FractionArithmeticProblem => {
     setSeed(seed);
-    return generator.generate({task, operation, usesCommonDenominator}).data;
+    return generator.generate({range: task.startsWith('unlike-') ? originalFractionArithmeticRange : createCanonicalNumericRange(fractionArithmeticUpperBounds(task).at(-1)!), task, operation, usesCommonDenominator}).data;
 };
 
 const improperNumerator = (value: MixedFractionValue): number =>
@@ -211,22 +214,22 @@ describe('FractionArithmeticGenerator', () => {
 
     it('rejects missing, invalid, and incompatible configurations', () => {
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({
+        expect(() => generator.generate({range: createCanonicalNumericRange(10),
             task: 'fraction-operation',
             operation: 'division' as never,
             usesCommonDenominator: true
         })).toThrow('Operation must be addition, subtraction, or multiplication.');
-        expect(() => generator.generate({
+        expect(() => generator.generate({range: createCanonicalNumericRange(10),
             task: 'fraction-operation',
             operation: 'addition',
             usesCommonDenominator: false
         })).toThrow('CommonDenominator is required');
-        expect(() => generator.generate({
+        expect(() => generator.generate({range: createCanonicalNumericRange(10),
             task: 'fraction-operation',
             operation: 'multiplication',
             usesCommonDenominator: false
         })).toThrow('Unsupported multiplication task');
-        expect(() => generator.generate({
+        expect(() => generator.generate({range: createCanonicalNumericRange(10),
             task: 'decompose-proper',
             operation: 'subtraction',
             usesCommonDenominator: true
@@ -404,7 +407,7 @@ describe('unlike denominator fraction arithmetic', () => {
             for (const operation of ['addition', 'subtraction'] as const) {
                 for (let index = 0; index < 120; index++) {
                     setSeed(`unlike-${task}-${operation}-${index}`);
-                    const data = generator.generate({
+                    const data = generator.generate({range: task.startsWith('unlike-') ? originalFractionArithmeticRange : createCanonicalNumericRange(fractionArithmeticUpperBounds(task).at(-1)!),
                         task, operation, usesCommonDenominator: false
                     }).data;
                     expect(data.task).toBe(task);
@@ -444,16 +447,16 @@ describe('unlike denominator fraction arithmetic', () => {
 
     it('replays unlike samples and rejects mismatched common-denominator configuration', () => {
         setSeed('unlike-replay');
-        const first = generator.generate({
+        const first = generator.generate({range: originalFractionArithmeticRange,
             task: 'unlike-fraction-operation', operation: 'addition',
             usesCommonDenominator: false
         });
         setSeed('unlike-replay');
-        expect(generator.generate({
+        expect(generator.generate({range: originalFractionArithmeticRange,
             task: 'unlike-fraction-operation', operation: 'addition',
             usesCommonDenominator: false
         })).toEqual(first);
-        expect(() => generator.generate({
+        expect(() => generator.generate({range: originalFractionArithmeticRange,
             task: 'unlike-mixed-operation', operation: 'subtraction',
             usesCommonDenominator: true
         })).toThrow('cannot also request CommonDenominator');

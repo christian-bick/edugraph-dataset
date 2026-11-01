@@ -21,16 +21,18 @@ import {
     FractionArithmeticGeneratorConfig,
     FractionArithmeticGeneratorSchema
 } from './spec.ts';
+import {binaryFractionCases, fractionDecompositionCases, mixedFractionCases, validateFractionArithmeticRange, wholeFractionProductCases} from './numeric-domain.ts';
+import type {CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
-const NON_BINARY_DENOMINATORS = [3, 4, 6, 8] as const satisfies readonly FractionParts[];
-const DECOMPOSITION_DENOMINATORS = [4, 6, 8] as const satisfies readonly FractionParts[];
-const PRODUCT_DENOMINATORS = [3, 4, 6, 8] as const satisfies readonly FractionParts[];
 
 const pick = <T>(values: readonly T[]): T => values[Math.floor(random() * values.length)]!;
 
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
+const weighted = <T extends {weight: number}>(rows: readonly T[]): T => {
+    if (!rows.length) throw new GeneratorValidationError('fraction-arithmetic', 'No source cases support this task and canonical range.');
+    let remaining = random() * rows.reduce((sum, row) => sum + row.weight, 0);
+    return rows.find(row => (remaining -= row.weight) < 0) ?? rows[rows.length - 1]!;
+};
 
 const makeFraction = (
     numerator: number,
@@ -54,31 +56,6 @@ const makeMixedFromImproper = (
     numerator % denominator,
     denominator
 );
-
-type FractionProductSample = {
-    denominator: FractionParts;
-    wholeFactor: number;
-    fractionNumerator: number;
-    productNumerator: number;
-};
-
-const productSamples = (productKind: 'proper' | 'improper'): FractionProductSample[] =>
-    PRODUCT_DENOMINATORS.flatMap(denominator =>
-        Array.from({length: denominator - 2}, (_, index) => index + 2).flatMap(
-            fractionNumerator => Array.from({length: 3}, (_, index) => index + 2)
-                .map(wholeFactor => ({
-                    denominator,
-                    wholeFactor,
-                    fractionNumerator,
-                    productNumerator: wholeFactor * fractionNumerator
-                }))
-                .filter(sample => sample.productNumerator <= 4 * denominator
-                    && sample.productNumerator % denominator !== 0
-                    && (productKind === 'proper'
-                        ? sample.productNumerator < denominator
-                        : sample.productNumerator >= denominator))
-        )
-    );
 
 const TENTHS_HUNDREDTHS_ADDITION_SAMPLES = Array.from({length: 9}, (_, index) => index + 1)
     .flatMap(tenthsNumerator => {
@@ -105,9 +82,8 @@ const generateTenthsHundredthsAddition = (): TenthsHundredthsAdditionProblem => 
     };
 };
 
-const generateUnitFractionMultiple = (): UnitFractionMultipleProblem => {
-    const denominator = pick(DENOMINATORS);
-    const wholeFactor = randomInteger(2, 4);
+const generateUnitFractionMultiple = (range: CanonicalNumericRange): UnitFractionMultipleProblem => {
+    const {denominator, wholeFactor} = weighted(wholeFractionProductCases('unit', range));
     return {
         task: 'unit-fraction-multiple',
         operation: 'multiplication',
@@ -120,9 +96,9 @@ const generateUnitFractionMultiple = (): UnitFractionMultipleProblem => {
 };
 
 const generateWholeNumberFractionProduct = (
-    productKind: 'proper' | 'improper'
+    productKind: 'proper' | 'improper', range: CanonicalNumericRange
 ): WholeNumberFractionProductProblem => {
-    const sample = pick(productSamples(productKind));
+    const sample = weighted(wholeFractionProductCases(productKind, range));
     return {
         task: 'whole-number-fraction-product',
         operation: 'multiplication',
@@ -135,36 +111,24 @@ const generateWholeNumberFractionProduct = (
 };
 
 const binarySample = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation, range: CanonicalNumericRange
 ): Pick<FractionBinaryOperationProblem, 'denominator' | 'first' | 'second' | 'result'> => {
-    const denominator = pick(DENOMINATORS);
-    if (operation === 'addition') {
-        const firstNumerator = randomInteger(1, denominator - 1);
-        const secondNumerator = randomInteger(1, denominator - firstNumerator);
-        return {
-            denominator,
-            first: makeFraction(firstNumerator, denominator),
-            second: makeFraction(secondNumerator, denominator),
-            result: makeFraction(firstNumerator + secondNumerator, denominator)
-        };
-    }
-    const firstNumerator = randomInteger(2, denominator);
-    const secondNumerator = randomInteger(1, firstNumerator - 1);
+    const {denominator, firstNumerator, secondNumerator} = weighted(binaryFractionCases(operation, range));
     return {
         denominator,
         first: makeFraction(firstNumerator, denominator),
         second: makeFraction(secondNumerator, denominator),
-        result: makeFraction(firstNumerator - secondNumerator, denominator)
+        result: makeFraction(operation === 'addition' ? firstNumerator + secondNumerator : firstNumerator - secondNumerator, denominator)
     };
 };
 
 const generateBinaryOperation = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation, range: CanonicalNumericRange
 ): FractionBinaryOperationProblem => ({
     task: 'fraction-operation',
     operation,
     sharedWhole: 1,
-    ...binarySample(operation)
+    ...binarySample(operation, range)
 });
 
 const decompositionTerms = (
@@ -176,14 +140,12 @@ const decompositionTerms = (
     : [[1, totalNumerator - 1], [denominator, denominator, totalNumerator - 2 * denominator]];
 
 const generateDecomposition = (
-    sourceKind: 'proper' | 'mixed'
+    sourceKind: 'proper' | 'mixed', range: CanonicalNumericRange
 ): FractionDecompositionProblem => {
-    const denominator = sourceKind === 'proper'
-        ? pick(DECOMPOSITION_DENOMINATORS)
-        : pick(DENOMINATORS);
+    const {denominator, sourceNumerator} = weighted(fractionDecompositionCases(sourceKind, range));
     const source = sourceKind === 'mixed'
-        ? {kind: 'mixed' as const, value: makeMixed(2, randomInteger(1, denominator - 1), denominator)}
-        : {kind: 'proper' as const, value: makeFraction(randomInteger(3, denominator - 1), denominator)};
+        ? {kind: 'mixed' as const, value: makeMixed(2, sourceNumerator - 2 * denominator, denominator)}
+        : {kind: 'proper' as const, value: makeFraction(sourceNumerator, denominator)};
     const totalNumerator = source.kind === 'mixed'
         ? improperNumerator(source.value)
         : source.value.numerator;
@@ -206,17 +168,10 @@ const generateDecomposition = (
 };
 
 const mixedSample = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation, range: CanonicalNumericRange
 ): Pick<MixedFractionOperationProblem, 'denominator' | 'first' | 'second' | 'result'> => {
-    const regroup = random() < 0.5;
-    const denominator = pick(NON_BINARY_DENOMINATORS);
+    const {denominator, firstNumerator, secondNumerator} = weighted(mixedFractionCases(operation, range));
     if (operation === 'addition') {
-        const firstNumerator = regroup
-            ? randomInteger(2, denominator - 1)
-            : randomInteger(1, denominator - 2);
-        const secondNumerator = regroup
-            ? randomInteger(denominator - firstNumerator + 1, denominator - 1)
-            : randomInteger(1, denominator - firstNumerator - 1);
         const first = makeMixed(1, firstNumerator, denominator);
         const second = makeMixed(1, secondNumerator, denominator);
         return {
@@ -230,12 +185,6 @@ const mixedSample = (
         };
     }
 
-    const firstNumerator = regroup
-        ? randomInteger(1, denominator - 2)
-        : randomInteger(2, denominator - 1);
-    const secondNumerator = regroup
-        ? randomInteger(firstNumerator + 1, denominator - 1)
-        : randomInteger(1, firstNumerator - 1);
     const first = makeMixed(2, firstNumerator, denominator);
     const second = makeMixed(1, secondNumerator, denominator);
     return {
@@ -250,12 +199,12 @@ const mixedSample = (
 };
 
 const generateMixedOperation = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation, range: CanonicalNumericRange
 ): MixedFractionOperationProblem => ({
     task: 'mixed-operation',
     operation,
     sharedWhole: 1,
-    ...mixedSample(operation)
+    ...mixedSample(operation, range)
 });
 
 type UnlikeFractionSample = Readonly<{
@@ -500,7 +449,8 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
         validateConfigFields('fraction-arithmetic', config, [
             'task',
             'usesCommonDenominator',
-            'operation'
+            'operation',
+            'range'
         ]);
 
         const operation = config.operation!;
@@ -514,13 +464,13 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
         }
         if (operation === 'multiplication') {
             if (config.task === 'unit-fraction-multiple') {
-                return {data: generateUnitFractionMultiple()};
+                return {data: generateUnitFractionMultiple(config.range!)};
             }
             if (config.task === 'whole-number-fraction-product-proper') {
-                return {data: generateWholeNumberFractionProduct('proper')};
+                return {data: generateWholeNumberFractionProduct('proper', config.range!)};
             }
             if (config.task === 'whole-number-fraction-product-improper') {
-                return {data: generateWholeNumberFractionProduct('improper')};
+                return {data: generateWholeNumberFractionProduct('improper', config.range!)};
             }
             throw new GeneratorValidationError(
                 'fraction-arithmetic',
@@ -534,6 +484,9 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
             || config.task === 'unlike-fraction-operation-improper-equivalence'
             || config.task === 'unlike-mixed-operation'
             || config.task === 'unlike-mixed-operation-equivalence') {
+            if (config.range!.min !== 0 || config.range!.max !== Number.MAX_SAFE_INTEGER) {
+                throw new GeneratorValidationError('fraction-arithmetic', 'Unlike-denominator source work has no reviewed canonical range profile yet.');
+            }
             if (config.usesCommonDenominator) {
                 throw new GeneratorValidationError(
                     'fraction-arithmetic',
@@ -551,19 +504,21 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
             );
         }
         if (config.task === 'tenths-hundredths-addition' && operation === 'addition') {
+            validateFractionArithmeticRange(config.range!);
+            if (config.range!.max !== 100) throw new GeneratorValidationError('fraction-arithmetic', 'Tenths-to-hundredths scaling requires upper100.');
             return {data: generateTenthsHundredthsAddition()};
         }
         if (config.task === 'fraction-operation') {
-            return {data: generateBinaryOperation(operation)};
+            return {data: generateBinaryOperation(operation, config.range!)};
         }
         if (config.task === 'decompose-proper' && operation === 'addition') {
-            return {data: generateDecomposition('proper')};
+            return {data: generateDecomposition('proper', config.range!)};
         }
         if (config.task === 'decompose-mixed' && operation === 'addition') {
-            return {data: generateDecomposition('mixed')};
+            return {data: generateDecomposition('mixed', config.range!)};
         }
         if (config.task === 'mixed-operation') {
-            return {data: generateMixedOperation(operation)};
+            return {data: generateMixedOperation(operation, config.range!)};
         }
         throw new GeneratorValidationError(
             'fraction-arithmetic',

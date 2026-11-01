@@ -1,3 +1,4 @@
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
@@ -23,7 +24,7 @@ const generateAddition = (
     seed = 'tenths-hundredths-addition-view'
 ): TenthsHundredthsAdditionPresentation => {
     setSeed(seed);
-    const neutral = arithmeticGenerator.generate({
+    const neutral = arithmeticGenerator.generate({range: createCanonicalNumericRange(100),
         task: 'tenths-hundredths-addition',
         operation: 'addition',
         usesCommonDenominator: true

@@ -1,4 +1,7 @@
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {fractionArithmeticUpperBounds} from '../../../generators/fraction/fraction-arithmetic/numeric-domain.ts';
+import {originalFractionArithmeticRange} from '../../../generators/fraction/fraction-arithmetic/spec.ts';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
 import {FractionArithmeticGeneratorConfig} from '../../../generators/fraction/fraction-arithmetic/spec.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -12,7 +15,8 @@ const generator = new FractionArithmeticGenerator();
 
 const generate = (config: FractionArithmeticGeneratorConfig) => {
     setSeed(`presentation-${config.task}-${config.operation}`);
-    return generator.generate(config).data;
+    return generator.generate({...config, range: config.range ?? (config.task!.startsWith('unlike-')
+        ? originalFractionArithmeticRange : createCanonicalNumericRange(fractionArithmeticUpperBounds(config.task!).at(-1)!))}).data;
 };
 
 describe('fraction arithmetic view presentation', () => {
@@ -94,7 +98,7 @@ describe('fraction arithmetic view presentation', () => {
         for (const operation of ['addition', 'subtraction'] as const) {
             for (let index = 0; index < 80; index += 1) {
                 setSeed(`presentation-mixed-${operation}-${index}`);
-                const neutral = generator.generate({
+                const neutral = generator.generate({range: createCanonicalNumericRange(100),
                     task: 'mixed-operation',
                     usesCommonDenominator: true,
                     operation

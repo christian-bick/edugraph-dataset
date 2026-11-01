@@ -1,8 +1,10 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import type {GeneratorCompatibilityRule} from '../../../types/compatibility.ts';
+import {fractionArithmeticUpperBounds} from './numeric-domain.ts';
 
 const fractionArithmeticTaskLabels = [
     Area.IteratedOperation,
@@ -148,6 +150,26 @@ withLabelChoices(resolveTask, {
     contextLabels: [Area.Addition, Area.Subtraction, Area.Multiplication]
 });
 
+const rangeMappings = [[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10], [Scope.NumbersSmaller20, 20],
+    [Scope.NumbersSmaller100, 100]] as const;
+const rangeLabels = rangeMappings.map(([label]) => label);
+const selectRange = selectExactLabelMap(rangeMappings.map(([label, upper]) => [label, createCanonicalNumericRange(upper)] as const));
+const rangeContext = [...fractionArithmeticTaskLabels, Area.Addition, Area.Subtraction, Area.Multiplication];
+// Unlike-denominator work retains its existing mathematical corpus without a
+// range claim while its hidden common-denominator choice is reviewed.
+export const originalFractionArithmeticRange: CanonicalNumericRange = {
+    min: 0, max: Number.MAX_SAFE_INTEGER, maximumAbove: -1, minimumBelow: 5
+};
+const rangeChoices = [[], ...rangeLabels.map(label => [label])];
+const resolveArithmeticRange = withLabelChoices(exactResolver((labels: string[]) => {
+    const range = selectRange(labels);
+    if (!rangeContext.some(label => labels.includes(label))) return range ?? originalFractionArithmeticRange;
+    const task = resolveTask(labels);
+    if (!task) return undefined;
+    if (task.startsWith('unlike-')) return range ? undefined : originalFractionArithmeticRange;
+    return range && fractionArithmeticUpperBounds(task).includes(range.max) ? range : undefined;
+}), {kind: 'alternatives', alternatives: rangeChoices, contextLabels: rangeContext, resolvedContext: true});
+
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 // Preserve the old exact task routing when new canonical bundles expose more-specific
@@ -189,6 +211,11 @@ export const spec: GeneratorSpec = {
             && !selected(Scope.FractionNumbers) && !selected(Scope.MixedNumbers)) return addition;
         return (selected(Scope.FractionNumbers) || selected(Scope.MixedNumbers))
             && (addition || selected(Area.Subtraction));
+    }), generatorLabelRule('fraction-task-range', [...rangeContext, ...rangeLabels], selected => {
+        const task = resolveTask(rangeContext.filter(selected));
+        const upper = rangeMappings.find(([label]) => selected(label))?.[1];
+        return !!task && (task.startsWith('unlike-') ? upper === undefined
+            : upper !== undefined && fractionArithmeticUpperBounds(task).includes(upper));
     })],
     generalLabels: [
         Area.Equation,
@@ -217,7 +244,8 @@ export const FractionArithmeticGeneratorSchema = {
             [Area.Subtraction],
             [Area.Multiplication]
         ]
-    ]
+    ],
+    range: [rangeLabels, resolveArithmeticRange, rangeChoices]
 } as const;
 
 export type FractionArithmeticGeneratorConfig = ConfigFromSchema<

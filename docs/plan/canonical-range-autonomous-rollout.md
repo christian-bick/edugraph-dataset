@@ -911,3 +911,21 @@ actual source selections, direct/planned resolution and same-value projections p
 sampling/replay identities change; reference-zero continuation remains exact. Payloads, renderers,
 matching policy and the Area allowlist are unchanged. Evidence:
 `temp/range-autonomous/batch5/measurement-time/{signed-focused.log,signed-types.log,verification.json}`.
+
+## Fifth batch: settled fraction arithmetic
+
+Same-denominator operations, decomposition, whole-fraction products, mixed-number work and
+tenths/hundredths addition use existing task/operation configurations with canonical uppers5/10/20/100.
+Their required unit-part, scaling and regrouping counts are included; ordinary notation components
+are not automatically independent quantities. All315 weighted finite paths plus450 tenths/
+hundredths pairs remain, with the original nested denominator/numerator and regroup probabilities
+conditioned on the selected band. No positive lower or endpoint retirement is introduced.
+
+Unlike-denominator pools retain their exact old sampling and an empty range-label binding to the
+original unbounded mathematical constraint. Their16 unresolved selections stay visible; declaring
+possible range outputs does not close them. All24 routes remain,32→55 selections, closing16
+actual baseline omissions. Eighty-one tests/nine files pass, including finite support/mass,
+all24 feasible settled task/operation/range cells, direct/planned/replay checks and the existing
+Question/Solution presentations. Types and whitespace checks pass. Four consumer fixtures now
+provide the explicit mathematical range; renderers, payload types, source targets and IDs are unchanged.
+Evidence: `temp/range-autonomous/batch5/fraction-decimal/fraction-arithmetic-*`.

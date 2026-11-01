@@ -1,3 +1,4 @@
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {FractionArithmeticGenerator} from '../../../generators/fraction/fraction-arithmetic/generator.ts';
@@ -63,7 +64,7 @@ describe('fraction arithmetic typography', () => {
 
     it('withholds the unit-fraction multiplier and copy count in Question mode', () => {
         setSeed('unit-multiple-component');
-        const neutral = generator.generate({
+        const neutral = generator.generate({range: createCanonicalNumericRange(10),
             task: 'unit-fraction-multiple',
             usesCommonDenominator: false,
             operation: 'multiplication'
@@ -94,7 +95,7 @@ describe('fraction arithmetic typography', () => {
 
     it('keeps separate known groups in Question mode and reveals only the supplied aggregate in Solution mode', () => {
         setSeed('fraction-product-component');
-        const neutral = generator.generate({
+        const neutral = generator.generate({range: createCanonicalNumericRange(100),
             task: 'whole-number-fraction-product-improper',
             usesCommonDenominator: false,
             operation: 'multiplication'
@@ -125,7 +126,7 @@ describe('fraction arithmetic typography', () => {
 
     it('corrects only the legacy binary token identity while retaining its legend layout', () => {
         setSeed('legacy-group-token-coherence');
-        const neutral = generator.generate({
+        const neutral = generator.generate({range: createCanonicalNumericRange(10),
             task: 'fraction-operation',
             usesCommonDenominator: true,
             operation: 'addition'
@@ -164,7 +165,7 @@ describe('fraction arithmetic typography', () => {
 
     it('preserves legacy-local dot legends for decompose and mixed-operation SSR', () => {
         setSeed('legacy-decompose-presentation');
-        const neutralDecomposition = generator.generate({
+        const neutralDecomposition = generator.generate({range: createCanonicalNumericRange(10),
             task: 'decompose-proper',
             usesCommonDenominator: true,
             operation: 'addition'
@@ -176,7 +177,7 @@ describe('fraction arithmetic typography', () => {
         if (decomposition.task !== 'decompose') throw new Error('Expected decomposition.');
 
         setSeed('legacy-mixed-presentation');
-        const neutralMixed = generator.generate({
+        const neutralMixed = generator.generate({range: createCanonicalNumericRange(100),
             task: 'mixed-operation',
             usesCommonDenominator: true,
             operation: 'addition'
