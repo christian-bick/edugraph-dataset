@@ -577,3 +577,41 @@ tests/four files, types and standards validation pass. All mathematical sampler 
 unchanged. Source ID-derived seeds/replay/cache identities will change at regeneration; they
 are recorded as an approved source correction, separately from additive band expansion or
 range-gap closure. Future clearly evidenced source-domain omissions use the same strategy.
+
+## Third autonomous batch acceptance
+
+The third batch updates12 producer families and closes **41 baseline source range omissions:
+410→369**. NumberTheory conjunctions remain outside the agreed all-Areas allowlist, so GCD/LCM
+and full-factor profiles receive no omission-closure credit. Factor/divisibility profiles tighten
+existing declarations and add six reviewed source bands. Clock singleton retirements remain
+separate support changes, precisely counted above. All current findings are range-only:
+369 source+1,062 unchanged stored rows, with zero conflicts, invalid contexts, incomplete
+selections, annotation-contract errors or strict failures. The graph/Area policy is unchanged.
+
+Current source counts are **1,309 authored /1,270 normalized targets,1,698 routes and3,258
+complete selections**. Cumulative comparison against16f09717 preserves every prior route lineage
+and every unchanged claim. The explicitly approved integer-domain correction maps30 raw and12
+normalized IDs across64 routes without losing a route, selection, competency or source alias.
+Apart from those migrations, this batch adds only six reviewed4.OA.B.4 band targets/routes.
+Native allocation is1,698 train+437 validation tuples:2,135 requested pairs /4,270 images before
+deduplication. Source ID-derived seeds/replay/cache identities will refresh at regeneration.
+
+All **7,601 tests /932 files** pass the complete coverage gate using two workers. No timeout,
+test or coverage threshold is relaxed; all generator thresholds pass. Instrumented coverage is
+98.78% statements /97.54% branches /100% functions /99.37% lines. Repository, standards, types
+and documentation checks pass. Logs: `temp/range-autonomous/batch3/{check-corrected,
+types-corrected,global-corrected,coverage}.log`, `audit/` and the owned family/source records.
+The stored2,918 images and VQA cache are unchanged. The completed batch is ready for immediate
+push under the user's instruction; independent standard work continues afterward.
+
+## Next standard work after the third push
+
+- Known-fact derivation and flexible add/subtract strategies have a reviewed concrete source-band
+  plan preserving the full existing source frames and intended wider producer support.
+- Decimal expanded form and adjacent-place scaling have compact weighted-block designs; rounding,
+  comparison and fraction arithmetic remain larger applications of the established approach.
+- Small rulers, measurement number lines and the banknotes-only currency branch have settled
+  projection/quantity contracts. Coin/mixed-unit and open ratio-table projections remain separate.
+- The fixed100 ten-tens leaf supports a clear U120→U100 source correction; its separate100–900
+  sibling keeps its genuine broader envelope. Scalar zero/source bands are under the same direct
+  source-intent review. A source-ID change alone no longer makes a clear correction a blocker.

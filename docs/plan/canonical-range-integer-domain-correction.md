@@ -72,3 +72,5 @@ in `temp/range-autonomous/batch3/fraction-decimal/source-correction/`. Sixty-fou
 acquire the12 new normalized target IDs; selected labels, supported mathematics and source
 coverage remain unchanged. Content-derived seeds/replay/cache identities consequently change
 when the dataset is regenerated. The Area allowlist, range policy and matching engine do not change.
+The [combined batch acceptance](canonical-range-autonomous-rollout.md#third-autonomous-batch-acceptance)
+passes the full7,601-test/932-file coverage suite and every repository gate.

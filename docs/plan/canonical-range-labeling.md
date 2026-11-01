@@ -3,12 +3,12 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the target-expansion helper, first eight-family adoption, R4/R5 and two
+Status: the target-expansion helper, first eight-family adoption, R4/R5 and three
 [autonomous batches](canonical-range-autonomous-rollout.md) are accepted. Those batches cover
-29 further families, retaining every earlier target claim and route while adding reviewed
-source variants. The latest accepted source covers **1,264 normalized targets /1,692 routes
-and3,105 complete selections**, with **410 range-presence omissions** remaining. A third batch
-is in combined validation, including a subsequently authorized source-domain correction. The
+41 further families, preserving earlier competency/route lineages while adding reviewed source
+variants and applying the authorized integer-domain correction. The accepted source covers
+**1,270 normalized targets /1,698 routes and3,258 complete selections**, with **369 range-presence
+omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md) separates further standard
 profile work from concrete projection/quantity issues. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
@@ -768,9 +768,10 @@ quantity decisions remain in the [remaining-family review](canonical-range-remai
 ### Subsequent autonomous checkpoints
 
 The [autonomous rollout ledger](canonical-range-autonomous-rollout.md) records the completed
-entry-document cleanup and two subsequent validated batches. They update29 producer families
-and close107 baseline range-presence omissions:517→410. The current source has1,264 normalized
-targets,1,692 routes and3,105 complete selections; every earlier target claim and route remains.
-All source gates and the full7,570-test/920-file coverage suite pass. The stored dataset and VQA
+entry-document cleanup and three subsequent validated batches. They update41 producer families
+and close148 baseline range-presence omissions:517→369. The current source has1,270 normalized
+targets,1,698 routes and3,258 complete selections. Every earlier route lineage remains, with
+30 raw/12 normalized target IDs migrating under the approved integer-domain source correction.
+All source gates and the full7,601-test/932-file coverage suite pass. The stored dataset and VQA
 cache remain unchanged. Standard-profile work continues through the reviewed queue while genuine
 projection/source-claim decisions stay separate; range validation remains report-only.
