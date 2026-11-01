@@ -24,7 +24,12 @@ These items are not newly scheduled by the archive move.
   guarantees. Its [inventory](canonical-range-inventory.csv) describes current competency
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
   permutations and sampling changes are accepted, while lower-bound and singleton semantics
-  remain explicit decisions. Production targets and range validation have not changed yet.
+  remain explicit decisions. The opt-in expansion helper is implemented with unchanged production
+  targets. The [shared-consumer review](canonical-range-consumer-review.md) covers 18 comparison
+  routes and 135 arithmetic routes: every currently bounded route retains a feasible configuration,
+  but seven optional arithmetic width choices need exclusion. Source expansion beyond the pilot,
+  eight unspecified-upper measurement targets and endpoint semantics remain activation work.
+  Range validation has not changed yet.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

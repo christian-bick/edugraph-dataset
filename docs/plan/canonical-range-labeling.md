@@ -4,7 +4,8 @@ Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
 Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility review
-is in progress. The inventory and first competency review remain the rollout baseline. No production
+is complete. R2/R3 activation still requires source-band adoption and the applicable open contracts.
+The inventory and first competency review remain the rollout baseline. No production
 target adopts the helper yet; sampling, stored annotations and the report-only range gate remain
 unchanged.
 
@@ -219,6 +220,8 @@ These counts establish existing declared support; they do not establish canonica
 
 ### R1 — reviewed expansion helper (2026-11-01)
 
+Implemented in `d009f763`.
+
 `DatasetPermutationBuilder.applyUpperRangeVariants({ through: 20 })` expands a reviewed sequence
 of catalog upper thresholds. `{ bands: [5, 20] }` names reviewed exceptions. The pure
 `expandUpperRangeVariants` helper replaces existing upper labels, retains other dimensions,
@@ -247,6 +250,27 @@ The first sandbox attempt could not rename Vitest temporary files; the unrestric
 then hit four timeouts and one transient fixture lock. Rerunning with filesystem permission and
 `--maxWorkers=4` passes without changing tests or timeouts. Logs are in
 `temp/canonical-range-2026-11-01/`. No dataset regeneration or VQA is part of R1.
+
+### R2/R3 — shared-consumer feasibility prerequisite (2026-11-01)
+
+The [consumer review](canonical-range-consumer-review.md) now covers every current route of the
+two pilot producers, including consumers outside the original seven-definition pilot:
+
+- `comparison`: 18 routes, 18 admitted selections and 12 unique resolved configurations; every
+  selection has a feasible canonical upper witness. Its Grade 1/2/4 consumers also need source-band
+  review. Exact endpoint equalities make the existing singleton question concrete.
+- `arithmetic-ops-pairs`: 54 normalized targets, 135 routes and 37 unique configurations. Seven
+  optional width choices are empty under the upper-witness condition, affecting 60 routes; every
+  bounded route retains a feasible alternative. Eight measurement routes have no explicit upper
+  bound and require separate source review. The <=5 number-line projection is a local simplification
+  candidate, not a proved violation of the established operand/result range definition.
+
+No currently authored target needs removal just to retain a matching path. This does not yet prove
+preservation of all smaller-number examples: activating a shared sampler requires reviewing bands
+for all of its source competencies. The review records the relevant quantities, minimal constructive
+sampler changes, exact empty-width proofs and complete consumer lists. Neither family needs a new
+producer or annotation adapter for the upper-witness construction. Lower-bound and singleton
+semantics remain open.
 
 R1 is inert until deliberately adopted. R2 and R3 must become operational together for each
 reviewed family: explicit target expansion without canonical-band generation does not fix the
