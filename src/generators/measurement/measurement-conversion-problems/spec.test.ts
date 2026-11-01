@@ -1,9 +1,13 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {MeasurementConversionProblemsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {MeasurementConversionProblemsGeneratorSchema as schema, spec} from './spec.ts';
+import {storyRangeLabels} from './range-profile.ts';
+import {conversionStoryRangeProfiles, conversionStoryTuples} from './numeric-domain.ts';
 
 const pairCases = [
     [[Area.UnitMagnitudeScaling, Scope.KilometerScale, Scope.MeterScale], 'kilometer-meter'],
@@ -49,7 +53,8 @@ describe('MeasurementConversionProblemsGenerator spec integration', () => {
             expect(stub.data.kind).toBe('measurement-conversion-story');
             expect(stub.data.pair.id).toBe(pairId);
             expect(stub.data.numberKind).toBe(numberKind);
-            expect(new Set(stub.labels)).toEqual(new Set([...pairLabels, numberLabel]));
+            expect(new Set(stub.labels.filter(label => !storyRangeLabels.includes(label))))
+                .toEqual(new Set([...pairLabels, numberLabel]));
         }
     });
 
@@ -67,5 +72,21 @@ describe('MeasurementConversionProblemsGenerator spec integration', () => {
             Scope.IntegerNumbers,
             Scope.DecimalNumbers
         ])).toThrow('Ambiguous exact label mapping');
+    });
+
+    it('resolves every unit/kind/range profile through direct and planned paths', () => {
+        for (const [pairLabels, pairId] of pairCases) for (const [label, kind] of [
+            [Scope.IntegerNumbers, 'integer'], [Scope.DecimalNumbers, 'decimal']
+        ] as const) for (const profile of conversionStoryRangeProfiles) {
+            if (!conversionStoryTuples(pairId, kind, profile.range).length) continue;
+            const labels = [...pairLabels, label, ...profile.labels];
+            const direct = extractConfig(schema, labels);
+            const planned = resolveSchemaChoices(schema, labels, {unitPair: pairLabels, numberKind: [label], range: profile.labels});
+            expect(direct.config).toEqual(planned.config);
+            const {data} = generator.generate(direct.config);
+            expect(hasCanonicalRangeWitness([1, data.pair.factor, data.conversion.largerHundredths / 100,
+                data.conversion.smallerHundredths / 100, data.additionalTargetHundredths / 100,
+                data.totalTargetHundredths / 100], profile.range)).toBe(true);
+        }
     });
 });

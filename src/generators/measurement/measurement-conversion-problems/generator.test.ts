@@ -1,5 +1,8 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {
     MeasurementConversionPairId,
     MeasurementConversionStoryProblem
@@ -7,6 +10,10 @@ import type {
 import {measurementConversionPairSeeds} from '../helpers.ts';
 import {MeasurementUnitEquivalencesGenerator} from '../measurement-unit-equivalences/generator.ts';
 import {MeasurementConversionProblemsGenerator} from './generator.ts';
+import {conversionStoryRangeProfiles, conversionStoryTuples} from './numeric-domain.ts';
+
+const rangesFor = (unitPair: MeasurementConversionPairId, numberKind: 'integer' | 'decimal') =>
+    conversionStoryRangeProfiles.filter(profile => conversionStoryTuples(unitPair, numberKind, profile.range).length);
 
 const pairs = [
     ['kilometer-meter', 'length', 'magnitude', 'kilometer', 'meter', 1000],
@@ -67,7 +74,7 @@ describe('MeasurementConversionProblemsGenerator', () => {
             setSeed(`shared-pair-${unitPair}`);
             const sequence = sequenceGenerator.generate({unitPair}).data;
             setSeed(`shared-pair-${unitPair}`);
-            const story = generator.generate({unitPair, numberKind: 'integer'}).data;
+            const story = generator.generate({unitPair, numberKind: 'integer', range: rangesFor(unitPair, 'integer')[0]!.range}).data;
             expect(sequence.pair).toEqual(seedPair);
             expect(story.pair).toEqual(seedPair);
             expect(sequence.pair).not.toBe(seedPair);
@@ -88,15 +95,15 @@ describe('MeasurementConversionProblemsGenerator', () => {
     it.each(pairs)('builds exact two-step stories for %s', (unitPair, _kind, _scaling, _large, _small, factor) => {
         for (const numberKind of ['integer', 'decimal'] as const) {
             const directions = new Set<MeasurementConversionStoryProblem['sourceSide']>();
-            for (let seed = 0; seed < 100; seed++) {
+            for (const {range} of rangesFor(unitPair, numberKind)) for (let seed = 0; seed < 100; seed++) {
                 setSeed(`${unitPair}-${numberKind}-${seed}`);
-                const first = generator.generate({unitPair, numberKind});
+                const first = generator.generate({unitPair, numberKind, range});
                 expect(first.data.numberKind).toBe(numberKind);
                 expect(first.data.pair.factor).toBe(factor);
                 expectValidStory(first.data);
                 directions.add(first.data.sourceSide);
                 setSeed(`${unitPair}-${numberKind}-${seed}`);
-                expect(generator.generate({unitPair, numberKind})).toEqual(first);
+                expect(generator.generate({unitPair, numberKind, range})).toEqual(first);
             }
             expect(directions).toEqual(new Set(['larger', 'smaller']));
         }
@@ -108,12 +115,56 @@ describe('MeasurementConversionProblemsGenerator', () => {
         ] as const satisfies readonly MeasurementConversionPairId[]) {
             for (let seed = 0; seed < 100; seed++) {
                 setSeed(`reverse-decimal-${unitPair}-${seed}`);
-                const story = generator.generate({unitPair, numberKind: 'decimal'}).data;
+                const story = generator.generate({unitPair, numberKind: 'decimal', range: rangesFor(unitPair, 'decimal')[0]!.range}).data;
                 if (story.sourceSide !== 'smaller') continue;
                 expect(story.conversion.smallerHundredths % 100).toBe(0);
                 expect(story.conversion.largerHundredths % 100).not.toBe(0);
                 expect(story.additionalTargetHundredths % 100).not.toBe(0);
             }
         }
+    });
+
+    it.each(pairs)('preserves all finite story quantities across canonical profiles for %s', (unitPair, _kind, _scale, _large, _small, factor) => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            for (const numberKind of ['integer', 'decimal'] as const) {
+                const candidates = numberKind === 'integer' ? Array.from({length: 8}, (_, i) => (i + 2) * 100)
+                    : Array.from({length: 5}, (_, whole) => [1, 5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 95, 99]
+                        .map(fraction => whole * 100 + fraction)).flat();
+                const expected = new Set<string>();
+                for (const side of ['larger', 'smaller']) for (const larger of candidates) for (let whole = 1; whole <= 5; whole++) {
+                    for (const fraction of numberKind === 'integer' ? [0] : [25, 50, 75]) {
+                        const scale = side === 'larger' ? Math.max(1, Math.floor(factor / 10)) : 1;
+                        expected.add([side, larger, whole * scale * 100 + fraction].join(':'));
+                    }
+                }
+                const seen = new Set<string>();
+                for (const {range} of rangesFor(unitPair, numberKind)) {
+                    const tuples = conversionStoryTuples(unitPair, numberKind, range);
+                    for (let index = 0; index < tuples.length; index++) {
+                        draw.mockClear().mockReturnValue((index + 0.5) / tuples.length);
+                        const {data} = generator.generate({unitPair, numberKind, range});
+                        const values = [1, factor, data.conversion.largerHundredths / 100,
+                            data.conversion.smallerHundredths / 100, data.additionalTargetHundredths / 100,
+                            data.totalTargetHundredths / 100];
+                        expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                        expect(draw).toHaveBeenCalledTimes(1);
+                        const key = [data.sourceSide, data.conversion.largerHundredths, data.additionalTargetHundredths].join(':');
+                        expect(seen.has(key)).toBe(false);
+                        seen.add(key);
+                    }
+                }
+                expect(seen).toEqual(expected);
+            }
+        } finally { draw.mockRestore(); }
+    });
+
+    it.each([undefined, createCanonicalNumericRange(20), createCanonicalNumericRange(1000, 5),
+        {...createCanonicalNumericRange(10000), maximumAbove: 0}])('rejects missing or infeasible story range %j before drawing', range => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            expect(() => generator.generate({unitPair: 'kilometer-meter', numberKind: 'integer', range})).toThrow();
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 });

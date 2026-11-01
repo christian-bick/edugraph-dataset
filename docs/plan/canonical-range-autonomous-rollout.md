@@ -131,6 +131,28 @@ profile selection changes conditional sampling. This closes28 baseline source-pr
 Evidence: `temp/range-autonomous/measurement-time/conversion-focused.log`,
 `conversion-types.log` and `route-verification.json`.
 
+## Conversion stories
+
+`measurement-conversion-problems` now preselects canonical range profiles over all 16,310 original
+mathematical stories. Required quantities include the one-unit relation, conversion factor,
+source and converted amounts, added quantity and final total. The given1 excludes a positive
+lower. All14 previous routes remain; their14 selections become28. Payloads and rendering remain
+unchanged. Sixty-nine focused tests across four files and TypeScript pass, covering the complete
+finite support and planned profile choices. Fourteen baseline source-presence findings close.
+
+The added range capability initially admitted a generic Grade 2 addition-only target. That source
+does not ask for the multiplication/division and unit-conversion knowledge required by this task.
+The existing positive target-precondition mechanism resolves the mismatch: the view now requires
+`Area.UnitConversion`, supported by both existing scaling specializations. All14 conversion targets
+remain matched. A regression proves that removing only this precondition re-admits the unrelated
+Grade 2 target. No target-ID filter, negative blacklist or global matching change is introduced.
+
+Evidence: `temp/range-autonomous/measurement-time/checkpoint-report.md`, `story-focused.log`,
+`story-types.log` and `route-verification.json`. The final combined matching audit preserves every
+old target ID/label set and route, adding only the reviewed decomposition upper5 target/route:
+**1,290 authored / 1,251 normalized targets, 1,676 routes and 3,025 complete selections**.
+There are no unmatched targets or incomplete selections. Validation allocation remains432 tuples.
+
 ## Decisions and complications
 
 These entries do not block work in other families.

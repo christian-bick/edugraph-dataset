@@ -1,6 +1,6 @@
 import {beforeAll, describe, expect, it} from 'vitest';
 import {fileURLToPath} from 'node:url';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../../lib/model-catalog.ts';
 import {matchTarget} from '../../lib/matching.ts';
 import {computeSampleKey, computeSampleSeed} from '../../lib/generation.ts';
@@ -9,6 +9,7 @@ import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-aud
 import {assessLabelDependencyCoverage} from '../../lib/label-dependency-coverage.ts';
 import type {MeasurementConversionStoryProblem, MeasurementNumberLineProblem} from '../../types/problems.ts';
 import {spec as grade4Targets} from '../../spec/ccss/grade-04.ts';
+import {spec as grade2Targets} from '../../spec/ccss/grade-02.ts';
 import {spec as grade5Targets} from '../../spec/ccss/grade-05.ts';
 import {spec as grade6Targets} from '../../spec/ccss/grade-06.ts';
 import {MeasurementNumberLineGenerator} from './measurement-number-line/generator.ts';
@@ -43,6 +44,16 @@ const families = [
 ] as const;
 
 describe('measurement label declarations on existing competency targets', () => {
+    it('requires the conversion competency instead of admitting a generic Grade 2 addition story', () => {
+        const generator = generators.find(entry => entry.generatorId === 'measurement-conversion-problems')!;
+        const view = views.find(entry => entry.viewId === 'measure-conversion-problems')!;
+        const target = grade2Targets.find(target => target.id.startsWith('2.OA.A.1-two-step-word-problems~')
+            && target.labels.includes(Area.Addition) && !target.labels.includes(Area.Subtraction))!;
+        const rules = (view.compatibility ?? view.spec.compatibility ?? []).filter(rule => rule.id !== 'conversion-story-request');
+        const unrestricted = {...view, compatibility: rules, spec: {...view.spec, compatibility: rules}};
+        expect(matchTarget(target, generator, unrestricted).matched).toBe(true);
+        expect(matchTarget(target, generator, view)).toMatchObject({matched: false, reason: 'missing-required-label', label: Area.UnitConversion});
+    });
     it('covers all five line units and seven conversion pairs in both configured number kinds', () => {
         expect(lineTargets).toHaveLength(10);
         expect(storyTargets).toHaveLength(14);
@@ -59,7 +70,7 @@ describe('measurement label declarations on existing competency targets', () => 
             expect(view.generalLabels).not.toContain(label);
         }
         expect(Object.keys(generator.schema!).sort()).toEqual(
-            generatorId === 'measurement-number-line' ? ['measurementKind', 'numberKind'] : ['numberKind', 'unitPair']
+            generatorId === 'measurement-number-line' ? ['measurementKind', 'numberKind'] : ['numberKind', 'range', 'unitPair']
         );
         expect(view.schema).toEqual({});
     });
