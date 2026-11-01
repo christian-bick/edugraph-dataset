@@ -1,71 +1,67 @@
-import {beforeEach, describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
+import {Scope} from 'edugraph-ts';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {getRulerTicks} from '../../../visuals/views/measure/measure-length/helpers.ts';
 import {MeasurementLengthGenerator} from './generator.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {rulerLengthAt, rulerLengthCaseCount, rulerRangeProfiles} from './numeric-domain.ts';
 
 describe('MeasurementLengthGenerator', () => {
-    let generator: MeasurementLengthGenerator;
-
-    beforeEach(() => {
-        generator = new MeasurementLengthGenerator();
-        setSeed(42);
+    it('preserves all100 integer and991 tenth-unit lengths exactly once, with every ruler label in its canonical band', () => {
+        const generator = new MeasurementLengthGenerator(), draw = vi.spyOn(rng, 'random');
+        const seen = new Set<string>();
+        try {
+            for (const useDecimals of [false, true]) for (const {range} of rulerRangeProfiles) {
+                const count = rulerLengthCaseCount(useDecimals, range);
+                for (let index = 0; index < count; index++) {
+                    draw.mockClear().mockReturnValue((index + 0.5) / count);
+                    const {data} = generator.generate({useDecimals, range});
+                    const ticks = getRulerTicks(data.bandLength).flatMap(tick => tick.value === undefined ? [] : [tick.value]);
+                    expect(hasCanonicalRangeWitness([data.problemLength, ...ticks], range)).toBe(true);
+                    expect(data.problemLength).toBeGreaterThanOrEqual(1);
+                    expect(data.problemLength).toBeLessThanOrEqual(100);
+                    expect(data.bandLength).toBeGreaterThanOrEqual(data.problemLength);
+                    expect(data.useDecimals).toBe(useDecimals);
+                    const key = `${useDecimals}:${Math.round(data.problemLength * 10)}`;
+                    expect(seen.has(key)).toBe(false);
+                    seen.add(key);
+                    expect(draw).toHaveBeenCalledTimes(1);
+                }
+            }
+            const expected = new Set<string>();
+            for (let value = 1; value <= 100; value++) expected.add(`false:${value * 10}`);
+            for (let value = 10; value <= 1000; value++) expected.add(`true:${value}`);
+            expect(seen).toEqual(expected);
+            expect(seen.size).toBe(1091);
+            expect(rulerRangeProfiles.map(({range}) => rulerLengthCaseCount(false, range))).toEqual([5, 5, 10, 80]);
+            expect(rulerRangeProfiles.map(({range}) => rulerLengthCaseCount(true, range))).toEqual([41, 50, 100, 800]);
+        } finally { draw.mockRestore(); }
     });
 
-    it('should have the correct type', () => {
-        expect(generator.type).toBe('measurement');
-    });
-
-    it('should be deterministic with the same seed', () => {
-        const config = { range: { min: 0, max: 10 }, useDecimals: true };
-        setSeed(123);
-        const stub1 = generator.generate(config);
-        setSeed(123);
-        const stub2 = generator.generate(config);
-        expect(stub1).toEqual(stub2);
-    });
-
-    it('should validate standard measure bounds for decimals', () => {
-        const config = { range: { min: 0, max: 10 }, useDecimals: true };
-        const stub = generator.generate(config);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.bandLength).toBe(10);
-        expect(stub!.data.useDecimals).toBe(true);
-        expect(stub!.data.problemLength).toBeGreaterThan(0);
-        expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
-    });
-
-    it('should validate standard measure bounds for integers', () => {
-        const config = { range: { min: 0, max: 10 }, useDecimals: false };
-        const stub = generator.generate(config);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.bandLength).toBe(10);
-        expect(stub!.data.useDecimals).toBe(false);
-        expect(Number.isInteger(stub!.data.problemLength)).toBe(true);
-        expect(stub!.data.problemLength).toBeGreaterThanOrEqual(1);
-        expect(stub!.data.problemLength).toBeLessThanOrEqual(10);
-    });
-
-    it('selects ruler bands that cover longer requested ranges', () => {
-        const observedBands = new Set<number>();
-
-        for (let seed = 0; seed < 200; seed++) {
-            setSeed(seed);
-            observedBands.add(generator.generate({range: {min: 0, max: 100}, useDecimals: false})!.data.bandLength);
-        }
-
-        expect(observedBands).toEqual(new Set([10, 20, 50, 100]));
-    });
-
-    it('caps the ruler and generated length at 100', () => {
-        for (let seed = 0; seed < 20; seed++) {
-            setSeed(seed);
-            const stub = generator.generate({range: {min: 0, max: 1_000}, useDecimals: true})!;
-            expect(stub.data.bandLength).toBeLessThanOrEqual(100);
-            expect(stub.data.problemLength).toBeLessThanOrEqual(100);
+    it('preserves both tool payloads and exact seeded replay with one within-profile draw', () => {
+        const generator = new MeasurementLengthGenerator();
+        for (const [tool, rendered] of [[Scope.PhysicalRuler, 'ruler'], [Scope.Tapemeter, 'tape']] as const) {
+            const config = {range: rulerRangeProfiles[0]!.range, useDecimals: false, tool};
+            rng.setSeed(123);
+            const first = generator.generate(config), continuation = rng.random();
+            expect(first.data.tool).toBe(rendered);
+            expect(first.data.bandLength).toBe(5);
+            rng.setSeed(123);
+            expect(generator.generate(config)).toEqual(first);
+            expect(rng.random()).toBe(continuation);
         }
     });
 
-    it('should throw an error if range is missing', () => {
-        const config = { range: null as any, useDecimals: true };
-        expect(() => generator.generate(config)).toThrow();
+    it('rejects malformed or noncanonical configurations and indices before sampling', () => {
+        const generator = new MeasurementLengthGenerator(), draw = vi.spyOn(rng, 'random');
+        const range = rulerRangeProfiles[0]!.range;
+        try {
+            for (const config of [null, {}, {range}, {range, useDecimals: 'yes'},
+                {range: {min: 0, max: 10}, useDecimals: false}, {range: {...range, min: 5}, useDecimals: false}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            for (const index of [-1, 0.5, rulerLengthCaseCount(false, range)]) expect(() => rulerLengthAt(false, range, index)).toThrow();
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 });

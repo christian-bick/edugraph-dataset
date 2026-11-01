@@ -1,8 +1,8 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, Scope, deductCompatible} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {hasLabel, selectExactMatch} from "../../../lib/resolvers.ts";
+import {hasLabel, selectExactMatch, selectExactLabelSetMap} from "../../../lib/resolvers.ts";
+import {rulerRangeProfiles} from './numeric-domain.ts';
 
 const exactTool = exactResolver((labels: string[]) => {
     if (labels.includes(Scope.CentimeterScale) || labels.includes(Scope.MeterScale)) return undefined;
@@ -26,7 +26,7 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-
+const rangeChoices = rulerRangeProfiles.map(profile => profile.labels);
 export const MeasurementLengthGeneratorSchema = {
     useDecimals: [
         [
@@ -36,8 +36,11 @@ export const MeasurementLengthGeneratorSchema = {
         hasLabel(Scope.DecimalNumbers)
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        resolveRangeFromLabels
+        [...new Set(rangeChoices.flat())],
+        withLabelChoices(selectExactLabelSetMap(rulerRangeProfiles.map(profile =>
+            [profile.labels, profile.range] as const)),
+        {kind: 'alternatives', alternatives: rangeChoices, relation: 'capability'}),
+        rangeChoices
     ],
     tool: [
         [Scope.PhysicalRuler, Scope.Tapemeter],

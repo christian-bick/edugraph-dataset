@@ -632,3 +632,19 @@ resolution and the complete generator/view spec gate pass, including standalone 
 and rejection of infeasible supplied context. This tightens old bounds and closes no baseline
 range-presence finding. Evidence: `temp/range-autonomous/batch4/arithmetic/known-fact-review.md`,
 `verify-known-fact.json` and `known-fact-spec-gate.log`.
+
+## Fourth batch: ruler profiles and smaller Grade1 measurements
+
+Four upper bands5/10/20/100 preserve all100 integer lengths and991 exact decimal tenths from the
+original family union. Origin0 prevents positive floors. Values through5 now select the existing
+five-unit ruler support; every displayed ruler numeral fits the same tight band as the length.
+No shared renderer changes are needed. Within each profile the draw is uniform over exact lengths;
+the legacy decimal endpoint half-weights are intentionally replaced by uniform tenth-unit tickets
+under the accepted sampling changes. Both mathematical domains remain complete.
+
+Two reviewed upper5 Grade1 variants extend `1.MD.A.2-measure-length`, retaining all six earlier
+routes. Eight routes admit20 selections, including both earlier Grade2 unbounded-tool routes.
+Forty focused tests/11 files pass. All new source profiles pass dependency evaluation and direct/
+planned config comparison. Two baseline range omissions close; four earlier ranged routes gain
+canonical witnesses. Evidence: `temp/range-autonomous/batch4/measurement-time/ruler-focused.log`,
+`route-verification.json` and `source-verification.json`.
