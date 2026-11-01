@@ -460,7 +460,7 @@ const numberLineRepresentationBuilder = new DatasetPermutationBuilder()
         Scope.Numberline,
         Scope.NumbersSmaller100,
         Ability.VisualArticulation
-    ]);
+    ]).applyUpperRangeVariants({through: 100});
 
 // --- 2.MD.B.6: Represent sums and differences on a number line ---
 const numberLineArithmeticBuilder = new DatasetPermutationBuilder()

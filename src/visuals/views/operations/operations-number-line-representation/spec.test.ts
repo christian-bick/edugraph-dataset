@@ -25,8 +25,18 @@ describe('operations-number-line-representation view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.Numberline, Scope.ArabicNumerals, Ability.VisualArticulation
         ]);
-        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Scope.NumbersSmaller100]);
+        expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([]);
+        expect(spec.compatibility?.find(rule => rule.id === 'number-line-bounded-domain')?.dependencies)
+            .toHaveLength(4);
         expect(OperationsNumberLineRepresentationViewSchema).toEqual({});
+    });
+
+    it('admits every reviewed smaller Grade 2 source band while retaining the explicit bound precondition', () => {
+        const family = gradeTwoTargets.filter(target => target.id.startsWith('2.MD.B.6-number-line-representation~'));
+        expect(family).toHaveLength(4);
+        for (const target of family) {
+            expect(planModelCompatibility(target, generator, view(spec)).supported).toBe(true);
+        }
     });
 
     it('admits the unchanged bounded Grade 2 target with its rooted relation producer', () => {

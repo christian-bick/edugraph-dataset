@@ -31,10 +31,15 @@ describe('rooted whole-number length projection', () => {
                 expect(markup).toMatch(/<text[^>]*>0<\/text>/);
             }
             expect(question).not.toContain('stroke="#059669"');
-            const maximum = Math.max(10, Math.ceil(endpoint / 10) * 10);
+            const maximum = endpoint <= 5 ? 5 : Math.max(10, Math.ceil(endpoint / 10) * 10);
             const endX = 48 + endpoint / maximum * 664;
             expect(solution).toContain(`<line x1="48" y1="120" x2="${endX}"`);
             expect(solution).toContain(`>${endpoint}</text>`);
+            if (endpoint <= 5) {
+                expect(question).not.toContain('>10</text>');
+                expect(solution).not.toContain('>10</text>');
+                expect(question).not.toContain('>0.5</text>');
+            }
         }
     });
 

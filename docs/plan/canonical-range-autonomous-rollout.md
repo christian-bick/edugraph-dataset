@@ -262,10 +262,28 @@ Truthful invariant positive-integer labels satisfy the numeric obligations activ
 
 The exact eight earlier routes remain, with eight selections becoming15. Twenty-seven focused
 tests pass, including actual estimation projections, exhaustive finite support and dependency
-evaluation of every admitted bundle. Eight baseline source range omissions close. No targets,
-views, payload contracts or global policies change. Evidence:
+evaluation of every admitted bundle. These eight routes previously lacked a numeric trigger, so
+this activates and satisfies their numeric dependencies; it does not close eight findings from
+the439 baseline. No targets, views, payload contracts or global policies change. Evidence:
 `temp/range-autonomous/batch2/measurement-time/mass-focused.log`, `mass-ownership.log` and
 `route-verification.json`.
+
+## Second batch: rooted whole-number lengths
+
+The rooted relation retains origin0, unit1 and every positive endpoint, now selected through
+ordinary canonical upper profiles. The required origin excludes a positive lower. The reviewed
+2.MD.B.6 builder adds upper5/10/20 variants and preserves its original upper100 ID and labels.
+Its marking view keeps an explicit target-bound precondition, generalized to any of the four
+supported upper bands. The actual unbounded Grade6 regression remains rejected.
+
+The shared number-line renderer uses integral0..5 ticks for endpoints through5, extending its
+existing arithmetic behavior to marking tasks. Otherwise an upper5 task would display an
+unnecessary10. All100 original positive endpoints are retained exactly once across the four
+source bands; the required origin and endpoint remain observable in both modes. All21 focused
+tests/five files pass, including all202 original0..100 question/solution projections, direct
+resolution of all nine declared catalog bands and16 planned draws/replays. TypeScript and global
+target/route preservation pass. This tightens existing annotations without closing a baseline
+range-presence finding. Evidence: `temp/range-autonomous/batch2/rooted-length-tests.log`.
 
 ## Second batch: decimal writing and reading
 
