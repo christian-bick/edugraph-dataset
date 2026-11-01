@@ -692,3 +692,10 @@ completion. Rendering and the cents/dollars competency remain intact. Evidence:
 Eight correlated zero/range profiles retain all810,243 original values:278,802 zero-present and531,441 zero-free. The task explicitly assesses coefficient counts and unit-valued factors as well as the full decimal; fractional units prevent positive floors. Compact weighted pattern blocks preserve each original conditional path mass without rejection or endpoint retirement. The old route remains,2→8 selections, closing two range omissions. Twenty-six focused tests/five files cover independent finite support/probability, block endpoints, both resolution paths and question/solution evidence. Payloads, targets and rendering are unchanged.
 
 Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `expanded-tests.log`, `expanded-matching.log` and neighboring proof records.
+
+
+## Fourth batch: adjacent decimal-place scaling
+
+Seven correlated profiles retain all177,309 original charts:66,717 zero-present and110,592 zero-free. Required quantities include the full numeral, highlighted contributions, factor10 and reciprocal0.1; no positive floor applies. First-zero weighted blocks retain the original conditional law and distinguish the one-free-digit whole charts from four-free-digit fractional charts. The old route remains,2→7 selections, closing two range omissions. Twenty-two tests/seven files prove finite support/mass, sampler block endpoints, direct/planned correlation and both projections. No endpoint, source, payload or renderer changes.
+
+Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `scaling-tests.log`, `scaling-matching.log` and neighboring proof records.

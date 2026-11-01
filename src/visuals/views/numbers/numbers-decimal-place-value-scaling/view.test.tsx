@@ -1,8 +1,11 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {DecimalPlaceValueScalingGenerator} from '../../../../generators/place-value/decimal-place-value-scaling/generator.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../../lib/canonical-numeric-range.ts';
 import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import type {DecimalAdjacentPlaceScalingProblem} from '../../../../types/problems.ts';
 import {decimalBoundaryCase, fractionalCase, wholeCase} from './fixtures.ts';
+import {displayNumeral} from './helpers.ts';
 
 let NumbersDecimalPlaceValueScalingCore: typeof import('./view.tsx').NumbersDecimalPlaceValueScalingCore;
 beforeAll(async () => {
@@ -22,6 +25,21 @@ function render(data: DecimalAdjacentPlaceScalingProblem, isSolutionView: boolea
 }
 
 describe('numbers-decimal-place-value-scaling view', () => {
+    it('preserves the required numerical quantities across all seven range profiles in both modes', () => {
+        const generator = new DecimalPlaceValueScalingGenerator();
+        for (const requireZeroCoefficient of [true, false]) for (const upper of [10, 20, 100, 120, 1000]) {
+            if (!requireZeroCoefficient && upper <= 100) continue;
+            const range = createCanonicalNumericRange(upper);
+            const data = generator.generate({requireZeroCoefficient, range}).data;
+            expect(hasCanonicalRangeWitness([data.numberInThousandths / 1000,
+                data.higherPlace.digitValueInThousandths / 1000, data.lowerPlace.digitValueInThousandths / 1000,
+                10, 1 / 10], range)).toBe(true);
+            expect(render(data, false)).toContain(displayNumeral(data));
+            expect(render(data, true)).toContain(displayNumeral(data));
+            expect(render(data, true)).toContain('one tenth as large');
+        }
+    });
+
     it('shows a whole-and-fractional place chart while asking for both unknown ratios', () => {
         const question = render(wholeCase, false);
         expect(question).toContain('55.000');

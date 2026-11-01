@@ -1,11 +1,11 @@
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
-import * as rng from '../../../lib/random.ts';
 import type {DecimalAdjacentPlaceScalingProblem} from '../../../types/problems.ts';
 import {DecimalPlaceValueScalingGenerator} from './generator.ts';
 
 const generator = new DecimalPlaceValueScalingGenerator();
-afterEach(() => vi.restoreAllMocks());
+const bounds = [10, 20, 100, 120, 1000];
 const names = ['hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'] as const;
 const exponents = [2, 1, 0, -1, -2, -3] as const;
 const units = [100000, 10000, 1000, 100, 10, 1] as const;
@@ -56,7 +56,7 @@ describe('DecimalPlaceValueScalingGenerator', () => {
         const domains = new Set<string>();
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({requireZeroCoefficient: true}).data;
+            const data = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(bounds[seed % bounds.length]!)}).data;
             checkExactScaling(data);
             higherIndices.add(data.higherPlace.digitIndex);
             repeatedDigits.add(data.repeatedDigit);
@@ -76,45 +76,20 @@ describe('DecimalPlaceValueScalingGenerator', () => {
 
     it('replays the same exact chart under the same seed', () => {
         setSeed('decimal-adjacent-place-scaling');
-        const first = generator.generate({requireZeroCoefficient: true});
+        const first = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)});
         setSeed('decimal-adjacent-place-scaling');
-        expect(generator.generate({requireZeroCoefficient: true})).toEqual(first);
+        expect(generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 
     it.each([true, false])('realizes the complete coefficient profile %s', requireZeroCoefficient => {
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({requireZeroCoefficient}).data;
+            const allowed = requireZeroCoefficient ? bounds : [120, 1000];
+            const data = generator.generate({requireZeroCoefficient, range: createCanonicalNumericRange(allowed[seed % allowed.length]!)}).data;
             checkExactScaling(data);
             expect(data.digits.includes(0)).toBe(requireZeroCoefficient);
             if (!requireZeroCoefficient) expect(data.higherPlace.digitIndex).toBeGreaterThanOrEqual(2);
         }
     });
 
-    it('partitions all 9^4 free-digit combinations without losing a chart', () => {
-        const alternatives = [0, 1, 2, 3, 4, 6, 7, 8, 9]; // repeated digit is 5
-        const zeroCounts = [729, 648, 576, 512];
-        const zeroShare = 2465 / 6561;
-        const counts = [0, 0];
-        const draw = vi.spyOn(rng, 'random');
-        for (let code = 0; code < 6561; code++) {
-            const free = Array.from({length: 4}, (_, index) => alternatives[Math.floor(code / 9 ** index) % 9]);
-            const firstZero = free.indexOf(0);
-            const requireZeroCoefficient = firstZero !== -1;
-            const randoms = [0.5, requireZeroCoefficient ? (2 + zeroShare / 2) / (2 + 3 * zeroShare) : 0.1];
-            if (requireZeroCoefficient) randoms.push((zeroCounts.slice(0, firstZero).reduce((sum, count) => sum + count, 0)
-                + zeroCounts[firstZero] / 2) / 2465);
-            free.forEach((digit, index) => {
-                if (index === firstZero) return;
-                const candidate = digit > 5 ? digit - 1 : digit;
-                randoms.push(!requireZeroCoefficient || index < firstZero ? (candidate - 0.5) / 8 : (candidate + 0.5) / 9);
-            });
-            draw.mockReset().mockImplementation(() => randoms.shift()!);
-            const data = generator.generate({requireZeroCoefficient}).data;
-            expect(data.digits).toEqual([free[0], free[1], 5, 5, free[2], free[3]]);
-            expect(randoms).toHaveLength(0);
-            counts[requireZeroCoefficient ? 0 : 1]++;
-        }
-        expect(counts).toEqual([2465, 4096]);
-    });
 });

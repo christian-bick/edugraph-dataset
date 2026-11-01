@@ -17,7 +17,7 @@ describe('DecimalPlaceValueScalingGenerator spec', () => {
         Scope.NumbersWithoutNegatives
     ]);
         expect(findSchemaFallbackContractIssues(DecimalPlaceValueScalingGeneratorSchema)).toEqual([]);
-        expect(normalizeSchemaChoices(DecimalPlaceValueScalingGeneratorSchema, [], 'generator')[0].alternatives
+        expect(normalizeSchemaChoices(DecimalPlaceValueScalingGeneratorSchema, [], 'generator').find(field => field.field === 'requireZeroCoefficient')!.alternatives
             .map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
     });
 
@@ -30,8 +30,8 @@ describe('DecimalPlaceValueScalingGenerator spec', () => {
             Scope.Base10,
             Scope.DecimalNumbers
         ])!;
-        expect(stub.labels).toHaveLength(1);
-        expect([Scope.NumbersWithZero, Scope.NumbersWithoutZero]).toContain(stub.labels[0]);
+        expect(stub.labels).toHaveLength(2);
+        expect(stub.labels.some(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never))).toBe(true);
         expect(stub.data.kind).toBe('decimal-adjacent-place-scaling');
         expect(stub.data.higherPlace.digitValueInThousandths)
             .toBe(stub.data.lowerPlace.digitValueInThousandths * 10);
@@ -40,7 +40,8 @@ describe('DecimalPlaceValueScalingGenerator spec', () => {
     it.each([Scope.NumbersWithZero, Scope.NumbersWithoutZero])('resolves the explicit coefficient profile %s', label => {
         const resolved = extractConfig(DecimalPlaceValueScalingGeneratorSchema, [label]);
         expect(resolved.config.requireZeroCoefficient).toBe(label === Scope.NumbersWithZero);
-        expect(resolved.resolvedLabels).toEqual([label]);
+        expect(resolved.resolvedLabels).toContain(label);
+        expect(resolved.resolvedLabels).toHaveLength(2);
         const data = new DecimalPlaceValueScalingGenerator().generate(resolved.config).data;
         expect(data.digits.includes(0)).toBe(label === Scope.NumbersWithZero);
     });
