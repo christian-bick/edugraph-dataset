@@ -145,6 +145,7 @@ const additionNearDoublesBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
+        [Scope.NumbersSmaller5],
         [Scope.NumbersSmaller10],
         [Scope.NumbersSmaller20]
     ]);

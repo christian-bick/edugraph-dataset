@@ -728,3 +728,27 @@ resolution paths. Rendering, source targets and payload shapes are unchanged. Th
 line proof covers20 routes/60 selections without missing/conflicting annotations. Evidence:
 `temp/range-autonomous/batch4/measurement-time/line-focused.log`, `route-verification.json` and
 `source-verification.json`.
+
+## Fourth batch: flexible integer strategies and declared widths
+
+Compact anchor/tail intervals retain all1,338,862 original authored frames under the original
+conditional row probabilities and two mathematical draws. Required operands, results, adjustments
+and typed-step quantities determine the bounds. Two impossible single-width/U1000 assignments
+retire while their target routes remain via multiple-width profiles; every old small-width frame
+is retained under reviewed smaller bands. The original cap999 and broad authored support remain.
+All10 old raw aliases and eight routes survive. Ten added raw variants create nine normalized
+targets/routes, with the new Grade3 think-addition upper20 alias correctly sharing its existing
+Grade1 representative. Seventeen routes admit32 selections. No baseline range omission closes.
+
+Near-double smaller-operand widths are now ordinary matching-capable declarations: upper5/10/20
+implies single-digit, while upper100/120/1000 implies multiple-digit. The supplementary inference
+rule is removed; old emitted widths and strategy meaning remain correct at the original source
+ceilings. Common inference machinery and the four expanded-form fallback cases stay unchanged;
+a synthetic fixture retains the proof that inferred-only outputs cannot establish matching.
+The production-dead legacy strategy sampler and its duplicate tests are retired.
+
+Sixty focused tests/nine files,684 representative projections and128 planned draws/replays pass.
+Independent finite enumeration proves full support, weights and canonical extrema; generator tests
+cover both ends of every compact row. Both resolution paths, types, the full spec gate and CCSS
+standards validation pass. Evidence: `temp/range-autonomous/batch4/arithmetic/flexible-review.md`,
+`verify-flexible.json` and `near-double-claim-migration.json`.

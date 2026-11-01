@@ -15,13 +15,11 @@ import {extractSchemaLabels} from './utils.ts';
 import type {ProblemGenerator} from '../types/ml-engine.ts';
 import type {AnyModuleSpec} from '../types/module-spec.ts';
 import type {ViewSpec} from '../types/view-spec.ts';
+import type {GeneratorSpec} from '../types/generator-spec.ts';
+import {planModelCompatibility} from './model-compatibility.ts';
 
 const cases: {name: string; generator: ProblemGenerator & {spec: AnyModuleSpec & {generatorId: string}};
     view: ViewSpec; targetLabels: string[]; expected: string; facet: string}[] = [
-    ...[Scope.NumbersSmaller10, Scope.NumbersSmaller20].map(range => ({
-        name: `near doubles ${range}`, generator: new IntegerAddSubtractStrategiesGenerator(), view: strategyView,
-        targetLabels: [Area.AdditionNearDoubles, range], expected: Scope.SingleDigitSmallestOperand, facet: 'operandDigits'
-    })),
     ...[Scope.NumbersSmaller1000, Scope.NumbersSmaller1000000].flatMap(range =>
         [Scope.TwoOperands, Scope.ThreeOperands].map(count => ({
             name: `expanded form ${range} ${count}`, generator: new PlaceValueExpandedGenerator(), view: expandedView,
@@ -30,7 +28,7 @@ const cases: {name: string; generator: ProblemGenerator & {spec: AnyModuleSpec &
         })))
 ];
 
-describe('six configuration inference acceptance cases', () => {
+describe('four expanded-form configuration inference acceptance cases', () => {
     it.each(cases)('proves $name and preserves planned draws in both modes', ({generator, view, targetLabels, expected, facet}) => {
         const spec = generator.spec;
         const baseSpec = {generalLabels: spec.generalLabels};
@@ -54,7 +52,7 @@ describe('six configuration inference acceptance cases', () => {
         expect(resolved.declaredLabels).toEqual(selection.labels);
         expect(evaluator.evaluate(resolved.labels).assessments).not.toContainEqual(expect.objectContaining({facet, status: 'missing'}));
         expect(evaluator.evaluate(resolved.labels).conflicts).toEqual([]);
-        // The existing make-ten choice already owns its width capability; inference adds no new catalog entries.
+        // These zero claims remain supplementary annotations rather than matching capabilities.
         if (facet === 'zero') expect(extractSchemaLabels(generator.schema)).not.toContain(expected);
         for (const mode of ['question', 'solution']) {
             const input = {generator, viewSchema: {}, viewSpec: view, plan,
@@ -76,5 +74,59 @@ describe('six configuration inference acceptance cases', () => {
             expect(generatePlannedDraw({...input, replay: enriched.replay})).toEqual(enriched);
         }
         expect(plan).toEqual(originalPlan);
+    });
+});
+
+describe('near-double acceptance cases migrated to matching-capable declarations', () => {
+    it.each([Scope.NumbersSmaller10, Scope.NumbersSmaller20])('declares and replays the width for %s without inference', range => {
+        const generator = new IntegerAddSubtractStrategiesGenerator();
+        const spec = generator.spec;
+        const targetLabels = [Area.AdditionNearDoubles, range, Scope.SingleDigitSmallestOperand, ...strategyView.generalLabels];
+        const planned = planModelCompatibility({id: 'declared-width-acceptance', labels: targetLabels},
+            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},
+            {viewId: strategyView.viewId, generalLabels: strategyView.generalLabels, schema: {}, spec: strategyView});
+        if (!planned.supported) throw new Error(planned.reason);
+        expect(spec.inferredLabels).toBeUndefined();
+        const selections = enumerateDependencyAuditSelections(planned.plan);
+        expect(selections.selections).toHaveLength(1);
+        const selection = selections.selections[0]!;
+        expect(selection.labels).toContain(Scope.SingleDigitSmallestOperand);
+        const annotation = resolveDependencyAuditAnnotation({id: 'declared-width-selection', plan: planned.plan, selection,
+            generator: {schema: generator.schema, spec}, view: {schema: {}, spec: strategyView}});
+        expect(annotation.annotationResolution.status).toBe('not_required');
+        expect(annotation.labels).toEqual(selection.labels);
+        for (const mode of ['question', 'solution']) {
+            const input = {generator, generatorSpec: spec, viewSchema: {}, viewSpec: strategyView, plan: planned.plan,
+                sampleKey: `declared-width-acceptance#${spec.generatorId}#${strategyView.viewId}#train#${mode}#inst:0`, seed: 39, attempt: 1};
+            const draw = generatePlannedDraw(input);
+            expect(draw.labels).toContain(Scope.SingleDigitSmallestOperand);
+            expect(Math.min(draw.stub!.data.leftOperand, draw.stub!.data.rightOperand)).toBeLessThan(10);
+            expect(generatePlannedDraw({...input, replay: draw.replay})).toEqual(draw);
+        }
+    });
+});
+
+describe('inferred-only output matching boundary', () => {
+    it('keeps advertised outputs outside matching even when exhaustive configuration inference proves them', () => {
+        const schema = {operation: [Area.Addition]} as const;
+        const output = Scope.SingleDigitSmallestOperand;
+        const spec: GeneratorSpec<typeof schema> = {generatorId: 'inferred-only-fixture',
+            generalLabels: [Scope.IntegerNumbers, Scope.Base10, Scope.TwoOperands, Scope.NumbersSmaller10,
+                Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero],
+            inferredLabels: [{produces: [output], infer: ({operation}) => operation === Area.Addition ? [output] : []}]};
+        const view: ViewSpec = {viewId: 'inferred-only-fixture-view', generalLabels: []};
+        const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
+        const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
+        const target = {id: 'inferred-only-fixture-target', labels: [Area.Addition]};
+        const planned = planModelCompatibility(target, model, consumer);
+        if (!planned.supported) throw new Error(planned.reason);
+        expect(planModelCompatibility({...target, labels: [...target.labels, output]}, model, consumer).supported).toBe(false);
+        expect(extractSchemaLabels(schema)).not.toContain(output);
+        const selection = enumerateDependencyAuditSelections(planned.plan).selections[0]!;
+        const annotation = resolveDependencyAuditAnnotation({id: 'inferred-only-selection', plan: planned.plan, selection,
+            generator: {schema, spec}, view: {schema: {}, spec: view}});
+        expect(annotation.annotationResolution).toMatchObject({status: 'exhaustive', outcome: {inferredLabels: [output]}});
+        expect(annotation.labels).toContain(output);
+        expect(selection.labels).not.toContain(output);
     });
 });

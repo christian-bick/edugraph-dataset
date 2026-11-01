@@ -2693,6 +2693,13 @@ representation completeness remains a separate design question.
 
 ### Completed inference acceptance cases
 
+This section preserves the original2026-10-29 acceptance checkpoint. The2026-11-01
+[canonical strategy profiles](canonical-range-autonomous-rollout.md#fourth-batch-flexible-integer-strategies-and-declared-widths)
+subsequently replace the near-double width inference with ordinary matching-capable declarations.
+Those two original cases retain their truthful labels through the declared profiles; the four
+expanded-form cases still use the configuration-only fallback. The common inference API and its
+exclusion from matching are unchanged. Counts and preservation comparisons below are historical.
+
 | Owner / resolved configuration | Added annotation | Exhaustive evidence | Why use the fallback here? |
 |---|---|---|---|
 | Near-doubles, maximum 10 or 20 | `SingleDigitSmallestOperand` | The smaller positive integer is `b`, with `2b + 1` below the configured bound. Thus `b <= 9`; the other operand may be 10. | Width depends on both strategy and range. A strategy-wide label overclaims wider configurations; additional selectable profiles would require redesigning legacy choice and sampling behavior. |

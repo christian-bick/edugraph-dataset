@@ -1,49 +1,26 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {IntegerFlexibleStrategyProblem} from '../../../types/problems.ts';
-import {additionMakeTen, additionNearDoubles, additionCompensation, subtractionCompensation, subtractionMakeTen, subtractionThinkAddition, strategyBounds} from '../integer-strategy-evidence.ts';
 import {IntegerAddSubtractStrategiesGeneratorConfig, IntegerAddSubtractStrategiesGeneratorSchema, spec} from './spec.ts';
+import {buildFlexibleStrategy, flexibleStrategyRows} from './domain.ts';
 
-const builders = {
-    'addition-make-ten': additionMakeTen,
-    'addition-near-doubles': additionNearDoubles,
-    'addition-compensation-single': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
-        additionCompensation({...bounds, largestOperandWidth: 'single'}),
-    'addition-compensation-multiple': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
-        additionCompensation({...bounds, largestOperandWidth: 'multiple'}),
-    'subtraction-compensation-single': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
-        subtractionCompensation({...bounds, largestOperandWidth: 'single'}),
-    'subtraction-compensation-multiple': (bounds: NonNullable<ReturnType<typeof strategyBounds>>) =>
-        subtractionCompensation({...bounds, largestOperandWidth: 'multiple'}),
-    'subtraction-make-ten': subtractionMakeTen,
-    'subtraction-think-addition': subtractionThinkAddition
-};
-
-export class IntegerAddSubtractStrategiesGenerator implements ProblemGenerator<
-    IntegerFlexibleStrategyProblem,
-    IntegerAddSubtractStrategiesGeneratorConfig
-> {
+export class IntegerAddSubtractStrategiesGenerator implements ProblemGenerator<IntegerFlexibleStrategyProblem, IntegerAddSubtractStrategiesGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = IntegerAddSubtractStrategiesGeneratorSchema;
     readonly spec = spec;
 
-    generate(
-        config: IntegerAddSubtractStrategiesGeneratorConfig
-    ): ProblemStub<IntegerFlexibleStrategyProblem> | null {
+    generate(config: IntegerAddSubtractStrategiesGeneratorConfig): ProblemStub<IntegerFlexibleStrategyProblem> {
         validateConfigFields('integer-add-subtract-strategies', config, ['strategy', 'range']);
-
-        const strategy = config.strategy!;
-        if (!Object.hasOwn(builders, strategy)) {
-            throw new GeneratorValidationError(
-                'integer-add-subtract-strategies',
-                `Unsupported strategy "${strategy}".`
-            );
-        }
-
-        const bounds = strategyBounds(config.range!);
-        if (!bounds) return null;
-
-        const problem = builders[strategy](bounds);
-        return problem ? {data: problem} : null;
+        const rows = flexibleStrategyRows(config.strategy!, config.range!);
+        if (!rows.length) throw new GeneratorValidationError('integer-add-subtract-strategies', 'The selected profile has no mathematical strategy frames.');
+        let position = random() * rows.reduce((sum, row) => sum + row.weight, 0);
+        const row = rows.find(candidate => {
+            if (position < candidate.weight) return true;
+            position -= candidate.weight;
+            return false;
+        }) ?? rows.at(-1)!;
+        const tail = row.minimum + Math.floor(random() * (row.maximum - row.minimum + 1));
+        return {data: buildFlexibleStrategy(config.strategy!, row.anchor, tail)};
     }
 }

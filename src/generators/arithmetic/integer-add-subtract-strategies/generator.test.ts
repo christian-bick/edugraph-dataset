@@ -1,16 +1,16 @@
 import {IntegerAdditionCountingOnGenerator} from '../integer-addition-counting-on/generator.ts';
 import {IntegerSubtractionCountingBackGenerator} from '../integer-subtraction-counting-back/generator.ts';
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {flexibleStrategyRows} from './domain.ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
-    IntegerAddSubtractStrategy,
     IntegerAddSubtractStrategyProblem,
     IntegerAddSubtractStrategyStep
 } from '../../../types/problems.ts';
 import {IntegerAddSubtractStrategiesGenerator} from './generator.ts';
-
-const targetRange = {min: 0, max: 1000};
 
 const operation = (
     operationType: 'addition' | 'subtraction',
@@ -181,125 +181,77 @@ const expectExactStrategy = (problem: IntegerAddSubtractStrategyProblem): void =
     ]);
 };
 
-describe('IntegerAddSubtractStrategiesGenerator', () => {
+afterEach(() => vi.restoreAllMocks());
+const strategies = ['addition-make-ten', 'addition-near-doubles', 'addition-compensation-single', 'addition-compensation-multiple',
+    'subtraction-compensation-single', 'subtraction-compensation-multiple', 'subtraction-make-ten', 'subtraction-think-addition'] as const;
+const quantities = (data: IntegerAddSubtractStrategyProblem): number[] => [data.leftOperand, data.rightOperand, data.answer, data.adjustment,
+    ...data.steps.flatMap(step => step.kind === 'decomposition' ? [step.whole, ...step.parts] : [step.leftOperand, step.rightOperand, step.result])];
+
+describe('IntegerAddSubtractStrategiesGenerator canonical construction', () => {
     const generator = new IntegerAddSubtractStrategiesGenerator();
 
-    const generateStrategy = (config: {strategy: IntegerAddSubtractStrategy; range: {min: number; max: number}}) =>
-        config.strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator().generate({range: {...createCanonicalNumericRange(config.range.max), ...config.range}})
-            : config.strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator().generate({range: {...createCanonicalNumericRange(config.range.max), ...config.range}})
-                : generator.generate({strategy: config.strategy === 'addition-compensation'
-                    || config.strategy === 'subtraction-compensation' ? `${config.strategy}-multiple` : config.strategy,
-                range: config.range});
-
-    it('strictly validates every required configuration field', () => {
-        expect(() => generator.generate({} as never)).toThrow();
-        expect(() => generator.generate({strategy: 'addition-compensation'} as never)).toThrow();
-        expect(() => generator.generate({range: targetRange} as never)).toThrow();
-    });
-
-    it.each([
-        'addition-counting-on',
-        'subtraction-counting-back',
-        'addition-make-ten',
-        'addition-near-doubles',
-        'addition-compensation',
-        'subtraction-compensation',
-        'subtraction-make-ten',
-        'subtraction-think-addition'
-    ] as const)('generates 100 exact and checkable %s problems', strategy => {
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const counting = strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back';
-            const stub = generateStrategy({strategy, range: counting ? {min: 0, max: 20} : targetRange});
-            expect(stub).not.toBeNull();
-            expect(stub!.data.strategy).toBe(strategy);
-            expectCommonInvariants(stub!.data);
-            expectExactStrategy(stub!.data);
-        }
-    });
-
-    it.each([
-        'addition-counting-on',
-        'subtraction-counting-back',
-        'addition-make-ten',
-        'addition-near-doubles',
-        'addition-compensation',
-        'subtraction-compensation',
-        'subtraction-make-ten',
-        'subtraction-think-addition'
-    ] as const)('returns null when the numeric interval cannot support %s', strategy => {
-        if (strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back') {
-            expect(() => generateStrategy({strategy, range: {min: 9, max: 10}})).toThrow();
-        } else {
-            expect(generateStrategy({strategy, range: {min: 9, max: 10}})).toBeNull();
-        }
-    });
-
-    it.each([
-        'addition-counting-on',
-        'subtraction-counting-back',
-        'addition-near-doubles'
-    ] as const)('generates %s inside both Grade 1 ranges', strategy => {
-        for (const range of [{min: 0, max: 10}, {min: 0, max: 20}]) {
-            for (let seed = 0; seed < 100; seed++) {
-                setSeed(seed);
-                const stub = generateStrategy({strategy, range});
-                expect(stub).not.toBeNull();
-                if (strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back') {
-                    expect(stub!.data.leftOperand).toBeLessThanOrEqual(range.max);
-                    expect(stub!.data.rightOperand).toBeLessThanOrEqual(range.max);
-                    expect(stub!.data.answer).toBeLessThanOrEqual(range.max);
-                } else {
-                    expect(stub!.data.leftOperand).toBeLessThan(range.max);
-                    expect(stub!.data.rightOperand).toBeLessThan(range.max);
-                    expect(stub!.data.answer).toBeLessThan(range.max);
+    it.each(strategies)('constructs exact %s proofs across every feasible canonical profile', strategy => {
+        const random = vi.spyOn(rng, 'random');
+        for (const {range} of canonicalRangeProfiles.filter(profile => profile.range.max <= 1000 && [0, 5].includes(profile.range.min))) {
+            const rows = flexibleStrategyRows(strategy, range);
+            if (!rows.length) continue;
+            const total = rows.reduce((sum, row) => sum + row.weight, 0);
+            for (const row of rows) {
+                const cumulative = rows.slice(0, rows.indexOf(row)).reduce((sum, current) => sum + current.weight, 0);
+                for (const tail of [row.minimum, row.maximum]) {
+                    random.mockReset().mockReturnValueOnce((cumulative + row.weight / 2) / total)
+                        .mockReturnValueOnce((tail - row.minimum + 0.5) / (row.maximum - row.minimum + 1));
+                    const {data} = generator.generate({strategy, range});
+                    expect(random).toHaveBeenCalledTimes(2);
+                    expectCommonInvariants(data);
+                    expectExactStrategy(data);
+                    expect(hasCanonicalRangeWitness(quantities(data), range)).toBe(true);
+                    if (strategy.endsWith('-single')) expect(Math.max(data.leftOperand, data.rightOperand)).toBeLessThan(10);
+                    if (strategy.endsWith('-multiple')) expect(Math.max(data.leftOperand, data.rightOperand)).toBeGreaterThanOrEqual(10);
                 }
-                expectExactStrategy(stub!.data);
             }
         }
     });
 
-    it.each([
-        'addition-make-ten',
-        'subtraction-make-ten',
-        'subtraction-think-addition'
-    ] as const)('generates %s inside NumbersSmaller20', strategy => {
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const stub = generateStrategy({strategy, range: {min: 0, max: 20}});
-            expect(stub).not.toBeNull();
-            expect(stub!.data.leftOperand).toBeLessThan(20);
-            expect(stub!.data.rightOperand).toBeLessThan(20);
-            expect(stub!.data.answer).toBeLessThan(20);
-            expectExactStrategy(stub!.data);
+    it('preserves all old low-width frames, teen subtraction and inclusive20 support', () => {
+        for (const strategy of ['addition-compensation-single', 'subtraction-compensation-single'] as const) {
+            expect(flexibleStrategyRows(strategy, createCanonicalNumericRange(20)).reduce((sum, row) => sum + row.maximum - row.minimum + 1, 0)).toBe(36);
         }
+        expect(flexibleStrategyRows('subtraction-make-ten', createCanonicalNumericRange(20, 5)).reduce((sum, row) => sum + row.maximum - row.minimum + 1, 0)).toBe(5);
+        const random = vi.spyOn(rng, 'random').mockReturnValue(0.999999);
+        expect(generator.generate({strategy: 'addition-make-ten', range: createCanonicalNumericRange(20)}).data.answer).toBe(20);
+        expect(generator.generate({strategy: 'subtraction-think-addition', range: createCanonicalNumericRange(20, 5)}).data.leftOperand).toBe(20);
+        expect(random).toHaveBeenCalledTimes(4);
     });
 
-    it('retains multi-digit Grade 3 think-addition operands', () => {
-        const generated = Array.from({length: 100}, (_, seed) => {
-            setSeed(seed);
-            return generator.generate({
-                strategy: 'subtraction-think-addition',
-                range: targetRange
-            })!.data;
-        });
-
-        expect(generated.some(problem => problem.rightOperand >= 10)).toBe(true);
-        generated.forEach(expectExactStrategy);
+    it('rejects malformed or infeasible profiles before consuming randomness', () => {
+        const random = vi.spyOn(rng, 'random');
+        for (const config of [undefined, {}, {strategy: 'addition-near-doubles'},
+            {strategy: 'unsupported', range: createCanonicalNumericRange(20)},
+            {strategy: 'addition-make-ten', range: {min: 0, max: 20}},
+            {strategy: 'addition-make-ten', range: createCanonicalNumericRange(10000)},
+            {strategy: 'addition-near-doubles', range: createCanonicalNumericRange(100, 10)},
+            {strategy: 'addition-near-doubles', range: createCanonicalNumericRange(20, 5)},
+            {strategy: 'addition-compensation-single', range: createCanonicalNumericRange(1000)}]) {
+            expect(() => generator.generate(config as never)).toThrow();
+        }
+        expect(random).not.toHaveBeenCalled();
     });
 
-    it('rejects unsupported strategy configurations', () => {
-        expect(() => generator.generate({
-            strategy: 'unsupported' as never,
-            range: targetRange
-        })).toThrow();
+    it('replays with fresh typed-step objects and unchanged random continuation', () => {
+        const config = {strategy: 'subtraction-think-addition' as const, range: createCanonicalNumericRange(1000, 5)};
+        rng.setSeed('integer-strategy');
+        const first = generator.generate(config), expected = structuredClone(first), continuation = rng.getRandomState();
+        (first.data.steps as unknown as {result?: number}[])[0]!.result = 999;
+        rng.setSeed('integer-strategy');
+        expect(generator.generate(config)).toEqual(expected);
+        expect(rng.getRandomState()).toBe(continuation);
     });
 
-    it('is deterministic for a project RNG seed', () => {
-        setSeed('integer-strategy');
-        const first = generator.generate({strategy: 'subtraction-think-addition', range: targetRange});
-        setSeed('integer-strategy');
-        const second = generator.generate({strategy: 'subtraction-think-addition', range: targetRange});
-        expect(second).toEqual(first);
+    it('leaves both separately owned counting leaves on their existing canonical domains', () => {
+        for (const generator of [new IntegerAdditionCountingOnGenerator(), new IntegerSubtractionCountingBackGenerator()]) {
+            const data = generator.generate({range: createCanonicalNumericRange(20)}).data;
+            expectExactStrategy(data);
+        }
     });
 });

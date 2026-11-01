@@ -311,7 +311,8 @@ const flexibleAddSubtractStrategiesBuilder = new DatasetPermutationBuilder()
         [Area.AdditionCompensation],
         [Area.SubtractionCompensation],
         [Area.SubtractionThinkAddition]
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [20, 100, 120, 1000]});
 
 const integerRoundingBuilder = new DatasetPermutationBuilder()
     .addLabels([
