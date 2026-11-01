@@ -88,8 +88,11 @@ describe('unit-relation payload contracts', () => {
                 expect(evaluation.conflicts).toEqual([]);
                 expect(evaluation.assessments.filter(assessment =>
                     assessment.status === 'missing' && assessment.facet !== 'range')).toEqual([]);
+                if (tuple.generatorId === 'measurement-conversion-values') {
+                    expect(evaluation.assessments.filter(assessment => assessment.status === 'missing')).toEqual([]);
+                }
             }
         }
-        expect(selectionCount).toBe(56);
+        expect(selectionCount).toBe(80);
     }, 30_000);
 });

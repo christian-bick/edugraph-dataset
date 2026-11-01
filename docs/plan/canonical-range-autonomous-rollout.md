@@ -116,6 +116,21 @@ sampling and the three existing routes remain unchanged. Twenty focused tests pa
 findings close. Evidence: `temp/range-autonomous/fraction-decimal/axis-tests.log` and the finite
 regression `src/generators/number/canonical-axis-ranges.it.test.ts`.
 
+## Bidirectional measurement conversions
+
+`measurement-conversion-values` partitions all 39,242 original ordered-distinct equality pairs
+into26 feasible unit/kind/range cells. The sole bidirectional view requires both equalities and
+the given one-large-unit conversion relation. Its explicit1 rules out a positive lower; all four
+numeric input/output quantities and the conversion factor determine the upper witness. Shared
+helpers expose the same existing candidate arrays without changing other samplers.
+
+All21 earlier routes remain exact, with28 previous selections becoming52. Forty-seven focused
+tests across four files pass, including the complete finite pools, all26 direct/planned cells,
+invalid profiles and one-draw sampling. Payloads, views and source targets are unchanged; range
+profile selection changes conditional sampling. This closes28 baseline source-presence findings.
+Evidence: `temp/range-autonomous/measurement-time/conversion-focused.log`,
+`conversion-types.log` and `route-verification.json`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.

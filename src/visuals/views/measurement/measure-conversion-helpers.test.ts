@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {MeasurementConversionValuesGenerator} from '../../../generators/measurement/measurement-conversion-values/generator.ts';
+import {conversionValueRangeProfiles, conversionValueTuples} from '../../../generators/measurement/measurement-conversion-values/numeric-domain.ts';
 import {MeasurementUnitEquivalencesGenerator} from '../../../generators/measurement/measurement-unit-equivalences/generator.ts';
 import {MeasurementUnitScaleGenerator} from '../../../generators/measurement/measurement-unit-scale/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
@@ -24,7 +25,8 @@ describe('measure-conversion validation', () => {
         expect(isValidUnitEquivalenceSequence(sequence)).toBe(true);
         expect(isValidMeasurementConversionValues(sequence as never)).toBe(false);
         for (const numericProfile of ['integer', 'decimal'] as const) {
-            const values = new MeasurementConversionValuesGenerator().generate({unitPair, numericProfile}).data;
+            const range = conversionValueRangeProfiles.find(profile => conversionValueTuples(unitPair, numericProfile, profile.range).length)!.range;
+            const values = new MeasurementConversionValuesGenerator().generate({unitPair, numericProfile, range}).data;
             expect(isValidMeasurementConversionValues(values)).toBe(true);
             expect(isValidUnitEquivalenceSequence(values as never)).toBe(false);
         }

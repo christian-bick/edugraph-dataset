@@ -1,7 +1,9 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {MeasurementConversionValuesProblem} from '../../../types/problems.ts';
-import {buildMeasurementConversionValues, measurementConversionPairSeeds} from '../helpers.ts';
+import {measurementConversionPairSeeds} from '../helpers.ts';
+import {random} from '../../../lib/random.ts';
+import {conversionValueTuples} from './numeric-domain.ts';
 import {
     MeasurementConversionValuesGeneratorConfig,
     MeasurementConversionValuesGeneratorSchema
@@ -31,6 +33,13 @@ export class MeasurementConversionValuesGenerator implements ProblemGenerator<
                 `Unsupported numeric profile "${config.numericProfile}".`
             );
         }
-        return {data: buildMeasurementConversionValues({...pair}, config.numericProfile)};
+        validateConfigFields('measurement-conversion-values', config, ['range']);
+        const tuples = conversionValueTuples(config.unitPair!, config.numericProfile, config.range!);
+        if (!tuples.length) throw new GeneratorValidationError('measurement-conversion-values', 'Unsupported canonical range.');
+        const selected = tuples[Math.floor(random() * tuples.length)]!;
+        const equality = (largerHundredths: number) => ({largerHundredths,
+            smallerHundredths: largerHundredths * pair.factor});
+        return {data: {pair: {...pair}, numericExamples: {numberKind: config.numericProfile,
+            equalities: [equality(selected[0]), equality(selected[1])]}}};
     }
 }

@@ -39,11 +39,11 @@ export const measurementConversionPairSeeds = Object.freeze({
     })
 } satisfies Record<MeasurementConversionPairId, MeasurementConversionPair>);
 
-const integerLargerHundredths = Array.from({length: 8}, (_, index) => (index + 2) * 100);
+export const integerLargerHundredths: readonly number[] = Array.from({length: 8}, (_, index) => (index + 2) * 100);
 const decimalFractionHundredths = [
     1, 5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 95, 99
 ] as const;
-const decimalLargerHundredths = Array.from({length: 5}, (_, whole) =>
+export const decimalLargerHundredths: readonly number[] = Array.from({length: 5}, (_, whole) =>
     decimalFractionHundredths.map(fraction => whole * 100 + fraction)).flat();
 
 /** Five consecutive integer quantities, using one seeded draw for the first row. */
