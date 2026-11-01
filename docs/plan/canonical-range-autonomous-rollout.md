@@ -427,3 +427,13 @@ one baseline range omission closes. All35 tests pass, with36 representative boun
 and24 planned draws/replays checking canonical bounds, strict annotations and target coverage.
 Evidence: `temp/range-autonomous/batch3/arithmetic/full-factor-review.md` and
 `verify-full-factor.json`. No target, view or global-policy change is used.
+
+## Third batch: elapsed-time split
+
+An invariant upper100 covers every one of the6,500 original hour/start/end-minute outcomes.
+The required31..55 starting-minute component proves a maximum above20; every required clock
+component, subinterval and duration is at most59. The question requires splitting at the next
+whole hour, whose minute component0 prevents a positive lower. Timestamp storage is excluded.
+The generator and views remain unchanged, and both earlier routes/selections remain. Six
+focused tests pass and two source range omissions close. Evidence:
+`temp/range-autonomous/batch3/measurement-time/` (elapsed focused and route verification reports).

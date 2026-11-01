@@ -14,7 +14,8 @@ export const spec: GeneratorSpec = {
         Area.MeasuringTime,
         Area.Difference,
         Scope.MinuteIntervals,
-        Scope.NumbersWithoutNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller100
     ]
 };
 
