@@ -129,7 +129,7 @@ const tenTensMakeHundredBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
         Scope.MultiplesOf100,
-        Scope.NumbersSmaller120,
+        Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
         Scope.PhysicalNumbers
     ])

@@ -648,3 +648,26 @@ Forty focused tests/11 files pass. All new source profiles pass dependency evalu
 planned config comparison. Two baseline range omissions close; four earlier ranged routes gain
 canonical witnesses. Evidence: `temp/range-autonomous/batch4/measurement-time/ruler-focused.log`,
 `route-verification.json` and `source-verification.json`.
+
+## Fourth batch: fixed-value source bounds
+
+Source intent settles four isolated bound corrections without changing any producer or view:
+the literal ten-tens leaf uses upper100 instead of120, and the two zero-only K.CC.A.3 branches
+use upper5 instead of20. Required hundred quantities are1,10,100; each zero branch has only0.
+The genuine100–900 sibling and every positive-writing range/claim remain unchanged. This does
+not claim complete canonical adoption of either broader producer family; flat-hundred and
+positive-writing projection questions stay separate.
+
+| Source | Old ID suffix | New ID suffix |
+| --- | --- | --- |
+| 2.NBT.A.1a ten-tens / DirectUnderstanding | 6eb535f7 | b3136955 |
+| 2.NBT.A.1a ten-tens / ProcedureUnderstanding | 8b2822b7 | 5ede9391 |
+| K.CC.A.3 write-numerals / zero | 71492382 | 74c636e9 |
+| K.CC.A.3 represent-counts / zero | 1432894b | 14a9f846 |
+
+All23 writing/hundred family routes remain after the four source IDs migrate; five routes are
+affected and none is added/lost. Five source selections and20 planned draws/replays pass
+canonical witnesses, target coverage and annotation contracts. Thirty-seven focused tests/six
+files prove unchanged values and random continuation; same-value hundred markup remains identical
+in both tasks/modes. No baseline missing-range closure is claimed. Evidence:
+`temp/range-autonomous/batch4/fixed-source-verification.json` and `fixed-source-tests.log`.

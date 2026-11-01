@@ -63,7 +63,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
+        [Scope.NumbersWithZero, Scope.NumbersSmaller5]
     ]);
 
 // --- K.CC.A.3: Represent a number of objects with a written numeral 0-20 ---
@@ -78,7 +78,7 @@ const representCountsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
-        [Scope.NumbersWithZero, Scope.NumbersSmaller20]
+        [Scope.NumbersWithZero, Scope.NumbersSmaller5]
     ]);
 
 // --- K.CC.B.4b: Conservation (count is independent of arrangement/order) ---
