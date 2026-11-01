@@ -1,54 +1,77 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {assertRatioComparison} from '../../../visuals/views/ratio/ratio-table-helpers.ts';
 import {RatioTableComparisonsGenerator} from './generator.ts';
-
-const generator = new RatioTableComparisonsGenerator();
+import {comparisonFramesForRange, comparisonRangeProfiles} from './numeric-domain.ts';
 
 describe('RatioTableComparisonsGenerator', () => {
-    it('rejects missing and invalid relation configurations', () => {
-        for (const config of [null, {}, {relation: null}, {relation: 'not-equal'}, {relation: 1}]) {
-            expect(() => generator.generate(config as never)).toThrow();
-        }
-    });
-
-    it.each(['less', 'equal', 'greater'] as const)('proves %s with equivalent tables sharing a consequent', relation => {
-        const inputs = new Set<string>();
-        let unlikeConsequents = 0;
-        for (let seed = 0; seed < 120; seed++) {
-            setSeed(seed);
-            const {data} = generator.generate({relation});
-            expect(data.kind).toBe('ratio-table-comparison');
-            expect(data.relation).toBe(relation);
-            expect(data.left.quantities).toEqual(data.right.quantities);
-            const normalized = data.normalized;
-            for (const [table, expected] of [[data.left, normalized.leftAntecedent], [data.right, normalized.rightAntecedent]] as const) {
-                expect(table.coordinateScale.xMax / table.coordinateScale.xStep).toBeLessThanOrEqual(10);
-                expect(table.coordinateScale.yMax / table.coordinateScale.yStep).toBeLessThanOrEqual(10);
-                expect(table.rows).toHaveLength(4);
-                expect(new Set(table.rows.map(row => row.scale)).size).toBe(4);
-                for (const row of table.rows) {
-                    expect(row.antecedent).toBe(table.base[0] * row.scale);
-                    expect(row.consequent).toBe(table.base[1] * row.scale);
-                    expect(Number.isSafeInteger(row.scale)).toBe(true);
-                    expect(row.scale).toBeGreaterThan(0);
+    it('preserves every original comparison in all four quantity contexts with exact canonical bounds', () => {
+        const generator = new RatioTableComparisonsGenerator();
+        const expected = new Set<string>();
+        const contexts = ['red beads', 'apples', 'flour', 'paint'];
+        for (let numerator = 1; numerator <= 8; numerator++) for (let denominator = 1; denominator <= 4; denominator++) {
+            for (const context of contexts) {
+                for (const multiple of [2, 3]) expected.add(`equal:${numerator},${denominator}:${numerator * multiple},${denominator * multiple}:${context}`);
+                for (let secondDenominator = 1; secondDenominator <= 4; secondDenominator++) for (let gap = 1; gap <= 3; gap++) {
+                    const small = `${numerator},${denominator}`;
+                    const large = `${Math.floor(numerator * secondDenominator / denominator) + gap},${secondDenominator}`;
+                    expected.add(`less:${small}:${large}:${context}`);
+                    expected.add(`greater:${large}:${small}:${context}`);
                 }
-                expect(table.rows.at(-1)).toMatchObject({antecedent: expected, consequent: normalized.consequent});
             }
-            const actual = Math.sign(normalized.leftAntecedent - normalized.rightAntecedent);
-            expect(actual).toBe(relation === 'less' ? -1 : relation === 'equal' ? 0 : 1);
-            const cross = Math.sign(data.left.base[0] * data.right.base[1] - data.right.base[0] * data.left.base[1]);
-            expect(actual).toBe(cross);
-            if (data.left.base[1] !== data.right.base[1]) unlikeConsequents++;
-            inputs.add(JSON.stringify(data));
         }
-        expect(unlikeConsequents).toBeGreaterThan(40);
-        expect(inputs.size).toBeGreaterThan(70);
+        const seen = new Set<string>();
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            for (const relation of ['less', 'equal', 'greater'] as const) for (const {range} of comparisonRangeProfiles) {
+                const pool = comparisonFramesForRange(relation, range);
+                for (let index = 0; index < pool.length; index++) for (let context = 0; context < contexts.length; context++) {
+                    draw.mockClear().mockReturnValueOnce((context + 0.5) / contexts.length).mockReturnValueOnce((index + 0.5) / pool.length);
+                    const {data} = generator.generate({relation, range});
+                    assertRatioComparison('ratio-table-comparison', data);
+                    const key = `${relation}:${data.left.base}:${data.right.base}:${data.left.quantities[0].name}`;
+                    expect(seen.has(key)).toBe(false);
+                    seen.add(key);
+                    const values = [data.left, data.right].flatMap(table => table.rows.flatMap(row => [row.antecedent, row.consequent]));
+                    expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                    expect(data.left.quantities).toEqual(data.right.quantities);
+                    expect(Math.sign(data.normalized.leftAntecedent - data.normalized.rightAntecedent))
+                        .toBe(relation === 'less' ? -1 : relation === 'equal' ? 0 : 1);
+                    for (const table of [data.left, data.right]) {
+                        expect(new Set(table.rows.map(row => row.scale)).size).toBe(4);
+                        expect(table.coordinateScale.xMax / table.coordinateScale.xStep).toBeLessThanOrEqual(10);
+                        expect(table.coordinateScale.yMax / table.coordinateScale.yStep).toBeLessThanOrEqual(10);
+                    }
+                    expect(draw).toHaveBeenCalledTimes(2);
+                }
+            }
+            expect(seen).toEqual(expected);
+            expect(seen.size).toBe(3328);
+        } finally { draw.mockRestore(); }
+    }, 20000);
+
+    it('rejects missing, invalid and infeasible configurations before drawing', () => {
+        const generator = new RatioTableComparisonsGenerator();
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            for (const config of [null, {}, {relation: null}, {relation: 'not-equal'}, {relation: 1},
+                {relation: 'equal'}, {relation: 'equal', range: {min: 0, max: 10}},
+                {relation: 'equal', range: comparisonRangeProfiles.at(-1)!.range}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 
-    it('replays an identical comparison', () => {
-        setSeed(53);
-        const first = generator.generate({relation: 'greater'});
-        setSeed(53);
-        expect(generator.generate({relation: 'greater'})).toEqual(first);
+    it('replays a selected profile and preserves its random continuation', () => {
+        const generator = new RatioTableComparisonsGenerator();
+        const config = {relation: 'greater', range: comparisonRangeProfiles[0]!.range} as const;
+        rng.setSeed(53);
+        const first = generator.generate(config);
+        const continuation = rng.random();
+        rng.setSeed(53);
+        expect(generator.generate(config)).toEqual(first);
+        expect(rng.random()).toBe(continuation);
     });
 });

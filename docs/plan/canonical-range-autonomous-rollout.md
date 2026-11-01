@@ -236,6 +236,21 @@ strict annotations and target coverage. This tightens existing bounds rather tha
 range findings. Evidence: `temp/range-autonomous/batch2/arithmetic/equation-review.md` and
 `verify-equation.json`.
 
+## Second batch: equivalent-ratio table comparisons
+
+Finite profiles preserve all832 original numeric frames across four quantity contexts. Bounds
+include both full tables and their common-consequent comparison; unused coordinate-layout witnesses
+do not determine the range. Upper10/20/100/120/1000 cells retain the three Grade6 routes, with
+three selections becoming13 and three source omissions closed. All14 focused tests pass,
+including every3,328 finite context/frame combinations and actual consumer rendering.
+
+The new upper10 capability exposed three unrelated Kindergarten numeral-comparison matches.
+The existing positive target-precondition mechanism now requires `Area.RatioEquivalence`, which
+the task necessarily assesses. A regression retains all earlier Grade6 routes and rejects the
+actual Kindergarten requests without target-ID filters or a global matching change. Evidence:
+`temp/range-autonomous/batch2/measurement-time/comparison-focused.log` and
+`route-verification.json`.
+
 ## Second batch: finite mass and volume contexts
 
 Mass reading, mass estimation and liquid-volume estimation now use nine feasible mathematical
