@@ -6,7 +6,7 @@ import {
     DecimalWritingGeneratorSchema,
     type DecimalWritingGeneratorConfig
 } from './spec.ts';
-import {sampleDecimalWritingWithWholeZero} from '../decimal-writing-values.ts';
+import {sampleDecimalWritingInRange} from '../decimal-writing-values.ts';
 
 export class DecimalWritingGenerator implements ProblemGenerator<
     DecimalWritingProblem,
@@ -16,7 +16,7 @@ export class DecimalWritingGenerator implements ProblemGenerator<
     schema = DecimalWritingGeneratorSchema;
 
     generate(config: DecimalWritingGeneratorConfig): ProblemStub<DecimalWritingProblem> | null {
-        validateConfigFields('decimal-writing', config, ['notationFamily', 'zeroProfile']);
+        validateConfigFields('decimal-writing', config, ['notationFamily', 'zeroProfile', 'range']);
         if (config.notationFamily !== Area.DecimalNotation
             && config.notationFamily !== Area.NumberNameNotation) {
             throw new GeneratorValidationError(
@@ -29,9 +29,6 @@ export class DecimalWritingGenerator implements ProblemGenerator<
         if (profile !== 'with-zero' && profile !== 'without-zero') {
             throw new GeneratorValidationError('decimal-writing', 'A declared zero profile is required.');
         }
-        // Condition the same raw mathematics after a matching-capable profile is
-        // resolved. The accepted payload never supplies or changes its labels.
-        const data = sampleDecimalWritingWithWholeZero(profile === 'with-zero');
-        return data ? {data} : null;
+        return {data: sampleDecimalWritingInRange(profile === 'with-zero', config.range!)};
     }
 }

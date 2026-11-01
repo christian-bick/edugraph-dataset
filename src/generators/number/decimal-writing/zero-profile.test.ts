@@ -8,6 +8,7 @@ import type {DecimalWritingProblem} from '../../../types/problems.ts';
 import {DecimalWritingGenerator} from './generator.ts';
 import {DecimalWritingGeneratorSchema, spec} from './spec.ts';
 import {decimalWritingHasZero, resolveDecimalNotation, resolveDecimalZeroProfile} from './zero-profile.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {decimalReadingChoices} from '../../../visuals/views/numbers/decimal-writing-helpers.ts';
 import {buildDecimalReadingRelation, DecimalReadingRelationsGenerator} from '../decimal-reading-relations/generator.ts';
 
@@ -77,45 +78,49 @@ describe('decimal number-name whole-quantity zero profiles', () => {
             .alternatives.map(choice => choice.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
         expect(plan([Area.NumberNameNotation, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).supported).toBe(false);
         expect(extractConfig(generator.schema, [Area.DecimalNotation, Scope.NumbersWithZero]).config)
-            .toEqual({notationFamily: Area.DecimalNotation, zeroProfile: 'with-zero'});
+            .toEqual({notationFamily: Area.DecimalNotation, zeroProfile: 'with-zero', range: createCanonicalNumericRange(5)});
     });
 
-    it('retains every old raw precision/pattern path and its duplicate probability mass', () => {
+    it('retains every old fractional precision/pattern path and all 9,990 source values across canonical profiles', () => {
         let queue: number[] = [];
         vi.spyOn(random, 'random').mockImplementation(() => {
             const next = queue.shift();
             if (next === undefined) throw new Error('Unexpected random draw or rejection');
             return next;
         });
-        const masses = new Map<string, number>();
+        const values = new Set<string>();
         const reader = new DecimalReadingRelationsGenerator();
-        let paths = 0, zeroMass = 0, nonzeroMass = 0;
-        const check = (data: DecimalWritingProblem, draws: number[], mass: number) => {
+        let paths = 0;
+        const check = (data: DecimalWritingProblem, draws: number[]) => {
             const zero = decimalWritingHasZero(data);
             const zeroProfile = zero ? 'with-zero' : 'without-zero';
+            const range = createCanonicalNumericRange(data.wholePart < 5 ? 5 : 10);
+            const wholeDraw = zero ? 0.5 : data.wholePart < 5 ? (data.wholePart - 0.5) / 4 : (data.wholePart - 4.5) / 5;
+            const conditionedDraws = [wholeDraw, ...draws.slice(1)];
             for (const notationFamily of [Area.DecimalNotation, Area.NumberNameNotation] as const) {
-                queue = [...draws];
-                expect(generator.generate({notationFamily, zeroProfile})?.data).toEqual(data);
+                queue = [...conditionedDraws];
+                expect(generator.generate({notationFamily, zeroProfile, range})?.data).toEqual(data);
                 expect(queue).toEqual([]);
             }
-            queue = [...draws];
-            const relation = reader.generate({zeroProfile})!.data;
+            queue = [...conditionedDraws];
+            const relation = reader.generate({zeroProfile, range})!.data;
             expect(relation).toEqual(buildDecimalReadingRelation(data));
             expect(relation.comparisonValues.every(value => Math.floor(value / 1000) === data.wholePart)).toBe(true);
             expect(queue).toEqual([]);
-            masses.set(data.canonicalNumeral, (masses.get(data.canonicalNumeral) ?? 0) + mass);
-            if (zero) zeroMass += mass; else nonzeroMass += mass;
+            expect(hasCanonicalRangeWitness([data.wholePart, data.fractionalPart.numerator / data.fractionalPart.denominator,
+                data.valueInThousandths / 1000, ...relation.comparisonValues.map(value => value / 1000)], range)).toBe(true);
+            values.add(data.canonicalNumeral);
             paths++;
         };
         for (let whole = 0; whole <= 9; whole++) {
             const wholeDraw = (whole + 0.5) / 10;
             for (let digit = 1; digit <= 9; digit++) check(decimal(whole, [digit, 0, 0], 1),
-                [wholeDraw, 0.06, (digit - 0.5) / 9], 0.1 * 0.12 / 9);
+                [wholeDraw, 0.06, (digit - 0.5) / 9]);
             for (let hundredth = 1; hundredth <= 9; hundredth++) {
                 check(decimal(whole, [0, hundredth, 0], 2),
-                    [wholeDraw, 0.18, 0.25, (hundredth - 0.5) / 9], 0.1 * 0.12 * 0.5 / 9);
+                    [wholeDraw, 0.18, 0.25, (hundredth - 0.5) / 9]);
                 for (let tenth = 0; tenth <= 9; tenth++) check(decimal(whole, [tenth, hundredth, 0], 2),
-                    [wholeDraw, 0.18, 0.75, (tenth + 0.5) / 10, (hundredth - 0.5) / 9], 0.1 * 0.12 * 0.5 / 10 / 9);
+                    [wholeDraw, 0.18, 0.75, (tenth + 0.5) / 10, (hundredth - 0.5) / 9]);
             }
             for (let pattern = 0; pattern <= 3; pattern++) {
                 const tenths = pattern === 0 || pattern === 2 ? [0] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -125,26 +130,22 @@ describe('decimal number-name whole-quantity zero profiles', () => {
                     if (tenth) draws.push((tenth - 0.5) / 9);
                     if (hundredth) draws.push((hundredth - 0.5) / 9);
                     draws.push((thousandth - 0.5) / 9);
-                    check(decimal(whole, [tenth, hundredth, thousandth], 3), draws,
-                        0.1 * 0.76 / 4 / tenths.length / hundredths.length / 9);
+                    check(decimal(whole, [tenth, hundredth, thousandth], 3), draws);
                 }
             }
         }
         expect(paths).toBe(10080);
-        expect(masses.size).toBe(9990);
-        expect(zeroMass).toBeCloseTo(0.1, 12);
-        expect(nonzeroMass).toBeCloseTo(0.9, 12);
-        expect([...masses.values()].reduce((sum, mass) => sum + mass, 0)).toBeCloseTo(1, 12);
+        expect(values.size).toBe(9990);
     });
 
-    it('requires the scoped profile and terminates a hostile incompatible source', () => {
+    it('requires the scoped profile and constructs nonzero whole quantities without rejection', () => {
         expect(() => generator.generate({notationFamily: Area.DecimalNotation})).toThrow('zeroProfile');
         for (const notationFamily of [Area.NumberNameNotation, Area.DecimalNotation]) {
-            expect(() => generator.generate({notationFamily, zeroProfile: 'legacy'} as never)).toThrow('declared zero');
+            expect(() => generator.generate({notationFamily, zeroProfile: 'legacy', range: createCanonicalNumericRange(5)} as never)).toThrow('declared zero');
         }
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
-        expect(generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero'})).toBeNull();
-        expect(draw).toHaveBeenCalledTimes(256 * 3);
+        expect(generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(5)})!.data.wholePart).toBe(1);
+        expect(draw).toHaveBeenCalledTimes(3);
     });
 
     it('keeps all reading quantities in the same numerical zero-whole context', () => {

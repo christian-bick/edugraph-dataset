@@ -1,7 +1,7 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalReadingRelationProblem, DecimalWritingProblem} from '../../../types/problems.ts';
-import {sampleDecimalWritingWithWholeZero} from '../decimal-writing-values.ts';
+import {sampleDecimalWritingInRange} from '../decimal-writing-values.ts';
 import {DecimalReadingRelationsGeneratorSchema, type DecimalReadingRelationsGeneratorConfig} from './spec.ts';
 
 /** Exact neighboring values retain the original 1/10/100-thousandth offsets and boundary reflection. */
@@ -20,14 +20,14 @@ export class DecimalReadingRelationsGenerator implements ProblemGenerator<
     schema = DecimalReadingRelationsGeneratorSchema;
 
     generate(config: DecimalReadingRelationsGeneratorConfig): ProblemStub<DecimalReadingRelationProblem> | null {
-        validateConfigFields('decimal-reading-relations', config, ['zeroProfile']);
-        if (typeof config !== 'object' || Array.isArray(config) || Object.keys(config).some(key => key !== 'zeroProfile')) {
-            throw new GeneratorValidationError('decimal-reading-relations', 'Only a zero profile is accepted.');
+        validateConfigFields('decimal-reading-relations', config, ['zeroProfile', 'range']);
+        if (typeof config !== 'object' || Array.isArray(config) || Object.keys(config).some(key => !['zeroProfile', 'range'].includes(key))) {
+            throw new GeneratorValidationError('decimal-reading-relations', 'Only zero and range profiles are accepted.');
         }
         if (config.zeroProfile !== 'with-zero' && config.zeroProfile !== 'without-zero') {
             throw new GeneratorValidationError('decimal-reading-relations', 'A declared zero profile is required.');
         }
-        const source = sampleDecimalWritingWithWholeZero(config.zeroProfile === 'with-zero');
-        return source ? {data: buildDecimalReadingRelation(source)} : null;
+        const source = sampleDecimalWritingInRange(config.zeroProfile === 'with-zero', config.range!);
+        return {data: buildDecimalReadingRelation(source)};
     }
 }

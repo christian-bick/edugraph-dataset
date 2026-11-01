@@ -2,6 +2,7 @@ import {Area} from 'edugraph-ts';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
 import * as random from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import type {DecimalWritingProblem} from '../../../types/problems.ts';
 import {DecimalWritingGenerator} from '../decimal-writing/generator.ts';
 import {buildDecimalReadingRelation, DecimalReadingRelationsGenerator} from './generator.ts';
@@ -28,18 +29,19 @@ describe('DecimalReadingRelationsGenerator', () => {
         for (const config of [{}, [], 'decimal']) {
             expect(() => generator.generate(config as never)).toThrow(/zeroProfile/);
         }
-        expect(() => generator.generate({zeroProfile: 'legacy'} as never)).toThrow(/declared zero profile/);
-        expect(() => generator.generate({zeroProfile: 'with-zero', extra: true} as never)).toThrow(/Only a zero profile/);
-        for (const invalid of [Object.assign([], {zeroProfile: 'with-zero'}), Object.assign(() => {}, {zeroProfile: 'with-zero'})]) {
-            expect(() => generator.generate(invalid as never)).toThrow(/Only a zero profile/);
+        const range = createCanonicalNumericRange(5);
+        expect(() => generator.generate({zeroProfile: 'legacy', range} as never)).toThrow(/declared zero profile/);
+        expect(() => generator.generate({zeroProfile: 'with-zero', range, extra: true} as never)).toThrow(/Only zero and range/);
+        for (const invalid of [Object.assign([], {zeroProfile: 'with-zero', range}), Object.assign(() => {}, {zeroProfile: 'with-zero', range})]) {
+            expect(() => generator.generate(invalid as never)).toThrow(/Only zero and range/);
         }
-        expect(generator.generate({zeroProfile: 'with-zero'})!.data.source.wholePart).toBe(0);
+        expect(generator.generate({zeroProfile: 'with-zero', range})!.data.source.wholePart).toBe(0);
     });
 
-    it('returns null on bounded sampling exhaustion rather than escaping the selected zero context', () => {
+    it('constructs the requested nonzero whole range even at the lowest random endpoint', () => {
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
-        expect(generator.generate({zeroProfile: 'without-zero'})).toBeNull();
-        expect(draw).toHaveBeenCalledTimes(256 * 3);
+        expect(generator.generate({zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)})!.data.source.canonicalNumeral).toBe('5.1');
+        expect(draw).toHaveBeenCalledTimes(3);
     });
 
     it('preserves all fractional comparison sets, reflecting only at the fractional boundary', () => {
@@ -47,6 +49,9 @@ describe('DecimalReadingRelationsGenerator', () => {
             const source = decimal(fraction, whole);
             const state = getRandomState();
             const data = buildDecimalReadingRelation(source);
+            const range = createCanonicalNumericRange(whole < 5 ? 5 : 10);
+            expect(hasCanonicalRangeWitness([whole, source.fractionalPart.numerator / source.fractionalPart.denominator,
+                source.valueInThousandths / 1000, ...data.comparisonValues.map(value => value / 1000)], range)).toBe(true);
             expect(data.source).toBe(source);
             expect(getRandomState()).toBe(state);
             expect(new Set([source.valueInThousandths, ...data.comparisonValues]).size).toBe(4);
@@ -62,12 +67,13 @@ describe('DecimalReadingRelationsGenerator', () => {
 
     it('uses the same settled name-writing profiles and does not draw entropy for alternatives', () => {
         const writing = new DecimalWritingGenerator();
-        for (const zeroProfile of ['with-zero', 'without-zero'] as const) for (let seed = 0; seed < 512; seed++) {
+        for (const [zeroProfile, upper] of [['with-zero', 5], ['without-zero', 5], ['without-zero', 10]] as const) for (let seed = 0; seed < 512; seed++) {
+            const range = createCanonicalNumericRange(upper);
             setSeed(seed);
-            const expected = writing.generate({notationFamily: Area.NumberNameNotation, zeroProfile})!;
+            const expected = writing.generate({notationFamily: Area.NumberNameNotation, zeroProfile, range})!;
             const state = getRandomState();
             setSeed(seed);
-            const actual = generator.generate({zeroProfile})!;
+            const actual = generator.generate({zeroProfile, range})!;
             expect(actual.data.source).toEqual(expected.data);
             expect(getRandomState()).toBe(state);
             expect(actual).not.toHaveProperty('labels');

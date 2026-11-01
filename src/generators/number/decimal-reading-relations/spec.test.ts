@@ -11,12 +11,12 @@ describe('decimal reading mathematical relation capabilities', () => {
     it('keeps the mathematical context invariant and supplies one matching-capable zero choice', () => {
         expect(spec.generalLabels).toEqual([Area.DecimalNotation, Scope.ThousandthDecimals,
             Scope.Base10, Scope.NumbersWithoutNegatives]);
-        expect(Object.keys(DecimalReadingRelationsGeneratorSchema)).toEqual(['zeroProfile']);
+        expect(Object.keys(DecimalReadingRelationsGeneratorSchema)).toEqual(['zeroProfile', 'range']);
         expect(findSchemaFallbackContractIssues(DecimalReadingRelationsGeneratorSchema)).toEqual([]);
         const result = generateWithLabels(new DecimalReadingRelationsGenerator(), [...spec.generalLabels])!;
         expect(result.data.kind).toBe('decimal-reading-relation');
         expect(result.data.comparisonValues).toHaveLength(3);
-        expect(result.labels).toHaveLength(1);
+        expect(result.labels).toHaveLength(2);
         expect([Scope.NumbersWithZero, Scope.NumbersWithoutZero]).toContain(result.labels[0]);
     });
 
@@ -36,7 +36,7 @@ describe('decimal reading mathematical relation capabilities', () => {
             expect(match.supported).toBe(true);
             if (!match.supported) throw new Error('Expected both reading zero contexts to match.');
             const direct = extractConfig(DecimalReadingRelationsGeneratorSchema, target.labels);
-            expect(direct.resolvedLabels).toEqual([zero]);
+            expect(direct.resolvedLabels).toContain(zero);
             expect(direct.config.zeroProfile).toBe(zero === Scope.NumbersWithZero ? 'with-zero' : 'without-zero');
             const input = {generator: instance, generatorSpec: spec, viewSchema: {}, viewSpec: reading, plan: match.plan,
                 sampleKey: `read-decimal-zero#${spec.generatorId}#${reading.viewId}#train#question#inst:0`, seed: 42, attempt: 1};

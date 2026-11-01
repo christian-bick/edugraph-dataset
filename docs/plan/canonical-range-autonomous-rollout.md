@@ -236,3 +236,19 @@ evaluation of every admitted bundle. Eight baseline source range omissions close
 views, payload contracts or global policies change. Evidence:
 `temp/range-autonomous/batch2/measurement-time/mass-focused.log`, `mass-ownership.log` and
 `route-verification.json`.
+
+## Second batch: decimal writing and reading
+
+Decimal writing and decimal reading now expose upper5/upper10 profiles under their established
+whole/fractional-quantity contract. The required fractional quantity is below1, excluding positive
+lower bounds. Zero-whole configurations admit only upper5. A constructive whole-part sampler
+replaces bounded rejection while retaining all9,990 original values and every fractional sampling
+path; reading distractors retain the same whole part and therefore the same range. Conditional
+sampling changes, but targets, rendering and the payload contract remain unchanged.
+
+All38 focused tests/nine files pass, including question/solution consumers and an exhaustive
+10,080 raw fractional-path review. The two writing routes and one reading route remain exact;
+writing selections change4→6 and reading2→3. Six baseline range-presence omissions close.
+No inference or matching-policy change is used. Evidence:
+`temp/range-autonomous/batch2/fraction-decimal/writing-tests.log`,
+`writing-current.json` and the neighboring writing verification reports.

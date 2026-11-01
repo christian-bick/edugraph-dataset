@@ -1,6 +1,7 @@
 import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {DecimalWritingProblem} from '../../../types/problems.ts';
 import {DecimalWritingGenerator} from './generator.ts';
 
@@ -40,7 +41,7 @@ describe('DecimalWritingGenerator', () => {
     it('requires a supported notation family', () => {
         expect(() => generator.generate({})).toThrow('notationFamily');
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({notationFamily: 'invalid', zeroProfile: 'legacy'} as never)).toThrow(
+        expect(() => generator.generate({notationFamily: 'invalid', zeroProfile: 'legacy', range: createCanonicalNumericRange(5)} as never)).toThrow(
             'Expected DecimalNotation or NumberNameNotation'
         );
     });
@@ -53,7 +54,7 @@ describe('DecimalWritingGenerator', () => {
             for (let seed = 0; seed < 240; seed++) {
                 setSeed(seed);
                 const {data} = generator.generate({notationFamily,
-                    zeroProfile: seed % 2 === 0 ? 'with-zero' : 'without-zero'})!;
+                    zeroProfile: seed % 2 === 0 ? 'with-zero' : 'without-zero', range: createCanonicalNumericRange(5)})!;
                 verifyExactValue(data);
                 expect(data.wholePart === 0).toBe(seed % 2 === 0);
                 precisions.add(data.fractionalPart.precision);
@@ -70,16 +71,16 @@ describe('DecimalWritingGenerator', () => {
 
     it('replays the same decimal under the same seed', () => {
         setSeed('decimal-writing-replay');
-        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero'});
+        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)});
         setSeed('decimal-writing-replay');
-        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero'})).toEqual(first);
+        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)})).toEqual(first);
     });
 
     it('can represent five and eight thousandths with both zero placeholders', () => {
         let example: DecimalWritingProblem | undefined;
         for (let seed = 0; seed < 10000 && !example; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero'})!;
+            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)})!;
             if (data.canonicalNumeral === '5.008') example = data;
         }
         expect(example).toEqual({

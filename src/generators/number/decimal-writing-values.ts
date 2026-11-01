@@ -1,4 +1,5 @@
 import {random} from '../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import type {DecimalWritingProblem} from '../../types/problems.ts';
 
 type FractionalPart = DecimalWritingProblem['fractionalPart'];
@@ -36,9 +37,7 @@ function fractionalPart(selected: FractionalPart['precision']): FractionalPart {
 const precisionLength = (selected: FractionalPart['precision']): number =>
     selected === 'tenths' ? 1 : selected === 'hundredths' ? 2 : 3;
 
-/** Original unconditioned mathematical sampler, including duplicate zero paths. */
-export function sampleDecimalWriting(): DecimalWritingProblem {
-    const wholePart = Math.floor(random() * 10);
+function decimalWriting(wholePart: number): DecimalWritingProblem {
     const fraction = fractionalPart(precision());
     const scale = precisionLength(fraction.precision);
     const valueInThousandths = wholePart * 1000 + fraction.numerator * 10 ** (3 - scale);
@@ -47,11 +46,16 @@ export function sampleDecimalWriting(): DecimalWritingProblem {
         canonicalNumeral, fractionalPart: fraction};
 }
 
-/** Condition the unchanged source law on the whole quantity, never its digits. */
-export function sampleDecimalWritingWithWholeZero(requireZeroWhole: boolean): DecimalWritingProblem | null {
-    for (let attempt = 0; attempt < 256; attempt++) {
-        const data = sampleDecimalWriting();
-        if ((data.wholePart === 0) === requireZeroWhole) return data;
-    }
-    return null;
+/** The whole quantity fixes the upper band; the required fractional quantity is
+ * always below one, so neither band has a positive lower descriptor. */
+export function sampleDecimalWritingInRange(requireZeroWhole: boolean, range: CanonicalNumericRange): DecimalWritingProblem {
+    if (!range || range.min !== 0 || ![5, 10].includes(range.max)
+        || requireZeroWhole && range.max !== 5) throw new Error('Unsupported decimal whole-quantity range.');
+    const expected = createCanonicalNumericRange(range.max);
+    if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
+        throw new Error('Invalid decimal whole-quantity range witnesses.');
+    const draw = random();
+    const wholePart = requireZeroWhole ? 0 : range.max === 5 ? 1 + Math.floor(draw * 4) : 5 + Math.floor(draw * 5);
+    return decimalWriting(wholePart);
 }
+

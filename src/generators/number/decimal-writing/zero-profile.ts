@@ -28,10 +28,11 @@ export const resolveDecimalZeroProfile = registerStaticResolver(withLabelChoices
         const notation = decimalNotationLabels.filter(label => labels.includes(label));
         const zero = decimalZeroLabels.filter(label => labels.includes(label));
         if (notation.length > 1 || zero.length > 1) return undefined;
+        if (labels.includes(Scope.NumbersSmaller10) && zero.includes(Scope.NumbersWithZero)) return undefined;
         if (zero.length) return zero[0] === Scope.NumbersWithZero ? 'with-zero' : 'without-zero';
         return undefined;
     }
 ), {
     kind: 'alternatives', alternatives: decimalZeroLabels.map(label => [label]),
-    contextLabels: decimalNotationLabels, resolvedContext: true
+    contextLabels: [...decimalNotationLabels, Scope.NumbersSmaller10], resolvedContext: true
 }));
