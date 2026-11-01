@@ -19,8 +19,9 @@ Prefer that source correction over a module participation guard compensating for
 numeric-domain claim. This does not replace legitimate task/representation preconditions.
 Cases needing an unresolved quantity interpretation, a new
 source envelope, a split or an unsettled change to an existing target claim are recorded separately while
-other supported work continues. No graph-policy, matching, Area-allowlist or inference change is
-part of this rollout.
+other supported work continues. No graph-policy, generic-matching or Area-allowlist change is
+part of this rollout, and no annotation-inference mechanism is added. A fallback can be replaced
+by ordinary declarations when the new configuration profiles prove its claim before generation.
 
 ## Settled fractional values and elapsed-time arithmetic
 
@@ -768,3 +769,50 @@ controls and all810 other coin/mixed raw outcomes preserve data and2/4-draw cont
 to the banknote checkpoint. The final owned measurement/currency proof covers38 routes/82
 selections, with no other missing facets/conflicts and direct/planned configs equal. Evidence:
 `temp/range-autonomous/batch4/measurement-time/penny-*` and its source/route verification reports.
+
+## Fourth autonomous batch acceptance
+
+Nine producer families and two isolated source-bound slices are adopted. The batch closes
+**37 source range omissions: 369→332**, for185 cumulative closures from the517 R5 baseline.
+Known-fact and flexible-strategy profiles tighten existing claims rather than closing omissions.
+The source has **1,333 authored /1,293 normalized targets,1,730 matching routes and3,382 complete
+selections**. All earlier route lineages and unchanged target claims survive. Relative to the third
+batch,24 raw/23 normalized variants add32 routes; one new Grade3 alias shares an existing Grade1
+representative. Cumulative authorized source migrations are34 raw/16 normalized IDs: the earlier
+integer-domain corrections plus the four fixed100/zero-only bound corrections recorded above.
+No additional source change is accepted by the exact migration verifier.
+
+All current findings remain range-only:332 source omissions plus1,062 unchanged stored rows.
+There are zero conflicts, unmatched targets, incomplete selections, annotation-contract errors
+or strict failures. Native allocation is1,730 train+442 validation tuples, or2,172 pairs/4,344
+requested images before deduplication. The generic matcher, Area allowlist and graph policy stay
+unchanged. No new inference is introduced; near-double width inference becomes ordinary declared
+capability while the existing four expanded-form fallback cases remain.
+
+Repository, standards, TypeScript and documentation checks pass. The complete coverage gate passes
+**7,600 tests /946 files**, with98.85% statements /97.57% branches /100% functions /99.35% lines;
+all generator thresholds pass using two workers, without relaxing a test, timeout or threshold.
+The first coverage run exposed a historical currency fixture that discarded spec-owned range
+rules and assumed one selection per target. Commit `7719d629` retains those rules, audits all22
+current selections and preserves the original configuration, data and PRNG equality assertions.
+Its87 focused tests pass; the subsequent complete coverage run passes.
+
+Evidence: `temp/range-autonomous/batch4/{global-final,check-final,types-final,docs-final,
+coverage-final}.log`, `global-verification.json`, `audit/` and the owned family records above.
+The stored2,918 images and VQA cache remain unchanged. Canonical regeneration and independent
+Question/Solution VQA remain separate acceptance work after source readiness.
+
+## Next standard work after the fourth push
+
+Continue finite/correlated arithmetic, fraction and signed-context profiles; use constructive
+compact domains for the remaining written methods where the required quantities are settled.
+Keep partial adoption explicit: an empty deferred binding is not a closed range finding.
+Two newly verified complications stay separate while independent work continues:
+
+- Unlike-denominator fraction execution can hide a choice of common denominator. For1/2+1/4,
+  the existing Question is identical at denominator4 or8, but the Solution's required count
+  changes the canonical band. A method/question contract is needed for that slice; this does
+  not defer the same-denominator and other settled fraction tasks.
+- Standard whole-number multiplication permits products above1,000,000, beyond the largest
+  approved catalog upper. Preserve that support pending a larger ontology bound or a reviewed
+  sampling-envelope decision; do not silently truncate it to close a finding.

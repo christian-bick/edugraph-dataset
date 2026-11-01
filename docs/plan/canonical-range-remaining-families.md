@@ -18,6 +18,10 @@ route. Full coverage acceptance is recorded separately in the rollout ledger.
 The third batch's source gates pass at **1,270 normalized targets /1,698 routes,3,258 selections
 and369 range omissions**. The authorized [integer-domain source correction](canonical-range-integer-domain-correction.md)
 migrates30 raw/12 normalized IDs without losing routes, selections or source-equivalence lineage.
+The fourth batch's source gates pass at **1,293 normalized targets /1,730 routes,3,382 selections
+and332 range omissions**. Four further source-backed fixed-bound corrections migrate four raw
+and four normalized IDs; every earlier route lineage remains supported. Full acceptance is
+recorded in the rollout ledger after the complete coverage gate.
 
 ## Review baseline
 
@@ -140,17 +144,17 @@ families with old bounds still require canonical review. They are not implementa
 
 | Family group | Review baseline | After R4/R5 | Current | Next treatment |
 | --- | ---: | ---: | ---: | --- |
-| Arithmetic | 90 | 90 | 77 | Known facts/strategies, then written algorithms and larger numeric families |
+| Arithmetic | 90 | 90 | 77 | Known facts/strategies adopted; continue written algorithms and larger numeric families |
 | Counting and integer writing | 0 | 0 | 0 | Tighten existing bounds; review shared projections and scalar-zero cases |
 | Fraction | 204 | 196 | 169 | Separate fraction values from explicitly assessed model/scaling counts |
-| Number (decimal/rational/length) | 47 | 47 | 19 | Remaining signed contexts and decimal place-value methods |
-| Place value | 11 | 9 | 6 | Decimal place value and method-specific quantity/source review |
-| Measurement | 137 | 97 | 52 | Small rulers/measurement lines, then shared-projection decisions |
-| Currency | 18 | 18 | 18 | Trace cents, dollars and required conversion/group counts |
+| Number (decimal/rational/length) | 47 | 47 | 14 | Remaining signed contexts; decimal place comparison adopted |
+| Place value | 11 | 9 | 0 | Presence gaps closed; broader method/source review remains separate |
+| Measurement | 137 | 97 | 30 | Rulers/measurement lines adopted; shared-projection decisions remain |
+| Currency | 18 | 18 | 14 | Banknotes/pennies adopted; trace other cents/dollars and required counts |
 | Time, elapsed time and interval arithmetic | 26 | 26 | 0 | Canonical component/split profiles implemented; endpoint retirements recorded |
 | Ratio | 10 | 10 | 4 | Remaining ratio-table and percentage quantity review |
 | Algebra | 24 | 24 | 24 | Formal numeric tasks under unchanged range qualification |
-| **Total** | **567** | **517** | **369** | No change to applicability policy |
+| **Total** | **567** | **517** | **332** | No change to applicability policy |
 
 Geometry, coordinate, shape and statistics tasks do not become mandatory range work merely
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range
@@ -181,7 +185,7 @@ The remaining candidates are proposals, not automatic extensions of R4 or R5.
 
 | Cases | Why a blanket range patch would fail | Recommended resolution |
 | --- | --- | --- |
-| Scalar writing and basic counting | Scalar zero still matches upper20 requests, although its tightest upper is5. Scalar threshold5/10/20 cases meet the accepted singleton exclusion. Count-out tasks additionally assess the available collection. Rooted lengths are now adopted with their required origin0. | Review source bands and all consumers; do not change the zero competency to manufacture a larger witness. Respect the [count-out input contract](count-out-supply.md#contract-and-implementation). |
+| Scalar writing and basic counting | The two zero-only K.CC.A.3 variants now request canonical upper5. Positive scalar threshold5/10/20 cases meet the accepted singleton exclusion, while count-out additionally assesses the available collection. Rooted lengths are adopted with their required origin0. | Review remaining positive source bands and all consumers; do not change the zero competency to manufacture a larger witness. Respect the [count-out input contract](count-out-supply.md#contract-and-implementation). |
 | Counting sequences and fixed offsets | Sequence terms differ from an explicit offset operand. A +10 operation must include10 in its lower bound; a sequence's implicit step is not automatically another operand. | Preserve the [established distinction](numeric-range-bounds.md#baseline-implementation-and-reproduced-evidence); use separate profiles and include negative/zero policies already adopted. |
 | Integer/decimal place-value methods and written columns | Ordinary notation coefficients are excluded, but a method can explicitly assess unit counts and their arithmetic. Some targets still require lower100/1000. | Resolve the concrete method's quantity set and source intent before changing those explicit lower targets. Do not silently weaken matching or reinterpret every digit as an operand. |
 | Ten/hundred offsets with place-value panels | All six source routes bound the whole-number start/step/result canonically, but the view explicitly captions place-unit counts and changes1 ten/hundred. For11+10=21,1 ten becomes2 tens, below the requested lower10. | The operand-only proof is insufficient for the assessed-count interpretation. Settle the quantity/source meaning before correcting a lower claim; removing it can also change mathematical support. This is more than adding a missing integer domain. Do not count these families complete. |
