@@ -488,3 +488,18 @@ preventing newly admitted non-decimal Grade1 fluency tasks without changing thei
 All23 tests/five files pass, including exhaustive scenario membership, canonical maxima and
 conditional probability checks. Evidence: `temp/range-autonomous/batch3/fraction-decimal/`
 (column profile tests, route comparison and type checks).
+
+## Third batch: decimal product and quotient models
+
+Seven product and three quotient profiles preserve all973 multiplication pairs and48 division
+inputs, with their original scenario/divisor probabilities conditioned on range. These existing
+tasks explicitly require cell/row/column counts and, for division, quotient-unit traces and inverse
+checks. Those assessed quantities determine the bounds; scaled storage fields alone do not.
+Fractional unit values or the required final zero remainder prevent positive lower bounds.
+
+Both old routes remain, changing1→7 and1→3 selections and closing two source omissions. Stable
+positive decimal-domain target guards prevent unrelated non-decimal matches. No payload, renderer
+or endpoint support changes. All45 tests/seven files and TypeScript pass, including complete
+finite support and both-mode consumer checks. Evidence:
+`temp/range-autonomous/batch3/fraction-decimal/` (decimal model verification reports) and
+`src/generators/arithmetic/decimal-model-ranges.it.test.ts`.

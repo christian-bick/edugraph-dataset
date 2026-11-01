@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {DecimalDivisionModelGenerator} from './generator.ts';
 import {DecimalDivisionModelGeneratorSchema, spec} from './spec.ts';
 
@@ -17,7 +17,7 @@ describe('DecimalDivisionModelGenerator spec', () => {
         Scope.TwoOperands,
         Scope.NumbersWithZero
     ]);
-        expect(DecimalDivisionModelGeneratorSchema).toEqual({});
+        expect(Object.keys(DecimalDivisionModelGeneratorSchema)).toEqual(['range']);
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
     });
 
@@ -39,12 +39,12 @@ describe('DecimalDivisionModelGenerator spec', () => {
         setSeed('decimal-division-target');
         const stub = generateWithLabels(generator, labels)!;
         expect(stub).not.toBeNull();
-        expect(stub.labels).toEqual([]);
+        expect(stub.labels).toHaveLength(1);
         expect(stub.data.kind).toBe('decimal-division-model');
         expect(stub.data.inverse.divisorTimesQuotientInMillionths)
             .toBe(stub.data.inverse.dividendInMillionths);
 
         setSeed('decimal-division-target');
-        expect(generator.generate({}).data).toEqual(stub.data);
+        expect(generator.generate(extractConfig(DecimalDivisionModelGeneratorSchema, labels).config).data).toEqual(stub.data);
     });
 });

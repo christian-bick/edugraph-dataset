@@ -1,5 +1,6 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {
     DecimalMultiplicationOperand,
@@ -162,14 +163,32 @@ export class DecimalMultiplicationModelGenerator implements ProblemGenerator<
     generate(
         config: DecimalMultiplicationModelGeneratorConfig
     ): ProblemStub<DecimalMultiplicationProblem> | null {
-        validateConfigFields('decimal-multiplication-model', config, []);
-        if (Object.keys(config).length !== 0) {
+        validateConfigFields('decimal-multiplication-model', config, ['range']);
+        if (Object.keys(config).some(key => key !== 'range')) {
             throw new GeneratorValidationError(
                 'decimal-multiplication-model', 'The configuration contains an unexpected field.'
             );
         }
-        const [first, second] = randomItem(candidatePools[randomItem(PROFILES)]);
+        const pools = decimalMultiplicationRangePools(config.range!);
+        let remaining = random() * pools.reduce((sum, pool) => sum + pool.weight, 0);
+        const pool = pools.find(pool => (remaining -= pool.weight) < 0) ?? pools[pools.length - 1]!;
+        const [first, second] = randomItem(pool.pairs);
         const data = createDecimalMultiplicationProblem(first, second);
         return data === null ? null : {data};
     }
+}
+
+/** The required cell product dominates row, column and individual-region counts.
+ * The actual decimal factors and cell unit are below five. */
+export function decimalMultiplicationRangePools(range: CanonicalNumericRange) {
+    if (!range || range.min !== 0 || ![5, 10, 20, 100, 120, 1000, 10000].includes(range.max))
+        throw new Error('Unsupported decimal area range.');
+    const expected = createCanonicalNumericRange(range.max);
+    if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
+        throw new Error('Invalid decimal area range witnesses.');
+    return PROFILES.map(profile => {
+        const original = candidatePools[profile];
+        const pairs = original.filter(([first, second]) => first * second <= range.max && first * second > range.maximumAbove);
+        return {profile, pairs, originalCount: original.length, weight: pairs.length / original.length / PROFILES.length};
+    }).filter(pool => pool.pairs.length > 0);
 }

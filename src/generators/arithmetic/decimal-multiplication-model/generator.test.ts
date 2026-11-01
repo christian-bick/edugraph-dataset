@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {
     DecimalMultiplicationOperand,
     DecimalMultiplicationProblem
@@ -140,14 +141,14 @@ describe('createDecimalMultiplicationProblem', () => {
 describe('DecimalMultiplicationModelGenerator', () => {
     it('requires an empty configuration object', () => {
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({variant: 'unsupported'} as never)).toThrow();
+        expect(() => generator.generate({range: createCanonicalNumericRange(100), variant: 'unsupported'} as never)).toThrow();
     });
 
     it('samples bounded positive hundredths factors and four-place products across profiles', () => {
         const profiles = new Set<string>();
         for (let seed = 0; seed < 240; seed++) {
             setSeed(`decimal-multiplication-${seed}`);
-            const data = generator.generate({})!.data;
+            const data = generator.generate({range: createCanonicalNumericRange([5, 10, 20, 100, 120, 1000, 10000][seed % 7]!)})!.data;
             expectExactArea(data);
             const first = data.first.valueInHundredths;
             const second = data.second.valueInHundredths;
@@ -176,8 +177,8 @@ describe('DecimalMultiplicationModelGenerator', () => {
 
     it('replays one exact Cartesian decomposition with the same seed', () => {
         setSeed('decimal-multiplication-replay');
-        const first = generator.generate({});
+        const first = generator.generate({range: createCanonicalNumericRange(1000)});
         setSeed('decimal-multiplication-replay');
-        expect(generator.generate({})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 });

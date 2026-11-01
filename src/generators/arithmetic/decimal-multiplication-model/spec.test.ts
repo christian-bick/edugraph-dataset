@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {DecimalMultiplicationModelGenerator} from './generator.ts';
 import {DecimalMultiplicationModelGeneratorSchema, spec} from './spec.ts';
 
@@ -16,14 +16,14 @@ describe('DecimalMultiplicationModelGenerator spec', () => {
             Scope.NumbersWithoutNegatives,
             Scope.TwoOperands
         ]);
-        expect(DecimalMultiplicationModelGeneratorSchema).toEqual({});
+        expect(Object.keys(DecimalMultiplicationModelGeneratorSchema)).toEqual(['range']);
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
     });
 
     it('resolves the Grade 5 target to an exact area model', () => {
         const generator = new DecimalMultiplicationModelGenerator();
         setSeed('decimal-multiplication-target');
-        const stub = generateWithLabels(generator, [
+        const labels = [
             Area.Multiplication,
             Area.PlaceValue,
             Scope.HundredthDecimals,
@@ -35,14 +35,15 @@ describe('DecimalMultiplicationModelGenerator spec', () => {
             Ability.ProcedureExecution,
             Ability.ProcedureUnderstanding,
             Ability.TextualArticulation
-        ])!;
+        ];
+        const stub = generateWithLabels(generator, labels)!;
         expect(stub).not.toBeNull();
-        expect(stub.labels).toEqual([]);
+        expect(stub.labels).toHaveLength(1);
         expect(stub.data.kind).toBe('decimal-multiplication-model');
         expect(stub.data.areaGrid.cellCount)
             .toBe(stub.data.first.valueInHundredths * stub.data.second.valueInHundredths);
 
         setSeed('decimal-multiplication-target');
-        expect(generator.generate({})?.data).toEqual(stub.data);
+        expect(generator.generate(extractConfig(DecimalMultiplicationModelGeneratorSchema, labels).config)?.data).toEqual(stub.data);
     });
 });

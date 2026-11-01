@@ -1,5 +1,6 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {
     DecimalDivisionGroupingBar,
@@ -17,9 +18,6 @@ const QUOTIENT_SCALE = 10000;
 const PLACES: readonly DecimalDivisionPlace[] = [
     'ones', 'tenths', 'hundredths', 'thousandths', 'ten-thousandths'
 ];
-
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
 
 const operand = (valueInHundredths: number): DecimalDivisionOperand => {
     const fraction = String(valueInHundredths % 100).padStart(2, '0')
@@ -155,16 +153,16 @@ export class DecimalDivisionModelGenerator implements ProblemGenerator<
     schema = DecimalDivisionModelGeneratorSchema;
 
     generate(config: DecimalDivisionModelGeneratorConfig): ProblemStub<DecimalDivisionProblem> {
-        validateConfigFields('decimal-division-model', config, []);
-        if (Object.keys(config).length !== 0) {
+        validateConfigFields('decimal-division-model', config, ['range']);
+        if (Object.keys(config).some(key => key !== 'range')) {
             throw new GeneratorValidationError(
                 'decimal-division-model', 'The configuration contains an unexpected field.'
             );
         }
-        const divisorInHundredths = random() < 0.5 ? 8 : 16;
-        const fullGroupCount = randomInteger(1, 4);
-        const remainderCells = 2 * randomInteger(0, divisorInHundredths / 2 - 1) + 1;
-        const dividendInHundredths = fullGroupCount * divisorInHundredths + remainderCells;
+        const candidates = decimalDivisionRangeCandidates(config.range!);
+        let remaining = random() * candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
+        const {dividend: dividendInHundredths, divisor: divisorInHundredths} =
+            candidates.find(candidate => (remaining -= candidate.weight) < 0) ?? candidates[candidates.length - 1]!;
         // Powers-of-two divisors and odd remainders guarantee an exact quotient
         // whose minimal decimal precision is three or four places.
         const data = createDecimalDivisionProblem(
@@ -177,4 +175,20 @@ export class DecimalDivisionModelGenerator implements ProblemGenerator<
         }
         return {data};
     }
+}
+
+/** Explicit unit-count division, not scaled storage coefficients. */
+export function decimalDivisionRangeCandidates(range: CanonicalNumericRange) {
+    if (!range || range.min !== 0 || ![100, 120, 1000].includes(range.max)) throw new Error('Unsupported decimal grouping range.');
+    const expected = createCanonicalNumericRange(range.max);
+    if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
+        throw new Error('Invalid decimal grouping range witnesses.');
+    return [8, 16].flatMap(divisor => Array.from({length: 4}, (_, index) => index + 1).flatMap(full =>
+        Array.from({length: divisor / 2}, (_, index) => 2 * index + 1).flatMap(remainder => {
+            const dividend = full * divisor + remainder;
+            const maximum = Math.max(10, dividend, divisor, ...divisionSteps(dividend, divisor)
+                .flatMap(step => [step.partialDividend, step.quotientDigit, step.subtrahend, step.remainder]));
+            return maximum <= range.max && maximum > range.maximumAbove
+                ? [{dividend, divisor, weight: 1 / (4 * divisor)}] : [];
+        })));
 }

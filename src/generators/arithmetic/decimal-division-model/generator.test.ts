@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {DecimalDivisionProblem} from '../../../types/problems.ts';
 import {createDecimalDivisionProblem, DecimalDivisionModelGenerator} from './generator.ts';
 
@@ -157,7 +158,7 @@ describe('createDecimalDivisionProblem', () => {
 describe('DecimalDivisionModelGenerator', () => {
     it('requires an empty configuration object', () => {
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({variant: 'unsupported'} as never)).toThrow();
+        expect(() => generator.generate({range: createCanonicalNumericRange(100), variant: 'unsupported'} as never)).toThrow();
     });
 
     it('samples bounded exact three- and four-place quotient profiles', () => {
@@ -165,7 +166,7 @@ describe('DecimalDivisionModelGenerator', () => {
         const seenGroupCounts = new Set<number>();
         for (let seed = 0; seed < 240; seed++) {
             setSeed(`decimal-division-${seed}`);
-            const data = generator.generate({}).data;
+            const data = generator.generate({range: createCanonicalNumericRange([100, 120, 1000][seed % 3]!)}).data;
             expectExactDivision(data);
             const A = data.dividend.valueInHundredths;
             const B = data.divisor.valueInHundredths;
@@ -187,8 +188,8 @@ describe('DecimalDivisionModelGenerator', () => {
 
     it('replays the same exact grouping and trace for one seed', () => {
         setSeed('decimal-division-replay');
-        const first = generator.generate({});
+        const first = generator.generate({range: createCanonicalNumericRange(1000)});
         setSeed('decimal-division-replay');
-        expect(generator.generate({})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 });
