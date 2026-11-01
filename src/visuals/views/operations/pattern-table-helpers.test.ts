@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {ArithmeticPatternsGenerator} from '../../../generators/arithmetic/arithmetic-patterns/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
     ArithmeticOperationTablePatternProblem,
     ArithmeticRecurrencePatternProblem
@@ -31,6 +32,7 @@ function recurrence(
     setSeed(17);
     return generator.generate({
         operation,
+        range: createCanonicalNumericRange(operation === 'addition' ? 20 : 100),
         useCommutativeLaw: law === 'commutative',
         useAssociativeLaw: law === 'associative',
         useDistributiveLaw: law === 'distributive'

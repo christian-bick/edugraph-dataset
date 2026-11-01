@@ -3,6 +3,7 @@ import {describe, expect, it} from 'vitest';
 import {ArithmeticPatternsGenerator} from '../../../generators/arithmetic/arithmetic-patterns/generator.ts';
 import {ArithmeticOperationTableGenerator} from '../../../generators/arithmetic/arithmetic-operation-table/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {
     ArithmeticOperationTablePatternProblem,
@@ -22,6 +23,7 @@ function recurrenceProblem(withLaw: boolean): ArithmeticRecurrencePatternProblem
     setSeed(17);
     return generator.generate({
         operation: 'multiplication',
+        range: createCanonicalNumericRange(100),
         useCommutativeLaw: false,
         useAssociativeLaw: false,
         useDistributiveLaw: withLaw

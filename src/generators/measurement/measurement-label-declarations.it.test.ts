@@ -48,7 +48,8 @@ describe('measurement label declarations on existing competency targets', () => 
         const generator = generators.find(entry => entry.generatorId === 'measurement-conversion-problems')!;
         const view = views.find(entry => entry.viewId === 'measure-conversion-problems')!;
         const target = grade2Targets.find(target => target.id.startsWith('2.OA.A.1-two-step-word-problems~')
-            && target.labels.includes(Area.Addition) && !target.labels.includes(Area.Subtraction))!;
+            && target.labels.includes(Area.Addition) && !target.labels.includes(Area.Subtraction)
+            && target.labels.includes(Scope.NumbersSmaller100))!;
         const rules = (view.compatibility ?? view.spec.compatibility ?? []).filter(rule => rule.id !== 'conversion-story-request');
         const unrestricted = {...view, compatibility: rules, spec: {...view.spec, compatibility: rules}};
         expect(matchTarget(target, generator, unrestricted).matched).toBe(true);

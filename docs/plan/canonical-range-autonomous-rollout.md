@@ -1098,3 +1098,19 @@ files, including every actual native counting selection, and fresh TypeScript pa
 number renderer and constant word mapping add no randomness. Evidence:
 `temp/range-autonomous/batch5/counting/{step-instruction-tests.log,step-instruction-types.log}`.
 The view/checklist identity will refresh its affected artifacts at the later canonical stage.
+
+## Fifth batch: historical fixture adoption
+
+The first complete coverage run found16 failures in three historical fixtures. Two recurrence
+consumer fixtures bypassed configuration resolution and omitted the newly required range; they
+now provide explicit feasible canonical upper20/100 fields while retaining all original prose,
+rendering and rejection assertions. Their45-test/six-file suite and final TypeScript pass.
+
+The measurement-precondition fixture selected the first Grade2 addition target, which is now
+the reviewed upper5 variant. Its counterfactual conversion family needs at least upper20 because
+of a required factor16. Selecting the unchanged original upper100 target restores the intended
+comparison: removing only the UnitConversion prerequisite admits it, and the actual view rejects
+exactly that missing competency. Both assertions remain unchanged. Thirty tests and final types
+pass. No production behavior or validation rule is relaxed. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{pattern-consumer-fixtures,types-pattern-fixtures}.log`
+and `measurement-time/fixture-repair-{tests,types}.log`.
