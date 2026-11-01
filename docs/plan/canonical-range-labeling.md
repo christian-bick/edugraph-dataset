@@ -3,13 +3,13 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility and
-[source-band reviews](canonical-range-source-review.md) are complete, including the eight
-measurement targets. All recommendations were approved on 2026-11-01; R2/R3 producer and target
-adoption is in progress. Source readiness and dataset acceptance remain separate gates.
-The inventory and first competency review remain the rollout baseline. No production
-target adopts the helper yet; sampling, stored annotations and the report-only range gate remain
-unchanged.
+Status: the opt-in target-expansion helper and first eight-family producer/target adoption are
+implemented, including the eight measurement targets and approved unknown-number Ability
+correction. Source validation retains 1,247 normalized targets and 1,672 routes. The
+[remaining-family review](canonical-range-remaining-families.md) proposes the next 50-selection
+batch; it is not implemented. The original inventory remains a historical rollout baseline.
+Stored annotations have not been regenerated for these range changes, and the range gate remains
+report-only. Source readiness and dataset acceptance remain separate gates.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -547,3 +547,40 @@ replays plus 952 direct draws, all passing. The preceding 7,472-test coverage ru
 unchanged generator/library implementations; the target-only correction is verified by the exact
 migration, complete source contracts and resolved-draw checks. Regeneration and independent VQA
 remain the next artifact acceptance stage, and other numeric families still require range review.
+
+### Remaining-family review and next proposed batch — 2026-11-01
+
+The [current review](canonical-range-remaining-families.md) inventories all 175 active producers
+at `d6fd3b94`, traces the proposed families through their actual consumers, and separates missing
+range annotations from loose existing bounds. Fresh matching retains **1,286 authored / 1,247
+normalized targets, 1,672 routes and 2,964 complete source selections**. The strict annotation
+audit passes; its report-only range findings comprise **567 source selections and 1,062 stored
+rows**. Neither count measures all canonical-range work still needed.
+
+Recommend three implementation checkpoints, without target edits:
+
+1. Invariant upper100 for `decimal-power-ten-scaling` and `fraction-tenths-equivalence`:
+   **10 current selections / 8 routes**. Required mathematical scaling witnesses 100 in every
+   exercise; no positive lower applies. The in-memory declaration/matching review preserves
+   the complete current route set and ownership contracts.
+2. Upper5 through the existing range schema for **35 noninteger measurement-story selections**:
+   20 fraction cases and 15 decimal subtraction/multiplication/division cases. Preserve their
+   finite mathematical support and the completed integer branch.
+3. Upper5/upper10 profiles for the **five remaining decimal-addition story selections**. Preserve
+   all three existing sums; only `3.1 + 2.6 = 5.7` requires upper10. Select the profile before
+   generation, using ordinary matching-capable declarations.
+
+This covers **50 current source findings, 48 routes and 47 distinct targets**. It is expected
+to leave 517 source presence findings and increase complete selections by five, without changing
+the target or route counts. These are proposal counts; implementation must verify them. The
+measurement rollout must retain integer selection for existing targets without an explicit
+number kind: loosening the current range guard alone would admit unintended noninteger choices.
+The in-memory measurement experiment retains every route and the selected-label assignments
+on all 128 integer routes at both stages. The detailed review records this preservation requirement
+and the remaining runtime acceptance checks.
+
+Counting-on/back is the next separate finite-domain candidate: its reviewed upper5 variants add
+three targets/routes while retaining the current six. Conversion projections, scalar-zero target
+bounds, required column-unit arithmetic and other unsettled cases remain separate. No graph
+policy, Area allowlist, ontology meaning, matching implication, target, generator or view changed
+in this review; regeneration and VQA were not run.

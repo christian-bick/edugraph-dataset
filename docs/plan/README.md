@@ -32,8 +32,10 @@ These items are not newly scheduled by the archive move.
   1,286 authored / 1,247 normalized targets across eight affected producer families. It includes
   exact two-/three-digit comparison domains and the two-digit-addend correction. Source validation
   passes; the separately approved six-target unknown-number Ability correction retains all target
-  coverage with 1,672 final routes. Dataset acceptance is recorded separately in the main plan. Other numeric families still
-  need review; range dependency diagnostics remain report-only.
+  coverage with 1,672 final routes. The [remaining-family review](canonical-range-remaining-families.md)
+  records 567 current source presence findings and proposes the next 50-selection batch without
+  target changes, followed by counting-on/back and separate projection/quantity-contract cases.
+  Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO
