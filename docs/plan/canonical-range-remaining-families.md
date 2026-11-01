@@ -11,7 +11,10 @@ adds three upper5 targets while preserving all earlier target claims/routes. Cur
 findings remain 517 after R5: it tightens existing annotations rather than repairing missing ones.
 The [subsequent autonomous rollout](canonical-range-autonomous-rollout.md) closes 78 of those
 omissions and adds one reviewed source variant, retaining all earlier target claims/routes.
-Its current source counts are 1,251 normalized targets / 1,676 routes, with 439 range omissions.
+The first autonomous batch reached1,251 normalized targets /1,676 routes, with439 range omissions.
+The second batch's combined source gates now pass at **1,264 normalized targets /1,692 routes,
+3,105 complete selections and410 range omissions**. It preserves every earlier target claim and
+route. Full coverage acceptance is recorded separately in the rollout ledger.
 
 ## Review baseline
 
@@ -134,17 +137,17 @@ families with old bounds still require canonical review. They are not implementa
 
 | Family group | Review baseline | After R4/R5 | Current | Next treatment |
 | --- | ---: | ---: | ---: | --- |
-| Arithmetic | 90 | 90 | 90 | Finite strategies, known facts/patterns/word problems, then written algorithms |
+| Arithmetic | 90 | 90 | 86 | Common factors/multiples, paired patterns, known facts/strategies, then written algorithms |
 | Counting and integer writing | 0 | 0 | 0 | Tighten existing bounds; review shared projections and scalar-zero cases |
 | Fraction | 204 | 196 | 174 | Separate fraction values from explicitly assessed model/scaling counts |
-| Number (decimal/rational/length) | 47 | 47 | 40 | Reading/writing profiles and remaining signed contexts |
+| Number (decimal/rational/length) | 47 | 47 | 22 | Remaining signed contexts and decimal methods |
 | Place value | 11 | 9 | 6 | Decimal place value and method-specific quantity/source review |
-| Measurement | 137 | 97 | 55 | Remaining measurement and model profiles; shared-projection decisions |
+| Measurement | 137 | 97 | 54 | Remaining measurement and model profiles; shared-projection decisions |
 | Currency | 18 | 18 | 18 | Trace cents, dollars and required conversion/group counts |
 | Time, elapsed time and interval arithmetic | 26 | 26 | 22 | Assessed clock components/calculations, excluding timestamp storage |
-| Ratio | 10 | 10 | 10 | Required ratio operands, factors and results |
+| Ratio | 10 | 10 | 4 | Remaining ratio-table and percentage quantity review |
 | Algebra | 24 | 24 | 24 | Formal numeric tasks under unchanged range qualification |
-| **Total** | **567** | **517** | **439** | No change to applicability policy |
+| **Total** | **567** | **517** | **410** | No change to applicability policy |
 
 Geometry, coordinate, shape and statistics tasks do not become mandatory range work merely
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range
@@ -175,15 +178,34 @@ The remaining candidates are proposals, not automatic extensions of R4 or R5.
 
 | Cases | Why a blanket range patch would fail | Recommended resolution |
 | --- | --- | --- |
-| Scalar writing, basic counting and rooted lengths | Scalar zero still matches upper20 requests, although its tightest upper is5. Scalar threshold5/10/20 cases meet the accepted singleton exclusion; a rooted length also contains origin0 and does not. Count-out tasks additionally assess the available collection. | Review source bands and all consumers; do not change the zero competency to manufacture a larger witness. Respect the [count-out input contract](count-out-supply.md#contract-and-implementation). |
+| Scalar writing and basic counting | Scalar zero still matches upper20 requests, although its tightest upper is5. Scalar threshold5/10/20 cases meet the accepted singleton exclusion. Count-out tasks additionally assess the available collection. Rooted lengths are now adopted with their required origin0. | Review source bands and all consumers; do not change the zero competency to manufacture a larger witness. Respect the [count-out input contract](count-out-supply.md#contract-and-implementation). |
 | Counting sequences and fixed offsets | Sequence terms differ from an explicit offset operand. A +10 operation must include10 in its lower bound; a sequence's implicit step is not automatically another operand. | Preserve the [established distinction](numeric-range-bounds.md#baseline-implementation-and-reproduced-evidence); use separate profiles and include negative/zero policies already adopted. |
 | Integer/decimal place-value methods and written columns | Ordinary notation coefficients are excluded, but a method can explicitly assess unit counts and their arithmetic. Some targets still require lower100/1000. | Resolve the concrete method's quantity set and source intent before changing those explicit lower targets. Do not silently weaken matching or reinterpret every digit as an operand. |
 | Measurement-unit equivalences | Two views use only the first equivalence; the table uses five. At a start of7km, the single relation ends at7000m while the table reaches11000m. A payload-wide upper100000 is loose for the first projection. | Establish a consistent mathematical relation per consumer using existing contract options; seek confirmation for any necessary producer split. No hidden fifth-row witness. |
-| Rational opposite relations | Line and double-opposite tasks share a payload, but the latter omits the axis. | Assess the projected mathematical task; unused axis extents cannot establish its tightest bound. |
+| Rational opposite relations | Line and double-opposite tasks share a payload, but the latter omits the axis. | Further consumer tracing found the existing relation parameter can select truthful relation-specific bounds. This is standard autonomous work, with leaf compatibility checks, rather than an established split blocker. |
 | Fraction/measurement number lines | Axis positions may lie in0..1 while the task explicitly counts more than5 intervals. | Trace whether that count is an assessed mathematical quantity, not just representational subdivision. Keep the approved bound interpretation; document a decision only where the source task does not settle it. |
 | Operation tables | Full fixed0..6 tables give addition max12 and multiplication max36, but the prompt emphasizes one row. | Preserve the prior full-table interpretation explicitly, or settle the focused-row contract before adding fixed upper20/100. Do not count an irrelevant cell merely to witness a larger bound. |
 | Currency and clocks | `75¢+75¢=$1.50` assesses mixed units; clock components are not seconds since midnight. | Review the required arithmetic/conversion, preserving the explicitly supported cents/dollars competency. Do not normalize all labels from one storage unit. |
 | Structural algebra / formal expressions | Formal membership does not make every hidden evaluation relevant. Range qualification currently differs from sign/zero qualification. | Separate review under the unchanged graph; no implicit policy retirement or invented variable bounds in this batch. |
+
+The second autonomous review also found these concrete shared-projection boundaries. They remain
+separate while ordinary finite-profile work continues:
+
+| Cases | Concrete boundary | Why another declaration alone is insufficient |
+| --- | --- | --- |
+| Ratio-table construction/plotting | Construction asks for any three equivalent rows, while the stored payload uses fixed scales2/3/4. Plotting additionally requires origin0; table-only tasks can have a positive floor. | The open question does not force the stored rows, and the required quantity set differs across consumers. |
+| Fraction product interpretation/story creation | With17/6×6, interpretation requires the alternate subtotal17×6=102, but story creation requires17 selected parts and result17. | Upper120 for the former and upper20 for the latter cannot share an unqualified range claim. |
+| Fraction rectangle execution/lattice construction | Sides5/3 and1/2 imply a1/6-unit lattice with10 columns and3 rows; plain area execution does not request that lattice. | Stored grid metadata cannot establish the plain task's upper bound. Existing tile-proof separation solves only another slice. |
+| Fraction scaling comparison/explanation | Explanation requires a whole-number analogy absent from comparison, which can cross a catalog threshold. | The existing comparison profile does not distinguish the required analogy. |
+| Fraction equivalence classification/explanation | Classification judges equivalent amounts/locations, while explanation can require partition/scaling arithmetic even with the same existing flags. | Trace the actual Grade3 consumers before claiming a common count-based bound. |
+
+Conversely, closer tracing cleared several provisional concerns: fraction whole-equivalence
+explicitly asks for numerator-part counts in every consumer; rational opposites already have
+relation configurations suitable for relation-specific bounds; unit-rate and measurement-ratio
+tasks require their normalization/identity mathematics. These are established-profile work, not
+design-decision deferrals. Technical size alone does not justify skipping decimal column methods,
+expanded form, scaling, rounding or comparison: constructive finite domains and analytic interval
+blocks are already available solution approaches.
 
 These are rollout observations, not blanket old-contract violations. An existing loose inclusive
 bound can have been valid before canonical adoption. Future changes must preserve the matched

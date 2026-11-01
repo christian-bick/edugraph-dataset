@@ -179,7 +179,7 @@ Evidence under `temp/range-autonomous/`: `global-verification.json`, `check-batc
 are unchanged; this is source acceptance. The user requested pushing this batch as soon as its
 validation finishes. Work continues after that push using the same agreed solutions.
 
-## Next active standard work
+## Second-batch queue at its start
 
 These are not blocked merely because their implementation is larger:
 
@@ -342,7 +342,7 @@ The compact domain uses fewer than100 indexed interval blocks instead of materia
 at spec import. The original route remains, with one selection becoming six and one baseline
 range omission closed. All22 focused tests/six files pass, including exhaustive support and both
 question/solution direction projections. Targets, views and payload shapes stay unchanged.
-Evidence: `temp/range-autonomous/batch2/measurement-time/ratio-focused.log` and
+Evidence: `temp/range-autonomous/batch2/measurement-time/ratio-conversion-focused.log` and
 `route-verification.json`.
 
 ## Second batch: decimal writing and reading
@@ -360,3 +360,44 @@ writing selections change4→6 and reading2→3. Six baseline range-presence omi
 No inference or matching-policy change is used. Evidence:
 `temp/range-autonomous/batch2/fraction-decimal/writing-tests.log`,
 `current.json` and `writing-route-comparison.json`.
+
+## Second autonomous batch acceptance
+
+The second batch updates14 producer families and closes **29 baseline source range omissions:
+439→410**. Eight mass/volume routes are newly qualified and complete; they were not baseline
+omissions and are accounted separately. Other checkpoints tighten existing annotations rather
+than claiming missing-label closures. All findings remain range-only:410 source plus1,062
+unchanged stored rows. There are zero conflicts, invalid contexts, incomplete selections,
+inference-contract errors or strict failures. The graph and Area qualification are unchanged.
+
+Exact cumulative comparison against16f09717 preserves every authored/normalized target ID and
+label set and every earlier matching route. From the first-batch baseline,13 reviewed source
+targets and16 routes are added: six classification, four equation-judgment and three rooted-length
+targets, with the latter also admitting three nonnegative rational-positioning routes.
+Current counts are **1,303 authored /1,264 normalized targets,1,692 routes and3,105 selections**.
+Native allocation is1,692 train+436 validation tuples:2,128 requested pairs /4,256 images before
+deduplication. This is source allocation, not a regenerated dataset.
+
+The complete **7,570-test /920-file coverage gate** passes with two workers; no test timeout or
+coverage threshold is relaxed. Instrumented coverage is98.89% statements /97.87% branches /
+100% functions /99.50% lines, and every generator meets its required threshold. Repository,
+TypeScript and documentation gates pass. Existing external-document404 warnings are unrelated
+to this batch. Evidence: `temp/range-autonomous/batch2/{check-final,types-final,docs-final,
+global-final,coverage}.log`, its `audit/` reports and the family verification records above.
+The stored2,918-image dataset and VQA cache are unchanged. This batch is ready to push promptly
+under the user's instruction; established-profile work continues afterward.
+
+## Next standard work after the second push
+
+- Common GCD/LCM, full common-factor extraction and paired patterns have finite reviewed domains.
+- Decimal column add/subtract, multiplication and division already demand their unit-count
+  mathematics in both modes. Later expanded-form/scaling/rounding/comparison domains need compact
+  constructive sampling, not a new labeling mechanism.
+- Rational opposites can use the existing relation profiles and precise leaf compatibility.
+  Fraction whole-equivalence explicitly requires numerator-part counts in all consumers.
+- Elapsed-time arithmetic, clock components and unit-dimension operations have concrete finite
+  quantity contracts. Explicit cancellation identity1 is mathematical work; an empty unit
+  denominator written as1 is notation and must not suppress a truthful positive lower.
+
+The remaining-family review separately records actual shared-projection/open-question issues.
+Those do not stop these standard batches, and their unresolved requirements are not counted closed.

@@ -756,3 +756,13 @@ tuples or strict failures. Its 1,579 report-only range findings remain 517 sourc
 1,062 stored rows. Generation/VQA and acceptance of refreshed artifacts remain pending; the stored
 dataset is unchanged. The next unimplemented finite-domain candidates and the separate projection/
 quantity decisions remain in the [remaining-family review](canonical-range-remaining-families.md).
+
+### Subsequent autonomous checkpoints
+
+The [autonomous rollout ledger](canonical-range-autonomous-rollout.md) records the completed
+entry-document cleanup and two subsequent validated batches. They update29 producer families
+and close107 baseline range-presence omissions:517→410. The current source has1,264 normalized
+targets,1,692 routes and3,105 complete selections; every earlier target claim and route remains.
+All source gates and the full7,570-test/920-file coverage suite pass. The stored dataset and VQA
+cache remain unchanged. Standard-profile work continues through the reviewed queue while genuine
+projection/source-claim decisions stay separate; range validation remains report-only.
