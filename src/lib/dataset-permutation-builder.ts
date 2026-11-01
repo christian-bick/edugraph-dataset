@@ -7,6 +7,7 @@ import {
     ModuleImplementation
 } from "../types/ml-engine.ts";
 import { labelSetHash } from "./utils.ts";
+import { expandUpperRangeVariants, type ReviewedUpperRanges } from './target-range-variants.ts';
 
 /**
  * Maps a builder's permutations to competency targets with content-derived
@@ -108,6 +109,12 @@ export default class DatasetPermutationBuilder {
             }
         }
         this.permutations = newPermutations;
+        return this;
+    }
+
+    /** Replaces upper bounds with explicitly reviewed alternatives before target IDs exist. */
+    applyUpperRangeVariants(policy: ReviewedUpperRanges): this {
+        this.permutations = expandUpperRangeVariants(this.permutations, policy);
         return this;
     }
 

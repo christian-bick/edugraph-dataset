@@ -56,6 +56,9 @@ Study `src/spec/ccss/kindergarten.ts` and `grade-01.ts` for the established stru
   Labels within one group are conjunctive; the method forms the Cartesian product of the
   current permutations with those groups. Successive calls multiply orthogonal dimensions
   such as number ranges, zero inclusion, shapes and relations.
+- `.applyUpperRangeVariants({ through: 20 })` — opt-in shorthand for a reviewed sequence of
+  catalog upper bounds (5, 10, 20). Use `{ bands: [5, 20] }` for reviewed exceptions. It replaces
+  existing upper labels, retains other dimensions, and deduplicates alternatives before IDs.
 - `toTargets('<CCSS-id>-<slug>', builder)` from `src/lib/dataset-permutation-builder.ts` —
   maps the builder to active targets.
 - `defineImplementationPackage({...})` — defines one stable implementation package with a description
@@ -79,6 +82,20 @@ builder
 ```
 
 produces `current permutations × {A AND B, C} × {X, Y}`: four final permutations.
+
+Use upper-range expansion only after reviewing the relevant bands against the source competency
+and verifying canonical-band generation across the matched consumers. It does not prove generator
+feasibility or change matching. The helper orders selected bounds by the pinned catalog, rejects
+unsupported bounds and widening of an existing ceiling, and never silently drops an infeasible
+requested alternative. Informative lower bounds remain constraints: a smaller selected upper bound
+fails, and an equal lower/upper endpoint fails pending the singleton policy. A retained lower bound
+may therefore require explicit `bands` instead of `through`.
+
+The opt-in shorthand omits the universal `NumbersLargerZero` floor; it preserves sign and zero
+involvement labels. It does not add a lower-bound label for a band's maximum witness. For example,
+the canonical upper-100 condition requires some relevant magnitude above 20, not every operand
+above 20. Existing builders retain their behavior until they explicitly call the helper. See the
+[canonical range rollout](plan/canonical-range-labeling.md) for activation and validation.
 
 ### TSPEC-5 — Target ids are content hashes, not positions
 
@@ -312,7 +329,7 @@ library. Whether an eligible descriptor is justified by the target's competency 
 - [ ] **TSPEC-1** — the file exports only the five contract names, each with its correct type.
 - [ ] **TSPEC-2** — `spec` has no alias export; every live target is reachable through `spec` alone.
 - [ ] **TSPEC-3** — one builder per competency, derived from leaf standards, not one per standard.
-- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` and mapped via `toTargets` or `toImplementationTodos`; ontology gaps use `defineOntologyPackage`/`toOntologyTodo`; no hand-written target arrays.
+- [ ] **TSPEC-4** — permutations are built with `addLabels`/`applyLabelVariants` (or reviewed `applyUpperRangeVariants`) and mapped via `toTargets` or `toImplementationTodos`; range expansion has source review and generator guarantees; ontology gaps use `defineOntologyPackage`/`toOntologyTodo`; no hand-written target arrays.
 - [ ] **TSPEC-5** — no id is hand-written or position-derived; every id came out of `toTargets` or `toImplementationTodos`.
 - [ ] **TSPEC-6** — no label is broader, narrower, or otherwise adjusted to make a target match; gaps are parked with a TODO or a todo export.
 - [ ] **TSPEC-7** — every competency sits in exactly one of the four disposition arrays, every implementation TODO references a valid authored definition with explicit module strategies, every ontology TODO references a valid authored ontology package, and matching is confirmed via `npm run show:matching` for addressable competencies.

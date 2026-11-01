@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { Area, Scope } from 'edugraph-ts/generated';
 import DatasetPermutationBuilder, {
     defineImplementationPackage,
     toImplementationTodos,
@@ -6,6 +7,40 @@ import DatasetPermutationBuilder, {
 } from './dataset-permutation-builder.ts';
 
 describe('DatasetPermutationBuilder target mapping', () => {
+    it('makes reviewed ranges equivalent to explicit variants before content-derived IDs', () => {
+        const expanded = new DatasetPermutationBuilder()
+            .addLabels([Scope.NumbersSmaller20, Scope.NumbersWithoutZero])
+            .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
+            .applyUpperRangeVariants({ through: 20 });
+        const explicit = new DatasetPermutationBuilder()
+            .addLabels([Scope.NumbersWithoutZero])
+            .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
+            .applyLabelVariants([[Scope.NumbersSmaller5], [Scope.NumbersSmaller10], [Scope.NumbersSmaller20]]);
+        expect(toTargets('reviewed', expanded, 'Source competency.'))
+            .toEqual(toTargets('reviewed', explicit, 'Source competency.'));
+    });
+
+    it('retains existing IDs and orthogonal permutations while adding reviewed ranges', () => {
+        const builder = () => new DatasetPermutationBuilder().addLabels([Area.Addition, Scope.NumbersSmaller20])
+            .applyLabelVariants([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
+        const existing = toTargets('same-prefix', builder());
+        const expanded = toTargets('same-prefix', builder().applyUpperRangeVariants({ bands: [20, 5, 10, 5] }));
+        expect(expanded).toHaveLength(6);
+        for (const target of existing) {
+            const retained = expanded.find(candidate => candidate.id === target.id);
+            expect(new Set(retained?.labels)).toEqual(new Set(target.labels));
+        }
+        expect(new Set(expanded.map(target => target.id)).size).toBe(6);
+        expect(builder().build()).toHaveLength(2);
+    });
+
+    it('leaves the builder unchanged when reviewed bounds are invalid', () => {
+        const builder = new DatasetPermutationBuilder().addLabels([Area.Addition, Scope.NumbersSmaller10]);
+        const before = structuredClone(builder.build());
+        expect(() => builder.applyUpperRangeVariants({ through: 20 })).toThrow(/widen/);
+        expect(builder.build()).toEqual(before);
+    });
+
     it('maps active targets without implementation metadata', () => {
         const targets = toTargets('demo', new DatasetPermutationBuilder().addLabels(['A']));
         expect(targets).toHaveLength(1);

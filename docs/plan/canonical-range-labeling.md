@@ -3,9 +3,10 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: planning and baseline investigation. This checkpoint records the accepted direction,
-inventories the existing targets, and records a first competency review. It does not activate
-range expansion, change sampling, relabel stored images, or make range presence a strict gate.
+Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility review
+is in progress. The inventory and first competency review remain the rollout baseline. No production
+target adopts the helper yet; sampling, stored annotations and the report-only range gate remain
+unchanged.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -215,6 +216,37 @@ These counts establish existing declared support; they do not establish canonica
 | R3 — pilot target adoption | Activate reviewed per-competency expansions using the helper | Before/after target and matching inventories, standard ownership, distinctness review and weighting estimates |
 | R4 — remaining competency batches | Review and adopt bounded arithmetic/counting first, then task-specific number/measurement/fraction contexts | Per-batch source relevance, feasibility and canonical-bound evidence; deferred cases remain visible |
 | R5 — acceptance and classifier handoff | Canonical generation, range-aware support/completeness review, VQA and export checks | Dataset/ontology/policy pins, current coverage, no split leakage, controlled boundary contrasts |
+
+### R1 — reviewed expansion helper (2026-11-01)
+
+`DatasetPermutationBuilder.applyUpperRangeVariants({ through: 20 })` expands a reviewed sequence
+of catalog upper thresholds. `{ bands: [5, 20] }` names reviewed exceptions. The pure
+`expandUpperRangeVariants` helper replaces existing upper labels, retains other dimensions,
+deduplicates final label sets, and preserves content-derived IDs for unchanged permutations.
+
+The helper rejects unsupported thresholds, widening an existing ceiling, and upper bounds below
+an existing informative lower bound. Equal lower/upper endpoints fail explicitly while their policy
+is open. It omits only the accepted universal `NumbersLargerZero` floor; sign/zero involvement
+claims are retained. Invalid expansion leaves the builder unchanged. Authoring rules are in
+[TSPEC-4](../target-spec.md#tspec-4--build-permutations-programmatically).
+
+No production target invokes the helper. A read-only regression comparison verifies exact equality
+of all 1,028 authored target IDs/label sets, all 1,013 normalized target IDs/label sets, and all
+1,222 matching routes against the inventory baseline. This establishes unchanged target behavior,
+not unchanged source-dependency cache identities. Evidence is in
+`temp/canonical-range-2026-11-01/r1-regression.json` and its reproducible script.
+
+The helper and builder tests pass all 19 cases. The new helper has 100% statement, branch,
+function and line coverage. `npm run check -- --spec=ccss` passes, including unchanged strict
+annotation results (zero conflicts/failures; 1,675 report-only range findings). Documentation
+references pass with six external-fetch warnings.
+
+The full coverage suite passes **7,480 tests across 907 files** with four workers; the generator
+coverage checker also passes (98.36% statements, 97.05% branches, 100% functions, 99.46% lines).
+The first sandbox attempt could not rename Vitest temporary files; the unrestricted parallel run
+then hit four timeouts and one transient fixture lock. Rerunning with filesystem permission and
+`--maxWorkers=4` passes without changing tests or timeouts. Logs are in
+`temp/canonical-range-2026-11-01/`. No dataset regeneration or VQA is part of R1.
 
 R1 is inert until deliberately adopted. R2 and R3 must become operational together for each
 reviewed family: explicit target expansion without canonical-band generation does not fix the
