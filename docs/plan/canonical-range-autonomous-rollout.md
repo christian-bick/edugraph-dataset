@@ -416,3 +416,14 @@ boundary question/solution projections. Forty planned draws/replays pass canonic
 strict annotations and target coverage. No source, view or global-policy change is needed.
 Evidence: `temp/range-autonomous/batch3/arithmetic/common-relation-review.md` and
 `verify-common-relation.json`. Combined repository/coverage acceptance follows the completed batch.
+
+## Third batch: full common-factor extraction
+
+Six upper profiles preserve all3,913 original ordered positive addend pairs with a nontrivial
+common factor, retaining the inclusive100 addend cap and required sum through200. Both projection
+modes require the common-factor, coprime-residual, reconstruction and sum proof. Its explicit
+factor1 prevents a positive lower. The original target/route remains, admitting six selections;
+one baseline range omission closes. All35 tests pass, with36 representative boundary projections
+and24 planned draws/replays checking canonical bounds, strict annotations and target coverage.
+Evidence: `temp/range-autonomous/batch3/arithmetic/full-factor-review.md` and
+`verify-full-factor.json`. No target, view or global-policy change is used.

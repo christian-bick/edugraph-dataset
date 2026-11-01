@@ -4,6 +4,7 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {FullCommonFactorDistributionProblem} from '../../../types/problems.ts';
 import {commonPositiveDivisors} from '../common-factor-helpers.ts';
 import {CommonFactorDistributionRelationsGeneratorSchema, type CommonFactorDistributionRelationsGeneratorConfig} from './spec.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 const generatorId = 'common-factor-distribution-relations';
 
@@ -39,12 +40,16 @@ export class CommonFactorDistributionRelationsGenerator implements ProblemGenera
         validateConfigFields(generatorId, config, ['range']);
         const range = config.range!;
         if (typeof range !== 'object' || range === null || range.min !== 0
-            || ![100, 1000, Number.MAX_SAFE_INTEGER].includes(range.max)) {
+            || ![5, 10, 20, 100, 120, 1000].includes(range.max)) {
             throw new GeneratorValidationError(generatorId,
-                'Range must start at zero with inclusive bound 100, 1000, or the unbounded resolver sentinel.');
+                'Expected a reviewed canonical upper band without a positive lower.');
         }
-        const cap = range.max === Number.MAX_SAFE_INTEGER ? 200 : range.max;
-        const admitted = candidates.filter(([first, second]) => first + second <= cap);
+        const expected = createCanonicalNumericRange(range.max);
+        if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
+            throw new GeneratorValidationError(generatorId, 'Canonical range witnesses are missing or inconsistent.');
+        }
+        // The required full proof contains factor1; its largest quantity is the final sum.
+        const admitted = candidates.filter(([first, second]) => first + second > range.maximumAbove && first + second <= range.max);
         const [first, second] = admitted[Math.floor(random() * admitted.length)]!;
         return {data: buildFullCommonFactorDistributionProblem(first, second)};
     }

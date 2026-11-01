@@ -1,6 +1,7 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
-import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {buildFullCommonFactorDistributionProblem, CommonFactorDistributionRelationsGenerator} from './generator.ts';
 
 const generator = new CommonFactorDistributionRelationsGenerator();
@@ -74,52 +75,60 @@ describe('full common-factor distribution mathematical witnesses', () => {
     });
 });
 
-describe('full common-factor distribution required magnitude configuration', () => {
-    it('rejects empty and malformed configuration', () => {
-        expect(() => generator.generate({})).toThrow(GeneratorValidationError);
-        for (const range of [null, undefined, 100, '100', [], {}, {min: 1, max: 100}, {min: -1, max: 100},
-            {min: 0, max: 10}, {min: 0, max: 200}, {min: 0, max: 100.5}, {min: 0, max: Infinity}]) {
-            expect(() => generator.generate({range} as never)).toThrow(GeneratorValidationError);
-        }
-    });
+afterEach(() => vi.restoreAllMocks());
 
-    it('bounds all task values, including the sum and full witnesses, under each admitted range', () => {
-        const features = new Set<string>();
-        for (const max of [100, 1000, Number.MAX_SAFE_INTEGER]) {
-            const cap = max === Number.MAX_SAFE_INTEGER ? 200 : max;
-            for (let seed = 0; seed < 200; seed++) {
-                setSeed(seed);
-                const {data} = generator.generate({range: {min: 0, max}});
-                for (const value of [...data.addends, data.sum, ...data.commonDivisors, data.gcd,
-                    ...data.residualAddends, data.residualSum, ...data.residualCommonDivisors, ...data.distributedProducts]) {
-                    expect(Number.isSafeInteger(value)).toBe(true);
-                    expect(value).toBeGreaterThan(0);
-                    expect(value).toBeLessThanOrEqual(cap);
-                }
-                expect(data.addends.every(value => value <= 100)).toBe(true);
-                expect(data.gcd).toBeGreaterThan(1);
-                if (data.sum > 100) features.add('larger-sum');
-                if (data.sum === 100 && max === 100) features.add('inclusive-boundary');
-                if (data.addends[0] === data.addends[1]) features.add('equal');
-                if (data.addends.includes(100)) features.add('input-boundary');
+describe('full common-factor distribution required canonical magnitude', () => {
+    it('retains all 3913 original ordered pairs exactly once across six canonical bands', () => {
+        const random = vi.spyOn(rng, 'random');
+        const covered = new Set<string>();
+        for (const upper of [5, 10, 20, 100, 120, 1000]) {
+            const range = createCanonicalNumericRange(upper);
+            const pairs: [number, number][] = [];
+            for (let first = 1; first <= 100; first++) for (let second = 1; second <= 100; second++) {
+                if (first + second > range.maximumAbove && first + second <= upper
+                    && directCommonDivisors(first, second).length > 1) pairs.push([first, second]);
+            }
+            for (const [index, pair] of pairs.entries()) {
+                random.mockReset().mockReturnValue((index + 0.5) / pairs.length);
+                const {data} = generator.generate({range});
+                expect(random).toHaveBeenCalledTimes(1);
+                expect(data.addends).toEqual(pair);
+                expect(hasCanonicalRangeWitness([...data.addends, data.sum, ...data.commonDivisors, data.gcd,
+                    ...data.residualAddends, data.residualSum, ...data.residualCommonDivisors,
+                    ...data.distributedProducts], range)).toBe(true);
+                const key = pair.join(':');
+                expect(covered.has(key)).toBe(false);
+                covered.add(key);
             }
         }
-        expect([...features].sort()).toEqual(['equal', 'inclusive-boundary', 'input-boundary', 'larger-sum']);
+        const original = new Set<string>();
+        for (let first = 1; first <= 100; first++) for (let second = 1; second <= 100; second++) {
+            if (directCommonDivisors(first, second).length > 1) original.add(`${first}:${second}`);
+        }
+        expect(covered).toEqual(original);
+        expect(covered.size).toBe(3913);
     });
 
-    it('makes range 100 genuinely narrower while preserving deterministic unbounded-domain replay', () => {
-        let differs = false;
-        for (let seed = 0; seed < 30; seed++) {
-            setSeed(seed);
-            const smaller = generator.generate({range: {min: 0, max: 100}});
-            setSeed(seed);
-            const larger = generator.generate({range: {min: 0, max: 1000}});
-            setSeed(seed);
-            expect(generator.generate({range: {min: 0, max: Number.MAX_SAFE_INTEGER}})).toEqual(larger);
-            expect(Object.keys(larger)).toEqual(['data']);
-            expect(smaller.data.sum).toBeLessThanOrEqual(100);
-            if (larger.data.sum > 100) differs = true;
+    it('rejects malformed bounds and absent witnesses before consuming randomness', () => {
+        const random = vi.spyOn(rng, 'random');
+        for (const config of [undefined, {}, ...[null, undefined, 100, '100', [], {},
+            {min: 0, max: 100}, createCanonicalNumericRange(100, 5),
+            {min: 0, max: 200}, {min: 0, max: Number.MAX_SAFE_INTEGER}].map(range => ({range}))]) {
+            expect(() => generator.generate(config as never)).toThrow(GeneratorValidationError);
         }
-        expect(differs).toBe(true);
+        expect(random).not.toHaveBeenCalled();
+    });
+
+    it('replays deterministically and keeps complete proof arrays independent between draws', () => {
+        const config = {range: createCanonicalNumericRange(120)};
+        rng.setSeed(731);
+        const first = generator.generate(config);
+        const expected = structuredClone(first);
+        const continuation = rng.getRandomState();
+        (first.data.commonDivisors as number[]).push(999);
+        rng.setSeed(731);
+        expect(generator.generate(config)).toEqual(expected);
+        expect(rng.getRandomState()).toBe(continuation);
+        expect(Object.keys(first)).toEqual(['data']);
     });
 });
