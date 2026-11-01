@@ -54,7 +54,8 @@ describe('exact expression structure/exponent capability bundles', () => {
                 const numeric = [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives,
                     Scope.NumbersWithZero, Scope.NumbersWithoutZero];
                 expect(new Set(draw.labels.filter(label => !numeric.includes(label as never))))
-                    .toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.Base10]));
+                    .toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.Base10,
+                        ...(writing ? [Scope.NumbersSmaller5] : [])]));
                 expect(draw.labels.filter(label => numeric.includes(label as never))).toHaveLength(2);
                 expect(draw.stub!.data.precedenceWitness === null).toBe(writing);
                 if (target.labels.includes(Scope.PositiveExponent)) expect(draw.stub!.data.powerFacts.every((fact: ExactPowerFact) => fact.exponent > 0)).toBe(true);

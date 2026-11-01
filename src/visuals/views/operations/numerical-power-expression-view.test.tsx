@@ -146,7 +146,8 @@ describe('both full-uniform numeric leaf boundaries', () => {
         expect(evaluate.NumericalPowerExpressionEvaluateViewSchema).toEqual({});
         expect(write.NumericalPowerExpressionWriteViewSchema).toEqual({});
         expect(evaluate.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution]);
-        expect(write.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Ability.Formalization, Ability.TextualReception]);
+        expect(write.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller5,
+            Ability.Formalization, Ability.TextualReception]);
         const boundary = write.spec.compatibility!.find(rule => rule.id === 'numerical-power-writing-evidence')!;
         expect(boundary.dependencies).toEqual([{scope: 'generator', label: Area.OrderOfOperations}]);
         const query = (present: boolean) => ({has: (scope: string, label: string) => scope === 'generator' && label === Area.OrderOfOperations && present, exact: () => false});

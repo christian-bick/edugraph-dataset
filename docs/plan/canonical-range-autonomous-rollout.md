@@ -878,3 +878,18 @@ Twenty-three tests/four files pass, including full finite support, both configur
 810 same-value projections across all five consumers, and96 native planned draws with exact
 replays. Types and generator/view spec validation pass. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{pattern-review.md,verify-patterns.json,pattern-tests.log}`.
+
+## Fifth batch: unevaluated power writing
+
+The existing writing view gains invariant upper5 for its required base/exponent inputs. Its
+question explicitly says not to calculate the power, so an unused evaluated result cannot witness
+a larger range. All468 original mathematical paths and936 Question/Solution projections pass.
+The11 writing selections close11 omissions; all five existing power-family routes remain,
+including the separate evaluator routes. Forty-four native draws/replays retain exact old data
+and view random continuation. Thirty-two tests, types and the spec/ownership gate pass. Source
+targets, IDs, rendering and sampling are unchanged.
+
+Mixed-power evaluation's eight omissions remain separate. This producer still owns no range
+labels, so the writing invariant creates no ownership overlap. Future evaluator adoption must
+respect that boundary rather than assigning evaluated-value bounds to writing. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{power-writing-review.md,verify-power-writing.json}`.
