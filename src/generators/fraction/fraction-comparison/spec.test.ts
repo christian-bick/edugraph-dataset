@@ -28,7 +28,8 @@ describe('FractionComparisonGenerator spec integration', () => {
                 Scope.ProperFractions,
                 Scope.SingleFrameOfReference,
                 Scope.NumbersWithoutNegatives,
-                Scope.NumbersWithoutZero
+                Scope.NumbersWithoutZero,
+                Scope.NumbersSmaller5
             ]
         });
         expect(spec.generalLabels).not.toContain(Scope.VisualNumbers);

@@ -10,7 +10,8 @@ export const spec: GeneratorSpec = {
         Scope.MinuteIntervals,
         Scope.IntegerNumbers,
         Scope.NumbersWithoutNegatives,
-        Scope.SingleStep
+        Scope.SingleStep,
+        Scope.NumbersSmaller100
     ]
 };
 

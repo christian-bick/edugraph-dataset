@@ -30,7 +30,8 @@ describe('DecimalComparisonGenerator spec integration', () => {
                 Area.NumerationWithDecimals,
                 Area.DecimalPrecision,
                 Scope.DecimalNumbers,
-                Scope.NumbersWithoutNegatives
+                Scope.NumbersWithoutNegatives,
+                Scope.NumbersSmaller5
             ]
         });
     });

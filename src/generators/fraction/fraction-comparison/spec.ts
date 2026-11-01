@@ -27,7 +27,8 @@ export const spec: GeneratorSpec = {
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersWithoutZero
+        Scope.NumbersWithoutZero,
+        Scope.NumbersSmaller5
     ]
 };
 

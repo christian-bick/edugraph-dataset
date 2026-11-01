@@ -16,7 +16,8 @@ export const spec: GeneratorSpec = {
         Area.FractionReferenceComparison,
         Scope.ProperFractions,
         Scope.SingleFrameOfReference,
-        Scope.NumbersWithoutNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller5
     ]
 };
 

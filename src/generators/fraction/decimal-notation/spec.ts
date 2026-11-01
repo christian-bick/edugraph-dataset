@@ -7,7 +7,8 @@ export const spec: GeneratorSpec = {
     generalLabels: [
         Area.DecimalNotation,
         Scope.DecimalNumbers,
-        Scope.NumbersWithoutNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller5
     ]
 };
 

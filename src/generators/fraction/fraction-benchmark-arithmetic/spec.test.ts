@@ -9,7 +9,7 @@ const common = [Area.FractionReferenceComparison, Scope.FractionNumbers, Scope.S
 describe('fraction-benchmark-arithmetic schema integration', () => {
     it('keeps common-whole fraction reference comparison invariant and Ability-neutral', () => {
         expect(spec.generalLabels).toEqual([Area.FractionReferenceComparison, Scope.ProperFractions,
-            Scope.SingleFrameOfReference, Scope.NumbersWithoutNegatives]);
+            Scope.SingleFrameOfReference, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller5]);
         expect(spec.generalLabels).not.toContain(Area.NumericApproximation);
         for (const label of Object.values(Ability)) expect(spec.generalLabels).not.toContain(label);
     });

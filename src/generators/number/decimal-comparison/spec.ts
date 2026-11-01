@@ -16,7 +16,8 @@ export const spec: GeneratorSpec = {
         Area.NumerationWithDecimals,
         Area.DecimalPrecision,
         Scope.DecimalNumbers,
-        Scope.NumbersWithoutNegatives
+        Scope.NumbersWithoutNegatives,
+        Scope.NumbersSmaller5
     ]
 };
 
