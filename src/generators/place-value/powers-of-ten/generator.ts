@@ -19,11 +19,11 @@ export class PowersOfTenGenerator implements ProblemGenerator<
     schema = PowersOfTenGeneratorSchema;
 
     generate(config: PowersOfTenGeneratorConfig): ProblemStub<PowerTenNotationProblem> {
-        validateConfigFields('powers-of-ten', config, ['zeroExponent']);
-        if (typeof config.zeroExponent !== 'boolean') {
-            throw new GeneratorValidationError('powers-of-ten', 'Expected a boolean zero-exponent profile.');
+        validateConfigFields('powers-of-ten', config, ['exponent']);
+        if (![0, 1, 2].includes(config.exponent!)) {
+            throw new GeneratorValidationError('powers-of-ten', 'Expected a supported exponent profile.');
         }
-        const candidates = POWERS.filter(power => (power.exponent === 0) === config.zeroExponent);
+        const candidates = POWERS.filter(power => power.exponent === config.exponent);
         const power = candidates[Math.floor(random() * candidates.length)]!;
         return {data: {kind: 'power-ten-notation', power}};
     }

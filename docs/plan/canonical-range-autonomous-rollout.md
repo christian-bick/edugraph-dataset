@@ -76,6 +76,25 @@ and strict annotation checks. This repairs loose bounds and adds coverage, rathe
 range-presence omissions. Evidence: `temp/range-autonomous/arithmetic/first-review.md`,
 `verify-first.json` and `first-focused.log`.
 
+## Power notation and whole-number scaling
+
+Whole-number power-ten scaling gains invariant upper10000: every original11..99 is explicitly
+multiplied by100, producing1100..9900. Required factor1 or zero establishes no positive lower.
+The generator body and mathematical support remain unchanged; tests cover all81 originals.
+
+Power notation now preselects one exponent profile: zero/upper10→0, nonzero/upper10→1 and
+nonzero/upper100→2. All three previous mathematical cases remain, with one draw per case. The
+local configuration replaces the Boolean zero selector with the actual exponent; payloads and
+views stay unchanged. Given `100` and given `10 × 10` both denote the input number being converted
+to power notation. The bound includes that represented input, base10 and exponent, without
+including unrelated hidden intermediate calculations.
+
+Both old target/route claims remain exact; two old notation selections become three, giving four
+selections across two routes. Sixteen focused tests pass, including all12 question/solution
+representation combinations. Twenty-four planned draws/replays pass canonical witnesses, strict
+annotations and target coverage. Three baseline presence findings close. Evidence:
+`temp/range-autonomous/arithmetic/power-review.md`, `power-tests.log` and `verify-powers.json`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.

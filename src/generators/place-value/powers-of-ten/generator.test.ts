@@ -1,48 +1,28 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {PowersOfTenGenerator} from './generator.ts';
-
-describe('PowersOfTenGenerator', () => {
-    const generator = new PowersOfTenGenerator();
-
-    it('rejects a missing configuration', () => {
-        expect(() => generator.generate(null as never)).toThrow();
-    });
-
-    it('models zero, one, and two nonnegative integer exponents exactly', () => {
-        const exponents = new Set<number>();
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const zeroExponent = seed % 2 === 0;
-            const {data} = generator.generate({zeroExponent});
-            expect(data.kind).toBe('power-ten-notation');
-            const {power} = data;
-            exponents.add(power.exponent);
+const generator = new PowersOfTenGenerator();
+describe('canonical power-ten notation profiles', () => {
+    it.each([[0, 10], [1, 10], [2, 100]] as const)('retains exponent%s with tight upper%s', (exponent, upper) => {
+        const draw = vi.spyOn(rng, 'random').mockReturnValue(0.5);
+        try {
+            const {power} = generator.generate({exponent}).data;
             expect(power.base).toBe(10);
-            expect(power.value).toBe(10 ** power.exponent);
-            expect(power.repeatedFactors).toHaveLength(power.exponent);
-            expect(power.repeatedFactors.every(factor => factor === 10)).toBe(true);
-            expect(power.exponent).toBeGreaterThanOrEqual(0);
-            expect(power.exponent === 0).toBe(zeroExponent);
-        }
-        expect(exponents).toEqual(new Set([0, 1, 2]));
+            expect(power.exponent).toBe(exponent);
+            expect(power.value).toBe(10 ** exponent);
+            expect(power.repeatedFactors).toEqual(Array(exponent).fill(10));
+            expect(hasCanonicalRangeWitness([power.base, power.exponent, power.value], createCanonicalNumericRange(upper))).toBe(true);
+            expect(draw).toHaveBeenCalledTimes(1);
+        } finally {draw.mockRestore();}
     });
-
-    it('represents 10^0 as one and an empty product', () => {
-        const {power} = generator.generate({zeroExponent: true}).data;
-        expect(power.value).toBe(1);
-        expect(power.repeatedFactors).toEqual([]);
-    });
-
-    it('replays deterministically from a seed', () => {
-        setSeed('formal-power-ten');
-        const first = generator.generate({zeroExponent: false});
-        setSeed('formal-power-ten');
-        expect(generator.generate({zeroExponent: false})).toEqual(first);
-    });
-
-    it('rejects an absent or invalid profile', () => {
-        expect(() => generator.generate({} as never)).toThrow();
-        expect(() => generator.generate({zeroExponent: 'yes'} as never)).toThrow();
+    it('rejects missing and unsupported profiles before a draw', () => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            for (const config of [undefined, {}, {exponent: -1}, {exponent: 3}, {exponent: 0.5}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            expect(draw).not.toHaveBeenCalled();
+        } finally {draw.mockRestore();}
     });
 });

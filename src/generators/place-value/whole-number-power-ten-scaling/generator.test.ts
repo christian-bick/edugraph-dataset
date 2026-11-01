@@ -1,5 +1,7 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import type {
     WholeNumberPowerTenScalingProblem,
     WholePowerTenScaleStep
@@ -76,6 +78,22 @@ function checkSeries(data: WholeNumberPowerTenScalingProblem): void {
 }
 
 describe('WholeNumberPowerTenScalingGenerator', () => {
+    it('proves invariant upper10000 for every supported original', () => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            const seen = new Set<number>();
+            for (let tens = 1; tens <= 9; tens++) for (let ones = 1; ones <= 9; ones++) {
+                draw.mockReset().mockReturnValueOnce((tens - 0.5) / 9).mockReturnValueOnce((ones - 0.5) / 9);
+                const {data} = generator.generate({});
+                expect(data.primarySeries[0].original).toBe(10 * tens + ones);
+                const quantities = [...data.primarySeries, data.existingZeroWitness, data.zeroWitness]
+                    .flatMap(step => [step.original, step.product, step.power.base, step.power.exponent, step.power.value]);
+                expect(hasCanonicalRangeWitness(quantities, createCanonicalNumericRange(10000))).toBe(true);
+                seen.add(data.primarySeries[0].original);
+            }
+            expect(seen.size).toBe(81);
+        } finally {draw.mockRestore();}
+    });
     it('rejects a missing configuration object', () => {
         expect(() => generator.generate(null as never)).toThrow();
     });
