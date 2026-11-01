@@ -819,3 +819,30 @@ Two newly verified complications stay separate while independent work continues:
 - Standard whole-number multiplication permits products above1,000,000, beyond the largest
   approved catalog upper. Preserve that support pending a larger ontology bound or a reviewed
   sampling-envelope decision; do not silently truncate it to close a finding.
+
+## Fifth batch: percent application and inversion
+
+The two existing6.RP.A.3c targets remain unchanged. Both projections explicitly require the
+per-hundred equivalence, percentage, scale factor, whole and part; the inverse additionally
+divides by the same factor. Reference100 rules out upper5/10/20, and the factor at most1.5
+rules out a positive lower. Ordinary fraction components and an unused product numerator
+are not additional range inputs. Upper100/120/1000/10000 profiles are selected before generation.
+
+Compact numerator intervals preserve all **563,664 raw paths** supported by the old declared
+upper10000 source cap, including duplicate reduced-rational paths and their conditional mass.
+The old omitted-range/upper1000 support (56,133 paths) remains a subset. The profile mixture
+changes sampling and seeds; previously unbounded source requests can now draw from the larger
+already-declared cap as well. No new numeric envelope is invented. The per-hundred competency
+has no source ceiling, and both prior targets/routes remain. No target-band expansion is needed
+for these already-unbounded requests. Payload shapes and same-value rendering are unchanged.
+
+Independent full enumeration agrees with all1,003 compact rows:61,036 /19,369 /218,545 /264,714
+paths in the four bands. No endpoint or old mathematical case is retired. Twenty-four focused
+tests/five files pass, including exact finite support and mass, inclusive boundaries, both real
+native routes, all eight finalized selections, direct/planned configuration equality, deterministic
+replay and both Question/Solution projections. TypeScript passes. The owned annotation audit has
+no missing facets or conflicts. This closes two baseline omissions; combined source acceptance
+will verify the batch-wide count rather than adding unverified closures to the ledger.
+
+Evidence: `temp/range-autonomous/batch5/percent/{domain-census,interval-proof}.json` and
+`{focused,types}.log`. No inference, adapter, generic matching or Area-policy change is involved.

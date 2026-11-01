@@ -1,7 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {greatestCommonDivisor} from '../helpers.ts';
 import {PercentQuantityRelationsGenerator} from './generator.ts';
+import {PERCENT_SOURCE_CAP} from './numeric-domain.ts';
 
 const generator = new PercentQuantityRelationsGenerator();
 
@@ -10,22 +12,23 @@ describe('PercentQuantityRelationsGenerator', () => {
         for (const config of [
             null, {}, {range: null}, {range: 1000}, {range: {}},
             {range: {min: 1, max: 1000}}, {range: {min: -1, max: 1000}},
-            {range: {min: 0, max: 100}}, {range: {min: 0, max: Infinity}}
+            {range: {min: 0, max: 100}}, {range: {min: 0, max: Infinity}},
+            {range: createCanonicalNumericRange(20)}, {range: createCanonicalNumericRange(100, 5)}
         ]) {
             expect(() => generator.generate(config as never)).toThrow();
         }
     });
 
-    it.each([1000, 10000, Number.MAX_SAFE_INTEGER])(
+    it.each([100, 120, 1000, 10000])(
         'preserves exact percent, forward and inverse relations within range %s', max => {
-            const bound = max === Number.MAX_SAFE_INTEGER ? 1000 : max;
+            const range = createCanonicalNumericRange(max);
             const percentProfiles = new Set<string>();
             const wholeProfiles = new Set<string>();
             const partProfiles = new Set<string>();
             const problems = new Set<string>();
             for (let seed = 0; seed < 300; seed++) {
                 setSeed(seed);
-                const {data} = generator.generate({range: {min: 0, max}});
+                const {data} = generator.generate({range});
                 expect(data.kind).toBe('percent-quantity');
                 expect(Number.isSafeInteger(data.percent)).toBe(true);
                 expect(data.percent).toBeGreaterThanOrEqual(1);
@@ -43,12 +46,13 @@ describe('PercentQuantityRelationsGenerator', () => {
                     expect(value.numerator).toBeGreaterThan(0);
                     expect(value.denominator).toBeGreaterThan(0);
                     expect(greatestCommonDivisor(value.numerator, value.denominator)).toBe(1);
-                    expect(value.numerator).toBeLessThan(bound);
-                    expect(value.denominator).toBeLessThan(bound);
-                    expect(value.numerator / value.denominator).toBeLessThan(bound);
+                    expect(value.numerator).toBeLessThanOrEqual(PERCENT_SOURCE_CAP);
+                    expect(value.denominator).toBeLessThanOrEqual(400);
+                    expect(value.numerator / value.denominator).toBeLessThanOrEqual(max);
                 }
-                expect(whole.numerator * scaleFactor.numerator).toBeLessThan(bound);
-                expect(whole.denominator * scaleFactor.denominator).toBeLessThan(bound);
+                expect(whole.numerator * scaleFactor.numerator).toBeLessThanOrEqual(PERCENT_SOURCE_CAP);
+                expect(hasCanonicalRangeWitness([data.percent, 100, scaleFactor.numerator / scaleFactor.denominator,
+                    whole.numerator / whole.denominator, part.numerator / part.denominator], range)).toBe(true);
                 if (data.percent === 100) expect(part).toEqual(whole);
                 const relation = Math.sign(part.numerator * whole.denominator - whole.numerator * part.denominator);
                 expect(relation).toBe(Math.sign(data.percent - 100));
@@ -58,23 +62,24 @@ describe('PercentQuantityRelationsGenerator', () => {
                 problems.add(JSON.stringify(data));
                 expect(Object.keys(data).sort()).toEqual(['kind', 'part', 'perHundred', 'percent', 'scaleFactor', 'whole']);
             }
-            expect(percentProfiles).toEqual(new Set(['less', 'equal', 'greater']));
+            expect(percentProfiles).toEqual(new Set(max === 100 ? ['less', 'equal'] : ['less', 'equal', 'greater']));
             expect(wholeProfiles).toEqual(new Set(['integer', 'fractional']));
             expect(partProfiles).toEqual(new Set(['integer', 'fractional']));
-            expect(problems.size).toBeGreaterThan(250);
+            expect(problems.size).toBeGreaterThan(220);
         }
     );
 
-    it('makes the magnitude configuration change the sampled quantities', () => {
+    it('separates magnitude bands without changing the mathematical percent relation', () => {
         let largeNumerators = 0;
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const smaller = generator.generate({range: {min: 0, max: 1000}}).data;
+            const smaller = generator.generate({range: createCanonicalNumericRange(1000)}).data;
             setSeed(seed);
-            const larger = generator.generate({range: {min: 0, max: 10000}}).data;
-            expect(larger.percent).toBe(smaller.percent);
-            expect(larger.whole.numerator / larger.whole.denominator)
-                .toBeGreaterThan(smaller.whole.numerator / smaller.whole.denominator);
+            const larger = generator.generate({range: createCanonicalNumericRange(10000)}).data;
+            expect(Math.max(larger.whole.numerator / larger.whole.denominator,
+                larger.part.numerator / larger.part.denominator)).toBeGreaterThan(1000);
+            expect(Math.max(smaller.whole.numerator / smaller.whole.denominator,
+                smaller.part.numerator / smaller.part.denominator, smaller.percent)).toBeLessThanOrEqual(1000);
             if (larger.whole.numerator >= 1000 || larger.part.numerator >= 1000) largeNumerators++;
         }
         expect(largeNumerators).toBeGreaterThan(40);
@@ -82,8 +87,8 @@ describe('PercentQuantityRelationsGenerator', () => {
 
     it('reproduces the same relation with the same seed and config', () => {
         setSeed(88);
-        const first = generator.generate({range: {min: 0, max: 1000}});
+        const first = generator.generate({range: createCanonicalNumericRange(1000)});
         setSeed(88);
-        expect(generator.generate({range: {min: 0, max: 1000}})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 });

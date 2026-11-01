@@ -1,6 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {CANONICAL_RANGE_THRESHOLDS} from '../../../lib/canonical-numeric-range.ts';
 import {planCompatibility} from '../../../lib/compatibility.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
@@ -41,18 +42,23 @@ describe('percent-quantity-relations capabilities', () => {
             setSeed(23);
             const problem = generateWithLabels(new PercentQuantityRelationsGenerator(), [...mathematicalLabels, ability])!;
             expect(problem.data.kind).toBe('percent-quantity');
-            expect(problem.data.whole.numerator).toBeLessThan(1000);
-            expect(problem.data.part.numerator).toBeLessThan(1000);
-            expect(problem.labels).toEqual([]);
+            expect(problem.data.whole.numerator).toBeLessThan(10000);
+            expect(problem.data.part.numerator).toBeLessThan(10000);
+            expect(problem.labels).toHaveLength(1);
+            expect([Scope.NumbersSmaller100, Scope.NumbersSmaller120, Scope.NumbersSmaller1000,
+                Scope.NumbersSmaller10000]).toContain(problem.labels[0]);
         }
     );
 
-    it.each([[Scope.NumbersSmaller1000, 1000], [Scope.NumbersSmaller10000, 10000]] as const)(
+    it.each([[Scope.NumbersSmaller100, 100], [Scope.NumbersSmaller120, 120],
+        [Scope.NumbersSmaller1000, 1000], [Scope.NumbersSmaller10000, 10000]] as const)(
         'resolves the supported magnitude label %s', (label, bound) => {
             const problem = generateWithLabels(new PercentQuantityRelationsGenerator(), [...mathematicalLabels, label])!;
             expect(problem.labels).toEqual([label]);
-            expect(problem.data.whole.numerator).toBeLessThan(bound);
-            expect(problem.data.part.numerator).toBeLessThan(bound);
+            const {whole, part, percent} = problem.data;
+            const maximum = Math.max(percent, 100, whole.numerator / whole.denominator, part.numerator / part.denominator);
+            expect(maximum).toBeLessThanOrEqual(bound);
+            expect(maximum).toBeGreaterThan(CANONICAL_RANGE_THRESHOLDS[CANONICAL_RANGE_THRESHOLDS.indexOf(bound) - 1]!);
         }
     );
 
