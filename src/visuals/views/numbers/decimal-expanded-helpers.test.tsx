@@ -1,5 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {DecimalPlaceValueExpandedGenerator} from '../../../generators/place-value/decimal-place-value-expanded/generator.ts';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import type {DecimalExpandedPlace, DecimalPlaceValueExpandedProblem} from '../../../types/problems.ts';
 import {assertDecimalExpandedProblem, expandedTerm, expandedTermRows} from './decimal-expanded-helpers.ts';
@@ -55,6 +57,21 @@ function render(data: DecimalPlaceValueExpandedProblem, isSolutionView: boolean)
 }
 
 describe('decimal expanded-form view', () => {
+    it('keeps every resolved numerical band meaningful in both render modes', () => {
+        const generator = new DecimalPlaceValueExpandedGenerator();
+        for (const requireZeroCoefficient of [true, false]) for (const upper of [5, 10, 20, 100, 120, 1000]) {
+            if (!requireZeroCoefficient && upper <= 100) continue;
+            const range = createCanonicalNumericRange(upper);
+            const data = generator.generate({requireZeroCoefficient, range})!.data;
+            expect(hasCanonicalRangeWitness([data.valueInThousandths / 1000,
+                ...data.sumTerms.flatMap(term => [term.digit, term.unitNumerator / term.unitDenominator,
+                    term.contributionInThousandths / 1000])], range)).toBe(true);
+            expect(render(data, false)).toContain(data.canonicalNumeral);
+            const solution = render(data, true);
+            for (const term of data.sumTerms) expect(solution).toContain(expandedTerm(term));
+        }
+    });
+
     it('keeps zero placeholders visible while withholding the expanded terms in Question Mode', () => {
         const question = render(placeholder, false);
         expect(question).toContain('5.008');

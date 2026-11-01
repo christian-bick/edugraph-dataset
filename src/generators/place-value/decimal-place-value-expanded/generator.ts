@@ -1,4 +1,4 @@
-import {validateConfigFields} from '../../../lib/errors.ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalExpandedPlace, DecimalPlaceValueExpandedProblem} from '../../../types/problems.ts';
@@ -6,6 +6,7 @@ import {
     DecimalPlaceValueExpandedGeneratorSchema,
     type DecimalPlaceValueExpandedGeneratorConfig
 } from './spec.ts';
+import {expandedDecimalRangeBlocks} from './domain.ts';
 
 type FractionalDigits = DecimalPlaceValueExpandedProblem['fractionalDigits'];
 type Precision = DecimalPlaceValueExpandedProblem['fractionalPrecision'];
@@ -25,10 +26,6 @@ const PLACES: readonly [
     {name: 'hundredths', exponent: -2, unitNumerator: 1, unitDenominator: 100},
     {name: 'thousandths', exponent: -3, unitNumerator: 1, unitDenominator: 1000}
 ];
-
-const nonzeroDigit = (): number => 1 + Math.floor(random() * 9);
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
 
 const wholeDigits = (wholePart: number): readonly [number, number, number] => [
     Math.floor(wholePart / 100),
@@ -76,35 +73,6 @@ export function createExpandedDecimal(
     };
 }
 
-const WHOLE_PARTS = Array.from({length: 999}, (_, index) => index + 1);
-const ZERO_WHOLE_PARTS = WHOLE_PARTS.filter(value => wholeDigits(value).includes(0));
-const NONZERO_WHOLE_PARTS = WHOLE_PARTS.filter(value => !wholeDigits(value).includes(0));
-
-function sampleValue(requireZeroCoefficient: boolean): readonly [number, FractionalDigits, 3] {
-    // Each dataset sample includes a 1/1000 contribution; sparse cases also
-    // expose 5.008- and 0.305-style placeholders regularly.
-    // Four old patterns guarantee zero; only the all-positive-fraction pattern
-    // needs its whole-part support partitioned. These weights retain each
-    // pattern's original probability conditional on the selected zero profile.
-    const allPositiveFractionWeight = ZERO_WHOLE_PARTS.length / WHOLE_PARTS.length;
-    const draw = requireZeroCoefficient ? random() * (4 + allPositiveFractionWeight) : 0;
-    const pattern = !requireZeroCoefficient ? 2
-        : draw < 2 ? Math.floor(draw)
-        : draw < 2 + allPositiveFractionWeight ? 2
-        : draw < 3 + allPositiveFractionWeight ? 3 : 4;
-    switch (pattern) {
-        case 0: return [randomInteger(1, 99), [0, 0, nonzeroDigit()], 3];
-        case 1: return [0, [nonzeroDigit(), 0, nonzeroDigit()], 3];
-        case 2: {
-            const wholeParts = requireZeroCoefficient ? ZERO_WHOLE_PARTS : NONZERO_WHOLE_PARTS;
-            return [wholeParts[randomInteger(0, wholeParts.length - 1)]!,
-                [nonzeroDigit(), nonzeroDigit(), nonzeroDigit()], 3];
-        }
-        case 3: return [randomInteger(0, 99), [0, nonzeroDigit(), nonzeroDigit()], 3];
-        default: return [randomInteger(100, 999), [nonzeroDigit(), 0, nonzeroDigit()], 3];
-    }
-}
-
 export class DecimalPlaceValueExpandedGenerator implements ProblemGenerator<
     DecimalPlaceValueExpandedProblem,
     DecimalPlaceValueExpandedGeneratorConfig
@@ -115,9 +83,14 @@ export class DecimalPlaceValueExpandedGenerator implements ProblemGenerator<
     generate(
         config: DecimalPlaceValueExpandedGeneratorConfig
     ): ProblemStub<DecimalPlaceValueExpandedProblem> | null {
-        validateConfigFields('decimal-place-value-expanded', config, ['requireZeroCoefficient']);
-        const [wholePart, fractionalDigits, fractionalPrecision] = sampleValue(config.requireZeroCoefficient!);
-        const data = createExpandedDecimal(wholePart, fractionalDigits, fractionalPrecision);
+        validateConfigFields('decimal-place-value-expanded', config, ['requireZeroCoefficient', 'range']);
+        const blocks = expandedDecimalRangeBlocks(config.requireZeroCoefficient!, config.range!);
+        if (!blocks.length) throw new GeneratorValidationError('decimal-place-value-expanded', 'No expanded-form values support this range and zero profile.');
+        let remaining = random() * blocks.reduce((sum, block) => sum + block.weight, 0);
+        const block = blocks.find(block => (remaining -= block.weight) < 0) ?? blocks[blocks.length - 1]!;
+        const wholePart = block.wholes[Math.floor(random() * block.wholes.length)]!;
+        const fractionalDigits = block.digits.map(values => values.length === 1 ? values[0]! : values[Math.floor(random() * values.length)]!) as unknown as FractionalDigits;
+        const data = createExpandedDecimal(wholePart, fractionalDigits, 3);
         return data === null ? null : {data};
     }
 }

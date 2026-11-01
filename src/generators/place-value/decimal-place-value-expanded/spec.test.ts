@@ -17,7 +17,7 @@ describe('DecimalPlaceValueExpandedGenerator spec', () => {
             Scope.NumbersWithoutNegatives
         ]);
         expect(findSchemaFallbackContractIssues(DecimalPlaceValueExpandedGeneratorSchema)).toEqual([]);
-        expect(normalizeSchemaChoices(DecimalPlaceValueExpandedGeneratorSchema, [], 'generator')[0].alternatives
+        expect(normalizeSchemaChoices(DecimalPlaceValueExpandedGeneratorSchema, [], 'generator').find(field => field.field === 'requireZeroCoefficient')!.alternatives
             .map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
     });
 
@@ -29,8 +29,8 @@ describe('DecimalPlaceValueExpandedGenerator spec', () => {
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ])!;
-        expect(stub.labels).toHaveLength(1);
-        expect([Scope.NumbersWithZero, Scope.NumbersWithoutZero]).toContain(stub.labels[0]);
+        expect(stub.labels).toHaveLength(2);
+        expect(stub.labels.some(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never))).toBe(true);
         expect(stub.data.kind).toBe('decimal-place-value-expanded');
         expect(stub.data.sumTerms.length).toBeGreaterThanOrEqual(2);
         expect(stub.data.sumTerms.reduce((sum, term) => sum + term.contributionInThousandths, 0))
@@ -45,7 +45,8 @@ describe('DecimalPlaceValueExpandedGenerator spec', () => {
         expect(result.supported).toBe(true);
         const resolved = extractConfig(DecimalPlaceValueExpandedGeneratorSchema, labels);
         expect(resolved.config.requireZeroCoefficient).toBe(zeroLabel === Scope.NumbersWithZero);
-        expect(resolved.resolvedLabels).toEqual([zeroLabel]);
+        expect(resolved.resolvedLabels).toContain(zeroLabel);
+        expect(resolved.resolvedLabels).toHaveLength(2);
         const data = new DecimalPlaceValueExpandedGenerator().generate(resolved.config)!.data;
         expect(data.places.some(place => place.digit === 0)).toBe(zeroLabel === Scope.NumbersWithZero);
     });

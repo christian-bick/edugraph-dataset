@@ -685,3 +685,10 @@ tests/four files pass. All882 coin/mixed raw outcomes retain their original arit
 draw continuation; their empty range alternative keeps16 omissions visible rather than claiming
 completion. Rendering and the cents/dollars competency remain intact. Evidence:
 `temp/range-autonomous/batch4/measurement-time/` (banknote tests, route/source proof).
+
+
+## Fourth batch: decimal expanded form
+
+Eight correlated zero/range profiles retain all810,243 original values:278,802 zero-present and531,441 zero-free. The task explicitly assesses coefficient counts and unit-valued factors as well as the full decimal; fractional units prevent positive floors. Compact weighted pattern blocks preserve each original conditional path mass without rejection or endpoint retirement. The old route remains,2→8 selections, closing two range omissions. Twenty-six focused tests/five files cover independent finite support/probability, block endpoints, both resolution paths and question/solution evidence. Payloads, targets and rendering are unchanged.
+
+Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `expanded-tests.log`, `expanded-matching.log` and neighboring proof records.
