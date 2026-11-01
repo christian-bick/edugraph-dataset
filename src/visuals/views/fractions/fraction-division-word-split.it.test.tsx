@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {fileURLToPath} from 'node:url';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -133,7 +134,7 @@ describe('fraction division word-problem family separation', () => {
         expect(bindings).toBe(11);
     }, 30_000);
 
-    it('retains all five legacy target routes and eight zero/nonzero bindings on the original ID', () => {
+    it('retains all five legacy target routes with sixteen zero/nonzero range bindings', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-quotient-model')!;
         const generalView = views.find(candidate => candidate.viewId === generalId)!;
         const quotientView = views.find(candidate => candidate.viewId === quotientId)!;
@@ -151,8 +152,8 @@ describe('fraction division word-problem family separation', () => {
             }
             expect(matchTarget(target, generator, generalView)).toEqual({matched: false, reason: 'incompatible-type'});
         }
-        expect({tuples, withZero, withoutZero}).toEqual({tuples: 5, withZero: 3, withoutZero: 5});
-        const data = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-equation', numericProfile: 'zero'}).data;
+        expect({tuples, withZero, withoutZero}).toEqual({tuples: 5, withZero: 4, withoutZero: 12});
+        const data = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-equation', 'zero'), relationProfile: 'unit-divisor-equation', numericProfile: 'zero'}).data;
         const generalData = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: true, withMultiplication: false}).data;
         for (const isSolutionView of [false, true]) {

@@ -982,3 +982,20 @@ fixture now accounts for the26 selections and11 explicit range deferrals without
 mathematical or entropy comparisons. Rendering and numeric units stay unchanged.
 Evidence: `temp/range-autonomous/batch5/measurement-time/{cent-focused.log,cent-slices.log,
 cent-unaffected-verify.log,verification.json}`. Remaining dollar/cent cases stay separate.
+
+## Fifth batch: settled quotient roles
+
+Whole-sharing, fraction-as-quotient and whole-by-unit-fraction roles use existing configurations
+with finite upper5/10/20/100 profiles. All107 unique role/numeric pairs and177 actual relation
+pairs remain; both existing material variants are checked through354 outputs. Their original
+uniform conditional laws remain. Unit-dividend roles keep unchanged samplers and empty range
+bindings, leaving16 omissions visible rather than assigning a payload-wide count to every task.
+
+All22 routes remain,52→104 selections, closing36 baseline omissions. Twenty-three settled schema
+combinations pass direct/planned/replay and all six Question/Solution projections. Sixty-six
+focused tests/eight files plus23 migration tests/four files pass. An exposed direct resolver alias
+is repaired: explicit NumbersWithoutZero now resolves the same existing whole-sharing/unit-divisor
+role admitted by planned bindings. It adds no capability label, route or global matching behavior.
+Seven consumer fixtures supply the explicit range. Payloads, rendering, source targets and IDs
+are unchanged; profile sampling changes native outcomes. Evidence:
+`temp/range-autonomous/batch5/fraction-decimal/quotient-*`.

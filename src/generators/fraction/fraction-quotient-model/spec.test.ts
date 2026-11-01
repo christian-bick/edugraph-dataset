@@ -6,6 +6,7 @@ import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-
 import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {FractionQuotientModelGenerator} from './generator.ts';
 import {FractionQuotientModelGeneratorSchema, spec} from './spec.ts';
+import {quotientRangeLabels} from './range-profile.ts';
 
 const wholeRoles = [Scope.IntegerDividend, Scope.IntegerDivisor,
     Scope.FractionQuotient, Scope.NumbersWithoutNegatives];
@@ -109,10 +110,12 @@ describe('fraction-quotient-model schema integration', () => {
             ...(numeric === 'proper' ? [Scope.ProperFractions, Scope.NumbersWithoutZero]
                 : numeric === 'improper' ? [Scope.ImproperFractions, Scope.NumbersWithoutZero]
                     : [numeric === 'zero' ? Scope.NumbersWithZero : Scope.NumbersWithoutZero])];
-        expect(new Set<string>(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
+        expect(new Set<string>(resolved.resolvedLabels.filter(label => !quotientRangeLabels.includes(label as never))))
+            .toEqual(new Set<string>(expectedLabels));
         setSeed(_name);
         const problem = generateWithLabels(new FractionQuotientModelGenerator(), labels)!;
-        expect(new Set<string>(problem.labels)).toEqual(new Set<string>(expectedLabels));
+        expect(new Set<string>(problem.labels.filter(label => !quotientRangeLabels.includes(label as never))))
+            .toEqual(new Set<string>(expectedLabels));
         expect(problem.data.equationWitness !== undefined).toBe(relationProfile.endsWith('-equation'));
         expect(problem.data.multiplicationWitness !== undefined).toBe(relationProfile.endsWith('-inverse'));
     });

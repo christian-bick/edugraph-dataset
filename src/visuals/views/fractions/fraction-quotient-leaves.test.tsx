@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -54,7 +55,7 @@ describe('fraction quotient leaf contracts', () => {
                 setSeed(`fraction-quotient-leaf-${relationProfile}-${seed}`);
                 const numericProfile = relationProfile === 'fraction-as-quotient' ? seed % 2 ? 'proper' : 'improper'
                     : relationProfile.startsWith('unit-dividend-') ? 'nonzero' : seed % 2 ? 'zero' : 'nonzero';
-                const data = generator.generate({relationProfile, numericProfile}).data;
+                const data = generator.generate({range: quotientFixtureRange(relationProfile, numericProfile), relationProfile, numericProfile}).data;
                 for (const id of leafIds) {
                     expect(() => render(id, data, false)).not.toThrow();
                     expect(() => render(id, data, true)).not.toThrow();
@@ -65,7 +66,7 @@ describe('fraction quotient leaf contracts', () => {
 
     it('rejects an invalid inverse in every leaf', () => {
         setSeed('fraction-quotient-invalid-leaf');
-        const data = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-dividend-inverse', numericProfile: 'nonzero'}).data;
+        const data = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-dividend-inverse', 'nonzero'), relationProfile: 'unit-dividend-inverse', numericProfile: 'nonzero'}).data;
         const invalid = {...data, inverse: {...data.inverse,
             reconstructedDividend: {numerator: 25, denominator: 1}}};
         for (const id of leafIds) expect(() => render(id, invalid, false)).toThrow(/Validation Error/);

@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import type {FractionQuotientProblem} from '../../../types/problems.ts';
@@ -20,7 +21,7 @@ describe('fraction quotient view contract', () => {
                 setSeed(`fraction-quotient-view-${relationProfile}-${seed}`);
                 const numericProfile = relationProfile === 'fraction-as-quotient' ? seed % 2 ? 'proper' : 'improper'
                     : relationProfile.startsWith('unit-dividend-') ? 'nonzero' : seed % 2 ? 'zero' : 'nonzero';
-                const data = generator.generate({relationProfile, numericProfile}).data;
+                const data = generator.generate({range: quotientFixtureRange(relationProfile, numericProfile), relationProfile, numericProfile}).data;
                 expect(isValidFractionQuotient(data)).toBe(true);
                 sawZero ||= data.quotient.numerator === 0;
                 sawIntegralFraction ||= data.orientation === 'whole-by-whole'
@@ -34,7 +35,7 @@ describe('fraction quotient view contract', () => {
 
     it('rejects contradictory original roles, partition counts, inverse, and optional witnesses', () => {
         setSeed('fraction-quotient-invalid');
-        const unit = generator.generate({relationProfile: 'unit-dividend-equation', numericProfile: 'nonzero'}).data;
+        const unit = generator.generate({range: quotientFixtureRange('unit-dividend-equation', 'nonzero'), relationProfile: 'unit-dividend-equation', numericProfile: 'nonzero'}).data;
         expect(unit.orientation).toBe('unit-fraction-by-whole');
         if (unit.orientation !== 'unit-fraction-by-whole') return;
         expect(isValidFractionQuotient({...unit, divisor: {numerator: 0, denominator: 1}})).toBe(false);
@@ -47,7 +48,7 @@ describe('fraction quotient view contract', () => {
             recipientUnit: 'piece'}} as unknown as FractionQuotientProblem)).toBe(false);
 
         setSeed('fraction-quotient-invalid-multiplication');
-        const inverse = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'nonzero'}).data;
+        const inverse = generator.generate({range: quotientFixtureRange('unit-divisor-inverse', 'nonzero'), relationProfile: 'unit-divisor-inverse', numericProfile: 'nonzero'}).data;
         expect(isValidFractionQuotient({...inverse, multiplicationWitness: {...inverse.multiplicationWitness!,
             unreducedProduct: {numerator: 99, denominator: 1}}})).toBe(false);
     });

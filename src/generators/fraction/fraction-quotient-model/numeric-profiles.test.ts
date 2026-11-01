@@ -1,3 +1,6 @@
+import {quotientFixtureRange} from './range-fixtures.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {quotientRangePairs} from './numeric-domain.ts';
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it, vi} from 'vitest';
 import {planCompatibility} from '../../../lib/compatibility.ts';
@@ -66,9 +69,10 @@ describe('fraction quotient finite numeric profiles', () => {
         }
     });
 
-    it('admits thirteen compatible completions of the eight original unrequested relations', () => {
+    it('retains thirteen original completions while adding twenty-six range bindings', () => {
         const resolved = planned([]);
-        expect(resolved).toHaveLength(13);
+        expect(resolved).toHaveLength(26);
+        expect(new Set(resolved.map(item => `${item.config.relationProfile}:${item.config.numericProfile}`)).size).toBe(13);
         expect(new Set(resolved.map(item => item.config.relationProfile)).size).toBe(8);
     });
 
@@ -104,9 +108,13 @@ describe('fraction quotient finite numeric profiles', () => {
             const minSecond = sharing ? 1 : 2;
             for (let count = 0; count <= 6; count++) for (let second = minSecond; second <= 6; second++) {
                 for (const materialDraw of [0.25, 0.75]) {
-                    const secondDraw = (second - minSecond + 0.5) / (7 - minSecond);
-                    const current = draw({relationProfile, numericProfile: count === 0 ? 'zero' : 'nonzero'}, [
-                        count === 0 ? 0.5 : (count - 0.5) / 6, secondDraw, materialDraw]);
+                    const numericProfile = count === 0 ? 'zero' : 'nonzero';
+                    const max = sharing ? Math.max(count, second) : count === 0 ? 1 : count * second;
+                    const range = createCanonicalNumericRange([5, 10, 20, 100].find(upper => max <= upper)!);
+                    const pairs = quotientRangePairs(sharing ? 'whole-sharing' : 'unit-divisor', numericProfile, range);
+                    const index = pairs.findIndex(pair => pair[0] === count && pair[1] === second);
+                    expect(index).toBeGreaterThanOrEqual(0);
+                    const current = draw({relationProfile, numericProfile, range}, [(index + 0.5) / pairs.length, materialDraw]);
                     expect(current.dividend).toEqual({numerator: count, denominator: 1});
                     expect(current.divisor).toEqual(sharing
                         ? {numerator: second, denominator: 1} : {numerator: 1, denominator: second});
@@ -144,8 +152,8 @@ describe('fraction quotient finite numeric profiles', () => {
 
     it('rejects profile combinations that change original operand roles or make unsupported zero claims', () => {
         const generator = new FractionQuotientModelGenerator();
-        expect(() => generator.generate({relationProfile: 'fraction-as-quotient', numericProfile: 'zero'})).toThrow(/incompatible/);
-        expect(() => generator.generate({relationProfile: 'unit-dividend-basic', numericProfile: 'zero'})).toThrow(/incompatible/);
-        expect(() => generator.generate({relationProfile: 'unit-divisor-basic', numericProfile: 'proper'})).toThrow(/incompatible/);
+        expect(() => generator.generate({range: quotientFixtureRange('fraction-as-quotient', 'zero'), relationProfile: 'fraction-as-quotient', numericProfile: 'zero'})).toThrow(/incompatible/);
+        expect(() => generator.generate({range: quotientFixtureRange('unit-dividend-basic', 'zero'), relationProfile: 'unit-dividend-basic', numericProfile: 'zero'})).toThrow(/incompatible/);
+        expect(() => generator.generate({range: quotientFixtureRange('unit-divisor-basic', 'proper'), relationProfile: 'unit-divisor-basic', numericProfile: 'proper'})).toThrow(/incompatible/);
     });
 });

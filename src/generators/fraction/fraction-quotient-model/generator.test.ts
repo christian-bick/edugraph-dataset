@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from './range-fixtures.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import type {FractionQuotientProblem, FractionQuotientValue} from '../../../types/problems.ts';
@@ -16,7 +17,7 @@ const sample = (profile: typeof profiles[number], seed: string): FractionQuotien
     const alternate = Number(seed.match(/\d+$/)?.[0] ?? 0) % 2 === 0;
     const numericProfile = profile === 'fraction-as-quotient' ? alternate ? 'proper' : 'improper'
         : profile.startsWith('unit-dividend-') ? 'nonzero' : alternate ? 'zero' : 'nonzero';
-    return generator.generate({relationProfile: profile, numericProfile}).data;
+    return generator.generate({range: quotientFixtureRange(profile, numericProfile), relationProfile: profile, numericProfile}).data;
 };
 
 const equalValues = (first: FractionQuotientValue, second: FractionQuotientValue): boolean =>
@@ -152,8 +153,8 @@ describe('fraction-quotient-model exact division', () => {
             expect(sample(profile, `replay-${profile}`)).toEqual(sample(profile, `replay-${profile}`));
         }
         expect(() => generator.generate({} as FractionQuotientModelGeneratorConfig)).toThrow();
-        expect(() => generator.generate({relationProfile: 'unit-divisor-basic'})).toThrow(/numericProfile/);
-        expect(() => generator.generate({relationProfile: 'unknown', numericProfile: 'nonzero'} as unknown as
+        expect(() => generator.generate({range: quotientFixtureRange('unit-divisor-basic', undefined), relationProfile: 'unit-divisor-basic'})).toThrow(/numericProfile/);
+        expect(() => generator.generate({range: quotientFixtureRange('unknown', 'nonzero'), relationProfile: 'unknown', numericProfile: 'nonzero'} as unknown as
             FractionQuotientModelGeneratorConfig)).toThrow(/Unsupported relation profile/);
     });
 });

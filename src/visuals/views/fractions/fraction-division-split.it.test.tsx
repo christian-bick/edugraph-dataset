@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {fileURLToPath} from 'node:url';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -131,7 +132,7 @@ describe('supplied general division model migrations', () => {
     it.each(cases)('$newId and $oldId reject the other valid named payload family in both modes', entry => {
         const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
-        const quotient = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
+        const quotient = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-basic', 'zero'), relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {
             // @ts-expect-error An adversarial legacy fixture violates the general-only adapter contract.
             expect(() => renderers[entry.newId].general(quotient, solution)).toThrow(/Validation Error/);
@@ -182,7 +183,7 @@ describe('supplied general division model migrations', () => {
         expect(checked).toBe(11);
     }, 30_000);
 
-    it('retains 42 legacy selections on the four original IDs, including 14 zero and 28 nonzero choices', () => {
+    it('retains sixteen legacy routes with fourteen zero and seventy nonzero range choices', () => {
         const generator = generators.find(entry => entry.generatorId === 'fraction-quotient-model')!;
         let withZero = 0, withoutZero = 0, tuples = 0;
         for (const entry of cases) {
@@ -201,6 +202,6 @@ describe('supplied general division model migrations', () => {
                 expect(matchTarget(target, generator, wrongView)).toEqual({matched: false, reason: 'incompatible-type'});
             }
         }
-        expect({tuples, withZero, withoutZero}).toEqual({tuples: 16, withZero: 14, withoutZero: 28});
+        expect({tuples, withZero, withoutZero}).toEqual({tuples: 16, withZero: 14, withoutZero: 70});
     });
 });

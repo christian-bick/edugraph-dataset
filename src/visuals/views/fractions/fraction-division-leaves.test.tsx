@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -157,7 +158,7 @@ describe('general fraction division leaf contracts', () => {
                     ? ['nonzero'] as const : ['zero', 'nonzero'] as const;
             for (const numericProfile of numericProfiles) {
                 setSeed(`legacy-division-regression-${relationProfile}-${numericProfile}`);
-                const {data} = generator.generate({relationProfile, numericProfile});
+                const {data} = generator.generate({range: quotientFixtureRange(relationProfile, numericProfile), relationProfile, numericProfile});
                 for (const id of legacyLeafIds) {
                     for (const isSolutionView of [false, true]) {
                         const task = id.replace('fractions-', '') as FractionQuotientTask;

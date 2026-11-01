@@ -1,14 +1,22 @@
+import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
+import * as randomModule from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
 import {FractionQuotientBody} from './fraction-quotient-view.tsx';
 import {formatQuotientValue} from './fraction-quotient-helpers.ts';
 
 const generator = new FractionQuotientModelGenerator();
+const zeroThirds = (relationProfile: 'unit-divisor-basic' | 'unit-divisor-equation' | 'unit-divisor-inverse') => {
+    const draw = vi.spyOn(randomModule, 'random').mockReturnValue(0.3);
+    try { return generator.generate({relationProfile, numericProfile: 'zero', range: quotientFixtureRange(relationProfile, 'zero')}).data; }
+    finally { draw.mockRestore(); }
+};
 const sample = (relationProfile: Parameters<FractionQuotientModelGenerator['generate']>[0]['relationProfile']) => {
     setSeed(`quotient-render-${relationProfile}`);
-    return generator.generate({relationProfile, numericProfile: relationProfile === 'fraction-as-quotient'
+    return generator.generate({range: quotientFixtureRange(relationProfile, relationProfile === 'fraction-as-quotient'
+        ? 'proper' : 'nonzero'), relationProfile, numericProfile: relationProfile === 'fraction-as-quotient'
         ? 'proper' : 'nonzero'}).data;
 };
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
@@ -16,9 +24,9 @@ const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').repl
 describe('fraction quotient task projections', () => {
     it('distinguishes the original zero-dividend Equation collision from basic and inverse execution', () => {
         setSeed(39726493);
-        const basic = generator.generate({relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
+        const basic = zeroThirds('unit-divisor-basic');
         setSeed(1130970508);
-        const equation = generator.generate({relationProfile: 'unit-divisor-equation', numericProfile: 'zero'}).data;
+        const equation = zeroThirds('unit-divisor-equation');
         const {equationWitness, ...withoutEquation} = equation;
         expect(equationWitness).toBeDefined();
         expect(withoutEquation).toEqual(basic);
@@ -26,7 +34,7 @@ describe('fraction quotient task projections', () => {
         expect(equation.divisor).toEqual({numerator: 1, denominator: 3});
 
         setSeed(1130970508);
-        const inverse = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
+        const inverse = zeroThirds('unit-divisor-inverse');
         for (const isSolutionView of [false, true]) {
             const render = (data: typeof equation) => renderToStaticMarkup(
                 <FractionQuotientBody data={data} task="division-execution" isSolutionView={isSolutionView} />);
@@ -51,7 +59,7 @@ describe('fraction quotient task projections', () => {
         for (const relationProfile of ['whole-sharing-equation', 'unit-dividend-equation', 'unit-divisor-equation'] as const) {
             for (let seed = 0; seed < 6; seed++) {
                 setSeed(`execution-equation-${relationProfile}-${seed}`);
-                const data = generator.generate({relationProfile, numericProfile: 'nonzero'}).data;
+                const data = generator.generate({range: quotientFixtureRange(relationProfile, 'nonzero'), relationProfile, numericProfile: 'nonzero'}).data;
                 const witness = data.equationWitness!;
                 const groupCount = formatQuotientValue(witness.groupCount);
                 const perGroup = formatQuotientValue(witness.measurePerGroup);
@@ -96,7 +104,7 @@ describe('fraction quotient task projections', () => {
 
     it('replays the zero-dividend failure with an empty amount and a separate correct partition reference', () => {
         setSeed(1130970508);
-        const data = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
+        const data = zeroThirds('unit-divisor-inverse');
         expect(data.orientation).toBe('whole-by-unit-fraction');
         expect(data.dividend).toEqual({numerator: 0, denominator: 1});
         expect(data.divisor).toEqual({numerator: 1, denominator: 3});
@@ -133,7 +141,7 @@ describe('fraction quotient task projections', () => {
 
     it('keeps the zero-reference and execution check changes out of other legacy task identities', () => {
         setSeed(1130970508);
-        const data = generator.generate({relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
+        const data = generator.generate({range: quotientFixtureRange('unit-divisor-inverse', 'zero'), relationProfile: 'unit-divisor-inverse', numericProfile: 'zero'}).data;
         for (const task of ['division-interpretation', 'division-story-creation', 'division-inverse-explanation', 'division-word-problem'] as const) {
             const markup = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView />);
             expect(markup).not.toContain('One-meter partition reference');

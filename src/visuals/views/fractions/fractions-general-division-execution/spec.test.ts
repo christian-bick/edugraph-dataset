@@ -1,3 +1,4 @@
+import {quotientFixtureRange} from '../../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -80,7 +81,7 @@ describe('general division execution split', () => {
     it('rejects the other valid payload family statically and at runtime in both directions', () => {
         const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
-        const quotient = new FractionQuotientModelGenerator().generate({relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
+        const quotient = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-basic', 'zero'), relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {
             // @ts-expect-error The new leaf accepts the named general relation, never a legacy quotient problem.
             const wrongGeneral = generalPayload(quotient, solution);

@@ -6,7 +6,9 @@ import {
     FractionQuotientModelGeneratorConfig,
     FractionQuotientModelGeneratorSchema
 } from './spec.ts';
-import {fractionNotationPairs, numericProfiles, type QuotientNumericProfile} from './numeric-profiles.ts';
+import {numericProfiles, type QuotientNumericProfile} from './numeric-profiles.ts';
+import {quotientRangePairs} from './numeric-domain.ts';
+import type {CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 type Profile = FractionQuotientModelGeneratorConfig['relationProfile'];
 type Common = Pick<FractionQuotientProblem,
@@ -53,13 +55,10 @@ function common(
     };
 }
 
-function wholeByWhole(withEquation: boolean, numericProfile: QuotientNumericProfile): FractionQuotientProblem {
-    const notationPairs = numericProfile === 'proper' || numericProfile === 'improper'
-        ? fractionNotationPairs(numericProfile) : undefined;
-    const pair = notationPairs?.[integer(0, notationPairs.length - 1)];
-    const wholeUnitCount = pair?.[0] ?? integer(numericProfile === 'nonzero' ? 1 : 0,
-        numericProfile === 'zero' ? 0 : 6);
-    const recipientCount = pair?.[1] ?? integer(1, 6);
+function wholeByWhole(withEquation: boolean, numericProfile: QuotientNumericProfile, range: CanonicalNumericRange): FractionQuotientProblem {
+    const pairs = quotientRangePairs(withEquation ? 'whole-sharing' : 'notation', numericProfile, range);
+    if (!pairs.length) throw new GeneratorValidationError('fraction-quotient-model', 'No sharing pairs support this numeric range.');
+    const [wholeUnitCount, recipientCount] = pairs[integer(0, pairs.length - 1)]!;
     return {
         ...common(value(wholeUnitCount), value(recipientCount),
             value(wholeUnitCount, recipientCount), 'sharing', withEquation, false),
@@ -92,9 +91,10 @@ function unitFractionByWhole(withEquation: boolean, withMultiplication: boolean)
 }
 
 function wholeByUnitFraction(withEquation: boolean, withMultiplication: boolean,
-    numericProfile: QuotientNumericProfile): FractionQuotientProblem {
-    const wholeUnitCount = integer(numericProfile === 'nonzero' ? 1 : 0, numericProfile === 'zero' ? 0 : 6);
-    const partsPerWhole = integer(2, 6);
+    numericProfile: QuotientNumericProfile, range: CanonicalNumericRange): FractionQuotientProblem {
+    const pairs = quotientRangePairs('unit-divisor', numericProfile, range);
+    if (!pairs.length) throw new GeneratorValidationError('fraction-quotient-model', 'No group-count pairs support this numeric range.');
+    const [wholeUnitCount, partsPerWhole] = pairs[integer(0, pairs.length - 1)]!;
     const groupCount = wholeUnitCount * partsPerWhole;
     return {
         ...common(value(wholeUnitCount), value(1, partsPerWhole),
@@ -119,11 +119,13 @@ export class FractionQuotientModelGenerator implements ProblemGenerator<
     schema = FractionQuotientModelGeneratorSchema;
 
     generate(config: FractionQuotientModelGeneratorConfig): ProblemStub<FractionQuotientProblem> {
-        validateConfigFields('fraction-quotient-model', config, ['relationProfile', 'numericProfile']);
+        validateConfigFields('fraction-quotient-model', config, ['relationProfile', 'numericProfile', 'range']);
         if (!config.relationProfile || !PROFILE_VALUES.includes(config.relationProfile)) {
             throw new GeneratorValidationError('fraction-quotient-model',
                 `Unsupported relation profile "${config.relationProfile}".`);
         }
+        if (config.relationProfile.startsWith('unit-dividend-') && (config.range!.min !== 0 || config.range!.max !== Number.MAX_SAFE_INTEGER))
+            throw new GeneratorValidationError('fraction-quotient-model', 'Unit-dividend projections do not have a shared reviewed range profile yet.');
         const numericProfile = config.numericProfile!;
         if (!numericProfiles.some(([, value]) => value === numericProfile)
             || (config.relationProfile === 'fraction-as-quotient'
@@ -135,14 +137,14 @@ export class FractionQuotientModelGenerator implements ProblemGenerator<
                 `Numeric profile "${numericProfile}" is incompatible with "${config.relationProfile}".`);
         }
         switch (config.relationProfile) {
-            case 'fraction-as-quotient': return {data: wholeByWhole(false, numericProfile)};
-            case 'whole-sharing-equation': return {data: wholeByWhole(true, numericProfile)};
+            case 'fraction-as-quotient': return {data: wholeByWhole(false, numericProfile, config.range!)};
+            case 'whole-sharing-equation': return {data: wholeByWhole(true, numericProfile, config.range!)};
             case 'unit-dividend-basic': return {data: unitFractionByWhole(false, false)};
             case 'unit-dividend-inverse': return {data: unitFractionByWhole(false, true)};
             case 'unit-dividend-equation': return {data: unitFractionByWhole(true, false)};
-            case 'unit-divisor-basic': return {data: wholeByUnitFraction(false, false, numericProfile)};
-            case 'unit-divisor-inverse': return {data: wholeByUnitFraction(false, true, numericProfile)};
-            case 'unit-divisor-equation': return {data: wholeByUnitFraction(true, false, numericProfile)};
+            case 'unit-divisor-basic': return {data: wholeByUnitFraction(false, false, numericProfile, config.range!)};
+            case 'unit-divisor-inverse': return {data: wholeByUnitFraction(false, true, numericProfile, config.range!)};
+            case 'unit-divisor-equation': return {data: wholeByUnitFraction(true, false, numericProfile, config.range!)};
         }
     }
 }
