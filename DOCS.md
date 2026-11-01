@@ -71,47 +71,11 @@ Target requirements remain independent learner-task participation policies. Sche
 translates ontology-backed capabilities into typed configuration for the owning role before
 generation or rendering.
 
-Measurement conversion has two canonical producers: `measurement-unit-equivalences` returns
-five integer equivalences, while `measurement-conversion-values` returns two required exact
-equalities selected through integer/decimal schema choices. The sequence feeds the to-smaller,
-derivation and table views; numeric values feed the bidirectional view. Derivation also accepts
-the existing generic unit-scale model. Shared samplers, unit-pair choices and rendering components
-retain common behavior without optional-field task dispatch. Number kind is matching-capable
-through ordinary declarations; this family needs no inferred annotations. The
-[migration record](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
-documents retained targets, additional matches and new replay/sample identities.
-
-Parity and decimal reading likewise use dedicated canonical producers. `parity-grouping` carries
-the collection size, equal-group size, remainder and parity; the existing parity view renders that
-relation. `decimal-reading-relations` carries the source decimal and three exact comparison values;
-the reading view formats and orders them. Existing decimal-writing consumers keep their source-only
-producer. Shared samplers preserve the old mathematical draw order and conditional probabilities;
-new producer IDs deliberately change sample keys and replay identities. The
-[two-step review](docs/plan/label-dependency-graph.md#two-step-competency-review-2026-10-29)
-records complete target-route successors and same-value rendering checks. These migrations do not
-change dependency policy or automatically close missing annotations.
-
 VQA judges question and solution images independently. Each request contains its own image and
 mode, with no paired image or previous verdict. The system prompt explicitly permits deriving the
 mathematical work required by a question; solution mode evaluates the shown work and answer.
 Mode-specific verdicts and cache entries remain separate. Prompt/checklist edits change evaluation
 identities without themselves changing rendered pixels or proving empirical model accuracy.
-
-Rounding word problems carry their inclusive mathematical number domain and a canonical proposed
-result with its rounded value. The generator selects a feasible distinct integer before rendering;
-the view validates the evidence and derives only the rounded-equality verdict. Proposal sampling
-does not force a class balance. Existing matching declarations remain unchanged, while source,
-content/task and rendered-artifact identities refresh. The
-[reasoning repair](docs/plan/label-dependency-graph.md#reasoning-proposal-domain-repair-2026-10-30)
-records boundary support, shared-consumer controls and stale-source replay rejection.
-
-The current content modules also use finite mathematical profiles for operand widths,
-fraction magnitudes and settled coefficient/endpoint/sign distinctions. Their samplers
-partition the previous supported exercises before generation; labels remain ordinary
-matching capabilities. The
-[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
-record documents conditional sampling, verified repairs and concrete ownership/projection
-questions. Source audit closure remains separate from regeneration and stored-dataset acceptance.
 
 The [canonical range rollout](docs/plan/canonical-range-labeling.md) selects a tightest upper and
 strongest positive lower through ordinary schema profiles before generation. The numeric helper
@@ -124,52 +88,11 @@ Reviewed targets expand before IDs are assigned, and generator payloads remain m
 The plan records active families, intentional support changes, matching migration and the separate
 regeneration/VQA acceptance status; other families retain their existing inclusive-range contracts.
 
-Measurement stories now resolve canonical ranges for integer, fraction and decimal branches.
-An unspecified number kind retains the integer default. Decimal addition selects an upper5 or
-upper10 mathematical profile before sampling its existing finite tuple pool; the other noninteger
-branches have upper5. Decimal power-ten and tenths-equivalence scaling supply invariant upper100.
-These module declarations preserve the existing matching routes and mathematical payload shapes.
-
-Counting-on/back uses separate leaf range schemas and a finite mathematical helper, preserving
-explicit unit steps while enforcing inclusive upper5/10/20 witnesses. The Grade 1 target builders
-use the reviewed three-band shorthand. Their payloads and views remain compatible; the shared
-flexible-strategy schema and sampler retain their existing behavior. The range plan records the
-three additive target routes and their independent source/dataset acceptance.
-
-The [numerical-zero correction](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
-removes numeral-character partitions from writing and division, and checks the numerical work of
-the specified algorithms. Claims still come from preselected matching capabilities. Corrected
-partitions change conditional sampling and replay outcomes through the existing content identities;
-they do not add post-generation labeling. The standard-to-task review retains the authored fraction
-models and the independent Question/Solution evaluation inputs.
-
-The [fraction-model Scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
-introduced `BarModel` and `AreaModel` through the exact pinned ontology preview. Their ordinary view
-invariants provide matching capabilities and annotations without changing mathematical sampling
-or rendering. The adoption record separates package verification, declaration changes and deferred
-contexts whose model form is not consistently supplied or required in both modes.
-
-Five `fractions-general-division-*` leaves accept `FractionDivisionRelationProblem` for execution,
-interpretation, inverse explanation, story creation and word problems. The corresponding
-`fractions-division-*` IDs accept `FractionQuotientProblem` and retain legacy quotient capabilities.
-The general word task requires the common-part model through an unsolved frame and necessary
-prose. All six general projections, including construction, assess complete-group count and any
-fractional last group. The generator's ordinary schema profiles own zero presence/absence;
-positive-group projections omit unnecessary zero references. Both families reuse their rendering
-bodies. The [final migrations](docs/plan/label-dependency-graph.md#approved-final-seven-migrations-2026-10-30)
-document exhaustive operand support, target preservation and changed sampling/replay identities.
-
-`whole-number-lengths` supplies the canonical origin, endpoint and unit for the existing number-line
-marking view. Its invariant zero claim belongs to the rooted relation independently of its positive
-endpoint. Scalar writing retains its other consumers; both producers share the same positive
-inclusive-integer sampler. This mathematical contract replaces the former scalar-only route while
-preserving the marking competency and same-value rendering.
-
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations
 of broad requests. Both are explicit schema contracts; the existing inference callbacks remain
 independent additional annotations. See [SPEC-6](docs/spec-general.md#spec-6--reuse-shared-resolvers-pass-them-as-references)
-for authoring details and the repair plan for each deterministic owner resolver's proof.
+for authoring details; owner-specific proof and verification records belong with the corresponding module or plan.
 
 Browser-loaded shared resolvers use the pure `schema-resolution-key.ts` value helper directly.
 The server utility module re-exports that helper for compatibility; its inference, ownership and
@@ -201,7 +124,7 @@ contracts and target lifecycle rules live in [target-spec.md](docs/target-spec.m
 expansion before target IDs are assigned. It emits ordinary target permutations through the
 existing builder pipeline; loading, matching and generator configuration receive no new target
 format. The [range rollout](docs/plan/canonical-range-labeling.md) tracks generator guarantees
-and consumer review separately. Existing production builders have not adopted the helper yet.
+and consumer review separately.
 
 *   **Each standard owns a dataset folder.** `npm run generate:dataset -- --spec=<spec_module>` canonically writes to `out/dataset-<spec_module>/`, with its VQA cache in `cache/vqa-validation/dataset-<spec_module>/`. Regenerating one standard never touches another's samples, and generation never depends on a host Vite server.
 *   **Every generated standard has a complete dependency manifest.** `manifest.json` persists a versioned, planner-epoch-bound graph from matching and validation policy, target/generator/view capabilities, compatible module pairs, and successful match tuples through generator/view generation pairs, shards, images, VQA records, asset-index records, and coverage records. Capability nodes depend on the relevant ontology entities and ancestor relations; module implementation nodes remain separate so an output-only code edit does not cause rematching. Each generation-pair entry separates render nodes (pair, image, shard) from validation nodes (VQA), alongside its effective input hash, aggregate content/task hash, sample counts, and renderer identity. A definition-only ontology change can therefore invalidate VQA without scheduling pixel generation. Direct edges explain every invalidation; image nodes record byte digests and sizes, and each VQA node's input hash is the exact expected cache key. `checklist.md` and the dedicated VQA validation policy participate only in VQA-node dependencies, while the canonical standards tree, generated explorer files, favicons, and unrelated public files are absent from dataset dependencies. Shared render code and the public icon library remain explicit inputs. The icon library is indexed once as individual asset records: a literal `/icons/...` reference creates one source edge, while a template reference creates conservative edges to all matching records. Runtime asset choice stays in the view, but changing one icon reaches only views whose literal or template collection can select it. A request-local source index discovers and digests overlapping generator/view dependencies once.

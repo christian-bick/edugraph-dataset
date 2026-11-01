@@ -18,8 +18,6 @@ Development pins stable ontology `0.33.0`. Its
 [adoption record](docs/history/ontology-v032-adoption.md#stable-v0330-adoption-2026-10-30)
 confirms semantic equivalence with the preceding preview and a graph-only refresh
 preserving all 2,918 images and their exact passing VQA coverage.
-The [model-scope adoption](docs/plan/label-dependency-graph.md#ontology-preview-adoption-checkpoint)
-retains the earlier package verification and additive fraction-model declarations.
 Published dataset versions remain independently versioned.
 
 ## General Concepts
@@ -35,60 +33,9 @@ The architecture is split into three main parts:
 *   **The Body (Views):** HTML/CSS renderers that turn abstract math into visual DOM elements.
 *   **The Heart (Orchestrator):** A Playwright-powered Node.js pipeline that generates permutations, injects them into views, captures screenshots, and compiles the dataset metadata.
 
-The reviewed [Grade 6 CCSS specification](src/spec/ccss/grade-06.ts) has
-192 active target permutations and no implementation TODOs. Generated content
-comes from active targets in Kindergarten through Grade 6.
-
-For example, shape-composition exercises separate predicting suitable pieces from constructing
-an arrangement. Construction solutions use explicit component geometry supplied by the generator.
-
-Measurement conversion uses separate generators for whole-number equivalence sequences and
-integer/decimal equalities, with dedicated one-way and bidirectional execution views. The
-[split verification](docs/plan/label-dependency-graph.md#split-checkpoint-3--acceptance-and-backlog-reconciliation)
-records preserved target coverage and the resulting annotation repairs.
-
-Parity grouping and decimal reading now have dedicated canonical producers. Their existing views
-consume the grouping relation or source/comparison values, preserving every target route and the
-original mathematical sampling law. The
-[two-step review](docs/plan/label-dependency-graph.md#two-step-competency-review-2026-10-29)
-separates these completed local migrations from the ongoing zero-applicability decision.
-Question and solution evaluation remain independent: each judgement receives one image and may
-reason through the competency required by that image.
-
-General fraction-division models now use five dedicated task views, while the original view IDs
-retain quotient models. Both families reuse their existing rendering bodies. The
-[remaining-batch record](docs/plan/label-dependency-graph.md#remaining-batch-implementation-2026-10-30)
-documents preserved coverage and required story-model methods. General fraction models now use
-generator-owned profiles for zero or positive complete-group counts. A dedicated rooted-length
-producer preserves the existing number-line marking task while owning its required origin zero.
-The [final migrations](docs/plan/label-dependency-graph.md#approved-final-seven-migrations-2026-10-30)
-close the remaining source dependency gaps. Generic sign/zero annotations are excluded from
-algebraic tasks through an explicit contextual validation rule; elementary arithmetic-law examples
-retain their classification.
-
-Rounding reasonableness exercises receive their proposed value from the mathematical generator,
-within the same numeric domain as the exact and rounded quantities. The view evaluates that
-canonical proposal. Selection uses feasible values without imposing a verdict balance; the
-[reasoning repair](docs/plan/label-dependency-graph.md#reasoning-proposal-domain-repair-2026-10-30)
-records preserved target coverage and the boundary regressions.
-
-Arithmetic widths, fraction magnitudes and settled zero/sign distinctions use ordinary
-matching-capable mathematical profiles. The latest
-[numerical-zero review](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
-removes zero-digit proxies while preserving target coverage and retaining the authored visual-model
-requirements. The
-[autonomous work and decisions](docs/plan/label-dependency-graph.md#autonomous-work-and-decisions-requiring-input-2026-10-29)
-record separates verified repairs from concrete questions about content, annotation contracts
-and rare module splits. Source readiness remains separate from stored-dataset acceptance.
-
-The [canonical range plan](docs/plan/canonical-range-labeling.md) records the subsequent rollout
-of tightest numerical bounds. Reviewed source competencies expand into explicit range targets;
-matching-capable generator profiles construct exercises that demonstrate those bounds. Source
-implementation and regenerated dataset acceptance are tracked separately in that plan.
-The settled finite-domain batch also covers noninteger measurement stories and required
-power-ten/fraction scaling, preserving existing targets and matching routes.
-Counting-on/back now uses canonical upper5/10/20 profiles with reviewed Grade 1 target variants;
-the existing flexible strategies retain their earlier contract.
+Mathematical capabilities are declared before generation. Source readiness and generated-dataset
+acceptance are validated separately. Current work and module-specific verification records are
+indexed in [the project plans](docs/plan/README.md).
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 
@@ -131,8 +78,8 @@ PNG and public metadata row remain singular.
 npm run merge:dataset
 ```
 *(Tip: You can filter the generation using optional parameters:
-*   `--generator=X`: Limit generation to a specific generator module (e.g., `--generator=arithmetic-ops-pairs`).
-*   `--view=Y`: Limit generation to a specific visual view rendering (e.g., `--view=operations-vertical`).
+*   `--generator=X`: Limit generation to a specific generator module.
+*   `--view=Y`: Limit generation to a specific visual view rendering.
 *   `--training-only`: Skip validation set generation to speed up the process.
 *   `--affected`: Resolve and render only exact pairs reached from the persisted dependency delta.
 *   `--rebuild-graph`: Reconstruct the complete graph authoritatively, compare it with the previous graph, and execute only the changed closure; cannot be combined with a scoped generation flag.
