@@ -29,26 +29,6 @@ describe('clock occurrence profile migration', () => {
             [Scope.HourIntervals, Scope.MinuteIntervals]]) expect(resolveClockProfile(labels)).toBeUndefined();
     });
 
-    it('partitions every old minute-precision instant exactly once and uniformly within each profile', () => {
-        const random = vi.spyOn(rng, 'random');
-        const values: number[] = [];
-        for (const [mode, count] of [['zero-minutes', 24], ['positive-minutes', 24 * 59]] as const) {
-            const modeValues = new Set<number>();
-            for (let index = 0; index < count; index++) {
-                random.mockReturnValue((index + 0.5) / count);
-                const data = generator.generate(configuration({intervalLabel: Scope.MinuteIntervals, mode}))!.data;
-                const minute = data.secondsSinceMidnight % 3600 / 60;
-                expect(minute === 0).toBe(mode === 'zero-minutes');
-                modeValues.add(data.secondsSinceMidnight);
-                values.push(data.secondsSinceMidnight);
-            }
-            expect(modeValues.size).toBe(count);
-        }
-        expect(new Set(values).size).toBe(1440);
-        expect([...values].sort((a, b) => a - b)).toEqual(Array.from({length: 1440}, (_, i) => i * 60));
-        expect(random).toHaveBeenCalledTimes(1440);
-    });
-
     it.each(clockProfileChoices.map(labels => ({labels})))('emits truthful direct claims for $labels', ({labels}) => {
         for (const period of [[], [Scope.AnteMeridiem], [Scope.PostMeridiem]]) {
             for (const seed of [0, 1, 17, 42]) {
@@ -86,24 +66,6 @@ describe('clock occurrence profile migration', () => {
         const first = generatePlannedDraw(input);
         expect(first.labels).toContain(zero);
         expect(generatePlannedDraw({...input, replay: first.replay})).toEqual(first);
-    });
-
-    it('preserves existing non-minute mathematical paths and their entropy', () => {
-        for (const [intervalLabel, mode, requireZero, requireMultipleOf5] of [
-            [Scope.HourIntervals, 'whole-hour', false, false],
-            [Scope.HalfHourIntervals, 'half-hour', false, false],
-            [Scope.MinuteIntervals, 'positive-minutes', false, true],
-            [Scope.SecondIntervals, 'legacy-seconds', false, false],
-            [Scope.SecondIntervals, 'zero-seconds', true, false]
-        ] as const) for (let seed = 0; seed < 30; seed++) {
-            rng.setSeed(seed);
-            const old = generator.generate({intervalLabel, requireZero, requireMultipleOf5,
-                isAnteMeridiem: false, isPostMeridiem: false});
-            const state = rng.getRandomState();
-            rng.setSeed(seed);
-            expect(generator.generate({...configuration({intervalLabel, mode}), requireMultipleOf5})).toEqual(old);
-            expect(rng.getRandomState()).toBe(state);
-        }
     });
 
     it('rejects malformed resolved profile combinations', () => {

@@ -520,3 +520,19 @@ closing five source omissions. Nine tests/five files pass, including actual prep
 question/solution rendering and replay across the three consumers. No target, payload or renderer
 changes occur. Evidence: `temp/range-autonomous/batch3/fraction-decimal/` (opposite and whole
 equivalence test/route reports).
+
+## Third batch: clock components
+
+Compact hour/minute blocks and contiguous second intervals preselect canonical ranges over
+displayed clock components, excluding timestamp storage. All17 earlier routes remain;20 selections
+become108. Exhaustive support covers89,462 retained mode-specific timestamp outcomes. The agreed
+positive-threshold singleton exclusion retires ten configuration-class outcomes: four positive
+minute, two five-minute subset and four legacy-second cases. The subset overlaps two positive
+minute cases, so eight distinct payload timestamps retire before separate AM/PM metadata variants.
+Required zero-minute/second components and normalized displayed hours retain their existing meaning.
+
+All107 focused tests/18 files and types pass across every actual consumer. Twenty baseline source
+range omissions close. Both direct and planned configs agree throughout the owned source proof;
+no targets, payloads, renderers, Area qualification or range policy change. Legacy direct clock
+configurations remain available. Evidence: `temp/range-autonomous/batch3/measurement-time/`
+(clock support, consumer, route and source verification reports).

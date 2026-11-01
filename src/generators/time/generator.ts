@@ -5,6 +5,7 @@ import {Scope} from "edugraph-ts";
 import {TimeGeneratorConfig, TimeGeneratorSchema, spec} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
 import {ClockInterval} from './clock-profile.ts';
+import {clockCaseAt, clockCaseCount} from './numeric-domain.ts';
 
 function resolveInterval(intervalLabel: string | undefined): TimeIntervalSeconds {
     switch (intervalLabel) {
@@ -59,6 +60,19 @@ export class TimeGenerator implements ProblemGenerator<TimeProblem, TimeGenerato
         }
         if (config.requireMultipleOf5 && (intervalLabel !== Scope.MinuteIntervals || mode === 'zero-minutes')) {
             return null;
+        }
+
+        if (!legacy) {
+            validateConfigFields('time', config, ['range']);
+            const canonical = {...config, clockProfile: config.clockProfile!, range: config.range!,
+                requireMultipleOf5: config.requireMultipleOf5!, isAnteMeridiem: config.isAnteMeridiem!,
+                isPostMeridiem: config.isPostMeridiem!};
+            const count = clockCaseCount(canonical);
+            if (count === 0) throw new GeneratorValidationError('time', 'Unsupported canonical range for these clock components.');
+            return {data: {secondsSinceMidnight: clockCaseAt(canonical, Math.floor(random() * count)),
+                intervalSeconds: interval,
+                ...(config.isAnteMeridiem ? {period: 'ante-meridiem' as const} : {}),
+                ...(config.isPostMeridiem ? {period: 'post-meridiem' as const} : {})}};
         }
 
         const dayInSeconds = 24 * 3600;
