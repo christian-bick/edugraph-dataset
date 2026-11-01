@@ -41,6 +41,18 @@ export function radixSortUtf8(values: readonly string[]): string[] {
             return;
         }
 
+        // Shared bytes cannot affect ordering. Skip them without allocating a
+        // single bucket and recursing once for every URI/path prefix byte.
+        while (true) {
+            const byte = group[0].bytes[offset];
+            if (!group.every(item => item.bytes[offset] === byte)) break;
+            if (byte === undefined) {
+                for (const item of group) output.push(item.value);
+                return;
+            }
+            offset++;
+        }
+
         const buckets = new Map<number, EncodedValue[]>();
         for (const item of group) {
             const bucket = offset < item.bytes.length ? item.bytes[offset] + 1 : 0;

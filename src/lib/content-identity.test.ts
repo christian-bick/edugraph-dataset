@@ -5,6 +5,7 @@ import {describe, expect, it} from 'vitest';
 import {
     SourceContentIndex,
     digestContent,
+    digestFile,
     radixSortUtf8
 } from './content-identity.ts';
 
@@ -21,6 +22,38 @@ describe('content identity', () => {
             .toEqual(['a', 'a/a', 'a/z', 'z/file', 'ä/file']);
     });
 
+    it('skips long shared prefixes without changing byte ordering or mutating inputs', () => {
+        const prefix = 'http://edugraph.io/edu/'.repeat(1500);
+        const values = Object.freeze([`${prefix}Zero`, `${prefix}Addition`, `${prefix}Äquivalent`, `${prefix}Addend`]);
+        expect(radixSortUtf8(values)).toEqual([
+            `${prefix}Addend`, `${prefix}Addition`, `${prefix}Zero`, `${prefix}Äquivalent`
+        ]);
+        expect(values[0]).toBe(`${prefix}Zero`);
+    });
+
+    it('retains identical values and stable ties for distinct strings with identical UTF-8 encoding', () => {
+        expect(radixSortUtf8(['same', 'same', 'same'])).toEqual(['same', 'same', 'same']);
+        expect(radixSortUtf8(['', '', ''])).toEqual(['', '', '']);
+        // Isolated high/low surrogates and U+FFFD all encode as the replacement character.
+        const tied = ['prefix\uD800', 'prefix\uFFFD', 'prefix\uDC00'];
+        expect(radixSortUtf8(tied)).toEqual(tied);
+        expect(radixSortUtf8([...tied].reverse())).toEqual([...tied].reverse());
+    });
+
+    it('orders a prefix before its extensions, including empty strings and zero bytes', () => {
+        expect(radixSortUtf8(['prefixx', 'prefix', 'prefix\0', '', 'prefixa']))
+            .toEqual(['', 'prefix', 'prefix\0', 'prefixa', 'prefixx']);
+        expect(radixSortUtf8(['prefix', 'prefixx'])).toEqual(['prefix', 'prefixx']);
+        expect(radixSortUtf8([])).toEqual([]);
+        expect(radixSortUtf8(['one'])).toEqual(['one']);
+    });
+
+    it('agrees with stable unsigned UTF-8 byte order for mixed Unicode strings', () => {
+        const values = ['😀', '𐀀', '\uE000', 'é', 'e\u0301', '\uFFFD', '\uD800', '\uDC00', 'a', 'α', ''];
+        const expected = [...values].sort((left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)));
+        expect(radixSortUtf8(values)).toEqual(expected);
+    });
+
     it('hashes a file set independently of discovery order and honors exclusions', () => {
         const root = mkdtempSync(resolve(tmpdir(), 'edugraph-content-identity-'));
         mkdirSync(resolve(root, 'nested'));
@@ -29,6 +62,7 @@ describe('content identity', () => {
         writeFileSync(resolve(root, 'nested', 'ignored.test.ts'), 'ignored');
 
         try {
+            expect(digestFile(resolve(root, 'a.ts'))).toEqual(digestContent('a'));
             const include = (path: string): boolean => !path.endsWith('.test.ts');
             const directoryHash = new SourceContentIndex(root).hash([root], {include});
             const reversedHash = new SourceContentIndex(root).hash([
@@ -54,6 +88,7 @@ describe('content identity', () => {
 
         try {
             const index = new SourceContentIndex(root);
+            expect(index.identities([resolve(root, 'missing'), resolve(root, 'missing')])).toEqual([]);
             const complete = index.hash([resolve(root, 'shared')]);
             const subset = index.hash([resolve(root, 'shared', 'one.ts')]);
             const identities = index.identities([
