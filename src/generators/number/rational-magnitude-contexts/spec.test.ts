@@ -12,14 +12,14 @@ import {RationalMagnitudeContextsGeneratorSchema, spec} from './spec.ts';
 describe('contextual magnitude capability selection without ambiguous direction labels', () => {
     it('owns both exact comparison witnesses and a real signed input domain', () => {
         expect(spec.generalLabels).toEqual([Area.AbsoluteNumberMagnitude, Scope.RationalNumbers, Area.Inequality]);
-        expect(Object.keys(RationalMagnitudeContextsGeneratorSchema)).toEqual(['signDomain']);
+        expect(Object.keys(RationalMagnitudeContextsGeneratorSchema)).toEqual(['signDomain', 'range']);
         expect(findSchemaFallbackContractIssues(RationalMagnitudeContextsGeneratorSchema)).toEqual([]);
         expect(RationalMagnitudeContextsGeneratorSchema.signDomain[1]([])).toBeUndefined();
         expect(() => RationalMagnitudeContextsGeneratorSchema.signDomain[1]([Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives])).toThrow();
         for (const [label, signDomain] of [[Scope.NumbersWithNegatives, 'signed'], [Scope.NumbersWithoutNegatives, 'nonnegative']] as const) {
             const resolved = extractConfig(RationalMagnitudeContextsGeneratorSchema, [label]);
-            expect(resolved.config).toEqual({signDomain});
-            expect(resolved.resolvedLabels).toEqual([label]);
+            expect(resolved.config).toMatchObject({signDomain});
+            expect(resolved.resolvedLabels.filter(item => !RationalMagnitudeContextsGeneratorSchema.range[0].includes(item))).toEqual([label]);
             const data = generateWithLabels(new RationalMagnitudeContextsGenerator(), [Area.AbsoluteNumberMagnitude, Scope.RationalNumbers, label])!.data;
             expect(Math.min(data.first.sign, data.second.sign) < 0).toBe(signDomain === 'signed');
         }
@@ -45,7 +45,9 @@ describe('contextual magnitude capability selection without ambiguous direction 
                 const signed = Math.min(draw.stub!.data.first.sign, draw.stub!.data.second.sign) < 0;
                 const scope = signed ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives;
                 domains.add(scope);
-                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Area.Inequality, scope]));
+                const rangeLabels = draw.labels.filter(label => RationalMagnitudeContextsGeneratorSchema.range[0].includes(label));
+                expect(rangeLabels).toHaveLength(1);
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Area.Inequality, scope, ...rangeLabels]));
                 expect(draw.labels).not.toContain(Scope.Less);
                 expect(draw.labels).not.toContain(Scope.Greater);
             }
@@ -60,7 +62,8 @@ describe('contextual magnitude capability selection without ambiguous direction 
             setSeed(seed);
             const resolved = extractConfig(RationalMagnitudeContextsGeneratorSchema, [Scope.RationalNumbers]);
             domains.add(resolved.config.signDomain!);
-            expect(resolved.resolvedLabels).toEqual([resolved.config.signDomain === 'signed' ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives]);
+            expect(resolved.resolvedLabels.filter(label => !RationalMagnitudeContextsGeneratorSchema.range[0].includes(label)))
+                .toEqual([resolved.config.signDomain === 'signed' ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives]);
         }
         expect(domains).toEqual(new Set(['signed', 'nonnegative']));
         const labels = [Area.AbsoluteNumberMagnitude, Area.Inequality, Scope.RationalNumbers, Scope.NumbersWithNegatives];

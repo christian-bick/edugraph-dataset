@@ -12,14 +12,15 @@ import {RationalOrderContextsGeneratorSchema, spec} from './spec.ts';
 describe('contextual order capability ownership and authoritative selection', () => {
     it('owns inequality, rational values, sign domain and the exact comparison direction', () => {
         expect(spec.generalLabels).toEqual([Area.Inequality, Scope.RationalNumbers]);
-        expect(Object.keys(RationalOrderContextsGeneratorSchema)).toEqual(['signDomain', 'relation']);
+        expect(Object.keys(RationalOrderContextsGeneratorSchema)).toEqual(['signDomain', 'relation', 'range']);
         expect(findSchemaFallbackContractIssues(RationalOrderContextsGeneratorSchema)).toEqual([]);
         expect(() => RationalOrderContextsGeneratorSchema.relation[1]([Scope.Less, Scope.Greater])).toThrow();
         expect(RationalOrderContextsGeneratorSchema.relation[1]([])).toBeUndefined();
         for (const [label, relation] of [[Scope.Less, 'less'], [Scope.Greater, 'greater']] as const) {
             const resolved = extractConfig(RationalOrderContextsGeneratorSchema, [label, Scope.NumbersWithoutNegatives]);
-            expect(resolved.config).toEqual({signDomain: 'nonnegative', relation});
-            expect(resolved.resolvedLabels).toEqual([Scope.NumbersWithoutNegatives, label]);
+            expect(resolved.config).toMatchObject({signDomain: 'nonnegative', relation});
+            expect(resolved.resolvedLabels.filter(item => !RationalOrderContextsGeneratorSchema.range[0].includes(item)))
+                .toEqual([Scope.NumbersWithoutNegatives, label]);
             expect(generateWithLabels(new RationalOrderContextsGenerator(), [Area.Inequality, Scope.RationalNumbers, label])!.data.relation).toBe(relation);
         }
     });
@@ -43,7 +44,9 @@ describe('contextual order capability ownership and authoritative selection', ()
                     sampleKey: `${target.id}#${spec.generatorId}#${viewId}#train#question#inst:0`, seed, attempt: 1});
                 const negative = [draw.stub!.data.first.value.numerator, draw.stub!.data.second.value.numerator]
                     .some(value => value < 0);
-                expect(new Set(draw.labels)).toEqual(new Set([...target.labels,
+                const rangeLabels = draw.labels.filter(label => RationalOrderContextsGeneratorSchema.range[0].includes(label));
+                expect(rangeLabels).toHaveLength(1);
+                expect(new Set(draw.labels)).toEqual(new Set([...target.labels, ...rangeLabels,
                     negative ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives]));
                 expect(draw.stub!.data.relation).toBe(target.labels.includes(Scope.Less) ? 'less' : 'greater');
             }
@@ -56,7 +59,7 @@ describe('contextual order capability ownership and authoritative selection', ()
             setSeed(seed);
             const resolved = extractConfig(RationalOrderContextsGeneratorSchema, [Scope.RationalNumbers]);
             directions.add(resolved.config.relation!);
-            expect(resolved.resolvedLabels).toEqual([
+            expect(resolved.resolvedLabels.filter(label => !RationalOrderContextsGeneratorSchema.range[0].includes(label))).toEqual([
                 resolved.config.signDomain === 'signed' ? Scope.NumbersWithNegatives : Scope.NumbersWithoutNegatives,
                 resolved.config.relation === 'less' ? Scope.Less : Scope.Greater]);
         }

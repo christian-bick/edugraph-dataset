@@ -950,3 +950,18 @@ Fifty-six tests/12 files pass, including complete direct support across all16 op
 600 same-value Question/Solution projections,352 real-target draws/replays and sibling controls.
 The spec gate passes; final combined types follow the concurrent checkpoints. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{two-step-review.md,verify-two-step.json}`.
+
+## Fifth batch: contextual order and magnitude
+
+Both families use compact weighted numerator intervals with upper5/10 and no positive lower,
+including their common required reference datum0. Temperature/balance state zero directly;
+elevation names the sea-level datum already represented by the view's zero declaration. No
+pairwise distance up to20 is requested. The unrestricted legacy helper remains unchanged.
+
+All137,880 original paths and their conditional denominator/pattern/order weights remain, with
+no endpoint retirement. Integer-weight indexing is safe and the complete raw-path proof checks
+each interval. Order retains four routes,8→16 selections; magnitude retains two routes,3→6
+selections. Eleven baseline omissions close. Fifty-nine tests/nine files and label checks pass,
+with every actual source selection graph-clean, direct/planned equal, and88 native replay/state
+controls. No target, renderer, payload or matching changes occur; profile sampling changes seeds.
+Evidence: `temp/range-autonomous/batch5/measurement-time/{ordered-focused.log,verification.json}`.

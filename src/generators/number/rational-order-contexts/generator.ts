@@ -1,7 +1,8 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {RationalOrderContextProblem, SignedRational} from '../../../types/problems.ts';
-import {buildOrderedContextPair, type OrderedContextKind, sampleOrderedContextPair} from '../ordered-context-helpers.ts';
+import {buildOrderedContextPair, type OrderedContextKind} from '../ordered-context-helpers.ts';
+import {sampleCanonicalOrderedContextPair} from '../ordered-context-ranges.ts';
 import {RationalOrderContextsGeneratorSchema, type RationalOrderContextsGeneratorConfig} from './spec.ts';
 
 const generatorId = 'rational-order-contexts';
@@ -22,7 +23,8 @@ export class RationalOrderContextsGenerator implements ProblemGenerator<Rational
         if (config.signDomain !== 'signed' && config.signDomain !== 'nonnegative') {
             throw new GeneratorValidationError(generatorId, 'Sign domain must be signed or nonnegative.');
         }
-        const pair = sampleOrderedContextPair(config.signDomain);
+        validateConfigFields(generatorId, config, ['range']);
+        const pair = sampleCanonicalOrderedContextPair(config.signDomain, config.range!);
         const swap = pair.relation !== config.relation;
         return {data: buildRationalOrderContextProblem(pair.context.kind,
             swap ? pair.second.value : pair.first.value, swap ? pair.first.value : pair.second.value)};

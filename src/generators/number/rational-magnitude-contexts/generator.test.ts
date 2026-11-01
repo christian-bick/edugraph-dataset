@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {buildRationalMagnitudeContextProblem, RationalMagnitudeContextsGenerator} from './generator.ts';
+import {orderedContextRangeProfiles} from '../ordered-context-ranges.ts';
 
 const generator = new RationalMagnitudeContextsGenerator();
 const rational = (numerator: number, denominator = 1) => ({numerator, denominator});
@@ -41,7 +42,7 @@ describe('contextual signed order and absolute magnitude are distinct exact rela
         const features = new Set<string>();
         for (let seed = 0; seed < 1000; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({signDomain});
+            const {data} = generator.generate({signDomain, range: orderedContextRangeProfiles[seed % 2]!.range});
             expect(data.first.id).not.toBe(data.second.id);
             const first = data.first.value;
             const second = data.second.value;
@@ -71,9 +72,10 @@ describe('contextual signed order and absolute magnitude are distinct exact rela
 
     it('replays the same complete pair without task-dependent metadata', () => {
         setSeed('magnitude-context-replay');
-        const first = generator.generate({signDomain: 'signed'});
+        const range = orderedContextRangeProfiles[1]!.range;
+        const first = generator.generate({signDomain: 'signed', range});
         setSeed('magnitude-context-replay');
-        expect(generator.generate({signDomain: 'signed'})).toEqual(first);
+        expect(generator.generate({signDomain: 'signed', range})).toEqual(first);
         expect(Object.keys(first)).toEqual(['data']);
         expect(Object.keys(first.data)).toEqual(['kind', 'context', 'first', 'second', 'signedRelation', 'magnitudeRelation']);
     });

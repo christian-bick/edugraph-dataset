@@ -1,7 +1,8 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {RationalMagnitudeContextProblem, SignedRational} from '../../../types/problems.ts';
-import {buildOrderedContextPair, type OrderedContextKind, sampleOrderedContextPair} from '../ordered-context-helpers.ts';
+import {buildOrderedContextPair, type OrderedContextKind} from '../ordered-context-helpers.ts';
+import {sampleCanonicalOrderedContextPair} from '../ordered-context-ranges.ts';
 import {compareSignedRationals} from '../signed-rational-helpers.ts';
 import {RationalMagnitudeContextsGeneratorSchema, type RationalMagnitudeContextsGeneratorConfig} from './spec.ts';
 
@@ -23,7 +24,8 @@ export class RationalMagnitudeContextsGenerator implements ProblemGenerator<Rati
         if (config.signDomain !== 'nonnegative' && config.signDomain !== 'signed') {
             throw new GeneratorValidationError(generatorId, 'Sign domain must be nonnegative or signed.');
         }
-        const pair = sampleOrderedContextPair(config.signDomain);
+        validateConfigFields(generatorId, config, ['range']);
+        const pair = sampleCanonicalOrderedContextPair(config.signDomain, config.range!);
         return {data: buildRationalMagnitudeContextProblem(pair.context.kind, pair.first.value, pair.second.value)};
     }
 }
