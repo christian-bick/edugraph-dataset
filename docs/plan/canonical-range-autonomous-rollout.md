@@ -752,3 +752,19 @@ Independent finite enumeration proves full support, weights and canonical extrem
 cover both ends of every compact row. Both resolution paths, types, the full spec gate and CCSS
 standards validation pass. Evidence: `temp/range-autonomous/batch4/arithmetic/flexible-review.md`,
 `verify-flexible.json` and `near-double-claim-migration.json`.
+
+## Fourth batch: penny-only currency
+
+The existing formatter uses cents for coin-only amounts below100; the question cards, coin faces
+and solution equation all retain that unit. In particular, the old6/6 count draw becomes7¢+6¢=13¢,
+so13 is an explicitly required result rather than a hidden stored cent total. Upper5/10/20 profiles
+retain all36 raw draws per operation and duplicate weights; face1¢ prevents a positive floor.
+Conditional addition counts are10/22/4 and subtraction24/12 for upper5/10. No formatting is changed,
+and cents/dollars conversion remains supported in the other branches.
+
+All18 currency routes/source IDs remain,19→22 selections, closing two more range findings.
+Fourteen coin/mixed omissions remain explicit. Sixty-seven tests/five files pass. The340 same-seed
+controls and all810 other coin/mixed raw outcomes preserve data and2/4-draw continuation relative
+to the banknote checkpoint. The final owned measurement/currency proof covers38 routes/82
+selections, with no other missing facets/conflicts and direct/planned configs equal. Evidence:
+`temp/range-autonomous/batch4/measurement-time/penny-*` and its source/route verification reports.

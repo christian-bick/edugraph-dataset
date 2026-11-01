@@ -4,12 +4,13 @@ import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {coinDenominations} from './spec.ts';
-import {banknoteRangeProfiles} from './numeric-domain.ts';
+import {banknoteRangeProfiles, pennyRangeProfiles} from './numeric-domain.ts';
 
 const representationProfiles = [
     {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const, range: banknoteRangeProfiles[0]!.range},
     ...coinDenominations.flatMap(coinDenomination => [
-        {name: `coins ${coinDenomination}`, useCoins: true, useBanknotes: false, coinDenomination},
+        {name: `coins ${coinDenomination}`, useCoins: true, useBanknotes: false, coinDenomination,
+            ...(coinDenomination === Scope.HundredthDenomination ? {range: pennyRangeProfiles[0]!.range} : {})},
         {name: `mixed ${coinDenomination}`, useCoins: true, useBanknotes: true, coinDenomination}
     ])
 ];

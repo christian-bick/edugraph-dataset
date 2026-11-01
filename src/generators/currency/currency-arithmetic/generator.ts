@@ -4,7 +4,7 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {CurrencyAmount, CurrencyArithmeticProblem} from '../../../types/problems.ts';
 import {CurrencyArithmeticGeneratorConfig, CurrencyArithmeticGeneratorSchema} from './spec.ts';
-import {banknoteRowsForRange} from './numeric-domain.ts';
+import {banknoteRowsForRange, pennyRowsForRange} from './numeric-domain.ts';
 
 const denominationCents: Record<string, number> = {
     [Scope.QuarterDenomination]: 25,
@@ -72,8 +72,18 @@ export class CurrencyArithmeticGenerator implements ProblemGenerator<CurrencyAri
             });
             return {data: {operation, amounts: [amount(row.first), amount(row.second)], answerCents: row.answer * 100}};
         }
+        if (!config.useBanknotes && coinValueCents === 1) {
+            validateConfigFields('currency-arithmetic', config, ['range']);
+            const rows = config.range === false ? [] : pennyRowsForRange(operation, config.range!);
+            if (rows.length === 0) throw new GeneratorValidationError('currency-arithmetic', 'Unsupported canonical penny range.');
+            const row = rows[Math.floor(random() * rows.length)]!;
+            const amount = (count: number): CurrencyAmount => ({
+                items: [{kind: 'coin', denominationCents: 1, count}], totalCents: count
+            });
+            return {data: {operation, amounts: [amount(row.first), amount(row.second)], answerCents: row.answer}};
+        }
         if (config.range !== undefined && config.range !== false) {
-            throw new GeneratorValidationError('currency-arithmetic', 'Coin range qualification is outside this adoption.');
+            throw new GeneratorValidationError('currency-arithmetic', 'Range qualification for this currency representation is outside this adoption.');
         }
 
         let first = makeAmount(config.useCoins!, config.useBanknotes!, coinValueCents);

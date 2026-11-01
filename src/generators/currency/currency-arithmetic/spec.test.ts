@@ -103,7 +103,9 @@ describe('CurrencyArithmeticGenerator spec', () => {
             if (!result.supported) throw new Error('Currency profile must remain admitted.');
             const enumeration = enumerateDependencyAuditSelections(result.plan);
             expect(enumeration.status).toBe('complete');
-            expect(enumeration.selections).toHaveLength(profile.name === 'banknotes' && operation === Area.Addition ? 2 : 1);
+            const pennies = profile.labels.includes(Scope.HundredthDenomination) && !profile.labels.includes(Scope.Banknotes);
+            expect(enumeration.selections).toHaveLength(pennies ? operation === Area.Addition ? 3 : 2
+                : profile.name === 'banknotes' && operation === Area.Addition ? 2 : 1);
             const selected = enumeration.selections[0].labels;
             const mixed = profile.labels.includes(Scope.Coins) && profile.labels.includes(Scope.Banknotes);
             const additionConversion = operation === Area.Addition && (profile.labels.includes(Scope.QuarterDenomination)
@@ -122,7 +124,7 @@ describe('CurrencyArithmeticGenerator spec', () => {
             expect(evaluation.assessments.filter(assessment => assessment.status === 'missing'
                 && assessment.facet !== 'range').map(assessment => assessment.facet))
                 .toEqual(integer ? [] : ['numberKind']);
-            if (!integer || profile.name === 'banknotes') continue;
+            if (!integer || profile.name === 'banknotes' || pennies) continue;
 
             const selection = enumeration.selections[0];
             const bindings = Object.fromEntries(selection.choices.map(choice => {

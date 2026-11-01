@@ -77,13 +77,14 @@ describe('banknotes-only canonical ranges', () => {
         } finally { draw.mockRestore(); }
     });
 
-    it('preserves all882 original coin/mixed count outcomes, their probability weights and draw counts', () => {
+    it('preserves all810 unqualified coin/mixed count outcomes, their probability weights and draw counts', () => {
         const generator = new CurrencyArithmeticGenerator(), draw = vi.spyOn(rng, 'random');
         let cases = 0;
         try {
             for (const [coinDenomination, denominationCents] of [[Scope.QuarterDenomination, 25],
                 [Scope.TenthDenomination, 10], [Scope.TwentiethDenomination, 5], [Scope.HundredthDenomination, 1]] as const) {
                 for (const useBanknotes of [false, true]) {
+                    if (!useBanknotes && coinDenomination === Scope.HundredthDenomination) continue;
                     const maxCoins = useBanknotes ? 3 : Math.max(2, Math.min(6, Math.floor(75 / denominationCents)));
                     const inputs = (useBanknotes ? [1, 2, 3] : [0]).flatMap(banknotes =>
                         Array.from({length: maxCoins}, (_, index) => ({banknotes, coins: index + 1})));
@@ -112,7 +113,7 @@ describe('banknotes-only canonical ranges', () => {
                     }
                 }
             }
-            expect(cases).toBe(882);
+            expect(cases).toBe(810);
         } finally { draw.mockRestore(); }
     });
 
