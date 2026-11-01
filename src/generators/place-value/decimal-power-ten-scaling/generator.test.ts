@@ -1,5 +1,7 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import type {PowerTenDecimalValue} from '../../../types/problems.ts';
 import {DecimalPowerTenScalingGenerator} from './generator.ts';
 
@@ -7,6 +9,8 @@ const generator = new DecimalPowerTenScalingGenerator();
 
 const inThousandths = (value: PowerTenDecimalValue): number =>
     value.unscaled * 10 ** (3 - value.scale);
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('DecimalPowerTenScalingGenerator', () => {
     it('requires its selected operation', () => {
@@ -67,5 +71,32 @@ describe('DecimalPowerTenScalingGenerator', () => {
         const first = generator.generate({operation: 'division'});
         setSeed('decimal-ten-replay');
         expect(generator.generate({operation: 'division'})).toEqual(first);
+    });
+
+    it('witnesses canonical upper100 without a positive lower across all 162 supported cases', () => {
+        const draw = vi.spyOn(rng, 'random');
+        const range = createCanonicalNumericRange(100);
+        const numeric = (value: PowerTenDecimalValue) => value.unscaled / 10 ** value.scale;
+        const seen = new Set<string>();
+        for (const operation of ['multiplication', 'division'] as const) {
+            for (let tens = 1; tens <= 9; tens++) for (let ones = 1; ones <= 9; ones++) {
+                draw.mockReturnValueOnce((tens - 0.5) / 9).mockReturnValueOnce((ones - 0.5) / 9);
+                const {data} = generator.generate({operation});
+                expect(data.series[0].before.unscaled).toBe(10 * tens + ones);
+                const values = data.series.flatMap(step => [
+                    numeric(step.before), numeric(step.after), step.power.value,
+                    ...step.power.repeatedFactors,
+                    ...step.placeShifts.flatMap(place => [
+                        numeric(place.originalContribution), numeric(place.resultContribution)
+                    ])
+                ]);
+                expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                expect(Math.max(...values)).toBe(100);
+                expect(Math.min(...values)).toBeLessThan(5);
+                seen.add(`${operation}:${data.series[0].before.unscaled}`);
+            }
+        }
+        expect(seen.size).toBe(162);
+        expect(draw).toHaveBeenCalledTimes(324);
     });
 });

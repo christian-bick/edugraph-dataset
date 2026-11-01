@@ -7,7 +7,7 @@ Status: the opt-in target-expansion helper and first eight-family producer/targe
 implemented, including the eight measurement targets and approved unknown-number Ability
 correction. Source validation retains 1,247 normalized targets and 1,672 routes. The
 [remaining-family review](canonical-range-remaining-families.md) proposes the next 50-selection
-batch; it is not implemented. The original inventory remains a historical rollout baseline.
+batch; its first checkpoint is implemented below. The original inventory remains a historical rollout baseline.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
 
@@ -584,3 +584,17 @@ three targets/routes while retaining the current six. Conversion projections, sc
 bounds, required column-unit arithmetic and other unsettled cases remain separate. No graph
 policy, Area allowlist, ontology meaning, matching implication, target, generator or view changed
 in this review; regeneration and VQA were not run.
+
+### R4a — invariant scaling bounds
+
+The approved first checkpoint adds invariant `NumbersSmaller100` to
+`decimal-power-ten-scaling` and `fraction-tenths-equivalence`, covering ten source selections
+through eight routes and four views. Required powers/denominator scaling witness100, while a
+required value below5 rules out a positive lower descriptor. Generator mathematics, schema
+choices and payloads are unchanged.
+
+Tests cover all162 coefficient/operation cases and all ten tenths numerators, plus positive
+matching with the new bounds. All14 generator/spec tests and ten existing consumer tests pass.
+The preceding complete-catalog experiment preserves all1,247 targets /1,672 routes with no
+ownership issues. Full runtime/source acceptance for the three checkpoints follows R4c.
+Evidence: `temp/canonical-range-next-review/r4a-focused-tests.log` and `r4a-consumer-tests.log`.

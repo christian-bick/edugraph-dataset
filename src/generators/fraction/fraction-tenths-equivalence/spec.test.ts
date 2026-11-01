@@ -26,9 +26,9 @@ describe('fraction-tenths-equivalence schema', () => {
             spec: {viewId: 'magnitude-proof', generalLabels: [Ability.Formalization]}};
         for (const [label, value] of [[Scope.ProperFractions, 'proper'], [Scope.ImproperFractions, 'equal-whole']] as const) {
             expect(extractConfig(schema, [label]).config.fractionMagnitude).toBe(value);
-            expect(planModelCompatibility({id: 'tenths-proof', labels: [label, Ability.Formalization]},
+            expect(planModelCompatibility({id: 'tenths-proof', labels: [label, Scope.NumbersSmaller100, Ability.Formalization]},
                 generator, view).supported).toBe(true);
-            const stub = generateWithLabels(new FractionTenthsEquivalenceGenerator(), [label])!;
+            const stub = generateWithLabels(new FractionTenthsEquivalenceGenerator(), [label], spec)!;
             expect(stub.labels).toContain(label);
             expect(stub.data.tenths.numerator < 10).toBe(value === 'proper');
         }
