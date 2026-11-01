@@ -159,6 +159,39 @@ old target ID/label set and route, adding only the reviewed decomposition upper5
 **1,290 authored / 1,251 normalized targets, 1,676 routes and 3,025 complete selections**.
 There are no unmatched targets or incomplete selections. Validation allocation remains432 tuples.
 
+## First autonomous batch acceptance
+
+The combined batch updates15 families and closes **78 baseline source range omissions:
+517→439**. The length-difference activation is accounted separately: its newly required positive
+integer annotations are complete, with no newly unresolved dependencies. The final audit has
+only range-presence findings:439 source and1,062 unchanged stored rows, with zero conflicts,
+invalid contexts, incomplete selections or strict failures.
+
+All **7,576 tests /914 files** pass through the complete coverage gate using two workers, with no
+test, timeout or threshold relaxed. Generator coverage is98.86% statements /97.87% branches /
+100% functions /99.48% lines, and every generator meets its required thresholds. Repository,
+TypeScript and documentation gates pass. Exact global matching preserves every earlier target
+ID/label set and route, adding only the reviewed decomposition target/route. Allocation is now
+1,676 train+432validation tuples:2,108 requested pairs /4,216 images before deduplication.
+
+Evidence under `temp/range-autonomous/`: `global-verification.json`, `check-batch1.log`,
+`types-batch1.log`, `docs-batch1.log` and `coverage-batch1.log`. The stored dataset and VQA cache
+are unchanged; this is source acceptance. The user requested pushing this batch as soon as its
+validation finishes. Work continues after that push using the same agreed solutions.
+
+## Next active standard work
+
+These are not blocked merely because their implementation is larger:
+
+- Prime/composite finite classification profiles and six reviewed smaller-band target variants.
+- Equation judgment over existing exact relations and bounded neighboring claims.
+- Decimal writing/reading profiles preserving the established whole/fractional-quantity contract.
+- Finite mass/volume estimation, unit-rate relations and ratio-table comparisons. Consumer tracing
+  confirms the required quantities are projected by both unit-rate views; the provisional
+  projection concern there was falsified and is not a deferral.
+- Other arithmetic/fraction families still need complete source and consumer traces; a technical
+  challenge alone does not make them a user decision.
+
 ## Decisions and complications
 
 These entries do not block work in other families.

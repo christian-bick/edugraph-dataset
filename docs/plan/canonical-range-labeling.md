@@ -3,11 +3,13 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the opt-in target-expansion helper, first eight-family adoption, R4 finite-domain batch
-and R5 counting-on/back batch are implemented. Source validation now retains **1,250 normalized
-targets and 1,675 routes**, including all earlier target claims and routes. The
-[remaining-family review](canonical-range-remaining-families.md) tracks the remaining 517 source
-range-presence findings. The original inventory remains a historical rollout baseline.
+Status: the target-expansion helper, first eight-family adoption, R4/R5 and the first
+[autonomous batch](canonical-range-autonomous-rollout.md) are implemented. That batch covers
+15 further families and retains every earlier target claim and route, with one additive
+decomposition variant. Current source validation covers **1,251 normalized targets / 1,676 routes
+and 3,025 complete selections**, with **439 range-presence omissions** remaining. The
+[remaining-family review](canonical-range-remaining-families.md) separates further standard
+profile work from concrete projection/quantity issues. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
 

@@ -37,6 +37,10 @@ These items are not newly scheduled by the archive move.
   leaving 517 source findings with unchanged targets/routes. The approved counting-on/back batch
   adds three upper5 target variants and canonical sampling while retaining all earlier coverage:
   **1,250 normalized targets / 1,675 routes**. Separate projection/quantity-contract cases remain.
+  The [autonomous rollout](canonical-range-autonomous-rollout.md) records 15 subsequent families,
+  one additive source variant and 78 closed source range omissions: **1,251 normalized targets /
+  1,676 routes**, with 439 source range omissions remaining. Module-specific details stay in plans
+  and module tests; README.md and DOCS.md contain general usage and architecture.
   Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

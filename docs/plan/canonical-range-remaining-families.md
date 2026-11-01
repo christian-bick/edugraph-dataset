@@ -8,7 +8,10 @@ supersedes the review-baseline counts. The subsequently approved
 [R5 counting batch](canonical-range-labeling.md#r5--counting-oncounting-back-canonical-ranges)
 adds three upper5 targets while preserving all earlier target claims/routes. Current counts are
 1,250 normalized targets / 1,675 routes and 2,972 complete source selections. Range-presence
-findings remain 517: R5 tightens existing annotations rather than repairing missing ones.
+findings remain 517 after R5: it tightens existing annotations rather than repairing missing ones.
+The [subsequent autonomous rollout](canonical-range-autonomous-rollout.md) closes 78 of those
+omissions and adds one reviewed source variant, retaining all earlier target claims/routes.
+Its current source counts are 1,251 normalized targets / 1,676 routes, with 439 range omissions.
 
 ## Review baseline
 
@@ -129,19 +132,19 @@ counts are implementation acceptance requirements, not a claim that future sampl
 The source findings by owning directory are below, before and after R4. Counts refer to missing facets only;
 families with old bounds still require canonical review. They are not implementation-batch counts.
 
-| Family group | Review baseline | After R4 | Next treatment |
-| --- | ---: | ---: | --- |
-| Arithmetic | 90 | 90 | Finite strategies first, then known facts/patterns/word problems; method-specific intermediates before written algorithms |
-| Counting and integer writing | 0 | 0 | Tighten existing bounds; review source variants and scalar-zero cases rather than treating presence as completion |
-| Fraction | 204 | 196 | Separate fraction-value tasks from explicit equivalence/model-count operations |
-| Number (decimal/rational/length) | 47 | 47 | Ordinary decimal values, comparisons and signed quantities; preserve each view's assessed relation |
-| Place value | 11 | 9 | Existing integer bounds additionally need coefficient/method and source review |
-| Measurement | 137 | 97 | Conversion and number-line contracts next |
-| Currency | 18 | 18 | Trace cents, dollars, required conversion and group counts across the actual task |
-| Time, elapsed time and interval arithmetic | 26 | 26 | Bound assessed clock components/calculations, not timestamp storage |
-| Ratio | 10 | 10 | Include required ratio operands, conversion factors and results; finite profiles |
-| Algebra | 24 | 24 | Formal numeric expressions remain range-report eligible in some projections; keep them separate from the agreed sign/zero cutoff |
-| **Total** | **567** | **517** | No change to applicability policy |
+| Family group | Review baseline | After R4/R5 | Current | Next treatment |
+| --- | ---: | ---: | ---: | --- |
+| Arithmetic | 90 | 90 | 90 | Finite strategies, known facts/patterns/word problems, then written algorithms |
+| Counting and integer writing | 0 | 0 | 0 | Tighten existing bounds; review shared projections and scalar-zero cases |
+| Fraction | 204 | 196 | 174 | Separate fraction values from explicitly assessed model/scaling counts |
+| Number (decimal/rational/length) | 47 | 47 | 40 | Reading/writing profiles and remaining signed contexts |
+| Place value | 11 | 9 | 6 | Decimal place value and method-specific quantity/source review |
+| Measurement | 137 | 97 | 55 | Remaining measurement and model profiles; shared-projection decisions |
+| Currency | 18 | 18 | 18 | Trace cents, dollars and required conversion/group counts |
+| Time, elapsed time and interval arithmetic | 26 | 26 | 22 | Assessed clock components/calculations, excluding timestamp storage |
+| Ratio | 10 | 10 | 10 | Required ratio operands, factors and results |
+| Algebra | 24 | 24 | 24 | Formal numeric tasks under unchanged range qualification |
+| **Total** | **567** | **517** | **439** | No change to applicability policy |
 
 Geometry, coordinate, shape and statistics tasks do not become mandatory range work merely
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range
@@ -155,9 +158,10 @@ claims outside that gate still need to be truthful; the gate is not an exemption
   are 9 / 15 / 30 ordered problems per operation in bands5/10/20, with inclusive upper endpoints
   and required unit steps ruling out a positive lower. Both samplers now enforce canonical maximum
   witnesses before drawing. The flexible-strategy schema, payloads and views are unchanged.
-- **Time interval arithmetic:** four targets/routes. The question explicitly requires minutes
-  after the reference-hour origin; the endpoint is 65–90 and origin is zero. Upper100/no lower
-  is a small invariant candidate, separate from ordinary clock-reading tasks.
+- **Time interval arithmetic — implemented:** invariant upper100/no lower covers its four existing
+  routes. Decomposition, make-ten, two power families, selected fractional/rational families,
+  length differences and bidirectional/story conversions are also recorded in the autonomous
+  rollout. Other finite strategy/measurement candidates remain active work.
 - **Decomposition, flexible add/subtract strategies and known facts:** finite supports can use
   ordinary profiles. Include each required rewrite/intermediate. Make-ten cannot be expanded
   into a band excluding its required bridge10. Review all shared consumers before activation.
