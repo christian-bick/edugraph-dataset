@@ -4,6 +4,7 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {CurrencyAmount, CurrencyArithmeticProblem} from '../../../types/problems.ts';
 import {CurrencyArithmeticGeneratorConfig, CurrencyArithmeticGeneratorSchema} from './spec.ts';
+import {banknoteRowsForRange} from './numeric-domain.ts';
 
 const denominationCents: Record<string, number> = {
     [Scope.QuarterDenomination]: 25,
@@ -57,17 +58,30 @@ export class CurrencyArithmeticGenerator implements ProblemGenerator<CurrencyAri
             throw new GeneratorValidationError('currency-arithmetic', 'A coin denomination cannot be used without coins.');
         }
 
+        const operation = config.operation === Area.Addition
+            ? 'addition'
+            : config.operation === Area.Subtraction ? 'subtraction' : null;
+        if (!operation) return null;
+        if (!config.useCoins) {
+            validateConfigFields('currency-arithmetic', config, ['range']);
+            const rows = config.range === false ? [] : banknoteRowsForRange(operation, config.range!);
+            if (rows.length === 0) throw new GeneratorValidationError('currency-arithmetic', 'Unsupported canonical banknote range.');
+            const row = rows[Math.floor(random() * rows.length)]!;
+            const amount = (count: number): CurrencyAmount => ({
+                items: [{kind: 'banknote', denominationCents: 100, count}], totalCents: count * 100
+            });
+            return {data: {operation, amounts: [amount(row.first), amount(row.second)], answerCents: row.answer * 100}};
+        }
+        if (config.range !== undefined && config.range !== false) {
+            throw new GeneratorValidationError('currency-arithmetic', 'Coin range qualification is outside this adoption.');
+        }
+
         let first = makeAmount(config.useCoins!, config.useBanknotes!, coinValueCents);
         let second = makeAmount(config.useCoins!, config.useBanknotes!, coinValueCents);
         if (first.totalCents === second.totalCents) {
             first.items[0].count += 1;
             first.totalCents += first.items[0].denominationCents;
         }
-
-        const operation = config.operation === Area.Addition
-            ? 'addition'
-            : config.operation === Area.Subtraction ? 'subtraction' : null;
-        if (!operation) return null;
 
         if (operation === 'subtraction' && first.totalCents < second.totalCents) {
             [first, second] = [second, first];

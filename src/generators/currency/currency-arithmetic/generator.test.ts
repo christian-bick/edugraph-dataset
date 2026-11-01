@@ -4,9 +4,10 @@ import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {coinDenominations} from './spec.ts';
+import {banknoteRangeProfiles} from './numeric-domain.ts';
 
 const representationProfiles = [
-    {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const},
+    {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const, range: banknoteRangeProfiles[0]!.range},
     ...coinDenominations.flatMap(coinDenomination => [
         {name: `coins ${coinDenomination}`, useCoins: true, useBanknotes: false, coinDenomination},
         {name: `mixed ${coinDenomination}`, useCoins: true, useBanknotes: true, coinDenomination}
@@ -69,7 +70,8 @@ describe('CurrencyArithmeticGenerator', () => {
             operation: Area.Addition,
             useCoins: false,
             useBanknotes: true,
-            coinDenomination: 'none'
+            coinDenomination: 'none',
+            range: banknoteRangeProfiles[0]!.range
         })!;
 
         expect(problem.data.amounts.every(amount => amount.totalCents % 100 === 0)).toBe(true);
@@ -115,11 +117,11 @@ describe('CurrencyArithmeticGenerator', () => {
         }
     });
 
-    it.each([[0, 0.999], [0.999, 0]])('preserves positive subtraction for initial draw order %s / %s', (first, second) => {
-        const random = vi.spyOn(randomSource, 'random').mockReturnValueOnce(first).mockReturnValueOnce(second);
+    it.each([2, 6])('preserves positive subtraction for original ordered count ticket %s', ticket => {
+        const random = vi.spyOn(randomSource, 'random').mockReturnValue((ticket + 0.5) / 9);
         try {
             const problem = generator.generate({operation: Area.Subtraction, useCoins: false,
-                useBanknotes: true, coinDenomination: 'none'})!.data;
+                useBanknotes: true, coinDenomination: 'none', range: banknoteRangeProfiles[0]!.range})!.data;
             expect(problem.amounts.map(amount => amount.totalCents)).toEqual([300, 100]);
             expect(problem.answerCents).toBe(200);
         } finally {

@@ -3,6 +3,8 @@ import {hasLabel, selectExactLabelSetMap, selectExactMatch} from '../../../lib/r
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {resolveOptionalCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {currencyRangeChoices, currencyRangeContext, currencyRangeLabels, permitsCurrencyRange, resolveCurrencyRange} from './range-profile.ts';
 
 export const currencyOperations = [Area.Addition, Area.Subtraction] as const;
 export const coinDenominations = [
@@ -55,6 +57,10 @@ export const spec: GeneratorSpec = {
             && selected(selected(Scope.QuarterDenomination)
                 ? Scope.TwoDigitSmallestOperand : Scope.TwoDigitLargestOperand);
         return !selected(Scope.IntegerNumbers);
+    }), generatorLabelRule('currency-canonical-range', [...currencyRangeLabels, ...currencyRangeContext], selected => {
+        const labels = [...currencyRangeLabels, ...currencyRangeContext].filter(selected);
+        const range = resolveOptionalCanonicalRangeFromLabels(labels);
+        return range !== undefined && permitsCurrencyRange(labels, range);
     })],
     generalLabels: [
         Scope.Dollar,
@@ -69,7 +75,8 @@ export const CurrencyArithmeticGeneratorSchema = {
     operation: [currencyOperations, selectExactMatch],
     useCoins: [[Scope.Coins], hasLabel(Scope.Coins)],
     useBanknotes: [[Scope.Banknotes, Scope.MajorDenomination], hasLabel(Scope.Banknotes)],
-    coinDenomination: [[...new Set(denominationChoices.flat())], resolveCoinDenomination, denominationChoices]
+    coinDenomination: [[...new Set(denominationChoices.flat())], resolveCoinDenomination, denominationChoices],
+    range: [currencyRangeLabels, resolveCurrencyRange, currencyRangeChoices]
 } as const;
 
 export type CurrencyArithmeticGeneratorConfig = ConfigFromSchema<typeof CurrencyArithmeticGeneratorSchema>;

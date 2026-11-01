@@ -671,3 +671,17 @@ canonical witnesses, target coverage and annotation contracts. Thirty-seven focu
 files prove unchanged values and random continuation; same-value hundred markup remains identical
 in both tasks/modes. No baseline missing-range closure is claimed. Evidence:
 `temp/range-autonomous/batch4/fixed-source-verification.json` and `fixed-source-tests.log`.
+
+## Fourth batch: banknote-only currency
+
+An optional canonical range qualifies only the existing banknote-only branch: addition uses
+upper5/10 and subtraction upper5, with no positive lower because the visible denomination is1.
+All18 original count-draw outcomes remain, including duplicate/tie-adjustment multiplicities.
+Conditional pool sizes are8/1 for addition and9/0 for subtraction. Ordinary profile selection may
+change the earlier8/9 versus1/9 band mixture under the accepted sampling changes.
+
+All18 earlier routes remain,18→19 selections, closing two range omissions. Sixty-four focused
+tests/four files pass. All882 coin/mixed raw outcomes retain their original arithmetic and2/4
+draw continuation; their empty range alternative keeps16 omissions visible rather than claiming
+completion. Rendering and the cents/dollars competency remain intact. Evidence:
+`temp/range-autonomous/batch4/measurement-time/` (banknote tests, route/source proof).
