@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
     MultiplicationOperandDecomposition,
     MultiDigitMultiplicationProblem
@@ -14,6 +15,10 @@ const profiles = [
     ['one-by-four', 1, 4],
     ['two-by-two', 2, 2]
 ] as const satisfies readonly [OperandDigitProfile, 1 | 2, 1 | 2 | 3 | 4][];
+
+const config = (operandDigitProfile: OperandDigitProfile) => ({operandDigitProfile,
+    range: createCanonicalNumericRange(operandDigitProfile === 'one-by-one' ? 100 : operandDigitProfile === 'one-by-two' ? 1000
+        : operandDigitProfile === 'one-by-three' || operandDigitProfile === 'two-by-two' ? 10000 : 100000)});
 
 const expectValidDecomposition = (decomposition: MultiplicationOperandDecomposition): void => {
     expect(decomposition.parts).toHaveLength(String(decomposition.operand).length);
@@ -65,7 +70,7 @@ describe('MultiDigitMultiplicationGenerator', () => {
 
     it('strictly validates its operand profile', () => {
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({operandDigitProfile: 'unsupported'} as never))
+        expect(() => generator.generate({...config('one-by-one'), operandDigitProfile: 'unsupported'} as never))
             .toThrow('Unsupported operand digit profile "unsupported".');
     });
 
@@ -76,7 +81,7 @@ describe('MultiDigitMultiplicationGenerator', () => {
     ) => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const problem = generator.generate({operandDigitProfile}).data;
+            const problem = generator.generate(config(operandDigitProfile)).data;
             expect(problem.smallestOperandDigits).toBe(smallestOperandDigits);
             expect(problem.largestOperandDigits).toBe(largestOperandDigits);
             expectConsistentProblem(problem);
@@ -89,16 +94,16 @@ describe('MultiDigitMultiplicationGenerator', () => {
         _largestOperandDigits
     ) => {
         setSeed(`multi-digit-multiplication-${operandDigitProfile}`);
-        const first = generator.generate({operandDigitProfile});
+        const first = generator.generate(config(operandDigitProfile));
         setSeed(`multi-digit-multiplication-${operandDigitProfile}`);
-        expect(generator.generate({operandDigitProfile})).toEqual(first);
+        expect(generator.generate(config(operandDigitProfile))).toEqual(first);
     });
 
     it('never introduces zero through operand digits or partial products', () => {
         for (const [operandDigitProfile] of profiles) {
             for (let seed = 0; seed < 500; seed++) {
                 setSeed(`${operandDigitProfile}-${seed}`);
-                const problem = generator.generate({operandDigitProfile}).data;
+                const problem = generator.generate(config(operandDigitProfile)).data;
                 expect(String(problem.smallestOperand)).not.toContain('0');
                 expect(String(problem.largestOperand)).not.toContain('0');
                 expect(problem.smallestDecomposition.parts.every(part => part.value > 0))

@@ -1,6 +1,7 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
+import {multiplicationDomain, profileDigits} from './domain.ts';
 import {
     MultiDigitMultiplicationProblem,
     MultiplicationOperandDecomposition,
@@ -9,30 +10,8 @@ import {
 } from '../../../types/problems.ts';
 import {
     MultiDigitMultiplicationGeneratorConfig,
-    MultiDigitMultiplicationGeneratorSchema,
-    OperandDigitProfile
+    MultiDigitMultiplicationGeneratorSchema
 } from './spec.ts';
-
-const profileDigits: Readonly<Record<OperandDigitProfile, {
-    smallest: 1 | 2;
-    largest: 1 | 2 | 3 | 4;
-}>> = {
-    'one-by-one': {smallest: 1, largest: 1},
-    'one-by-two': {smallest: 1, largest: 2},
-    'one-by-three': {smallest: 1, largest: 3},
-    'one-by-four': {smallest: 1, largest: 4},
-    'two-by-two': {smallest: 2, largest: 2}
-};
-
-const randomNonZeroDigit = (): number => 1 + Math.floor(random() * 9);
-
-const randomOperand = (digitCount: 1 | 2 | 3 | 4): number => {
-    let operand = 0;
-    for (let index = 0; index < digitCount; index++) {
-        operand = operand * 10 + randomNonZeroDigit();
-    }
-    return operand;
-};
 
 const buildDecomposition = (operand: number): MultiplicationOperandDecomposition => {
     const digits = String(operand).split('').map(Number);
@@ -75,7 +54,7 @@ export class MultiDigitMultiplicationGenerator implements ProblemGenerator<
     generate(
         config: MultiDigitMultiplicationGeneratorConfig
     ): ProblemStub<MultiDigitMultiplicationProblem> {
-        validateConfigFields('multi-digit-multiplication', config, ['operandDigitProfile']);
+        validateConfigFields('multi-digit-multiplication', config, ['operandDigitProfile', 'range']);
 
         const digits = profileDigits[config.operandDigitProfile!];
         if (!digits) {
@@ -85,10 +64,9 @@ export class MultiDigitMultiplicationGenerator implements ProblemGenerator<
             );
         }
 
-        const sampledSmallest = randomOperand(digits.smallest);
-        const sampledLargest = randomOperand(digits.largest);
-        const smallestOperand = Math.min(sampledSmallest, sampledLargest);
-        const largestOperand = Math.max(sampledSmallest, sampledLargest);
+        const domain = multiplicationDomain(config.operandDigitProfile!, config.range!);
+        if (!domain.length) throw new GeneratorValidationError('multi-digit-multiplication', 'Expected a feasible operand/range profile.');
+        const [smallestOperand, largestOperand] = domain[Math.floor(random() * domain.length)]!;
         const smallestDecomposition = buildDecomposition(smallestOperand);
         const largestDecomposition = buildDecomposition(largestOperand);
         const partialProducts = buildPartialProducts(

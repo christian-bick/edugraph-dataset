@@ -999,3 +999,16 @@ role admitted by planned bindings. It adds no capability label, route or global 
 Seven consumer fixtures supply the explicit range. Payloads, rendering, source targets and IDs
 are unchanged; profile sampling changes native outcomes. Evidence:
 `temp/range-autonomous/batch5/fraction-decimal/quotient-*`.
+
+## Fifth batch: multidigit partial products
+
+All72,981 original ordered digit draws and69,705 distinct sorted factor pairs remain in25
+canonical cells, retaining duplicate draw-path weights. Required decomposition magnitudes,
+region products and final result determine the range; digit/place captions used only for notation
+do not create independent quantities. All five routes and source claims remain, five→25
+selections, closing five omissions. No source, payload or renderer changes occur.
+
+Thirty-six tests pass, including complete support/multiplicity proofs,150 Question/Solution
+projections and50 native draws/replays. The spec gate and final TypeScript pass; a typed Map
+replaces an unsafe fromEntries record assertion in the finite domain. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{partial-products-review.md,verify-partial-products.json}`.
