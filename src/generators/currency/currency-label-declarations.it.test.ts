@@ -1,5 +1,5 @@
 import {fileURLToPath} from 'node:url';
-import {Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {beforeAll, describe, expect, it} from 'vitest';
 import {computeSampleKey, computeSampleSeed} from '../../lib/generation.ts';
 import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-audit.ts';
@@ -40,11 +40,14 @@ beforeAll(async () => {
 });
 
 describe('currency declarations on existing Grade 2 word-problem targets', () => {
-    it('completes all 18 selections while retaining eight integer operand-digit obligations', () => {
+    it('covers all 18 targets and 22 selections while retaining eight source integer operand-digit obligations', () => {
         expect(targets).toHaveLength(18);
         const evaluator = createLabelDependencyEvaluator();
         let missing = 0;
-        let digitObligations = 0;
+        const digitTargets = new Set<string>();
+        let digitSelections = 0;
+        let selectionCount = 0;
+        let rangeDeferrals = 0;
         for (const target of targets) {
             const originalLabels = [...target.labels];
             const matched = matchTarget(target, generator, view);
@@ -52,29 +55,39 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             expect(target.labels).toEqual(originalLabels);
             const enumeration = enumerateDependencyAuditSelections(matched.plan);
             expect(enumeration.status).toBe('complete');
-            expect(enumeration.selections).toHaveLength(1);
-            const selected = enumeration.selections[0].labels;
-            const integer = selected.includes(Scope.IntegerNumbers);
-            expect(selected).toContain(Scope.DecimalNumbers);
-            const evaluation = evaluator.evaluate(selected);
-            expect(evaluation.context.status).toBe('eligible');
-            expect(evaluation.errors).toEqual([]);
-            expect(evaluation.conflicts).toEqual([]);
-            const gaps = evaluation.assessments.filter(assessment => assessment.status === 'missing' && assessment.facet !== 'range');
-            expect(gaps).toEqual([]);
-            expect(evaluation.assessments.some(assessment => assessment.facet === 'operandDigits')).toBe(integer);
-            if (integer) {
-                digitObligations++;
-                const withoutWidth = evaluator.evaluate(selected.filter(label => label === Scope.IntegerNumbers
-                    || !integerLabels.includes(label as Scope)));
-                expect(withoutWidth.assessments).toEqual(expect.arrayContaining([
-                    expect.objectContaining({facet: 'operandDigits', status: 'missing'})
-                ]));
+            const banknotes = target.labels.includes(Scope.Banknotes) && !target.labels.includes(Scope.Coins);
+            const pennies = target.labels.includes(Scope.HundredthDenomination) && !target.labels.includes(Scope.Banknotes);
+            const addition = target.labels.includes(Area.Addition);
+            expect(enumeration.selections).toHaveLength(banknotes ? addition ? 2 : 1 : pennies ? addition ? 3 : 2 : 1);
+            for (const {labels: selected} of enumeration.selections) {
+                const integer = selected.includes(Scope.IntegerNumbers);
+                expect(selected).toContain(Scope.DecimalNumbers);
+                const evaluation = evaluator.evaluate(selected);
+                expect(evaluation.context.status).toBe('eligible');
+                expect(evaluation.errors).toEqual([]);
+                expect(evaluation.conflicts).toEqual([]);
+                const gaps = evaluation.assessments.filter(assessment => assessment.status === 'missing');
+                expect(gaps.map(gap => gap.facet)).toEqual(banknotes || pennies ? [] : ['range']);
+                rangeDeferrals += gaps.filter(gap => gap.facet === 'range').length;
+                missing += gaps.filter(gap => gap.facet !== 'range').length;
+                expect(evaluation.assessments.some(assessment => assessment.facet === 'operandDigits')).toBe(integer);
+                if (integer) {
+                    digitTargets.add(target.id);
+                    digitSelections++;
+                    const withoutWidth = evaluator.evaluate(selected.filter(label => label === Scope.IntegerNumbers
+                        || !integerLabels.includes(label as Scope)));
+                    expect(withoutWidth.assessments).toEqual(expect.arrayContaining([
+                        expect.objectContaining({facet: 'operandDigits', status: 'missing'})
+                    ]));
+                }
+                selectionCount++;
             }
-            missing += gaps.length;
         }
         expect(missing).toBe(0);
-        expect(digitObligations).toBe(8);
+        expect(digitTargets.size).toBe(8);
+        expect(digitSelections).toBe(12);
+        expect(selectionCount).toBe(22);
+        expect(rangeDeferrals).toBe(14);
     });
 
     it('keeps quantity and notation invariants separate from the conditional integer declarations', () => {
@@ -96,7 +109,9 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
         const precedingSchema = {...generator.schema!, coinDenomination: [coinDenominations,
             selectExactLabelSetMap([[[], 'none'],
                 ...coinDenominations.map(denomination => [[denomination], denomination] as const)])] as const};
-        const precedingRules = (generator.compatibility ?? []).filter(rule => rule.id !== 'currency-integer-denominations');
+        // Remove only the additive integer claims; retain the current mathematical range contract.
+        const precedingRules = (generator.spec.compatibility ?? generator.compatibility ?? [])
+            .filter(rule => rule.id !== 'currency-integer-denominations');
         const preceding = {...generator,
             schema: precedingSchema,
             labels: [...generator.generalLabels, ...extractSchemaLabels(precedingSchema)],
