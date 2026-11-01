@@ -1061,3 +1061,23 @@ direct/planned/replay checks and all six Question/Solution projections. Fifty-ni
 pass, including the independent4,396-row magnitude oracle. Types and whitespace checks pass.
 Four shared fixtures are adopted; source targets, payloads, renderers and policies stay unchanged.
 Evidence: `temp/range-autonomous/batch5/fraction-decimal/general-division-*` and its census JSON.
+
+## Fifth batch: partial-quotient division
+
+All931,315 original mathematical frames and conditional draw-path weights remain in28 canonical
+cells. Required decomposition addends, quotient chunks, products, running subtraction states and
+final remainder participate; ordinary captions do not become additional operands. Exact100/1000
+dividend endpoints remain in the appropriate width profiles. Compact weighted remainder rows
+replace rejection failures without changing the source envelope or payload.
+
+The matching review caught ten unsuitable new subtraction/multiplication-fluency routes admitted
+by truthful intermediate Area declarations. The fixed area-model view now requires the original
+target's DivisionPartialQuotients competency through the existing positive task-precondition
+helper. All seven previous routes already request it and remain; there are no new family routes.
+No grade/target-ID guard, blacklist, target mutation or matcher change is introduced. Selections
+ten→28, closing exactly six baseline omissions; the four Grade4 selections were already ranged.
+
+Sixty-one tests/eight files pass, including full support/uniqueness/path-weight and required-quantity
+proofs,168 Question/Solution projections, all28 configuration cells and56 native draws/replays.
+Complete TypeScript, static specs and whitespace checks pass. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{partial-quotient-review.md,verify-partial-quotients.json}`.

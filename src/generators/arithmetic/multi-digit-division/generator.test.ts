@@ -1,5 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+const rangeFor = (digits: number) => createCanonicalNumericRange(digits === 1 ? 10 : digits === 2 ? 100 : digits === 3 ? 1000 : 10000);
 import {
     DivisionOperandDecomposition,
     MultiDigitDivisionProblem
@@ -64,18 +66,18 @@ describe('MultiDigitDivisionGenerator', () => {
 
     it('strictly validates the dividend digit count', () => {
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({requireZero: true, divisorDigits: 2, dividendDigits: 1} as never))
+        expect(() => generator.generate({requireZero: true, divisorDigits: 2, dividendDigits: 1, range: rangeFor(1)} as never))
             .toThrow('A two-digit divisor requires a dividend of at least two digits.');
-        expect(() => generator.generate({requireZero: false, divisorDigits: 3, dividendDigits: 2} as never))
+        expect(() => generator.generate({requireZero: false, divisorDigits: 3, dividendDigits: 2, range: rangeFor(2)} as never))
             .toThrow('Unsupported divisor digit count "3".');
-        expect(() => generator.generate({requireZero: false, divisorDigits: 1, dividendDigits: 5} as never))
+        expect(() => generator.generate({requireZero: false, divisorDigits: 1, dividendDigits: 5, range: rangeFor(4)} as never))
             .toThrow('Unsupported dividend digit count "5".');
     });
 
     it.each(legacyProfiles)('generates consistent %i-digit dividend evidence', dividendDigits => {
         for (let seed = 0; seed < 200; seed++) {
             setSeed(`${dividendDigits}-${seed}`);
-            const problem = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits})!.data;
+            const problem = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits, range: rangeFor(dividendDigits)})!.data;
             expect(problem.dividendDigits).toBe(dividendDigits);
             expect(problem.divisorDigits).toBe(1);
             expect(problem.remainder).toBeGreaterThan(0);
@@ -88,9 +90,9 @@ describe('MultiDigitDivisionGenerator', () => {
 
     it.each(legacyProfiles)('is deterministic for %i-digit dividends', dividendDigits => {
         setSeed(`multi-digit-division-${dividendDigits}`);
-        const first = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits});
+        const first = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits, range: rangeFor(dividendDigits)});
         setSeed(`multi-digit-division-${dividendDigits}`);
-        expect(generator.generate({requireZero: false, divisorDigits: 1, dividendDigits})).toEqual(first);
+        expect(generator.generate({requireZero: false, divisorDigits: 1, dividendDigits, range: rangeFor(dividendDigits)})).toEqual(first);
     });
 
     it.each(twoDigitDivisorProfiles)(
@@ -99,7 +101,7 @@ describe('MultiDigitDivisionGenerator', () => {
             const remainders = new Set<number>();
             for (let seed = 0; seed < 200; seed++) {
                 setSeed(`two-digit-${dividendDigits}-${seed}`);
-                const problem = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits})!.data;
+                const problem = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits, range: rangeFor(dividendDigits)})!.data;
                 expect(problem.divisorDigits).toBe(2);
                 expect(problem.dividendDigits).toBe(dividendDigits);
                 expectConsistentProblem(problem);
@@ -114,7 +116,7 @@ describe('MultiDigitDivisionGenerator', () => {
         for (const dividendDigits of [3, 4] as const) {
             for (let seed = 0; seed < 500; seed++) {
                 setSeed(`zero-quotient-${dividendDigits}-${seed}`);
-                const problem = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits})!.data;
+                const problem = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits, range: rangeFor(dividendDigits)})!.data;
                 for (const step of problem.partialQuotients) {
                     if (step.quotientDigit !== 0) continue;
                     zeroStepCount++;
@@ -130,9 +132,9 @@ describe('MultiDigitDivisionGenerator', () => {
     it.each(twoDigitDivisorProfiles)(
         'replays seeded two-digit-divisor problems with %i-digit dividends', dividendDigits => {
             setSeed(`two-digit-replay-${dividendDigits}`);
-            const first = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits});
+            const first = generator.generate({requireZero: true, divisorDigits: 2, dividendDigits, range: rangeFor(dividendDigits)});
             setSeed(`two-digit-replay-${dividendDigits}`);
-            expect(generator.generate({requireZero: true, divisorDigits: 2, dividendDigits})).toEqual(first);
+            expect(generator.generate({requireZero: true, divisorDigits: 2, dividendDigits, range: rangeFor(dividendDigits)})).toEqual(first);
         }
     );
 
@@ -140,7 +142,7 @@ describe('MultiDigitDivisionGenerator', () => {
         for (const dividendDigits of legacyProfiles) {
             for (let seed = 0; seed < 500; seed++) {
                 setSeed(`nonzero-${dividendDigits}-${seed}`);
-                const problem = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits})!.data;
+                const problem = generator.generate({requireZero: false, divisorDigits: 1, dividendDigits, range: rangeFor(dividendDigits)})!.data;
                 const evidence = [
                     problem.dividend,
                     problem.divisor,

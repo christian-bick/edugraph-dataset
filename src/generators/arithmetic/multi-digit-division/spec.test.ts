@@ -1,9 +1,12 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {partialQuotientDomain} from './domain.ts';
 import {MultiDigitDivisionGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {spec, MultiDigitDivisionGeneratorSchema as schema} from './spec.ts';
 
 const legacyProfiles = [
     [Scope.SingleDigitDividend, 1],
@@ -15,6 +18,31 @@ const twoDigitProfiles = legacyProfiles.slice(1);
 
 describe('MultiDigitDivisionGenerator spec integration', () => {
     const generator = new MultiDigitDivisionGenerator();
+
+    it('keeps every feasible width/zero/band cell equivalent in direct and planned resolution', () => {
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+        let feasible = 0;
+        for (const [width, digits] of legacyProfiles) for (const divisor of [1, 2]) for (const zero of [false, true]) {
+            for (const labels of schema.range[2]) {
+                const target = [width, divisor === 1 ? Scope.SingleDigitDivisor : Scope.TwoDigitDivisor,
+                    zero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero, ...labels];
+                const range = resolveCanonicalRangeFromLabels(labels)!;
+                if (!partialQuotientDomain(digits, divisor, zero, range).count) {
+                    expect(() => extractConfig(schema, target)).toThrow();
+                    continue;
+                }
+                const direct = extractConfig(schema, target);
+                const bindings = Object.fromEntries(normalizeSchemaChoices(schema, target, 'generator')
+                    .map(field => [field.field, field.alternatives[0]!.labels]));
+                bindings.range = labels;
+                const planned = resolveSchemaChoices(schema, target, bindings);
+                expect(planned.config).toEqual(direct.config);
+                expect(new Set(planned.resolvedLabels)).toEqual(new Set(direct.resolvedLabels));
+                feasible++;
+            }
+        }
+        expect(feasible).toBe(28);
+    });
 
     it('declares only invariant procedure and number-domain capabilities', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([

@@ -7,6 +7,7 @@ import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import {MultiDigitDivisionGenerator} from './generator.ts';
 import {MultiDigitDivisionGeneratorSchema, spec} from './spec.ts';
 import {partialQuotientHasZero, resolvePartialQuotientZero} from './zero-profile.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 afterEach(() => vi.restoreAllMocks());
 const generator = new MultiDigitDivisionGenerator();
@@ -57,17 +58,18 @@ describe('preselected partial-quotient zero mathematics', () => {
 
     it('requires a valid profile and preserves the legacy single-digit domain', () => {
         expect(() => generator.generate({divisorDigits: 2, dividendDigits: 2})).toThrow('requireZero');
-        expect(() => generator.generate({divisorDigits: 1, dividendDigits: 2, requireZero: true})).toThrow('feasible');
-        expect(() => generator.generate({divisorDigits: 2, dividendDigits: 2, requireZero: 'zero'} as never)).toThrow('profile');
+        expect(() => generator.generate({divisorDigits: 1, dividendDigits: 2, requireZero: true, range: createCanonicalNumericRange(100)})).toThrow('feasible');
+        expect(() => generator.generate({divisorDigits: 2, dividendDigits: 2, requireZero: 'zero', range: createCanonicalNumericRange(100)} as never)).toThrow('profile');
         expect(plan([Scope.SingleDigitDivisor, Scope.TwoDigitDividend, Scope.NumbersWithZero]).supported).toBe(false);
         expect(plan([Scope.SingleDigitDivisor, Scope.TwoDigitDividend]).supported).toBe(true);
         expect(plan([Scope.TwoDigitDivisor, Scope.TwoDigitDividend, Scope.NumbersWithZero, Scope.NumbersWithoutZero]).supported).toBe(false);
     });
 
-    it('terminates a zero-only random source when the zero-free profile is requested', () => {
-        // divisor10 contains a zero coefficient on every attempt.
+    it('selects admitted mathematics even at the first weighted position without rejection retries', () => {
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
-        expect(generator.generate({divisorDigits: 2, dividendDigits: 2, requireZero: false})).toBeNull();
-        expect(draw).toHaveBeenCalledTimes(256 * 3);
+        const problem = generator.generate({divisorDigits: 2, dividendDigits: 2, requireZero: false, range: createCanonicalNumericRange(100)});
+        expect(problem).not.toBeNull();
+        expect(partialQuotientHasZero(problem!.data)).toBe(false);
+        expect(draw).toHaveBeenCalledTimes(1);
     });
 });
