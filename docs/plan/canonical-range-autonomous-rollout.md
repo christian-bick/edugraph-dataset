@@ -401,3 +401,18 @@ under the user's instruction; established-profile work continues afterward.
 
 The remaining-family review separately records actual shared-projection/open-question issues.
 Those do not stop these standard batches, and their unresolved requirements are not counted closed.
+
+## Third batch: common-divisor and common-multiple proofs
+
+Ten correlated operation/range profiles preserve all10,200 original GCD pairs and169 LCM pairs,
+including the original inclusive100/12 operand caps. Each range follows its required proof:
+the GCD task excludes the unused stored LCM (99/100 stores9900), while LCM includes its required
+common-product proof. Explicit factor1 or zero prevents a positive lower. The finite domain
+preserves the exact five-scenario probability mass, including overlaps, then conditions it on
+the selected band. Both existing target claims/routes remain; two source range omissions close.
+
+All23 focused tests pass, including full domain/probability verification and60 representative
+boundary question/solution projections. Forty planned draws/replays pass canonical witnesses,
+strict annotations and target coverage. No source, view or global-policy change is needed.
+Evidence: `temp/range-autonomous/batch3/arithmetic/common-relation-review.md` and
+`verify-common-relation.json`. Combined repository/coverage acceptance follows the completed batch.

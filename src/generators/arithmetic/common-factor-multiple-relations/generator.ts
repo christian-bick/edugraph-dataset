@@ -4,9 +4,9 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {CommonDivisorWitness, CommonFactorMultipleProblem} from '../../../types/problems.ts';
 import {commonPositiveDivisors} from '../common-factor-helpers.ts';
 import {CommonFactorMultipleRelationsGeneratorSchema, type CommonFactorMultipleRelationsGeneratorConfig} from './spec.ts';
+import {commonRelationDomain} from './domain.ts';
 
 const generatorId = 'common-factor-multiple-relations';
-const randomInteger = (minimum: number, maximum: number): number => minimum + Math.floor(random() * (maximum - minimum + 1));
 
 /** Both relations are canonical data, including their distinct zero boundaries. */
 export function buildCommonFactorMultipleProblem(first: number, second: number): CommonFactorMultipleProblem {
@@ -40,32 +40,20 @@ export function buildCommonFactorMultipleProblem(first: number, second: number):
         lcm: {kind: 'positive', value: commonProducts[0], commonMultipliers, commonProducts}};
 }
 
-/** Seed concrete boundary cases while the configured operation fixes the numeric domain. */
-function sampleInputs(operation: 'gcd' | 'lcm'): readonly [number, number] {
-    const maximum = operation === 'gcd' ? 100 : 12;
-    const scenario = randomInteger(0, 4);
-    const positive = randomInteger(1, maximum);
-    if (scenario === 0) return [positive, positive];
-    if (scenario === 1) return random() < 0.5 ? [0, positive] : [positive, 0];
-    if (scenario === 2) return operation === 'lcm' ? [0, 0] : [100, randomInteger(1, 100)];
-    if (scenario === 3) {
-        const first = operation === 'lcm' ? 11 : randomInteger(1, maximum - 1);
-        return [first, first + 1];
-    }
-    const first = randomInteger(0, maximum);
-    return [first, randomInteger(operation === 'gcd' && first === 0 ? 1 : 0, maximum)];
-}
-
 export class CommonFactorMultipleRelationsGenerator implements ProblemGenerator<CommonFactorMultipleProblem, CommonFactorMultipleRelationsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = CommonFactorMultipleRelationsGeneratorSchema;
 
     generate(config: CommonFactorMultipleRelationsGeneratorConfig): ProblemStub<CommonFactorMultipleProblem> {
-        validateConfigFields(generatorId, config, ['operation']);
-        if (config.operation !== 'gcd' && config.operation !== 'lcm') {
-            throw new GeneratorValidationError(generatorId, 'Operation must be gcd or lcm.');
-        }
-        const [first, second] = sampleInputs(config.operation);
+        validateConfigFields(generatorId, config, ['profile']);
+        const candidates = commonRelationDomain(config.profile!);
+        let position = random() * candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
+        const selected = candidates.find(candidate => {
+            if (position < candidate.weight) return true;
+            position -= candidate.weight;
+            return false;
+        }) ?? candidates.at(-1)!;
+        const [first, second] = selected.inputs;
         return {data: buildCommonFactorMultipleProblem(first, second)};
     }
 }

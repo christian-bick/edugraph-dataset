@@ -1,6 +1,8 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
-import {setSeed} from '../../../lib/random.ts';
+import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {commonRelationDomain} from './domain.ts';
 import type {CommonFactorMultipleProblem} from '../../../types/problems.ts';
 import {buildCommonFactorMultipleProblem, CommonFactorMultipleRelationsGenerator} from './generator.ts';
 
@@ -85,49 +87,73 @@ describe('uniform common factor/multiple exact witnesses', () => {
     });
 });
 
-describe('common factor/multiple operation domains', () => {
-    it('rejects empty and unsupported operation configurations', () => {
-        expect(() => generator.generate({})).toThrow(GeneratorValidationError);
-        expect(() => generator.generate(null!)).toThrow(GeneratorValidationError);
-        for (const operation of ['factor', '', 0, null]) expect(() => generator.generate({operation} as never)).toThrow(GeneratorValidationError);
-    });
+afterEach(() => vi.restoreAllMocks());
 
-    it.each(['gcd', 'lcm'] as const)('keeps every seeded %s draw in its authored input domain', operation => {
-        const features = new Set<string>();
-        const maximum = operation === 'gcd' ? 100 : 12;
-        for (let seed = 0; seed < 1000; seed++) {
-            setSeed(seed);
-            const data = generator.generate({operation}).data;
-            const [first, second] = data.inputs;
-            expect(first).toBeGreaterThanOrEqual(0);
-            expect(second).toBeGreaterThanOrEqual(0);
-            expect(Math.max(first, second)).toBeLessThanOrEqual(maximum);
-            if (operation === 'gcd') expect(first !== 0 || second !== 0).toBe(true);
-            if (first === second && first > 0) features.add('equal');
-            if (first === 0 && second > 0) features.add('left-zero');
-            if (first > 0 && second === 0) features.add('right-zero');
-            if (first === 0 && second === 0) features.add('both-zero');
-            if (data.gcd.kind === 'defined' && data.gcd.value === 1) features.add('coprime');
-            if (data.gcd.kind === 'defined' && data.gcd.value > 1) features.add('common-factor');
-            if (first === maximum || second === maximum) features.add('inclusive-boundary');
-            if (first === 11 && second === 12) {
-                expect(data.lcm.value).toBe(132);
-                features.add('lcm-beyond-input-bound');
-            }
-        }
-        for (const feature of ['equal', 'left-zero', 'right-zero', 'coprime', 'common-factor', 'inclusive-boundary']) expect(features.has(feature)).toBe(true);
-        expect(features.has('both-zero')).toBe(operation === 'lcm');
-        if (operation === 'lcm') expect(features.has('lcm-beyond-input-bound')).toBe(true);
-    });
-
-    it('replays from seed with no learner-action field or output labels', () => {
+describe('common factor/multiple canonical operation domains', () => {
+    it('retains every original pair exactly once across its canonical bands', () => {
+        const random = vi.spyOn(rng, 'random');
         for (const operation of ['gcd', 'lcm'] as const) {
-            setSeed(417);
-            const first = generator.generate({operation});
-            setSeed(417);
-            expect(generator.generate({operation})).toEqual(first);
+            const covered = new Set<string>();
+            const uppers = operation === 'gcd' ? [5, 10, 20, 100] : [5, 10, 20, 100, 120, 1000];
+            for (const upper of uppers) {
+                const range = createCanonicalNumericRange(upper);
+                const candidates = commonRelationDomain({operation, range});
+                const total = candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
+                let cumulative = 0;
+                for (const candidate of candidates) {
+                    random.mockReset().mockReturnValue((cumulative + candidate.weight / 2) / total);
+                    const {data} = generator.generate({profile: {operation, range}});
+                    expect(random).toHaveBeenCalledTimes(1);
+                    expect(data.inputs).toEqual(candidate.inputs);
+                    const [first, second] = data.inputs;
+                    const values = operation === 'gcd' && data.gcd.kind === 'defined'
+                        ? [...data.inputs, data.gcd.value, ...data.gcd.commonDivisors, ...data.gcd.cofactors]
+                        : data.lcm.kind === 'zero-extension' ? [...data.inputs, data.lcm.value, ...data.lcm.zeroProducts]
+                            : data.gcd.kind === 'defined' && data.lcm.kind === 'positive'
+                                ? [...data.inputs, data.gcd.value, ...data.gcd.cofactors, ...data.gcd.cofactorCommonDivisors,
+                                    data.lcm.value, ...data.lcm.commonMultipliers, ...data.lcm.commonProducts] : [];
+                    expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                    expect(data).not.toHaveProperty('operation');
+                    const key = `${first}:${second}`;
+                    expect(covered.has(key)).toBe(false);
+                    covered.add(key);
+                    cumulative += candidate.weight;
+                }
+            }
+            const maximum = operation === 'gcd' ? 100 : 12;
+            const original = new Set<string>();
+            for (let first = 0; first <= maximum; first++) for (let second = 0; second <= maximum; second++) {
+                if (operation === 'lcm' || first !== 0 || second !== 0) original.add(`${first}:${second}`);
+            }
+            expect(covered).toEqual(original);
+            expect(covered.size).toBe(operation === 'gcd' ? 10200 : 169);
+        }
+    });
+
+    it('rejects malformed profiles before drawing randomness', () => {
+        const random = vi.spyOn(rng, 'random');
+        for (const config of [undefined, {}, {profile: {}},
+            {profile: {operation: 'factor', range: createCanonicalNumericRange(100)}},
+            {profile: {operation: 'gcd', range: createCanonicalNumericRange(1000)}},
+            {profile: {operation: 'gcd', range: createCanonicalNumericRange(100, 5)}},
+            {profile: {operation: 'lcm', range: {min: 0, max: 100}}}]) {
+            expect(() => generator.generate(config as never)).toThrow(GeneratorValidationError);
+        }
+        expect(random).not.toHaveBeenCalled();
+    });
+
+    it('replays from seed and preserves independent complete payload objects', () => {
+        for (const operation of ['gcd', 'lcm'] as const) {
+            const config = {profile: {operation, range: createCanonicalNumericRange(100)}};
+            rng.setSeed(417);
+            const first = generator.generate(config);
+            const expected = structuredClone(first);
+            const continuation = rng.getRandomState();
+            if (first.data.gcd.kind === 'defined') (first.data.gcd.commonDivisors as number[]).push(999);
+            rng.setSeed(417);
+            expect(generator.generate(config)).toEqual(expected);
+            expect(rng.getRandomState()).toBe(continuation);
             expect(Object.keys(first)).toEqual(['data']);
-            expect(first.data).not.toHaveProperty('operation');
         }
     });
 });
