@@ -95,6 +95,17 @@ representation combinations. Twenty-four planned draws/replays pass canonical wi
 annotations and target coverage. Three baseline presence findings close. Evidence:
 `temp/range-autonomous/arithmetic/power-review.md`, `power-tests.log` and `verify-powers.json`.
 
+## Fraction number-line counts
+
+`fraction-number-line` retains all36 original numerator/denominator cases and all four routes.
+The question explicitly requires partition and iteration counts, so the range bounds those
+counts as well as rational positions and the required zero origin. Upper5/10/20 profiles have no
+positive lower. Six previous selections become14 feasible kind/range selections. The generator
+now receives mathematical kind values rather than interpreting label IDs; payloads and rendering
+remain unchanged. Thirteen focused tests pass, including consumer projection and finite support.
+This closes six baseline presence findings. Evidence:
+`temp/range-autonomous/fraction-decimal/line-tests.log`, `line-current.log` and `types-line.log`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.
