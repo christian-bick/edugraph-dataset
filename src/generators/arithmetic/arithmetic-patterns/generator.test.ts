@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {ArithmeticRecurrencePatternProblem} from '../../../types/problems.ts';
 import {ArithmeticPatternsGenerator} from './generator.ts';
 
@@ -11,7 +12,8 @@ describe('ArithmeticPatternsGenerator', () => {
         operation,
         useCommutativeLaw: false,
         useAssociativeLaw: false,
-        useDistributiveLaw: false
+        useDistributiveLaw: false,
+        range: createCanonicalNumericRange(100)
     });
 
     it('strictly validates configuration', () => {
@@ -63,6 +65,7 @@ describe('ArithmeticPatternsGenerator', () => {
         setSeed(27);
         const data = generator.generate({
             ...config(operation),
+            range: createCanonicalNumericRange(operation === 'addition' ? 20 : 100),
             useCommutativeLaw: propertyLaw === 'commutative',
             useAssociativeLaw: propertyLaw === 'associative',
             useDistributiveLaw: propertyLaw === 'distributive'

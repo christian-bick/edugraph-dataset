@@ -863,3 +863,18 @@ support/mass, all interval boundaries, both configuration paths, decimal method 
 integer-domain matching boundary. The independent boundary proof checks1,712 exact payloads.
 Owned files typecheck; batch-wide types and native route/replay gates follow the concurrent
 checkpoints. Evidence: `temp/range-autonomous/batch5/fraction-decimal/standard-multiplication-*`.
+
+## Fifth batch: recurrence patterns
+
+All81 original recurrence/law frames remain in20 disjoint canonical cells, with each original
+uniform branch law preserved conditional on the selected profile. Required quantities are the
+rule/start, sequence terms including the missing answer, associative combined operand and explicit
+law witness; positional multiplication also requires its mathematical position inputs. Ordinary
+card numbering is excluded. Sampling/seed changes follow profile selection; no target or renderer
+changes are needed.
+
+The16 existing routes remain with no new matches,16→48 complete selections, closing16 omissions.
+Twenty-three tests/four files pass, including full finite support, both configuration paths,
+810 same-value projections across all five consumers, and96 native planned draws with exact
+replays. Types and generator/view spec validation pass. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{pattern-review.md,verify-patterns.json,pattern-tests.log}`.
