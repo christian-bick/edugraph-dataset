@@ -302,6 +302,19 @@ findings close; no targets, global matching or payload contracts change. Evidenc
 `temp/range-autonomous/batch2/fraction-decimal/rational-line-tests.log` and
 `rational-line-route-comparison.json`.
 
+## Second batch: unit-rate relations
+
+Four finite upper5/10/20/100 profiles preserve all2,534 original context/frame outcomes,
+including the original strict99 source cap and scale factors1/2,2,3. Both consumers require the
+original ratio, normalization to one and requested scaling. Their required1 excludes a positive
+lower. All three old source routes retain their claims and IDs; their three selections become12
+because those targets leave range unspecified. Three baseline range omissions close.
+
+All23 focused tests/four files and TypeScript pass, including exhaustive finite support,
+question/solution consumers and both schema-resolution paths. No target, view or payload change
+is needed. Evidence: `temp/range-autonomous/batch2/measurement-time/unit-rate-focused.log` and
+`route-verification.json`.
+
 ## Second batch: decimal writing and reading
 
 Decimal writing and decimal reading now expose upper5/upper10 profiles under their established
