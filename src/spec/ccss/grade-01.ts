@@ -161,7 +161,8 @@ const equalSignBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20]});
 
 // --- 1.OA.D.8: Determine the unknown whole number in an equation ---
 const unknownNumberBuilder = new DatasetPermutationBuilder()

@@ -1,8 +1,9 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {judgmentDomain} from './domain.ts';
 
 export const spec: GeneratorSpec<typeof ArithmeticEquationJudgmentGeneratorSchema> = {
     generatorId: 'arithmetic-equation-judgment',
@@ -21,12 +22,14 @@ const relations = [
 ] as const;
 
 export const ArithmeticEquationJudgmentGeneratorSchema = {
-    relation: [[Area.Addition, Area.Subtraction, Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        selectExactLabelSetMap(relations), relations.map(([labels]) => labels)],
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        resolveRangeFromLabels
-    ]
+    profile: (() => {
+        const profiles = relations.flatMap(([relationLabels, relation]) => canonicalRangeProfiles
+            .filter(({range}) => range.max <= 20)
+            .map(({labels, range}) => [[...relationLabels, ...labels], {relation, range}] as const)
+            .filter(([, profile]) => judgmentDomain(profile).length > 0));
+        return [[...new Set(profiles.flatMap(([labels]) => labels))], selectExactLabelSetMap(profiles),
+            profiles.map(([labels]) => labels)] as const;
+    })()
 } as const;
 
 export type ArithmeticEquationJudgmentGeneratorConfig = ConfigFromSchema<typeof ArithmeticEquationJudgmentGeneratorSchema>;

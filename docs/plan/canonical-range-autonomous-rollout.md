@@ -221,6 +221,21 @@ source-band coverage, rather than closing range-presence findings. Evidence:
 `temp/range-autonomous/batch2/arithmetic/classification-review.md` and
 `verify-classification.json`.
 
+## Second batch: equation judgment
+
+The existing upper20 Grade1 equal-sign tasks retain all840 mathematical claims, including their
+stated false proposals. Four reviewed smaller-band source variants retain both old target IDs
+and routes. Six routes now admit18 correlated relation/range profiles. Each bound includes both
+operands, the correct result and the stated proposal; a proposed zero remains a zero quantity
+even when the correct result is positive. One finite-pool draw replaces rejection without forcing
+a verdict mixture. Payloads, views and neighboring-proposal semantics stay unchanged.
+
+All11 focused tests pass, including1,680 question/solution projections. Every old claim belongs
+to exactly one feasible profile;72 planned draws and exact replays pass canonical witnesses,
+strict annotations and target coverage. This tightens existing bounds rather than closing missing
+range findings. Evidence: `temp/range-autonomous/batch2/arithmetic/equation-review.md` and
+`verify-equation.json`.
+
 ## Second batch: finite mass and volume contexts
 
 Mass reading, mass estimation and liquid-volume estimation now use nine feasible mathematical
@@ -251,4 +266,4 @@ All38 focused tests/nine files pass, including question/solution consumers and a
 writing selections change4→6 and reading2→3. Six baseline range-presence omissions close.
 No inference or matching-policy change is used. Evidence:
 `temp/range-autonomous/batch2/fraction-decimal/writing-tests.log`,
-`writing-current.json` and the neighboring writing verification reports.
+`current.json` and `writing-route-comparison.json`.

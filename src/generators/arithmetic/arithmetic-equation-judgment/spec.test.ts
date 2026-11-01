@@ -8,9 +8,23 @@ import {resolveEquationClaim} from '../../../visuals/views/operations/operations
 import {spec as viewSpec} from '../../../visuals/views/operations/operations-equation-judgment/spec.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {judgmentQuantities} from './domain.ts';
 
 describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
     const generator = new ArithmeticEquationJudgmentGenerator();
+
+    it('resolves all 18 correlated mathematical choices identically through direct and planned paths', () => {
+        for (const labels of ArithmeticEquationJudgmentGeneratorSchema.profile[2]) {
+            const direct = extractConfig(generator.schema, [...labels]);
+            const planned = resolveSchemaChoices(generator.schema, labels, {profile: labels});
+            expect(planned.config).toEqual(direct.config);
+            expect(new Set(planned.resolvedLabels)).toEqual(new Set(direct.resolvedLabels));
+            const draw = generator.generate(direct.config);
+            expect(hasCanonicalRangeWitness(judgmentQuantities(draw.data), direct.config.profile!.range)).toBe(true);
+        }
+    });
 
     it('resolves both supported operations and range labels', () => {
         for (const operation of [Area.Addition, Area.Subtraction] as const) {
@@ -27,9 +41,9 @@ describe('ArithmeticEquationJudgmentGenerator spec integration', () => {
     });
 
     it('proves every supported positive addition and either judgment have no zero', () => {
-        // The largest supported range ends at 100. Every smaller range is a subset.
-        for (let num1 = 1; num1 < 100; num1++) {
-            for (let num2 = 1; num1 + num2 <= 100; num2++) {
+        // The original source domain ends at 20; every canonical sub-band is a subset.
+        for (let num1 = 1; num1 < 20; num1++) {
+            for (let num2 = 1; num1 + num2 <= 20; num2++) {
                 const data = {num1, num2, answer: num1 + num2, operation: 'addition' as const};
                 for (const seed of [0, 1]) {
                     expect(resolveEquationClaim({...data, claimedAnswer: data.answer - seed}).claimedAnswer).toBeGreaterThan(0);
