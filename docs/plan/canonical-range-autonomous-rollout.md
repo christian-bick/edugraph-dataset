@@ -965,3 +965,20 @@ selections. Eleven baseline omissions close. Fifty-nine tests/nine files and lab
 with every actual source selection graph-clean, direct/planned equal, and88 native replay/state
 controls. No target, renderer, payload or matching changes occur; profile sampling changes seeds.
 Evidence: `temp/range-autonomous/batch5/measurement-time/{ordered-focused.log,verification.json}`.
+
+## Fifth batch: cents-only nickel and dime slices
+
+Nickel addition/subtraction and dime subtraction retain all108 original raw draws and duplicate
+weights. Operand totals and answers stay below100 cents, and both Question/Solution use cents.
+The assessed5¢/10¢ denominations establish lower5/10. Unasked picture cardinalities are not
+additional numerical inputs. Nickel addition has5/31 tickets at upper20/100; subtraction has
+3/12/21 at upper10/20/100. Dime subtraction has3/33 at upper20/100.
+
+All18 currency targets/routes remain,22→26 selections, closing three omissions. The702 other
+coin/mixed raw paths are unchanged, with608 exact seed/data/continuation controls across19
+unaffected configurations. Ninety tests/seven files and label checks pass;104 native replay
+controls, every direct/planned source selection and graph check pass. The historical currency
+fixture now accounts for the26 selections and11 explicit range deferrals without weakening its
+mathematical or entropy comparisons. Rendering and numeric units stay unchanged.
+Evidence: `temp/range-autonomous/batch5/measurement-time/{cent-focused.log,cent-slices.log,
+cent-unaffected-verify.log,verification.json}`. Remaining dollar/cent cases stay separate.

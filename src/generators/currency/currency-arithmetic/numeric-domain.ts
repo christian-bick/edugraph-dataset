@@ -17,6 +17,11 @@ export const banknoteRangeProfiles = canonicalRangeProfiles.filter(profile => Ob
     .some(row => hasCanonicalRangeWitness([1, row.first, row.second, row.answer], profile.range)));
 export const pennyRangeProfiles = canonicalRangeProfiles.filter(profile => Object.values(pennyRows).flat()
     .some(row => hasCanonicalRangeWitness([1, row.first, row.second, row.answer], profile.range)));
+/** Nickel arithmetic and dime subtraction stay entirely in cents in the current question/solution formatter. */
+export const centOnlyRangeProfiles = canonicalRangeProfiles.filter(profile =>
+    (['addition', 'subtraction'] as const).some(operation => ([5, 10] as const).some(denomination =>
+        !(denomination === 10 && operation === 'addition') && pennyRows[operation].some(row => hasCanonicalRangeWitness(
+            [denomination, row.first * denomination, row.second * denomination, row.answer * denomination], profile.range)))));
 
 export function banknoteRowsForRange(operation: Operation, range: CanonicalNumericRange) {
     const profile = banknoteRangeProfiles.find(profile => Object.entries(profile.range)
@@ -32,4 +37,13 @@ export function pennyRowsForRange(operation: Operation, range: CanonicalNumericR
     // All amounts and answers remain below100 cents; the unchanged formatter explicitly displays cents.
     return profile ? pennyRows[operation].filter(row =>
         hasCanonicalRangeWitness([1, row.first, row.second, row.answer], profile.range)) : [];
+}
+
+export function centOnlyRowsForRange(operation: Operation, denomination: 5 | 10, range: CanonicalNumericRange) {
+    if (denomination === 10 && operation === 'addition') return [];
+    const profile = centOnlyRangeProfiles.find(profile => Object.entries(profile.range)
+        .every(([key, value]) => range?.[key as keyof CanonicalNumericRange] === value));
+    // The named coin face is an assessed monetary input; unasked picture cardinalities are not extra quantities.
+    return profile ? pennyRows[operation].filter(row => hasCanonicalRangeWitness(
+        [denomination, row.first * denomination, row.second * denomination, row.answer * denomination], profile.range)) : [];
 }

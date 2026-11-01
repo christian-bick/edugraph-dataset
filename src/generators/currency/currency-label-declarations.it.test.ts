@@ -41,7 +41,7 @@ beforeAll(async () => {
 });
 
 describe('currency declarations on existing Grade 2 word-problem targets', () => {
-    it('covers all 18 targets and 22 selections while retaining eight source integer operand-digit obligations', () => {
+    it('covers all 18 targets and 26 selections while retaining eight source integer operand-digit obligations', () => {
         expect(targets).toHaveLength(18);
         const evaluator = createLabelDependencyEvaluator();
         let missing = 0;
@@ -58,8 +58,12 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             expect(enumeration.status).toBe('complete');
             const banknotes = target.labels.includes(Scope.Banknotes) && !target.labels.includes(Scope.Coins);
             const pennies = target.labels.includes(Scope.HundredthDenomination) && !target.labels.includes(Scope.Banknotes);
+            const nickels = target.labels.includes(Scope.TwentiethDenomination) && !target.labels.includes(Scope.Banknotes);
             const addition = target.labels.includes(Area.Addition);
-            expect(enumeration.selections).toHaveLength(banknotes ? addition ? 2 : 1 : pennies ? addition ? 3 : 2 : 1);
+            const dimeSubtraction = !addition && target.labels.includes(Scope.TenthDenomination) && !target.labels.includes(Scope.Banknotes);
+            const adopted = banknotes || pennies || nickels || dimeSubtraction;
+            expect(enumeration.selections).toHaveLength(banknotes ? addition ? 2 : 1 : pennies ? addition ? 3 : 2
+                : nickels ? addition ? 2 : 3 : dimeSubtraction ? 2 : 1);
             for (const {labels: selected} of enumeration.selections) {
                 const integer = selected.includes(Scope.IntegerNumbers);
                 expect(selected).toContain(Scope.DecimalNumbers);
@@ -68,7 +72,7 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
                 const gaps = evaluation.assessments.filter(assessment => assessment.status === 'missing');
-                expect(gaps.map(gap => gap.facet)).toEqual(banknotes || pennies ? [] : ['range']);
+                expect(gaps.map(gap => gap.facet)).toEqual(adopted ? [] : ['range']);
                 rangeDeferrals += gaps.filter(gap => gap.facet === 'range').length;
                 missing += gaps.filter(gap => gap.facet !== 'range').length;
                 expect(evaluation.assessments.some(assessment => assessment.facet === 'operandDigits')).toBe(integer);
@@ -86,9 +90,9 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
         }
         expect(missing).toBe(0);
         expect(digitTargets.size).toBe(8);
-        expect(digitSelections).toBe(12);
-        expect(selectionCount).toBe(22);
-        expect(rangeDeferrals).toBe(14);
+        expect(digitSelections).toBe(16);
+        expect(selectionCount).toBe(26);
+        expect(rangeDeferrals).toBe(11);
     });
 
     it('keeps quantity and notation invariants separate from the conditional integer declarations', () => {

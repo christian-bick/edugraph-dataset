@@ -104,7 +104,11 @@ describe('CurrencyArithmeticGenerator spec', () => {
             const enumeration = enumerateDependencyAuditSelections(result.plan);
             expect(enumeration.status).toBe('complete');
             const pennies = profile.labels.includes(Scope.HundredthDenomination) && !profile.labels.includes(Scope.Banknotes);
+            const nickels = profile.labels.includes(Scope.TwentiethDenomination) && !profile.labels.includes(Scope.Banknotes);
+            const dimeSubtraction = operation === Area.Subtraction && profile.labels.includes(Scope.TenthDenomination)
+                && !profile.labels.includes(Scope.Banknotes);
             expect(enumeration.selections).toHaveLength(pennies ? operation === Area.Addition ? 3 : 2
+                : nickels ? operation === Area.Addition ? 2 : 3 : dimeSubtraction ? 2
                 : profile.name === 'banknotes' && operation === Area.Addition ? 2 : 1);
             const selected = enumeration.selections[0].labels;
             const mixed = profile.labels.includes(Scope.Coins) && profile.labels.includes(Scope.Banknotes);
@@ -124,7 +128,8 @@ describe('CurrencyArithmeticGenerator spec', () => {
             expect(evaluation.assessments.filter(assessment => assessment.status === 'missing'
                 && assessment.facet !== 'range').map(assessment => assessment.facet))
                 .toEqual(integer ? [] : ['numberKind']);
-            if (!integer || profile.name === 'banknotes' || pennies) continue;
+            // The adopted finite-profile tests exhaust the complete old count paths for these slices.
+            if (!integer || profile.name === 'banknotes' || pennies || nickels || dimeSubtraction) continue;
 
             const selection = enumeration.selections[0];
             const bindings = Object.fromEntries(selection.choices.map(choice => {

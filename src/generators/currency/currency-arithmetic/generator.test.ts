@@ -4,7 +4,7 @@ import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {coinDenominations} from './spec.ts';
-import {banknoteRangeProfiles, pennyRangeProfiles} from './numeric-domain.ts';
+import {banknoteRangeProfiles, pennyRangeProfiles, centOnlyRangeProfiles, centOnlyRowsForRange} from './numeric-domain.ts';
 
 const representationProfiles = [
     {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const, range: banknoteRangeProfiles[0]!.range},
@@ -14,6 +14,14 @@ const representationProfiles = [
         {name: `mixed ${coinDenomination}`, useCoins: true, useBanknotes: true, coinDenomination}
     ])
 ];
+const operationConfig = (profile: typeof representationProfiles[number], operation: Area) => {
+    const denomination = profile.coinDenomination === Scope.TwentiethDenomination ? 5 : 10;
+    const centOnly = !profile.useBanknotes && (profile.coinDenomination === Scope.TwentiethDenomination
+        || profile.coinDenomination === Scope.TenthDenomination && operation === Area.Subtraction);
+    const range = centOnly ? centOnlyRangeProfiles.find(profile =>
+        centOnlyRowsForRange(operation === Area.Addition ? 'addition' : 'subtraction', denomination, profile.range).length)!.range : profile.range;
+    return {...profile, operation, range};
+};
 
 describe('CurrencyArithmeticGenerator', () => {
     const generator = new CurrencyArithmeticGenerator();
@@ -83,7 +91,7 @@ describe('CurrencyArithmeticGenerator', () => {
         for (const operation of [Area.Addition, Area.Subtraction]) {
             for (let seed = 0; seed < 40; seed++) {
                 setSeed(`${profile.name}-${operation}-${seed}`);
-                const stub = generator.generate({...profile, operation});
+                const stub = generator.generate(operationConfig(profile, operation));
                 expect(stub).not.toBeNull();
                 const {amounts, answerCents} = stub!.data;
                 for (const amount of amounts) {
@@ -108,7 +116,7 @@ describe('CurrencyArithmeticGenerator', () => {
     it.each(representationProfiles)('avoids a zero difference when both sampled $name totals are equal', profile => {
         const random = vi.spyOn(randomSource, 'random').mockReturnValue(0);
         try {
-            const {amounts, answerCents} = generator.generate({...profile, operation: Area.Subtraction})!.data;
+            const {amounts, answerCents} = generator.generate(operationConfig(profile, Area.Subtraction))!.data;
             expect(amounts[0].totalCents).toBeGreaterThan(amounts[1].totalCents);
             expect(answerCents).toBe(amounts[0].items[0].denominationCents);
             for (const amount of amounts) expect(amount.totalCents).toBe(amount.items.reduce(

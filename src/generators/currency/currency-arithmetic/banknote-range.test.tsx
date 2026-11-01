@@ -77,7 +77,7 @@ describe('banknotes-only canonical ranges', () => {
         } finally { draw.mockRestore(); }
     });
 
-    it('preserves all810 unqualified coin/mixed count outcomes, their probability weights and draw counts', () => {
+    it('preserves all702 remaining unqualified coin/mixed count outcomes, probability weights and draw counts', () => {
         const generator = new CurrencyArithmeticGenerator(), draw = vi.spyOn(rng, 'random');
         let cases = 0;
         try {
@@ -89,6 +89,9 @@ describe('banknotes-only canonical ranges', () => {
                     const inputs = (useBanknotes ? [1, 2, 3] : [0]).flatMap(banknotes =>
                         Array.from({length: maxCoins}, (_, index) => ({banknotes, coins: index + 1})));
                     for (const operation of [Area.Addition, Area.Subtraction]) for (const first of inputs) for (const second of inputs) {
+                        // Separate complete finite-profile proofs cover the newly adopted cents-only slices.
+                        if (!useBanknotes && (coinDenomination === Scope.TwentiethDenomination
+                            || coinDenomination === Scope.TenthDenomination && operation === Area.Subtraction)) continue;
                         const amount = (input: typeof first): CurrencyAmount => ({items: [
                             ...(useBanknotes ? [{kind: 'banknote' as const, denominationCents: 100, count: input.banknotes}] : []),
                             {kind: 'coin', denominationCents, count: input.coins}
@@ -113,7 +116,7 @@ describe('banknotes-only canonical ranges', () => {
                     }
                 }
             }
-            expect(cases).toBe(810);
+            expect(cases).toBe(702);
         } finally { draw.mockRestore(); }
     });
 

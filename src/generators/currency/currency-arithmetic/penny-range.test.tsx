@@ -78,7 +78,7 @@ describe('penny-only canonical ranges', () => {
         } finally { draw.mockRestore(); }
     });
 
-    it('resolves allfive penny cells in direct/planned paths and leaves other coins deferred', () => {
+    it('resolves allfive penny cells in direct/planned paths and leaves cross-unit branches deferred', () => {
         const evaluator = createLabelDependencyEvaluator();
         let cells = 0;
         for (const operation of [Area.Addition, Area.Subtraction]) {
@@ -104,7 +104,7 @@ describe('penny-only canonical ranges', () => {
             }
         }
         expect(cells).toBe(5);
-        for (const labels of [[Area.Addition, Scope.Coins, Scope.TwentiethDenomination],
+        for (const labels of [[Area.Addition, Scope.Coins, Scope.QuarterDenomination],
             [Area.Addition, Scope.Coins, Scope.Banknotes, Scope.HundredthDenomination]]) {
             const deferred = extractConfig(schema, labels);
             expect(deferred.config.range).toBe(false);
