@@ -5,7 +5,8 @@ Started 2026-10-31 on `codex/label-dependency-audit`, from
 
 Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility and
 [source-band reviews](canonical-range-source-review.md) are complete, including the eight
-measurement targets. R2/R3 activation requires producer adoption and the remaining lower/endpoint decisions.
+measurement targets. All recommendations were approved on 2026-11-01; R2/R3 producer and target
+adoption is in progress. Source readiness and dataset acceptance remain separate gates.
 The inventory and first competency review remain the rollout baseline. No production
 target adopts the helper yet; sampling, stored annotations and the report-only range gate remain
 unchanged.
@@ -38,6 +39,10 @@ independent Question/Solution evaluation remain unchanged.
 - Keep labels resolved before generation. Prefer matching-capable declarations and mathematical
   profiles. Do not introduce post-generation annotation adapters, graph-driven completion or
   payload-reading `inferredLabels`.
+- The 2026-11-01 approval also adopts strongest positive lower profiles, exclusion of isolated
+  positive threshold magnitudes, the reviewed measurement envelope and exact source-domain
+  corrections. The [source review](canonical-range-source-review.md#approved-decisions) records
+  the complete decision and its support/matching consequences.
 
 The user asked whether generator tests already guarantee canonical bands. They do not in general:
 the current contract guarantees the declared bounds, while strongest-band sampling is a stronger
@@ -332,23 +337,37 @@ pinned objectives; compare controlled threshold crossings and fresh held-out exa
 inspected examples remain regression evidence. Publishing a dataset or launching paid training
 is a later action, not part of this planning checkpoint.
 
-## Open questions and deferred semantics
+## Approved contracts and remaining rollout
 
 1. Adopt the [strongest positive lower profiles](canonical-range-source-review.md#strongest-lower-bounds),
-   selected before generation, with no positive lower when the minimum magnitude is below 5?
+   selected before generation, with no positive lower when the minimum magnitude is below 5.
    Explicit lower-target requests need correlated refinements under unchanged matching.
 2. Adopt the [narrow endpoint exclusion](canonical-range-source-review.md#endpoint-policy): omit
-   examples whose relevant absolute magnitudes all equal one positive catalog threshold?
+   examples whose relevant absolute magnitudes all equal one positive catalog threshold.
    This replaces the earlier upper-wins recommendation. It preserves source competencies and
    conflict semantics, while explicitly reducing mathematical support at those exact points.
 3. Adopt the reviewed source-domain recommendations, particularly exact two-/three-digit comparison
-   caps and the Grade 4 measurement envelope? These are disclosed curriculum sampling choices and
+   caps and the Grade 4 measurement envelope. These are disclosed curriculum sampling choices and
    source corrections, not numeric limits inferred from unrelated standard domains.
 
-The user accepted choosing the side containing other involved numbers at a shared endpoint;
-that does not settle an isolated singleton. No new ontology conflict suppression is authorized.
-Upper-band inventory and helper design can proceed independently. Full canonical lower/upper
-acceptance must wait for the endpoint and lower-profile contracts.
+The user approved all source-review recommendations on 2026-11-01, including the isolated endpoint
+exclusion and two-digit addend correction. No ontology conflict suppression or matching implication
+extension is introduced. Canonical lower/upper acceptance now depends on implementation and validation.
+
+### Adoption checkpoint 1 — shared mathematical profiles
+
+The shared numeric helper describes inclusive bounds and their strict tightness witnesses, using
+finite JSON-safe values for replay. A separate schema helper exposes the 45 feasible correlated
+catalog profiles. A partial upper request can select an additional canonical lower; an explicit
+lower request is never replaced through implication. The empty optional binding uses `false`,
+consistent with the schema's non-null resolution contract. No payload-derived label inference is used.
+
+The target-expansion helper continues to reject equal lower/upper endpoints, now under the approved
+exclusion instead of an unresolved-policy error. Unit tests cover threshold boundaries, omitted/weak
+lower claims, signed magnitudes, excluded singletons and partial-request capability selection.
+Producer and target adoption follows in coordinated checkpoints; this helper alone activates no sampler.
+The focused helper checkpoint passes 46 tests across three files. Full repository coverage and
+matching validation follow the coordinated family adoption, before dataset regeneration.
 
 Remaining fraction, measurement, place-value and required-intermediate quantity domains need family review
 before rollout. Preserve the source's actual competency rather than treating rendered digits,

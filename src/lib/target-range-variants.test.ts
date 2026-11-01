@@ -33,11 +33,11 @@ describe('reviewed target upper ranges', () => {
         ]);
     });
 
-    it('rejects impossible and unresolved bounds without silently dropping alternatives', () => {
+    it('rejects impossible and excluded bounds without silently dropping alternatives', () => {
         expect(() => expandUpperRangeVariants([{ labels: [Scope.NumbersLarger10] }], { bands: [5, 20] }))
             .toThrow(/below the existing lower bound 10/);
         expect(() => expandUpperRangeVariants([{ labels: [Scope.NumbersLarger10] }], { bands: [10, 20] }))
-            .toThrow(/singleton policy/);
+            .toThrow(/excluded by the canonical range policy/);
         expect(() => expandUpperRangeVariants([{ labels: [Scope.NumbersSmaller10] }], { through: 20 }))
             .toThrow(/widen the existing ceiling 10/);
     });

@@ -23,14 +23,13 @@ These items are not newly scheduled by the archive move.
   the separately agreed review of tightest bounds, relevant target-band expansion and generator
   guarantees. Its [inventory](canonical-range-inventory.csv) describes current competency
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
-  permutations and sampling changes are accepted, while lower-bound and singleton semantics
-  remain explicit decisions. The opt-in expansion helper is implemented with unchanged production
-  targets. The [shared-consumer review](canonical-range-consumer-review.md) covers 18 comparison
+  permutations and sampling changes are accepted. Strongest lower profiles, threshold-singleton
+  exclusion and all source-review recommendations were approved on 2026-11-01. The opt-in expansion
+  helper is implemented. The [shared-consumer review](canonical-range-consumer-review.md) covers 18 comparison
   routes and 135 arithmetic routes: every currently bounded route retains a feasible configuration,
   but seven optional arithmetic width choices need exclusion. The [source-band review](canonical-range-source-review.md)
   is complete for all 27 shared-consumer definitions, including the eight unspecified-upper
-  measurement targets. It recommends strongest lower profiles and a narrow threshold-endpoint
-  exclusion, with matching migration consequences documented. Producer adoption remains: the
+  measurement targets. Matching migration consequences are documented. Producer adoption is in progress: the
   read-only proposal has 60 unmatched targets and needs dedicated measurement support for all 80
   integer successors. Range validation and production targets have not changed yet.
 

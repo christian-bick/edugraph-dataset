@@ -1,8 +1,9 @@
 # Canonical range source-band review and remaining policy recommendations
 
 Completed 2026-11-01 from `818ca59a`, using ontology `0.33.0`. This completes the source review
-required by the [consumer review](canonical-range-consumer-review.md). Recommendations below are
-not implemented target or sampling changes. The production baseline remains 1,013 normalized
+required by the [consumer review](canonical-range-consumer-review.md). The user approved all
+recommendations on 2026-11-01; coordinated implementation is tracked in the main plan. Approval
+is not dataset acceptance. The pre-adoption baseline remains 1,013 normalized
 targets and 1,222 routes. The Area allowlist and all unrelated annotation rules remain unchanged.
 
 The review covers all **27 source definitions across 25 leaves** behind the two pilot producers,
@@ -337,8 +338,8 @@ to the mathematical exercise itself.
 ### Endpoint policy
 
 **Recommendation: exclude only examples whose relevant absolute magnitudes all equal one positive
-catalog threshold: `m=M=T`.** This is a narrow training-domain restriction requiring a decision,
-not an already approved rule. It preserves ordinary equalities and mixed-magnitude boundary examples.
+catalog threshold: `m=M=T`.** The user approved this narrow training-domain restriction on
+2026-11-01. It preserves ordinary equalities and mixed-magnitude boundary examples.
 
 Exclude, for example, `10=10` and `100=100`; keep `11=11`, `10<20`, `100<120` and `10+10=20`.
 For signed contexts the same magnitude rule would exclude `-10<10` too. Do not define the policy as
@@ -449,7 +450,7 @@ Question and Solution judgments remain independent.
 
 ### Implementation sequence and validation
 
-1. Decide the lower/endpoint convention and the disclosed sampling-domain recommendations.
+1. Lower/endpoint conventions and disclosed sampling-domain recommendations were approved on 2026-11-01.
 2. Extend mathematical profiles and compatibility across the complete producer set; preserve all
    correlated claims and reject empty combinations before sampling.
 3. Adopt reviewed target variants by coherent source family, including secondary routes and the
@@ -458,15 +459,15 @@ Question and Solution judgments remain independent.
    direct/planned resolution tests. Report old-to-new source associations and every support reduction.
 5. Regenerate canonically and perform replay, split and independent VQA acceptance when source-ready.
 
-## Open Questions
+## Approved decisions
 
-1. Adopt strongest positive lower profiles, including explicit lower-target expansion where needed?
-2. Exclude `m=M=T` threshold-singleton magnitude cases while retaining all other feasible comparisons?
+1. Adopt strongest positive lower profiles, including explicit lower-target expansion where needed.
+2. Exclude `m=M=T` threshold-singleton magnitude cases while retaining all other feasible comparisons.
 3. Adopt the disclosed source-domain recommendations: exact 99/999 comparison caps, the Grade 4
-   whole-number measurement envelope through 100, and the stated grade-specific practice selections?
+   whole-number measurement envelope through 100, and the stated grade-specific practice selections.
 
-These are concrete recommendations for the current request, not requests to reconfirm already
-accepted general sampling growth or routine implementation choices.
+All recommendations, including the two-digit addend correction and coordinated route adoption,
+were accepted by the user on 2026-11-01. No further policy clarification is needed for these batches.
 
 ## Evidence
 

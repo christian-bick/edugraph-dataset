@@ -39,7 +39,7 @@ function selectBounds(policy: ReviewedUpperRanges) {
  * Expands reviewed target bounds before target IDs are assigned. This authoring
  * shorthand neither establishes generator feasibility nor changes range matching.
  * Existing upper constraints cannot be widened; lower/upper singleton choices
- * fail explicitly until their annotation policy has been settled.
+ * fail explicitly under the canonical endpoint exclusion policy.
  */
 export function expandUpperRangeVariants(
     permutations: readonly { readonly labels: readonly string[] }[],
@@ -62,7 +62,7 @@ export function expandUpperRangeVariants(
                 throw new Error(`Reviewed upper bound ${bound.value} is below the existing lower bound ${floor}.`);
             }
             if (bound.value === floor) {
-                throw new Error(`Equal lower/upper endpoint ${floor} requires a settled singleton policy.`);
+                throw new Error(`Equal lower/upper endpoint ${floor} is excluded by the canonical range policy.`);
             }
             const labels = [...new Set([...retained, bound.upper])];
             const key = JSON.stringify([...labels].sort());
