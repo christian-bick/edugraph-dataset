@@ -331,6 +331,20 @@ question/solution consumers and both schema-resolution paths. No target, view or
 is needed. Evidence: `temp/range-autonomous/batch2/measurement-time/unit-rate-focused.log` and
 `route-verification.json`.
 
+## Second batch: measurement-ratio conversions
+
+Six upper profiles preserve all34,992 original fact/numerator/denominator draw outcomes,
+including repeated reduced-rational outcomes. Both direction projections require the unit
+equality, converted quantities and the dimension-preserving conversion-ratio identity1. That
+identity is required mathematical reasoning, so it prevents positive lower bounds consistently;
+unused forward/reverse scalar witnesses are not substituted for the projected quantities.
+The compact domain uses fewer than100 indexed interval blocks instead of materializing payloads
+at spec import. The original route remains, with one selection becoming six and one baseline
+range omission closed. All22 focused tests/six files pass, including exhaustive support and both
+question/solution direction projections. Targets, views and payload shapes stay unchanged.
+Evidence: `temp/range-autonomous/batch2/measurement-time/ratio-focused.log` and
+`route-verification.json`.
+
 ## Second batch: decimal writing and reading
 
 Decimal writing and decimal reading now expose upper5/upper10 profiles under their established

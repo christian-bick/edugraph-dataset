@@ -1,45 +1,39 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 import {MeasurementRatioRelationsGenerator} from './generator.ts';
-import {spec} from './spec.ts';
-
-const mathematicalLabels = [Area.UnitConversion, Area.RatioEquivalence, Scope.RationalNumbers];
+import {MeasurementRatioRelationsGeneratorSchema as schema, spec} from './spec.ts';
+import {conversionRatioRangeProfiles} from './numeric-domain.ts';
+import {spec as viewSpec} from '../../../visuals/views/measure/measure-ratio-conversion/spec.ts';
 
 describe('measurement-ratio-relations capabilities', () => {
-    it('owns the reviewed conversion, ratio and rational mathematics', () => {
-        expect(spec.generalLabels).toEqual([...mathematicalLabels,
-            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
-    });
-
-    it('generates the real Grade6 target without an explicit magnitude label', () => {
+    it('resolves every finite canonical band with required multiplicative identity1 and no positive floor', () => {
+        expect(conversionRatioRangeProfiles.map(({range}) => [range.min, range.max]))
+            .toEqual([[0, 20], [0, 100], [0, 120], [0, 1000], [0, 10000], [0, 100000]]);
+        const evaluator = createLabelDependencyEvaluator();
+        for (const profile of conversionRatioRangeProfiles) {
+            expect(extractConfig(schema, profile.labels).config.range).toEqual(profile.range);
+            expect(resolveSchemaChoices(schema, profile.labels, {range: profile.labels}).config.range).toEqual(profile.range);
+            const result = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...profile.labels]);
+            expect(result.errors).toEqual([]);
+            expect(result.conflicts).toEqual([]);
+            expect(result.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            expect(generateWithLabels(new MeasurementRatioRelationsGenerator(), profile.labels)!.labels).toEqual(profile.labels);
+        }
         const problem = generateWithLabels(new MeasurementRatioRelationsGenerator(), [
-            ...mathematicalLabels, Ability.ProcedureExecution, Ability.ProcedureUnderstanding
+            Area.UnitConversion, Area.RatioEquivalence, Scope.RationalNumbers,
+            Ability.ProcedureExecution, Ability.ProcedureUnderstanding
         ])!;
         expect(problem.data.kind).toBe('measurement-ratio-relation');
-        expect(problem.data.quantityEquality.first.numerator).toBeLessThan(10000);
-        expect(problem.data.quantityEquality.second.numerator).toBeLessThan(10000);
-        expect(problem.labels).toEqual([]);
     });
-
-    it.each([[Scope.NumbersSmaller10000, 10000], [Scope.NumbersSmaller100000, 100000]] as const)(
-        'resolves the true mathematical magnitude capability %s', (label, bound) => {
-            const problem = generateWithLabels(new MeasurementRatioRelationsGenerator(), [...mathematicalLabels, label])!;
-            expect(problem.labels).toEqual([label]);
-            expect(problem.data.quantityEquality.first.numerator).toBeLessThan(bound);
-            expect(problem.data.quantityEquality.second.numerator).toBeLessThan(bound);
-        }
-    );
 
     it('keeps the symmetric relation independent of requested learner action', () => {
         setSeed(71);
-        const execution = generateWithLabels(new MeasurementRatioRelationsGenerator(), [
-            ...mathematicalLabels, Ability.ProcedureExecution
-        ]);
+        const execution = generateWithLabels(new MeasurementRatioRelationsGenerator(), [Scope.NumbersSmaller10000, Ability.ProcedureExecution]);
         setSeed(71);
-        expect(generateWithLabels(new MeasurementRatioRelationsGenerator(), [
-            ...mathematicalLabels, Ability.ProcedureUnderstanding
-        ])).toEqual(execution);
+        expect(generateWithLabels(new MeasurementRatioRelationsGenerator(), [Scope.NumbersSmaller10000, Ability.ProcedureUnderstanding])).toEqual(execution);
     });
 });

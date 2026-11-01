@@ -1,8 +1,9 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {MeasurementConversionUnitId, MeasurementRatioRelationProblem, MeasurementRatioUnit} from '../../../types/problems.ts';
-import {pick, randomInteger, rational} from '../../ratio/helpers.ts';
-import {measurementConversionPairSeeds} from '../helpers.ts';
+import {rational} from '../../ratio/helpers.ts';
+import {random} from '../../../lib/random.ts';
+import {conversionRatioCaseCount, conversionRatioFrameAt} from './numeric-domain.ts';
 import {MeasurementRatioRelationsGeneratorSchema, type MeasurementRatioRelationsGeneratorConfig} from './spec.ts';
 
 type UnitId = MeasurementConversionUnitId | 'inch';
@@ -24,13 +25,6 @@ const unitMetadata = {
     inch: {symbol: 'in', system: 'customary', dimension: 'length'}
 } as const satisfies Record<UnitId, UnitMetadata>;
 
-const unitFacts: {first: UnitId; second: UnitId; firstValue: number; secondValue: number}[] = [
-    ...Object.values(measurementConversionPairSeeds).map(pair => ({
-        first: pair.largerUnit, second: pair.smallerUnit, firstValue: 1, secondValue: pair.factor
-    })),
-    {first: 'inch', second: 'centimeter', firstValue: 50, secondValue: 127}
-];
-
 const namedUnit = (id: UnitId): MeasurementRatioUnit => ({id, name: id, ...unitMetadata[id]});
 
 export class MeasurementRatioRelationsGenerator implements ProblemGenerator<
@@ -41,16 +35,9 @@ export class MeasurementRatioRelationsGenerator implements ProblemGenerator<
 
     generate(config: MeasurementRatioRelationsGeneratorConfig): ProblemStub<MeasurementRatioRelationProblem> {
         validateConfigFields('measurement-ratio-relations', config, ['range']);
-        const range = config.range!;
-        if (typeof range !== 'object' || range === null || range.min !== 0
-            || ![10000, 100000, Number.MAX_SAFE_INTEGER].includes(range.max)) {
-            throw new GeneratorValidationError('measurement-ratio-relations',
-                'Range must start at zero with bound 10000, 100000, or the unbounded resolver sentinel.');
-        }
-        const ceiling = range.max === Number.MAX_SAFE_INTEGER ? 9999 : range.max - 1;
-        const fact = pick(unitFacts);
-        const maximumNumerator = Math.floor(ceiling / Math.max(fact.firstValue, fact.secondValue));
-        const scaleFactor = rational(randomInteger(1, maximumNumerator), pick([1, 2, 4]));
+        const count = conversionRatioCaseCount(config.range!);
+        if (count === 0) throw new GeneratorValidationError('measurement-ratio-relations', 'Unsupported canonical range.');
+        const {fact, scaleFactor} = conversionRatioFrameAt(config.range!, Math.floor(random() * count));
 
         return {data: {
             kind: 'measurement-ratio-relation',
@@ -60,7 +47,7 @@ export class MeasurementRatioRelationsGenerator implements ProblemGenerator<
                 first: rational(fact.firstValue * scaleFactor.numerator, scaleFactor.denominator),
                 second: rational(fact.secondValue * scaleFactor.numerator, scaleFactor.denominator)
             },
-            scaleFactor,
+            scaleFactor: {...scaleFactor},
             forwardFactor: rational(fact.secondValue, fact.firstValue),
             reverseFactor: rational(fact.firstValue, fact.secondValue)
         }};

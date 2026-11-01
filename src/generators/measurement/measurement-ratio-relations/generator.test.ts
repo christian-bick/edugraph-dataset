@@ -1,130 +1,87 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {greatestCommonDivisor} from '../../ratio/helpers.ts';
+import {describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {rational} from '../../ratio/helpers.ts';
 import {measurementConversionPairSeeds} from '../helpers.ts';
+import {conversionProjection, isMeasurementRatioRelation} from '../../../visuals/views/measure/measurement-ratio-presentation.ts';
 import {MeasurementRatioRelationsGenerator} from './generator.ts';
-
-const generator = new MeasurementRatioRelationsGenerator();
+import {conversionRatioCaseCount, conversionRatioDomainFootprint, conversionRatioFrameAt, conversionRatioRangeProfiles} from './numeric-domain.ts';
 
 describe('MeasurementRatioRelationsGenerator', () => {
-    it('requires a resolved supported mathematical range', () => {
-        for (const config of [
-            null, {}, {range: null}, {range: 10000}, {range: {}},
-            {range: {min: -1, max: 10000}}, {range: {min: 1, max: 10000}},
-            {range: {min: 0, max: 1000}}, {range: {min: 0, max: 10000.1}},
-            {range: {min: 0, max: Infinity}}
-        ]) {
-            expect(() => generator.generate(config as never)).toThrow();
-        }
-    });
-
-    it.each([10000, 100000, Number.MAX_SAFE_INTEGER])(
-        'constructs symmetric exact conversion witnesses within range %s', max => {
-            const bound = max === Number.MAX_SAFE_INTEGER ? 10000 : max;
-            const pairs = new Set<string>();
-            const dimensions = new Set<string>();
-            const systems = new Set<string>();
-            const numericProfiles = new Set<string>();
-            const problems = new Set<string>();
-            for (let seed = 0; seed < 400; seed++) {
-                setSeed(seed);
-                const {data} = generator.generate({range: {min: 0, max}});
-                expect(data.kind).toBe('measurement-ratio-relation');
-                const {units, unitEquality, quantityEquality, scaleFactor, forwardFactor, reverseFactor} = data;
-                const pairId = `${units.first.id}-${units.second.id}`;
-                pairs.add(pairId);
-                dimensions.add(units.first.dimension);
-                systems.add(`${units.first.system}-${units.second.system}`);
-                expect(units.first.dimension).toBe(units.second.dimension);
-                expect(units.first.name).toBe(units.first.id);
-                expect(units.second.name).toBe(units.second.id);
-                expect(units.first.symbol).not.toBe('');
-                expect(units.second.symbol).not.toBe('');
-                expect(unitEquality.first.denominator).toBe(1);
-                expect(unitEquality.second.denominator).toBe(1);
-                const first = unitEquality.first.numerator;
-                const second = unitEquality.second.numerator;
-                if (pairId === 'inch-centimeter') {
-                    expect([first, second]).toEqual([50, 127]);
-                    expect(forwardFactor).toEqual({numerator: 127, denominator: 50});
-                    expect(reverseFactor).toEqual({numerator: 50, denominator: 127});
-                    expect(units.first.system).toBe('customary');
-                    expect(units.second.system).toBe('metric');
-                } else {
-                    const fact = measurementConversionPairSeeds[pairId as keyof typeof measurementConversionPairSeeds];
-                    expect(fact).toBeDefined();
-                    expect([first, second]).toEqual([1, fact.factor]);
-                }
-                expect(forwardFactor.numerator * first).toBe(second * forwardFactor.denominator);
-                expect(reverseFactor.numerator * second).toBe(first * reverseFactor.denominator);
-                expect(forwardFactor.numerator * reverseFactor.numerator)
-                    .toBe(forwardFactor.denominator * reverseFactor.denominator);
-                for (const [quantity, primitive] of [[quantityEquality.first, first], [quantityEquality.second, second]] as const) {
-                    expect(quantity.numerator * scaleFactor.denominator)
-                        .toBe(primitive * scaleFactor.numerator * quantity.denominator);
-                    expect(primitive * scaleFactor.numerator).toBeLessThan(bound);
-                    numericProfiles.add(quantity.denominator === 1 ? 'integer' : 'fractional');
-                }
-                expect(quantityEquality.second.numerator * quantityEquality.first.denominator * forwardFactor.denominator)
-                    .toBe(quantityEquality.first.numerator * forwardFactor.numerator * quantityEquality.second.denominator);
-                for (const value of [
-                    unitEquality.first, unitEquality.second,
-                    quantityEquality.first, quantityEquality.second,
-                    scaleFactor, forwardFactor, reverseFactor
-                ]) {
-                    expect(Number.isSafeInteger(value.numerator)).toBe(true);
-                    expect(Number.isSafeInteger(value.denominator)).toBe(true);
-                    expect(value.numerator).toBeGreaterThan(0);
-                    expect(value.denominator).toBeGreaterThan(0);
-                    expect(value.numerator).toBeLessThan(bound);
-                    expect(value.denominator).toBeLessThan(bound);
-                    expect(greatestCommonDivisor(value.numerator, value.denominator)).toBe(1);
-                }
-                expect(Object.keys(data).sort()).toEqual([
-                    'forwardFactor', 'kind', 'quantityEquality', 'reverseFactor', 'scaleFactor', 'unitEquality', 'units'
-                ]);
-                problems.add(JSON.stringify(data));
+    it('preserves every original unit-fact and scale draw, including equal reduced-rational outcomes', () => {
+        const facts = [...Object.values(measurementConversionPairSeeds).map(pair => ({
+            first: pair.largerUnit, second: pair.smallerUnit, firstValue: 1, secondValue: pair.factor
+        })), {first: 'inch', second: 'centimeter', firstValue: 50, secondValue: 127}];
+        const expected = new Map<string, number>(), seen = new Map<string, number>();
+        for (const fact of facts) for (let numerator = 1; numerator <= Math.floor(99999 / Math.max(fact.firstValue, fact.secondValue)); numerator++) {
+            for (const denominator of [1, 2, 4]) {
+                const scale = rational(numerator, denominator);
+                const key = [fact.first, fact.second, scale.numerator, scale.denominator].join(':');
+                expected.set(key, (expected.get(key) ?? 0) + 1);
             }
-            expect(pairs).toEqual(new Set([...Object.keys(measurementConversionPairSeeds), 'inch-centimeter']));
-            expect(dimensions).toEqual(new Set(['length', 'mass', 'volume', 'time']));
-            expect(systems).toEqual(new Set(['metric-metric', 'customary-customary', 'time-time', 'customary-metric']));
-            expect(numericProfiles).toEqual(new Set(['integer', 'fractional']));
-            expect(problems.size).toBeGreaterThan(200);
         }
-    );
+        const generator = new MeasurementRatioRelationsGenerator(), draw = vi.spyOn(rng, 'random');
+        let cases = 0;
+        try {
+            for (const {range} of conversionRatioRangeProfiles) {
+                const count = conversionRatioCaseCount(range);
+                for (let index = 0; index < count; index++) {
+                    draw.mockClear().mockReturnValue((index + 0.5) / count);
+                    const {data} = generator.generate({range});
+                    expect(isMeasurementRatioRelation(data)).toBe(true);
+                    const key = [data.units.first.id, data.units.second.id, data.scaleFactor.numerator, data.scaleFactor.denominator].join(':');
+                    seen.set(key, (seen.get(key) ?? 0) + 1);
+                    const number = (value: {numerator: number; denominator: number}) => value.numerator / value.denominator;
+                    for (const direction of ['first-to-second', 'second-to-first'] as const) {
+                        const projection = conversionProjection(data, direction);
+                        const values = [projection.sourceValue, projection.targetValue, projection.ratioNumerator,
+                            projection.ratioDenominator, data.unitEquality.first, data.unitEquality.second].map(number);
+                        expect(hasCanonicalRangeWitness([1, ...values], range)).toBe(true);
+                        expect(Math.max(...values)).toBeLessThanOrEqual(99999);
+                    }
+                    expect(draw).toHaveBeenCalledTimes(1);
+                    cases++;
+                }
+            }
+            expect(seen).toEqual(expected);
+            expect(cases).toBe(34992);
+            expect(conversionRatioDomainFootprint.outcomes).toBe(cases);
+            expect(conversionRatioDomainFootprint.blocks).toBeLessThan(100);
+        } finally { draw.mockRestore(); }
+    }, 30000);
 
-    it('makes the configured magnitude range affect sampled measurements', () => {
-        let widerTerms = 0;
-        let largerMeasurements = 0;
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const smaller = generator.generate({range: {min: 0, max: 10000}}).data;
-            setSeed(seed);
-            const larger = generator.generate({range: {min: 0, max: 100000}}).data;
-            expect(larger.units).toEqual(smaller.units);
-            expect(larger.unitEquality).toEqual(smaller.unitEquality);
-            expect(larger.scaleFactor.numerator / larger.scaleFactor.denominator)
-                .toBeGreaterThanOrEqual(smaller.scaleFactor.numerator / smaller.scaleFactor.denominator);
-            if (larger.scaleFactor.numerator / larger.scaleFactor.denominator
-                > smaller.scaleFactor.numerator / smaller.scaleFactor.denominator) largerMeasurements++;
-            if (larger.quantityEquality.second.numerator >= 10000) widerTerms++;
-        }
-        expect(widerTerms).toBeGreaterThan(40);
-        expect(largerMeasurements).toBeGreaterThan(90);
+    it('requires a supported complete canonical profile before sampling', () => {
+        const generator = new MeasurementRatioRelationsGenerator(), draw = vi.spyOn(rng, 'random');
+        try {
+            for (const config of [null, {}, {range: null}, {range: 10000}, {range: {}},
+                {range: {min: 0, max: 10000}}, {range: {...conversionRatioRangeProfiles[0]!.range, min: 5}}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 
-    it('replays the same physical equalities from the same seed', () => {
-        setSeed(64);
-        const first = generator.generate({range: {min: 0, max: 10000}});
-        setSeed(64);
-        expect(generator.generate({range: {min: 0, max: 10000}})).toEqual(first);
+    it('rejects indices outside the compact finite source slices', () => {
+        const range = conversionRatioRangeProfiles[0]!.range;
+        for (const index of [-1, 0.5, conversionRatioCaseCount(range)]) {
+            expect(() => conversionRatioFrameAt(range, index)).toThrow();
+        }
+        expect(() => conversionRatioFrameAt({...range, min: 5}, 0)).toThrow();
     });
 
-    it('never mutates the reused immutable unit facts', () => {
-        const before = JSON.stringify(measurementConversionPairSeeds);
-        const problem = generator.generate({range: {min: 0, max: 10000}});
-        problem.data.units.first.name = 'changed';
-        problem.data.unitEquality.first.numerator = 999;
-        expect(JSON.stringify(measurementConversionPairSeeds)).toBe(before);
+    it('replays exactly and isolates mutable output from the reused finite domain', () => {
+        const generator = new MeasurementRatioRelationsGenerator();
+        const config = {range: conversionRatioRangeProfiles[0]!.range};
+        rng.setSeed(64);
+        const first = generator.generate(config), continuation = rng.random();
+        rng.setSeed(64);
+        expect(generator.generate(config)).toEqual(first);
+        expect(rng.random()).toBe(continuation);
+        const original = JSON.stringify(first);
+        first.data.units.first.name = 'changed';
+        first.data.unitEquality.first.numerator = 999;
+        first.data.scaleFactor.numerator = 999;
+        rng.setSeed(64);
+        expect(JSON.stringify(generator.generate(config))).toBe(original);
     });
 });
