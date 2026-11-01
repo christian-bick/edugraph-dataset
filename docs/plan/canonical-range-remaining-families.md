@@ -4,8 +4,11 @@ Read-only production review on 2026-11-01 at `d6fd3b94`, ontology `0.33.0`, on
 `codex/label-dependency-audit`. This extends the [range plan](canonical-range-labeling.md),
 not the earlier historical inventory. The R4a–R4c proposal below was subsequently approved and
 implemented; its [acceptance record](canonical-range-labeling.md#r4c--decimal-addition-profiles-and-complete-batch-acceptance)
-supersedes the review-baseline counts. Current source range-presence findings are 517, with all
-1,247 normalized targets / 1,672 routes retained and 2,969 complete source selections.
+supersedes the review-baseline counts. The subsequently approved
+[R5 counting batch](canonical-range-labeling.md#r5--counting-oncounting-back-canonical-ranges)
+adds three upper5 targets while preserving all earlier target claims/routes. Current counts are
+1,250 normalized targets / 1,675 routes and 2,972 complete source selections. Range-presence
+findings remain 517: R5 tightens existing annotations rather than repairing missing ones.
 
 ## Review baseline
 
@@ -144,17 +147,14 @@ Geometry, coordinate, shape and statistics tasks do not become mandatory range w
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range
 claims outside that gate still need to be truthful; the gate is not an exemption from label validity.
 
-### Ready for a separate finite-domain batch
+### Finite-domain rollout and next candidates
 
-- **Counting on/back:** two generators, three views, six current routes. Add reviewed upper5
-  variants alongside upper10/20 in `1.OA.C.5-counting-operation-relationship` and
-  `1.OA.C.6-addition-counting-on`. A current-catalog experiment adds exactly three targets/routes:
-  **1,250 targets / 1,675 routes**, retaining all existing routes. Complete feasible positive
-  supports are 9 / 15 / 30 ordered problems per operation in bands5/10/20. Required unit steps
-  rule out a positive lower. Seed0 currently produces `1+1=2` or `2−1=1` under upper10 and20,
-  demonstrating why current passing tests do not prove tightness. Fix the two leaf samplers'
-  exclusive `max−1` handling and profile them without changing the shared flexible-strategy
-  schema. Existing payloads and all three views can remain.
+- **Counting on/back — implemented in R5:** two generators, three views, nine routes after adding
+  the three reviewed upper5 variants in `1.OA.C.5-counting-operation-relationship` and
+  `1.OA.C.6-addition-counting-on`. All previous targets/routes remain. Complete positive supports
+  are 9 / 15 / 30 ordered problems per operation in bands5/10/20, with inclusive upper endpoints
+  and required unit steps ruling out a positive lower. Both samplers now enforce canonical maximum
+  witnesses before drawing. The flexible-strategy schema, payloads and views are unchanged.
 - **Time interval arithmetic:** four targets/routes. The question explicitly requires minutes
   after the reference-hour origin; the endpoint is 65–90 and origin is zero. Upper100/no lower
   is a small invariant candidate, separate from ordinary clock-reading tasks.
@@ -165,7 +165,7 @@ claims outside that gate still need to be truthful; the gate is not an exemption
   are suitable. Include actual conversion operands/results in their named units, not raw storage
   hundredths. Review the full source list before proposing particular target bands.
 
-These are subsequent proposals, not automatic extensions of R4a–R4c.
+The remaining candidates are proposals, not automatic extensions of R4 or R5.
 
 ### Concrete complications to keep separate
 
@@ -209,8 +209,8 @@ Implementation acceptance for R4a–R4c:
    checkpoint and update source-readiness accounting. Verify equal-value rendering and report
    artifact/cache identity consequences before the separately authorized artifact stage.
 5. Regenerate and run independent Question/Solution VQA only at the later agreed acceptance
-   point. Allocation is still 2,103 requested pairs / 4,206 images before deduplication if routes
-   and target IDs remain unchanged; exact changed-image/cache work cannot be inferred from the
+   point. The R4 baseline allocation was 2,103 requested pairs / 4,206 images before deduplication;
+   R5 now allocates 2,107 / 4,214. Exact changed-image/cache work cannot be inferred from the
    50-selection count. Stored-row findings remain unchanged until regeneration.
 
 Do not declare all range work closed after this batch or promote the range gate to strict.

@@ -21,7 +21,7 @@ These items are not newly scheduled by the archive move.
 
 - **Canonical numeric ranges:** the [range-labeling plan](canonical-range-labeling.md) starts
   the separately agreed review of tightest bounds, relevant target-band expansion and generator
-  guarantees. Its [inventory](canonical-range-inventory.csv) describes current competency
+  guarantees. Its [inventory](canonical-range-inventory.csv) describes review-baseline competency
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
   permutations and sampling changes are accepted. Strongest lower profiles, threshold-singleton
   exclusion and all source-review recommendations were approved on 2026-11-01. The opt-in expansion
@@ -34,8 +34,9 @@ These items are not newly scheduled by the archive move.
   passes; the separately approved six-target unknown-number Ability correction retains all target
   coverage with 1,672 final routes. The [remaining-family review](canonical-range-remaining-families.md)
   records the baseline 567 source presence findings. Its approved 50-selection batch is implemented,
-  leaving 517 source findings with unchanged targets/routes. Counting-on/back and separate
-  projection/quantity-contract cases follow.
+  leaving 517 source findings with unchanged targets/routes. The approved counting-on/back batch
+  adds three upper5 target variants and canonical sampling while retaining all earlier coverage:
+  **1,250 normalized targets / 1,675 routes**. Separate projection/quantity-contract cases remain.
   Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

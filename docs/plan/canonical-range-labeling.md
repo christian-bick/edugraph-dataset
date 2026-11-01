@@ -3,11 +3,11 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the opt-in target-expansion helper and first eight-family producer/target adoption are
-implemented, including the eight measurement targets and approved unknown-number Ability
-correction. Source validation retains 1,247 normalized targets and 1,672 routes. The
-[remaining-family review](canonical-range-remaining-families.md) records the completed 50-selection
-batch below, leaving 517 source range-presence findings. The original inventory remains a historical rollout baseline.
+Status: the opt-in target-expansion helper, first eight-family adoption, R4 finite-domain batch
+and R5 counting-on/back batch are implemented. Source validation now retains **1,250 normalized
+targets and 1,675 routes**, including all earlier target claims and routes. The
+[remaining-family review](canonical-range-remaining-families.md) tracks the remaining 517 source
+range-presence findings. The original inventory remains a historical rollout baseline.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
 
@@ -720,3 +720,37 @@ checking canonical witnesses, target coverage and strict annotations. Broader co
 40 planned/replay and 36 direct draws. Numerical draws supplement the exhaustive finite tests;
 they do not exhaust seed space. Logs: `implementation-focused.log`, `implementation-types.log`,
 `projection-tests.log` and `verification-checkpoint1.json`.
+
+#### R5 checkpoint 2 — source bands and acceptance
+
+The two reviewed builders now use `applyUpperRangeVariants({ bands: [5, 10, 20] })`.
+The exact source audit confirms **1,289 authored / 1,250 normalized targets, 1,675 routes and
+2,972 selections**. Exactly the three approved upper5 targets/routes are added; every earlier
+authored and normalized target ID/label set and every existing route remain. No target is unmatched.
+The source standards gate passes. Native allocation is 1,675 train and 432 validation tuples;
+only the new understanding variant acquires the additional validation allocation.
+
+All **1,666 non-adopted generation plans** remain identical to the `1579c61b` baseline, as do
+all 76 flexible-strategy runtime controls. The nine counting routes/selections pass 36 planned
+draws and exact replays plus 36 direct draws, checking canonical ranges, target coverage and strict
+annotations. Exhaustive tests prove all 108 operation-specific mathematical problems across
+the three bands; the three views preserve their required unit-step evidence in all 324 static
+Question/Solution projections. These are source and rendering-contract checks, not canonical
+dataset screenshots or VQA acceptance.
+
+The sampler checkpoint is `c47fc0b2`. Evidence: `source-verification.json`,
+`source-standards-check.log`, `verification-final.json` and `consumer-review.md` in
+`temp/canonical-range-counting/`. Final repository and coverage gates are recorded below.
+
+Final acceptance passes `npm run check -- --spec=ccss`, TypeScript, documentation references and
+the complete **7,533-test / 912-file coverage suite** with `VITEST_MAX_WORKERS=2`. No test, timeout
+or threshold is relaxed. Both counting generators have 100% statement and branch coverage; all
+generator thresholds pass. Overall generator coverage is 98.84% statements / 97.84% branches /
+100% functions / 99.46% lines. Logs: `check-final.log`, `types-final.log`, `docs-final.log` and
+`coverage-final.log` in the evidence directory.
+
+The strict annotation audit enumerates all 2,972 source selections with zero conflicts, incomplete
+tuples or strict failures. Its 1,579 report-only range findings remain 517 source omissions plus
+1,062 stored rows. Generation/VQA and acceptance of refreshed artifacts remain pending; the stored
+dataset is unchanged. The next unimplemented finite-domain candidates and the separate projection/
+quantity decisions remain in the [remaining-family review](canonical-range-remaining-families.md).

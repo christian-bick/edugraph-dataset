@@ -84,10 +84,8 @@ const relateCountingStrategyBuilder = new DatasetPermutationBuilder()
         [Area.AdditionCountingOn],
         [Area.SubtractionCountingBack]
     ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
-    ]);
+    .addLabels([Scope.NumbersSmaller20])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 // --- 1.OA.C.6: Add and subtract within 20, fluency within 10 ---
 const fluencyBuilder = new DatasetPermutationBuilder()
@@ -120,10 +118,8 @@ const additionCountingOnBuilder = new DatasetPermutationBuilder()
         ...arithmeticStrategyConstraints,
         Ability.ProcedureUnderstanding
     ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
-    ]);
+    .addLabels([Scope.NumbersSmaller20])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 const additionMakeTenBuilder = new DatasetPermutationBuilder()
     .addLabels([

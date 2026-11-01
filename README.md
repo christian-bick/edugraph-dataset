@@ -87,6 +87,8 @@ matching-capable generator profiles construct exercises that demonstrate those b
 implementation and regenerated dataset acceptance are tracked separately in that plan.
 The settled finite-domain batch also covers noninteger measurement stories and required
 power-ten/fraction scaling, preserving existing targets and matching routes.
+Counting-on/back now uses canonical upper5/10/20 profiles with reviewed Grade 1 target variants;
+the existing flexible strategies retain their earlier contract.
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 

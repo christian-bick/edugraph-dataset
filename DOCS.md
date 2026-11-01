@@ -130,6 +130,12 @@ upper10 mathematical profile before sampling its existing finite tuple pool; the
 branches have upper5. Decimal power-ten and tenths-equivalence scaling supply invariant upper100.
 These module declarations preserve the existing matching routes and mathematical payload shapes.
 
+Counting-on/back uses separate leaf range schemas and a finite mathematical helper, preserving
+explicit unit steps while enforcing inclusive upper5/10/20 witnesses. The Grade 1 target builders
+use the reviewed three-band shorthand. Their payloads and views remain compatible; the shared
+flexible-strategy schema and sampler retain their existing behavior. The range plan records the
+three additive target routes and their independent source/dataset acceptance.
+
 The [numerical-zero correction](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
 removes numeral-character partitions from writing and division, and checks the numerical work of
 the specified algorithms. Claims still come from preselected matching capabilities. Corrected
