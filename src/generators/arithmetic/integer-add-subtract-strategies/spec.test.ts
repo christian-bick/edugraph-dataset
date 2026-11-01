@@ -109,16 +109,18 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         [Area.SubtractionCompensation, 'subtraction-compensation'],
         [Area.SubtractionMakeTen, 'subtraction-make-ten'],
         [Area.SubtractionThinkAddition, 'subtraction-think-addition']
-    ] as const)('resolves %s within 1000', (strategyLabel, strategy) => {
+    ] as const)('resolves %s within its supported range', (strategyLabel, strategy) => {
         setSeed(strategy);
         const selected = strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator()
             : strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator() : generator;
         const selectedSpec = strategy === 'addition-counting-on' ? countingOnSpec : strategy === 'subtraction-counting-back' ? countingBackSpec : spec;
+        const counting = strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back';
+        const upperLabel = counting ? Scope.NumbersSmaller20 : Scope.NumbersSmaller1000;
         const stub = generateWithLabels<IntegerAddSubtractStrategyProblem>(selected, [
             strategyLabel,
             ...invariantLabels,
             Scope.ArabicNumerals,
-            Scope.NumbersSmaller1000
+            upperLabel
         ]);
 
         expect(stub).not.toBeNull();
@@ -128,7 +130,7 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub!.data.answer).toBeLessThan(1000);
         expect([...selectedSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([
             strategyLabel,
-            Scope.NumbersSmaller1000
+            upperLabel
         ]));
     });
 
@@ -157,9 +159,15 @@ describe('IntegerAddSubtractStrategiesGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.strategy).toBe(strategy);
         const upperBound = rangeLabel === Scope.NumbersSmaller10 ? 10 : 20;
-        expect(stub!.data.leftOperand).toBeLessThan(upperBound);
-        expect(stub!.data.rightOperand).toBeLessThan(upperBound);
-        expect(stub!.data.answer).toBeLessThan(upperBound);
+        if (strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back') {
+            expect(stub!.data.leftOperand).toBeLessThanOrEqual(upperBound);
+            expect(stub!.data.rightOperand).toBeLessThanOrEqual(upperBound);
+            expect(stub!.data.answer).toBeLessThanOrEqual(upperBound);
+        } else {
+            expect(stub!.data.leftOperand).toBeLessThan(upperBound);
+            expect(stub!.data.rightOperand).toBeLessThan(upperBound);
+            expect(stub!.data.answer).toBeLessThan(upperBound);
+        }
         expect([...selectedSpec.generalLabels, ...stub!.labels]).toEqual(expect.arrayContaining([strategyLabel, rangeLabel]));
     });
 });

@@ -668,3 +668,55 @@ The next separate proposal is counting-on/back; its three source additions were 
 not part of R4. Conversion/projection and quantity-contract work remains in the remaining-family
 review. Source completion does not yet establish dataset acceptance; regeneration and VQA remain
 at the later acceptance point.
+
+### R5 — counting-on/counting-back canonical ranges
+
+Approved after R4, from `1579c61b` on the same branch. The two Grade 1 counting-strategy
+producers now use isolated upper5/10/20 schemas and a finite mathematical sampler. The shared
+flexible-strategy schema and `integer-strategy-evidence.ts` retain their previous behavior.
+The inherited counting-leaf capabilities above 20 had no current target consumers and are retired
+within this reviewed family scope; the broader flexible producer remains available.
+
+For each operation, the complete positive domain partitions into **9 / 15 / 30 ordered problems**
+under upper5/10/20. Addition uses a positive starting value plus 1..3; subtraction uses the
+corresponding positive minuend, decrement and answer. Every explicit unit step remains in the
+payload. Required step operand 1 rules out a positive lower descriptor. Results/minuends at 10
+and 20 are included; these are not threshold-singleton tasks because 1 is also involved.
+
+The chosen band is resolved before generation. One uniform draw selects a feasible ordered pair
+inside it, without retries or a balancing rule. This changes seeded outcomes and conditional
+sampling, as accepted for the range rollout. Existing mathematical cases below 20 remain supported
+across the bands, and the previously excluded inclusive upper endpoints become available. No
+post-generation annotations, adapters or inferred labels are introduced. Payload shapes, rendering,
+Area qualification, ontology bounds and generic matching semantics remain unchanged.
+
+Checkpoint 1 isolates the two generators and verifies all six existing routes before source
+expansion. Checkpoint 2 adds upper5 alongside upper10/20 to
+`1.OA.C.5-counting-operation-relationship` (addition/subtraction, ConceptDerivation) and
+`1.OA.C.6-addition-counting-on` (ProcedureUnderstanding), preserving every existing label set and ID.
+All consumers are reviewed: `operations-counting-on-operation-derivation`,
+`operations-counting-back-operation-derivation` and the counting-on member of
+`operations-add-subtract-strategy-understanding`.
+
+The current-catalog source proposal adds exactly three targets/routes: **1,286→1,289 authored,
+1,247→1,250 normalized, 1,672→1,675 routes and 2,969→2,972 complete selections**. The two source
+competencies gain 50% more train tuples (4→6 and 2→3), representing meaningful finer bands. Native
+allocation adds three train tuples and one validation tuple: **2,107 requested pairs / 4,214 images
+before deduplication**, up from 2,103 / 4,206. These are allocation estimates, not generated artifacts.
+
+This batch repairs loose existing bounds and adds reviewed coverage; it does not close missing
+range-presence findings. The 517 source findings and 1,062 stored-row findings remain separate.
+Evidence and acceptance results are recorded under `temp/canonical-range-counting/`.
+
+#### R5 checkpoint 1 — isolated canonical sampling
+
+All **93 focused tests / seven files** and TypeScript validation pass. Independent projection
+tests exercise all 324 producer/view/mode combinations across the complete support. The runtime
+probe preserves exactly all 1,286 authored / 1,247 normalized targets and 1,672 routes before
+expansion. Every non-adopted generation plan hash is unchanged, and all 76 flexible-strategy
+control records retain their configurations, values, labels, view state and PRNG continuation.
+All six current counting routes pass 24 planned draws with exact replays and 24 direct draws,
+checking canonical witnesses, target coverage and strict annotations. Broader controls pass
+40 planned/replay and 36 direct draws. Numerical draws supplement the exhaustive finite tests;
+they do not exhaust seed space. Logs: `implementation-focused.log`, `implementation-types.log`,
+`projection-tests.log` and `verification-checkpoint1.json`.

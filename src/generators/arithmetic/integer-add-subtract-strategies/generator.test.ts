@@ -2,6 +2,7 @@ import {IntegerAdditionCountingOnGenerator} from '../integer-addition-counting-o
 import {IntegerSubtractionCountingBackGenerator} from '../integer-subtraction-counting-back/generator.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
     IntegerAddSubtractStrategy,
     IntegerAddSubtractStrategyProblem,
@@ -184,8 +185,8 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     const generator = new IntegerAddSubtractStrategiesGenerator();
 
     const generateStrategy = (config: {strategy: IntegerAddSubtractStrategy; range: {min: number; max: number}}) =>
-        config.strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator().generate({range: config.range})
-            : config.strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator().generate({range: config.range})
+        config.strategy === 'addition-counting-on' ? new IntegerAdditionCountingOnGenerator().generate({range: {...createCanonicalNumericRange(config.range.max), ...config.range}})
+            : config.strategy === 'subtraction-counting-back' ? new IntegerSubtractionCountingBackGenerator().generate({range: {...createCanonicalNumericRange(config.range.max), ...config.range}})
                 : generator.generate({strategy: config.strategy === 'addition-compensation'
                     || config.strategy === 'subtraction-compensation' ? `${config.strategy}-multiple` : config.strategy,
                 range: config.range});
@@ -208,7 +209,8 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
     ] as const)('generates 100 exact and checkable %s problems', strategy => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const stub = generateStrategy({strategy, range: targetRange});
+            const counting = strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back';
+            const stub = generateStrategy({strategy, range: counting ? {min: 0, max: 20} : targetRange});
             expect(stub).not.toBeNull();
             expect(stub!.data.strategy).toBe(strategy);
             expectCommonInvariants(stub!.data);
@@ -226,7 +228,11 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
         'subtraction-make-ten',
         'subtraction-think-addition'
     ] as const)('returns null when the numeric interval cannot support %s', strategy => {
-        expect(generateStrategy({strategy, range: {min: 9, max: 10}})).toBeNull();
+        if (strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back') {
+            expect(() => generateStrategy({strategy, range: {min: 9, max: 10}})).toThrow();
+        } else {
+            expect(generateStrategy({strategy, range: {min: 9, max: 10}})).toBeNull();
+        }
     });
 
     it.each([
@@ -239,9 +245,15 @@ describe('IntegerAddSubtractStrategiesGenerator', () => {
                 setSeed(seed);
                 const stub = generateStrategy({strategy, range});
                 expect(stub).not.toBeNull();
-                expect(stub!.data.leftOperand).toBeLessThan(range.max);
-                expect(stub!.data.rightOperand).toBeLessThan(range.max);
-                expect(stub!.data.answer).toBeLessThan(range.max);
+                if (strategy === 'addition-counting-on' || strategy === 'subtraction-counting-back') {
+                    expect(stub!.data.leftOperand).toBeLessThanOrEqual(range.max);
+                    expect(stub!.data.rightOperand).toBeLessThanOrEqual(range.max);
+                    expect(stub!.data.answer).toBeLessThanOrEqual(range.max);
+                } else {
+                    expect(stub!.data.leftOperand).toBeLessThan(range.max);
+                    expect(stub!.data.rightOperand).toBeLessThan(range.max);
+                    expect(stub!.data.answer).toBeLessThan(range.max);
+                }
                 expectExactStrategy(stub!.data);
             }
         }
