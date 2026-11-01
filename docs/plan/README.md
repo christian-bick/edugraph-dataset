@@ -27,9 +27,12 @@ These items are not newly scheduled by the archive move.
   remain explicit decisions. The opt-in expansion helper is implemented with unchanged production
   targets. The [shared-consumer review](canonical-range-consumer-review.md) covers 18 comparison
   routes and 135 arithmetic routes: every currently bounded route retains a feasible configuration,
-  but seven optional arithmetic width choices need exclusion. Source expansion beyond the pilot,
-  eight unspecified-upper measurement targets and endpoint semantics remain activation work.
-  Range validation has not changed yet.
+  but seven optional arithmetic width choices need exclusion. The [source-band review](canonical-range-source-review.md)
+  is complete for all 27 shared-consumer definitions, including the eight unspecified-upper
+  measurement targets. It recommends strongest lower profiles and a narrow threshold-endpoint
+  exclusion, with matching migration consequences documented. Producer adoption remains: the
+  read-only proposal has 60 unmatched targets and needs dedicated measurement support for all 80
+  integer successors. Range validation and production targets have not changed yet.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

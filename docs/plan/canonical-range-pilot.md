@@ -4,8 +4,9 @@ This is a reviewed standard-expansion seed for the [canonical range plan](canoni
 
 The [2026-11-01 shared-consumer review](canonical-range-consumer-review.md) completes the current
 configuration-feasibility inventory for both producers. Existing bounded routes retain feasible
-choices, but sampler activation also needs source-band review outside this pilot and the applicable
-endpoint/lower-bound contracts. The target-expansion helper is implemented; this proposal has not
+choices. The [complete source-band review](canonical-range-source-review.md) now covers consumers
+outside this pilot and recommends concrete endpoint/lower-bound contracts. Those decisions and
+producer adoption remain before activation. The target-expansion helper is implemented; this proposal has not
 yet been applied to production targets.
 
 ## Source Scope

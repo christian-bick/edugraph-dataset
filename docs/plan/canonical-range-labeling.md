@@ -3,8 +3,9 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility review
-is complete. R2/R3 activation still requires source-band adoption and the applicable open contracts.
+Status: R1 implements the opt-in target-expansion helper; the shared-generator feasibility and
+[source-band reviews](canonical-range-source-review.md) are complete, including the eight
+measurement targets. R2/R3 activation requires producer adoption and the remaining lower/endpoint decisions.
 The inventory and first competency review remain the rollout baseline. No production
 target adopts the helper yet; sampling, stored annotations and the report-only range gate remain
 unchanged.
@@ -200,8 +201,9 @@ valid. Do not let available implementations choose the source competency's pedag
 ## Checkpoints and validation
 
 The [first source review](canonical-range-pilot.md) proposes a small counting/comparison and
-integer-arithmetic cohort. Its reviewed bands and raw permutation estimates remain a proposal
-until the complete generator-consumer feasibility and matching review is performed.
+integer-arithmetic cohort. The [complete shared-consumer source review](canonical-range-source-review.md)
+extends it to all 27 definitions behind the two pilot producers, plus the four-addend sibling.
+Its source recommendations and read-only matching audit do not activate producer contracts or targets.
 
 The seven-definition pilot retains 19 authored permutations and adds 17, giving 36. Read-only
 normalization against the entire existing target set gives 1,013 → 1,024 normalized targets and
@@ -265,12 +267,42 @@ two pilot producers, including consumers outside the original seven-definition p
   bound and require separate source review. The <=5 number-line projection is a local simplification
   candidate, not a proved violation of the established operand/result range definition.
 
-No currently authored target needs removal just to retain a matching path. This does not yet prove
+Under this upper-only feasibility check, no currently authored target needs removal just to retain a matching path. This does not yet prove
 preservation of all smaller-number examples: activating a shared sampler requires reviewing bands
 for all of its source competencies. The review records the relevant quantities, minimal constructive
 sampler changes, exact empty-width proofs and complete consumer lists. Neither family needs a new
 producer or annotation adapter for the upper-witness construction. Lower-bound and singleton
 semantics remain open.
+
+### R2/R3 — source-band and migration review (2026-11-01)
+
+The [completed source review](canonical-range-source-review.md) contains all 25 source-leaf excerpts,
+per-definition band choices and separate recommendations for canonical lower bounds and isolated
+threshold endpoints. The eight previously unbounded kilogram/liter targets need coordinated adoption
+across both existing producers. Their twenty-target integer measurement branch expands to eighty
+under the recommended 5/10/20/100 sampling envelope; the standard itself states no numeric ceiling.
+The other forty fraction/decimal measurement targets remain unchanged.
+
+The review also identifies two source corrections: exact 10..99 and 100..999 comparison domains,
+and two-/three-/four-addend tasks whose operands are two-digit numbers but whose sums may exceed 100.
+Secondary array routes join the implementation scope. No new generator split or annotation adapter
+is proposed. Strongest-lower profiling requires explicit lower-target variants where requested;
+three old equality conjunctions need canonical successors, refining the earlier upper-only result.
+
+A combined in-memory proposal produces **1,252 authored / 1,213 normalized targets**, with
+1,434 routes under current declarations. Structural normalization and equivalence checks pass,
+but **60 proposed targets are unmatched**: twelve addend cases and 48 measurement cases. All 80 integer
+measurement successors need dedicated-producer range support, including 32 with an existing fallback
+match. All 1,002 retained authored IDs keep their routes. These are implementation gaps, not source
+review failures or evidence of dataset readiness. The counts include correlated lower variants:
+the impossible lower 10/upper 1000 two-addend combination is replaced by a lower 20 successor.
+
+This checkpoint changes documentation only. Production targets, sampling, matching, ontology,
+dataset and VQA cache remain unchanged. `npm run check:docs` passes, with the same six external-fetch
+warnings as the preceding checkpoint. The diff passes whitespace validation; no implementation tests,
+regeneration or VQA are needed for this documentation-only review.
+
+### Remaining implementation and acceptance work
 
 R1 is inert until deliberately adopted. R2 and R3 must become operational together for each
 reviewed family: explicit target expansion without canonical-band generation does not fix the
@@ -302,18 +334,22 @@ is a later action, not part of this planning checkpoint.
 
 ## Open questions and deferred semantics
 
-1. For a task whose only relevant magnitude is exactly a threshold (for example, 10), should the
-   compact annotation retain the upper bound and omit the equal lower bound, as proposed but
-   not yet accepted?
-2. When a target does not request a positive lower bound, which pre-generation profiles should
-   ensure that its strongest informative lower bound is nevertheless consistent, including
-   cases where the minimum magnitude is below the smallest positive threshold?
+1. Adopt the [strongest positive lower profiles](canonical-range-source-review.md#strongest-lower-bounds),
+   selected before generation, with no positive lower when the minimum magnitude is below 5?
+   Explicit lower-target requests need correlated refinements under unchanged matching.
+2. Adopt the [narrow endpoint exclusion](canonical-range-source-review.md#endpoint-policy): omit
+   examples whose relevant absolute magnitudes all equal one positive catalog threshold?
+   This replaces the earlier upper-wins recommendation. It preserves source competencies and
+   conflict semantics, while explicitly reducing mathematical support at those exact points.
+3. Adopt the reviewed source-domain recommendations, particularly exact two-/three-digit comparison
+   caps and the Grade 4 measurement envelope? These are disclosed curriculum sampling choices and
+   source corrections, not numeric limits inferred from unrelated standard domains.
 
 The user accepted choosing the side containing other involved numbers at a shared endpoint;
 that does not settle an isolated singleton. No new ontology conflict suppression is authorized.
 Upper-band inventory and helper design can proceed independently. Full canonical lower/upper
 acceptance must wait for the endpoint and lower-profile contracts.
 
-Fraction, measurement, place-value and required-intermediate quantity domains need family review
+Remaining fraction, measurement, place-value and required-intermediate quantity domains need family review
 before rollout. Preserve the source's actual competency rather than treating rendered digits,
 optional methods or every hidden payload value as part of the range.

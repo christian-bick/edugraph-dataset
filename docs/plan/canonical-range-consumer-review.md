@@ -160,9 +160,9 @@ configuration domains. Seeded probes supplement that proof; they do not replace 
 
 ## Next implementation checkpoints
 
-1. Complete source-band review for all shared consumers, including inherited endpoint constraints
-   and the eight unspecified-upper measurement targets. Record support changes separately from
-   matching-route changes.
+1. Source-band review is [complete](canonical-range-source-review.md), including inherited endpoint
+   constraints and all eight unspecified-upper measurement targets. The follow-up records source
+   recommendations, support changes, secondary producers and a combined matching migration audit.
 2. Resolve the already-open singleton and strongest-lower contracts where required. Upper-only
    progress must not claim full canonical lower/upper acceptance.
 3. Add owner-local maximum-witness resolution, constructive sampling and compatibility together,
