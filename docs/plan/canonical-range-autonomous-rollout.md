@@ -503,3 +503,20 @@ or endpoint support changes. All45 tests/seven files and TypeScript pass, includ
 finite support and both-mode consumer checks. Evidence:
 `temp/range-autonomous/batch3/fraction-decimal/` (decimal model verification reports) and
 `src/generators/arithmetic/decimal-model-ranges.it.test.ts`.
+
+## Third batch: opposite relations and whole-fraction counts
+
+Rational opposites now use relation-aware upper5/10 profiles over all14,168 original raw
+lattice/point paths, preserving duplicate reduced-step probability mass after conditioning.
+Iterated negation assesses its original/reference magnitude and required zero; axis tasks assess
+their complete required axis. Existing relation descriptors and precise leaf compatibility keep
+those projections aligned without a producer split. All three old routes remain,3→6 selections,
+with three source omissions closed. All88 tests/five files and types pass; no endpoint retires.
+
+Whole-fraction equivalence explicitly requires numerator-part counts in all three consumers.
+All15 original whole/denominator pairs partition into upper5/10/20/100 cells of4/6/4/1. A required
+whole or fractional unit defeats a positive lower. All five old routes remain,5→20 selections,
+closing five source omissions. Nine tests/five files pass, including actual prepared
+question/solution rendering and replay across the three consumers. No target, payload or renderer
+changes occur. Evidence: `temp/range-autonomous/batch3/fraction-decimal/` (opposite and whole
+equivalence test/route reports).

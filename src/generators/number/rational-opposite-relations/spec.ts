@@ -1,6 +1,6 @@
 import {Area, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -15,7 +15,9 @@ export const RationalOppositeRelationsGeneratorSchema = {
         [[Area.RulesOfSigns], 'iterated-negation'],
         [[Area.Zero], 'zero-fixed-point']
     ] as const)],
-    range: [[Scope.NumbersSmaller5, Scope.NumbersSmaller10], resolveRangeFromLabels]
+    range: [[Scope.NumbersSmaller5, Scope.NumbersSmaller10], selectExactLabelMap([
+        [Scope.NumbersSmaller5, createCanonicalNumericRange(5)], [Scope.NumbersSmaller10, createCanonicalNumericRange(10)]
+    ] as const)]
 } as const;
 
 export type RationalOppositeRelationsGeneratorConfig = ConfigFromSchema<typeof RationalOppositeRelationsGeneratorSchema>;

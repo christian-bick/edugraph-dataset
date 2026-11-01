@@ -4,6 +4,7 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {RationalOppositeRelationProblem, SignedRational, SignedRationalLocation} from '../../../types/problems.ts';
 import {absoluteSignedRational, isCanonicalSignedRational, makeSignedRational, negateSignedRational} from '../signed-rational-helpers.ts';
 import {RationalOppositeRelationsGeneratorSchema, type RationalOppositeRelationsGeneratorConfig} from './spec.ts';
+import {rationalOppositeRangeProfiles} from './domain.ts';
 
 const generatorId = 'rational-opposite-relations';
 const integerWithin = (value: number, minimum: number, maximum: number): boolean => Number.isSafeInteger(value)
@@ -68,19 +69,14 @@ export class RationalOppositeRelationsGenerator implements ProblemGenerator<
         if (!['iterated-negation', 'nonzero-opposition', 'zero-fixed-point'].includes(relation!)) {
             throw new GeneratorValidationError(generatorId, 'Unsupported mathematical relation.');
         }
-        if (typeof range !== 'object' || range === null || Array.isArray(range) || range.min !== 0 || Object.is(range.min, -0)
-            || ![5, 10, Number.MAX_SAFE_INTEGER].includes(range.max)) {
-            throw new GeneratorValidationError(generatorId, 'Range must start at zero with inclusive absolute bound 5, 10, or the unbounded resolver sentinel.');
-        }
-        const cap = range.max === Number.MAX_SAFE_INTEGER ? 10 : range.max;
-        const radiusTicks = randomInteger(2, 5);
-        const step = makeSignedRational(randomInteger(1, Math.floor(cap / radiusTicks)), randomInteger(1, 2));
-        const originalTick = relation === 'zero-fixed-point' ? 0 : relation === 'iterated-negation'
-            ? randomInteger(-radiusTicks, radiusTicks) : randomInteger(1, radiusTicks) * (random() < 0.5 ? -1 : 1);
+        const profiles = rationalOppositeRangeProfiles(relation!, range!);
+        let remaining = random() * profiles.reduce((sum, profile) => sum + profile.weight, 0);
+        const {radiusTicks, step, originalTick, oppositeMagnitudeTick} =
+            profiles.find(profile => (remaining -= profile.weight) < 0) ?? profiles[profiles.length - 1]!;
         const firstMagnitude = randomInteger(1, radiusTicks);
         const secondChoice = randomInteger(1, radiusTicks - 1);
         const secondMagnitude = secondChoice >= firstMagnitude ? secondChoice + 1 : secondChoice;
         return {data: buildRationalOppositeRelationProblem({step, radiusTicks, originalTick,
-            oppositeMagnitudeTick: randomInteger(1, radiusTicks), unequalMagnitudeTicks: [firstMagnitude, secondMagnitude]})};
+            oppositeMagnitudeTick, unequalMagnitudeTicks: [firstMagnitude, secondMagnitude]})};
     }
 }

@@ -2,13 +2,17 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {WholeNumberFractionEquivalenceProblem} from '../../../types/problems.ts';
 import {FractionWholeEquivalenceGeneratorConfig, FractionWholeEquivalenceGeneratorSchema} from './spec.ts';
 import {random} from '../../../lib/random.ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {wholeFractionCandidates} from './domain.ts';
 
 export class FractionWholeEquivalenceGenerator implements ProblemGenerator<WholeNumberFractionEquivalenceProblem, FractionWholeEquivalenceGeneratorConfig> {
     type: AbstractProblem['type'] = 'fraction';
     schema = FractionWholeEquivalenceGeneratorSchema;
-    generate(_config: FractionWholeEquivalenceGeneratorConfig): ProblemStub<WholeNumberFractionEquivalenceProblem> {
-        const wholeNumber = [1, 2, 3][Math.floor(random() * 3)] as 1 | 2 | 3;
-        const denominator = ([2, 3, 4, 6, 8] as const)[Math.floor(random() * 5)]!;
+    generate(config: FractionWholeEquivalenceGeneratorConfig): ProblemStub<WholeNumberFractionEquivalenceProblem> {
+        validateConfigFields('fraction-whole-equivalence', config, ['range']);
+        if (Object.keys(config).some(key => key !== 'range')) throw new GeneratorValidationError('fraction-whole-equivalence', 'Unexpected configuration field.');
+        const candidates = wholeFractionCandidates(config.range!);
+        const {wholeNumber, denominator} = candidates[Math.floor(random() * candidates.length)]!;
         return {data: {
             task: 'represent-whole-as-fraction', wholeNumber,
             fraction: {numerator: wholeNumber * denominator, denominator}, relation: 'equal'

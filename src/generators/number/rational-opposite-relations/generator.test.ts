@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import type {RationalOppositeRelationProblem, SignedRational, SignedRationalLocation} from '../../../types/problems.ts';
 import {buildRationalOppositeRelationProblem, RationalOppositeRelationsGenerator, type RationalOppositeModelParameters} from './generator.ts';
 import type {RationalOppositeRelationsGeneratorConfig} from './spec.ts';
@@ -129,7 +130,7 @@ describe('configured opposite relation sampling', () => {
             const denominators = new Set<number>();
             for (let seed = 0; seed < 250; seed++) {
                 setSeed(seed);
-                const data = generator.generate({relation, range: {min: 0, max: 10}}).data;
+                const data = generator.generate({relation, range: createCanonicalNumericRange(seed % 2 ? 5 : 10)}).data;
                 assertModel(data);
                 signs.add(data.original.sign);
                 radii.add(data.axis.zeroIndex);
@@ -146,30 +147,26 @@ describe('configured opposite relation sampling', () => {
         }
     );
 
-    it.each([5, 10, Number.MAX_SAFE_INTEGER])('constrains all displayed values/components to the genuine magnitude bound %s', maximum => {
-        const cap = maximum === Number.MAX_SAFE_INTEGER ? 10 : maximum;
-        const extents = new Set<number>();
+    it.each([5, 10])('constrains the actual relation projection to canonical magnitude band %s', maximum => {
+        const range = createCanonicalNumericRange(maximum);
         for (let seed = 0; seed < 400; seed++) {
             setSeed(seed);
-            const data = generator.generate({relation: 'iterated-negation', range: {min: 0, max: maximum}}).data;
+            const data = generator.generate({relation: 'iterated-negation', range}).data;
             for (const value of scalars(data)) {
-                expect(absolute(BigInt(value.numerator))).toBeLessThanOrEqual(BigInt(cap) * BigInt(value.denominator));
-                expect(Math.abs(value.numerator)).toBeLessThanOrEqual(cap);
-                expect(value.denominator).toBeLessThanOrEqual(cap);
+                expect(absolute(BigInt(value.numerator))).toBeLessThanOrEqual(10n * BigInt(value.denominator));
+                expect(Math.abs(value.numerator)).toBeLessThanOrEqual(10);
+                expect(value.denominator).toBeLessThanOrEqual(2);
             }
-            extents.add(data.axis.maximum.numerator / data.axis.maximum.denominator);
+            const required = data.original.sign === 0 ? data.oppositePair.commonMagnitude : data.original.magnitude;
+            expect(hasCanonicalRangeWitness([0, required.numerator / required.denominator], range)).toBe(true);
         }
-        expect(extents.has(cap)).toBe(true);
-        expect([...extents].some(value => value > 5)).toBe(cap === 10);
     });
 
-    it('replays exact content and makes the unbounded sentinel an explicit local ten-bound draw', () => {
+    it('replays exact content in a declared canonical range', () => {
         setSeed(241);
-        const expected = generator.generate({relation: 'iterated-negation', range: {min: 0, max: 10}});
+        const expected = generator.generate({relation: 'iterated-negation', range: createCanonicalNumericRange(10)});
         setSeed(241);
-        expect(generator.generate({relation: 'iterated-negation', range: {min: 0, max: 10}})).toEqual(expected);
-        setSeed(241);
-        expect(generator.generate({relation: 'iterated-negation', range: {min: 0, max: Number.MAX_SAFE_INTEGER}})).toEqual(expected);
+        expect(generator.generate({relation: 'iterated-negation', range: createCanonicalNumericRange(10)})).toEqual(expected);
     });
 
     it.each([undefined, null, {}, {relation: 'iterated-negation'}, {range: {min: 0, max: 5}},
@@ -185,6 +182,6 @@ describe('configured opposite relation sampling', () => {
     it.each(['range', [0, 5], {min: -1, max: 5}, {min: 1, max: 5}, {min: -0, max: 5},
         {min: 0, max: 20}, {min: 0, max: 5.5}, {min: 0, max: NaN}, {min: 0, max: Infinity}])('rejects unsupported magnitude configuration: %j', range => {
         expect(() => generator.generate({relation: 'iterated-negation', range} as unknown as RationalOppositeRelationsGeneratorConfig))
-            .toThrow('inclusive absolute bound');
+            .toThrow(/canonical range|range witnesses/);
     });
 });

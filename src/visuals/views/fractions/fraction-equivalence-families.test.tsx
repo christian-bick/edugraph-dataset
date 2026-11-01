@@ -4,6 +4,7 @@ import {FractionEquivalenceGenerator} from '../../../generators/fraction/fractio
 import {FractionTenthsEquivalenceGenerator} from '../../../generators/fraction/fraction-tenths-equivalence/generator.ts';
 import {FractionWholeEquivalenceGenerator} from '../../../generators/fraction/fraction-whole-equivalence/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
 import {FractionEquivalenceView} from './fraction-equivalence-view.tsx';
 import {FractionLineView} from '../numbers/fraction-line-view.tsx';
@@ -21,7 +22,7 @@ describe('equivalence payload families', () => {
                 usesProportionalScaling: false
             }).data;
             const tenths = new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude: 'proper'}).data;
-            const whole = new FractionWholeEquivalenceGenerator().generate({}).data;
+            const whole = new FractionWholeEquivalenceGenerator().generate({range: createCanonicalNumericRange([5, 10, 20, 100][seed % 4]!)}).data;
             for (const solution of [false, true]) {
                 for (const mode of ['formalization', 'explanation'] as const) {
                     for (const data of [proper, tenths]) {
