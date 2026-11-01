@@ -52,7 +52,8 @@ const multiplicationKnownFactPropertiesBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.CommutativeLaw, Scope.TwoOperands],
         [Area.AssociativeLaw, Scope.ThreeOperands]
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [10, 20]});
 
 const divisionUnknownFactorBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -66,7 +67,8 @@ const divisionUnknownFactorBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Ability.ProcedureInversion,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100]});
 
 const multiplicationKnownFactFluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -78,7 +80,8 @@ const multiplicationKnownFactFluencyBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller100,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [10, 20, 100]});
 
 const divisionKnownFactFluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -90,7 +93,8 @@ const divisionKnownFactFluencyBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller100,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100]});
 
 const computeWithin100Builder = new DatasetPermutationBuilder()
     .addLabels([
@@ -334,7 +338,8 @@ const oneDigitTimesMultipleOfTenBuilder = new DatasetPermutationBuilder()
         Scope.SingleDigitSmallestOperand,
         Scope.TwoDigitLargestOperand,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [100, 120, 1000]});
 
 // ==========================================
 // 3. Measurement and Data (3.MD)

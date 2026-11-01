@@ -1,131 +1,109 @@
 import {Scope} from 'edugraph-ts';
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {KnownFactDerivationProblem} from '../../../types/problems.ts';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import type {KnownFactDerivationProblem, KnownFactDerivationStrategy} from '../../../types/problems.ts';
 import {ArithmeticKnownFactDerivationGenerator} from './generator.ts';
-import {ArithmeticKnownFactDerivationGeneratorConfig} from './spec.ts';
+import type {ArithmeticKnownFactDerivationGeneratorConfig} from './spec.ts';
+import {knownFactDomain, knownFactQuantities} from './domain.ts';
 
-const baseConfig: ArithmeticKnownFactDerivationGeneratorConfig = {
-    operation: 'multiplication',
-    arity: Scope.TwoOperands,
-    useCommutativeLaw: false,
-    useAssociativeLaw: false,
-    usePlaceValueScaling: false,
-    range: {min: 0, max: 100}
+afterEach(() => vi.restoreAllMocks());
+const generator = new ArithmeticKnownFactDerivationGenerator();
+const configFor = (strategy: KnownFactDerivationStrategy, upper: number, lower = 0): ArithmeticKnownFactDerivationGeneratorConfig => ({
+    operation: strategy === 'inverse-division' ? 'division' : 'multiplication',
+    arity: strategy === 'associative' ? Scope.ThreeOperands : Scope.TwoOperands,
+    useCommutativeLaw: strategy === 'commutative', useAssociativeLaw: strategy === 'associative',
+    usePlaceValueScaling: strategy === 'place-value-scaling', range: createCanonicalNumericRange(upper, lower)
+});
+const key = (data: KnownFactDerivationProblem): string => JSON.stringify([data.strategy,
+    data.knownFact.firstFactor, data.knownFact.secondFactor, data.knownFact.product, data.derivedOperands, data.answer]);
+
+/** Independent enumeration of the original complete authored factors, not just active source ceilings. */
+const originalFrames = (strategy: KnownFactDerivationStrategy): Set<string> => {
+    const result = new Set<string>();
+    for (let first = 2; first <= 9; first++) for (let second = 2; second <= 9; second++) {
+        const product = first * second;
+        const knownFact = {firstFactor: first, secondFactor: second, product};
+        if (strategy === 'commutative' && first !== second) result.add(key({strategy, operation: 'multiplication', knownFact, derivedOperands: [second, first], answer: product}));
+        if (strategy === 'inverse-division') result.add(key({strategy, operation: 'division', knownFact, derivedOperands: [product, first], answer: second}));
+        if (strategy === 'place-value-scaling') result.add(key({strategy, operation: 'multiplication', knownFact, derivedOperands: [first, second * 10], answer: product * 10}));
+        if (strategy === 'associative') for (let outer = 2; outer <= 9; outer++) {
+            result.add(key({strategy, operation: 'multiplication', knownFact, derivedOperands: [outer, first, second], answer: outer * product}));
+        }
+    }
+    return result;
 };
 
-const generate = (
-    overrides: Partial<ArithmeticKnownFactDerivationGeneratorConfig> = {},
-    seed = 'known-fact'
-): KnownFactDerivationProblem | null => {
-    setSeed(seed);
-    return new ArithmeticKnownFactDerivationGenerator().generate({
-        ...baseConfig,
-        ...overrides
-    })?.data ?? null;
-};
+describe('canonical known-fact derivation', () => {
+    it.each([['commutative', 56], ['associative', 512], ['inverse-division', 64], ['place-value-scaling', 64]] as const)(
+        'preserves all %s frames, one uniform draw and strongest bounds', (strategy, count) => {
+            const random = vi.spyOn(rng, 'random');
+            const seen = new Set<string>();
+            for (const {range} of canonicalRangeProfiles.filter(profile => profile.range.max <= 1000 && [0, 5].includes(profile.range.min))) {
+                const candidates = knownFactDomain(strategy, range);
+                for (const [index, expected] of candidates.entries()) {
+                    random.mockReset().mockReturnValue((index + 0.5) / candidates.length);
+                    const {data} = generator.generate(configFor(strategy, range.max, range.min))!;
+                    expect(data).toEqual(expected);
+                    expect(random).toHaveBeenCalledTimes(1);
+                    expect(data.knownFact.product).toBe(data.knownFact.firstFactor * data.knownFact.secondFactor);
+                    expect(data.answer).toBe(strategy === 'inverse-division'
+                        ? data.derivedOperands[0] / data.derivedOperands[1]
+                        : data.derivedOperands.reduce((product, factor) => product * factor, 1));
+                    expect(hasCanonicalRangeWitness(knownFactQuantities(data), range)).toBe(true);
+                    expect(data).not.toHaveProperty('prompt');
+                    expect(data).not.toHaveProperty('questionEquation');
+                    expect(seen.has(key(data))).toBe(false);
+                    seen.add(key(data));
+                }
+            }
+            expect(seen.size).toBe(count);
+            expect(seen).toEqual(originalFrames(strategy));
+        }
+    );
 
-describe('ArithmeticKnownFactDerivationGenerator', () => {
-    it('strictly validates every required configuration field', () => {
-        const generator = new ArithmeticKnownFactDerivationGenerator();
-        expect(() => generator.generate({} as never)).toThrow();
-        expect(() => generator.generate({operation: 'multiplication'} as never)).toThrow();
+    it('retains all old property cases and includes legitimate inclusive20 endpoints', () => {
+        const commutative = knownFactDomain('commutative', createCanonicalNumericRange(20));
+        expect(commutative).toContainEqual({strategy: 'commutative', operation: 'multiplication',
+            knownFact: {firstFactor: 4, secondFactor: 5, product: 20}, derivedOperands: [5, 4], answer: 20});
+        const associative = knownFactDomain('associative', createCanonicalNumericRange(20));
+        expect(associative.filter(data => data.answer === 20)).toHaveLength(3);
+        expect(knownFactDomain('place-value-scaling', createCanonicalNumericRange(120)).some(data => data.answer === 120)).toBe(true);
     });
 
-    it('derives a swapped multiplication fact with the commutative property', () => {
-        const problem = generate({useCommutativeLaw: true, range: {min: 0, max: 20}})!;
-        const [first, second] = problem.derivedOperands;
-
-        expect(problem.strategy).toBe('commutative');
-        expect(problem.operation).toBe('multiplication');
-        expect(problem.derivedOperands).toHaveLength(2);
-        expect(first).toBe(problem.knownFact.secondFactor);
-        expect(second).toBe(problem.knownFact.firstFactor);
-        expect(problem.answer).toBe(problem.knownFact.product);
-        expect(problem.answer).toBeLessThan(20);
-        expect(problem).not.toHaveProperty('prompt');
-        expect(problem).not.toHaveProperty('questionEquation');
-        expect(problem).not.toHaveProperty('solutionEquation');
-        expect(problem).not.toHaveProperty('relationEquation');
+    it('keeps broad fluency and explicit commutativity as the same mathematical manifestation', () => {
+        const explicit = configFor('commutative', 100);
+        rng.setSeed(41);
+        const first = generator.generate(explicit);
+        rng.setSeed(41);
+        expect(generator.generate({...explicit, useCommutativeLaw: false})).toEqual(first);
     });
 
-    it('regroups three factors around the supplied known fact with the associative property', () => {
-        const problem = generate({
-            arity: Scope.ThreeOperands,
-            useAssociativeLaw: true,
-            range: {min: 0, max: 20}
-        })!;
-        const [first, second, third] = problem.derivedOperands as readonly [number, number, number];
-
-        expect(problem.strategy).toBe('associative');
-        expect(problem.derivedOperands).toHaveLength(3);
-        expect(problem.knownFact.firstFactor).toBe(second);
-        expect(problem.knownFact.secondFactor).toBe(third);
-        expect(problem.answer).toBe(first * second * third);
-        expect(problem.answer).toBeLessThan(20);
+    it('rejects invalid configuration and impossible strategy combinations before randomness', () => {
+        const random = vi.spyOn(rng, 'random');
+        const valid = configFor('commutative', 20);
+        for (const config of [undefined, {}, {...valid, operation: 'addition'}, {...valid, arity: 'four-operands'},
+            {...valid, range: {min: 0, max: 20}}, {...valid, range: createCanonicalNumericRange(100, 10)},
+            {...valid, range: createCanonicalNumericRange(10000)}]) {
+            expect(() => generator.generate(config as never)).toThrow();
+        }
+        for (const config of [{...valid, operation: 'division'}, {...valid, arity: Scope.ThreeOperands},
+            {...valid, usePlaceValueScaling: true}, configFor('commutative', 5), configFor('place-value-scaling', 20)]) {
+            expect(generator.generate(config as never)).toBeNull();
+        }
+        expect(random).not.toHaveBeenCalled();
     });
 
-    it('uses a multiplication fact as the missing-factor evidence for division', () => {
-        const problem = generate({
-            operation: 'division'
-        })!;
-        const [dividend, divisor] = problem.derivedOperands;
-
-        expect(problem.strategy).toBe('inverse-division');
-        expect(problem.operation).toBe('division');
-        expect(dividend).toBe(problem.knownFact.product);
-        expect(divisor).toBe(problem.knownFact.firstFactor);
-        expect(dividend / divisor).toBe(problem.answer);
-        expect(problem.answer).toBe(problem.knownFact.secondFactor);
-    });
-
-    it('uses commutative and inverse derivations as visible manifestations of broad known-fact fluency', () => {
-        expect(generate()?.strategy).toBe('commutative');
-        expect(generate({operation: 'division'})?.strategy).toBe('inverse-division');
-    });
-
-    it('scales a one-digit known fact to a one-digit times multiple-of-ten product', () => {
-        const problem = generate({
-            usePlaceValueScaling: true,
-            range: {min: 0, max: 1000}
-        })!;
-        const [oneDigitFactor, multipleOfTen] = problem.derivedOperands;
-
-        expect(problem.strategy).toBe('place-value-scaling');
-        expect(oneDigitFactor).toBeGreaterThanOrEqual(2);
-        expect(oneDigitFactor).toBeLessThanOrEqual(9);
-        expect(multipleOfTen).toBeGreaterThanOrEqual(20);
-        expect(multipleOfTen).toBeLessThanOrEqual(90);
-        expect(multipleOfTen % 10).toBe(0);
-        expect(problem.answer).toBe(oneDigitFactor * multipleOfTen);
-        expect(problem.answer).toBe(problem.knownFact.product * 10);
-        expect(problem.answer).toBeLessThan(1000);
-    });
-
-    it('rejects incompatible strategy, operation, and arity combinations', () => {
-        expect(generate({operation: 'division', useCommutativeLaw: true})).toBeNull();
-        expect(generate({arity: Scope.ThreeOperands})).toBeNull();
-        expect(generate({useCommutativeLaw: true, usePlaceValueScaling: true})).toBeNull();
-        expect(generate({operation: 'division', usePlaceValueScaling: true})).toBeNull();
-    });
-
-    it('returns null when the requested range cannot contain a valid positive known fact', () => {
-        expect(generate({range: {min: 0, max: 4}})).toBeNull();
-        expect(generate({
-            usePlaceValueScaling: true,
-            range: {min: 0, max: 40}
-        })).toBeNull();
-    });
-
-    it('rejects unsupported operation and arity values', () => {
-        const generator = new ArithmeticKnownFactDerivationGenerator();
-        expect(() => generator.generate({...baseConfig, operation: 'addition'} as never)).toThrow();
-        expect(() => generator.generate({...baseConfig, arity: 'four-operands'} as never)).toThrow();
-    });
-
-    it('is deterministic for the project RNG seed', () => {
-        const first = generate({usePlaceValueScaling: true}, 'repeatable');
-        const second = generate({usePlaceValueScaling: true}, 'repeatable');
-        expect(second).toEqual(first);
+    it('replays while keeping the returned known fact and operand arrays independent', () => {
+        const config = configFor('associative', 1000, 5);
+        rng.setSeed('known-fact-replay');
+        const first = generator.generate(config)!;
+        const expected = structuredClone(first), continuation = rng.getRandomState();
+        first.data.knownFact.firstFactor = 999;
+        (first.data.derivedOperands as unknown as number[]).push(999);
+        rng.setSeed('known-fact-replay');
+        expect(generator.generate(config)).toEqual(expected);
+        expect(rng.getRandomState()).toBe(continuation);
     });
 });

@@ -615,3 +615,20 @@ push under the user's instruction; independent standard work continues afterward
 - The fixed100 ten-tens leaf supports a clear U120→U100 source correction; its separate100–900
   sibling keeps its genuine broader envelope. Scalar zero/source bands are under the same direct
   source-intent review. A source-ID change alone no longer makes a clear correction a blocker.
+
+## Fourth batch: known-fact derivation
+
+Ordinary strategy/range profiles preserve all696 authored frames:56 unequal-factor commutative
+facts,512 associative triples,64 inverse-division facts and64 tenfold scaling frames. Required
+quantities are the given fact, derived operands/answer and explicitly assessed scaling10; an
+unused product from another associative grouping is excluded. Uniform mathematical sampling
+remains uniform conditional on the selected band, with one draw and no balancing requirement.
+
+Five reviewed Grade3 builders add12 targets and21 routes. All six earlier raw aliases and11
+routes remain, for32 routes/39 selections. Inclusive endpoints20/120 fit the agreed policy without
+widening source ceilings; broader authored associative support remains available. Eighteen
+focused tests,228 representative projections and156 planned draws/replays pass. Direct/planned
+resolution and the complete generator/view spec gate pass, including standalone fallback probes
+and rejection of infeasible supplied context. This tightens old bounds and closes no baseline
+range-presence finding. Evidence: `temp/range-autonomous/batch4/arithmetic/known-fact-review.md`,
+`verify-known-fact.json` and `known-fact-spec-gate.log`.

@@ -1,19 +1,45 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {canonicalRangeProfiles, resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 import {
     hasLabel,
     selectExactLabelMap,
     selectExactMatch
 } from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
+import {knownFactDomain, knownFactStrategy} from './domain.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 const resolveOperation = selectExactLabelMap([
     [Area.MultiplicationKnownFactDerivation, 'multiplication'],
     [Area.DivisionKnownFactDerivation, 'division']
 ] as const);
 
-import {generatorLabelRule} from '../../compatibility-rules.ts';
+const strategyContext = [Area.MultiplicationKnownFactDerivation, Area.DivisionKnownFactDerivation,
+    Area.CommutativeLaw, Area.AssociativeLaw, Area.PlaceValue, Scope.TwoOperands, Scope.ThreeOperands];
+const strategyFromLabels = (labels: string[]) => {
+    const operation = resolveOperation(labels);
+    if (!operation) return undefined;
+    const arity = labels.includes(Scope.ThreeOperands) ? 3 : labels.includes(Scope.TwoOperands) ? 2 : undefined;
+    return arity ? knownFactStrategy(operation, arity, labels.includes(Area.CommutativeLaw),
+        labels.includes(Area.AssociativeLaw), labels.includes(Area.PlaceValue)) : undefined;
+};
+const rangeProfiles = canonicalRangeProfiles.filter(({range}) => range.max <= 1000 && [0, 5].includes(range.min)
+    && range.min < range.max && ['commutative', 'associative', 'inverse-division', 'place-value-scaling'].some(strategy =>
+        knownFactDomain(strategy as Parameters<typeof knownFactDomain>[0], range).length > 0));
+const rangeChoices = rangeProfiles.map(({labels}) => labels);
+const rangeLabels = [...new Set(rangeChoices.flat())];
+const permitsRange = (labels: string[], range: Parameters<typeof knownFactDomain>[1]): boolean => {
+    // Standalone fallback validation has no strategy provider; resolved draws always do.
+    if (!strategyContext.some(label => labels.includes(label))) return true;
+    const strategy = strategyFromLabels(labels);
+    return strategy !== undefined && knownFactDomain(strategy, range).length > 0;
+};
+const resolveRange = withLabelChoices(exactResolver((labels: string[]) => {
+    const range = resolveCanonicalRangeFromLabels(labels);
+    return range && permitsRange(labels, range) ? range : undefined;
+}), {kind: 'alternatives', alternatives: rangeChoices, relation: 'capability',
+    contextLabels: strategyContext, resolvedContext: true});
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-known-fact-derivation',
@@ -29,6 +55,10 @@ export const spec: GeneratorSpec = {
         if ((commutative || scaling) && (!multiplication || !selected(Scope.TwoOperands))) return false;
         if (associative && (!multiplication || !selected(Scope.ThreeOperands))) return false;
         return !selected(Scope.ThreeOperands) || associative;
+    }), generatorLabelRule('known-fact-canonical-band', [...strategyContext, ...rangeLabels], selected => {
+        const labels = [...strategyContext, ...rangeLabels].filter(selected);
+        const range = resolveCanonicalRangeFromLabels(labels);
+        return range !== undefined && permitsRange(labels, range);
     })],
     generalLabels: [
         Area.Equation,
@@ -71,8 +101,9 @@ export const ArithmeticKnownFactDerivationGeneratorSchema = {
         ]
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
-        resolveRangeFromLabels
+        rangeLabels,
+        resolveRange,
+        rangeChoices
     ]
 } as const;
 

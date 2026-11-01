@@ -1,9 +1,13 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticKnownFactDerivationGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {spec, ArithmeticKnownFactDerivationGeneratorSchema as schema} from './spec.ts';
+import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {knownFactDomain} from './domain.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {findSchemaFallbackContractIssues} from '../../../lib/utils.ts';
 
 const invariants = [
     Scope.ArabicNumerals,
@@ -21,6 +25,41 @@ const generate = (labels: string[]) => {
 };
 
 describe('ArithmeticKnownFactDerivationGenerator spec integration', () => {
+    it('supports standalone range fallback probes while rejecting incomplete supplied strategy context', () => {
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+        expect(schema.range[1]([Scope.NumbersSmaller20])).toEqual(resolveCanonicalRangeFromLabels([Scope.NumbersSmaller20]));
+        expect(schema.range[1]([Scope.NumbersSmaller20, Area.PlaceValue])).toBeUndefined();
+    });
+    it('keeps direct and planned resolution equivalent for all feasible strategy/band configurations', () => {
+        const contexts = [
+            [Area.MultiplicationKnownFactDerivation, Scope.TwoOperands],
+            [Area.MultiplicationKnownFactDerivation, Scope.TwoOperands, Area.CommutativeLaw],
+            [Area.MultiplicationKnownFactDerivation, Scope.ThreeOperands, Area.AssociativeLaw],
+            [Area.DivisionKnownFactDerivation, Scope.TwoOperands],
+            [Area.MultiplicationKnownFactDerivation, Scope.TwoOperands, Area.PlaceValue]
+        ];
+        let feasible = 0;
+        for (const context of contexts) for (const labels of schema.range[2]) {
+            const range = resolveCanonicalRangeFromLabels(labels)!;
+            const strategy = context.includes(Area.PlaceValue) ? 'place-value-scaling'
+                : context.includes(Area.AssociativeLaw) ? 'associative'
+                    : context.includes(Area.DivisionKnownFactDerivation) ? 'inverse-division' : 'commutative';
+            const target = [...context, ...labels];
+            if (!knownFactDomain(strategy, range).length) {
+                expect(() => extractConfig(schema, target)).toThrow();
+                continue;
+            }
+            const direct = extractConfig(schema, target);
+            const bindings = Object.fromEntries(normalizeSchemaChoices(schema, target, 'generator')
+                .map(field => [field.field, field.alternatives[0]!.labels]));
+            bindings.range = labels;
+            const planned = resolveSchemaChoices(schema, target, bindings);
+            expect(planned.config).toEqual(direct.config);
+            expect(new Set(planned.resolvedLabels)).toEqual(new Set(direct.resolvedLabels));
+            feasible++;
+        }
+        expect(feasible).toBe(23);
+    });
     it('declares only invariant mathematical capabilities as general labels', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining(invariants));
         expect(spec.generalLabels).not.toContain(Area.MultiplicationKnownFactDerivation);
