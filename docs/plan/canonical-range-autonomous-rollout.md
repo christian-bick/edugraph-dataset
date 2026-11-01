@@ -285,6 +285,23 @@ resolution of all nine declared catalog bands and16 planned draws/replays. TypeS
 target/route preservation pass. This tightens existing annotations without closing a baseline
 range-presence finding. Evidence: `temp/range-autonomous/batch2/rooted-length-tests.log`.
 
+## Second batch: rational number-line values
+
+Rational axes now select upper5 for fractions/decimals and upper5/10/20 for integer scales.
+Every tick is a required scale anchor, including zero, so no positive lower applies. All704
+original finite scale/point/form/precision/sign cases remain. The12 old routes and their explicit
+sign choices remain, with three reviewed Grade2 source bands additionally matching the rational
+positioning view. There are15 routes and23 selections. Because2.MD.B.6 requests whole numbers,
+the existing schema fallback mechanism selects only the nonnegative domain when sign is
+unspecified; explicit signed requests remain supported. Every original Grade6 target explicitly
+requests its sign context, so no earlier sign selection is lost.
+
+All28 focused tests/four files pass, including exhaustive support, question/solution projections,
+direct/planned fallback checks and invalid form/range combinations. Twelve baseline range-presence
+findings close; no targets, global matching or payload contracts change. Evidence:
+`temp/range-autonomous/batch2/fraction-decimal/rational-line-tests.log` and
+`rational-line-route-comparison.json`.
+
 ## Second batch: decimal writing and reading
 
 Decimal writing and decimal reading now expose upper5/upper10 profiles under their established

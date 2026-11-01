@@ -4,11 +4,11 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import * as rng from '../../../lib/random.ts';
 import {RationalLinePositioningBody, RationalLineReadingBody} from '../../../visuals/views/numbers/rational-numberline-view.tsx';
-import {planCompatibility} from '../../../lib/compatibility.ts';
+import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {implementationTodos, spec as activeGradeSixTargets} from '../../../spec/ccss/grade-06.ts';
 import {RationalNumberlineValuesGenerator} from './generator.ts';
 import {RationalNumberlineValuesGeneratorSchema, spec} from './spec.ts';
@@ -28,7 +28,7 @@ describe('numberline mathematical capabilities and complete correlated numeric f
                     for (let radius = 2; radius <= 5; radius++) {
                         random.mockReturnValueOnce((radius - 2 + 0.5) / 4)
                             .mockReturnValueOnce((index + 0.5) / 5).mockReturnValueOnce(0).mockReturnValueOnce(0);
-                        const data = new RationalNumberlineValuesGenerator().generate({numberKind: 'fraction', signDomain}).data;
+                        const data = new RationalNumberlineValuesGenerator().generate({numberKind: 'fraction', signDomain, range: createCanonicalNumericRange(5)}).data;
                         expect(data.axis.step).toEqual({numerator: 1, denominator});
                         for (const body of [RationalLineReadingBody, RationalLinePositioningBody]) {
                             for (const isSolutionView of [false, true]) for (const seed of [0, 1]) {
@@ -44,7 +44,7 @@ describe('numberline mathematical capabilities and complete correlated numeric f
     });
     it('owns the zero-containing axis and selected numeration/form/sign claims with complete fallback bundles', () => {
         expect(spec.generalLabels).toEqual([Scope.NumbersWithZero]);
-        expect(Object.keys(RationalNumberlineValuesGeneratorSchema)).toEqual(['numberKind', 'signDomain']);
+        expect(Object.keys(RationalNumberlineValuesGeneratorSchema)).toEqual(['numberKind', 'signDomain', 'range']);
         expect(RationalNumberlineValuesGeneratorSchema.numberKind[2]).toEqual(forms);
         expect(findSchemaFallbackContractIssues(RationalNumberlineValuesGeneratorSchema)).toEqual([]);
         expect(() => RationalNumberlineValuesGeneratorSchema.numberKind[1]([Scope.IntegerNumbers, Scope.FractionNumbers])).toThrow();
@@ -57,8 +57,9 @@ describe('numberline mathematical capabilities and complete correlated numeric f
         for (const sign of [Scope.NumbersWithoutNegatives, Scope.NumbersWithNegatives]) {
             const labels = [...form, sign];
             const resolved = extractConfig(RationalNumberlineValuesGeneratorSchema, labels);
-            expect(resolved.config).toEqual({numberKind, signDomain: sign === Scope.NumbersWithNegatives ? 'signed' : 'nonnegative'});
-            expect(new Set(resolved.resolvedLabels)).toEqual(new Set(labels));
+            expect(resolved.config).toMatchObject({numberKind, signDomain: sign === Scope.NumbersWithNegatives ? 'signed' : 'nonnegative'});
+            expect(new Set(resolved.resolvedLabels)).toEqual(new Set([...labels,
+                resolved.config.range!.max === 5 ? Scope.NumbersSmaller5 : resolved.config.range!.max === 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller20]));
             expect(generateWithLabels(new RationalNumberlineValuesGenerator(), labels)!.data.kind).toBe('rational-numberline-values');
         }
     });
@@ -66,7 +67,8 @@ describe('numberline mathematical capabilities and complete correlated numeric f
     it('resolves every singleton form fallback to its complete truthful conjunction', () => {
         for (const form of forms) for (const label of form) {
             const resolved = extractConfig(RationalNumberlineValuesGeneratorSchema, [label, Scope.NumbersWithoutNegatives]);
-            expect(new Set(resolved.resolvedLabels)).toEqual(new Set([...form, Scope.NumbersWithoutNegatives]));
+            expect(new Set(resolved.resolvedLabels)).toEqual(new Set([...form, Scope.NumbersWithoutNegatives,
+                resolved.config.range!.max === 5 ? Scope.NumbersSmaller5 : resolved.config.range!.max === 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller20]));
         }
     });
 
@@ -74,20 +76,25 @@ describe('numberline mathematical capabilities and complete correlated numeric f
         const targets = [...activeGradeSixTargets, ...implementationTodos].filter(target =>
             target.id.startsWith('6.NS.C.6c-rational-numberline-positioning~') || target.id.startsWith('6.NS.C.6c-rational-numberline-reading~'));
         expect(targets).toHaveLength(12);
+        expect(targets.every(target => [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives]
+            .filter(label => target.labels.includes(label)).length === 1)).toBe(true);
         for (const target of targets) {
             const positioning = target.labels.includes(Ability.VisualArticulation);
             const ability = positioning ? Ability.VisualArticulation : Ability.VisualReception;
             const viewId = positioning ? 'numbers-rational-line-positioning' : 'numbers-rational-line-reading';
-            const result = planCompatibility({identity: {targetId: target.id, generatorId: spec.generatorId, viewId},
-                targetLabels: target.labels, generatorLabels: spec.generalLabels, viewLabels: [Scope.Numberline, ability],
-                fields: normalizeSchemaChoices(RationalNumberlineValuesGeneratorSchema, target.labels, 'generator')});
+            const result = planModelCompatibility(target,
+                {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: RationalNumberlineValuesGeneratorSchema, spec},
+                {viewId, generalLabels: [Scope.Numberline, ability], schema: {}, spec: {viewId, generalLabels: [Scope.Numberline, ability]}});
             expect(result.supported).toBe(true);
             if (!result.supported) throw new Error(result.reason);
             for (let seed = 0; seed < 8; seed++) {
                 const draw = generatePlannedDraw({generator: new RationalNumberlineValuesGenerator(), viewSchema: {}, plan: result.plan,
                     sampleKey: `${target.id}#${spec.generatorId}#${viewId}#train#question#inst:0`, seed, attempt: 1});
                 expect(draw.stub!.data.kind).toBe('rational-numberline-values');
+                const maximum = draw.stub!.data.axis.maximum;
+                const bound = maximum.numerator / maximum.denominator;
                 expect(new Set(draw.labels)).toEqual(new Set([...target.labels, Scope.NumbersWithZero,
+                    bound <= 5 ? Scope.NumbersSmaller5 : bound <= 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller20,
                     ...(target.labels.includes(Scope.FractionNumbers) ? [Scope.ProperFractions] : [])]));
             }
         }

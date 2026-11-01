@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {RationalCoordinateAxis, SignedRational} from '../../../types/problems.ts';
 import {isCoordinateLocation, isCoordinateNotation, isRationalCoordinateAxis, makeCoordinateAxis} from '../../coordinate/coordinate-helpers.ts';
 import {buildRationalNumberlineValuesProblem, RationalNumberlineValuesGenerator} from './generator.ts';
@@ -70,7 +71,7 @@ describe('configured numberline generation', () => {
         let unreduced = false;
         for (const signDomain of ['nonnegative', 'signed'] as const) for (let seed = 0; seed < 160; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({numberKind, signDomain});
+            const {data} = generator.generate({numberKind, signDomain, range: createCanonicalNumericRange(5)});
             const {axis, point} = data;
             expect(Object.keys(data).sort()).toEqual(['axis', 'kind', 'point']);
             expect(data.kind).toBe('rational-numberline-values');
@@ -112,9 +113,9 @@ describe('configured numberline generation', () => {
 
     it('replays all math from the same seed and validates every required configuration field', () => {
         setSeed(73);
-        const first = generator.generate({numberKind: 'decimal', signDomain: 'signed'});
+        const first = generator.generate({numberKind: 'decimal', signDomain: 'signed', range: createCanonicalNumericRange(5)});
         setSeed(73);
-        expect(generator.generate({numberKind: 'decimal', signDomain: 'signed'})).toEqual(first);
+        expect(generator.generate({numberKind: 'decimal', signDomain: 'signed', range: createCanonicalNumericRange(5)})).toEqual(first);
         for (const config of [null, {}, {numberKind: 'integer'}, {signDomain: 'signed'}, {numberKind: '', signDomain: 'signed'},
             {numberKind: 'other', signDomain: 'signed'}, {numberKind: 'integer', signDomain: 'other'}]) {
             expect(() => generator.generate(config as never)).toThrow(GeneratorValidationError);
