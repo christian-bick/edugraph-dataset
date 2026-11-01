@@ -31,7 +31,8 @@ These items are not newly scheduled by the archive move.
   reached through arithmetic-law/array producers. Coordinated adoption expands the source to
   1,286 authored / 1,247 normalized targets across eight affected producer families. It includes
   exact two-/three-digit comparison domains and the two-digit-addend correction. Source validation
-  and dataset acceptance are recorded separately in the main plan. Other numeric families still
+  passes; the separately approved six-target unknown-number Ability correction retains all target
+  coverage with 1,672 final routes. Dataset acceptance is recorded separately in the main plan. Other numeric families still
   need review; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

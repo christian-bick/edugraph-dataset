@@ -177,7 +177,7 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller20,
-        Ability.Formalization
+        Ability.ProcedureExecution
     ])
     .applyLabelVariants([
         [Area.Addition],

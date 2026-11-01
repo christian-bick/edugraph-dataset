@@ -458,9 +458,9 @@ change; sampler mathematics and view rendering code do not. Existing source targ
 six-target set are unchanged. Evidence is `temp/canonical-range-source-review/unknown-number-ability-proposal.json`.
 
 This Ability change is outside the original range approval and the standing preservation of target
-conjunctions. The user separately approved the concrete correction on 2026-11-01. Apply it in its
-own checkpoint after range adoption, and verify the six-target/three-route migration before
-canonical regeneration. The adoption counts above deliberately describe the range checkpoint.
+conjunctions. The user separately approved the concrete correction on 2026-11-01; its implementation
+and verification are recorded in checkpoint 3 below. The adoption counts above deliberately
+describe the range checkpoint.
 
 Array cardinality also remains deliberately at its original granularity when the target leaves it
 unspecified. The ontology has no five-operand descriptor, so five-row tasks retain their previous
@@ -518,3 +518,32 @@ Other fraction, decimal, place-value and required-intermediate quantity domains 
 review before rollout. Range dependency diagnostics remain report-only. Stored dataset acceptance
 is separate from this source adoption: regeneration, replay/split checks and independent Question
 and Solution VQA must validate a new artifact before it is described as range-canonical.
+
+### Adoption checkpoint 3 — restore unknown-number execution
+
+The approved correction replaces `Formalization` with `ProcedureExecution` in the single
+`1.OA.D.8-unknown-number` builder, covering addition/subtraction at upper5/10/20. All other labels
+and the separate unknown-operand targets remain unchanged. This follows the source and restores
+the Ability used before the earlier ontology migration.
+
+The exact migration audit confirms **1,286 authored / 1,247 normalized targets and 1,672 routes**,
+with zero unmatched targets, structural errors or declared-equivalence issues. All six changed
+target IDs/label sets and the complete route diff agree with the approved proposal: only the
+three array-writing routes disappear; the existing equation-completion routes remain.
+
+The final deterministic allocation is 1,672 train tuples and 431 validation tuples: 2,103 requested
+pairs / 4,206 images before deduplication. The changed target IDs alter validation assignment as
+well as native seeds. This still is an allocation estimate, not a generated or accepted artifact.
+The implementation does not change generator mathematics, view rendering or annotation policy.
+
+Evidence: `source-correction-verification.ts/.json` and `source-correction-planned-probe.log` under
+`temp/canonical-range-source-review/`. The range adoption was committed as `4d141bbb`; the shared
+profiles and sorting prerequisite are `9bf4dda9` and `34cffab5` respectively.
+
+`npm run check -- --spec=ccss` passes after the correction: 2,964 source selections, zero strict
+annotation failures/conflicts/incomplete tuples, and 1,629 report-only range findings. The
+eight-family probe now covers 695 routes / 1,785 selections, with 7,140 planned draws and exact
+replays plus 952 direct draws, all passing. The preceding 7,472-test coverage run validates the
+unchanged generator/library implementations; the target-only correction is verified by the exact
+migration, complete source contracts and resolved-draw checks. Regeneration and independent VQA
+remain the next artifact acceptance stage, and other numeric families still require range review.
