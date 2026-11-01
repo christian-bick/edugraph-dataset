@@ -1,177 +1,76 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {
-    MeasurementNumberLineKind,
-    MeasurementNumberLineProblem
-} from '../../../types/problems.ts';
+import {describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {isValidMeasurementNumberLineProblem, getMeasurementNumberLinePresentation} from '../../../visuals/views/measurement/measurement-number-line/helpers.ts';
 import {MeasurementNumberLineGenerator} from './generator.ts';
-import {MeasurementNumberLineGeneratorConfig} from './spec.ts';
+import {measurementLineCaseCount, measurementLineFrameAt, measurementLineRangeProfiles} from './numeric-domain.ts';
 
-const generator = new MeasurementNumberLineGenerator();
-
-const measurementKinds: readonly MeasurementNumberLineKind[] = [
-    'length',
-    'time',
-    'liquid-volume',
-    'weight',
-    'money'
-];
-
-const numberKinds = ['fraction', 'decimal'] as const;
-
-const unitIds = {
-    length: 'meter',
-    time: 'hour',
-    'liquid-volume': 'liter',
-    weight: 'kilogram',
-    money: 'dollar'
-} as const;
-
-const gcd = (a: number, b: number): number => b === 0 ? Math.abs(a) : gcd(b, a % b);
-
-const expectCoherent = (problem: MeasurementNumberLineProblem): void => {
-    expect(Object.keys(problem).sort()).toEqual([
-        'measurementKind',
-        'numberKind',
-        'targetIndex',
-        'tickValues',
-        'unitId'
-    ]);
-    expect(problem.unitId).toBe(unitIds[problem.measurementKind]);
-
-    const tickCount = problem.tickValues.length - 1;
-    const interval = problem.tickValues[1]!;
-    expect(problem.targetIndex).toBeGreaterThan(1);
-    expect(problem.targetIndex).toBeLessThan(tickCount);
-    expect(problem.tickValues[problem.targetIndex]).toBeDefined();
-
-    for (const [index, value] of problem.tickValues.entries()) {
-        expect(value.numerator * tickCount).toBe(index * value.denominator);
-        if (index > 0) {
-            const previous = problem.tickValues[index - 1]!;
-            const differenceNumerator = value.numerator * previous.denominator
-                - previous.numerator * value.denominator;
-            const differenceDenominator = value.denominator * previous.denominator;
-            expect(differenceNumerator * interval.denominator)
-                .toBe(interval.numerator * differenceDenominator);
-        }
-    }
-
-    const start = problem.tickValues[0]!;
-    const end = problem.tickValues[tickCount]!;
-    expect(start.numerator).toBe(0);
-    expect(end.numerator).toBe(end.denominator);
-
-    const target = problem.tickValues[problem.targetIndex]!;
-    if (problem.numberKind === 'fraction') {
-        expect([4, 8]).toContain(tickCount);
-        expect(target.numerator).toBeLessThan(target.denominator);
-        expect(target.denominator).toBeGreaterThan(1);
-        expect(gcd(target.numerator, target.denominator)).toBe(1);
-        expect(start).toEqual({numerator: 0, denominator: 1});
-        expect(end).toEqual({numerator: 1, denominator: 1});
-        for (const value of problem.tickValues) {
-            expect(gcd(value.numerator, value.denominator)).toBe(1);
-        }
-    } else {
-        expect(tickCount).toBe(10);
-        const denominator = problem.measurementKind === 'money' ? 100 : 10;
-        expect(interval).toEqual({
-            numerator: problem.measurementKind === 'money' ? 10 : 1,
-            denominator
-        });
-        for (const value of problem.tickValues) {
-            expect(value.denominator).toBe(denominator);
-        }
-    }
-};
+const kinds = ['length', 'time', 'liquid-volume', 'weight', 'money'] as const;
 
 describe('MeasurementNumberLineGenerator', () => {
-    it('strictly validates configuration', () => {
-        expect(() => generator.generate({} as never)).toThrow('Required field "measurementKind" is missing.');
-        expect(() => generator.generate({
-            measurementKind: 'distance',
-            numberKind: 'fraction'
-        } as never)).toThrow('Unsupported measurement kind "distance".');
-        expect(() => generator.generate({
-            measurementKind: 'length',
-            numberKind: 'integer'
-        } as never)).toThrow('Unsupported number kind "integer".');
-    });
-
-    it('is deterministic for the complete mathematical identity', () => {
-        const config: MeasurementNumberLineGeneratorConfig = {
-            measurementKind: 'liquid-volume',
-            numberKind: 'fraction'
-        };
-        setSeed('measurement-number-line-determinism');
-        const first = generator.generate(config);
-        setSeed('measurement-number-line-determinism');
-        expect(generator.generate(config)).toEqual(first);
-    });
-
-    it('generates all 10 target configurations with exact bounded scales', () => {
-        for (const measurementKind of measurementKinds) {
-            for (const numberKind of numberKinds) {
-                for (let seed = 0; seed < 80; seed++) {
-                    setSeed(`${measurementKind}-${numberKind}-${seed}`);
-                    const stub = generator.generate({
-                        measurementKind,
-                        numberKind
-                    });
-                    expectCoherent(stub.data);
-                }
+    it('retains all80 lines and original within-profile probabilities over100 weighted source tickets', () => {
+        const expected = new Map<string, number>(), seen = new Map<string, number>();
+        for (const measurementKind of kinds) {
+            for (const tickCount of [4, 8, 10]) for (let targetIndex = 2; targetIndex < tickCount; targetIndex++) {
+                expected.set([measurementKind, tickCount === 10 ? 'decimal' : 'fraction', tickCount, targetIndex].join(':'),
+                    tickCount === 4 ? 3 : 1);
             }
         }
+        const generator = new MeasurementNumberLineGenerator(), draw = vi.spyOn(rng, 'random');
+        let tickets = 0;
+        try {
+            for (const measurementKind of kinds) for (const numberKind of ['fraction', 'decimal'] as const) {
+                for (const {range} of measurementLineRangeProfiles) {
+                    const count = measurementLineCaseCount(numberKind, range);
+                    for (let index = 0; index < count; index++) {
+                        draw.mockClear().mockReturnValue((index + 0.5) / count);
+                        const {data} = generator.generate({measurementKind, numberKind, range});
+                        expect(isValidMeasurementNumberLineProblem(data)).toBe(true);
+                        const tickCount = data.tickValues.length - 1;
+                        const key = [measurementKind, numberKind, tickCount, data.targetIndex].join(':');
+                        seen.set(key, (seen.get(key) ?? 0) + 1);
+                        const values = data.tickValues.map(value => value.numerator / value.denominator);
+                        expect(hasCanonicalRangeWitness([...values, data.targetIndex], range)).toBe(true);
+                        const presentation = getMeasurementNumberLinePresentation(data);
+                        expect(presentation.explanation).toContain(`count ${data.targetIndex} equal intervals`);
+                        expect(Object.keys(data).sort()).toEqual(['measurementKind', 'numberKind', 'targetIndex', 'tickValues', 'unitId']);
+                        expect(draw).toHaveBeenCalledTimes(1);
+                        tickets++;
+                    }
+                }
+            }
+            expect(seen).toEqual(expected);
+            expect(seen.size).toBe(80);
+            expect(tickets).toBe(100);
+            expect(measurementLineRangeProfiles.map(({range}) => measurementLineCaseCount('fraction', range))).toEqual([10, 2]);
+            expect(measurementLineRangeProfiles.map(({range}) => measurementLineCaseCount('decimal', range))).toEqual([4, 4]);
+        } finally { draw.mockRestore(); }
     });
 
-    it('reaches both approved fraction interval counts', () => {
-        const counts = new Set<number>();
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const data = generator.generate({
-                measurementKind: 'length',
-                numberKind: 'fraction'
-            }).data;
-            counts.add(data.tickValues.length - 1);
-        }
-        expect(counts).toEqual(new Set([4, 8]));
+    it('rejects malformed configurations, profiles and ticket indices before sampling', () => {
+        const generator = new MeasurementNumberLineGenerator(), draw = vi.spyOn(rng, 'random');
+        const range = measurementLineRangeProfiles[0]!.range;
+        try {
+            for (const config of [null, {}, {measurementKind: 'distance', numberKind: 'fraction'},
+                {measurementKind: 'length', numberKind: 'integer'}, {measurementKind: 'length', numberKind: 'fraction'},
+                {measurementKind: 'length', numberKind: 'fraction', range: {min: 0, max: 5}}]) {
+                expect(() => generator.generate(config as never)).toThrow();
+            }
+            for (const index of [-1, 0.5, measurementLineCaseCount('fraction', range)]) {
+                expect(() => measurementLineFrameAt('fraction', range, index)).toThrow();
+            }
+            expect(measurementLineCaseCount('fraction', {...range, min: 5})).toBe(0);
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
 
-    it('keeps ontology labels out of the generated payload', () => {
-        for (const measurementKind of measurementKinds) {
-            setSeed(measurementKind);
-            const stub = generator.generate({
-                measurementKind,
-                numberKind: 'decimal'
-            });
-            expect(Object.keys(stub)).toEqual(['data']);
-        }
-    });
-
-    it('keeps presentation fields out of the canonical payload', () => {
-        setSeed('canonical-contract');
-        const data = generator.generate({
-            measurementKind: 'time',
-            numberKind: 'fraction'
-        }).data;
-        for (const field of [
-            'task',
-            'unit',
-            'tickCount',
-            'ticks',
-            'labeledTickIndices',
-            'start',
-            'end',
-            'interval',
-            'target',
-            'prompt',
-            'scaleStatement',
-            'answerStatement',
-            'explanation'
-        ]) {
-            expect(data).not.toHaveProperty(field);
-        }
-        expect(data.tickValues.every(value => Object.keys(value).length === 2)).toBe(true);
+    it('replays the selected line and random continuation exactly', () => {
+        const generator = new MeasurementNumberLineGenerator();
+        const config = {measurementKind: 'money', numberKind: 'decimal', range: measurementLineRangeProfiles[1]!.range} as const;
+        rng.setSeed('measurement-line');
+        const first = generator.generate(config), continuation = rng.random();
+        rng.setSeed('measurement-line');
+        expect(generator.generate(config)).toEqual(first);
+        expect(rng.random()).toBe(continuation);
     });
 });

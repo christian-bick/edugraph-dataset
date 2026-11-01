@@ -1,7 +1,8 @@
 import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
+import {ConfigFromSchema, withLabelChoices} from '../../../types/schema.ts';
+import {measurementLineRangeProfiles} from './numeric-domain.ts';
 
 export const measurementNumberLineKinds = [
     Scope.MeterScale,
@@ -21,6 +22,7 @@ export const spec: GeneratorSpec = {
     generalLabels: [Scope.NumbersWithoutNegatives, Scope.NumbersWithZero]
 };
 
+const rangeChoices = measurementLineRangeProfiles.map(profile => profile.labels);
 export const MeasurementNumberLineGeneratorSchema = {
     measurementKind: [
         [
@@ -57,7 +59,10 @@ export const MeasurementNumberLineGeneratorSchema = {
             [Area.NumerationWithFractions, Scope.ProperFractions],
             [Area.NumerationWithDecimals, Scope.DecimalNumbers]
         ]
-    ]
+    ],
+    range: [[...new Set(rangeChoices.flat())], withLabelChoices(selectExactLabelSetMap(
+        measurementLineRangeProfiles.map(profile => [profile.labels, profile.range] as const)
+    ), {kind: 'alternatives', alternatives: rangeChoices, relation: 'capability'}), rangeChoices]
 } as const;
 
 export type MeasurementNumberLineGeneratorConfig = ConfigFromSchema<

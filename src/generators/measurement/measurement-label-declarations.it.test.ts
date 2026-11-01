@@ -70,7 +70,7 @@ describe('measurement label declarations on existing competency targets', () => 
             expect(view.generalLabels).not.toContain(label);
         }
         expect(Object.keys(generator.schema!).sort()).toEqual(
-            generatorId === 'measurement-number-line' ? ['measurementKind', 'numberKind'] : ['numberKind', 'range', 'unitPair']
+            generatorId === 'measurement-number-line' ? ['measurementKind', 'numberKind', 'range'] : ['numberKind', 'range', 'unitPair']
         );
         expect(view.schema).toEqual({});
     });

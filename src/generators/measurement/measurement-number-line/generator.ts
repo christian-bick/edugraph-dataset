@@ -11,6 +11,7 @@ import {
     MeasurementNumberLineGeneratorConfig,
     MeasurementNumberLineGeneratorSchema
 } from './spec.ts';
+import {measurementLineCaseCount, measurementLineFrameAt} from './numeric-domain.ts';
 
 type NumberKind = MeasurementNumberLineProblem['numberKind'];
 
@@ -46,9 +47,6 @@ const makeValue = (
     return {numerator, denominator};
 };
 
-const randomInteger = (min: number, max: number): number =>
-    min + Math.floor(random() * (max - min + 1));
-
 export class MeasurementNumberLineGenerator implements ProblemGenerator<
     MeasurementNumberLineProblem,
     MeasurementNumberLineGeneratorConfig
@@ -72,9 +70,10 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
 
         const measurementKind = config.measurementKind as MeasurementNumberLineKind;
         const numberKind = config.numberKind as NumberKind;
-        const tickCount: 4 | 8 | 10 = numberKind === 'fraction'
-            ? random() >= 0.5 ? 8 : 4
-            : 10;
+        validateConfigFields('measurement-number-line', config, ['range']);
+        const count = measurementLineCaseCount(numberKind, config.range!);
+        if (count === 0) throw new GeneratorValidationError('measurement-number-line', 'Unsupported canonical range.');
+        const {tickCount, targetIndex} = measurementLineFrameAt(numberKind, config.range!, Math.floor(random() * count));
         const denominator = numberKind === 'fraction'
             ? tickCount
             : measurementKind === 'money' ? 100 : 10;
@@ -85,7 +84,6 @@ export class MeasurementNumberLineGenerator implements ProblemGenerator<
             {length: tickCount + 1},
             (_, index) => makeValue(index * increment, denominator, numberKind)
         );
-        const targetIndex = randomInteger(2, tickCount - 1);
         const data: MeasurementNumberLineProblem = {
             measurementKind,
             numberKind,

@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {MeasurementNumberLineGenerator} from '../../../../generators/measurement/measurement-number-line/generator.ts';
 import {setSeed} from '../../../../lib/random.ts';
+import {measurementLineRangeProfiles} from '../../../../generators/measurement/measurement-number-line/numeric-domain.ts';
 import {
     MeasurementNumberLineKind,
     MeasurementNumberLineProblem
@@ -31,7 +32,8 @@ const problemFor = (
     setSeed(seed);
     return generator.generate({
         measurementKind,
-        numberKind
+        numberKind,
+        range: measurementLineRangeProfiles[0]!.range
     }).data;
 };
 

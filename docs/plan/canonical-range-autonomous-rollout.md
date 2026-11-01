@@ -713,3 +713,18 @@ Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `rounding-tests.log`
 Twenty-four relation/zero/range profiles preserve the original conditional source law through a local six-position digit DP. It retains deciding-place weights, shared-whole prefixes, triangular unequal digits, short-format overrides and the corrected final-digit pair mass. Equality retains all98,901 original values. Analytic finite-state probability partition and independent enumeration of4,495,500 final-place paths verify the law; this is not a brute-force claim over every full inequality pair. Every explicitly compared place-unit count participates in the range. Three old routes remain,5→24 selections, closing five omissions. Thirty-eight tests/five files cover profiles, both resolution paths and projections. Constructive successful-profile sampling removes the old4096-retry null outcome without changing mathematical support, precision sampling, payloads, sources or rendering.
 
 Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `comparison-tests.log`, `comparison-matching.log` and neighboring probability proof records.
+
+## Fourth batch: measurement number lines
+
+Upper5/10 profiles bound the provided axis/step values and explicitly required target-step count.
+The denominator in a supplied1/8 step is notation; unlike partition-construction tasks, this
+question does not ask learners to count all eight partitions. All80 original lines remain across
+five measurement units, represented by100 weighted tickets. Quarter targets retain weight3 versus
+eighth targets1; decimal targets retain their original uniform law conditional on band.
+
+All12 prior routes remain,20→40 selections, closing20 baseline range omissions. Sixty-two tests/
+four files and type checks pass, including complete support, rendered helper evidence and both
+resolution paths. Rendering, source targets and payload shapes are unchanged. The combined ruler/
+line proof covers20 routes/60 selections without missing/conflicting annotations. Evidence:
+`temp/range-autonomous/batch4/measurement-time/line-focused.log`, `route-verification.json` and
+`source-verification.json`.
