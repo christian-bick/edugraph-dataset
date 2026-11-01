@@ -11,7 +11,9 @@ interface CoreProps {
     payload: ViewRenderPayload<'counting-number-sequence'>;
 }
 
-const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
+const countingStepNames = {1: 'ones', 5: 'fives', 10: 'tens', 100: 'hundreds'} as const;
+
+export const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     const {problem, isSolutionView} = payload;
     const data = problem.data;
 
@@ -42,11 +44,10 @@ const CountingNumberSequenceCore = ({config, payload}: CoreProps) => {
     return (
         <div className="flex justify-center items-center p-6 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] w-fit mx-auto font-sans">
             <div className="flex flex-col items-center max-w-[760px]">
-                {!isSolutionView && (
-                    <div className="text-2xl font-bold text-slate-700 mb-6 text-center">
-                        Fill in the missing number.
-                    </div>
-                )}
+                <div className="text-2xl font-bold text-slate-700 mb-6 text-center">
+                    <div>Count forward by {countingStepNames[data.stepSize]}.</div>
+                    {!isSolutionView && <div>Fill in the missing number.</div>}
+                </div>
                 <div className="flex flex-nowrap justify-center items-center gap-2.5 p-5 bg-slate-100 border-2 border-slate-200 rounded-xl">
                     {data.sequence.map((value, index) => {
                         const isMissing = index === missingIndex;

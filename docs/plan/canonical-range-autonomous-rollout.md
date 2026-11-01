@@ -1081,3 +1081,20 @@ Sixty-one tests/eight files pass, including full support/uniqueness/path-weight 
 proofs,168 Question/Solution projections, all28 configuration cells and56 native draws/replays.
 Complete TypeScript, static specs and whitespace checks pass. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{partial-quotient-review.md,verify-partial-quotients.json}`.
+
+## Fifth batch: standalone sequence instructions
+
+Independent review exposed an existing consumer ambiguity made systematic by the new step10/
+upper20 source route: the two-term question displayed10 and a blank without stating the step.
+Both modes now say to count forward by ones/fives/tens/hundreds using the already supplied
+mathematical relation. This repairs the missing premise under IMPL-V5/IMPL-V11; the question
+still withholds its answer. It does not turn the sequence step into an arithmetic offset operand
+or change the agreed range quantity set.
+
+This is a local rendering-text/checklist change. Payloads, source labels/targets, matching, sampling
+and RNG are unchanged. Tests distinguish identical10/blank displays with answers11 versus20,
+cover every step, interior physical blanks, both modes and invalid input. Sixty-three tests/nine
+files, including every actual native counting selection, and fresh TypeScript pass. The unchanged
+number renderer and constant word mapping add no randomness. Evidence:
+`temp/range-autonomous/batch5/counting/{step-instruction-tests.log,step-instruction-types.log}`.
+The view/checklist identity will refresh its affected artifacts at the later canonical stage.

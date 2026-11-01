@@ -1,2 +1,2 @@
-- **Identity:** An ordered numeral or countable-dot sequence has one identifiable missing position after its visible start.
-- **Modes:** Question Mode leaves that position empty; Solution Mode fills it with the value that continues the visible step pattern.
+- **Identity:** Count forward by the stated step in an ordered numeral or countable-dot sequence with one missing position after its visible start.
+- **Modes:** Question Mode leaves that position empty; Solution Mode fills it while preserving the stated counting step.
