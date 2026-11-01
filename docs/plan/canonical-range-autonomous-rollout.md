@@ -42,6 +42,20 @@ Evidence: `temp/range-autonomous/fraction-decimal/` (`invariant-tests.log`, `bas
 `route-verification.json`, `types-first.log`). Full repository and coverage acceptance follows the
 completed autonomous run.
 
+## Length-difference profiles
+
+`measurement-length-difference` now selects one of five canonical range profiles before drawing:
+lower/upper `(0,10)`, `(5,10)`, `(0,20)`, `(5,20)` and `(5,100)`, containing respectively
+9, 1, 24, 44 and 10 tuples. These disjoint cells preserve all 88 original shorter/difference/longer
+triples. All three quantities are required by the sole `measure-length-difference` projection;
+no payload or view change is needed. The one existing target/route remains, with five admitted
+selections replacing one unbounded selection. This closes one baseline source-presence finding.
+
+The time and length-difference focused gate passes 11 tests across four files, including complete
+finite support and canonical witnesses. Exact owned route comparison and TypeScript pass.
+Evidence: `temp/range-autonomous/measurement-time/route-verification.json`, `first-focused.log`
+and `types-first.log`. The invariant checkpoint is `4e556963`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.
