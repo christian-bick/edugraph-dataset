@@ -83,14 +83,14 @@ const factorPairsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FactorsAndMultiples,
     Scope.NumbersSmaller100,
     Ability.ProcedureExecution
-]);
+]).applyUpperRangeVariants({through: 100});
 
 const oneDigitMultipleTestBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FactorsAndMultiples,
     Area.PerfectDivisibility,
     Scope.NumbersSmaller100,
     Ability.ProcedureExecution
-]);
+]).applyUpperRangeVariants({through: 100});
 
 const primeClassificationBuilder = new DatasetPermutationBuilder().addLabels([
     Area.PrimeNumbers,

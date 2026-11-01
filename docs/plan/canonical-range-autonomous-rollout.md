@@ -437,3 +437,25 @@ whole hour, whose minute component0 prevents a positive lower. Timestamp storage
 The generator and views remain unchanged, and both earlier routes/selections remain. Six
 focused tests pass and two source range omissions close. Evidence:
 `temp/range-autonomous/batch3/measurement-time/` (elapsed focused and route verification reports).
+
+## Third batch: factor pairs and divisibility
+
+Four factor-proof bands and five divisibility bands retain all99 original factor inputs and178
+divisor/quotient cases. Complete factor proofs include1; a divisibility case may instead support
+lower5/upper100 when divisor and quotient are both at least5. The stored zero remainder is not a
+new range witness: this projection says “Divides evenly” and assesses candidate/divisor/quotient.
+The original strict99 cap and all proof payloads stay unchanged. Weighted finite selection
+preserves the old divisor/quotient probability law conditional on the preselected profile.
+
+Six reviewed smaller-band variants extend the same4.OA.B.4 source builders, retaining both old
+target IDs/claims and routes. Eight routes admit nine selections. The existing task selector's
+explicit absence default is preserved; a positive floor requires the declared divisibility
+context, so it is an admitted alternative rather than a context-free fallback. No resolver or
+matching-engine feature is added. This tightens existing bounds and closes no baseline omission.
+
+All32 focused tests/seven files pass, including unaffected classification siblings. All277
+original cases retain their proofs across554 question/solution projections. Thirty-six planned
+draws and replays pass target coverage, strict annotations and both resolution paths. Spec
+ownership/applicability and TypeScript pass. Evidence:
+`temp/range-autonomous/batch3/{factor-multiple-tests,factor-projections,factor-specs,factor-types}.log`
+and `verify-factors.json`.

@@ -2,15 +2,10 @@ import {random} from '../../lib/random.ts';
 import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import {GeneratorValidationError} from '../../lib/errors.ts';
 import {FactorPairsProblem, OneDigitMultipleTestProblem, PrimeClassificationProblem, CompositeClassificationProblem, PositiveFactorEvidence, PositiveFactorPair} from '../../types/problems.ts';
+import {factorPairNumbers, multipleTestCases} from './factor-multiple-relations/domain.ts';
 
-const MINIMUM_FACTOR_PAIR_NUMBER = 1;
 const MINIMUM_CLASSIFICATION_NUMBER = 2;
 const MAXIMUM_NUMBER = 99;
-const MINIMUM_DIVISOR = 2;
-const MAXIMUM_DIVISOR = 9;
-
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
 
 const randomItem = <T>(items: readonly T[]): T =>
     items[Math.floor(random() * items.length)]!;
@@ -58,8 +53,10 @@ const numbersByClassification = (classification: 'prime' | 'composite'): number[
 const primeNumbers = numbersByClassification('prime');
 const compositeNumbers = numbersByClassification('composite');
 
-export const generateFactorPairs = (): FactorPairsProblem => {
-    const number = randomInteger(MINIMUM_FACTOR_PAIR_NUMBER, MAXIMUM_NUMBER);
+export const generateFactorPairs = (range: CanonicalNumericRange): FactorPairsProblem => {
+    const candidates = factorPairNumbers(range);
+    if (!candidates.length) throw new GeneratorValidationError('factor-multiple-relations', 'No factor proof supports the selected range.');
+    const number = randomItem(candidates);
     const evidence = buildFactorEvidence(number);
     return {
         kind: 'factor-pairs',
@@ -67,9 +64,15 @@ export const generateFactorPairs = (): FactorPairsProblem => {
     };
 };
 
-export const generateMultipleTest = (): OneDigitMultipleTestProblem => {
-    const divisor = randomInteger(MINIMUM_DIVISOR, MAXIMUM_DIVISOR);
-    const quotient = randomInteger(1, Math.floor(MAXIMUM_NUMBER / divisor));
+export const generateMultipleTest = (range: CanonicalNumericRange): OneDigitMultipleTestProblem => {
+    const candidates = multipleTestCases(range);
+    if (!candidates.length) throw new GeneratorValidationError('factor-multiple-relations', 'No multiple test supports the selected range.');
+    const ticket = random() * candidates.reduce((total, candidate) => total + candidate.weight, 0);
+    let cumulative = 0;
+    const {divisor, quotient} = candidates.find((candidate, index) => {
+        cumulative += candidate.weight;
+        return ticket < cumulative || index === candidates.length - 1;
+    })!;
     const candidate = divisor * quotient;
     return {
         kind: 'one-digit-multiple-test',

@@ -49,18 +49,18 @@ describe('FactorMultipleRelationsGenerator', () => {
     const generateFamily = (task: 'factor-pairs' | 'one-digit-multiple-test' | 'prime-classification' | 'composite-classification') =>
         task === 'prime-classification' ? new NumbersPrimeClassificationGenerator().generate({range: createCanonicalNumericRange(100)})
             : task === 'composite-classification' ? new NumbersCompositeClassificationGenerator().generate({range: createCanonicalNumericRange(100)})
-                : generator.generate({task});
+                : generator.generate({task, range: createCanonicalNumericRange(100)});
 
     it('strictly validates its configuration', () => {
         expect(() => generator.generate({} as never)).toThrow();
-        expect(() => generator.generate({task: 'unsupported'} as never))
+        expect(() => generator.generate({task: 'unsupported', range: createCanonicalNumericRange(100)} as never))
             .toThrow('Unsupported task "unsupported".');
     });
 
     it('lists every positive factor pair exactly once', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const problem = generator.generate({task: 'factor-pairs'}).data;
+            const problem = generator.generate({task: 'factor-pairs', range: createCanonicalNumericRange(100)}).data;
             expect(problem.kind).toBe('factor-pairs');
             if (problem.kind !== 'factor-pairs') throw new Error('Unexpected task');
             expectExhaustiveEvidence(problem);
@@ -73,7 +73,7 @@ describe('FactorMultipleRelationsGenerator', () => {
 
         for (let seed = 0; seed < 1000 && (!oneProblem || !squareProblem); seed++) {
             setSeed(seed);
-            const problem = generator.generate({task: 'factor-pairs'}).data;
+            const problem = generator.generate({task: 'factor-pairs', range: createCanonicalNumericRange(5)}).data;
             if (problem.kind !== 'factor-pairs') throw new Error('Unexpected task');
             if (problem.number === 1) oneProblem = problem;
             if (problem.number > 1 && Number.isInteger(Math.sqrt(problem.number))) {
@@ -96,9 +96,10 @@ describe('FactorMultipleRelationsGenerator', () => {
 
     it('provides affirmative one-digit perfect-divisibility evidence', () => {
         const divisors = new Set<number>();
-        for (let seed = 0; seed < 200; seed++) {
+        for (const range of [5, 10, 20, 100].map(upper => createCanonicalNumericRange(upper))
+            .concat([createCanonicalNumericRange(100, 5)])) for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
-            const problem = generator.generate({task: 'one-digit-multiple-test'}).data;
+            const problem = generator.generate({task: 'one-digit-multiple-test', range}).data;
             expect(problem.kind).toBe('one-digit-multiple-test');
             if (problem.kind !== 'one-digit-multiple-test') throw new Error('Unexpected task');
             divisors.add(problem.divisor);

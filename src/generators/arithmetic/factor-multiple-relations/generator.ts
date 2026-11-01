@@ -19,13 +19,13 @@ export class FactorMultipleRelationsGenerator implements ProblemGenerator<
     generate(
         config: FactorMultipleRelationsGeneratorConfig
     ): ProblemStub<FactorPairsOrMultipleTestProblem> {
-        validateConfigFields('factor-multiple-relations', config, ['task']);
+        validateConfigFields('factor-multiple-relations', config, ['task', 'range']);
 
         switch (config.task) {
             case 'factor-pairs':
-                return {data: generateFactorPairs()};
+                return {data: generateFactorPairs(config.range!)};
             case 'one-digit-multiple-test':
-                return {data: generateMultipleTest()};
+                return {data: generateMultipleTest(config.range!)};
             default:
                 throw new GeneratorValidationError(
                     'factor-multiple-relations',
