@@ -6,9 +6,12 @@ import {ArithmeticWordProblemsLetterEquationGenerator} from '../arithmetic-word-
 import {spec as equationGeneratorSpec} from '../arithmetic-word-problems-letter-equation/spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {twoStepDomain} from './domain.ts';
 import {ArithmeticWordProblemsTwoStepGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {spec, ArithmeticWordProblemsTwoStepGeneratorSchema as schema} from './spec.ts';
 
 const operationCases = [
     {labels: [Area.Addition], operations: ['addition', 'addition']},
@@ -28,6 +31,28 @@ describe('ArithmeticWordProblemsTwoStepGenerator spec integration', () => {
     const roundingGenerator = new ArithmeticWordProblemsRoundingGenerator();
     const remainderGenerator = new ArithmeticWordProblemsInterpretedRemainderGenerator();
     const generator = new ArithmeticWordProblemsTwoStepGenerator();
+
+    it('keeps direct and planned canonical bands equivalent for every feasible operation context', () => {
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+        let feasible = 0;
+        for (const context of operationCases) for (const labels of schema.range[2]) {
+            const range = resolveCanonicalRangeFromLabels(labels)!;
+            const target = [...context.labels, ...labels];
+            if (!twoStepDomain(context.operations, range).count) {
+                expect(() => extractConfig(schema, target)).toThrow();
+                continue;
+            }
+            const direct = extractConfig(schema, target);
+            const bindings = Object.fromEntries(normalizeSchemaChoices(schema, target, 'generator')
+                .map(field => [field.field, field.alternatives[0]!.labels]));
+            bindings.range = labels;
+            const planned = resolveSchemaChoices(schema, target, bindings);
+            expect(planned.config).toEqual(direct.config);
+            expect(new Set(planned.resolvedLabels)).toEqual(new Set(direct.resolvedLabels));
+            feasible++;
+        }
+        expect(feasible).toBe(62);
+    });
 
     it('declares invariant multi-step and sign constraints', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([

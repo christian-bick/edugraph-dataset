@@ -38,27 +38,6 @@ const valuesInRange = (values: Values, minimum: number, maximum: number): boolea
         Number.isInteger(value) && value >= minimum && value <= maximum
     );
 
-export function generateLegacyValues(
-    operations: NamedOperations,
-    minimum: number,
-    maximum: number
-): Values | null {
-    for (let attempt = 0; attempt < 200; attempt++) {
-        const operandLimit = Math.min(maximum, Math.max(12, minimum + 12));
-        const num1 = randomInteger(minimum, operandLimit);
-        const num2 = randomInteger(minimum, operandLimit);
-        const num3 = randomInteger(minimum, operandLimit);
-        if (num1 === null || num2 === null || num3 === null) return null;
-
-        const intermediate = applyOperation(num1, num2, operations[0]);
-        const answer = applyOperation(intermediate, num3, operations[1]);
-        const values = {num1, num2, num3, intermediate, answer};
-        if (valuesInRange(values, minimum, maximum)) return values;
-    }
-
-    return null;
-}
-
 export function generateGrade4Values(
     operations: NamedOperations,
     minimum: number,

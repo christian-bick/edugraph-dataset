@@ -929,3 +929,24 @@ all24 feasible settled task/operation/range cells, direct/planned/replay checks 
 Question/Solution presentations. Types and whitespace checks pass. Four consumer fixtures now
 provide the explicit mathematical range; renderers, payload types, source targets and IDs are unchanged.
 Evidence: `temp/range-autonomous/batch5/fraction-decimal/fraction-arithmetic-*`.
+
+## Fifth batch: positive-integer two-step stories
+
+Constructive compact intervals support all753,174 positive integral frames within the existing
+ceiling100 across the ten authored operation sequences, in62 canonical cells. All former
+operand-at-most12 cases remain; a subtraction/subtraction source that formerly could not witness
+upper100 now has a valid challenge band. This expands mathematical support inside the existing
+standard envelope. One uniform concrete-frame index replaces bounded rejection; profile selection
+changes sampling and replay identities without forcing a balanced mixture.
+
+The Grade2 builder adds nine reviewed upper5/10/20 variants, retaining all three old upper100
+aliases. All13 previous routes remain, now22 routes/88 selections, closing ten baseline omissions.
+Rounding, letter-equation and interpreted-remainder siblings retain their exact old field contracts
+and1,000,000 envelope through an extracted category-level declaration. Their8/10/1 routes and
+selection sets, mathematical draws and PRNG continuation remain unchanged. The unused old small
+sampler is removed. Payloads and renderers stay unchanged.
+
+Fifty-six tests/12 files pass, including complete direct support across all16 operation sequences,
+600 same-value Question/Solution projections,352 real-target draws/replays and sibling controls.
+The spec gate passes; final combined types follow the concurrent checkpoints. Evidence:
+`temp/range-autonomous/batch5/arithmetic/{two-step-review.md,verify-two-step.json}`.

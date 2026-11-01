@@ -44,7 +44,8 @@ const twoStepWordProblemsBuilder = new DatasetPermutationBuilder()
         [Area.Addition],
         [Area.Subtraction],
         [Area.Addition, Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 2.OA.B.2: Compute within 20 ---
 const fluencyWithin20Builder = new DatasetPermutationBuilder()

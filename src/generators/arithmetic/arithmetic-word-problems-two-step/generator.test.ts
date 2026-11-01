@@ -4,6 +4,7 @@ import {ArithmeticWordProblemsLetterEquationGenerator} from '../arithmetic-word-
 import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
     ArithmeticOperation,
     ArithmeticWordProblemTwoStep
@@ -57,7 +58,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 setSeed(seed);
                 const stub = generator.generate({
                     operations,
-                    range: {min: 0, max: 100}
+                    range: createCanonicalNumericRange(100)
                 });
                 expect(stub).not.toBeNull();
                 expect(stub!.data.kind).toBe('two-step');
@@ -79,7 +80,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
             setSeed(9);
             const stub = generator.generate({
                 operations,
-                range: {min: 0, max: 1_000_000}
+                range: createCanonicalNumericRange(100)
             });
             expect(stub).not.toBeNull();
             if (stub!.data.kind !== 'two-step') throw new Error('Expected legacy payload.');
@@ -206,7 +207,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
     it('returns null for unsupported operations, incompatible tasks, and infeasible ranges', () => {
         expect(generator.generate({
             operations: 'unsupported',
-            range: {min: 0, max: 100}
+            range: createCanonicalNumericRange(100)
         })).toBeNull();
         expect(remainderGenerator.generate({
             range: {min: 5, max: 5}
@@ -216,10 +217,10 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
             range: {min: 50, max: 51}
         })).toBeNull();
         for (const operations of operationSequences) {
-            expect(generator.generate({
+            expect(() => generator.generate({
                 operations,
                 range: {min: 5, max: 5}
-            })).toBeNull();
+            } as never)).toThrow();
         }
     });
 });

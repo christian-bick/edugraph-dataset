@@ -1,13 +1,13 @@
 import {Area} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {ArithmeticWordProblemsTwoStepGeneratorSchema, spec as baseSpec} from '../arithmetic-word-problems-two-step/spec.ts';
+import {TwoStepExtendedGeneratorSchema, twoStepGeneralLabels, twoStepOperationCompatibility} from '../two-step-capabilities.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-word-problems-rounding',
-    compatibility: baseSpec.compatibility,
-    generalLabels: [...baseSpec.generalLabels, Area.IntegerRounding]
+    compatibility: twoStepOperationCompatibility,
+    generalLabels: [...twoStepGeneralLabels, Area.IntegerRounding]
 };
 
-export const ArithmeticWordProblemsRoundingGeneratorSchema = ArithmeticWordProblemsTwoStepGeneratorSchema;
+export const ArithmeticWordProblemsRoundingGeneratorSchema = TwoStepExtendedGeneratorSchema;
 export type ArithmeticWordProblemsRoundingGeneratorConfig = ConfigFromSchema<typeof ArithmeticWordProblemsRoundingGeneratorSchema>;
