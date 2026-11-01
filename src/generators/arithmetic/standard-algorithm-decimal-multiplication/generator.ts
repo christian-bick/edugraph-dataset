@@ -2,8 +2,9 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalStandardMultiplicationProblem, StandardMultiplicationPartialRow, StandardMultiplicationSumColumn} from '../../../types/problems.ts';
-import {decimalDigits, exactDecimal, parseExactDecimal, validateMagnitudeRange} from '../standard-decimal-helpers.ts';
+import {decimalDigits, exactDecimal, parseExactDecimal} from '../standard-decimal-helpers.ts';
 import {StandardAlgorithmDecimalMultiplicationGeneratorSchema, type StandardAlgorithmDecimalMultiplicationGeneratorConfig} from './spec.ts';
+import {standardDecimalMultiplicationCases} from './domain.ts';
 
 const generatorId = 'standard-algorithm-decimal-multiplication';
 const randomInteger = (min: number, max: number): number => min + Math.floor(random() * (max - min + 1));
@@ -59,14 +60,11 @@ export class StandardAlgorithmDecimalMultiplicationGenerator implements ProblemG
 
     generate(config: StandardAlgorithmDecimalMultiplicationGeneratorConfig): ProblemStub<DecimalStandardMultiplicationProblem> {
         validateConfigFields(generatorId, config, ['range']);
-        const cap = validateMagnitudeRange(config.range, generatorId);
-        const firstScale = randomInteger(1, 3);
-        const minimumFirst = 10 * 10 ** firstScale;
-        const choices = [0, 1, 2, 4, 5, 8, 10, 12, 20, 25, 50, 101, 102, 105, 110]
-            .filter(value => value * minimumFirst <= cap);
-        const secondCoefficient = choices[randomInteger(0, choices.length - 1)]!;
-        const first = exactDecimal(randomInteger(minimumFirst,
-            secondCoefficient === 0 ? cap : Math.floor(cap / secondCoefficient)), firstScale, generatorId);
+        const cases = standardDecimalMultiplicationCases(config.range!);
+        let remaining = random() * cases.reduce((sum, entry) => sum + entry.weight, 0);
+        const selected = cases.find(entry => (remaining -= entry.weight) < 0) ?? cases[cases.length - 1]!;
+        const {firstScale, secondCoefficient} = selected;
+        const first = exactDecimal(randomInteger(selected.minimum, selected.maximum), firstScale, generatorId);
         const second = exactDecimal(secondCoefficient, randomInteger(0, 3), generatorId);
         const factors = random() < 0.5 ? [first, second] : [second, first];
         return {data: buildDecimalStandardMultiplicationProblem(factors[0]!.numeral, factors[1]!.numeral)};

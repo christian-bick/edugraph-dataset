@@ -846,3 +846,20 @@ will verify the batch-wide count rather than adding unverified closures to the l
 
 Evidence: `temp/range-autonomous/batch5/percent/{domain-census,interval-proof}.json` and
 `{focused,types}.log`. No inference, adapter, generic matching or Area-policy change is involved.
+
+## Fifth batch: standard decimal multiplication
+
+Six upper profiles from100 through1,000,000 describe the required coefficient-column work:
+both coefficients, unscaled product and prescribed shifted rows. The printed shift0 rules out
+a positive lower. Compact coefficient intervals retain all10,055,172 paths in the former largest
+source-cap domain, every precision/orientation, and exact1,000,000 coefficient support. The two
+old explicit-cap capabilities retain their own conditional source laws; newly exposed smaller
+bands condition the former omitted-range corpus. These distinct laws are not presented as one
+unchanged global profile mixture. Sampling and native replay identities change.
+
+The sole existing target/route remains, one→six selections, closing one range omission. Payloads
+and same-value question/solution markup stay unchanged. Fifty-six tests/six files cover analytic
+support/mass, all interval boundaries, both configuration paths, decimal method evidence and the
+integer-domain matching boundary. The independent boundary proof checks1,712 exact payloads.
+Owned files typecheck; batch-wide types and native route/replay gates follow the concurrent
+checkpoints. Evidence: `temp/range-autonomous/batch5/fraction-decimal/standard-multiplication-*`.

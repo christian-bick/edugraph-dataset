@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
 import type {DecimalStandardMultiplicationProblem} from '../../../types/problems.ts';
@@ -97,13 +98,13 @@ describe('standard decimal multiplication configuration', () => {
         }
     });
 
-    it('proves range and canonical-label invariants across both bounds and the no-bound sentinel', () => {
+    it('proves range and mathematical invariants across every canonical band', () => {
         const features = new Set<string>();
-        for (const max of [100000, 1000000, Number.MAX_SAFE_INTEGER]) {
-            const cap = max === Number.MAX_SAFE_INTEGER ? 999999 : max;
+        for (const max of [100, 120, 1000, 10000, 100000, 1000000]) {
+            const cap = max;
             for (let seed = 0; seed < 160; seed++) {
                 setSeed(seed);
-                const data = generator.generate({range: {min: 0, max}}).data;
+                const data = generator.generate({range: createCanonicalNumericRange(max)}).data;
                 assertProduct(data);
                 expect(Math.max(data.multiplicand.coefficient / 10 ** data.multiplicand.scale,
                     data.multiplier.coefficient / 10 ** data.multiplier.scale)).toBeGreaterThanOrEqual(10);
@@ -127,12 +128,12 @@ describe('standard decimal multiplication configuration', () => {
         let larger = false;
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const first = generator.generate({range: {min: 0, max: 100000}});
+            const first = generator.generate({range: createCanonicalNumericRange(100000)});
             setSeed(seed);
-            expect(generator.generate({range: {min: 0, max: 100000}})).toEqual(first);
+            expect(generator.generate({range: createCanonicalNumericRange(100000)})).toEqual(first);
             expect(Object.keys(first)).toEqual(['data']);
             setSeed(seed);
-            const second = generator.generate({range: {min: 0, max: 1000000}}).data;
+            const second = generator.generate({range: createCanonicalNumericRange(1000000)}).data;
             if (second.product.coefficient > 100000 || second.multiplicand.coefficient > 100000
                 || second.multiplier.coefficient > 100000) larger = true;
         }
