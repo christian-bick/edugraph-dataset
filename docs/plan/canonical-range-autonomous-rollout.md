@@ -220,3 +220,19 @@ PRNG continuation. These families already had range labels: this repairs tightne
 source-band coverage, rather than closing range-presence findings. Evidence:
 `temp/range-autonomous/batch2/arithmetic/classification-review.md` and
 `verify-classification.json`.
+
+## Second batch: finite mass and volume contexts
+
+Mass reading, mass estimation and liquid-volume estimation now use nine feasible mathematical
+range cells over all16 original object/container outcomes. Digital mass reading assesses the
+displayed mass; estimation also requires the given one-unit reference and reference count.
+The reference1 excludes a positive lower only in estimation. The digital3/4kg cases have no
+positive lower,12kg uses lower10/upper20, and180/320/450g use lower120/upper1000.
+Truthful invariant positive-integer labels satisfy the numeric obligations activated by ranges.
+
+The exact eight earlier routes remain, with eight selections becoming15. Twenty-seven focused
+tests pass, including actual estimation projections, exhaustive finite support and dependency
+evaluation of every admitted bundle. Eight baseline source range omissions close. No targets,
+views, payload contracts or global policies change. Evidence:
+`temp/range-autonomous/batch2/measurement-time/mass-focused.log`, `mass-ownership.log` and
+`route-verification.json`.

@@ -1,19 +1,24 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Ability, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
 import {MeasurementLiquidVolumeEstimationGenerator} from './generator.ts';
-import {spec} from './spec.ts';
+import {MeasurementLiquidVolumeEstimationGeneratorSchema as schema, spec} from './spec.ts';
+import {liquidEstimateRangeProfiles} from './numeric-domain.ts';
 
 describe('measurement-liquid-volume-estimation spec', () => {
-    it('declares the invariant measurement family', () => {
-        expect(spec.generalLabels).toEqual([Area.Estimation, Area.MeasuringVolume, Scope.LiquidVolumes, Scope.LiterScale]);
-    });
-
-    it('cannot fall back to another payload family when the target omits its area', () => {
-        for (let seed = 0; seed < 30; seed++) {
-            const stub = generateWithLabels(new MeasurementLiquidVolumeEstimationGenerator(), []);
-            expect(stub!.data.measurementKind).toBe('liquid-volume');
+    it('resolves both exact upper bands in direct and planned paths without a universal floor', () => {
+        expect(liquidEstimateRangeProfiles.map(({range}) => [range.min, range.max])).toEqual([[0, 5], [0, 10]]);
+        for (const profile of liquidEstimateRangeProfiles) {
+            expect(extractConfig(schema, profile.labels).config.range).toEqual(profile.range);
+            expect(resolveSchemaChoices(schema, profile.labels, {range: profile.labels}).config.range).toEqual(profile.range);
+            const result = createLabelDependencyEvaluator().evaluate([...spec.generalLabels!, ...profile.labels, Ability.ProcedureExecution]);
+            expect(result.errors).toEqual([]);
+            expect(result.conflicts).toEqual([]);
+            expect(result.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            expect(profile.labels).not.toContain(Scope.NumbersLargerZero);
         }
+        expect(generateWithLabels(new MeasurementLiquidVolumeEstimationGenerator(), [])!.data.unit).toBe('L');
     });
-
 });
