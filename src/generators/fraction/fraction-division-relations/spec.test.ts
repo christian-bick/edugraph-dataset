@@ -15,6 +15,8 @@ const magnitudeOf = (data: FractionDivisionRelationProblem): Scope => {
     return operand.numerator < operand.denominator ? Scope.ProperFractions : Scope.ImproperFractions;
 };
 const zeroOf = (data: FractionDivisionRelationProblem) => data.model.completeGroups === 0 ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
+const withoutRange = (labels: readonly string[]) => labels.filter(label => ![Scope.NumbersSmaller5, Scope.NumbersSmaller10,
+    Scope.NumbersSmaller20, Scope.NumbersSmaller100].includes(label as never));
 
 const profiles = [
     [[Scope.FractionDividend, Scope.FractionDivisor], 'fraction-by-fraction'],
@@ -32,7 +34,7 @@ describe('fraction-division-relations capabilities', () => {
             Area.Division, Scope.NumbersWithoutNegatives, ...labels, Ability.ProcedureExecution
         ])!;
         expect(problem.data.operandProfile).toBe(operandProfile);
-        expect(new Set(problem.labels)).toEqual(new Set([...labels, magnitudeOf(problem.data), zeroOf(problem.data)]));
+        expect(new Set(withoutRange(problem.labels))).toEqual(new Set([...labels, magnitudeOf(problem.data), zeroOf(problem.data)]));
         expect(problem.data).not.toHaveProperty('equationWitness');
         expect(problem.data).not.toHaveProperty('multiplicationWitness');
     });
@@ -43,7 +45,7 @@ describe('fraction-division-relations capabilities', () => {
         ] as const) {
             const problem = generateWithLabels(new FractionDivisionRelationsGenerator(), [...labels, mathematicalLabel])!;
             expect(problem.data[field]).toBeDefined();
-            expect(new Set(problem.labels)).toEqual(new Set([...labels, mathematicalLabel, magnitudeOf(problem.data), zeroOf(problem.data)]));
+            expect(new Set(withoutRange(problem.labels))).toEqual(new Set([...labels, mathematicalLabel, magnitudeOf(problem.data), zeroOf(problem.data)]));
         }
     });
 
@@ -52,7 +54,7 @@ describe('fraction-division-relations capabilities', () => {
         const problem = generateWithLabels(new FractionDivisionRelationsGenerator(), labels)!;
         expect(problem.data.equationWitness).toBeDefined();
         expect(problem.data.multiplicationWitness).toBeDefined();
-        expect(new Set(problem.labels)).toEqual(new Set([...labels, magnitudeOf(problem.data), zeroOf(problem.data)]));
+        expect(new Set(withoutRange(problem.labels))).toEqual(new Set([...labels, magnitudeOf(problem.data), zeroOf(problem.data)]));
     });
 
     it('rejects conflicting original role bundles', () => {
@@ -87,7 +89,7 @@ describe('fraction-division-relations capabilities', () => {
         expect(execution!.data).not.toHaveProperty('prompt');
     });
 
-    it('admits exactly eleven complete pre-generation operand/group profiles and replays their claims', () => {
+    it('retains eleven original operand/group profiles within thirty-four range bindings and replays their claims', () => {
         expect(spec).not.toHaveProperty('inferredLabels');
         expect(findSchemaFallbackContractIssues(FractionDivisionRelationsGeneratorSchema)).toEqual([]);
         const result = planCompatibility({identity: {targetId: 'division-profiles', generatorId: spec.generatorId, viewId: 'proof'},
@@ -97,7 +99,7 @@ describe('fraction-division-relations capabilities', () => {
         if (!result.supported) throw new Error(result.reason);
         const enumeration = enumerateDependencyAuditSelections(result.plan);
         expect(enumeration.status).toBe('complete');
-        expect(enumeration.selections).toHaveLength(11);
+        expect(enumeration.selections).toHaveLength(34);
         const configs = new Set<string>();
         for (const selection of enumeration.selections) {
             expect(selection.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as Scope)))
@@ -121,7 +123,9 @@ describe('fraction-division-relations capabilities', () => {
                 expect(getRandomState()).toBe(state);
             }
         }
-        expect(configs.size).toBe(11);
+        expect(configs.size).toBe(34);
+        expect(new Set([...configs].map(value => { const {operandProfile, groupCountProfile} = JSON.parse(value);
+            return `${operandProfile}:${groupCountProfile}`; })).size).toBe(11);
     });
 
     it('resolves the always-zero proper-fraction/integer context directly and rejects its impossible opposite', () => {

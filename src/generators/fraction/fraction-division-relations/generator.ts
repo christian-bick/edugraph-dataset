@@ -5,6 +5,7 @@ import {greatestCommonDivisor, pick, rational} from '../../ratio/helpers.ts';
 import {FractionDivisionRelationsGeneratorSchema, type FractionDivisionRelationsGeneratorConfig} from './spec.ts';
 import {random} from '../../../lib/random.ts';
 import {divisionOperandProfiles, sampleDivisionOperands} from './operand-profiles.ts';
+import {hasSharedDivisionRange, sampleDivisionRangeOperands} from './numeric-domain.ts';
 
 function commonUnitModel(
     dividend: FractionQuotientValue, divisor: FractionQuotientValue
@@ -63,7 +64,7 @@ export class FractionDivisionRelationsGenerator implements ProblemGenerator<
     schema = FractionDivisionRelationsGeneratorSchema;
 
     generate(config: FractionDivisionRelationsGeneratorConfig): ProblemStub<FractionDivisionRelationProblem> {
-        validateConfigFields('fraction-division-relations', config, ['operandProfile', 'groupCountProfile', 'withEquation', 'withMultiplication']);
+        validateConfigFields('fraction-division-relations', config, ['operandProfile', 'groupCountProfile', 'withEquation', 'withMultiplication', 'range']);
         if (!Object.hasOwn(divisionOperandProfiles, config.operandProfile!)) {
             throw new GeneratorValidationError('fraction-division-relations', 'Unsupported original operand profile.');
         }
@@ -76,7 +77,15 @@ export class FractionDivisionRelationsGenerator implements ProblemGenerator<
             throw new GeneratorValidationError('fraction-division-relations', 'Mathematical witness choices must be resolved booleans.');
         }
         const operandProfile = selectedProfile.kind;
-        const {dividend, divisor} = sampleDivisionOperands(config.operandProfile!, config.groupCountProfile!, random());
+        const sharedRange = hasSharedDivisionRange(config.operandProfile!, config.groupCountProfile!);
+        if (!sharedRange
+            && (config.range!.min !== 0 || config.range!.max !== Number.MAX_SAFE_INTEGER))
+            throw new GeneratorValidationError('fraction-division-relations', 'Reciprocal-sensitive projections retain their original unlabelled range.');
+        if (sharedRange && config.range!.max === Number.MAX_SAFE_INTEGER)
+            throw new GeneratorValidationError('fraction-division-relations', 'Select a canonical range for the shared model role.');
+        const {dividend, divisor} = sharedRange
+            ? sampleDivisionRangeOperands(config.operandProfile!, config.groupCountProfile!, config.range!, random)
+            : sampleDivisionOperands(config.operandProfile!, config.groupCountProfile!, random());
         const reciprocal = {numerator: divisor.denominator, denominator: divisor.numerator};
         const reciprocalProduct = {
             numerator: dividend.numerator * reciprocal.numerator,

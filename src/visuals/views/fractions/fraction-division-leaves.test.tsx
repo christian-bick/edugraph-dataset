@@ -1,3 +1,4 @@
+import {divisionFixtureRange} from '../../../generators/fraction/fraction-division-relations/range-fixtures.ts';
 import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -72,7 +73,7 @@ describe('general fraction division leaf contracts', () => {
                 for (const withMultiplication of [false, true]) {
                     for (let seed = 0; seed < 12; seed++) {
                         setSeed(`general-leaf-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                        const {data} = generator.generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
+                        const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
                         contexts.add(data.context.kind);
                         for (const id of leafIds) {
                             const question = render(id, data, false);
@@ -127,7 +128,7 @@ describe('general fraction division leaf contracts', () => {
 
     it('rejects malformed general arithmetic, models, contexts, and optional witnesses in every leaf', () => {
         setSeed('general-fraction-invalid-leaf');
-        const {data} = new FractionDivisionRelationsGenerator().generate({
+        const {data} = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'),
             operandProfile: 'fraction-by-fraction-proper', groupCountProfile: 'zero', withEquation: true, withMultiplication: true
         });
         for (const invalid of [

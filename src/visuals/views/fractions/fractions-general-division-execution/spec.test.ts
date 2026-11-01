@@ -1,3 +1,4 @@
+import {divisionFixtureRange} from '../../../../generators/fraction/fraction-division-relations/range-fixtures.ts';
 import {quotientFixtureRange} from '../../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -51,7 +52,7 @@ describe('general division execution split', () => {
             ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
             for (const withMultiplication of [false, true]) for (let seed = 0; seed < 8; seed++) {
                 setSeed(`general-execution-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = generator.generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
+                const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
                 expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
                 contexts.add(data.context.kind);
                 dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
@@ -79,7 +80,7 @@ describe('general division execution split', () => {
     });
 
     it('rejects the other valid payload family statically and at runtime in both directions', () => {
-        const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
+        const general = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'), operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
         const quotient = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-basic', 'zero'), relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {

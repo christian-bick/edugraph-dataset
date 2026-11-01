@@ -1,3 +1,6 @@
+import {divisionFixtureRange} from './range-fixtures.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {commonDivisionMaximum, divisionRangeRows, hasSharedDivisionRange} from './numeric-domain.ts';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import * as rng from '../../../lib/random.ts';
 import {FractionDivisionRelationsGenerator} from './generator.ts';
@@ -83,8 +86,21 @@ describe.each(roles)('complete finite division support for %s', role => {
             expect(interval).toBeDefined();
             expect(interval.weight).toBeCloseTo(expected.originalWeight, 16);
             expect(interval.probability).toBeCloseTo(expected.magnitudeProbability / groupMass.get(groupKey)!, 14);
-            random.mockReset().mockReturnValueOnce(interval.draw).mockReturnValueOnce(0);
-            const data = generator.generate({operandProfile: expected.profile, groupCountProfile: expected.group,
+            const range = hasSharedDivisionRange(expected.profile, expected.group)
+                ? createCanonicalNumericRange([5, 10, 20, 100].find(upper => commonDivisionMaximum(
+                    {numerator: expected.a, denominator: expected.b}, {numerator: expected.c, denominator: expected.d}) <= upper)!)
+                : divisionFixtureRange(expected.profile, expected.group);
+            let draw = interval.draw;
+            if (hasSharedDivisionRange(expected.profile, expected.group)) {
+                const candidates = divisionRangeRows(expected.profile, expected.group, range);
+                const index = candidates.findIndex(row => row.dividend.numerator === expected.a && row.dividend.denominator === expected.b
+                    && row.divisor.numerator === expected.c && row.divisor.denominator === expected.d);
+                expect(index).toBeGreaterThanOrEqual(0);
+                draw = (candidates.slice(0, index).reduce((sum, row) => sum + row.weight, 0) + candidates[index]!.weight / 2)
+                    / candidates.reduce((sum, row) => sum + row.weight, 0);
+            }
+            random.mockReset().mockReturnValueOnce(draw).mockReturnValueOnce(0);
+            const data = generator.generate({range, operandProfile: expected.profile, groupCountProfile: expected.group,
                 withEquation: false, withMultiplication: false}).data;
             expect(data.dividend).toEqual({numerator: expected.a, denominator: expected.b});
             expect(data.divisor).toEqual({numerator: expected.c, denominator: expected.d});

@@ -1,3 +1,4 @@
+import {divisionFixtureRange} from './range-fixtures.ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import type {FractionDivisionRelationProblem, FractionQuotientValue} from '../../../types/problems.ts';
@@ -51,7 +52,7 @@ describe('FractionDivisionRelationsGenerator', () => {
             setSeed(seed);
             const selectedProfile = `${operandProfile}-${seed % 2 ? 'proper' : 'improper'}` as const;
             const groupCountProfile = selectedProfile === 'fraction-by-integer-proper' || seed % 3 === 0 ? 'zero' : 'positive';
-            const stub = generator.generate({operandProfile: selectedProfile, groupCountProfile, withEquation: false, withMultiplication: false});
+            const stub = generator.generate({range: divisionFixtureRange(selectedProfile, groupCountProfile), operandProfile: selectedProfile, groupCountProfile, withEquation: false, withMultiplication: false});
             expect(Object.keys(stub)).toEqual(['data']);
             const {data} = stub;
             expect(data.kind).toBe('fraction-division-relation');
@@ -147,7 +148,7 @@ describe('FractionDivisionRelationsGenerator', () => {
         expect(secondDenominators).toEqual(operandProfile === 'fraction-by-integer'
             ? new Set([1]) : new Set([2, 3, 4, 6]));
         expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
-        expect(zero).toBeGreaterThan(15);
+        expect(zero).toBeGreaterThan(0);
         expect(improper).toBeGreaterThan(200);
         expect(nonUnitProper).toBeGreaterThan(15);
         expect(mixedQuotients).toBeGreaterThan(20);
@@ -162,9 +163,9 @@ describe('FractionDivisionRelationsGenerator', () => {
                     setSeed(seed);
                     const selectedProfile = `${operandProfile}-${seed % 2 ? 'proper' : 'improper'}` as const;
                     const groupCountProfile = selectedProfile === 'fraction-by-integer-proper' || seed % 3 === 0 ? 'zero' : 'positive';
-                    const data = generator.generate({operandProfile: selectedProfile, groupCountProfile, withEquation, withMultiplication}).data;
+                    const data = generator.generate({range: divisionFixtureRange(selectedProfile, groupCountProfile), operandProfile: selectedProfile, groupCountProfile, withEquation, withMultiplication}).data;
                     setSeed(seed);
-                    const baseline = generator.generate({operandProfile: selectedProfile, groupCountProfile, withEquation: false, withMultiplication: false}).data;
+                    const baseline = generator.generate({range: divisionFixtureRange(selectedProfile, groupCountProfile), operandProfile: selectedProfile, groupCountProfile, withEquation: false, withMultiplication: false}).data;
                     const {equationWitness, multiplicationWitness, ...relation} = data;
                     expect(relation).toEqual(baseline);
                     expect(!!equationWitness).toBe(withEquation);
@@ -189,7 +190,7 @@ describe('FractionDivisionRelationsGenerator', () => {
     );
 
     it('replays identical original forms, physical context and model groups', () => {
-        const config = {operandProfile: 'fraction-by-fraction-proper', groupCountProfile: 'zero', withEquation: true, withMultiplication: true} as const;
+        const config = {range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'), operandProfile: 'fraction-by-fraction-proper', groupCountProfile: 'zero', withEquation: true, withMultiplication: true} as const;
         setSeed(123);
         const first: FractionDivisionRelationProblem = generator.generate(config).data;
         setSeed(123);

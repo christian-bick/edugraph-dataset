@@ -1,3 +1,4 @@
+import {divisionFixtureRange} from '../../../generators/fraction/fraction-division-relations/range-fixtures.ts';
 import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotient-model/range-fixtures.ts';
 import {fileURLToPath} from 'node:url';
 import {createElement} from 'react';
@@ -104,7 +105,7 @@ describe('supplied general division model migrations', () => {
             ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
             for (const withMultiplication of [false, true]) for (let seed = 0; seed < 4; seed++) {
                 setSeed(`division-model-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = new FractionDivisionRelationsGenerator().generate({operandProfile, groupCountProfile, withEquation, withMultiplication});
+                const {data} = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
                 expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
                 contexts.add(data.context.kind);
                 dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
@@ -130,7 +131,7 @@ describe('supplied general division model migrations', () => {
     });
 
     it.each(cases)('$newId and $oldId reject the other valid named payload family in both modes', entry => {
-        const general = new FractionDivisionRelationsGenerator().generate({operandProfile: 'fraction-by-fraction-proper',
+        const general = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'), operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;
         const quotient = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-basic', 'zero'), relationProfile: 'unit-divisor-basic', numericProfile: 'zero'}).data;
         for (const solution of [false, true]) {
@@ -141,7 +142,7 @@ describe('supplied general division model migrations', () => {
         }
     });
 
-    it.each(cases)('$newId retains three real targets, eleven complete profile selections and replay ownership', entry => {
+    it.each(cases)('$newId retains three real targets, thirty-four range selections and replay ownership', entry => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === entry.newId)!;
         const quotientView = views.find(candidate => candidate.viewId === entry.oldId)!;
@@ -156,7 +157,8 @@ describe('supplied general division model migrations', () => {
             if (!result.matched) throw new Error(result.reason);
             const selections = enumerateDependencyAuditSelections(result.plan);
             expect(selections.status).toBe('complete');
-            expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 3 : 4);
+            expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 11
+                : target.labels.includes(Scope.FractionDividend) ? 10 : 13);
             for (const selection of selections.selections) {
                 checked++;
                 const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
@@ -180,7 +182,7 @@ describe('supplied general division model migrations', () => {
                 }
             }
         }
-        expect(checked).toBe(11);
+        expect(checked).toBe(34);
     }, 30_000);
 
     it('retains sixteen legacy routes with fourteen zero and seventy nonzero range choices', () => {

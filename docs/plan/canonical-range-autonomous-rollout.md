@@ -1043,3 +1043,21 @@ TypeScript and the generator/view spec gate pass. These tighten existing annotat
 truthful source variants; no baseline missing-range closure is claimed. Evidence:
 `temp/range-autonomous/batch5/counting/{verification.json,verification.log,focused-final.log,
 native.log,types.log,spec-gate.log,global.log}`.
+
+## Fifth batch: shared general-division configurations
+
+Eight existing operand/group configurations have common canonical bounds across the required
+group model and the execution/inverse reciprocal. Their3,485 weighted rows retain exact old
+support and conditional mass. Quantities include operands/quotient, mandatory complete-group
+count, numbered axis positions and the explicitly assessed last-group remainder/divisor counts.
+Stored coverage ticks, unused totals and pure notation denominators are excluded. The reciprocal
+is checked independently and cannot change an adopted band's maximum.
+
+The three reciprocal-sensitive configurations retain their old sampler and empty range bindings:
+proper-fraction by proper-fraction in both group profiles, and integer by proper-fraction with
+zero complete groups. Their18 selections remain unresolved. All18 routes remain,66→204
+selections, closing48 baseline omissions. Thirty-one settled bands and34 total bindings pass
+direct/planned/replay checks and all six Question/Solution projections. Fifty-nine tests/11 files
+pass, including the independent4,396-row magnitude oracle. Types and whitespace checks pass.
+Four shared fixtures are adopted; source targets, payloads, renderers and policies stay unchanged.
+Evidence: `temp/range-autonomous/batch5/fraction-decimal/general-division-*` and its census JSON.
