@@ -2,6 +2,8 @@ import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
+import {comparisonDomain} from './domain.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'multiplicative-comparison',
@@ -23,12 +25,14 @@ const operationProfiles = [
 ] as const;
 
 export const MultiplicativeComparisonGeneratorSchema = {
-    operation: [
-        [Area.Multiplication, Area.Division, Scope.SingleDigitSmallestOperand,
-            Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand],
-        selectExactLabelSetMap(operationProfiles),
-        operationProfiles.map(([labels]) => labels)
-    ]
+    profile: (() => {
+        const profiles = operationProfiles.flatMap(([operationLabels, operation]) => canonicalRangeProfiles
+            .filter(({range}) => range.max <= 100)
+            .map(({labels, range}) => [[...operationLabels, ...labels], {operation, range}] as const)
+            .filter(([, profile]) => comparisonDomain(profile).length > 0));
+        return [[...new Set(profiles.flatMap(([labels]) => labels))], selectExactLabelSetMap(profiles),
+            profiles.map(([labels]) => labels)] as const;
+    })()
 } as const;
 
 export type MultiplicativeComparisonGeneratorConfig = ConfigFromSchema<

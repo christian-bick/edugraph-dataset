@@ -6,11 +6,7 @@ import {
     MultiplicativeComparisonGeneratorConfig,
     MultiplicativeComparisonGeneratorSchema
 } from './spec.ts';
-
-const MAX_COMPARED_QUANTITY = 100;
-
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
+import {comparisonDomain} from './domain.ts';
 
 export class MultiplicativeComparisonGenerator implements ProblemGenerator<
     MultiplicativeComparisonProblem,
@@ -22,46 +18,23 @@ export class MultiplicativeComparisonGenerator implements ProblemGenerator<
     generate(
         config: MultiplicativeComparisonGeneratorConfig
     ): ProblemStub<MultiplicativeComparisonProblem> {
-        validateConfigFields('multiplicative-comparison', config, ['operation']);
-
-        if (!['multiplication', 'division-single', 'division-two'].includes(config.operation!)) {
-            throw new GeneratorValidationError('multiplicative-comparison', 'Unsupported operation profile.');
+        validateConfigFields('multiplicative-comparison', config, ['profile']);
+        const candidates = comparisonDomain(config.profile!);
+        if (!candidates.length) {
+            throw new GeneratorValidationError('multiplicative-comparison', 'The selected profile has no mathematical comparisons.');
         }
-        const operation = config.operation === 'multiplication' ? 'multiplication' : 'division';
-        // In either division projection the compared quantity is the dividend and largest operand.
-        // Partition that quantity without selecting which of the two factors the view hides.
-        const referenceBounds = (scale: number) => ({
-            minimum: config.operation === 'division-two' ? Math.max(2, Math.ceil(10 / scale)) : 2,
-            maximum: Math.min(12, Math.floor(
-                (config.operation === 'division-single' ? 9 : MAX_COMPARED_QUANTITY) / scale))
+        const rows = [...new Set(candidates.map(data => data.scaleFactor))].map(scale => {
+            const values = candidates.filter(data => data.scaleFactor === scale);
+            const originalCount = Math.min(12, Math.floor(100 / scale)) - 1;
+            return {values, weight: values.length / originalCount};
         });
-        const scales = Array.from({length: 8}, (_, index) => index + 2).filter(scale => {
-            const bounds = referenceBounds(scale);
-            return bounds.minimum <= bounds.maximum;
-        });
-        // Retain the old uniform-scale/uniform-reference law conditional on the width.
-        const weights = scales.map(scale => {
-            const bounds = referenceBounds(scale);
-            const originalCount = Math.min(12, Math.floor(MAX_COMPARED_QUANTITY / scale)) - 1;
-            return (bounds.maximum - bounds.minimum + 1) / originalCount;
-        });
-        let position = random() * weights.reduce((sum, weight) => sum + weight, 0);
-        const scaleFactor = scales.find((_, index) => {
-            if (position < weights[index]!) return true;
-            position -= weights[index]!;
+        // Preserve the old uniform-scale/uniform-reference law conditional on the selected profile.
+        let position = random() * rows.reduce((sum, row) => sum + row.weight, 0);
+        const row = rows.find(candidate => {
+            if (position < candidate.weight) return true;
+            position -= candidate.weight;
             return false;
-        }) ?? scales.at(-1)!;
-        const bounds = referenceBounds(scaleFactor);
-        const referenceQuantity = randomInteger(bounds.minimum, bounds.maximum);
-        const comparedQuantity = referenceQuantity * scaleFactor;
-
-        return {
-            data: {
-                referenceQuantity,
-                scaleFactor,
-                comparedQuantity,
-                operation
-            }
-        };
+        }) ?? rows.at(-1)!;
+        return {data: {...row.values[Math.floor(random() * row.values.length)]!}};
     }
 }

@@ -251,6 +251,22 @@ actual Kindergarten requests without target-ID filters or a global matching chan
 `temp/range-autonomous/batch2/measurement-time/comparison-focused.log` and
 `route-verification.json`.
 
+## Second batch: multiplicative comparison
+
+Eleven operation/range profiles retain all87 original reference/scale pairs for each supported
+operation. Both consumers require reference quantity, scale factor and compared quantity.
+The existing three routes now admit16 selections, closing four baseline source range omissions.
+Sampling remains uniform-scale/uniform-reference conditional on the selected feasible profile,
+without a balancing requirement. All11 tests pass, including696 question/solution projections
+across both views, and64 planned draws/replays pass strict annotations and target coverage.
+
+The new range capability initially admitted eight generic Grade3 multiplication/division stories.
+The comparative word task requires the distinct reference-to-compared proportional-scaling
+competency. Its existing positive participation mechanism now requires `Area.ProportionalScaling`,
+retaining all three earlier routes and rejecting those unrelated Grade3 requests. No target or
+global matching change is used. Evidence:
+`temp/range-autonomous/batch2/arithmetic/comparison-review.md` and `verify-comparison.json`.
+
 ## Second batch: finite mass and volume contexts
 
 Mass reading, mass estimation and liquid-volume estimation now use nine feasible mathematical
