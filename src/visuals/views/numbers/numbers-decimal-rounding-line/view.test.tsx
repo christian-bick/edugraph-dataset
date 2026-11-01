@@ -1,8 +1,12 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {DecimalRoundingGenerator} from '../../../../generators/place-value/decimal-rounding/generator.ts';
+import {roundingRanges, supportsRoundingRange} from '../../../../generators/place-value/decimal-rounding/range-profile.ts';
+import {hasCanonicalRangeWitness} from '../../../../lib/canonical-numeric-range.ts';
 import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import type {DecimalRoundingProblem} from '../../../../types/problems.ts';
 import {roundingCase} from './fixtures.ts';
+import {formatTenThousandths, roundingExplanation} from './helpers.ts';
 
 let NumbersDecimalRoundingLineCore: typeof import('./view.tsx').NumbersDecimalRoundingLineCore;
 beforeAll(async () => {
@@ -20,6 +24,19 @@ function render(data: DecimalRoundingProblem, isSolutionView: boolean): string {
 }
 
 describe('numbers-decimal-rounding-line view', () => {
+    it('keeps each resolved range tied to required candidates and distances in both modes', () => {
+        const generator = new DecimalRoundingGenerator();
+        for (const requireZeroEndpoint of [true, false]) for (const [, range] of roundingRanges) {
+            if (!supportsRoundingRange(requireZeroEndpoint, range)) continue;
+            const data = generator.generate({requireZeroEndpoint, range}).data;
+            expect(hasCanonicalRangeWitness([data.inputInTenThousandths, data.lowerCandidateInTenThousandths,
+                data.upperCandidateInTenThousandths, data.midpointInTenThousandths, data.roundedInTenThousandths,
+                data.distanceToLowerInTenThousandths, data.distanceToUpperInTenThousandths].map(value => value / 10000), range)).toBe(true);
+            expect(render(data, false)).toContain(`Round ${formatTenThousandths(data.inputInTenThousandths)}`);
+            expect(render(data, true)).toContain(roundingExplanation(data));
+        }
+    });
+
     it('asks for a hundredths result with candidates and midpoint but no selected endpoint', () => {
         const data = roundingCase({name: 'hundredths', quantumInTenThousandths: 100}, 99900, 99950);
         const question = render(data, false);

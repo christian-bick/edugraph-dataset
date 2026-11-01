@@ -1,10 +1,14 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import * as rng from '../../../lib/random.ts';
 import type {DecimalRoundingProblem} from '../../../types/problems.ts';
 import {decimalRoundingCases, DecimalRoundingGenerator} from './generator.ts';
+import {decimalRoundingRangeBlocks} from './domain.ts';
 
 const generator = new DecimalRoundingGenerator();
+const ranges = [...[5, 10, 20, 100, 120, 1000].map(upper => createCanonicalNumericRange(upper)),
+    ...[5, 10, 20].map(lower => createCanonicalNumericRange(1000, lower))];
 afterEach(() => vi.restoreAllMocks());
 const places = new Map([
     ['hundreds', 1_000_000],
@@ -71,7 +75,7 @@ describe('DecimalRoundingGenerator', () => {
 
         for (let seed = 0; seed < 600; seed++) {
             setSeed(seed);
-            const data = generator.generate({requireZeroEndpoint: false}).data;
+            const data = generator.generate({requireZeroEndpoint: false, range: ranges[seed % ranges.length]}).data;
             expectExactRounding(data);
             observedPlaces.add(data.roundingPlace.name);
             observedDirections.add(data.direction);
@@ -105,12 +109,13 @@ describe('DecimalRoundingGenerator', () => {
     });
 
     it.each([...places.keys()])('keeps a %s carry visibly away from its endpoint', place => {
-        const cases = decimalRoundingCases(false);
+        const range = ranges.find(range => decimalRoundingRangeBlocks(false, range).some(entry => entry.roundingPlace.name === place && entry.scenario === 3))!;
+        const cases = decimalRoundingRangeBlocks(false, range);
         const index = cases.findIndex(entry => entry.roundingPlace.name === place && entry.scenario === 3);
         const preceding = cases.slice(0, index).reduce((sum, entry) => sum + entry.weight, 0);
         const total = cases.reduce((sum, entry) => sum + entry.weight, 0);
         vi.spyOn(rng, 'random').mockReturnValue(0.1234567).mockReturnValueOnce((preceding + cases[index].weight / 2) / total);
-        const data = generator.generate({requireZeroEndpoint: false}).data;
+        const data = generator.generate({requireZeroEndpoint: false, range}).data;
         const quantum = data.roundingPlace.quantumInTenThousandths;
         expect(data.roundingPlace.name).toBe(place);
         expect(data.direction).toBe('up');
@@ -123,27 +128,30 @@ describe('DecimalRoundingGenerator', () => {
 
     it('replays the same rounding interval and result under the same seed', () => {
         setSeed('decimal-place-rounding');
-        const first = generator.generate({requireZeroEndpoint: false});
+        const first = generator.generate({requireZeroEndpoint: false, range: createCanonicalNumericRange(1000)});
         setSeed('decimal-place-rounding');
-        expect(generator.generate({requireZeroEndpoint: false})).toEqual(first);
+        expect(generator.generate({requireZeroEndpoint: false, range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 
     it.each([true, false])('retains every supported place/scenario in endpoint profile %s', requireZeroEndpoint => {
         const cases = decimalRoundingCases(requireZeroEndpoint);
         expect(cases).toHaveLength(requireZeroEndpoint ? 18 : 24);
-        const total = cases.reduce((sum, entry) => sum + entry.weight, 0);
         const draw = vi.spyOn(rng, 'random');
-        let cumulative = 0;
         for (const entry of cases) {
             const intervals = 10_000_000 / entry.roundingPlace.quantumInTenThousandths;
             const zeroShare = entry.scenario === 3 ? 0 : 1 / intervals;
             expect(entry.weight).toBe(requireZeroEndpoint ? zeroShare : 1 - zeroShare);
-            draw.mockReset().mockReturnValue(0.1234567).mockReturnValueOnce((cumulative + entry.weight / 2) / total);
-            const data = generator.generate({requireZeroEndpoint}).data;
+            const range = ranges.find(range => decimalRoundingRangeBlocks(requireZeroEndpoint, range)
+                .some(block => block.roundingPlace.name === entry.roundingPlace.name && block.scenario === entry.scenario))!;
+            const blocks = decimalRoundingRangeBlocks(requireZeroEndpoint, range);
+            const index = blocks.findIndex(block => block.roundingPlace.name === entry.roundingPlace.name && block.scenario === entry.scenario);
+            const cumulative = blocks.slice(0, index).reduce((sum, block) => sum + block.weight, 0);
+            const total = blocks.reduce((sum, block) => sum + block.weight, 0);
+            draw.mockReset().mockReturnValue(0.1234567).mockReturnValueOnce((cumulative + blocks[index]!.weight / 2) / total);
+            const data = generator.generate({requireZeroEndpoint, range}).data;
             expectExactRounding(data);
             expect(data.roundingPlace).toEqual(entry.roundingPlace);
             expect(data.lowerCandidateInTenThousandths === 0).toBe(requireZeroEndpoint);
-            cumulative += entry.weight;
         }
     });
 });

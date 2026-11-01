@@ -699,3 +699,10 @@ Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `expanded-tests.log`
 Seven correlated profiles retain all177,309 original charts:66,717 zero-present and110,592 zero-free. Required quantities include the full numeral, highlighted contributions, factor10 and reciprocal0.1; no positive floor applies. First-zero weighted blocks retain the original conditional law and distinguish the one-free-digit whole charts from four-free-digit fractional charts. The old route remains,2→7 selections, closing two range omissions. Twenty-two tests/seven files prove finite support/mass, sampler block endpoints, direct/planned correlation and both projections. No endpoint, source, payload or renderer changes.
 
 Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `scaling-tests.log`, `scaling-matching.log` and neighboring proof records.
+
+
+## Fourth batch: decimal rounding
+
+Twelve profiles include input, rounded value, interval endpoints/midpoint and required distances. Zero-endpoint cases admit upper5/10/100; nonzero cases admit all six uppers through1000, plus lower5/10/20 only with upper1000. Products of interval progressions and offset spans prove complete original support and conditional probability, retaining all18/24 zero/nonzero place/scenarios. Rank selection skips exactly the old rejected whole-number inputs. The old route remains,2→12 selections, closing two omissions. Thirty-two tests/seven files cover analytic partitions, both resolution paths and question/solution projections. No endpoint retirement, source or renderer changes.
+
+Evidence: `temp/range-autonomous/batch4/fraction-decimal/`: `rounding-tests.log`, `rounding-matching.log` and neighboring analytic proof records.

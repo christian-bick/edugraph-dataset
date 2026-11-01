@@ -14,7 +14,7 @@ describe('DecimalRoundingGenerator spec', () => {
             Scope.NumbersWithoutNegatives
         ]);
         expect(findSchemaFallbackContractIssues(DecimalRoundingGeneratorSchema)).toEqual([]);
-        expect(normalizeSchemaChoices(DecimalRoundingGeneratorSchema, [], 'generator')[0].alternatives
+        expect(normalizeSchemaChoices(DecimalRoundingGeneratorSchema, [], 'generator').find(field => field.field === 'requireZeroEndpoint')!.alternatives
             .map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
     });
 
@@ -25,8 +25,8 @@ describe('DecimalRoundingGenerator spec', () => {
             Scope.Base10,
             Scope.NumbersWithoutNegatives
         ])!;
-        expect(stub.labels).toHaveLength(1);
-        expect([Scope.NumbersWithZero, Scope.NumbersWithoutZero]).toContain(stub.labels[0]);
+        expect(stub.labels.length).toBeGreaterThanOrEqual(2);
+        expect(stub.labels.some(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never))).toBe(true);
         expect(stub.data.kind).toBe('decimal-place-rounding');
         expect(stub.data.roundedInTenThousandths)
             .toBe(stub.data.direction === 'down'
@@ -36,7 +36,8 @@ describe('DecimalRoundingGenerator spec', () => {
     it.each([Scope.NumbersWithZero, Scope.NumbersWithoutZero])('resolves the explicit endpoint profile %s', label => {
         const resolved = extractConfig(DecimalRoundingGeneratorSchema, [label]);
         expect(resolved.config.requireZeroEndpoint).toBe(label === Scope.NumbersWithZero);
-        expect(resolved.resolvedLabels).toEqual([label]);
+        expect(resolved.resolvedLabels).toContain(label);
+        expect(resolved.resolvedLabels.length).toBeGreaterThanOrEqual(2);
         const data = new DecimalRoundingGenerator().generate(resolved.config).data;
         expect(data.lowerCandidateInTenThousandths === 0).toBe(label === Scope.NumbersWithZero);
     });
