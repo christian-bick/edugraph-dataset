@@ -3,11 +3,9 @@ import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
-import {requireTargetLabels} from '../../../lib/target-policies.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'decimal-multiplication-model',
-    compatibility: [requireTargetLabels('decimal-area-numeric-domain', [Scope.DecimalNumbers])],
     generalLabels: [
         Area.Multiplication,
         Area.PlaceValue,

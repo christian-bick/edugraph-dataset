@@ -3,11 +3,12 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the target-expansion helper, first eight-family adoption, R4/R5 and the first
-[autonomous batch](canonical-range-autonomous-rollout.md) are implemented. That batch covers
-15 further families and retains every earlier target claim and route, with one additive
-decomposition variant. Current source validation covers **1,251 normalized targets / 1,676 routes
-and 3,025 complete selections**, with **439 range-presence omissions** remaining. The
+Status: the target-expansion helper, first eight-family adoption, R4/R5 and two
+[autonomous batches](canonical-range-autonomous-rollout.md) are accepted. Those batches cover
+29 further families, retaining every earlier target claim and route while adding reviewed
+source variants. The latest accepted source covers **1,264 normalized targets /1,692 routes
+and3,105 complete selections**, with **410 range-presence omissions** remaining. A third batch
+is in combined validation, including a subsequently authorized source-domain correction. The
 [remaining-family review](canonical-range-remaining-families.md) separates further standard
 profile work from concrete projection/quantity issues. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
@@ -33,6 +34,13 @@ independent Question/Solution evaluation remain unchanged.
   every smaller threshold to every existing target by default.
 - Preserve each source competency and its standard association. Replace the selected upper
   bound in each variant rather than appending both the broad and narrow bounds.
+- Correct an underspecified target when its source clearly establishes the missing numeric
+  domain, rather than adding a module guard to compensate for that omission. The user explicitly
+  approved this strategy for Grade1 integer fluency and equivalent source aliases. Such corrections
+  legitimately change claims/IDs; record their exact lineage, matching consequences and preserved
+  competency coverage. Keep module participation preconditions for genuine stronger task contracts.
+  The [integer-domain source correction](canonical-range-integer-domain-correction.md) records
+  the first completed alias-closure migration and exact target/route mappings.
 - Sampling changes and the increased number/weight of meaningful permutations are accepted.
   Choose feasible configurations without forcing a balanced mixture. Record counts and coverage
   effects; do not silently discard an unsupported reviewed competency.

@@ -83,9 +83,6 @@ describe('canonical decimal unit-exchange ranges', () => {
             expect(extractConfig(schema, [Area.Addition, Scope.NumbersSmaller10]).config.zeroPresence).toBe(true);
             expect(extractConfig(schema, [Area.Subtraction, Scope.NumbersWithoutZero]).config.range!.max).toBe(20);
         }
-        expect(planModelCompatibility({id: 'integer-fluency', labels: [Area.Addition, Scope.NumbersSmaller20, Scope.NumbersWithoutZero]},
-            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
-            {viewId: 'range-test', generalLabels: [], schema: {}, spec: {viewId: 'range-test', generalLabels: []}}).supported).toBe(false);
     });
 
     it('rejects malformed or infeasible range claims before sampling', () => {

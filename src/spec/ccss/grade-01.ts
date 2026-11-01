@@ -91,6 +91,7 @@ const relateCountingStrategyBuilder = new DatasetPermutationBuilder()
 const fluencyBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

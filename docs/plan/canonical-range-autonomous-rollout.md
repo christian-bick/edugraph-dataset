@@ -12,9 +12,13 @@ Source range-presence findings are 517; stored-row findings are 1,062. Neither c
 loose existing bounds. Generation and VQA remain a later acceptance stage.
 
 Implementation continues through invariants, existing schema bundles and finite correlated
-profiles. Existing target claims/routes remain supported. Reviewed smaller source bands can be
-added without changing earlier IDs. Cases needing an unresolved quantity interpretation, a new
-source envelope, a split or a change to an existing target claim are recorded separately while
+profiles. Unchanged target claims/routes remain supported. Reviewed smaller source bands can be
+added without changing earlier IDs. The user's subsequent instruction also authorizes correcting
+evidently underspecified source targets, with exact old/new ID and route-lineage verification.
+Prefer that source correction over a module participation guard compensating for a missing true
+numeric-domain claim. This does not replace legitimate task/representation preconditions.
+Cases needing an unresolved quantity interpretation, a new
+source envelope, a split or an unsettled change to an existing target claim are recorded separately while
 other supported work continues. No graph-policy, matching, Area-allowlist or inference change is
 part of this rollout.
 
@@ -409,11 +413,14 @@ including the original inclusive100/12 operand caps. Each range follows its requ
 the GCD task excludes the unused stored LCM (99/100 stores9900), while LCM includes its required
 common-product proof. Explicit factor1 or zero prevents a positive lower. The finite domain
 preserves the exact five-scenario probability mass, including overlaps, then conditions it on
-the selected band. Both existing target claims/routes remain; two source range omissions close.
+the selected band. Both existing target claims/routes remain. Their NumberTheory Areas put these
+contexts outside the unchanged all-Areas allowlist, so they had no baseline range finding and
+no missing-range closure is claimed.
 
 All23 focused tests pass, including full domain/probability verification and60 representative
 boundary question/solution projections. Forty planned draws/replays pass canonical witnesses,
-strict annotations and target coverage. No source, view or global-policy change is needed.
+annotation contracts and target coverage. Dependency completeness remains outside policy scope
+for these contexts. No source, view or global-policy change is needed.
 Evidence: `temp/range-autonomous/batch3/arithmetic/common-relation-review.md` and
 `verify-common-relation.json`. Combined repository/coverage acceptance follows the completed batch.
 
@@ -423,8 +430,9 @@ Six upper profiles preserve all3,913 original ordered positive addend pairs with
 common factor, retaining the inclusive100 addend cap and required sum through200. Both projection
 modes require the common-factor, coprime-residual, reconstruction and sum proof. Its explicit
 factor1 prevents a positive lower. The original target/route remains, admitting six selections;
-one baseline range omission closes. All35 tests pass, with36 representative boundary projections
-and24 planned draws/replays checking canonical bounds, strict annotations and target coverage.
+its GCD Area puts the complete conjunction outside the unchanged Area allowlist, so no baseline
+range finding closes. All35 tests pass, with36 representative boundary projections
+and24 planned draws/replays checking canonical bounds, annotation contracts and target coverage.
 Evidence: `temp/range-autonomous/batch3/arithmetic/full-factor-review.md` and
 `verify-full-factor.json`. No target, view or global-policy change is used.
 
@@ -482,8 +490,9 @@ exchanges, alongside the decimal operands/results. Required10-for-1 exchanges ma
 infeasible, while zero-free cases necessarily use upper20. No positive lower applies. Every
 original scenario path and its conditional per-pair probability remains; the generator's payload
 and both projections are unchanged. The two old routes now admit six selections, closing four
-source range omissions. The existing positive target-domain policy requires `DecimalNumbers`,
-preventing newly admitted non-decimal Grade1 fluency tasks without changing their targets.
+source range omissions. The subsequently authorized source correction adds `IntegerNumbers`
+to the elementary fluency aliases, so ordinary positive matching excludes decimal methods.
+No decimal-domain participation guard remains.
 
 All23 tests/five files pass, including exhaustive scenario membership, canonical maxima and
 conditional probability checks. Evidence: `temp/range-autonomous/batch3/fraction-decimal/`
@@ -497,8 +506,8 @@ tasks explicitly require cell/row/column counts and, for division, quotient-unit
 checks. Those assessed quantities determine the bounds; scaled storage fields alone do not.
 Fractional unit values or the required final zero remainder prevent positive lower bounds.
 
-Both old routes remain, changing1→7 and1→3 selections and closing two source omissions. Stable
-positive decimal-domain target guards prevent unrelated non-decimal matches. No payload, renderer
+Both old routes remain, changing1→7 and1→3 selections and closing two source omissions. Corrected
+integer source domains prevent unrelated non-decimal matches through normal matching. No payload, renderer
 or endpoint support changes. All45 tests/seven files and TypeScript pass, including complete
 finite support and both-mode consumer checks. Evidence:
 `temp/range-autonomous/batch3/fraction-decimal/` (decimal model verification reports) and
@@ -551,3 +560,20 @@ owned routes/125 admitted selections through dependency evaluation and both reso
 with no missing facets or conflicts. No target, view, payload or policy changes occur.
 Evidence: `temp/range-autonomous/batch3/measurement-time/` (unit-dimension finite support and
 combined source verification reports).
+
+## Third batch: source-owned integer domains
+
+The user explicitly approved correcting underspecified target domains instead of compensating
+with module guards. Exact normalization tracing identifies six elementary fluency/written-arithmetic
+builders across Kindergarten and Grades1–3:30 raw permutations sharing12 normalized label sets.
+All add only `IntegerNumbers`; the three temporary decimal-domain target guards are removed.
+The [complete source migration](canonical-range-integer-domain-correction.md) records every old/new
+raw and normalized ID, the source-alias closure and64 affected route identities.
+
+Before/after counts remain1,309 authored /1,270 normalized targets,1,698 routes and3,258 selections.
+Every old route maps to its corrected identity with identical selected annotations; there are no
+lost/added routes, selections, source associations or unmatched targets. Seventeen focused
+tests/four files, types and standards validation pass. All mathematical sampler hashes remain
+unchanged. Source ID-derived seeds/replay/cache identities will change at regeneration; they
+are recorded as an approved source correction, separately from additive band expansion or
+range-gap closure. Future clearly evidenced source-domain omissions use the same strategy.

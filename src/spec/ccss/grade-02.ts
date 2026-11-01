@@ -50,6 +50,7 @@ const twoStepWordProblemsBuilder = new DatasetPermutationBuilder()
 const fluencyWithin20Builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -232,6 +233,7 @@ const compareThreeDigitBuilder = new DatasetPermutationBuilder()
 const fluencyWithin100Builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
@@ -296,6 +298,7 @@ const fourAddendsBuilder = new DatasetPermutationBuilder()
 const writtenAddSubtractBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersSmaller1000,

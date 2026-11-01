@@ -3,13 +3,11 @@ import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 import {generatorLabelRule} from '../../compatibility-rules.ts';
-import {requireTargetLabels} from '../../../lib/target-policies.ts';
 import {decimalColumnRangeLabels, decimalColumnZeroLabels, resolveDecimalColumnRange, resolveDecimalColumnZero} from './range-profile.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'decimal-addition-subtraction',
-    compatibility: [requireTargetLabels('decimal-column-numeric-domain', [Scope.DecimalNumbers]),
-        generatorLabelRule('decimal-column-unit-range', [...decimalColumnRangeLabels, ...decimalColumnZeroLabels], selected =>
+    compatibility: [generatorLabelRule('decimal-column-unit-range', [...decimalColumnRangeLabels, ...decimalColumnZeroLabels], selected =>
         !selected(Scope.NumbersSmaller10) || !selected(Scope.NumbersWithoutZero))],
     generalLabels: [
         Area.PlaceValue,
