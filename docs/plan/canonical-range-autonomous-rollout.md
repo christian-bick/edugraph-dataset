@@ -796,6 +796,9 @@ The first coverage run exposed a historical currency fixture that discarded spec
 rules and assumed one selection per target. Commit `7719d629` retains those rules, audits all22
 current selections and preserves the original configuration, data and PRNG equality assertions.
 Its87 focused tests pass; the subsequent complete coverage run passes.
+The immediate follow-up types the fixture's retained compatibility rules explicitly: the catalog's
+loose spec type otherwise leaves its filter callback implicitly typed. This is test typing only;
+the runtime fixture, production inputs and passing coverage behavior are unchanged.
 
 Evidence: `temp/range-autonomous/batch4/{global-final,check-final,types-final,docs-final,
 coverage-final}.log`, `global-verification.json`, `audit/` and the owned family records above.

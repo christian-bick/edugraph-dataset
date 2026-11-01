@@ -11,6 +11,7 @@ import {getRandomState} from '../../lib/random.ts';
 import {selectExactLabelSetMap} from '../../lib/resolvers.ts';
 import {extractSchemaLabels} from '../../lib/utils.ts';
 import {spec as grade2Targets} from '../../spec/ccss/grade-02.ts';
+import type {GeneratorCompatibilityRule} from '../../types/compatibility.ts';
 import type {CurrencyArithmeticProblem} from '../../types/problems.ts';
 import {currencyStory, formatCurrency} from '../../visuals/views/currency/currency-word-problem/helpers.ts';
 import {CurrencyArithmeticGenerator} from './currency-arithmetic/generator.ts';
@@ -110,8 +111,8 @@ describe('currency declarations on existing Grade 2 word-problem targets', () =>
             selectExactLabelSetMap([[[], 'none'],
                 ...coinDenominations.map(denomination => [[denomination], denomination] as const)])] as const};
         // Remove only the additive integer claims; retain the current mathematical range contract.
-        const precedingRules = (generator.spec.compatibility ?? generator.compatibility ?? [])
-            .filter(rule => rule.id !== 'currency-integer-denominations');
+        const retainedRules: readonly GeneratorCompatibilityRule[] = generator.spec.compatibility ?? generator.compatibility ?? [];
+        const precedingRules = retainedRules.filter(rule => rule.id !== 'currency-integer-denominations');
         const preceding = {...generator,
             schema: precedingSchema,
             labels: [...generator.generalLabels, ...extractSchemaLabels(precedingSchema)],
