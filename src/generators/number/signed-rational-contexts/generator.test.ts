@@ -3,6 +3,7 @@ import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
 import type {SignedRationalContextMetadata, SignedRationalContextProblem} from '../../../types/problems.ts';
 import {buildSignedRationalContextProblem, SignedRationalContextsGenerator} from './generator.ts';
+import {signedContextRangeProfiles} from './numeric-domain.ts';
 
 const generator = new SignedRationalContextsGenerator();
 const contexts = [
@@ -93,7 +94,8 @@ describe('signed contextual mathematical sampling domains', () => {
         const features = new Set<string>();
         for (let seed = 0; seed < 1000; seed++) {
             setSeed(seed);
-            const stub = generator.generate({relation});
+            const stub = generator.generate({relation,
+                range: signedContextRangeProfiles[relation === 'reference-zero' ? 0 : seed % 2]!.range});
             expect(Object.keys(stub)).toEqual(['data']);
             const data = stub.data;
             contextKinds.add(data.context.kind);
@@ -131,9 +133,10 @@ describe('signed contextual mathematical sampling domains', () => {
     it('replays exact canonical content without learner-task or ontology fields', () => {
         for (const relation of ['reference-zero', 'directed-pair'] as const) {
             setSeed(413);
-            const first = generator.generate({relation});
+            const range = signedContextRangeProfiles[relation === 'reference-zero' ? 0 : 1]!.range;
+            const first = generator.generate({relation, range});
             setSeed(413);
-            expect(generator.generate({relation})).toEqual(first);
+            expect(generator.generate({relation, range})).toEqual(first);
             expect(Object.keys(first)).toEqual(['data']);
             expect(first.data).not.toHaveProperty('relation');
         }

@@ -4,6 +4,7 @@ import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../type
 import type {SignedRational, SignedRationalContextMetadata, SignedRationalContextProblem} from '../../../types/problems.ts';
 import {absoluteSignedRational, isCanonicalSignedRational, makeSignedRational, negateSignedRational} from '../signed-rational-helpers.ts';
 import {SignedRationalContextsGeneratorSchema, type SignedRationalContextsGeneratorConfig} from './spec.ts';
+import {directedContextCaseCount, directedContextFrameAt} from './numeric-domain.ts';
 
 const generatorId = 'signed-rational-contexts';
 type ContextKind = SignedRationalContextMetadata['kind'];
@@ -34,18 +35,6 @@ export function buildSignedRationalContextProblem(context: ContextKind, values: 
         observations: [observations[0]!, ...observations.slice(1)]};
 }
 
-function sampleDirectedPair(context: ContextKind): readonly SignedRational[] {
-    // Dollar balances use exact cent-compatible fractions; the pure contract stays rational.
-    const denominators = context === 'balance' ? [1, 2, 4, 5] : [1, 2, 3, 4, 5, 6];
-    const denominator = denominators[randomInteger(0, denominators.length - 1)]!;
-    const positive = makeSignedRational(randomInteger(1, 10 * denominator), denominator);
-    // A neighboring positive rational gives an unequal pair constructively, without retries.
-    const negativeMagnitude = random() < 0.5 ? positive : makeSignedRational(
-        positive.numerator + (positive.numerator < 10 * positive.denominator ? 1 : -1), positive.denominator);
-    const negative = negateSignedRational(negativeMagnitude);
-    return random() < 0.5 ? [positive, negative] : [negative, positive];
-}
-
 export class SignedRationalContextsGenerator implements ProblemGenerator<SignedRationalContextProblem, SignedRationalContextsGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = SignedRationalContextsGeneratorSchema;
@@ -55,8 +44,21 @@ export class SignedRationalContextsGenerator implements ProblemGenerator<SignedR
         if (config.relation !== 'reference-zero' && config.relation !== 'directed-pair') {
             throw new GeneratorValidationError(generatorId, 'Relation must be reference-zero or directed-pair.');
         }
-        const context = contexts[randomInteger(0, contexts.length - 1)]!;
-        const values = config.relation === 'reference-zero' ? [makeSignedRational(0, 1)] : sampleDirectedPair(context);
-        return {data: buildSignedRationalContextProblem(context, values)};
+        validateConfigFields(generatorId, config, ['range']);
+        const range = config.range!;
+        const count = directedContextCaseCount(range);
+        if (count === 0 || config.relation === 'reference-zero' && (range.min !== 0 || range.max !== 5)) {
+            throw new GeneratorValidationError(generatorId, 'Unsupported canonical range for this contextual relation.');
+        }
+        if (config.relation === 'reference-zero') {
+            const context = contexts[randomInteger(0, contexts.length - 1)]!;
+            return {data: buildSignedRationalContextProblem(context, [makeSignedRational(0, 1)])};
+        }
+        const frame = directedContextFrameAt(range, Math.floor(random() * count));
+        const positive = makeSignedRational(frame.numerator, frame.denominator);
+        const negativeMagnitude = frame.neighbor ? makeSignedRational(
+            positive.numerator + (positive.numerator < 10 * positive.denominator ? 1 : -1), positive.denominator) : positive;
+        const negative = negateSignedRational(negativeMagnitude);
+        return {data: buildSignedRationalContextProblem(frame.context, frame.positiveFirst ? [positive, negative] : [negative, positive])};
     }
 }

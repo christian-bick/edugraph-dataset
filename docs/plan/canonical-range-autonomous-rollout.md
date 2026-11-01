@@ -893,3 +893,21 @@ Mixed-power evaluation's eight omissions remain separate. This producer still ow
 labels, so the writing invariant creates no ownership overlap. Future evaluator adoption must
 respect that boundary rather than assigning evaluated-value bounds to writing. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{power-writing-review.md,verify-power-writing.json}`.
+
+## Fifth batch: signed contextual values
+
+Reference-zero has invariant upper5 through its relation-correlated range choice. Its sampler
+remains unchanged, verified across all four context choices and256 exact data/PRNG controls.
+Directed pairs use upper5/no positive lower or lower5/upper10. A third upper10/no-lower choice
+is infeasible: the neighboring-value sampler cannot place one magnitude strictly below5 and the
+other above5. No artificial profile is added.
+
+The compact88 blocks retain2,912 non-singleton raw paths with their exact conditional source
+weights (110,268 integer-weighted tickets). Only88 raw threshold-singleton paths retire,
+representing16 distinct contextual signed pairs at magnitudes5/10. This is the approved narrow
+endpoint exclusion, not a new zero/sign rule. All three old routes and source IDs remain,
+three→five selections, closing three omissions. Forty focused tests/six files, final TypeScript,
+actual source selections, direct/planned resolution and same-value projections pass. Directed
+sampling/replay identities change; reference-zero continuation remains exact. Payloads, renderers,
+matching policy and the Area allowlist are unchanged. Evidence:
+`temp/range-autonomous/batch5/measurement-time/{signed-focused.log,signed-types.log,verification.json}`.

@@ -4,6 +4,8 @@ import {setSeed} from '../../../lib/random.ts';
 import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {SignedRationalContextsGenerator} from './generator.ts';
 import {SignedRationalContextsGeneratorSchema, spec} from './spec.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 
 const zeroBundle = [Area.Zero, Scope.NumbersWithZero];
 const resolvedZeroBundle = [...zeroBundle, Scope.NumbersWithoutNegatives];
@@ -39,7 +41,10 @@ describe('signed rational context capability ownership', () => {
         for (let seed = 0; seed < 25; seed++) {
             setSeed(seed);
             const problem = generateWithLabels(new SignedRationalContextsGenerator(), [...bundle, Scope.RationalNumbers, ...abilities])!;
-            expect(problem.labels).toEqual(relation === 'reference-zero' ? resolvedZeroBundle : resolvedSignedBundle);
+            expect(problem.labels.filter(label => !SignedRationalContextsGeneratorSchema.range[0].includes(label)))
+                .toEqual(relation === 'reference-zero' ? resolvedZeroBundle : resolvedSignedBundle);
+            expect(hasCanonicalRangeWitness(problem.data.observations.map(({value}) => value.numerator / value.denominator),
+                resolveCanonicalRangeFromLabels(problem.labels)!)).toBe(true);
             expect(problem.data.kind).toBe('signed-rational-contexts');
             if (relation === 'reference-zero') expect(problem.data.observations.map(({value}) => value.numerator)).toEqual([0]);
             else {
