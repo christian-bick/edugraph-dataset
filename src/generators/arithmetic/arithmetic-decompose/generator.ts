@@ -3,32 +3,29 @@ import {ArithmeticDecomposeProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {ArithmeticDecomposeGeneratorConfig, ArithmeticDecomposeGeneratorSchema} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../../lib/errors.ts";
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 export class ArithmeticDecomposeGenerator implements ProblemGenerator<ArithmeticDecomposeProblem, ArithmeticDecomposeGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticDecomposeGeneratorSchema;
 
-    generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub | null {
+    generate(config: ArithmeticDecomposeGeneratorConfig): ProblemStub<ArithmeticDecomposeProblem> {
         validateConfigFields('arithmetic-decompose', config, ['range']);
         const resolvedRange = config.range!;
-        if (resolvedRange.min > resolvedRange.max) {
-            throw new GeneratorValidationError('arithmetic-decompose', `Invalid range bounds: min (${resolvedRange.min}) exceeds max (${resolvedRange.max}).`);
+        if (!resolvedRange || resolvedRange.min !== 0 || ![5, 10].includes(resolvedRange.max)) {
+            throw new GeneratorValidationError('arithmetic-decompose', 'Expected canonical upper5 or upper10 with no positive lower.');
         }
-        
-        const minVal = Math.max(resolvedRange.min, 3);
-        const maxVal = Math.min(resolvedRange.max, 99);
-        if (minVal > maxVal) {
-            throw new GeneratorValidationError('arithmetic-decompose', `Effective range bounds invalid: minVal (${minVal}) exceeds maxVal (${maxVal}).`);
+        const expected = createCanonicalNumericRange(resolvedRange.max);
+        if (resolvedRange.maximumAbove !== expected.maximumAbove || resolvedRange.minimumBelow !== expected.minimumBelow) {
+            throw new GeneratorValidationError('arithmetic-decompose', 'Invalid canonical range witnesses.');
         }
+        const minVal = Math.max(resolvedRange.maximumAbove + 1, 3);
+        const maxVal = resolvedRange.max;
         const targetNumber = Math.floor(random() * (maxVal - minVal + 1)) + minVal;
         
         const pairs: [number, number][] = [];
         for (let i = 1; i <= Math.floor(targetNumber / 2); i++) {
             pairs.push([i, targetNumber - i]);
-        }
-
-        if (pairs.length < 1) {
-            return null;
         }
 
         let pair1: [number, number] = [0, 0];

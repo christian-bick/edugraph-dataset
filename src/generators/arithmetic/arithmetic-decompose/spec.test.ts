@@ -1,55 +1,25 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { ArithmeticDecomposeGenerator } from './generator.ts';
-import { setSeed } from '../../../lib/random.ts';
-import { Scope } from 'edugraph-ts';
-import { generateWithLabels } from '../../../lib/utils.ts';
+import {Ability, Scope} from 'edugraph-ts';
+import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
+import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
+import {ArithmeticDecomposeGenerator} from './generator.ts';
+import {ArithmeticDecomposeGeneratorSchema as schema, spec} from './spec.ts';
 
-describe('ArithmeticDecomposeGenerator Spec Integration', () => {
-    let generator: ArithmeticDecomposeGenerator;
-
-    beforeEach(() => {
-        generator = new ArithmeticDecomposeGenerator();
-        setSeed(42);
+describe('decomposition range declarations', () => {
+    it.each([[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10]] as const)('resolves %s in both paths', (label, upper) => {
+        const direct = extractConfig(schema, [label]);
+        expect(direct).toEqual(resolveSchemaChoices(schema, [label], {range: [label]}));
+        expect(direct.config.range).toEqual(createCanonicalNumericRange(upper));
+        expect(generateWithLabels(new ArithmeticDecomposeGenerator(), [label])!.labels).toEqual([label]);
     });
-
-    it('should respect physical range bounds when using labels', () => {
-        // Test NumbersSmaller10 (min 3, max 10)
-        for (let i = 0; i < 20; i++) {
-            const stub = generateWithLabels(generator, [
-                Scope.NumbersSmaller10
-            ]);
-            expect(stub).not.toBeNull();
-            const target = stub!.data.targetNumber;
-            expect(target).toBeGreaterThanOrEqual(3);
-            expect(target).toBeLessThanOrEqual(10);
-
-            const p1 = stub!.data.pair1;
-            const p2 = stub!.data.pair2;
-            expect(p1[0] + p1[1]).toBe(target);
-            expect(p2[0] + p2[1]).toBe(target);
-            expect(p1[0] === p2[0] && p1[1] === p2[1]).toBe(false);
-        }
-
-        // Test NumbersSmaller20 (min 3, max 20)
-        for (let i = 0; i < 20; i++) {
-            const stub = generateWithLabels(generator, [
-                Scope.NumbersSmaller20
-            ]);
-            expect(stub).not.toBeNull();
-            const target = stub!.data.targetNumber;
-            expect(target).toBeGreaterThanOrEqual(3);
-            expect(target).toBeLessThanOrEqual(20);
-        }
-
-        // Test NumbersSmaller100 (min 3, max 99)
-        for (let i = 0; i < 20; i++) {
-            const stub = generateWithLabels(generator, [
-                Scope.NumbersSmaller100
-            ]);
-            expect(stub).not.toBeNull();
-            const target = stub!.data.targetNumber;
-            expect(target).toBeGreaterThanOrEqual(3);
-            expect(target).toBeLessThanOrEqual(99);
+    it('does not offer false lower or dormant larger-range capabilities', () => {
+        const generator = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
+        const view = {viewId: 'decompose-proof', generalLabels: [Ability.ProcedureUnderstanding], schema: {},
+            spec: {viewId: 'decompose-proof', generalLabels: [Ability.ProcedureUnderstanding]}};
+        for (const label of [Scope.NumbersLargerZero, Scope.NumbersLarger5, Scope.NumbersSmaller20, Scope.NumbersSmaller100]) {
+            expect(planModelCompatibility({id: 'unsupported-decompose', labels: [label, Ability.ProcedureUnderstanding]}, generator, view).supported).toBe(false);
         }
     });
 });

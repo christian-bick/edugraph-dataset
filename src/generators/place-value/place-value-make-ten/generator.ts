@@ -3,26 +3,26 @@ import {PlaceValueMakeTenProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {PlaceValueMakeTenGeneratorConfig, PlaceValueMakeTenGeneratorSchema} from "./spec.ts";
 import {validateConfigFields, GeneratorValidationError} from "../../../lib/errors.ts";
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMakeTenProblem, PlaceValueMakeTenGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = PlaceValueMakeTenGeneratorSchema;
 
-    generate(config: PlaceValueMakeTenGeneratorConfig): ProblemStub | null {
+    generate(config: PlaceValueMakeTenGeneratorConfig): ProblemStub<PlaceValueMakeTenProblem> {
         validateConfigFields('place-value-make-ten', config, ['requireZero', 'range']);
         const resolvedRange = config.range!;
-
+        if (typeof config.requireZero !== 'boolean' || !resolvedRange || resolvedRange.max !== 10
+            || ![0, 5].includes(resolvedRange.min) || config.requireZero && resolvedRange.min !== 0) {
+            throw new GeneratorValidationError('place-value-make-ten', 'Unsupported canonical make-ten profile.');
+        }
+        const expected = createCanonicalNumericRange(10, resolvedRange.min);
+        if (resolvedRange.maximumAbove !== expected.maximumAbove || resolvedRange.minimumBelow !== expected.minimumBelow) {
+            throw new GeneratorValidationError('place-value-make-ten', 'Invalid canonical range witnesses.');
+        }
         const target = 10;
         if (config.requireZero) {
-            const zeroWitnesses = [0, target].filter(
-                given => given >= resolvedRange.min && given <= resolvedRange.max
-            );
-            if (zeroWitnesses.length === 0) {
-                throw new GeneratorValidationError(
-                    'place-value-make-ten',
-                    'The requested range excludes both make-ten zero witnesses (0 and 10).'
-                );
-            }
+            const zeroWitnesses = [0, target];
             const givenNumber = zeroWitnesses[Math.floor(random() * zeroWitnesses.length)];
             return {
                 data: {
@@ -33,13 +33,8 @@ export class PlaceValueMakeTenGenerator implements ProblemGenerator<PlaceValueMa
             };
         }
 
-        const minGiven = Math.max(1, resolvedRange.min);
-        const maxGiven = Math.min(target - 1, resolvedRange.max);
-        if (minGiven > maxGiven) {
-            throw new GeneratorValidationError('place-value-make-ten', `Effective range bounds invalid: resolvedMin (${minGiven}) exceeds resolvedMax (${maxGiven}).`);
-        }
-
-        const givenNumber = Math.floor(random() * (maxGiven - minGiven + 1)) + minGiven;
+        const givens = resolvedRange.min === 5 ? [5] : [1, 2, 3, 4, 6, 7, 8, 9];
+        const givenNumber = givens[Math.floor(random() * givens.length)];
         const missingNumber = target - givenNumber;
 
         return {

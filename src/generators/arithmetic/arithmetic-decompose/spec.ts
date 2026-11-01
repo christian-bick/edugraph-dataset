@@ -1,7 +1,8 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-decompose',
@@ -19,8 +20,11 @@ export const spec: GeneratorSpec = {
 
 export const ArithmeticDecomposeGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller100]),
-        resolveRangeFromLabels
+        [Scope.NumbersSmaller5, Scope.NumbersSmaller10],
+        selectExactLabelMap([
+            [Scope.NumbersSmaller5, createCanonicalNumericRange(5)],
+            [Scope.NumbersSmaller10, createCanonicalNumericRange(10)]
+        ])
     ]
 } as const;
 

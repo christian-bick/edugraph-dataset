@@ -56,6 +56,26 @@ finite support and canonical witnesses. Exact owned route comparison and TypeScr
 Evidence: `temp/range-autonomous/measurement-time/route-verification.json`, `first-focused.log`
 and `types-first.log`. The invariant checkpoint is `4e556963`.
 
+## Decomposition and make-ten profiles
+
+`arithmetic-decompose` now has upper5/upper10 profiles over the complete original totals3..10,
+including every pair/orientation. Required decompositions guarantee a quantity below5, so no
+positive lower applies. The sole existing upper10 route remains; a source-reviewed upper5
+variant is added to `K.OA.A.3` without changing any earlier target ID or labels. Dormant upper
+capabilities above10 are retired within this reviewed source family.
+
+`place-value-make-ten` retains all 11 original complements. Upper10 is fixed; positive complements
+other than5+5 use no positive lower, while5+5 uses lower5. Zero-bearing complements keep no lower.
+Compatibility and runtime guards reject zero plus a positive lower. All three profiles use one
+mathematical draw, including the singleton. No view or payload changes are required.
+
+All 15 focused tests across four files pass. Exact owned matching preserves both earlier routes
+and adds only the reviewed decomposition route; three total routes admit four selections. Sixteen
+planned draws and exact replays plus seven direct draws pass canonical witnesses, target coverage
+and strict annotation checks. This repairs loose bounds and adds coverage, rather than closing
+range-presence omissions. Evidence: `temp/range-autonomous/arithmetic/first-review.md`,
+`verify-first.json` and `first-focused.log`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.

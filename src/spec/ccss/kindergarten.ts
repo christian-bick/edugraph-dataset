@@ -237,7 +237,8 @@ const decomposeBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller10,
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10]});
 
 // --- K.OA.A.4: For any number from 1 to 9, find the number that makes 10 ---
 const makeTenBuilder = new DatasetPermutationBuilder()
