@@ -33,12 +33,15 @@ describe('measurement canonical range profiles', () => {
         expect(measurementRangeChoices.flat()).not.toContain(Scope.NumbersLargerZero);
     });
 
-    it('keeps fractional and decimal range domains explicitly empty', () => {
-        for (const numberLabel of [Scope.FractionNumbers, Scope.DecimalNumbers]) {
-            const [domain] = normalizeSchemaChoices({range: schema.range}, [numberLabel], 'generator');
-            expect(domain.alternatives.map(choice => choice.labels)).toEqual([[]]);
-            expect(resolveMeasurementRange([numberLabel])).toBe(false);
-            expect(resolveMeasurementRange([numberLabel, Scope.NumbersSmaller5])).toBeUndefined();
+    it('defaults fixed-bound noninteger tasks to upper5 and leaves decimal addition for its own profile checkpoint', () => {
+        for (const numberLabel of [Scope.FractionNumbers, Scope.DecimalNumbers]) for (const operation of operations) {
+            const labels = [numberLabel, operation];
+            const [domain] = normalizeSchemaChoices({range: schema.range}, labels, 'generator');
+            const unprofiled = numberLabel === Scope.DecimalNumbers && operation === Area.Addition;
+            expect(domain.alternatives.map(choice => choice.labels)).toEqual(unprofiled ? [[]] : [[Scope.NumbersSmaller5]]);
+            expect(resolveMeasurementRange([...labels, ...(unprofiled ? [] : [Scope.NumbersSmaller5])]))
+                .toEqual(unprofiled ? false : createCanonicalNumericRange(5));
+            expect(resolveMeasurementRange([...labels, Scope.NumbersSmaller10])).toBeUndefined();
         }
         expect(resolveMeasurementRange([Scope.IntegerNumbers])).toBeUndefined();
         expect(resolveMeasurementRange([])).toBe(false);
@@ -62,9 +65,9 @@ describe('measurement canonical range profiles', () => {
                         ? operand.count : operand.value.numerator / operand.value.denominator),
                     stub.data.answer.numerator / stub.data.answer.denominator];
                     expect(hasCanonicalRangeWitness(values, resolved.config.range)).toBe(true);
-                    expect(stub.data.numberKind).toBe('integer');
                 } else {
-                    expect(stub.data.numberKind).not.toBe('integer');
+                    expect(stub.data.numberKind).toBe('decimal');
+                    expect(stub.data.operation).toBe('addition');
                     expect(resolved.resolvedLabels.some(label => measurementRangeChoices.flat().includes(label))).toBe(false);
                 }
             }
@@ -114,7 +117,7 @@ describe('measurement canonical range profiles', () => {
             setSeed(seed);
             const resolved = extractConfig(schema, [Scope.MeterScale, number, Area.Multiplication]);
             expect(resolved.config.operandDigits).toEqual({role: 'largest', digits: 1});
-            expect(resolved.config.range).toBe(false);
+            expect(resolved.config.range).toEqual(createCanonicalNumericRange(5));
             expect(passes(resolved.resolvedLabels)).toBe(true);
             expect(generator.generate(resolved.config).data.numberKind).not.toBe('integer');
         }
@@ -137,7 +140,7 @@ describe('measurement canonical range profiles', () => {
         expect(resolveMeasurementOperandDigits([Area.Addition])).toBe(false);
     });
 
-    it('preserves all forty noninteger contexts, annotations and random continuation in both resolution paths', () => {
+    it('adds only the fixed range annotation without changing other resolved fields or entropy in either path', () => {
         const {range: _range, ...withoutRange} = schema;
         const precedingSchema = {...withoutRange, operandDigits: [schema.operandDigits[0],
             resolveMeasurementWordProblemOperandDigits, measurementWordProblemOperandDigitChoices] as const};
@@ -147,19 +150,22 @@ describe('measurement canonical range profiles', () => {
                 const operandDigits = operation === Area.Multiplication ? [Scope.SingleDigitLargestOperand]
                     : operation === Area.Division ? [Scope.SingleDigitDivisor] : [];
                 const labels = [...measurementKind, ...numberKind, operation, ...operandDigits];
+                const rangeLabels = numberKind.includes(Scope.DecimalNumbers) && operation === Area.Addition
+                    ? [] : [Scope.NumbersSmaller5];
+                const range = rangeLabels.length ? createCanonicalNumericRange(5) : false;
                 for (const planned of [false, true]) {
                     const binding = {measurementKind, numberKind, operation: [operation], operandDigits};
                     setSeed(`noninteger-${planned}-${labels.join('|')}`);
                     const preceding = planned ? resolveSchemaChoices(precedingSchema, labels, binding)
                         : extractConfig(precedingSchema, labels);
                     const precedingState = getRandomState();
-                    const expected = generator.generate({...preceding.config, range: false});
+                    const expected = generator.generate({...preceding.config, range});
                     const expectedContinuation = getRandomState();
                     setSeed(`noninteger-${planned}-${labels.join('|')}`);
-                    const current = planned ? resolveSchemaChoices(schema, labels, {...binding, range: []})
+                    const current = planned ? resolveSchemaChoices(schema, labels, {...binding, range: rangeLabels})
                         : extractConfig(schema, labels);
-                    expect(current.config).toEqual({...preceding.config, range: false});
-                    expect(current.resolvedLabels).toEqual(preceding.resolvedLabels);
+                    expect(current.config).toEqual({...preceding.config, range});
+                    expect([...current.resolvedLabels].sort()).toEqual([...preceding.resolvedLabels, ...rangeLabels].sort());
                     expect(getRandomState()).toBe(precedingState);
                     expect(generator.generate(current.config)).toEqual(expected);
                     expect(getRandomState()).toBe(expectedContinuation);

@@ -3,7 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
-import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {
     MeasurementWordProblemGrade4,
     MeasurementWordProblemKind,
@@ -126,7 +126,7 @@ describe('MeasurementWordProblemsGenerator', () => {
         const config: MeasurementWordProblemsGeneratorConfig = {
             measurementKind: 'liquid-volume',
             numberKind: 'decimal',
-            operation: Area.Division, range: false
+            operation: Area.Division, range: createCanonicalNumericRange(5)
         };
         setSeed('measurement-word-problem-determinism');
         const first = generator.generate(config);
@@ -142,7 +142,11 @@ describe('MeasurementWordProblemsGenerator', () => {
         ['integer', {...createCanonicalNumericRange(20), minimumBelow: 10}],
         ['integer', createCanonicalNumericRange(100)],
         ['fraction', undefined], ['decimal', undefined],
-        ['fraction', createCanonicalNumericRange(5)], ['decimal', createCanonicalNumericRange(5)]
+        ['fraction', false], ['fraction', createCanonicalNumericRange(10)],
+        ['fraction', {...createCanonicalNumericRange(5), maximumAbove: 5}],
+        ['fraction', {...createCanonicalNumericRange(5), min: 1}],
+        ['fraction', {...createCanonicalNumericRange(5), minimumBelow: 10}],
+        ['decimal', createCanonicalNumericRange(5)]
     ])('rejects invalid or infeasible %s range %j without sampling', (numberKind, range) => {
         const random = vi.spyOn(randomSource, 'random');
         try {
@@ -179,7 +183,8 @@ describe('MeasurementWordProblemsGenerator', () => {
         const random = vi.spyOn(randomSource, 'random');
         try {
             expect(() => generator.generate({measurementKind: 'length', numberKind, operation, operandDigits,
-                range: numberKind === 'integer' ? createCanonicalNumericRange(20) : false} as never)).toThrow();
+                range: numberKind === 'integer' ? createCanonicalNumericRange(20)
+                    : numberKind === 'decimal' && operation === Area.Addition ? false : createCanonicalNumericRange(5)} as never)).toThrow();
             expect(random).not.toHaveBeenCalled();
         } finally {
             random.mockRestore();
@@ -247,6 +252,44 @@ describe('MeasurementWordProblemsGenerator', () => {
         }
     });
 
+    it.each(measurementKinds)('preserves every fixed-bound noninteger tuple and one-draw sampling for %s', measurementKind => {
+        // Independent finite support, expressed as the actual task quantities rather than storage numerators.
+        const cases = [
+            ['fraction', Area.Addition, [[1 / 8, 2 / 8, 3 / 8], [1 / 8, 6 / 8, 7 / 8], [3 / 8, 2 / 8, 5 / 8], [5 / 8, 2 / 8, 7 / 8]]],
+            ['fraction', Area.Subtraction, [[3 / 8, 2 / 8, 1 / 8], [7 / 8, 6 / 8, 1 / 8], [5 / 8, 2 / 8, 3 / 8], [7 / 8, 2 / 8, 5 / 8]]],
+            ['fraction', Area.Multiplication, [[2, 2 / 8, 4 / 8], [3, 2 / 8, 6 / 8], [3, 1 / 8, 3 / 8]]],
+            ['fraction', Area.Division, [[2 / 8, 2, 1 / 8], [4 / 8, 2, 2 / 8], [3 / 8, 3, 1 / 8], [6 / 8, 3, 2 / 8]]],
+            ['decimal', Area.Subtraction, [[2.7, 1.4, 1.3], [3.7, 1.6, 2.1], [4.7, 1.5, 3.2]]],
+            ['decimal', Area.Multiplication, [[2, 1.3, 2.6], [3, 1.2, 3.6], [4, 1.1, 4.4]]],
+            ['decimal', Area.Division, [[2.6, 2, 1.3], [3.6, 3, 1.2], [4.4, 4, 1.1]]]
+        ] as const;
+        const random = vi.spyOn(randomSource, 'random');
+        const range = createCanonicalNumericRange(5);
+        let count = 0;
+        try {
+            for (const [numberKind, operation, expected] of cases) {
+                const seen: number[][] = [];
+                for (const [index, tuple] of expected.entries()) {
+                    random.mockClear().mockReturnValue((index + 0.5) / expected.length);
+                    const {data} = generator.generate({measurementKind, numberKind, operation, range});
+                    expectConsistent(data, measurementKind, numberKind, operationNames[operation]);
+                    const values = [...data.operands.map(operand => operand.role === 'group-count'
+                        ? operand.count : operand.value.numerator / operand.value.denominator),
+                    data.answer.numerator / data.answer.denominator];
+                    expect(values).toEqual(tuple);
+                    expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                    expect(random).toHaveBeenCalledTimes(1);
+                    seen.push(values);
+                    count++;
+                }
+                expect(seen).toEqual(expected);
+            }
+            expect(count).toBe(24);
+        } finally {
+            random.mockRestore();
+        }
+    });
+
     it('covers every measurement, number, and operation permutation with exact one-step math', () => {
         for (const measurementKind of measurementKinds) {
             for (const numberKind of numberKinds) {
@@ -262,7 +305,8 @@ describe('MeasurementWordProblemsGenerator', () => {
                             operation: operationLabel,
                             operandDigits,
                             range: numberKind === 'integer'
-                                ? createCanonicalNumericRange(operandDigits?.digits === 2 ? 20 : 5) : false
+                                ? createCanonicalNumericRange(operandDigits?.digits === 2 ? 20 : 5)
+                                : numberKind === 'decimal' && operationLabel === Area.Addition ? false : createCanonicalNumericRange(5)
                         });
                         expectConsistent(
                             stub.data,

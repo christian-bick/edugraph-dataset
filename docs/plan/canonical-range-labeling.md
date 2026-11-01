@@ -598,3 +598,22 @@ matching with the new bounds. All14 generator/spec tests and ten existing consum
 The preceding complete-catalog experiment preserves all1,247 targets /1,672 routes with no
 ownership issues. Full runtime/source acceptance for the three checkpoints follows R4c.
 Evidence: `temp/canonical-range-next-review/r4a-focused-tests.log` and `r4a-consumer-tests.log`.
+
+### R4b — fixed noninteger measurement bounds
+
+The second checkpoint adds upper5 through the existing range field to all20 fractional and
+15 decimal subtraction/multiplication/division selections. Their120 unit-specific tuples remain
+unchanged. Decimal addition retains its previous unprofiled contract until R4c.
+
+Unspecified number-kind requests now have an explicit integer default in both planner metadata
+and direct resolution. This replaces the former integer-only range guard while preserving its
+effect on existing consumers. Partial and explicit fraction/decimal requests remain supported.
+No mathematical payload, view, target or generic matching contract changes.
+
+All92 focused tests pass, including exhaustive finite support, canonical bounds, malformed
+profiles, direct/planned resolution and one-draw sampling. The before/after runtime probe retains
+exactly all1,286 authored /1,247 normalized targets and1,672 routes. All2,054 recorded integer
+config/data/label/random-state comparisons and32 invariant-family comparisons are unchanged.
+It passes1,688 planned draws and exact replays plus754 direct draws; complete family selection
+counts remain412. Evidence is under `temp/canonical-range-r4/` (`verification-r4b.json` and
+`measurement-tests.log`). Full coverage and final audit follow R4c.

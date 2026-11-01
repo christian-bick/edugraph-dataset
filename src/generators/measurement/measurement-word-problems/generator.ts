@@ -268,9 +268,14 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
         const measurementKind = config.measurementKind as MeasurementWordProblemKind;
         const numberKind = config.numberKind as MeasurementWordProblemNumberKind;
         const range = config.range;
-        if (numberKind === 'integer') {
-            if (!range || ![5, 10, 20, 100].includes(range.max)) {
-                throw new GeneratorValidationError('measurement-word-problems', 'Integer problems require a canonical range choice.');
+        if (numberKind === 'decimal' && operation === 'addition') {
+            if (range !== false) {
+                throw new GeneratorValidationError('measurement-word-problems', 'Decimal addition requires an explicit empty range choice.');
+            }
+        } else {
+            if (!range || (numberKind === 'integer' ? ![5, 10, 20, 100].includes(range.max)
+                : range.min !== 0 || range.max !== 5)) {
+                throw new GeneratorValidationError('measurement-word-problems', 'Unsupported canonical range choice.');
             }
             let expected: CanonicalNumericRange;
             try {
@@ -281,8 +286,6 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
             if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
                 throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range witnesses.');
             }
-        } else if (range !== false) {
-            throw new GeneratorValidationError('measurement-word-problems', 'Noninteger problems require an explicit empty range choice.');
         }
         const operandDigits = config.operandDigits;
         if (operandDigits !== undefined && operandDigits !== false) {

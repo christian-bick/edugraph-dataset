@@ -27,11 +27,13 @@ const selectNumberKind = selectExactLabelSetMap([
     [[Scope.DecimalNumbers], 'decimal']
 ] as const);
 
-/** A requested canonical bound belongs only to this rollout's integer branch. */
+/** Preserve the integer completion previously imposed by the integer-only range guard. */
 export const resolveMeasurementNumberKind = withLabelChoices(exactResolver((labels: string[]) => {
-    const kind = selectNumberKind(labels);
-    return measurementRangeLabels.some(label => labels.includes(label)) && kind !== 'integer' ? undefined : kind;
-}), {...selectNumberKind.labelChoices!, contextLabels: measurementRangeLabels});
+    const requested = [...numberLabels, Scope.ProperFractions].some(label => labels.includes(label));
+    return requested ? selectNumberKind(labels) : 'integer';
+}), {
+    ...selectNumberKind.labelChoices!, defaults: [{labels: [Scope.IntegerNumbers]}]
+});
 const digitLabels = measurementWordProblemOperandDigitChoices.flat();
 export const measurementRangeContext = [...operations.map(([label]) => label), ...numberLabels, ...digitLabels];
 
@@ -41,7 +43,11 @@ const selectedOperation = (labels: readonly string[]): ArithmeticOperation | und
 /** No payload inspection: this checks the generator's authored, finite mathematical support. */
 export function permitsMeasurementRange(labels: readonly string[], range: CanonicalNumericRange | false): boolean {
     const integer = labels.includes(Scope.IntegerNumbers);
-    if (numberLabels.some(label => labels.includes(label)) && !integer) return range === false;
+    if (numberLabels.some(label => labels.includes(label)) && !integer) {
+        // Decimal addition is the remaining mixed-band slice, adopted separately.
+        if (labels.includes(Scope.DecimalNumbers) && selectedOperation(labels) === 'addition') return range === false;
+        return range !== false && range.min === 0 && range.max === 5;
+    }
     if (range === false) return !integer;
     const operation = selectedOperation(labels);
     if (!operation) return true;
@@ -56,8 +62,11 @@ export const resolveMeasurementRange = withLabelChoices(exactResolver((labels: s
 }), {
     kind: 'alternatives', alternatives: measurementRangeChoices, relation: 'capability',
     defaults: [
-        {whenAll: [Scope.FractionNumbers], labels: []},
-        {whenAll: [Scope.DecimalNumbers], labels: []}
+        {whenAll: [Scope.FractionNumbers], labels: [Scope.NumbersSmaller5]},
+        {whenAll: [Scope.DecimalNumbers, Area.Addition], labels: []},
+        ...[Area.Subtraction, Area.Multiplication, Area.Division].map(operation => ({
+            whenAll: [Scope.DecimalNumbers, operation], labels: [Scope.NumbersSmaller5]
+        }))
     ],
     contextLabels: measurementRangeContext, resolvedContext: true
 });

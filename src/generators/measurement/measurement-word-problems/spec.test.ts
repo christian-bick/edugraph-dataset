@@ -1,7 +1,6 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
-import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {MeasurementWordProblemsGenerator} from './generator.ts';
@@ -72,7 +71,8 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                             operation: [operationLabel],
                             operandDigits: operandDigitBinding,
                             range: numberKind === 'integer' ? [operandDigitBinding.includes(Scope.TwoDigitLargestOperand)
-                                ? Scope.NumbersSmaller20 : Scope.NumbersSmaller5] : []
+                                ? Scope.NumbersSmaller20 : Scope.NumbersSmaller5]
+                                : numberKind === 'decimal' && operation === 'addition' ? [] : [Scope.NumbersSmaller5]
                         });
                         const stub = generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig);
                         expect(stub.data).toMatchObject({measurementKind, numberKind, operation});
@@ -134,21 +134,22 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
             .toEqual({config: {operandDigits: profile}, resolvedLabels: labels});
     });
 
-    it('keeps exactly three number configurations with proper magnitude owned by the fraction choice', () => {
+    it('defaults unspecified number kind to integer and retains every explicit number choice', () => {
         expect(spec.generalLabels).not.toContain(Scope.ProperFractions);
         expect(findSchemaFallbackContractIssues(numberSchema)).toEqual([]);
         const [domain] = normalizeSchemaChoices(numberSchema, [], 'generator');
-        expect(domain.alternatives).toHaveLength(3);
-        const configurations = domain.alternatives.map(alternative => {
-            const resolved = resolveSchemaChoices(numberSchema, [], {numberKind: alternative.labels});
+        expect(domain.alternatives.map(alternative => alternative.labels)).toEqual([[Scope.IntegerNumbers]]);
+        const configurations = numberCases.map(([label]) => {
+            const [explicit] = normalizeSchemaChoices(numberSchema, [label], 'generator');
+            const resolved = resolveSchemaChoices(numberSchema, [label], {numberKind: explicit.alternatives[0].labels});
             return {value: resolved.config.numberKind, labels: resolved.resolvedLabels};
         });
         expect(configurations).toEqual([
-            {value: 'decimal', labels: [Scope.DecimalNumbers]},
+            {value: 'integer', labels: [Scope.IntegerNumbers]},
             {value: 'fraction', labels: fractionLabels},
-            {value: 'integer', labels: [Scope.IntegerNumbers]}
+            {value: 'decimal', labels: [Scope.DecimalNumbers]}
         ]);
-        expect(MeasurementWordProblemsGeneratorSchema.numberKind[1]([])).toBeUndefined();
+        expect(MeasurementWordProblemsGeneratorSchema.numberKind[1]([])).toBe('integer');
     });
 
     it.each([
@@ -169,7 +170,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         const generateFraction = (requested: string[]) => {
             const resolved = resolveSchemaChoices(MeasurementWordProblemsGeneratorSchema, [...fixedLabels, ...requested], {
                 measurementKind: [Scope.MeterScale], numberKind: fractionLabels,
-                operation: [Area.Multiplication], operandDigits: [Scope.SingleDigitLargestOperand], range: []
+                operation: [Area.Multiplication], operandDigits: [Scope.SingleDigitLargestOperand], range: [Scope.NumbersSmaller5]
             });
             return {data: generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig).data,
                 labels: resolved.resolvedLabels};
@@ -193,30 +194,17 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         expect(() => extractConfig(numberSchema, labels)).toThrow();
     });
 
-    it('preserves unspecified number-kind fallback values and entropy consumption', () => {
-        // Capture the preceding three-choice contract so this annotation change cannot bias fallback sampling.
-        const precedingSchema = {numberKind: [
-            [Scope.IntegerNumbers, Scope.FractionNumbers, Scope.DecimalNumbers],
-            selectExactLabelMap([
-                [Scope.IntegerNumbers, 'integer'],
-                [Scope.FractionNumbers, 'fraction'],
-                [Scope.DecimalNumbers, 'decimal']
-            ])
-        ]} as const;
-        const seen = new Set<string>();
+    it('keeps the implicit integer completion stable across direct and planned resolution', () => {
         for (let index = 0; index < 60; index++) {
             setSeed(`number-kind-fallback-${index}`);
-            const preceding = extractConfig(precedingSchema, []);
-            const precedingRandomState = getRandomState();
+            const direct = extractConfig(numberSchema, []);
+            const continuation = getRandomState();
             setSeed(`number-kind-fallback-${index}`);
-            const current = extractConfig(numberSchema, []);
-            expect(current.config).toEqual(preceding.config);
-            expect(getRandomState()).toEqual(precedingRandomState);
-            expect(current.resolvedLabels).toEqual(preceding.config.numberKind === 'fraction'
-                ? fractionLabels : preceding.resolvedLabels);
-            seen.add(current.config.numberKind!);
+            const planned = resolveSchemaChoices(numberSchema, [], {numberKind: [Scope.IntegerNumbers]});
+            expect(direct).toEqual(planned);
+            expect(direct.config.numberKind).toBe('integer');
+            expect(getRandomState()).toEqual(continuation);
         }
-        expect([...seen].sort()).toEqual(['decimal', 'fraction', 'integer']);
     });
 
     it('resolves Dollar as a unit-measurement Scope', () => {
