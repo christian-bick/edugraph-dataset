@@ -3,7 +3,7 @@ import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
 
-export const spec: GeneratorSpec = {generatorId: 'rational-order-relations', generalLabels: [Area.Inequality, Scope.RationalNumbers, Scope.NumbersWithZero, Scope.NumbersWithNegatives]};
+export const spec: GeneratorSpec = {generatorId: 'rational-order-relations', generalLabels: [Area.Inequality, Scope.RationalNumbers, Scope.NumbersWithZero, Scope.NumbersWithNegatives, Scope.NumbersSmaller5]};
 export const RationalOrderRelationsGeneratorSchema = {
     relation: [[Scope.Less, Scope.Greater], selectExactLabelMap([[Scope.Less, 'less'], [Scope.Greater, 'greater']] as const),
         [[Scope.Less], [Scope.Greater]]]

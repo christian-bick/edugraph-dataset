@@ -106,6 +106,16 @@ remain unchanged. Thirteen focused tests pass, including consumer projection and
 This closes six baseline presence findings. Evidence:
 `temp/range-autonomous/fraction-decimal/line-tests.log`, `line-current.log` and `types-line.log`.
 
+## Bounded rational axes
+
+`rational-magnitude-relations` and `rational-order-relations` gain invariant upper5. Every assessed
+value and generated axis lies within this smallest band, and the required zero reference excludes
+a positive lower. The claim does not rely on an unprojected larger axis. Both generator bodies,
+sampling and the three existing routes remain unchanged. Twenty focused tests pass, including all
+128 scale/location/sign outcomes and976 strict ordered pairs/directions. Four baseline presence
+findings close. Evidence: `temp/range-autonomous/fraction-decimal/axis-tests.log` and the finite
+regression `src/generators/number/canonical-axis-ranges.it.test.ts`.
+
 ## Decisions and complications
 
 These entries do not block work in other families.
