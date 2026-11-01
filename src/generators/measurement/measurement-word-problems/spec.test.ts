@@ -70,7 +70,9 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                             measurementKind: [...resolvedMeasurementLabels],
                             numberKind: numberKind === 'fraction' ? fractionLabels : [numberLabel],
                             operation: [operationLabel],
-                            operandDigits: operandDigitBinding
+                            operandDigits: operandDigitBinding,
+                            range: numberKind === 'integer' ? [operandDigitBinding.includes(Scope.TwoDigitLargestOperand)
+                                ? Scope.NumbersSmaller20 : Scope.NumbersSmaller5] : []
                         });
                         const stub = generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig);
                         expect(stub.data).toMatchObject({measurementKind, numberKind, operation});
@@ -167,7 +169,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
         const generateFraction = (requested: string[]) => {
             const resolved = resolveSchemaChoices(MeasurementWordProblemsGeneratorSchema, [...fixedLabels, ...requested], {
                 measurementKind: [Scope.MeterScale], numberKind: fractionLabels,
-                operation: [Area.Multiplication], operandDigits: [Scope.SingleDigitLargestOperand]
+                operation: [Area.Multiplication], operandDigits: [Scope.SingleDigitLargestOperand], range: []
             });
             return {data: generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig).data,
                 labels: resolved.resolvedLabels};

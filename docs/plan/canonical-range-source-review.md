@@ -10,6 +10,8 @@ The review covers all **27 source definitions across 25 leaves** behind the two 
 including the complete integer branch of Grade 4 measurement. It also identifies the four-addend
 sibling that must join the same source correction. Source review is complete; implementation,
 matching migration and dataset acceptance are separate steps.
+The implementation closure below adds six definitions across five further source leaves, to preserve
+the existing smaller examples in the additional producers reached by that correction.
 
 ## Source Scope
 
@@ -469,6 +471,43 @@ Question and Solution judgments remain independent.
 All recommendations, including the two-digit addend correction and coordinated route adoption,
 were accepted by the user on 2026-11-01. No further policy clarification is needed for these batches.
 
+## Additional shared-producer closure
+
+The implementation review found six more definitions behind the triple and array producers. Simply
+tightening their old highest band would silently remove lower-magnitude examples, including almost
+every array grouping case. Apply the same reviewed expansion approach to these existing competencies
+and adopt their two counterpart producers. This introduces no policy exception or generator split.
+
+| Definition | Relevant source wording | Authored count | Upper bands |
+| --- | --- | ---: | --- |
+| `1.OA.A.2-three-addend-word-problems` | “Solve word problems that call for addition of three whole numbers whose sum is less than or equal to 20” | 1 → 3 | 5, 10, 20 |
+| `1.OA.B.3-properties` | “Apply properties of operations as strategies to add and subtract.” | 4 → 12 | 5, 10, 20 |
+| `3.OA.B.5-distributive-property` | “Apply properties of operations as strategies to multiply and divide.” Its example is `8 × (5 + 2) = (8 × 5) + (8 × 2) = 40 + 16 = 56`. | 2 → 8 | 5, 10, 20, 100 |
+| `3.OA.A.1-equal-groups-interpretation` | “Interpret products of whole numbers, e.g., interpret 5 × 7 as the total number of objects in 5 groups of 7 objects each.” | 2 → 8 | 5, 10, 20, 100 |
+| `3.OA.A.2-partitive-division` | “Interpret whole-number quotients of whole numbers, e.g., interpret 56 ÷ 8 as the number of objects in each share when 56 objects are partitioned equally into 8 shares” | 2 → 8 | 5, 10, 20, 100 |
+| `3.OA.A.2-quotative-division` | The same leaf continues: “or as a number of shares when 56 objects are partitioned into equal shares of 8 objects each.” | 2 → 8 | 5, 10, 20, 100 |
+
+Only the first leaf states its ceiling explicitly. For the other five definitions, 20/100 remain the
+existing dataset sampling envelopes. Preserve both law abilities and both collection/array variants;
+do not add equivalence aliases or weaken their source claims. These expansions add 34 authored
+permutations to the original 1,252 proposal. Every original upper-band target remains.
+
+| Additional producer | Complete existing source surface | Adoption |
+| --- | --- | --- |
+| `arithmetic-property-relations` | The six property targets from `1.OA.B.3` and `3.OA.B.5`, through execution/explanation views | Canonical profiles preserve the mathematical relation and required law intermediates. |
+| `equal-groups-collection` | The three physical-collection targets from `3.OA.A.1/A.2`, through `operations-equal-groups` | Partition all 25 ordered pairs in `2..6 × 2..6` into five feasible profiles; preserve both division meanings. |
+
+Those producers introduce no further current source consumers. The two unbounded `2.OA.C.4` array
+targets remain partial requests admitting every feasible profile within their five-by-five source
+domain. Grade 3 array targets instead explicitly request upper100: their new smaller variants are
+necessary to preserve the existing `2..5 × 2..5` support. Upper100 alone would retain only `5 × 5`.
+
+The separate binary-addition array route needs columns through20 so that, for example, `11 + 11 = 22`
+can witness upper100. This local extension preserves the at-most-five rows/columns of the repeated
+addition competency; ordinary operand-width profiles describe the changed binary arithmetic.
+Evidence and the complete 20 pre-expansion counterpart routes are in
+`temp/canonical-range-source-review/closure-review.md`.
+
 ## Evidence
 
 Read-only evidence is under `temp/canonical-range-source-review/`: source extraction and arithmetic
@@ -478,6 +517,9 @@ positive `L<U` catalog pairs, lack of lower 20→lower 10 capability substitutio
 cell counts 8/8/15. `combined-proposal-final.ts/.json` retains every final proposed target,
 normalized representative, matching route and capability gap. `combined-proposal-feasibility.mjs/.json`
 records the exact addend-domain partitions and witnesses. The earlier `combined-proposal.ts/.json`
-and diagnostics retain the preliminary upper-stage audit separately. No production code, target definitions,
-ontology, dataset or cache changes were
-made for this review. Documentation checks and committed-state verification are recorded in the main plan.
+and diagnostics retain the preliminary upper-stage audit separately. The original source-review
+checkpoint changed documentation only. The subsequent approved implementation and its validation
+are recorded in the [main plan](canonical-range-labeling.md#adoption-checkpoint-2--reviewed-source-families).
+`verify-authored-targets.ts` checks exact adoption of the core proposal plus the six-definition
+closure; `adoption-matching-audit.ts` checks retained routes, unmatched targets and allocation growth.
+Neither source review nor source adoption alone establishes regenerated dataset or VQA acceptance.

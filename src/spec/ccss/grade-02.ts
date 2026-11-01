@@ -26,7 +26,8 @@ const oneStepWordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 2.OA.A.1: Two-step word problems within 100 ---
 const twoStepWordProblemsBuilder = new DatasetPermutationBuilder()
@@ -96,7 +97,8 @@ const evenEqualAddendsBuilder = new DatasetPermutationBuilder()
         Scope.TwoOperands,
         Scope.NumbersSmaller20,
         Ability.Formalization
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 // --- 2.OA.C.4: Add objects in a rectangular number array ---
 const numberArrayTotalBuilder = new DatasetPermutationBuilder()
@@ -211,16 +213,19 @@ const compareThreeDigitBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger100,
-        Scope.NumbersSmaller1000,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Area.NumericInequality, Scope.Greater],
-        [Area.NumericEquality, Scope.Equal],
-        [Area.NumericInequality, Scope.Less]
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger100, Scope.NumbersSmaller120],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger100, Scope.NumbersSmaller120],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger100, Scope.NumbersSmaller120],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger100, Scope.NumbersSmaller1000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger100, Scope.NumbersSmaller1000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger120, Scope.NumbersSmaller1000],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger120, Scope.NumbersSmaller1000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger120, Scope.NumbersSmaller1000]
     ]);
 
 // --- 2.NBT.B.5: Compute within 100 ---
@@ -237,7 +242,8 @@ const fluencyWithin100Builder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [20, 100] });
 
 // --- 2.NBT.B.6: Add two or three two-digit numbers ---
 const twoThreeAddendsBuilder = new DatasetPermutationBuilder()
@@ -245,15 +251,24 @@ const twoThreeAddendsBuilder = new DatasetPermutationBuilder()
         Area.Addition,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger10,
-        Scope.NumbersSmaller100,
+        Scope.TwoDigitLargestOperand,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.TwoOperands],
-        [Scope.ThreeOperands]
+        [Scope.TwoOperands, Scope.NumbersLarger10, Scope.NumbersSmaller20],
+        [Scope.TwoOperands, Scope.NumbersLarger10, Scope.NumbersSmaller100],
+        [Scope.TwoOperands, Scope.NumbersLarger10, Scope.NumbersSmaller120],
+        [Scope.TwoOperands, Scope.NumbersLarger20, Scope.NumbersSmaller100],
+        [Scope.TwoOperands, Scope.NumbersLarger20, Scope.NumbersSmaller120],
+        [Scope.TwoOperands, Scope.NumbersLarger20, Scope.NumbersSmaller1000],
+        [Scope.ThreeOperands, Scope.NumbersLarger10, Scope.NumbersSmaller100],
+        [Scope.ThreeOperands, Scope.NumbersLarger10, Scope.NumbersSmaller120],
+        [Scope.ThreeOperands, Scope.NumbersLarger10, Scope.NumbersSmaller1000],
+        [Scope.ThreeOperands, Scope.NumbersLarger20, Scope.NumbersSmaller100],
+        [Scope.ThreeOperands, Scope.NumbersLarger20, Scope.NumbersSmaller120],
+        [Scope.ThreeOperands, Scope.NumbersLarger20, Scope.NumbersSmaller1000]
     ]);
 
 // --- 2.NBT.B.6: Add four two-digit numbers ---
@@ -263,11 +278,18 @@ const fourAddendsBuilder = new DatasetPermutationBuilder()
         Scope.FourOperands,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger10,
-        Scope.NumbersSmaller100,
+        Scope.TwoDigitLargestOperand,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersLarger10, Scope.NumbersSmaller100],
+        [Scope.NumbersLarger10, Scope.NumbersSmaller120],
+        [Scope.NumbersLarger10, Scope.NumbersSmaller1000],
+        [Scope.NumbersLarger20, Scope.NumbersSmaller100],
+        [Scope.NumbersLarger20, Scope.NumbersSmaller120],
+        [Scope.NumbersLarger20, Scope.NumbersSmaller1000]
     ]);
 
 // --- 2.NBT.B.7: Written addition and subtraction within 1000 ---
@@ -284,7 +306,8 @@ const writtenAddSubtractBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [20, 100, 120, 1000] });
 
 // --- 2.NBT.B.7: Concrete place-value regrouping ---
 const concreteRegroupingBuilder = new DatasetPermutationBuilder()
@@ -427,7 +450,8 @@ const lengthWordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 2.MD.B.6: Represent whole numbers on a number line ---
 const numberLineRepresentationBuilder = new DatasetPermutationBuilder()
@@ -449,7 +473,8 @@ const numberLineArithmeticBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 2.MD.C.7: Tell and write time to the nearest five minutes ---
 const nearestFiveMinuteTimeBuilder = new DatasetPermutationBuilder()

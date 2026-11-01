@@ -1,13 +1,16 @@
-import {Area} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
+import {canonicalRangeLabelChoices, canonicalRangeLabels} from '../../../lib/canonical-range-labels.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {arithmeticTripleLabels, arithmeticTripleSchema, arithmeticTripleWidthRule} from '../arithmetic-triple-schema.ts';
+import {arithmeticTripleLabels} from '../arithmetic-triple-schema.ts';
+import {canonicalTripleFields, canonicalTripleDomainRule, canonicalTripleWidthRule, resolveCanonicalTripleRange} from '../canonical-triple-schema.ts';
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-triples',
-    compatibility: [arithmeticTripleWidthRule, generatorLabelRule('three-operand-property-law', [
+    compatibility: [canonicalTripleWidthRule, canonicalTripleDomainRule, generatorLabelRule('three-operand-property-law', [
         Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
         Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw
     ], selected => {
@@ -23,6 +26,10 @@ export const spec: GeneratorSpec = {
     generalLabels: arithmeticTripleLabels
 };
 
-export const ArithmeticOpsTriplesGeneratorSchema = arithmeticTripleSchema;
+export const ArithmeticOpsTriplesGeneratorSchema = {
+    ...canonicalTripleFields,
+    requireTwoDigitOperands: [[Scope.TwoDigitLargestOperand], hasLabel(Scope.TwoDigitLargestOperand)],
+    range: [canonicalRangeLabels, resolveCanonicalTripleRange, canonicalRangeLabelChoices()]
+} as const;
 
 export type ArithmeticOpsTriplesGeneratorConfig = ConfigFromSchema<typeof ArithmeticOpsTriplesGeneratorSchema>;

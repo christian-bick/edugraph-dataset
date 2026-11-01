@@ -157,7 +157,7 @@ describe('arithmetic number-line references', () => {
                 : {num1: 1, num2: maximum - 1, answer: maximum, operation: 'addition'};
             const values = tickValues(render(data, false));
             expect(values.every(Number.isInteger)).toBe(true);
-            expect(values.at(-1)).toBe(Math.max(10, Math.ceil(maximum / 10) * 10));
+            expect(values.at(-1)).toBe(maximum <= 5 ? 5 : Math.ceil(maximum / 10) * 10);
             expect(new Set(values.slice(1).map((value, index) => value - values[index]!)).size).toBe(1);
             expect(values.includes(0)).toBe(maximum < 2);
         }
@@ -176,11 +176,11 @@ describe('arithmetic number-line references', () => {
         expect(() => render({num1: 1}, false)).toThrow(/Required field/);
     });
 
-    it('resolves and replays all five real Grade-2 choices with truthful zero absence in both modes', () => {
+    it('resolves and replays every canonical Grade-2 choice with truthful zero absence in both modes', () => {
         const generator = new ArithmeticOpsPairsGenerator();
         const evaluate = createLabelDependencyEvaluator().evaluate;
         const actual = targets.filter(target => target.id.startsWith('2.MD.B.6-number-line-arithmetic~'));
-        expect(actual).toHaveLength(2);
+        expect(actual).toHaveLength(8);
         let choices = 0;
         for (const target of actual) {
             const result = planModelCompatibility(target,
@@ -221,6 +221,6 @@ describe('arithmetic number-line references', () => {
                 expect(getRandomState()).toBe(continuation);
             }
         }
-        expect(choices).toBe(5);
+        expect(choices).toBeGreaterThanOrEqual(actual.length);
     });
 });

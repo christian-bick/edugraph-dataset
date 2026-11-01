@@ -87,7 +87,7 @@ export const NumbersPlaceValueComparisonCore = ({config: _config, payload}: Core
     if (!isValidPlaceValueComparisonProblem(data)) {
         throw new ViewValidationError(
             VIEW_ID,
-            'Expected two integers from 10 through 100 and their mathematically correct supplied relation.'
+            'Expected two two-digit integers and their mathematically correct supplied relation.'
         );
     }
 

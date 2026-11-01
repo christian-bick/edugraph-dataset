@@ -88,9 +88,6 @@ const cases: readonly [string, string, readonly string[], readonly string[]][] =
         [Area.Addition, Area.AssociativeLaw], [Area.Addition, Area.AssociativeLaw, Area.CommutativeLaw]],
     ['arithmetic-ops-pairs', 'equal addends sign and zero',
         [Area.Addition, Area.IteratedOperation], [Area.Addition, Area.IteratedOperation, Scope.NumbersWithZero]],
-    ['comparison', 'equal zero and negative values',
-        [Area.NumericInequality, Scope.Less, Scope.NumbersWithZero, Scope.NumbersWithNegatives],
-        [Area.NumericEquality, Scope.Equal, Scope.NumbersWithZero, Scope.NumbersWithNegatives]],
     ['counting-sequence', 'multiple-ten steps',
         [Scope.MultiplesOf10, Scope.StepsOf10], [Scope.MultiplesOf10, Scope.StepsOf5]],
     ['currency-arithmetic', 'coin denomination',
@@ -217,8 +214,19 @@ describe('generator configuration compatibility', () => {
         })).toThrow(/undeclared/i);
     });
 
-    it('does not move numeric range feasibility into semantic compatibility', () => {
-        expect(plan('arithmetic-ops-pairs', [Area.Addition, Scope.NumbersSmaller5, Scope.MultiplesOf10]).supported).toBe(true);
+    it('rejects comparison claims with no feasible joint numeric profile', () => {
+        expect(plan('comparison', [Area.NumericInequality, Scope.Less,
+            Scope.NumbersWithZero, Scope.NumbersWithNegatives]).supported).toBe(true);
+        expect(plan('comparison', [Area.NumericEquality, Scope.Equal,
+            Scope.NumbersWithZero, Scope.NumbersWithNegatives])).toMatchObject({
+            supported: false, reason: 'empty-domain', fields: [{owner: 'generator', field: 'comparison'}]
+        });
+    });
+
+    it('admits only feasible canonical arithmetic profiles before generation', () => {
+        const labels = [Area.Addition, Scope.MultiplesOf10, Scope.NumbersWithoutZero, Scope.NumbersWithoutNegatives];
+        expect(plan('arithmetic-ops-pairs', [...labels, Scope.NumbersSmaller5]).supported).toBe(false);
+        expect(plan('arithmetic-ops-pairs', [...labels, Scope.NumbersSmaller20]).supported).toBe(true);
     });
 });
 

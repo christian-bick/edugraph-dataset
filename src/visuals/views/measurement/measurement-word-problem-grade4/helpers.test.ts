@@ -1,6 +1,7 @@
 import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {MeasurementWordProblemsGenerator} from '../../../../generators/measurement/measurement-word-problems/generator.ts';
+import {createCanonicalNumericRange} from '../../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../../lib/random.ts';
 import {
     MeasurementWordProblemGrade4,
@@ -40,6 +41,7 @@ const generate = (
         measurementKind,
         numberKind,
         operation: operationArea,
+        range: numberKind === 'integer' ? createCanonicalNumericRange(5) : false,
         operandDigits: numberKind === 'integer' && (operation === 'addition' || operation === 'subtraction')
             ? {role: 'largest', digits: 1} : undefined
     }).data;

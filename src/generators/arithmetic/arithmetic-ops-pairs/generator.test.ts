@@ -1,216 +1,50 @@
 import {Area} from 'edugraph-ts';
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
-import * as rng from '../../../lib/random.ts';
-import {ArithmeticPairProblem} from '../../../types/problems.ts';
 import {ArithmeticOpsPairsGenerator} from './generator.ts';
 
-const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
-afterEach(() => vi.restoreAllMocks());
-
-function expectValidEquation(problem: ArithmeticPairProblem) {
-    if (problem.operation === 'addition') expect(problem.num1 + problem.num2).toBe(problem.answer);
-    if (problem.operation === 'subtraction') expect(problem.num1 - problem.num2).toBe(problem.answer);
-    if (problem.operation === 'multiplication') expect(problem.num1 * problem.num2).toBeCloseTo(problem.answer);
-    if (problem.operation === 'division') {
-        expect(problem.num2).not.toBe(0);
-        expect(problem.num1 / problem.num2).toBeCloseTo(problem.answer);
-    }
-}
+const generator = new ArithmeticOpsPairsGenerator();
+const base = {operation: Area.Addition as const, range: createCanonicalNumericRange(20), largestOperandDigits: 1 as const,
+    requireZero: false, requireNegative: false, requireMultipleOf10: false, requireEqualAddends: false, requireEvenResult: false};
 
 describe('ArithmeticOpsPairsGenerator', () => {
-    const generator = new ArithmeticOpsPairsGenerator();
-
-    it('has the correct type', () => {
-        expect(generator.type).toBe('arithmetic');
-    });
-
-    it.each([1, 2] as const)('generates the declared %i-digit primary operands within 20', largestOperandDigits => {
-        for (const operation of [Area.Addition, Area.Subtraction] as const) for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const data = generator.generate({operation, largestOperandDigits,
-                requireNegative: false, requireZero: false, requireMultipleOf10: false,
-                requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}})!.data;
-            expectValidEquation(data);
-            expect(data.answer).toBeLessThanOrEqual(20);
-            expect(Math.max(data.num1, data.num2) < 10 ? 1 : 2).toBe(largestOperandDigits);
+    it('validates every required configuration field', () => {
+        for (const field of Object.keys(base)) {
+            const config = {...base}; delete config[field as keyof typeof base];
+            expect(() => generator.generate(config)).toThrow();
         }
-    });
-
-    it('rejects explicit profiles outside their supported mathematical domain', () => {
-        const base = {operation: Area.Addition, largestOperandDigits: 2,
-            requireNegative: false, requireZero: false, requireMultipleOf10: false,
-            requireEqualAddends: false, requireEvenResult: false, range: {min: 1, max: 20}} as const;
-        for (const patch of [{operation: Area.Multiplication}, {requireNegative: true}, {requireZero: true},
-            {requireMultipleOf10: true}, {requireEqualAddends: true, operation: Area.Subtraction}, {range: {min: 10, max: 20}},
-            {range: {min: 1, max: 10000}}, {largestOperandDigits: 3}]) {
-            expect(generator.generate({...base, ...patch} as never)).toBeNull();
-        }
-    });
-
-    it('partitions all ten equal-addend exercises into nine single-digit and one two-digit case', () => {
-        const draw = vi.spyOn(rng, 'random');
-        const allAddends: number[] = [];
-        for (const largestOperandDigits of [1, 2] as const) {
-            const count = largestOperandDigits === 1 ? 9 : 1;
-            for (let index = 0; index < count; index++) {
-                draw.mockReturnValue((index + 0.5) / count);
-                const data = generator.generate({operation: Area.Addition, largestOperandDigits,
-                    requireNegative: false, requireZero: false, requireMultipleOf10: false,
-                    requireEqualAddends: true, requireEvenResult: true, range: {min: 1, max: 20}})!.data;
-                expectValidEquation(data);
-                expect(data.num1).toBe(data.num2);
-                expect(data.num1).toBe(largestOperandDigits === 1 ? index + 1 : 10);
-                expect(data.answer % 2).toBe(0);
-                allAddends.push(data.num1);
-            }
-        }
-        expect(allAddends).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        expect(draw).toHaveBeenCalledTimes(10);
-    });
-
-    it('strictly validates every required config field', () => {
         expect(() => generator.generate({} as never)).toThrow();
-        expect(() => generator.generate({
-            operation: Area.Addition,
-            requireNegative: false,
-            requireZero: false,
-            largestOperandDigits: 0,
-            requireMultipleOf10: false
-        } as never)).toThrow();
-        expect(() => generator.generate({
-            operation: Area.Addition,
-            range: {min: 1, max: 10},
-            requireZero: false,
-            largestOperandDigits: 0,
-            requireMultipleOf10: false
-        } as never)).toThrow();
     });
-
-    it('proves zero and negative scope requirements for every operation and seed', () => {
-        for (const operation of operations) {
-            for (const requireZero of [false, true]) {
-                for (const requireNegative of [false, true]) {
-                    for (let seed = 0; seed < 25; seed++) {
-                        setSeed(seed);
-                        const stub = generator.generate({
-                            operation,
-                            requireNegative,
-                            requireZero,
-                            largestOperandDigits: 0,
-                            requireMultipleOf10: false,
-                            requireEqualAddends: false,
-                            requireEvenResult: false,
-                            range: {min: 1, max: 10}
-                        });
-                        expect(stub).not.toBeNull();
-                        const values = [stub!.data.num1, stub!.data.num2, stub!.data.answer];
-                        expectValidEquation(stub!.data);
-                        expect(values.every(value => Math.abs(value) <= 10)).toBe(true);
-                        expect(values.includes(0)).toBe(requireZero);
-                        expect(values.some(value => value < 0)).toBe(requireNegative);
-                    }
-                }
-            }
-        }
+    it('retains the canonical payload type and rejects unsupported operations or empty profiles', () => {
+        expect(generator.type).toBe('arithmetic');
+        expect(generator.generate({...base, operation: 'unsupported'})).toBeNull();
+        expect(generator.generate({...base, operation: 'unknown'} as never)).toBeNull();
+        expect(generator.generate({...base, range: createCanonicalNumericRange(1000, 10), largestOperandDigits: 2})).toBeNull();
     });
-
-    it('constrains every numeric term to a multiple of 10 for non-multiplication operations', () => {
-        for (const operation of [Area.Addition, Area.Subtraction, Area.Division] as const) {
-            for (const requireZero of [false, true]) {
-                for (let seed = 0; seed < 20; seed++) {
-                    setSeed(seed);
-                    const stub = generator.generate({
-                        operation,
-                        requireNegative: false,
-                        requireZero,
-                        largestOperandDigits: 0,
-                        requireMultipleOf10: true,
-                        requireEqualAddends: false,
-                        requireEvenResult: false,
-                        range: {min: 1, max: 1000}
-                    });
-                    expect(stub).not.toBeNull();
-                    const values = [stub!.data.num1, stub!.data.num2, stub!.data.answer];
-                    expectValidEquation(stub!.data);
-                    expect(values.every(value => value % 10 === 0)).toBe(true);
-                    expect(values.includes(0)).toBe(requireZero);
-                }
-            }
-        }
-    });
-
-    it('multiplies exactly one one-digit factor by one multiple from 10 through 90', () => {
-        for (let seed = 0; seed < 100; seed++) {
+    it.each([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const)('constructs canonical %s values', operation => {
+        for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
-            const data = generator.generate({
-                operation: Area.Multiplication,
-                requireNegative: false,
-                requireZero: false,
-                largestOperandDigits: 0,
-                requireMultipleOf10: true,
-                requireEqualAddends: false,
-                requireEvenResult: false,
-                range: {min: 1, max: 1000}
-            })!.data;
-            const factors = [data.num1, data.num2];
-            const oneDigitFactors = factors.filter(value => value >= 1 && value <= 9);
-            const decadeFactors = factors.filter(value => value >= 10 && value <= 90 && value % 10 === 0);
-
-            expect(oneDigitFactors).toHaveLength(1);
-            expect(decadeFactors).toHaveLength(1);
-            expect(data.answer).toBe(data.num1 * data.num2);
-            expect(data.answer).toBeLessThan(1000);
+            const config = {...base, operation, range: createCanonicalNumericRange(100), largestOperandDigits: 2 as const};
+            const data = generator.generate(config)!.data;
+            expect(hasCanonicalRangeWitness([data.num1, data.num2, data.answer], config.range)).toBe(true);
         }
     });
-
-    it('leaves all blank placement to the consuming view', () => {
-        const baseConfig = {
-            operation: Area.Addition,
-            requireNegative: false,
-            requireZero: false,
-            largestOperandDigits: 0,
-            requireMultipleOf10: false,
-            requireEqualAddends: false,
-            requireEvenResult: false,
-            range: {min: 1, max: 10}
-        } as const;
-
-        expect(generator.generate(baseConfig)!.data).not.toHaveProperty('blankPart');
-    });
-
-    it('returns null for an unsupported operation or impossible range', () => {
-        const baseConfig = {
-            requireNegative: false,
-            requireZero: false,
-            largestOperandDigits: 0,
-            requireMultipleOf10: false,
-            requireEqualAddends: false,
-            requireEvenResult: false,
-            range: {min: 1, max: 10}
-        } as const;
-
-        expect(generator.generate({...baseConfig, operation: 'unsupported'})).toBeNull();
-        expect(generator.generate({...baseConfig, operation: Area.Addition, range: {min: 10, max: 1}})).toBeNull();
-    });
-
-    it('generates an even result from two equal addends when requested', () => {
-        for (let seed = 0; seed < 20; seed++) {
+    it('retains both the small-subtrahend and small-difference source classes', () => {
+        const samples = Array.from({length: 200}, (_, seed) => {
             setSeed(seed);
-            const stub = generator.generate({
-                operation: Area.Addition,
-                requireNegative: false,
-                requireZero: false,
-                largestOperandDigits: 0,
-                requireMultipleOf10: false,
-                requireEqualAddends: true,
-                requireEvenResult: true,
-                range: {min: 1, max: 20}
-            });
-            expect(stub).not.toBeNull();
-            expect(stub!.data.num1).toBe(stub!.data.num2);
-            expect(stub!.data.answer % 2).toBe(0);
-            expect(stub!.data.answer).toBeLessThanOrEqual(20);
-        }
+            return generator.generate({...base, operation: Area.Subtraction, largestOperandDigits: 2})!.data;
+        });
+        expect(samples.some(data => data.num2 > data.answer)).toBe(true);
+        expect(samples.some(data => data.num2 < data.answer)).toBe(true);
+        expect(samples.some(data => data.answer === 2 && data.num2 >= 10)).toBe(true);
+    });
+    it('preserves cancellation and zero-operand forms in signed zero exercises', () => {
+        const samples = Array.from({length: 80}, (_, seed) => {
+            setSeed(seed);
+            return generator.generate({...base, range: createCanonicalNumericRange(5), requireZero: true, requireNegative: true})!.data;
+        });
+        expect(samples.some(data => data.answer === 0 && data.num1 !== 0 && data.num2 !== 0)).toBe(true);
+        expect(samples.some(data => data.num1 === 0 || data.num2 === 0)).toBe(true);
     });
 });

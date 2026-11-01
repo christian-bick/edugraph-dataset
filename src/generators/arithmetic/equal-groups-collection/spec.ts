@@ -2,6 +2,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {equalGroupsRangeChoices, equalGroupsRangeLabels, resolveEqualGroupsRange} from './range-profile.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'equal-groups-collection',
@@ -12,7 +13,6 @@ export const spec: GeneratorSpec = {
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller100,
         Scope.IntegerNumbers,
         Scope.SingleDigitSmallestOperand
     ]
@@ -26,7 +26,8 @@ export const EqualGroupsCollectionGeneratorSchema = {
             [Area.PartitiveDivision, 'partitive-division'],
             [Area.QuotativeDivision, 'quotative-division']
         ])
-    ]
+    ],
+    range: [equalGroupsRangeLabels, resolveEqualGroupsRange, equalGroupsRangeChoices]
 } as const;
 
 export type EqualGroupsCollectionGeneratorConfig = ConfigFromSchema<

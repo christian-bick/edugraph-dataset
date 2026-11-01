@@ -32,6 +32,15 @@ Map ontology labels **only** to abstract mathematical configuration. Typical par
 | `useDecimals`    | `hasLabel(Scope.NumbersWithDecimals)`             |
 | `attribute`, `relation` | `selectExactMatch`                         |
 
+For a family adopted into canonical range labeling, the resolved numeric profile also describes
+the witnesses that make its bounds tightest: the maximum exceeds the previous upper threshold,
+and the minimum is below the next lower threshold. Resolve those correlated claims before drawing
+values. A separate mathematical source-domain cap can be stricter than the inclusive ontology bound
+(for example, two-digit values ending at 99 under upper 100); it does not redefine that descriptor.
+Keep the chosen profile feasible with every other admitted mathematical constraint. See the
+[approved range contracts](plan/canonical-range-labeling.md#approved-contracts-and-remaining-rollout)
+for the rollout boundary and endpoint policy.
+
 The schema must contain **zero** visual or presentation parameters — no `isReverse`,
 `layoutStyle`, `themeColor`, or comparable flag. Anything describing how a problem is laid
 out, styled, or interacted with belongs in the view spec ([spec-view.md](spec-view.md)).

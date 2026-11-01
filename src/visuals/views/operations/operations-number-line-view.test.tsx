@@ -71,4 +71,13 @@ describe('operations number line view family', () => {
             false
         )).toThrow('Unsupported operation');
     });
+    it('keeps through-five arithmetic scales integral and within five', () => {
+        const markup = renderToStaticMarkup(<OperationsNumberLineView mode="arithmetic" viewId="operations-number-line-arithmetic"
+            payload={payload('operations-number-line-arithmetic', {num1: 2, num2: 3, answer: 5, operation: 'addition'}, true)}
+            showZeroReference={false} />);
+        expect(markup).toContain('>5</text>');
+        expect(markup).not.toContain('>10</text>');
+        expect(markup).not.toContain('>0.5</text>');
+        expect(markup).not.toContain('>0</text>');
+    });
 });

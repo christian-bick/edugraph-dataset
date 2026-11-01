@@ -1,10 +1,16 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {canonicalFourRangeChoices, canonicalFourRangeLabels, canonicalFourRangeProfiles, resolveCanonicalFourRange} from './canonical-range.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'arithmetic-ops-four',
+    compatibility: [generatorLabelRule('canonical-four-addend-domain', canonicalFourRangeLabels, selected => {
+        const labels = canonicalFourRangeLabels.filter(selected);
+        return canonicalFourRangeProfiles.some(candidate => candidate.labels.length === labels.length
+            && candidate.labels.every(selected));
+    })],
     generalLabels: [
         Area.Addition,
         Scope.FourOperands,
@@ -19,8 +25,9 @@ export const spec: GeneratorSpec = {
 
 export const ArithmeticOpsFourGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        resolveRangeFromLabels
+        canonicalFourRangeLabels,
+        resolveCanonicalFourRange,
+        canonicalFourRangeChoices
     ]
 } as const;
 

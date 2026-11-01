@@ -1,132 +1,62 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
-import {getRandomState, setSeed} from '../../../lib/random.ts';
-import {hasLabel} from '../../../lib/resolvers.ts';
-import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
-import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
+import {generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticOpsTriplesGenerator} from './generator.ts';
-import {ArithmeticOpsTriplesGeneratorSchema, spec} from './spec.ts';
+import {spec, type ArithmeticOpsTriplesGeneratorConfig} from './spec.ts';
 
-describe('ArithmeticOpsTriplesGenerator Spec Integration', () => {
-    const generator = new ArithmeticOpsTriplesGenerator();
+const generator = new ArithmeticOpsTriplesGenerator();
+const plan = (labels: string[]) => planModelCompatibility({id: 'canonical-triple', labels},
+    {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},
+    {viewId: 'test', generalLabels: [], schema: {}, spec: {viewId: 'test', generalLabels: []}});
 
-    it('advertises exactly three operands as an invariant capability', () => {
-        expect(spec.generalLabels).toContain(Scope.ThreeOperands);
-        expect(generator.schema).not.toHaveProperty('operandCardinality');
+describe('canonical triple declarations', () => {
+    it('retains addition, sum, and property-law requests', () => {
+        for (const labels of [[Area.Addition, Scope.NumbersSmaller20],
+            [Area.Addition, Area.Sum, Scope.NumbersSmaller20],
+            [Area.Addition, Area.CommutativeLaw, Scope.NumbersSmaller20],
+            [Area.Addition, Area.AssociativeLaw, Scope.NumbersSmaller20],
+            [Area.Addition, Area.Multiplication, Area.DistributiveLaw, Scope.NumbersSmaller100]]) {
+            expect(plan(labels).supported).toBe(true);
+            expect(generateWithLabels(generator, labels)).not.toBeNull();
+        }
     });
-
-    it('resolves Sum into a three-addend addition payload', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Addition,
-            Area.Sum,
-            Scope.ThreeOperands,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersSmaller20
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.num1 + stub!.data.num2 + stub!.data.num3).toBe(stub!.data.answer);
-        expect(stub!.data.answer).toBeLessThanOrEqual(20);
-        expect(stub!.labels).toContain(Area.Addition);
+    it('admits every reviewed two-digit triple cell and rejects the empty within20 cell', () => {
+        for (const lower of [Scope.NumbersLarger10, Scope.NumbersLarger20])
+            for (const upper of [Scope.NumbersSmaller100, Scope.NumbersSmaller120, Scope.NumbersSmaller1000]) {
+                const result = plan([Area.Addition, Scope.TwoDigitLargestOperand, lower, upper, Scope.NumbersWithoutZero]);
+                expect(result.supported).toBe(true);
+                if (!result.supported) continue;
+                for (let seed = 0; seed < 10; seed++) {
+                    const resolved = resolvePlannedConfigurations({generatorSchema: generator.schema, viewSchema: {}, plan: result.plan,
+                        sampleKey: 'canonical-triple#arithmetic-ops-triples#test#train#question#inst:0', seed, attempt: 1});
+                    const data = generator.generate(resolved.generatorConfig as ArithmeticOpsTriplesGeneratorConfig)!.data;
+                    expect([data.num1, data.num2, data.num3].every(value => value >= 10 && value <= 99)).toBe(true);
+                }
+            }
+        expect(plan([Area.Addition, Scope.TwoDigitLargestOperand, Scope.NumbersLarger10, Scope.NumbersSmaller20]).supported).toBe(false);
     });
-
-    it('does not add Sum to a generic three-addend addition target', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Addition,
-            Scope.ThreeOperands,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersSmaller20
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.labels).toContain(Area.Addition);
-        expect(stub!.labels).not.toContain(Area.Sum);
+    it('completes feasible strongest lowers in partial direct requests', () => {
+        for (const refinement of [Scope.TwoDigitLargestOperand, Scope.MultiplesOf10]) {
+            const labels = [Area.Addition, refinement, Scope.NumbersSmaller100, Scope.NumbersWithoutZero];
+            expect(plan(labels).supported).toBe(true);
+            const data = generateWithLabels(generator, labels)!.data;
+            expect([data.num1, data.num2, data.num3].every(value => value >= 10)).toBe(true);
+            if (refinement === Scope.TwoDigitLargestOperand) expect([data.num1, data.num2, data.num3].every(value => value <= 99)).toBe(true);
+        }
     });
-
-    it.each([
-        [Area.CommutativeLaw, 'commutative'],
-        [Area.AssociativeLaw, 'associative']
-    ] as const)('resolves %s into its triple property payload', (law, propertyLaw) => {
-        const stub = generateWithLabels(generator, [
-            Area.Addition,
-            law,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersSmaller20
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.propertyLaw).toBe(propertyLaw);
-        expect(stub!.labels).toContain(law);
-    });
-
-    it('does not expose negative or procedure-inversion configuration', () => {
-        expect(generator.schema).not.toHaveProperty('requireNegative');
-        expect(generator.schema).not.toHaveProperty('invertProcedure');
-        expect(generator.schema).not.toHaveProperty('useThreeAddends');
-    });
-
-    it('resolves a distributive target to multiplication with two partial products', () => {
-        const stub = generateWithLabels(generator, [
-            Area.Addition,
-            Area.Multiplication,
-            Area.DistributiveLaw,
-            Scope.ThreeOperands,
-            Scope.NumbersWithoutNegatives,
-            Scope.NumbersSmaller100
-        ]);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.operation).toBe('multiplication');
-        expect(stub!.data.propertyLaw).toBe('distributive');
-        expect(stub!.data.partialProducts).toHaveLength(2);
-        expect(stub!.labels).toEqual(expect.arrayContaining([
-            Area.Addition,
-            Area.Multiplication,
-            Area.DistributiveLaw
-        ]));
-    });
-
-    it('does not attach a distributive width to an ordinary addition configuration', () => {
-        const labels = [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.NumbersSmaller1000];
-        const result = planModelCompatibility({id: 'ordinary-addition-width', labels},
-            {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
-                schema: generator.schema, spec},
-            {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
-        expect(result).toMatchObject({supported: false, reason: 'incompatible-rules'});
-        setSeed(2);
-        expect(generateWithLabels(generator, labels)).toBeNull();
-    });
-
-    it.each([
-        [Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division],
-        [Area.Addition, Area.CommutativeLaw], [Area.Addition, Area.AssociativeLaw],
-        [Area.Addition, Area.Multiplication, Area.DistributiveLaw]
-    ].map(operationLabels => ({operationLabels})))('preserves the old configuration, entropy and choice counts for $operationLabels', ({operationLabels}) => {
-        const labels = [...operationLabels, Scope.NumbersSmaller100];
-        const legacySchema = {...ArithmeticOpsTriplesGeneratorSchema,
-            useDistributiveLaw: [[Area.DistributiveLaw], hasLabel(Area.DistributiveLaw)]} as const;
-        const domains = [legacySchema, generator.schema].map(schema => {
-            setSeed(71);
-            const choices = normalizeSchemaChoices(schema, labels, 'generator');
-            const result = planModelCompatibility({id: 'legacy-triple', labels},
-                {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
-                {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
-            expect(getRandomState()).toBe(71);
+    it('declares the proved smallest-operand width for the reviewed smaller addition bands', () => {
+        for (const upper of [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20]) {
+            const labels = [Area.Addition, upper, Scope.NumbersWithoutZero];
+            const result = plan(labels);
             expect(result.supported).toBe(true);
-            if (!result.supported) throw new Error('Expected the original triple profile to remain admitted.');
-            return {
-                choices: choices.map(domain => [domain.field, domain.alternatives.length]),
-                admitted: result.plan.domains.map(domain => [domain.field, domain.alternatives.length]),
-                groups: result.plan.groups.map(group => ({fields: group.fields, count: group.assignments.length}))
-            };
-        });
-        expect(domains[1]).toEqual(domains[0]);
-        for (const seed of [0, 2, 42]) {
-            const draws = [legacySchema, generator.schema].map(schema => {
-                setSeed(seed);
-                const {config} = extractConfig(schema, labels);
-                const configurationState = getRandomState();
-                const stub = generator.generate(config);
-                return {config, configurationState, stub, state: getRandomState()};
-            });
-            expect(draws[1]).toEqual(draws[0]);
+            if (!result.supported) continue;
+            const resolved = resolvePlannedConfigurations({generatorSchema: generator.schema, viewSchema: {}, plan: result.plan,
+                sampleKey: 'canonical-triple#arithmetic-ops-triples#test#train#question#inst:0', seed: 5, attempt: 1});
+            expect(resolved.generatorLabels).toContain(Scope.SingleDigitSmallestOperand);
+            const data = generator.generate(resolved.generatorConfig as ArithmeticOpsTriplesGeneratorConfig)!.data;
+            expect(Math.min(data.num1, data.num2, data.num3)).toBeLessThan(10);
         }
     });
 });

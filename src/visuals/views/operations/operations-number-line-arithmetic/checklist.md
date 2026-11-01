@@ -1,2 +1,2 @@
-- **Identity:** The learner executes addition or subtraction within 0 through 100 on a horizontal number line with an evenly spaced numerical scale. A zero reference is retained when an operand or result is zero; otherwise the displayed scale is positive.
+- **Identity:** The learner executes addition or subtraction within 0 through 100 on a horizontal number line with an evenly spaced integer scale. Through-five calculations use a scale ending at five. A zero reference is retained when an operand or result is zero; otherwise the displayed scale is positive.
 - **Modes:** Question Mode shows the start point and unresolved equation. Solution Mode shows the correctly directed jump, signed jump label, endpoint, equation, and answer.

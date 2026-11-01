@@ -2,6 +2,8 @@ import {Area} from 'edugraph-ts';
 import {describe, expect, it, vi} from 'vitest';
 import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {
     MeasurementWordProblemGrade4,
     MeasurementWordProblemKind,
@@ -124,12 +126,33 @@ describe('MeasurementWordProblemsGenerator', () => {
         const config: MeasurementWordProblemsGeneratorConfig = {
             measurementKind: 'liquid-volume',
             numberKind: 'decimal',
-            operation: Area.Division
+            operation: Area.Division, range: false
         };
         setSeed('measurement-word-problem-determinism');
         const first = generator.generate(config);
         setSeed('measurement-word-problem-determinism');
         expect(generator.generate(config)).toEqual(first);
+    });
+
+    it.each([
+        ['integer', undefined], ['integer', false], ['integer', null],
+        ['integer', createCanonicalNumericRange(120)],
+        ['integer', {min: 3, max: 20, maximumAbove: 10, minimumBelow: 5}],
+        ['integer', {...createCanonicalNumericRange(20), maximumAbove: 0}],
+        ['integer', {...createCanonicalNumericRange(20), minimumBelow: 10}],
+        ['integer', createCanonicalNumericRange(100)],
+        ['fraction', undefined], ['decimal', undefined],
+        ['fraction', createCanonicalNumericRange(5)], ['decimal', createCanonicalNumericRange(5)]
+    ])('rejects invalid or infeasible %s range %j without sampling', (numberKind, range) => {
+        const random = vi.spyOn(randomSource, 'random');
+        try {
+            expect(() => generator.generate({measurementKind: 'length', numberKind, range,
+                operation: Area.Addition, operandDigits: numberKind === 'integer'
+                    ? {role: 'largest', digits: 1} : false} as never)).toThrow();
+            expect(random).not.toHaveBeenCalled();
+        } finally {
+            random.mockRestore();
+        }
     });
 
     it.each([
@@ -155,74 +178,70 @@ describe('MeasurementWordProblemsGenerator', () => {
     ])('rejects %s before sampling', (_, numberKind, operation, operandDigits) => {
         const random = vi.spyOn(randomSource, 'random');
         try {
-            expect(() => generator.generate({measurementKind: 'length', numberKind, operation, operandDigits} as never)).toThrow();
+            expect(() => generator.generate({measurementKind: 'length', numberKind, operation, operandDigits,
+                range: numberKind === 'integer' ? createCanonicalNumericRange(20) : false} as never)).toThrow();
             expect(random).not.toHaveBeenCalled();
         } finally {
             random.mockRestore();
         }
     });
 
-    it.each(measurementKinds)('partitions all original integer addition pairs by operand width for %s', measurementKind => {
-        const seen = new Set<string>();
+    it.each(measurementKinds)('partitions every original integer tuple by tightest bounds and operand width for %s', measurementKind => {
         const random = vi.spyOn(randomSource, 'random');
         try {
-            for (const [largestOperandDigits, count] of [[1, 64], [2, 297]] as const) {
-                const profilePairs = new Set<string>();
-                for (let index = 0; index < count; index++) {
-                    random.mockReturnValue((index + 0.5) / count);
-                    const stub = generator.generate({measurementKind, numberKind: 'integer',
-                        operation: Area.Addition, operandDigits: {role: 'largest', digits: largestOperandDigits}});
-                    expectConsistent(stub.data, measurementKind, 'integer', 'addition');
-                    if (stub.data.operation !== 'addition') throw new Error('Expected addition operands.');
-                    const values = stub.data.operands.map(operand => operand.value.numerator);
-                    expect(String(Math.max(...values)).length).toBe(largestOperandDigits);
-                    const pair = values.join('+');
-                    expect(seen.has(pair)).toBe(false);
-                    seen.add(pair);
-                    profilePairs.add(pair);
+            for (const operation of operations) {
+                // Independent description of the support before canonical profiles were introduced.
+                const expected: number[][] = [];
+                if (operation === Area.Addition) {
+                    for (let first = 2; first <= 20; first++) for (let second = 2; second <= 20; second++) {
+                        expected.push([first, second, first + second]);
+                    }
+                } else if (operation === Area.Subtraction) {
+                    for (let second = 2; second <= 10; second++) for (let answer = 1; answer <= 15; answer++) {
+                        expected.push([second + answer, second, answer]);
+                    }
+                } else {
+                    for (let groups = 2; groups <= 6; groups++) {
+                        for (let measured = operation === Area.Division ? 1 : 2; measured <= 12; measured++) {
+                            expected.push(operation === Area.Division
+                                ? [groups * measured, groups, measured] : [groups, measured, groups * measured]);
+                        }
+                    }
                 }
-                expect(profilePairs.size).toBe(count);
-            }
-            const expected = new Set<string>();
-            for (let first = 2; first <= 20; first++) {
-                for (let second = 2; second <= 20; second++) expected.add(`${first}+${second}`);
-            }
-            expect(seen).toEqual(expected);
-            // The one-digit profile includes 9 + 9, although its answer has two digits.
-            expect(seen.has('9+9')).toBe(true);
-        } finally {
-            random.mockRestore();
-        }
-    });
-
-    it.each(measurementKinds)('partitions all original positive integer subtraction pairs by operand width for %s', measurementKind => {
-        const seen = new Set<string>();
-        const random = vi.spyOn(randomSource, 'random');
-        try {
-            for (const [digits, count] of [[1, 28], [2, 107]] as const) {
-                const profilePairs = new Set<string>();
-                for (let index = 0; index < count; index++) {
-                    random.mockReturnValue((index + 0.5) / count);
-                    const stub = generator.generate({measurementKind, numberKind: 'integer',
-                        operation: Area.Subtraction, operandDigits: {role: 'largest', digits}});
-                    expectConsistent(stub.data, measurementKind, 'integer', 'subtraction');
-                    if (stub.data.operation !== 'subtraction') throw new Error('Expected subtraction operands.');
-                    const values = stub.data.operands.map(operand => operand.value.numerator);
-                    expect(String(Math.max(...values)).length).toBe(digits);
-                    const pair = values.join('-');
-                    expect(seen.has(pair)).toBe(false);
-                    seen.add(pair);
-                    profilePairs.add(pair);
+                const seen = new Set<string>();
+                const digitChoices = operation === Area.Addition || operation === Area.Subtraction ? [1, 2] as const : [undefined];
+                for (const {range} of canonicalRangeProfiles.filter(({range}) => range.max <= 100)) {
+                    for (const digits of digitChoices) {
+                        const tuples = expected.filter(values => {
+                            const min = Math.min(...values), max = Math.max(...values);
+                            const tightUpper = [5, 10, 20, 100].find(bound => max <= bound);
+                            const tightLower = [0, 5, 10, 20].filter(bound => min >= bound).at(-1);
+                            return range.max === tightUpper && range.min === tightLower
+                                && (digits === undefined || String(Math.max(values[0], values[1])).length === digits);
+                        });
+                        if (!tuples.length) continue;
+                        const profileSeen = new Set<string>();
+                        for (let index = 0; index < tuples.length; index++) {
+                            random.mockReturnValue((index + 0.5) / tuples.length);
+                            const stub = generator.generate({measurementKind, numberKind: 'integer', operation, range,
+                                operandDigits: digits === undefined ? undefined : {role: 'largest', digits}});
+                            expectConsistent(stub.data, measurementKind, 'integer', operationNames[operation]);
+                            const values = [...stub.data.operands.map(operand => operand.role === 'group-count'
+                                ? operand.count : operand.value.numerator), stub.data.answer.numerator];
+                            expect(Math.max(...values)).toBeLessThanOrEqual(range.max);
+                            expect(Math.max(...values)).toBeGreaterThan(range.maximumAbove);
+                            expect(Math.min(...values)).toBeGreaterThanOrEqual(range.min);
+                            expect(Math.min(...values)).toBeLessThan(range.minimumBelow);
+                            const key = values.join(',');
+                            expect(seen.has(key)).toBe(false);
+                            seen.add(key);
+                            profileSeen.add(key);
+                        }
+                        expect(profileSeen).toEqual(new Set(tuples.map(values => values.join(','))));
+                    }
                 }
-                expect(profilePairs.size).toBe(count);
+                expect(seen).toEqual(new Set(expected.map(values => values.join(','))));
             }
-            const expected = new Set<string>();
-            for (let second = 2; second <= 10; second++) {
-                for (let answer = 1; answer <= 15; answer++) expected.add(`${second + answer}-${second}`);
-            }
-            expect(seen).toEqual(expected);
-            // Two-digit operands may still produce the one-digit answer 1.
-            expect(seen.has('11-10')).toBe(true);
         } finally {
             random.mockRestore();
         }
@@ -241,7 +260,9 @@ describe('MeasurementWordProblemsGenerator', () => {
                             measurementKind,
                             numberKind,
                             operation: operationLabel,
-                            operandDigits
+                            operandDigits,
+                            range: numberKind === 'integer'
+                                ? createCanonicalNumericRange(operandDigits?.digits === 2 ? 20 : 5) : false
                         });
                         expectConsistent(
                             stub.data,
@@ -262,7 +283,7 @@ describe('MeasurementWordProblemsGenerator', () => {
                 measurementKind,
                 numberKind: 'integer',
                 operation: Area.Addition,
-                operandDigits: {role: 'largest', digits: 1}
+                operandDigits: {role: 'largest', digits: 1}, range: createCanonicalNumericRange(5)
             });
             expect(Object.keys(stub)).toEqual(['data']);
         }

@@ -22,7 +22,8 @@ const multiplicationDivisionWordProblemsBuilder = new DatasetPermutationBuilder(
         Scope.NumbersSmaller100,
         Ability.TextualReception
     ])
-    .applyLabelVariants([[Area.Multiplication], [Area.Division]]);
+    .applyLabelVariants([[Area.Multiplication], [Area.Division]])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 const unknownMultiplicationDivisionBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -35,7 +36,8 @@ const unknownMultiplicationDivisionBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Ability.ProcedureInversion
     ])
-    .applyLabelVariants([[Area.Multiplication], [Area.Division]]);
+    .applyLabelVariants([[Area.Multiplication], [Area.Division]])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 const multiplicationKnownFactPropertiesBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -100,7 +102,8 @@ const computeWithin100Builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Area.Multiplication], [Area.Division]]);
+    .applyLabelVariants([[Area.Multiplication], [Area.Division]])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 3.OA.A.1: Interpret products as equal groups ---
 const multiplicationEqualGroupsBuilder = new DatasetPermutationBuilder()
@@ -119,7 +122,8 @@ const multiplicationEqualGroupsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
         [Scope.NumberArray]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 3.OA.A.2: Interpret quotients through collection division ---
 const partitiveDivisionBuilder = new DatasetPermutationBuilder()
@@ -137,7 +141,8 @@ const partitiveDivisionBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
         [Scope.NumberArray]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 const quotativeDivisionBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -154,7 +159,8 @@ const quotativeDivisionBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.PhysicalNumbers],
         [Scope.NumberArray]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 3.OA.B.5: Use the distributive property for multiplication ---
 // Keep application and its explanatory supporting refinement as separate tasks.
@@ -172,7 +178,8 @@ const multiplicationDistributiveBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Ability.ProcedureExecution],
         [Ability.ProcedureUnderstanding]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20, 100] });
 
 // --- 3.OA.D.8: Solve connected two-step word problems ---
 const fourOperationTwoStepBuilder = new DatasetPermutationBuilder()
@@ -253,7 +260,8 @@ const addSubtractWithin1000Builder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Area.Addition], [Area.Subtraction]]);
+    .applyLabelVariants([[Area.Addition], [Area.Subtraction]])
+    .applyUpperRangeVariants({ bands: [20, 100, 120, 1000] });
 
 const placeValuePartitioningWithin1000Builder = new DatasetPermutationBuilder()
     .addLabels([
@@ -413,9 +421,25 @@ const massVolumeWordProblemsBuilder = new DatasetPermutationBuilder()
         [Scope.VolumeMeasurement, Scope.LiquidVolumes, Scope.LiterScale]
     ])
     .applyLabelVariants([
+        [Area.Addition, Scope.NumbersSmaller5],
+        [Area.Addition, Scope.NumbersSmaller10],
+        [Area.Addition, Scope.NumbersSmaller20],
+        [Area.Addition, Scope.NumbersSmaller100],
+        [Area.Addition, Scope.NumbersSmaller120],
         [Area.Addition, Scope.NumbersSmaller1000],
+        [Area.Subtraction, Scope.NumbersSmaller5],
+        [Area.Subtraction, Scope.NumbersSmaller10],
+        [Area.Subtraction, Scope.NumbersSmaller20],
+        [Area.Subtraction, Scope.NumbersSmaller100],
+        [Area.Subtraction, Scope.NumbersSmaller120],
         [Area.Subtraction, Scope.NumbersSmaller1000],
+        [Area.Multiplication, Scope.NumbersSmaller5],
+        [Area.Multiplication, Scope.NumbersSmaller10],
+        [Area.Multiplication, Scope.NumbersSmaller20],
         [Area.Multiplication, Scope.NumbersSmaller100],
+        [Area.Division, Scope.NumbersSmaller5],
+        [Area.Division, Scope.NumbersSmaller10],
+        [Area.Division, Scope.NumbersSmaller20],
         [Area.Division, Scope.NumbersSmaller100]
     ]);
 

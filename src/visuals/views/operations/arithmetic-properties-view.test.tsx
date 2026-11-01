@@ -141,9 +141,9 @@ describe('arithmetic property display compatibility', () => {
 
     it.each(views)('accepts complete bounded producer draws for $spec.viewId', ({spec, schema, ability, Component}) => {
         for (const {law, operations} of laws) {
-            for (const upper of [Scope.NumbersSmaller20, Scope.NumbersSmaller100]) {
+            for (const upper of [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100]) {
                 const target = {id: 'property-bounded-fixture', labels: [
-                    law, ...operations, ability, Scope.NumbersLargerZero, upper
+                    law, ...operations, ability, upper
                 ]};
                 const planned = planModelCompatibility(target, generator, {...spec, schema, spec});
                 if (!planned.supported) throw new Error(`Bounded property fixture rejected: ${planned.reason}`);
@@ -166,7 +166,7 @@ describe('arithmetic property display compatibility', () => {
 
     it.each(views)('rejects a producer range beyond the display capacity for $spec.viewId', ({spec, schema, ability}) => {
         const target = {id: 'property-large-fixture', labels: [
-            Area.Addition, Area.CommutativeLaw, ability, Scope.NumbersLargerZero, Scope.NumbersSmaller1000
+            Area.Addition, Area.CommutativeLaw, ability, Scope.NumbersSmaller1000
         ]};
         const unrestricted = planModelCompatibility(target, generator, {...spec, schema, spec: {...spec, compatibility: []}});
         expect(unrestricted.supported).toBe(true);

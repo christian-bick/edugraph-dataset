@@ -1,93 +1,20 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {findSchemaFallbackContractIssues} from '../../../lib/utils.ts';
-import {validateSchemaChoiceContracts} from '../../../lib/schema-choices.ts';
-import {operandWidthContextLabels, permitsLargestOperandWidth, resolveLargestOperandDigits,
-    usesLargestOperandWidthProfiles} from './operand-width.ts';
-import {ArithmeticOpsPairsGeneratorSchema} from './spec.ts';
+import {resolveLargestOperandDigits} from './operand-width.ts';
 
-const addition = [Area.Addition, Scope.NumbersSmaller20];
-const selectedFrom = (labels: readonly string[]) => (label: string) => labels.includes(label);
-const nonExcludingContext = new Set<string>([
-    Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division,
-    Area.IteratedOperation, Scope.NumbersSmaller20, Scope.NumbersSmaller100, Scope.NumbersSmaller120,
-    Scope.NumbersSmaller1000, Scope.NumbersSmaller10000, Scope.NumbersSmaller100000,
-    Scope.NumbersSmaller1000000
-]);
-
-describe('Binary operand-width profile resolution', () => {
-    it.each([Area.Addition, Area.Subtraction])('requires a width for the scoped %s domain', operation => {
-        const labels = [operation, Scope.NumbersSmaller20];
-        expect(usesLargestOperandWidthProfiles(selectedFrom(labels))).toBe(true);
-        expect(resolveLargestOperandDigits(labels)).toBeUndefined();
+describe('canonical operand width resolution', () => {
+    it('resolves precise widths and the nonoverlapping broad multiple-digit profile', () => {
         expect(resolveLargestOperandDigits([Scope.SingleDigitLargestOperand])).toBe(1);
         expect(resolveLargestOperandDigits([Scope.TwoDigitLargestOperand])).toBe(2);
-        expect(resolveLargestOperandDigits([])).toBe(0);
-        expect(() => validateSchemaChoiceContracts(ArithmeticOpsPairsGeneratorSchema)).not.toThrow();
-        expect(findSchemaFallbackContractIssues(ArithmeticOpsPairsGeneratorSchema)).toEqual([]);
+        expect(resolveLargestOperandDigits([Scope.ThreeDigitLargestOperand])).toBe(3);
+        expect(resolveLargestOperandDigits([Scope.FourDigitLargestOperand])).toBe(4);
+        expect(resolveLargestOperandDigits([Scope.MultipleDigitLargestOperand])).toBe('multiple');
+        expect(resolveLargestOperandDigits([Scope.MultipleDigitLargestOperand, Scope.TwoDigitLargestOperand])).toBe(2);
     });
-
-    it.each([Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand])(
-        'resolves the selected scoped width %s', width => {
-            expect(resolveLargestOperandDigits([...addition, width]))
-                .toBe(width === Scope.SingleDigitLargestOperand ? 1 : 2);
-        }
-    );
-
-    it('rejects competing widths instead of hiding their conflict through deduplication', () => {
-        expect(resolveLargestOperandDigits([
-            ...addition, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand
-        ])).toBeUndefined();
-    });
-
-    it('accepts one precise completion of a broad multiple-digit request without hiding conflicts', () => {
-        const bounded = [Area.Subtraction, Scope.NumbersSmaller100];
-        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand])).toBeUndefined();
-        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
-            Scope.TwoDigitLargestOperand])).toBe(2);
-        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
-            Scope.ThreeDigitLargestOperand])).toBe(3);
-        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
-            Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand])).toBeUndefined();
-        expect(resolveLargestOperandDigits([...bounded, Scope.MultipleDigitLargestOperand,
-            Scope.SingleDigitLargestOperand])).toBeUndefined();
-    });
-
-    it.each(operandWidthContextLabels.filter(label => !nonExcludingContext.has(label)))(
-        'leaves %s outside the new profiles', label => {
-            const labels = [...addition, label];
-            expect(usesLargestOperandWidthProfiles(selectedFrom(labels))).toBe(false);
-            expect(resolveLargestOperandDigits(labels)).toBe(0);
-            expect(resolveLargestOperandDigits([...labels, Scope.TwoDigitLargestOperand])).toBeUndefined();
-        }
-    );
-
-    it.each([Area.Multiplication, Area.Division])(
-        'keeps %s on the existing sampler', operation => {
-            expect(resolveLargestOperandDigits([operation, Scope.NumbersSmaller20])).toBe(0);
-            expect(resolveLargestOperandDigits([
-                operation, Scope.NumbersSmaller20, Scope.SingleDigitLargestOperand
-            ])).toBeUndefined();
-        }
-    );
-
-    it('includes equal-addend addition while retaining the existing iterated-subtraction behavior', () => {
-        expect(resolveLargestOperandDigits([...addition, Area.IteratedOperation])).toBeUndefined();
-        expect(resolveLargestOperandDigits([
-            ...addition, Area.IteratedOperation, Scope.TwoDigitLargestOperand
-        ])).toBe(2);
-        expect(resolveLargestOperandDigits([
-            Area.Subtraction, Area.IteratedOperation, Scope.NumbersSmaller20
-        ])).toBe(0);
-    });
-
-    it('retains the existing within-five single-width claim', () => {
-        const legacy = [Area.Subtraction, Scope.NumbersSmaller5, Scope.NumbersWithZero];
-        expect(permitsLargestOperandWidth(selectedFrom(legacy), 1)).toBe(true);
-        expect(permitsLargestOperandWidth(selectedFrom(legacy), 2)).toBe(false);
-        expect(resolveLargestOperandDigits([...legacy, Scope.SingleDigitLargestOperand])).toBe(1);
-        expect(resolveLargestOperandDigits([
-            ...legacy, Scope.MultiplesOf10, Scope.SingleDigitLargestOperand
-        ])).toBeUndefined();
+    it('rejects ambiguous or unsupported requests', () => {
+        expect(resolveLargestOperandDigits([])).toBeUndefined();
+        expect(resolveLargestOperandDigits([Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand])).toBeUndefined();
+        expect(resolveLargestOperandDigits([Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand])).toBeUndefined();
+        expect(resolveLargestOperandDigits([Area.Addition, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller5])).toBeUndefined();
     });
 });

@@ -3,7 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {planModelCompatibility} from '../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../lib/planned-generation.ts';
 import {getRandomState, setSeed} from '../../lib/random.ts';
-import {hasLabel} from '../../lib/resolvers.ts';
+import {canonicalRangeLabels, resolveCanonicalRangeFromLabels} from '../../lib/canonical-range-labels.ts';
+import {hasCanonicalRangeWitness} from '../../lib/canonical-numeric-range.ts';
 import {extractConfig} from '../../lib/utils.ts';
 import type {GeneratorSpec} from '../../types/generator-spec.ts';
 import type {ProblemGenerator} from '../../types/ml-engine.ts';
@@ -22,17 +23,17 @@ const plan = (generator: ProblemGenerator, spec: GeneratorSpec, labels: string[]
 
 const pairCases = [
     {name: 'addition within 10', operation: Area.Addition, bounds: [Scope.NumbersSmaller10],
-        claim: Scope.SingleDigitSmallestOperand},
+        claim: undefined},
     {name: 'subtraction within 10', operation: Area.Subtraction, bounds: [Scope.NumbersSmaller10],
-        claim: Scope.SingleDigitSmallestOperand},
+        claim: undefined},
     {name: 'addition from 10 within 100', operation: Area.Addition,
-        bounds: [Scope.NumbersLarger10, Scope.NumbersSmaller100], claim: Scope.TwoDigitSmallestOperand},
+        bounds: [Scope.NumbersLarger10, Scope.NumbersSmaller100], claim: Scope.TwoDigitLargestOperand},
     {name: 'addition within 5', operation: Area.Addition, bounds: [Scope.NumbersSmaller5],
         claim: Scope.SingleDigitLargestOperand},
     {name: 'subtraction within 5', operation: Area.Subtraction, bounds: [Scope.NumbersSmaller5],
         claim: Scope.SingleDigitLargestOperand}
 ];
-const cases = [
+const cases: {name: string; generator: ProblemGenerator; spec: GeneratorSpec; labels: string[]; claim?: string}[] = [
     ...pairCases.map(example => ({name: `pair ${example.name}`, generator: new ArithmeticOpsPairsGenerator(),
         spec: pairSpec, labels: [example.operation, ...example.bounds, Scope.NumbersWithoutNegatives,
             Scope.NumbersWithoutZero], claim: example.claim})),
@@ -49,38 +50,47 @@ const cases = [
     ])
 ];
 
-describe('Arithmetic operand-width declaration preservation', () => {
-    it.each(cases)('keeps the original mathematics and entropy for $name', ({generator, spec, labels, claim}) => {
+const assertClaims = (data: Record<string, unknown>, labels: string[]) => {
+    const operands = [data.num1, data.num2, data.num3]
+        .filter((value): value is number => typeof value === 'number').map(Math.abs);
+    const width = (value: number) => Math.max(1, Math.floor(Math.log10(Math.max(1, value))) + 1);
+    const smallest = width(Math.min(...operands)), largest = width(Math.max(...operands));
+    for (const [label, value, expected] of [
+        [Scope.SingleDigitSmallestOperand, smallest, 1], [Scope.TwoDigitSmallestOperand, smallest, 2],
+        [Scope.SingleDigitLargestOperand, largest, 1], [Scope.TwoDigitLargestOperand, largest, 2],
+        [Scope.ThreeDigitLargestOperand, largest, 3], [Scope.FourDigitLargestOperand, largest, 4]
+    ] as const) if (labels.includes(label)) expect(value).toBe(expected);
+    if (labels.includes(Scope.MultipleDigitLargestOperand)) expect(largest).toBeGreaterThan(1);
+    const range = resolveCanonicalRangeFromLabels(labels.filter(label => canonicalRangeLabels.includes(label)));
+    expect(range).toBeDefined();
+    expect(hasCanonicalRangeWitness([...operands, data.answer as number], range!)).toBe(true);
+};
+
+describe('Canonical arithmetic operand-width declarations', () => {
+    it.each(cases)('constructs truthful direct and planned profiles and replays each path for $name', ({generator, spec, labels, claim}) => {
         const result = plan(generator, spec, labels);
         expect(result.supported).toBe(true);
         if (!result.supported) return;
-        // This is the predicate used before contextual width declarations; concrete sampling is unchanged.
-        const originalGenerator: ProblemGenerator = generator;
-        const originalSchema = {...originalGenerator.schema,
-            requireMultipleOf10: [[Scope.MultiplesOf10], hasLabel(Scope.MultiplesOf10)] as const};
-        let successes = 0;
         for (let seed = 0; seed < 32; seed++) {
             setSeed(seed);
-            const originalConfig = extractConfig(originalSchema, labels).config;
-            const original = originalGenerator.generate(originalConfig);
+            const direct = extractConfig(generator.schema, labels);
+            const directStub = generator.generate(direct.config);
             const continuation = getRandomState();
-            const draw = generatePlannedDraw({generator, viewSchema: {}, plan: result.plan,
-                sampleKey: `width-test#${spec.generatorId}#width-proof#train#question#inst:0`, seed, attempt: 1});
-            expect(draw.stub?.data ?? null).toEqual(original?.data ?? null);
+            expect(directStub).not.toBeNull();
+            assertClaims(directStub!.data, direct.resolvedLabels);
+            setSeed(seed);
+            const directReplay = extractConfig(generator.schema, labels);
+            expect(generator.generate(directReplay.config)).toEqual(directStub);
             expect(getRandomState()).toBe(continuation);
-            expect(draw.labels).toContain(claim);
-            if (!draw.stub) continue;
-            successes++;
-            const values = [draw.stub.data.num1, draw.stub.data.num2, draw.stub.data.num3]
-                .filter((value): value is number => typeof value === 'number').map(Math.abs);
-            if (claim === Scope.SingleDigitLargestOperand) expect(Math.max(...values)).toBeLessThan(10);
-            else if (claim === Scope.SingleDigitSmallestOperand) expect(Math.min(...values)).toBeLessThan(10);
-            else {
-                expect(Math.min(...values)).toBeGreaterThanOrEqual(10);
-                expect(Math.min(...values)).toBeLessThan(100);
-            }
+            const input = {generator, viewSchema: {}, plan: result.plan,
+                sampleKey: `width-test#${spec.generatorId}#width-proof#train#question#inst:0`, seed, attempt: 1};
+            const draw = generatePlannedDraw(input), plannedContinuation = getRandomState();
+            expect(draw.stub).not.toBeNull();
+            if (claim) expect(draw.labels).toContain(claim);
+            assertClaims(draw.stub!.data, draw.labels);
+            expect(generatePlannedDraw({...input, replay: draw.replay})).toEqual(draw);
+            expect(getRandomState()).toBe(plannedContinuation);
         }
-        expect(successes).toBeGreaterThan(0);
     });
 
     it.each([
@@ -93,9 +103,17 @@ describe('Arithmetic operand-width declaration preservation', () => {
             [operation, range, width, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]).supported).toBe(false);
     });
 
-    it('keeps wider non-distributive triples outside the new width claim', () => {
-        const result = plan(new ArithmeticOpsTriplesGenerator(), tripleSpec,
+    it('completes a feasible stronger lower for an explicit triple smallest-width request', () => {
+        const generator = new ArithmeticOpsTriplesGenerator();
+        const result = plan(generator, tripleSpec,
             [Area.Addition, Scope.NumbersSmaller100, Scope.TwoDigitSmallestOperand]);
-        expect(result.supported).toBe(false);
+        expect(result.supported).toBe(true);
+        if (!result.supported) return;
+        const draw = generatePlannedDraw({generator, viewSchema: {}, plan: result.plan,
+            sampleKey: 'width-test#arithmetic-ops-triples#width-proof#train#question#inst:0', seed: 7, attempt: 1});
+        expect(draw.labels).toContain(Scope.NumbersLarger10);
+        expect(draw.labels).toContain(Scope.TwoDigitSmallestOperand);
+        expect(draw.stub).not.toBeNull();
+        assertClaims(draw.stub!.data, draw.labels);
     });
 });

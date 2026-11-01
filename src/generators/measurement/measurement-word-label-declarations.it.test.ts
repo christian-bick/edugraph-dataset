@@ -12,6 +12,8 @@ import {arithmeticOperations, resolveDeclaredOperation} from '../arithmetic/help
 import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-audit.ts';
 import {createLabelDependencyEvaluator} from '../../lib/label-dependencies.ts';
 import {assessLabelDependencyCoverage} from '../../lib/label-dependency-coverage.ts';
+import {canonicalRangeLabels, resolveCanonicalRangeFromLabels} from '../../lib/canonical-range-labels.ts';
+import {hasCanonicalRangeWitness, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import * as randomSource from '../../lib/random.ts';
 import type {MeasurementWordProblemGrade4, MeasurementWordProblemValue} from '../../types/problems.ts';
 import {spec as grade4Targets} from '../../spec/ccss/grade-04.ts';
@@ -164,18 +166,49 @@ const expectIntegerAdditiveWidth = (labels: readonly string[], data: Measurement
     expect(labels.includes(Scope.TwoDigitLargestOperand)).toBe(largest >= 10);
 };
 
+const expectedSelectionCount = (labels: readonly string[]): number => {
+    if (!labels.includes(Scope.IntegerNumbers)) return 1;
+    const uppers = [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100];
+    const upperIndex = uppers.findIndex(label => labels.includes(label));
+    expect(upperIndex).toBeGreaterThanOrEqual(0);
+    // Independent finite-domain counts, including each feasible strongest-lower/width combination.
+    const counts = labels.includes(Area.Addition) ? [1, 2, 5, 4]
+        : labels.includes(Area.Subtraction) ? [1, 3, 3, 2] : [1, 1, 1, 2];
+    return counts[upperIndex]!;
+};
+
+const expectCanonicalRange = (
+    labels: readonly string[], config: Record<string, unknown>, data: MeasurementWordProblemGrade4
+) => {
+    expect(labels).not.toContain(Scope.NumbersLargerZero);
+    if (data.numberKind !== 'integer') {
+        expect(config.range).toBe(false);
+        expect(labels.filter(label => canonicalRangeLabels.includes(label))).toEqual([]);
+        return;
+    }
+    const range = config.range as CanonicalNumericRange;
+    expect(range).toBeTruthy();
+    expect(resolveCanonicalRangeFromLabels([...labels])).toEqual(range);
+    const values = [...data.operands.map(operand => operand.role === 'measured'
+        ? operand.value.numerator / operand.value.denominator : operand.count),
+    data.answer.numerator / data.answer.denominator];
+    expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+};
+
 describe('measurement word-problem declarations on existing Grade 4 targets', () => {
     it('assigns positive quantities to the generator and decimal digit notation to the view', () => {
-        expect(targets).toHaveLength(60);
+        expect(targets).toHaveLength(120);
+        expect(targets.filter(target => target.labels.includes(Scope.IntegerNumbers))).toHaveLength(80);
+        expect(targets.filter(target => !target.labels.includes(Scope.IntegerNumbers))).toHaveLength(40);
         expect(generator.generalLabels).toEqual(expect.arrayContaining(quantityLabels));
         expect(view.generalLabels).toEqual(expect.arrayContaining(notationLabels));
         for (const label of notationLabels) expect(generator.generalLabels).not.toContain(label);
         for (const label of quantityLabels) expect(view.generalLabels).not.toContain(label);
-        expect(Object.keys(generator.schema!).sort()).toEqual(['measurementKind', 'numberKind', 'operandDigits', 'operation']);
+        expect(Object.keys(generator.schema!).sort()).toEqual(['measurementKind', 'numberKind', 'operandDigits', 'operation', 'range']);
         expect(view.schema).toEqual({});
     });
 
-    it('checks 70 source selections without unresolved non-range dependency assessments', () => {
+    it('checks 195 source selections without unresolved non-range dependency assessments', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         let selectionCount = 0;
@@ -184,8 +217,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
             if (!matched.matched) throw new Error(`Existing target stopped matching: ${target.id}: ${matched.reason}`);
             const selections = enumerateDependencyAuditSelections(matched.plan);
             expect(selections.status).toBe('complete');
-            expect(selections.selections).toHaveLength((target.labels.includes(Area.Addition) || target.labels.includes(Area.Subtraction))
-                && target.labels.includes(Scope.IntegerNumbers) ? 2 : 1);
+            expect(selections.selections).toHaveLength(expectedSelectionCount(target.labels));
             selectionCount += selections.selections.length;
             for (const selection of selections.selections) {
                 const evaluation = evaluator.evaluate(selection.labels);
@@ -199,14 +231,14 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 }
             }
         }
-        expect(selectionCount).toBe(70);
+        expect(selectionCount).toBe(195);
         expect(Object.fromEntries(missingCounts)).toEqual({});
     });
 
     it.each([
-        {name: 'number kind and operation omitted', labels: [], count: 14},
-        {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 3},
-        {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 6},
+        {name: 'number kind and operation omitted', labels: [], count: 39},
+        {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 7},
+        {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 31},
         {name: 'fraction kind with operation omitted', labels: [Scope.FractionNumbers], count: 4},
         {name: 'decimal kind with operation omitted', labels: [Scope.DecimalNumbers], count: 4}
     ])('preserves the complete semantic configuration set for $name', ({labels, count}) => {
@@ -238,6 +270,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 const data = draw.stub!.data as unknown as MeasurementWordProblemGrade4;
                 expect(data.numberKind).toBe(entry.config.numberKind);
                 expectIntegerAdditiveWidth(draw.labels, data);
+                expectCanonicalRange(draw.labels, entry.config, data);
                 expectPositiveQuantityPresentation(data, mode);
             }
         }
@@ -252,7 +285,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'smallest width with omitted kind and operation', labels: [Scope.SingleDigitSmallestOperand], kinds: ['integer']}
     ])('admits the supported explicit role for $name', ({labels, kinds}) => {
         const current = admittedConfigurations(labels);
-        expect(current.configurations.map(entry => entry.config.numberKind).sort()).toEqual(kinds);
+        expect([...new Set(current.configurations.map(entry => entry.config.numberKind))].sort()).toEqual(kinds);
         for (const entry of current.configurations) {
             expect(entry.config.operation).toBe(Area.Multiplication);
             expect(entry.selection.labels).toEqual(expect.arrayContaining(labels));
@@ -271,7 +304,11 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'two-digit width with kind and operation omitted', labels: [Scope.TwoDigitLargestOperand], operations: [Area.Addition, Area.Subtraction], widths: [2, 2]}
     ])('admits exactly the supported integer additive profiles for $name', ({labels, operations, widths}) => {
         const current = admittedConfigurations(labels);
-        expect(current.configurations.map(entry => operationValue(entry.config).largestOperandDigits).sort()).toEqual(widths);
+        const semanticProfiles = [...new Map(current.configurations.map(entry => {
+            const profile = operationValue(entry.config);
+            return [JSON.stringify(profile), profile] as const;
+        })).values()];
+        expect(semanticProfiles.map(profile => profile.largestOperandDigits).sort()).toEqual(widths);
         expect([...new Set(current.configurations.map(entry => entry.config.operation))].sort()).toEqual(operations);
         for (const entry of current.configurations) {
             expect(entry.config.numberKind).toBe('integer');
@@ -282,9 +319,10 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
 
     it('allows a partial largest-width request to select only integer addition/subtraction or noninteger multiplication', () => {
         const current = admittedConfigurations([Scope.SingleDigitLargestOperand]);
-        expect(current.configurations.map(entry => [operationValue(entry.config).operation, entry.config.numberKind]).sort())
-            .toEqual([[Area.Addition, 'integer'], [Area.Subtraction, 'integer'],
-                [Area.Multiplication, 'decimal'], [Area.Multiplication, 'fraction']].sort());
+        const semanticProfiles = [...new Set(current.configurations.map(entry =>
+            JSON.stringify([operationValue(entry.config).operation, entry.config.numberKind])))].sort();
+        expect(semanticProfiles).toEqual([[Area.Addition, 'integer'], [Area.Subtraction, 'integer'],
+            [Area.Multiplication, 'decimal'], [Area.Multiplication, 'fraction']].map(profile => JSON.stringify(profile)).sort());
         for (const entry of current.configurations) expectOperationRoles(entry.selection.labels, entry.config);
     });
 
@@ -304,7 +342,11 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'fraction subtraction with one-digit width', labels: [Area.Subtraction, Scope.FractionNumbers, Scope.SingleDigitLargestOperand]},
         {name: 'decimal subtraction with two-digit width', labels: [Area.Subtraction, Scope.DecimalNumbers, Scope.TwoDigitLargestOperand]},
         {name: 'subtraction with competing widths', labels: [Area.Subtraction, Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand]},
-        {name: 'subtraction with multiplication width', labels: [Area.Subtraction, Scope.SingleDigitSmallestOperand]}
+        {name: 'subtraction with multiplication width', labels: [Area.Subtraction, Scope.SingleDigitSmallestOperand]},
+        {name: 'one-digit addition above twenty', labels: [Area.Addition, Scope.IntegerNumbers, Scope.SingleDigitLargestOperand, Scope.NumbersSmaller100]},
+        {name: 'two-digit addition within ten', labels: [Area.Addition, Scope.IntegerNumbers, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller10]},
+        {name: 'noninteger range rollout', labels: [Area.Addition, Scope.DecimalNumbers, Scope.NumbersSmaller5]},
+        {name: 'impossible lower-bound division', labels: [Area.Division, Scope.IntegerNumbers, Scope.NumbersSmaller100, Scope.NumbersLarger10]}
     ])('rejects unsupported explicit claims for $name without rewriting the target', ({labels}) => {
         const target = partialTarget(labels);
         const originalLabels = [...target.labels];
@@ -320,8 +362,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(matched.plan.targetLabels).toEqual([...originalLabels].sort());
         const selections = enumerateDependencyAuditSelections(matched.plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength((target.labels.includes(Area.Addition) || target.labels.includes(Area.Subtraction))
-            && target.labels.includes(Scope.IntegerNumbers) ? 2 : 1);
+        expect(selections.selections).toHaveLength(expectedSelectionCount(target.labels));
         const producer = new MeasurementWordProblemsGenerator();
         for (const selection of selections.selections) {
             const receipt = createGenerationSelectionReceipt(matched.plan, selection.choices);
@@ -344,6 +385,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(coverage.failures).toEqual([]);
                 const data = draw.stub!.data as unknown as MeasurementWordProblemGrade4;
                 expectIntegerAdditiveWidth(draw.labels, data);
+                expectCanonicalRange(draw.labels, config, data);
                 expectPositiveQuantityPresentation(data, mode);
             };
             for (const mode of ['question', 'solution'] as const) {

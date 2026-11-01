@@ -3,44 +3,22 @@ import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {NumberArrayProblem} from '../../../types/problems.ts';
 import {NumberArrayGeneratorConfig, NumberArrayGeneratorSchema} from './spec.ts';
-
-const randomInteger = (min: number, max: number) => min + Math.floor(random() * (max - min + 1));
+import {arrayCandidates} from './profiles.ts';
 
 export class NumberArrayGenerator implements ProblemGenerator<NumberArrayProblem, NumberArrayGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = NumberArrayGeneratorSchema;
 
-    generate(config: NumberArrayGeneratorConfig): ProblemStub<NumberArrayProblem> {
+    generate(config: NumberArrayGeneratorConfig): ProblemStub<NumberArrayProblem> | null {
         validateConfigFields('number-array', config, [
             'operation',
             'requireTwoOperands',
-            'requireIteratedOperation'
+            'profile'
         ]);
+        validateConfigFields('number-array', config.profile!, ['range', 'smallestDigits', 'largestDigits', 'iterated']);
 
-        const operation = config.operation!;
-        const minimumRows = config.requireIteratedOperation ? 3 : 2;
-        const rows = operation === 'addition' && config.requireTwoOperands
-            ? 2
-            : randomInteger(minimumRows, 5);
-        const columns = randomInteger(2, 5);
-        const total = rows * columns;
-        const answer = operation === 'partitive-division'
-            ? columns
-            : operation === 'quotative-division'
-                ? rows
-                : total;
-
-        return {
-            data: {
-                operation,
-                groupCount: rows,
-                groupSize: columns,
-                rows,
-                columns,
-                total,
-                answer,
-                addends: Array.from({length: rows}, () => columns)
-            }
-        };
+        const candidates = arrayCandidates(config.operation!, config.requireTwoOperands!, config.profile!);
+        if (!candidates.length) return null;
+        return {data: candidates[Math.floor(random() * candidates.length)]!};
     }
 }

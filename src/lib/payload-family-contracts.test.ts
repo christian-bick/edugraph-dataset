@@ -134,10 +134,12 @@ describe('declared producer/view payload families', () => {
                 }
             }
         }
-        const ordinary = targets.find(target => target.id === '2.NBT.B.6-two-three-addends~71b01c5e')!;
-        expect(ordinary).toBeDefined();
-        expect(tuples.filter(tuple => tuple.target.id === ordinary.id)
-            .some(tuple => tuple.viewId.startsWith('operations-properties'))).toBe(false);
+        const ordinary = targets.filter(target => target.id.startsWith('2.NBT.B.6-two-three-addends~'));
+        expect(ordinary.length).toBeGreaterThan(0);
+        for (const target of ordinary) {
+            expect(tuples.filter(tuple => tuple.target.id === target.id)
+                .some(tuple => tuple.viewId.startsWith('operations-properties'))).toBe(false);
+        }
     }, 120_000);
 
     it('does not advertise a ten-step change inside a range smaller than ten', () => {

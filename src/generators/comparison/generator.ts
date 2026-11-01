@@ -9,8 +9,9 @@ import {
     createWholeNumberPlaceValues
 } from '../../lib/whole-number-notation.ts';
 import {ComparisonGeneratorConfig, ComparisonGeneratorSchema} from "./spec.ts";
-import {Scope} from 'edugraph-ts';
 import {validateConfigFields} from "../../lib/errors.ts";
+import {comparisonIntervals} from './sampling.ts';
+import {hasCanonicalRangeWitness} from '../../lib/canonical-numeric-range.ts';
 
 const createComparisonEvidence = (
     num1: number,
@@ -53,36 +54,28 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
     schema = ComparisonGeneratorSchema;
 
     generate(config: ComparisonGeneratorConfig): ProblemStub<ComparisonProblem> | null {
-        validateConfigFields('comparison', config, ['range', 'relation', 'requireNegative', 'requireZero']);
-        const resolvedRange = config.range!;
-        const minMagnitude = Math.max(1, Math.ceil(resolvedRange.min));
-        const maxMagnitude = Math.floor(resolvedRange.max);
-        if (resolvedRange.min > resolvedRange.max || maxMagnitude < minMagnitude) return null;
+        validateConfigFields('comparison', config, ['comparison']);
+        const profile = config.comparison!;
+        validateConfigFields('comparison', profile,
+            ['range', 'maximumValue', 'relation', 'requireNegative', 'requireZero']);
+        const intervals = comparisonIntervals(profile);
+        if (!intervals) return null;
+        const {range, relation, requireNegative, requireZero} = profile;
+        const drawInteger = (min: number, max: number): number =>
+            min + Math.floor(random() * (max - min + 1));
+        const low = drawInteger(intervals.lowMinimum, intervals.lowMaximum);
+        const high = relation === 'equal' ? low : drawInteger(
+            Math.max(intervals.highMinimum, low + (requireNegative || requireZero ? 0 : 1)),
+            intervals.highMaximum
+        );
+        const lower = requireNegative ? -high : low;
+        const higher = relation === 'equal' ? lower : requireNegative && requireZero ? 0 : high;
+        // A negative/nonzero comparison retains its smaller-magnitude positive witness.
+        const largerValue = requireNegative && !requireZero && relation !== 'equal' ? low : higher;
+        const [num1, num2] = relation === 'greater' ? [largerValue, lower] : [lower, largerValue];
+        if (!hasCanonicalRangeWitness([num1, num2], range)) return null;
 
-        const requireNegative = config.requireNegative!;
-        const requireZero = config.requireZero!;
-
-        if (maxMagnitude > 1000 && !requireNegative && !requireZero) {
-            const count = maxMagnitude - minMagnitude + 1;
-            if (count < 1 || (config.relation !== Scope.Equal && count < 2)) return null;
-
-            const first = minMagnitude + Math.floor(random() * count);
-            const offset = config.relation === Scope.Equal
-                ? 0
-                : 1 + Math.floor(random() * (count - 1));
-            const second = minMagnitude + ((first - minMagnitude + offset) % count);
-            const lower = Math.min(first, second);
-            const higher = Math.max(first, second);
-            const [num1, num2] = config.relation === Scope.Less
-                ? [lower, higher]
-                : config.relation === Scope.Greater
-                    ? [higher, lower]
-                    : [first, first];
-            const relation = config.relation === Scope.Less
-                ? 'less'
-                : config.relation === Scope.Greater
-                    ? 'greater'
-                    : 'equal';
+        if (range.max > 1000 && !requireNegative && !requireZero) {
             return {
                 data: {
                     task: 'multi-digit-place-value-comparison',
@@ -94,55 +87,11 @@ export class ComparisonGenerator implements ProblemGenerator<ComparisonProblem, 
             };
         }
 
-        const magnitude = Math.floor(random() * (maxMagnitude - minMagnitude + 1)) + minMagnitude;
-
-        let num1 = 0;
-        let num2 = 0;
-
-        if (config.relation === Scope.Equal) {
-            if (requireZero && requireNegative) return null;
-            num1 = requireZero ? 0 : requireNegative ? -magnitude : magnitude;
-            num2 = num1;
-        } else if (config.relation === Scope.Less) {
-            if (requireZero && requireNegative) {
-                [num1, num2] = [-magnitude, 0];
-            } else if (requireZero) {
-                [num1, num2] = [0, magnitude];
-            } else if (requireNegative) {
-                [num1, num2] = [-magnitude, magnitude];
-            } else {
-                if (minMagnitude === maxMagnitude) return null;
-                [num1, num2] = [minMagnitude, maxMagnitude];
-            }
-        } else if (config.relation === Scope.Greater) {
-            if (requireZero && requireNegative) {
-                [num1, num2] = [0, -magnitude];
-            } else if (requireZero) {
-                [num1, num2] = [magnitude, 0];
-            } else if (requireNegative) {
-                [num1, num2] = [magnitude, -magnitude];
-            } else {
-                if (minMagnitude === maxMagnitude) return null;
-                [num1, num2] = [maxMagnitude, minMagnitude];
-            }
-        } else {
-            return null;
-        }
-
-        let resolvedRelation: 'less' | 'greater' | 'equal';
-        if (num1 > num2) {
-            resolvedRelation = 'greater';
-        } else if (num1 < num2) {
-            resolvedRelation = 'less';
-        } else {
-            resolvedRelation = 'equal';
-        }
-
         return {
             data: {
                 num1,
                 num2,
-                relation: resolvedRelation
+                relation
             }
         };
     }

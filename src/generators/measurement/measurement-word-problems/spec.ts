@@ -6,9 +6,18 @@ import {generatorLabelRule} from '../../compatibility-rules.ts';
 import {
     measurementWordProblemOperandDigitChoices,
     measurementWordProblemOperationChoices,
-    resolveMeasurementWordProblemOperandDigits,
     resolveMeasurementWordProblemOperation
 } from './operation-labels.ts';
+import {
+    measurementRangeChoices,
+    measurementRangeContext,
+    measurementRangeLabels,
+    permitsMeasurementRange,
+    resolveMeasurementNumberKind,
+    resolveMeasurementOperandDigits,
+    resolveMeasurementRange
+} from './range-profile.ts';
+import {resolveOptionalCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 
 export const measurementWordProblemKinds = [
     Scope.MeterScale,
@@ -57,6 +66,12 @@ export const spec: GeneratorSpec = {
             && !selected(Scope.SingleDigitLargestOperand)
             && !selected(Scope.TwoDigitLargestOperand)
             && !selected(Scope.SingleDigitDivisor);
+    }), generatorLabelRule('measurement-canonical-range', [
+        ...measurementRangeLabels, ...measurementRangeContext
+    ], selected => {
+        const labels = [...measurementRangeLabels, ...measurementRangeContext].filter(selected);
+        const range = resolveOptionalCanonicalRangeFromLabels(labels);
+        return range !== undefined && permitsMeasurementRange(labels, range);
     })]
 };
 
@@ -88,11 +103,7 @@ export const MeasurementWordProblemsGeneratorSchema = {
     ],
     numberKind: [
         measurementWordProblemNumberKinds,
-        selectExactLabelSetMap([
-            [[Scope.IntegerNumbers], 'integer'],
-            [[Scope.FractionNumbers, Scope.ProperFractions], 'fraction'],
-            [[Scope.DecimalNumbers], 'decimal']
-        ]),
+        resolveMeasurementNumberKind,
         [
             [Scope.IntegerNumbers],
             [Scope.FractionNumbers, Scope.ProperFractions],
@@ -106,8 +117,13 @@ export const MeasurementWordProblemsGeneratorSchema = {
     ],
     operandDigits: [
         [...new Set(measurementWordProblemOperandDigitChoices.flat())],
-        resolveMeasurementWordProblemOperandDigits,
+        resolveMeasurementOperandDigits,
         measurementWordProblemOperandDigitChoices
+    ],
+    range: [
+        measurementRangeLabels,
+        resolveMeasurementRange,
+        measurementRangeChoices
     ]
 } as const;
 

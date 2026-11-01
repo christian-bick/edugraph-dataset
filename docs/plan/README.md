@@ -25,13 +25,14 @@ These items are not newly scheduled by the archive move.
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
   permutations and sampling changes are accepted. Strongest lower profiles, threshold-singleton
   exclusion and all source-review recommendations were approved on 2026-11-01. The opt-in expansion
-  helper is implemented. The [shared-consumer review](canonical-range-consumer-review.md) covers 18 comparison
-  routes and 135 arithmetic routes: every currently bounded route retains a feasible configuration,
-  but seven optional arithmetic width choices need exclusion. The [source-band review](canonical-range-source-review.md)
-  is complete for all 27 shared-consumer definitions, including the eight unspecified-upper
-  measurement targets. Matching migration consequences are documented. Producer adoption is in progress: the
-  read-only proposal has 60 unmatched targets and needs dedicated measurement support for all 80
-  integer successors. Range validation and production targets have not changed yet.
+  helper and ordinary canonical range profiles are implemented. The
+  [source-band review](canonical-range-source-review.md) covers the complete shared-consumer
+  scope, including the eight unspecified-upper measurement targets and six additional definitions
+  reached through arithmetic-law/array producers. Coordinated adoption expands the source to
+  1,286 authored / 1,247 normalized targets across eight affected producer families. It includes
+  exact two-/three-digit comparison domains and the two-digit-addend correction. Source validation
+  and dataset acceptance are recorded separately in the main plan. Other numeric families still
+  need review; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

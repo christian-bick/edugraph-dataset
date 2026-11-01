@@ -47,6 +47,36 @@ const render = (
 />);
 
 describe('operations number array view family', () => {
+    it.each([
+        ['execution', 'operations-number-array-total'],
+        ['formalization', 'operations-number-array-equation-formalization'],
+        ['interpretation', 'operations-number-array-interpretation']
+    ] as const)('fits two-row addition through20 columns in %s', (mode, viewId) => {
+        for (const columns of [6, 10, 11, 20]) {
+            const data: NumberArrayProblem = {operation: 'addition', rows: 2, columns,
+                groupCount: 2, groupSize: columns, total: columns * 2, answer: columns * 2,
+                addends: [columns, columns]};
+            for (const solution of [false, true]) {
+                const html = render(mode, viewId, data, solution);
+                expect(html).toContain(`aria-label="2 rows by ${columns} columns"`);
+                expect(html.match(/rounded-full bg-indigo-500/g)).toHaveLength(columns * 2);
+                expect(html).toContain(columns > 10 ? 'grid gap-1' : 'grid gap-2');
+                const cellSize = columns > 10 ? 20 : 32;
+                const gap = columns > 10 ? 4 : 8;
+                expect(columns * cellSize + (columns - 1) * gap).toBeLessThanOrEqual(506);
+            }
+        }
+    });
+
+    it('keeps wider arrays confined to binary addition', () => {
+        for (const [operation, rows, columns] of [
+            ['addition', 3, 6], ['addition', 2, 21], ['multiplication', 2, 6],
+            ['partitive-division', 2, 6], ['quotative-division', 2, 6]
+        ] as const) {
+            const data = {...addition, operation, rows, columns};
+            expect(() => render('execution', 'operations-number-array-total', data, false)).toThrow();
+        }
+    });
     it('withholds the five-by-three interpretation while keeping the complete array visible', () => {
         const viewId = 'operations-number-array-interpretation';
         const question = render('interpretation', viewId, fiveByThree, false);

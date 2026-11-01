@@ -102,11 +102,12 @@ export const OperationsNumberArrayView = ({
         'addends'
     ]);
 
+    const binaryAddition = data.operation === 'addition' && data.rows === 2;
     if (!Number.isInteger(data.rows) || data.rows < 2 || data.rows > 5
-        || !Number.isInteger(data.columns) || data.columns < 2 || data.columns > 5) {
+        || !Number.isInteger(data.columns) || data.columns < 2 || data.columns > (binaryAddition ? 20 : 5)) {
         throw new ViewValidationError(
             viewId,
-            'Rows and columns must each be integers from 2 through 5.'
+            'Arrays require 2 through 5 rows and columns; two-row addition may have up to 20 columns.'
         );
     }
     if (data.groupCount !== data.rows
@@ -137,6 +138,9 @@ export const OperationsNumberArrayView = ({
         : mode === 'interpretation'
             ? interpretationPrompt(data)
             : executionPrompt(data);
+    const gridClass = data.columns > 10 ? 'grid gap-1' : data.columns > 5 ? 'grid gap-2' : 'grid gap-3';
+    const cellClass = data.columns > 10 ? 'size-5' : data.columns > 5 ? 'size-8' : 'size-12';
+    const dotClass = data.columns > 10 ? 'size-2.5' : data.columns > 5 ? 'size-4' : 'size-6';
 
     return (
         <div className="w-[620px] rounded-2xl bg-white p-8 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -147,13 +151,13 @@ export const OperationsNumberArrayView = ({
 
             <div className="mt-6 flex min-h-[250px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-6">
                 <div
-                    className="grid gap-3"
+                    className={gridClass}
                     style={{gridTemplateColumns: `repeat(${data.columns}, minmax(0, 1fr))`}}
                     aria-label={`${data.rows} rows by ${data.columns} columns`}
                 >
                     {Array.from({length: data.total}, (_, index) => (
-                        <div key={index} className="flex size-12 items-center justify-center rounded-lg border-2 border-indigo-300 bg-white">
-                            <div className="size-6 rounded-full bg-indigo-500" />
+                        <div key={index} className={`flex ${cellClass} items-center justify-center rounded-lg border-2 border-indigo-300 bg-white`}>
+                            <div className={`${dotClass} rounded-full bg-indigo-500`} />
                         </div>
                     ))}
                 </div>

@@ -81,10 +81,11 @@ export function isValidMultiDigitComparisonProblem(data: MultiDigitComparisonPro
     if (data.task !== 'multi-digit-place-value-comparison'
         || !Number.isSafeInteger(data.num1)
         || !Number.isSafeInteger(data.num2)
-        || data.num1 <= 1000
-        || data.num1 >= 1000000
-        || data.num2 <= 1000
-        || data.num2 >= 1000000
+        || data.num1 < 1
+        || data.num1 > 1000000
+        || data.num2 < 1
+        || data.num2 > 1000000
+        || Math.max(data.num1, data.num2) <= 1000
         || data.relation !== resolvedRelation(data.num1, data.num2)
         || typeof data.evidence !== 'object'
         || data.evidence === null) {

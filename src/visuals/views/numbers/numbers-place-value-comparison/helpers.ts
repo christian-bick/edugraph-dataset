@@ -8,7 +8,7 @@ export type TensAndOnesDecomposition = {
 export type DecidingPlace = 'tens' | 'ones' | 'all';
 
 const isSupportedInteger = (value: unknown): value is number =>
-    Number.isSafeInteger(value) && (value as number) >= 10 && (value as number) <= 100;
+    Number.isSafeInteger(value) && (value as number) >= 10 && (value as number) <= 99;
 
 const resolvedRelation = (
     num1: number,

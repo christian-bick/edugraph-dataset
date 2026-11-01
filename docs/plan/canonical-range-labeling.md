@@ -369,6 +369,152 @@ Producer and target adoption follows in coordinated checkpoints; this helper alo
 The focused helper checkpoint passes 46 tests across three files. Full repository coverage and
 matching validation follow the coordinated family adoption, before dataset regeneration.
 
-Remaining fraction, measurement, place-value and required-intermediate quantity domains need family review
-before rollout. Preserve the source's actual competency rather than treating rendered digits,
-optional methods or every hidden payload value as part of the range.
+### Adoption checkpoint 2 — reviewed source families
+
+The coordinated adoption covers comparison, arithmetic pairs/triples/four-addend sums, property
+relations, number arrays, equal-group collections and whole-number measurement word problems.
+All use ordinary matching-capable configuration alternatives selected before generation. Constructive
+sampling or a finite mathematical domain proves feasibility; generated payloads never supply labels.
+Generic matching, the Area allowlist, ontology conflicts and inference behavior are unchanged.
+
+The authored targets implement the approved proposal plus the six definitions identified by the
+[shared-producer closure](canonical-range-source-review.md#additional-shared-producer-closure).
+This closure preserves smaller examples behind the additional array/triple routes rather than
+silently restricting those competencies to their previous largest band. It adds 34 permutations
+to the core proposal: **1,286 authored / 1,247 normalized targets**, compared with the pre-adoption
+1,028 / 1,013. Structural, duplicate and declared-equivalence checks pass; exact labels agree with
+the reviewed proposal and closure.
+
+Specific mathematical and rendering changes are:
+
+- Comparison uses local 10..99 and 100..999 cohorts, while ontology bounds remain inclusive.
+  Correlated lower/upper/relation cells remove only the approved threshold-singleton examples.
+- Two-, three- and four-addend `2.NBT.B.6` tasks use two-digit addends and allow their larger sums.
+  Canonical lower profiles preserve both lower10 and lower20 cases. Pair subtraction/division
+  retain both roles for the smaller quantity; negative, zero, width and fixed-step claims remain
+  correlated with the chosen mathematical domain.
+- Grade 4 integer measurement uses the approved upper5/10/20/100 envelope. All 611 original
+  dedicated-producer tuples per unit survive across 31 feasible profiles, including all operand
+  widths. The 40 fraction/decimal target permutations, payload sampling and random continuation
+  remain unchanged. The eight shared kilogram/liter targets are covered through both producers.
+- Equal-group collections preserve all 25 ordered `2..6 × 2..6` pairs and both division meanings.
+  Array repeated-addition tasks retain their five-by-five domain; binary addition can use two
+  rows with up to 20 columns to witness the requested upper100 band.
+- The through5 arithmetic number line uses five integer intervals. Other scales, rooted lengths
+  and the existing zero-reference policy retain their behavior. Comparison views accept valid
+  inclusive catalog endpoints while the dedicated two-digit view enforces its local 99 maximum.
+- Property-law construction ensures a commutative exchange changes visible operands. Required
+  associative/distributive calculations may supply range evidence; unused commutative products
+  cannot establish a wider upper band.
+
+These changes intentionally alter sampling, target identities and replay/cache keys within the
+reviewed cohorts. Exact source ceilings, approved dataset envelopes and deliberately retired
+endpoint cases remain distinguished in the source review. No new producer split or adapter is used.
+
+The matching migration has **1,675 routes**, with no unmatched target. All 1,178 old routes whose
+exact label sets remain are retained. The other 44 old route obligations have canonical successors
+under the same source definition, producer and view. An independent source-association audit
+preserves all 1,015 distinct source/nonrange conjunctions; only the reviewed bounds and the explicit
+`2.NBT.B.6` two-digit-largest constraint are excluded from that comparison. All 40 noninteger
+measurement targets retain their exact IDs.
+
+| Producer | Current routes |
+| --- | ---: |
+| `comparison` | 49 |
+| `arithmetic-ops-pairs` | 347 |
+| `arithmetic-ops-triples` | 50 |
+| `arithmetic-ops-four` | 24 |
+| `arithmetic-property-relations` | 20 |
+| `number-array` | 28 |
+| `equal-groups-collection` | 12 |
+| `measurement-word-problems` | 168 |
+
+With the existing one-instance allocation and deterministic validation split, requested train/val
+tuples change from **1,222 / 305** to **1,675 / 430**. That is **1,527 → 2,105 requested pairs**,
+or **3,054 → 4,210 images before deduplication** (about 38% more). Actual stored images and VQA
+work depend on canonical deduplication, split exclusion and cache identity. The old accepted artifact
+contains 2,918 images; the allocation estimate is not a regenerated dataset count.
+
+#### Separate source decision — `1.OA.D.8` unknown-number Ability
+
+Reviewing all 21 newly admitted array routes found three that expose an inherited source-mapping
+error. `1.OA.D.8-unknown-number` currently requests `Formalization`, but the standard asks for an
+unknown in a supplied equation (`8 + ? = 11`, `5 = □ − 3`, `6 + 6 = □`). The array formalization
+view instead asks the learner to write a complete equation from the array. Its labels are truthful;
+the target Ability does not express the intended source competency.
+
+History supports a local correction: the original target (`dd8382f5`) and its implementation
+(`f5635dfb`) used `ProcedureExecution`. Commit `99dce1547` changed it to `Formalization` while
+adding `Equation` during a Grade 1 ontology migration, without specifying a new equation-writing
+competency. Recommend restoring **`ProcedureExecution` on exactly the six unknown-number targets**,
+retaining `Equation`, operation, bounds and all other claims. The six separate unknown-operand
+`ProcedureInversion` targets stay unchanged. Do not introduce a view blacklist or target-ID gate.
+
+The concrete in-memory migration keeps 1,286 authored / 1,247 normalized targets and all target
+coverage. Each affected target retains the existing `arithmetic-ops-pairs` routes through
+`operations-boxes` and `operations-boxes-inversion`. Only the three newly admitted array-formalization
+routes disappear: 1,675 → 1,672 total routes. Six target IDs and their native seeds/replay/cache keys
+change; sampler mathematics and view rendering code do not. Existing source targets outside this
+six-target set are unchanged. Evidence is `temp/canonical-range-source-review/unknown-number-ability-proposal.json`.
+
+This Ability change is outside the original range approval and the standing preservation of target
+conjunctions. The user separately approved the concrete correction on 2026-11-01. Apply it in its
+own checkpoint after range adoption, and verify the six-target/three-route migration before
+canonical regeneration. The adoption counts above deliberately describe the range checkpoint.
+
+Array cardinality also remains deliberately at its original granularity when the target leaves it
+unspecified. The ontology has no five-operand descriptor, so five-row tasks retain their previous
+omission of operand-width claims rather than acquiring unsupported count obligations. Explicit
+binary profiles carry truthful widths. The unused `IteratedOperation + TwoOperands` combination
+is now rejected: it previously forced two rows despite this family's existing repeated-addition
+contract requiring at least three addends. No current target route requires that combination.
+
+#### Source verification
+
+The independent cross-family probe enumerates **1,790 admitted selections across 698 affected
+routes**. It passes 7,160 planned draws and their exact replays, 958 direct draws, resolved target
+coverage and strict annotation validation, with zero failures. This exhausts configuration
+selections; the numerical draws use two seeds per Question/Solution mode and are **not** an
+exhaustive proof of every numerical outcome. Finite measurement/collection/array support proofs
+and constructive sampler boundary tests provide complementary mathematical evidence.
+
+The direct-path checks caught and repaired contextual choices that the planned path already
+handled: range-qualified measurement requests now select the integer domain; multiplication
+widths remain single-digit where required; explicit array widths select a supported binary
+configuration. Unspecified array arity retains the five-by-five domain. Four-addend fallback
+metadata advertises only its six feasible cells. No shared resolver, matching algorithm or
+validation gate was relaxed to accommodate these fixes.
+
+The shared numeric/label helpers have 100% focused coverage. Dedicated measurement and collection
+generation has 100% focused coverage; arithmetic helper/generator coverage exceeds 97% statements
+and 96% branches, with 100% lines/functions. Comparison and array profiles include all feasible
+direct/planned configurations, finite-support checks, exact boundaries and consumer layout tests.
+Reproducible probe reports and logs are under `temp/canonical-range-source-review/`.
+
+`npm run check -- --spec=ccss` passes, including all 517 generator/view modules, source matching,
+label usage, documentation, stored split integrity and the strict annotation gate. The latter
+checks 2,969 source selections and the existing 2,918 stored images: zero strict failures,
+conflicts or incomplete tuples; 1,629 range findings remain report-only. Documentation has the
+same six external-fetch warnings. Stored-split and annotation checks do not establish replay or
+VQA acceptance for the changed source.
+
+The larger catalogue exposed a shared sorting cost during coverage, not a numerical feasibility
+cost. Profiling attributed 7.43 seconds of matching CPU to repeated UTF-8 prefix work. A separate
+behavior-preserving checkpoint skips common bytes before radix bucketing; the same measurement
+fell to 0.65 seconds. A 3,408-array catalogue workload runs about 6.2 times faster with identical
+ordered bytes and aggregate hashes. This is a sorting benchmark, not a claim about whole-pipeline
+speed. All 103 focused identity/matching/planned/replay tests pass, with 100% coverage of
+`content-identity.ts`. Matching rules, ordering, test timeouts and validation requirements are
+unchanged; ordinary source-file fingerprints still reflect the implementation edit.
+
+The final `npm run test:coverage` passes **7,472 tests across 910 files** with four workers, with
+no timeout changes. Generator coverage is 98.85% statements, 97.84% branches, 100% functions and
+99.46% lines; every generator passes its coverage threshold. Earlier runs exposed the corrected
+four-addend fallback declaration and obsolete pre-canonical compatibility expectations, then
+catalogue timeouts. The final run uses the settled source and prefix optimization. No regeneration
+or VQA was performed for this adoption checkpoint.
+
+Other fraction, decimal, place-value and required-intermediate quantity domains still need family
+review before rollout. Range dependency diagnostics remain report-only. Stored dataset acceptance
+is separate from this source adoption: regeneration, replay/split checks and independent Question
+and Solution VQA must validate a new artifact before it is described as range-canonical.

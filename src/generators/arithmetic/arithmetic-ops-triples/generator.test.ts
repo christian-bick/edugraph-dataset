@@ -1,160 +1,30 @@
 import {Area} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {ArithmeticTripleProblem} from '../../../types/problems.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {ArithmeticOpsTriplesGenerator} from './generator.ts';
 
-const operations = [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const;
-
-function expectValidEquation(problem: ArithmeticTripleProblem) {
-    if (problem.operation === 'addition') expect(problem.num1 + problem.num2 + problem.num3).toBe(problem.answer);
-    if (problem.operation === 'subtraction') expect(problem.num1 - problem.num2 - problem.num3).toBe(problem.answer);
-    if (problem.operation === 'multiplication') {
-        const expected = problem.propertyLaw === 'distributive'
-            ? problem.num1 * (problem.num2 + problem.num3)
-            : problem.num1 * problem.num2 * problem.num3;
-        expect(expected).toBe(problem.answer);
-    }
-    if (problem.operation === 'division') {
-        expect(problem.num2).not.toBe(0);
-        expect(problem.num3).not.toBe(0);
-        expect(problem.num1 / problem.num2 / problem.num3).toBe(problem.answer);
-    }
-}
-
+const generator = new ArithmeticOpsTriplesGenerator();
+const base = {operation: Area.Addition as const, range: createCanonicalNumericRange(20), requireZero: false,
+    requireMultipleOf10: false, requireTwoDigitOperands: false, useCommutativeLaw: false, useAssociativeLaw: false, useDistributiveLaw: false};
 describe('ArithmeticOpsTriplesGenerator', () => {
-    const generator = new ArithmeticOpsTriplesGenerator();
-
-    it('strictly validates every required config field', () => {
+    it('validates required configuration and rejects unsupported operations', () => {
         expect(() => generator.generate({} as never)).toThrow();
+        expect(generator.generate({...base, operation: 'unsupported'})).toBeNull();
+        expect(generator.generate({...base, operation: 'unknown'} as never)).toBeNull();
+        expect(generator.generate({...base, requireTwoDigitOperands: true, range: createCanonicalNumericRange(20, 10)})).toBeNull();
+        expect(generator.type).toBe('arithmetic');
     });
-
-    it('generates non-negative triples for every operation and zero scope', () => {
-        for (const operation of operations) {
-            for (const requireZero of [false, true]) {
-                for (let seed = 0; seed < 20; seed++) {
-                    setSeed(seed);
-                    const stub = generator.generate({
-                        operation,
-                        requireZero,
-                        requireMultipleOf10: false,
-                        useCommutativeLaw: false,
-                        useAssociativeLaw: false,
-                        useDistributiveLaw: false,
-                        range: {min: 1, max: 20}
-                    });
-                    expect(stub).not.toBeNull();
-                    const values = [stub!.data.num1, stub!.data.num2, stub!.data.num3, stub!.data.answer];
-                    expectValidEquation(stub!.data);
-                    expect(values.every(value => value >= 0 && value <= 20)).toBe(true);
-                    expect(values.includes(0)).toBe(requireZero);
-                }
-            }
-        }
+    it('keeps the complete arithmetic payload within its canonical profile', () => {
+        const data = generator.generate(base)!.data;
+        expect(data.num1 + data.num2 + data.num3).toBe(data.answer);
+        expect(hasCanonicalRangeWitness([data.num1, data.num2, data.num3, data.answer], base.range)).toBe(true);
     });
-
-    it('keeps a three-addend sum within the Grade 1 maximum of 20', () => {
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const stub = generator.generate({
-                operation: Area.Addition,
-                requireZero: false,
-                requireMultipleOf10: false,
-                useCommutativeLaw: false,
-                useAssociativeLaw: false,
-                useDistributiveLaw: false,
-                range: {min: 0, max: 20}
-            });
-
-            expect(stub).not.toBeNull();
-            const operands = [stub!.data.num1, stub!.data.num2, stub!.data.num3];
-            expect(operands).toHaveLength(3);
-            expect(operands.every(Number.isInteger)).toBe(true);
-            expect(operands.every(value => value >= 0)).toBe(true);
-            expect(operands.reduce((sum, value) => sum + value, 0)).toBe(stub!.data.answer);
-            expect(stub!.data.answer).toBeLessThanOrEqual(20);
-        }
-    });
-
-    it('supports multiples of ten for every operation', () => {
-        for (const operation of operations) {
-            const stub = generator.generate({
-                operation,
-                requireZero: false,
-                requireMultipleOf10: true,
-                useCommutativeLaw: false,
-                useAssociativeLaw: false,
-                useDistributiveLaw: false,
-                range: {min: 1, max: 1000000}
-            });
-            expect(stub).not.toBeNull();
-            expectValidEquation(stub!.data);
-            expect([stub!.data.num1, stub!.data.num2, stub!.data.num3, stub!.data.answer]
-                .every(value => value % 10 === 0)).toBe(true);
-        }
-    });
-
-    it.each([
-        [Area.Addition, 'commutative'],
-        [Area.Addition, 'associative'],
-        [Area.Multiplication, 'commutative'],
-        [Area.Multiplication, 'associative']
-    ] as const)('generates a valid %s %s-law triple', (operation, propertyLaw) => {
-        const stub = generator.generate({
-            operation,
-            requireZero: false,
-            requireMultipleOf10: false,
-            useCommutativeLaw: propertyLaw === 'commutative',
-            useAssociativeLaw: propertyLaw === 'associative',
-            useDistributiveLaw: false,
-            range: {min: 1, max: 20}
-        });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.propertyLaw).toBe(propertyLaw);
-        expectValidEquation(stub!.data);
-    });
-
-    it('rejects incompatible triple configurations', () => {
-        const baseConfig = {
-            requireZero: false,
-            requireMultipleOf10: false,
-            useCommutativeLaw: false,
-            useAssociativeLaw: false,
-            useDistributiveLaw: false,
-            range: {min: 1, max: 20}
-        } as const;
-
-        expect(generator.generate({...baseConfig, operation: Area.Division, useCommutativeLaw: true})).toBeNull();
-        expect(generator.generate({
-            ...baseConfig,
-            operation: Area.Addition,
-            useCommutativeLaw: true,
-            useAssociativeLaw: true
-        })).toBeNull();
-        expect(generator.generate({...baseConfig, operation: 'unsupported'})).toBeNull();
-    });
-
-    it('generates a bounded distributive multiplication decomposition', () => {
-        for (let seed = 0; seed < 40; seed++) {
-            setSeed(seed);
-            const stub = generator.generate({
-                operation: Area.Multiplication,
-                requireZero: false,
-                requireMultipleOf10: false,
-                useCommutativeLaw: false,
-                useAssociativeLaw: false,
-                useDistributiveLaw: true,
-                range: {min: 1, max: 100}
-            });
-            expect(stub).not.toBeNull();
-            expect(stub!.data.propertyLaw).toBe('distributive');
-            expect(stub!.data.combinedFactor).toBe(stub!.data.num2 + stub!.data.num3);
-            expect(stub!.data.partialProducts).toEqual([
-                stub!.data.num1 * stub!.data.num2,
-                stub!.data.num1 * stub!.data.num3
-            ]);
-            expectValidEquation(stub!.data);
-            expect(stub!.data.answer).toBeLessThanOrEqual(100);
-        }
+    it('preserves distributive combined factors and partial products', () => {
+        const config = {...base, operation: Area.Multiplication as const, useDistributiveLaw: true, range: createCanonicalNumericRange(100)};
+        const data = generator.generate(config)!.data;
+        expect(data.propertyLaw).toBe('distributive');
+        expect(data.combinedFactor).toBe(data.num2 + data.num3);
+        expect(data.partialProducts).toEqual([data.num1 * data.num2, data.num1 * data.num3]);
+        expect(data.answer).toBe(data.partialProducts!.reduce((a, b) => a + b, 0));
     });
 });

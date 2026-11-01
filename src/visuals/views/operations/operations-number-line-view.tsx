@@ -89,9 +89,10 @@ export const OperationsNumberLineView = ({mode, payload, viewId, showZeroReferen
             (resolved as ArithmeticPairProblem).num2,
             (resolved as ArithmeticPairProblem).answer
         );
-    const maximum = roundedMaximum(largestValue);
+    const maximum = !representation && largestValue <= 5 ? 5 : roundedMaximum(largestValue);
     const toX = (value: number) => LEFT + (value / maximum) * (RIGHT - LEFT);
-    const ticks = Array.from({length: 11}, (_, index) => (maximum / 10) * index)
+    const intervals = maximum === 5 ? 5 : 10;
+    const ticks = Array.from({length: intervals + 1}, (_, index) => (maximum / intervals) * index)
         .filter(value => showOrigin || value !== 0);
 
     const length = representation ? resolved as WholeNumberLengthProblem : null;

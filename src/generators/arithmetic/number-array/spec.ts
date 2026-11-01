@@ -1,15 +1,25 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {arrayCandidates, arrayOperations, arrayProfileChoices, arrayProfileFromSelection,
+    arrayProfileLabels, resolveArrayArity, resolveArrayProfile} from './profiles.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'number-array',
+    compatibility: [generatorLabelRule('canonical-array-domain', [
+        ...arrayOperations.map(([label]) => label), Scope.TwoOperands, ...arrayProfileLabels
+    ], selected => {
+        const operation = arrayOperations.find(([label]) => selected(label))?.[1];
+        const profile = arrayProfileFromSelection(selected);
+        return operation !== undefined && profile !== undefined
+            && arrayCandidates(operation, selected(Scope.TwoOperands), profile).length > 0;
+    })],
     generalLabels: [
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller100,
         Scope.IntegerNumbers
     ]
 };
@@ -25,14 +35,11 @@ export const NumberArrayGeneratorSchema = {
         ])
     ],
     requireTwoOperands: [
-        [Scope.TwoOperands, Scope.SingleDigitSmallestOperand],
-        hasLabel(Scope.TwoOperands),
-        [[], [Scope.TwoOperands, Scope.SingleDigitSmallestOperand]]
+        [Scope.TwoOperands],
+        resolveArrayArity,
+        [[], [Scope.TwoOperands]]
     ],
-    requireIteratedOperation: [
-        [Area.IteratedOperation],
-        hasLabel(Area.IteratedOperation)
-    ]
+    profile: [arrayProfileLabels, resolveArrayProfile, arrayProfileChoices]
 } as const;
 
 export type NumberArrayGeneratorConfig = ConfigFromSchema<typeof NumberArrayGeneratorSchema>;

@@ -81,6 +81,11 @@ requirements. The
 record separates verified repairs from concrete questions about content, annotation contracts
 and rare module splits. Source readiness remains separate from stored-dataset acceptance.
 
+The [canonical range plan](docs/plan/canonical-range-labeling.md) records the subsequent rollout
+of tightest numerical bounds. Reviewed source competencies expand into explicit range targets;
+matching-capable generator profiles construct exercises that demonstrate those bounds. Source
+implementation and regenerated dataset acceptance are tracked separately in that plan.
+
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 
 ## First Steps

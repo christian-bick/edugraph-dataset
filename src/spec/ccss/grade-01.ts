@@ -20,7 +20,8 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 // --- 1.OA.A.2: Word problems with three addends (sum <= 20) ---
 const threeAddendsBuilder = new DatasetPermutationBuilder()
@@ -32,7 +33,8 @@ const threeAddendsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller20,
         Ability.TextualReception
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 // --- 1.OA.B.3: Apply properties of operations (commutative/associative) ---
 // Completion practices the required application; explaining how and why the change
@@ -52,7 +54,8 @@ const propertiesBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Ability.ProcedureExecution],
         [Ability.ProcedureUnderstanding]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 const arithmeticStrategyConstraints = [
     Scope.TwoOperands,
@@ -100,10 +103,8 @@ const fluencyBuilder = new DatasetPermutationBuilder()
         [Area.Addition],
         [Area.Subtraction]
     ])
-    .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
-    ]);
+    .addLabels([Scope.NumbersSmaller20])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 const subtractionMakeTenBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -181,7 +182,8 @@ const unknownNumberBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 const unknownOperandBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -197,7 +199,8 @@ const unknownOperandBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10, 20] });
 
 // ==========================================
 // 2. Number and Operations in Base Ten (1.NBT)
@@ -293,9 +296,8 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
     ]);
 
 // --- 1.NBT.B.3: Compare two two-digit numbers by tens and ones ---
-// The ontology range boundaries are inclusive, so this target admits 10 through 100.
-// We intentionally accept 100 as a practical approximation of the standard's arbitrary
-// two-digit cutoff; the view represents it coherently as 10 tens and 0 ones.
+// Inclusive ontology bounds describe canonical bands; the comparison producer's local
+// mathematical profiles retain the source's exact 10..99 two-digit domain.
 const placeValueComparisonBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
@@ -303,14 +305,17 @@ const placeValueComparisonBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersLarger10,
-        Scope.NumbersSmaller100,
         Ability.ProcedureUnderstanding
     ])
     .applyLabelVariants([
-        [Area.NumericInequality, Scope.Greater],
-        [Area.NumericInequality, Scope.Less],
-        [Area.NumericEquality, Scope.Equal]
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger10, Scope.NumbersSmaller20],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger10, Scope.NumbersSmaller20],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger10, Scope.NumbersSmaller20],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger10, Scope.NumbersSmaller100],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger10, Scope.NumbersSmaller100],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger20, Scope.NumbersSmaller100],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger20, Scope.NumbersSmaller100],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger20, Scope.NumbersSmaller100]
     ]);
 
 const addAdditionOperandVariants = (builder: DatasetPermutationBuilder): DatasetPermutationBuilder => builder

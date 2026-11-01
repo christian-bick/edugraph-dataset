@@ -160,12 +160,14 @@ const createCompareGroupsBuilder = (strategyLabels: string[]): DatasetPermutatio
 const compareGroupsByCountingBuilder = createCompareGroupsBuilder([
     Area.NumerationWithIntegers,
     Scope.AdditiveCount
-]);
+])
+    .applyUpperRangeVariants({ bands: [5, 10] });
 
 // --- K.CC.C.6: Compare groups by matching objects one-to-one ---
 const compareGroupsByMatchingBuilder = createCompareGroupsBuilder([
     Area.SetComparison
-]);
+])
+    .applyUpperRangeVariants({ bands: [5, 10] });
 
 // --- K.CC.C.7: Compare two numbers between 1 and 10 presented as written numerals ---
 const compareNumeralsBuilder = new DatasetPermutationBuilder()
@@ -181,7 +183,8 @@ const compareNumeralsBuilder = new DatasetPermutationBuilder()
         [Area.NumericInequality, Scope.Greater],
         [Area.NumericInequality, Scope.Less],
         [Area.NumericEquality, Scope.Equal]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10] });
 
 // ==========================================
 // 2. Operations and Algebraic Thinking (K.OA)
@@ -202,7 +205,8 @@ const representOperationsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10] });
 
 // --- K.OA.A.2: Solve addition and subtraction word problems within 10 ---
 const wordProblemsBuilder = new DatasetPermutationBuilder()
@@ -218,7 +222,8 @@ const wordProblemsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.Addition],
         [Area.Subtraction]
-    ]);
+    ])
+    .applyUpperRangeVariants({ bands: [5, 10] });
 
 // --- K.OA.A.3: Decompose numbers less than or equal to 10 into pairs ---
 const decomposeBuilder = new DatasetPermutationBuilder()

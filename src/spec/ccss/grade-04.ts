@@ -201,13 +201,27 @@ const compareMultiDigitNumbersBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger1000,
-        Scope.NumbersSmaller1000000,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Area.NumericInequality, Scope.Greater], [Area.NumericEquality, Scope.Equal], [Area.NumericInequality, Scope.Less]]);
+    .applyLabelVariants([
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger1000, Scope.NumbersSmaller10000],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger1000, Scope.NumbersSmaller10000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger1000, Scope.NumbersSmaller10000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger1000, Scope.NumbersSmaller100000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger1000, Scope.NumbersSmaller100000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger10000, Scope.NumbersSmaller100000],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger10000, Scope.NumbersSmaller100000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger10000, Scope.NumbersSmaller100000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger1000, Scope.NumbersSmaller1000000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger1000, Scope.NumbersSmaller1000000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger10000, Scope.NumbersSmaller1000000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger10000, Scope.NumbersSmaller1000000],
+        [Area.NumericInequality, Scope.Less, Scope.NumbersLarger100000, Scope.NumbersSmaller1000000],
+        [Area.NumericEquality, Scope.Equal, Scope.NumbersLarger100000, Scope.NumbersSmaller1000000],
+        [Area.NumericInequality, Scope.Greater, Scope.NumbersLarger100000, Scope.NumbersSmaller1000000]
+    ]);
 
 const grade4IntegerRoundingBuilder = new DatasetPermutationBuilder()
     .addLabels([
@@ -320,7 +334,14 @@ const measurementKinds = [
 const grade4MeasurementWordProblemsBuilder = new DatasetPermutationBuilder()
     .addLabels([Scope.SingleStep, Scope.TwoOperands, Ability.TextualReception])
     .applyLabelVariants(measurementKinds)
-    .applyLabelVariants([[Scope.IntegerNumbers], [Scope.FractionNumbers], [Scope.DecimalNumbers]])
+    .applyLabelVariants([
+        [Scope.IntegerNumbers, Scope.NumbersSmaller5],
+        [Scope.IntegerNumbers, Scope.NumbersSmaller10],
+        [Scope.IntegerNumbers, Scope.NumbersSmaller20],
+        [Scope.IntegerNumbers, Scope.NumbersSmaller100],
+        [Scope.FractionNumbers],
+        [Scope.DecimalNumbers]
+    ])
     .applyLabelVariants([[Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division]]);
 
 const grade4MeasurementNumberLinesBuilder = new DatasetPermutationBuilder()

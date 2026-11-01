@@ -78,6 +78,19 @@ describe('comparison validation', () => {
         })).toBe(true);
     });
 
+    it('accepts inclusive thousand/million endpoints with their supplied evidence', () => {
+        const boundary: MultiDigitComparisonProblem = {
+            task: 'multi-digit-place-value-comparison', num1: 1000, num2: 1_000_000, relation: 'less',
+            evidence: {kind: 'first-difference', placeName: 'millions', exponent: 6,
+                leftDigit: 0, rightDigit: 1, leftPlaceValue: 0, rightPlaceValue: 1_000_000}
+        };
+        expect(isValidMultiDigitComparisonProblem(boundary)).toBe(true);
+        expect(isValidMultiDigitComparisonProblem({...boundary, num1: 1})).toBe(true);
+        expect(isValidMultiDigitComparisonProblem({...boundary, num1: 0})).toBe(false);
+        expect(isValidMultiDigitComparisonProblem({...boundary, num2: 1_000_001})).toBe(false);
+        expect(multiDigitComparisonPresentation(boundary).comparisonEquation).toBe('1,000 < 1,000,000');
+    });
+
     it('rejects evidence that does not identify the first differing place', () => {
         expect(isValidMultiDigitComparisonProblem({
             ...firstDifferenceProblem,

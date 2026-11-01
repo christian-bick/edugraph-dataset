@@ -1,5 +1,6 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     ArithmeticOperation,
@@ -14,6 +15,7 @@ import {
     MeasurementWordProblemsGeneratorConfig,
     MeasurementWordProblemsGeneratorSchema
 } from './spec.ts';
+import {measurementIntegerTuples} from './integer-domain.ts';
 
 type ExactValue = {numerator: number; denominator: number};
 
@@ -57,29 +59,6 @@ const integer = (value: number): ExactValue => ({numerator: value, denominator: 
 
 const pick = <T>(values: readonly T[]): T => values[Math.floor(random() * values.length)]!;
 
-const randomInteger = (min: number, max: number): number =>
-    min + Math.floor(random() * (max - min + 1));
-
-const integerAdditionPairs = Array.from({length: 19}, (_, first) =>
-    Array.from({length: 19}, (_, second) => [first + 2, second + 2] as const)
-).flat();
-
-// Partition the existing finite support before sampling. Answer width does not
-// participate: for example, 9 + 9 still has a one-digit largest operand.
-const integerAdditionPairsByWidth = {
-    1: integerAdditionPairs.filter(([first, second]) => Math.max(first, second) < 10),
-    2: integerAdditionPairs.filter(([first, second]) => Math.max(first, second) >= 10)
-};
-
-const integerSubtractionPairs = Array.from({length: 9}, (_, subtrahend) =>
-    Array.from({length: 15}, (_, answer) => [subtrahend + answer + 3, subtrahend + 2] as const)
-).flat();
-
-const integerSubtractionPairsByWidth = {
-    1: integerSubtractionPairs.filter(([minuend]) => minuend < 10),
-    2: integerSubtractionPairs.filter(([minuend]) => minuend >= 10)
-};
-
 const gcd = (a: number, b: number): number => {
     let first = Math.abs(a);
     let second = Math.abs(b);
@@ -99,24 +78,27 @@ const decimalValue = (tenths: number, measurementKind: MeasurementWordProblemKin
         ? {numerator: tenths * 10, denominator: 100}
         : {numerator: tenths, denominator: 10};
 
-const sampleInteger = (operation: ArithmeticOperation, largestOperandDigits?: 1 | 2): MathSample => {
+const sampleInteger = (
+    operation: ArithmeticOperation, range: CanonicalNumericRange, largestOperandDigits?: 1 | 2
+): MathSample => {
     if (operation === 'addition' || operation === 'subtraction') {
         if (largestOperandDigits === undefined) {
             throw new GeneratorValidationError('measurement-word-problems', `Integer ${operation} requires a largest-operand digit choice.`);
         }
-        const pairsByWidth = operation === 'addition' ? integerAdditionPairsByWidth : integerSubtractionPairsByWidth;
-        const [first, second] = pick(pairsByWidth[largestOperandDigits]);
+    }
+    const tuples = measurementIntegerTuples(operation, range, largestOperandDigits);
+    if (!tuples.length) {
+        throw new GeneratorValidationError('measurement-word-problems', 'Unsupported integer range/operand-width combination.');
+    }
+    const [first, second, answer] = pick(tuples);
+    if (operation === 'addition' || operation === 'subtraction') {
         return {operation, first: integer(first), second: integer(second),
-            answer: integer(operation === 'addition' ? first + second : first - second)};
+            answer: integer(answer)};
     }
     if (operation === 'multiplication') {
-        const groupCount = randomInteger(2, 6);
-        const measured = randomInteger(2, 12);
-        return {operation, groupCount, measured: integer(measured), answer: integer(groupCount * measured)};
+        return {operation, groupCount: first, measured: integer(second), answer: integer(answer)};
     }
-    const groupCount = randomInteger(2, 6);
-    const answer = randomInteger(1, 12);
-    return {operation, total: integer(groupCount * answer), groupCount, answer: integer(answer)};
+    return {operation, total: integer(first), groupCount: second, answer: integer(answer)};
 };
 
 const sampleFraction = (operation: ArithmeticOperation): MathSample => {
@@ -200,9 +182,10 @@ const sampleMath = (
     numberKind: MeasurementWordProblemNumberKind,
     operation: ArithmeticOperation,
     measurementKind: MeasurementWordProblemKind,
+    range: CanonicalNumericRange | false,
     largestOperandDigits?: 1 | 2
 ): MathSample => {
-    if (numberKind === 'integer') return sampleInteger(operation, largestOperandDigits);
+    if (numberKind === 'integer' && range) return sampleInteger(operation, range, largestOperandDigits);
     if (numberKind === 'fraction') return sampleFraction(operation);
     return sampleDecimal(operation, measurementKind);
 };
@@ -284,6 +267,23 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
 
         const measurementKind = config.measurementKind as MeasurementWordProblemKind;
         const numberKind = config.numberKind as MeasurementWordProblemNumberKind;
+        const range = config.range;
+        if (numberKind === 'integer') {
+            if (!range || ![5, 10, 20, 100].includes(range.max)) {
+                throw new GeneratorValidationError('measurement-word-problems', 'Integer problems require a canonical range choice.');
+            }
+            let expected: CanonicalNumericRange;
+            try {
+                expected = createCanonicalNumericRange(range.max, range.min);
+            } catch {
+                throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range choice.');
+            }
+            if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
+                throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range witnesses.');
+            }
+        } else if (range !== false) {
+            throw new GeneratorValidationError('measurement-word-problems', 'Noninteger problems require an explicit empty range choice.');
+        }
         const operandDigits = config.operandDigits;
         if (operandDigits !== undefined && operandDigits !== false) {
             const valid = operandDigits !== null && (
@@ -296,7 +296,7 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
             if (!valid) throw new GeneratorValidationError('measurement-word-problems', 'Unsupported operand digit choice.');
         }
         const data = buildProblem(
-            sampleMath(numberKind, operation, measurementKind,
+            sampleMath(numberKind, operation, measurementKind, range,
                 operandDigits && operandDigits.role === 'largest' ? operandDigits.digits : undefined),
             measurementKind,
             numberKind

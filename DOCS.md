@@ -113,6 +113,17 @@ matching capabilities. The
 record documents conditional sampling, verified repairs and concrete ownership/projection
 questions. Source audit closure remains separate from regeneration and stored-dataset acceptance.
 
+The [canonical range rollout](docs/plan/canonical-range-labeling.md) selects a tightest upper and
+strongest positive lower through ordinary schema profiles before generation. The numeric helper
+`canonical-numeric-range.ts` carries inclusive bounds plus strict maximum/minimum witnesses;
+`canonical-range-labels.ts` exposes their correlated matching capabilities. Module-local feasibility
+checks combine them with operation, digit width, sign/zero and source-domain constraints. Unrequested
+lower descriptors can complete a profile, while an explicitly requested lower remains an exact
+capability requirement. Matching does not acquire range-containment or implication semantics.
+Reviewed targets expand before IDs are assigned, and generator payloads remain mathematical data.
+The plan records active families, intentional support changes, matching migration and the separate
+regeneration/VQA acceptance status; other families retain their existing inclusive-range contracts.
+
 The [numerical-zero correction](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
 removes numeral-character partitions from writing and division, and checks the numerical work of
 the specified algorithms. Claims still come from preselected matching capabilities. Corrected
