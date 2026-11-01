@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../lib/canonical-numeric-range.ts';
 import {getRandomState, random, setSeed} from '../../lib/random.ts';
 import {countingOffsetStarts, generateCountingOffset} from './counting-offset.ts';
 
@@ -84,6 +85,24 @@ describe('counting offset candidate domains', () => {
         expect(starts).not.toContain(10);
         expect(starts).toContain(11);
         expect(starts).not.toContain(19);
+    });
+
+    it.each(['inc', 'dec'] as const)('retains all old one-step starts in exactly one canonical %s band', direction => {
+        const old = countingOffsetStarts({direction, range: {min: 0, max: 1000}}, 1);
+        const partition = [5, 10, 20, 100, 120, 1000].flatMap(upper => {
+            const range = createCanonicalNumericRange(upper);
+            const starts = old.filter(start => hasCanonicalRangeWitness([start, 1,
+                direction === 'inc' ? start + 1 : start - 1], range));
+            for (const seed of [0, 31, 97]) {
+                setSeed(seed);
+                const draw = generateCountingOffset({direction, range}, 1, 'unrestricted', range);
+                expect(draw).not.toBeNull();
+                expect(starts).toContain(draw!.data.numObjects);
+            }
+            return starts;
+        });
+        expect(partition).toHaveLength(old.length);
+        expect([...partition].sort((a, b) => a - b)).toEqual(old);
     });
 
     it('retains the same seeded draw and payload when a profile preserves the domain', () => {

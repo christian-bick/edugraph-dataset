@@ -1012,3 +1012,34 @@ Thirty-six tests pass, including complete support/multiplicity proofs,150 Questi
 projections and50 native draws/replays. The spec gate and final TypeScript pass; a typed Map
 replaces an unsafe fromEntries record assertion in the finite domain. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{partial-products-review.md,verify-partial-products.json}`.
+
+## Fifth batch: existing sequence bounds and one-step closure
+
+Counting sequences now select tightest upper/strongest lower profiles before generation. Their
+implicit step remains a sequence relation rather than an additional arithmetic operand, consistent
+with the established range distinction. The finite domain retains all1,993 distinct old declared
+range/step sequences across57 cells, including old preferred lengths and truncated end runs.
+No sequence is shortened to create a witness. Sampling is uniform over distinct retained frames
+within a profile; the former source-cap/start hierarchy is not claimed unchanged. This is the
+accepted incidental sampling change, not a balancing requirement.
+
+Source review adds22 variants across K.CC.A.1, K.CC.A.2,1.NBT.A.1 and2.NBT.A.2, keeping all nine
+old aliases and their1,553 source-case instances. Bands are per step: counting by5 starts at
+upper10, by10 at upper20, and by100 at upper120. K.CC.A.2 additionally has lower10/upper20 so
+its former starts10..19 retain truthful strongest floors. Other source claims remain unchanged.
+
+The smaller bands reach nine new one-step object/sequence routes. That existing producer also
+gains canonical profiles, with the explicit adjustment1 ruling out every positive lower. Its full
+old support partitions across the six upper bands without retirement. The two old routes remain.
+Together the two producers have42 routes:31 sequence and11 one-step. Payload types and renderers
+remain unchanged. Ten/hundred offsets retain their exact legacy range declarations through the
+existing category helper, and their sampling remains unchanged; their separate assessed-count
+question is not silently decided here.
+
+The102-test/12-file focused gate passes, including exhaustive old-support partition, both native
+configuration paths, exact replay and actual Question/Solution components for every admitted
+selection. The cumulative source verifier preserves every earlier route lineage and claim;
+TypeScript and the generator/view spec gate pass. These tighten existing annotations and add
+truthful source variants; no baseline missing-range closure is claimed. Evidence:
+`temp/range-autonomous/batch5/counting/{verification.json,verification.log,focused-final.log,
+native.log,types.log,spec-gate.log,global.log}`.

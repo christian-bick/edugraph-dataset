@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {CountingSequenceGenerator} from './generator.ts';
 
 describe('CountingSequenceGenerator', () => {
@@ -17,13 +18,15 @@ describe('CountingSequenceGenerator', () => {
 
     it('generates a forward sequence from a visible start', () => {
         const stub = generator.generate({
-            range: {min: 1, max: 20},
+            range: createCanonicalNumericRange(20, 5),
             stepMagnitude: Scope.StepsOf1,
             requireMultipleOf10: false
         });
 
         expect(stub).not.toBeNull();
-        expect(stub!.data.sequence).toHaveLength(6);
+        expect(stub!.data.sequence.length).toBeGreaterThanOrEqual(2);
+        expect(stub!.data.sequence.length).toBeLessThanOrEqual(10);
+        expect(hasCanonicalRangeWitness(stub!.data.sequence, createCanonicalNumericRange(20, 5))).toBe(true);
         expect(stub!.data.sequence[0]).toBeGreaterThan(1);
         stub!.data.sequence.slice(1).forEach((value, index) => {
             expect(value - stub!.data.sequence[index]).toBe(1);
@@ -36,7 +39,7 @@ describe('CountingSequenceGenerator', () => {
         for (let seed = 0; seed < 200; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 1, max: 120},
+                range: createCanonicalNumericRange(120, 100),
                 stepMagnitude: Scope.StepsOf1,
                 requireMultipleOf10: false
             });
@@ -47,13 +50,13 @@ describe('CountingSequenceGenerator', () => {
             starts.add(stub!.data.sequence[0]);
         }
 
-        expect(starts.size).toBeGreaterThan(50);
+        expect(starts.size).toBeGreaterThan(10);
         expect([...starts].some(start => start > 100)).toBe(true);
     });
 
     it('steps by tens from an arbitrary randomized start', () => {
         const stub = generator.generate({
-            range: {min: 3, max: 100},
+            range: createCanonicalNumericRange(100, 20),
             stepMagnitude: Scope.StepsOf10,
             requireMultipleOf10: false
         });
@@ -70,7 +73,7 @@ describe('CountingSequenceGenerator', () => {
         [Scope.StepsOf100, 100]
     ] as const)('supports %s through 1000', (stepMagnitude, expectedStep) => {
         const stub = generator.generate({
-            range: {min: 1, max: 1000},
+            range: createCanonicalNumericRange(1000, expectedStep === 5 ? 120 : 0),
             stepMagnitude,
             requireMultipleOf10: false
         });
@@ -84,7 +87,7 @@ describe('CountingSequenceGenerator', () => {
 
     it('aligns steps of ten when multiples of ten are required', () => {
         const stub = generator.generate({
-            range: {min: 3, max: 100},
+            range: createCanonicalNumericRange(100, 20),
             stepMagnitude: Scope.StepsOf10,
             requireMultipleOf10: true
         });
@@ -94,7 +97,7 @@ describe('CountingSequenceGenerator', () => {
 
     it('returns null when multiples of ten conflict with steps of one', () => {
         expect(generator.generate({
-            range: {min: 1, max: 20},
+            range: createCanonicalNumericRange(20, 5),
             stepMagnitude: Scope.StepsOf1,
             requireMultipleOf10: true
         })).toBeNull();
@@ -102,7 +105,7 @@ describe('CountingSequenceGenerator', () => {
 
     it('returns null when fewer than two sequence values fit', () => {
         expect(generator.generate({
-            range: {min: 10, max: 10},
+            range: {...createCanonicalNumericRange(20), min: 10, max: 10},
             stepMagnitude: Scope.StepsOf10,
             requireMultipleOf10: true
         })).toBeNull();
@@ -110,7 +113,7 @@ describe('CountingSequenceGenerator', () => {
 
     it('rejects unsupported step magnitudes', () => {
         expect(() => generator.generate({
-            range: {min: 1, max: 20},
+            range: createCanonicalNumericRange(20, 5),
             stepMagnitude: Scope.StepMagnitude,
             requireMultipleOf10: false
         } as never)).toThrow('Unsupported step magnitude');

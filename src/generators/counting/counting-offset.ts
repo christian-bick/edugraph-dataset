@@ -1,7 +1,12 @@
 import {random} from '../../lib/random.ts';
 import {CountingOffsetProblem} from '../../types/problems.ts';
 import {ProblemStub} from '../../types/ml-engine.ts';
-import {CountingIncDecGeneratorConfig} from './counting-inc-dec/spec.ts';
+import {hasCanonicalRangeWitness, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
+
+interface CountingOffsetConfig {
+    readonly direction?: 'inc' | 'dec';
+    readonly range?: {readonly min: number; readonly max: number};
+}
 
 const hasNoZeroDigit = (value: number): boolean => !String(value).includes('0');
 
@@ -9,7 +14,7 @@ export type CountingOffsetOperandProfile = 'unrestricted' | 'two-digit' | 'three
 
 /** Enumerates the complete domain before the single seeded mathematical draw. */
 export function countingOffsetStarts(
-    config: CountingIncDecGeneratorConfig,
+    config: CountingOffsetConfig,
     stepSize: 1 | 10 | 100,
     operandProfile: CountingOffsetOperandProfile = 'unrestricted'
 ): number[] {
@@ -38,15 +43,17 @@ export function countingOffsetStarts(
 }
 
 export function generateCountingOffset<TStep extends 1 | 10 | 100>(
-    config: CountingIncDecGeneratorConfig,
+    config: CountingOffsetConfig,
     stepSize: TStep,
-    operandProfile: CountingOffsetOperandProfile = 'unrestricted'
+    operandProfile: CountingOffsetOperandProfile = 'unrestricted',
+    canonicalRange?: CanonicalNumericRange
 ): ProblemStub<CountingOffsetProblem<TStep>> | null {
     const incDecType = config.direction;
     if (incDecType !== 'inc' && incDecType !== 'dec') return null;
 
     const resolvedRange = config.range!;
-    const validStarts = countingOffsetStarts(config, stepSize, operandProfile);
+    const validStarts = countingOffsetStarts(config, stepSize, operandProfile).filter(value => !canonicalRange
+        || hasCanonicalRangeWitness([value, stepSize, incDecType === 'inc' ? value + stepSize : value - stepSize], canonicalRange));
     if (validStarts.length === 0) return null;
 
     const numObjects = validStarts[Math.floor(random() * validStarts.length)];

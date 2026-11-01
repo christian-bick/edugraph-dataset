@@ -162,14 +162,19 @@ const countWithin1000Builder = new DatasetPermutationBuilder()
         Scope.After,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.StepsOf1],
-        [Scope.StepsOf5],
-        [Scope.StepsOf10],
-        [Scope.StepsOf100]
+        ...[Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20,
+            Scope.NumbersSmaller100, Scope.NumbersSmaller120, Scope.NumbersSmaller1000]
+            .map(upper => [Scope.StepsOf1, upper]),
+        ...[Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100,
+            Scope.NumbersSmaller120, Scope.NumbersSmaller1000]
+            .map(upper => [Scope.StepsOf5, upper]),
+        ...[Scope.NumbersSmaller20, Scope.NumbersSmaller100, Scope.NumbersSmaller120, Scope.NumbersSmaller1000]
+            .map(upper => [Scope.StepsOf10, upper]),
+        ...[Scope.NumbersSmaller120, Scope.NumbersSmaller1000]
+            .map(upper => [Scope.StepsOf100, upper])
     ]);
 
 // --- 2.NBT.A.3: Read and write base-ten numerals ---

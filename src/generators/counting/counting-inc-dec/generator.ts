@@ -9,6 +9,6 @@ export class CountingIncDecGenerator implements ProblemGenerator<CountingOneOffs
 
     generate(config: CountingIncDecGeneratorConfig): ProblemStub<CountingOneOffsetProblem> | null {
         validateConfigFields('counting-inc-dec', config, ['range', 'direction']);
-        return generateCountingOffset(config, 1);
+        return generateCountingOffset(config, 1, 'unrestricted', config.range);
     }
 }

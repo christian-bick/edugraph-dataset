@@ -1,5 +1,6 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import {sampleGenerationPlan} from '../../lib/compatibility.ts';
 import {planModelCompatibility, type ViewChoiceModel} from '../../lib/model-compatibility.ts';
 import {bindingsForSelection} from '../../lib/planned-generation.ts';
@@ -38,7 +39,7 @@ describe('counting offset semantic feasibility', () => {
             for (const [upper, max] of upperBounds.filter(([label]) => (schema.range[0] as readonly string[]).includes(label))) {
                 for (const [profileLabels, operandProfile, digitCount] of supportedProfiles) {
                     for (const [label, direction] of [[Area.Increment, 'inc'], [Area.Decrement, 'dec']] as const) {
-                        const labels = [lower, upper, label, ...profileLabels];
+                        const labels = [...(step === 1 && min === 0 ? [] : [lower]), upper, label, ...profileLabels];
                         const context = `${spec.generatorId}: ${JSON.stringify({min, max, direction, operandProfile})}`;
                         const expectedStarts = Array.from({length: max}, (_, index) => index + 1).filter(start => {
                             const result = direction === 'inc' ? start + step : start - step;
@@ -53,7 +54,7 @@ describe('counting offset semantic feasibility', () => {
                         if (!planned.supported) continue;
                         const bindings = bindingsForSelection(planned.plan, sampleGenerationPlan(planned.plan, () => 0));
                         const resolved = resolveSchemaChoices(schema, labels, bindings.generator);
-                        expect(resolved.config.range, context).toEqual({min, max});
+                        expect(resolved.config.range, context).toEqual(step === 1 ? createCanonicalNumericRange(max) : {min, max});
                         expect(resolved.config.direction, context).toBe(direction);
                         if ('operandProfile' in resolved.config) expect(resolved.config.operandProfile, context).toBe(operandProfile);
                         expect(resolved.resolvedLabels, context).toEqual(expect.arrayContaining(labels));
@@ -93,7 +94,7 @@ describe('counting offset semantic feasibility', () => {
             }, view);
             expect(planned.supported).toBe(false);
             if (planned.supported) throw new Error('The fixed operand 1 is outside the requested range');
-            expect(planned.ruleIds).toContain('generator:offset-1-operand-in-range');
+            expect(planned.reason).toBe('uncovered-target');
         }
     });
 });

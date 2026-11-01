@@ -18,15 +18,16 @@ const countTo100Builder = new DatasetPermutationBuilder()
         Area.NumerationWithIntegers,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.StepsOf1], // count by ones
-        [Scope.StepsOf10, Scope.MultiplesOf10] // count by tens through decade values
+        ...[Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100]
+            .map(upper => [Scope.StepsOf1, upper]),
+        ...[Scope.NumbersSmaller20, Scope.NumbersSmaller100]
+            .map(upper => [Scope.StepsOf10, Scope.MultiplesOf10, upper])
     ]);
 
 // --- K.CC.A.2: Start from a given number ---
@@ -41,15 +42,15 @@ const countFrom5Builder = new DatasetPermutationBuilder()
         Scope.StepsOf1,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger5,
         Scope.NumbersWithoutZero,
         Scope.NumbersWithoutNegatives,
         Scope.After,
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
-        [Scope.NumbersSmaller10],
-        [Scope.NumbersSmaller20]
+        [Scope.NumbersLarger5, Scope.NumbersSmaller10],
+        [Scope.NumbersLarger5, Scope.NumbersSmaller20],
+        [Scope.NumbersLarger10, Scope.NumbersSmaller20]
     ]);
 
 // --- K.CC.A.3: Write numbers from 0 to 20 (stroke writing) ---

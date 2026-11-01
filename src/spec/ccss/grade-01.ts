@@ -216,7 +216,8 @@ const countTo120Builder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller120,
         Ability.ProcedureExecution
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100, 120]});
 
 // --- 1.NBT.A.1: Read numerals through 120 ---
 const readNumeralsBuilder = new DatasetPermutationBuilder()

@@ -3,6 +3,7 @@ import {CountingHundredOffsetGenerator} from '../counting-hundred-offset/generat
 import {beforeEach, describe, expect, it} from 'vitest';
 import {Scope} from 'edugraph-ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {CountingIncDecGenerator} from './generator.ts';
 
 describe('CountingIncDecGenerator', () => {
@@ -23,7 +24,7 @@ describe('CountingIncDecGenerator', () => {
 
     it('increments by one without exceeding the range', () => {
         const stub = generator.generate({
-            range: {min: 1, max: 10},
+            range: createCanonicalNumericRange(10),
             direction: 'inc'
         });
 
@@ -36,7 +37,7 @@ describe('CountingIncDecGenerator', () => {
 
     it('decrements by one without reaching zero', () => {
         const stub = generator.generate({
-            range: {min: 1, max: 10},
+            range: createCanonicalNumericRange(10),
             direction: 'dec'
         });
 
@@ -142,7 +143,7 @@ describe('CountingIncDecGenerator', () => {
 
     it('returns null when the range cannot fit the requested change', () => {
         expect(generator.generate({
-            range: {min: 1, max: 1},
+            range: {...createCanonicalNumericRange(5), min: 1, max: 1},
             direction: 'inc'
         })).toBeNull();
         expect(new CountingTenOffsetGenerator().generate({
@@ -154,13 +155,13 @@ describe('CountingIncDecGenerator', () => {
 
     it('bounds the explicit unit adjustment even when the result is hidden', () => {
         for (const direction of ['inc', 'dec'] as const) {
-            expect(generator.generate({range: {min: 5, max: 20}, direction})).toBeNull();
+            expect(generator.generate({range: createCanonicalNumericRange(20, 5), direction})).toBeNull();
         }
     });
 
     it('returns null for an unsupported direction', () => {
         expect(generator.generate({
-            range: {min: 1, max: 20},
+            range: createCanonicalNumericRange(20),
             direction: Scope.DerivedCount
         } as never)).toBeNull();
     });

@@ -1,13 +1,11 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
-import {countingOffsetStepRangeRule} from '../counting-offset-compatibility.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-inc-dec',
-    compatibility: [countingOffsetStepRangeRule(1)],
     generalLabels: [
         Area.NumerationWithIntegers,
         Scope.StepsOf1,
@@ -38,8 +36,13 @@ const resolveDirection = selectExactLabelSetMap([
 
 export const CountingIncDecGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
-        resolveRangeFromLabels
+        [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100,
+            Scope.NumbersSmaller120, Scope.NumbersSmaller1000],
+        selectExactLabelMap([
+            [Scope.NumbersSmaller5, createCanonicalNumericRange(5)], [Scope.NumbersSmaller10, createCanonicalNumericRange(10)],
+            [Scope.NumbersSmaller20, createCanonicalNumericRange(20)], [Scope.NumbersSmaller100, createCanonicalNumericRange(100)],
+            [Scope.NumbersSmaller120, createCanonicalNumericRange(120)], [Scope.NumbersSmaller1000, createCanonicalNumericRange(1000)]
+        ] as const)
     ],
     direction: [
         countingDirections,
