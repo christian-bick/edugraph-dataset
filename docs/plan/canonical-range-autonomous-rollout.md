@@ -459,3 +459,18 @@ draws and replays pass target coverage, strict annotations and both resolution p
 ownership/applicability and TypeScript pass. Evidence:
 `temp/range-autonomous/batch3/{factor-multiple-tests,factor-projections,factor-specs,factor-types}.log`
 and `verify-factors.json`.
+
+## Third batch: aligned recurrence patterns
+
+Five mode/range configurations preserve all1,764 independent and376 correspondence frames,
+including their exact original source-example and additive/multiplicative mixture masses before
+conditioning. Positions0..5 are mathematical recurrence inputs in this family: each prompt asks
+for corresponding positions/alignment and rules advancing from the initial step. They are shown
+in both modes, unlike arbitrary table row numbering. They preserve the existing view-owned zero
+claim and rule out a positive lower even when every sequence value is at least5.
+
+All three old routes remain, with seven selections and three source range omissions closed.
+Nine tests,48 representative boundary projections and28 planned draws/replays pass. The original
+correspondence default remains; no source, renderer or global-policy change is used. Evidence:
+`temp/range-autonomous/batch3/arithmetic/paired-pattern-review.md` and
+`verify-paired-pattern.json`.
