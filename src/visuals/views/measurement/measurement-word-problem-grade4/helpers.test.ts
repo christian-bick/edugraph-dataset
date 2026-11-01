@@ -41,7 +41,7 @@ const generate = (
         measurementKind,
         numberKind,
         operation: operationArea,
-        range: numberKind === 'integer' ? createCanonicalNumericRange(5) : false,
+        range: createCanonicalNumericRange(5),
         operandDigits: numberKind === 'integer' && (operation === 'addition' || operation === 'subtraction')
             ? {role: 'largest', digits: 1} : undefined
     }).data;
@@ -91,6 +91,24 @@ describe('measurement-word-problem-grade4 presentation', () => {
         expect(lengthDecimal.answer.display).toMatch(/^\d+\.\d$/);
         expect(lengthDecimal.answer.quantityText).toMatch(/ meters?$/);
     });
+
+    it.each(measurementKinds.flatMap(measurementKind => [5, 10].map(upper => [measurementKind, upper] as const)))(
+        'preserves both decimal-addition profiles in %s at upper%s', (measurementKind, upper) => {
+            setSeed(`${measurementKind}-decimal-addition-${upper}`);
+            const {data} = generator.generate({measurementKind, numberKind: 'decimal', operation: Area.Addition,
+                range: createCanonicalNumericRange(upper)});
+            const presentation = buildMeasurementWordProblemPresentation(data)!;
+            expect(presentation).not.toBeNull();
+            expect(upper === 10 ? [5.7] : [2.7, 3.7]).toContain(data.answer.numerator / data.answer.denominator);
+            for (const operand of presentation.operands) {
+                expect(presentation.questionEquation).toContain(operand.text);
+                expect(presentation.solutionEquation).toContain(operand.text);
+            }
+            expect(presentation.questionEquation).toContain('?');
+            expect(presentation.questionEquation).not.toContain(presentation.answer.equationTerm);
+            expect(presentation.solutionEquation).toContain(presentation.answer.equationTerm);
+        }
+    );
 
     it.each([
         ['wrong unit identity', () => ({...generate('time', 'integer', 'addition', Area.Addition), unitId: 'meter'})],

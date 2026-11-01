@@ -33,8 +33,9 @@ These items are not newly scheduled by the archive move.
   exact two-/three-digit comparison domains and the two-digit-addend correction. Source validation
   passes; the separately approved six-target unknown-number Ability correction retains all target
   coverage with 1,672 final routes. The [remaining-family review](canonical-range-remaining-families.md)
-  records 567 current source presence findings and proposes the next 50-selection batch without
-  target changes, followed by counting-on/back and separate projection/quantity-contract cases.
+  records the baseline 567 source presence findings. Its approved 50-selection batch is implemented,
+  leaving 517 source findings with unchanged targets/routes. Counting-on/back and separate
+  projection/quantity-contract cases follow.
   Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains

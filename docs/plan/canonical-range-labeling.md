@@ -6,8 +6,8 @@ Started 2026-10-31 on `codex/label-dependency-audit`, from
 Status: the opt-in target-expansion helper and first eight-family producer/target adoption are
 implemented, including the eight measurement targets and approved unknown-number Ability
 correction. Source validation retains 1,247 normalized targets and 1,672 routes. The
-[remaining-family review](canonical-range-remaining-families.md) proposes the next 50-selection
-batch; its first checkpoint is implemented below. The original inventory remains a historical rollout baseline.
+[remaining-family review](canonical-range-remaining-families.md) records the completed 50-selection
+batch below, leaving 517 source range-presence findings. The original inventory remains a historical rollout baseline.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
 
@@ -589,20 +589,20 @@ in this review; regeneration and VQA were not run.
 
 The approved first checkpoint adds invariant `NumbersSmaller100` to
 `decimal-power-ten-scaling` and `fraction-tenths-equivalence`, covering ten source selections
-through eight routes and four views. Required powers/denominator scaling witness100, while a
-required value below5 rules out a positive lower descriptor. Generator mathematics, schema
+through eight routes and four views. Required powers/denominator scaling witness 100, while a
+required value below 5 rules out a positive lower descriptor. Generator mathematics, schema
 choices and payloads are unchanged.
 
-Tests cover all162 coefficient/operation cases and all ten tenths numerators, plus positive
-matching with the new bounds. All14 generator/spec tests and ten existing consumer tests pass.
-The preceding complete-catalog experiment preserves all1,247 targets /1,672 routes with no
+Tests cover all 162 coefficient/operation cases and all ten tenths numerators, plus positive
+matching with the new bounds. All 14 generator/spec tests and ten existing consumer tests pass.
+The preceding complete-catalog experiment preserves all 1,247 targets / 1,672 routes with no
 ownership issues. Full runtime/source acceptance for the three checkpoints follows R4c.
 Evidence: `temp/canonical-range-next-review/r4a-focused-tests.log` and `r4a-consumer-tests.log`.
 
 ### R4b — fixed noninteger measurement bounds
 
-The second checkpoint adds upper5 through the existing range field to all20 fractional and
-15 decimal subtraction/multiplication/division selections. Their120 unit-specific tuples remain
+The second checkpoint adds upper5 through the existing range field to all 20 fractional and
+15 decimal subtraction/multiplication/division selections. Their 120 unit-specific tuples remain
 unchanged. Decimal addition retains its previous unprofiled contract until R4c.
 
 Unspecified number-kind requests now have an explicit integer default in both planner metadata
@@ -610,10 +610,61 @@ and direct resolution. This replaces the former integer-only range guard while p
 effect on existing consumers. Partial and explicit fraction/decimal requests remain supported.
 No mathematical payload, view, target or generic matching contract changes.
 
-All92 focused tests pass, including exhaustive finite support, canonical bounds, malformed
+All 92 focused tests pass, including exhaustive finite support, canonical bounds, malformed
 profiles, direct/planned resolution and one-draw sampling. The before/after runtime probe retains
-exactly all1,286 authored /1,247 normalized targets and1,672 routes. All2,054 recorded integer
-config/data/label/random-state comparisons and32 invariant-family comparisons are unchanged.
-It passes1,688 planned draws and exact replays plus754 direct draws; complete family selection
-counts remain412. Evidence is under `temp/canonical-range-r4/` (`verification-r4b.json` and
+exactly all 1,286 authored / 1,247 normalized targets and 1,672 routes. All 2,054 recorded integer
+config/data/label/random-state comparisons and 32 invariant-family comparisons are unchanged.
+It passes 1,688 planned draws and exact replays plus 754 direct draws; complete family selection
+counts remain 412. Evidence is under `temp/canonical-range-r4/` (`verification-r4b.json` and
 `measurement-tests.log`). Full coverage and final audit follow R4c.
+
+### R4c — decimal-addition profiles and complete batch acceptance
+
+The third checkpoint adds upper5/upper10 choices to the five decimal-addition story routes.
+The upper5 pool retains `1.2+1.5=2.7` and `2.3+1.4=3.7`; upper10 retains
+`3.1+2.6=5.7`. The schema selects the bound before generation. Sampling uses exact tenths and
+one draw within the selected pool, including its singleton. The accepted profile selection changes
+the relative frequencies and seeded outcomes of this slice. No balance is imposed.
+
+All branches now require a canonical range, so the module no longer admits an empty range choice
+or uses the optional range resolver. The 35 fixed-bound noninteger contexts keep their original
+sampling and all 135 unit-specific noninteger tuples remain supported. No new tuple is introduced;
+all source target labels/IDs, payloads, rendering implementations and matching semantics remain.
+
+The final audit enumerates **2,969 selections**, with zero strict failures, conflicts or incomplete
+tuples. Source range-presence findings decrease **567→517**, closing exactly 50. The 1,062 stored-row
+findings remain, since no dataset was regenerated. Range remains report-only and the Area allowlist
+is unchanged.
+
+The exact baseline comparison retains **1,286 authored / 1,247 normalized targets and 1,672 route
+keys**. Measurement has 417 selections across its 168 existing routes. Across the three producers,
+427 selections pass 1,708 planned draws and exact replays plus 764 direct draws, with canonical
+witnesses, target coverage and strict annotation checks. All 2,054 recorded integer config/data/
+label/random-state outcomes and 32 representative invariant-family outcomes are identical. Numerical
+draws supplement the finite-support proof; they do not exhaust the random seed space.
+
+The finite verification retains all 135 noninteger mathematical tuples with zero new/missing cases,
+and 9,000 same-seed canonical/one-draw checks pass. Generator tests cover all 172 scaling outcomes
+(162 power-ten cases and ten tenths numerators), all 120 fixed-bound story tuples, and all 15
+decimal-addition tuples. The 180 focused generator/spec/presentation tests pass, including both
+addition profiles in all five units and independent Question/Solution equation presentation.
+The 164 integration tests retain all 120 Grade 4 measurement targets and validate all 200 of their
+source selections, including the range facet. Synthetic partial requests explicitly test the integer
+default; future noninteger requests must declare their number kind. Every current CCSS route is retained.
+
+Evidence under `temp/canonical-range-r4/`: `baseline.json`, `verification-final.json`,
+`finite-story-support-final.json`, `measurement-r4c-tests.log` and `audit/audit.json`. R4a is
+committed as `7a713e20`; R4b as `d8d4ae69`. Final repository/coverage verification is recorded below.
+
+Final verification passes `npm run check -- --spec=ccss`, TypeScript and documentation checks,
+and the complete **7,504-test / 910-file coverage suite**. `VITEST_MAX_WORKERS=2` avoids unrelated
+default-concurrency timeouts without changing any test, timeout or coverage threshold. Generator
+coverage is 98.85% statements / 97.84% branches / 100% functions / 99.46% lines; every generator
+meets its required thresholds. Measurement stories and tenths equivalence each have 100% statement
+and branch coverage; decimal power-ten scaling has 93.54% / 93.75%. Logs: `check.log`,
+`types-final.log`, `docs-final.log` and `coverage-bounded.log` in the same evidence directory.
+
+The next separate proposal is counting-on/back; its three source additions were reviewed but are
+not part of R4. Conversion/projection and quantity-contract work remains in the remaining-family
+review. Source completion does not yet establish dataset acceptance; regeneration and VQA remain
+at the later acceptance point.

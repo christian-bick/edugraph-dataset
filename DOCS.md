@@ -124,6 +124,12 @@ Reviewed targets expand before IDs are assigned, and generator payloads remain m
 The plan records active families, intentional support changes, matching migration and the separate
 regeneration/VQA acceptance status; other families retain their existing inclusive-range contracts.
 
+Measurement stories now resolve canonical ranges for integer, fraction and decimal branches.
+An unspecified number kind retains the integer default. Decimal addition selects an upper5 or
+upper10 mathematical profile before sampling its existing finite tuple pool; the other noninteger
+branches have upper5. Decimal power-ten and tenths-equivalence scaling supply invariant upper100.
+These module declarations preserve the existing matching routes and mathematical payload shapes.
+
 The [numerical-zero correction](docs/plan/label-dependency-graph.md#numerical-zero-repairs-and-model-falsification-2026-10-29)
 removes numeral-character partitions from writing and division, and checks the numerical work of
 the specified algorithms. Claims still come from preselected matching capabilities. Corrected

@@ -2,7 +2,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {
     canonicalRangeLabelChoices,
     canonicalRangeProfiles,
-    resolveOptionalCanonicalRangeFromLabels
+    resolveCanonicalRangeFromLabels
 } from '../../../lib/canonical-range-labels.ts';
 import type {CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
@@ -14,7 +14,7 @@ import {
     resolveMeasurementWordProblemOperandDigits
 } from './operation-labels.ts';
 
-export const measurementRangeChoices = [[], ...canonicalRangeLabelChoices([5, 10, 20, 100])];
+export const measurementRangeChoices = canonicalRangeLabelChoices([5, 10, 20, 100]);
 export const measurementRangeLabels = [...new Set(measurementRangeChoices.flat())];
 const operations = [
     [Area.Addition, 'addition'], [Area.Subtraction, 'subtraction'],
@@ -32,7 +32,7 @@ export const resolveMeasurementNumberKind = withLabelChoices(exactResolver((labe
     const requested = [...numberLabels, Scope.ProperFractions].some(label => labels.includes(label));
     return requested ? selectNumberKind(labels) : 'integer';
 }), {
-    ...selectNumberKind.labelChoices!, defaults: [{labels: [Scope.IntegerNumbers]}]
+    ...selectNumberKind.labelChoices!, kind: 'alternatives', defaults: [{labels: [Scope.IntegerNumbers]}]
 });
 const digitLabels = measurementWordProblemOperandDigitChoices.flat();
 export const measurementRangeContext = [...operations.map(([label]) => label), ...numberLabels, ...digitLabels];
@@ -41,14 +41,12 @@ const selectedOperation = (labels: readonly string[]): ArithmeticOperation | und
     operations.find(([label]) => labels.includes(label))?.[1];
 
 /** No payload inspection: this checks the generator's authored, finite mathematical support. */
-export function permitsMeasurementRange(labels: readonly string[], range: CanonicalNumericRange | false): boolean {
+export function permitsMeasurementRange(labels: readonly string[], range: CanonicalNumericRange): boolean {
     const integer = labels.includes(Scope.IntegerNumbers);
     if (numberLabels.some(label => labels.includes(label)) && !integer) {
-        // Decimal addition is the remaining mixed-band slice, adopted separately.
-        if (labels.includes(Scope.DecimalNumbers) && selectedOperation(labels) === 'addition') return range === false;
-        return range !== false && range.min === 0 && range.max === 5;
+        const decimalAddition = labels.includes(Scope.DecimalNumbers) && selectedOperation(labels) === 'addition';
+        return range.min === 0 && (range.max === 5 || decimalAddition && range.max === 10);
     }
-    if (range === false) return !integer;
     const operation = selectedOperation(labels);
     if (!operation) return true;
     const digits = labels.includes(Scope.SingleDigitLargestOperand) ? 1
@@ -57,13 +55,12 @@ export function permitsMeasurementRange(labels: readonly string[], range: Canoni
 }
 
 export const resolveMeasurementRange = withLabelChoices(exactResolver((labels: string[]) => {
-    const range = resolveOptionalCanonicalRangeFromLabels(labels);
+    const range = resolveCanonicalRangeFromLabels(labels);
     return range !== undefined && permitsMeasurementRange(labels, range) ? range : undefined;
 }), {
     kind: 'alternatives', alternatives: measurementRangeChoices, relation: 'capability',
     defaults: [
         {whenAll: [Scope.FractionNumbers], labels: [Scope.NumbersSmaller5]},
-        {whenAll: [Scope.DecimalNumbers, Area.Addition], labels: []},
         ...[Area.Subtraction, Area.Multiplication, Area.Division].map(operation => ({
             whenAll: [Scope.DecimalNumbers, operation], labels: [Scope.NumbersSmaller5]
         }))

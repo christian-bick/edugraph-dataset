@@ -140,10 +140,14 @@ const sampleFraction = (operation: ArithmeticOperation): MathSample => {
 
 const sampleDecimal = (
     operation: ArithmeticOperation,
-    measurementKind: MeasurementWordProblemKind
+    measurementKind: MeasurementWordProblemKind,
+    range: CanonicalNumericRange
 ): MathSample => {
     if (operation === 'addition') {
-        const [first, second] = pick([[12, 15], [23, 14], [31, 26]] as const);
+        // Compare exact tenths: the selected band must contain the required sum.
+        const tuples = ([[12, 15], [23, 14], [31, 26]] as const).filter(([first, second]) =>
+            first + second <= range.max * 10 && first + second > range.maximumAbove * 10);
+        const [first, second] = pick(tuples);
         return {
             operation,
             first: decimalValue(first, measurementKind),
@@ -182,12 +186,12 @@ const sampleMath = (
     numberKind: MeasurementWordProblemNumberKind,
     operation: ArithmeticOperation,
     measurementKind: MeasurementWordProblemKind,
-    range: CanonicalNumericRange | false,
+    range: CanonicalNumericRange,
     largestOperandDigits?: 1 | 2
 ): MathSample => {
-    if (numberKind === 'integer' && range) return sampleInteger(operation, range, largestOperandDigits);
+    if (numberKind === 'integer') return sampleInteger(operation, range, largestOperandDigits);
     if (numberKind === 'fraction') return sampleFraction(operation);
-    return sampleDecimal(operation, measurementKind);
+    return sampleDecimal(operation, measurementKind, range);
 };
 
 const makeValue = ({numerator, denominator}: ExactValue): MeasurementWordProblemValue => ({
@@ -268,24 +272,19 @@ export class MeasurementWordProblemsGenerator implements ProblemGenerator<
         const measurementKind = config.measurementKind as MeasurementWordProblemKind;
         const numberKind = config.numberKind as MeasurementWordProblemNumberKind;
         const range = config.range;
-        if (numberKind === 'decimal' && operation === 'addition') {
-            if (range !== false) {
-                throw new GeneratorValidationError('measurement-word-problems', 'Decimal addition requires an explicit empty range choice.');
-            }
-        } else {
-            if (!range || (numberKind === 'integer' ? ![5, 10, 20, 100].includes(range.max)
-                : range.min !== 0 || range.max !== 5)) {
-                throw new GeneratorValidationError('measurement-word-problems', 'Unsupported canonical range choice.');
-            }
-            let expected: CanonicalNumericRange;
-            try {
-                expected = createCanonicalNumericRange(range.max, range.min);
-            } catch {
-                throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range choice.');
-            }
-            if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
-                throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range witnesses.');
-            }
+        const decimalAddition = numberKind === 'decimal' && operation === 'addition';
+        if (!range || (numberKind === 'integer' ? ![5, 10, 20, 100].includes(range.max)
+            : range.min !== 0 || !(range.max === 5 || decimalAddition && range.max === 10))) {
+            throw new GeneratorValidationError('measurement-word-problems', 'Unsupported canonical range choice.');
+        }
+        let expected: CanonicalNumericRange;
+        try {
+            expected = createCanonicalNumericRange(range.max, range.min);
+        } catch {
+            throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range choice.');
+        }
+        if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
+            throw new GeneratorValidationError('measurement-word-problems', 'Invalid canonical range witnesses.');
         }
         const operandDigits = config.operandDigits;
         if (operandDigits !== undefined && operandDigits !== false) {

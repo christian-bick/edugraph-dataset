@@ -85,6 +85,8 @@ The [canonical range plan](docs/plan/canonical-range-labeling.md) records the su
 of tightest numerical bounds. Reviewed source competencies expand into explicit range targets;
 matching-capable generator profiles construct exercises that demonstrate those bounds. Source
 implementation and regenerated dataset acceptance are tracked separately in that plan.
+The settled finite-domain batch also covers noninteger measurement stories and required
+power-ten/fraction scaling, preserving existing targets and matching routes.
 
 > **For a deep dive into the architecture, the dataset pipeline, and a step-by-step guide on how to add new generators and views, please read the [Technical Documentation (DOCS.md)](./DOCS.md).**
 

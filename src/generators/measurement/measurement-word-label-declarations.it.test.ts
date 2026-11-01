@@ -12,7 +12,7 @@ import {arithmeticOperations, resolveDeclaredOperation} from '../arithmetic/help
 import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-audit.ts';
 import {createLabelDependencyEvaluator} from '../../lib/label-dependencies.ts';
 import {assessLabelDependencyCoverage} from '../../lib/label-dependency-coverage.ts';
-import {canonicalRangeLabels, resolveCanonicalRangeFromLabels} from '../../lib/canonical-range-labels.ts';
+import {resolveCanonicalRangeFromLabels} from '../../lib/canonical-range-labels.ts';
 import {hasCanonicalRangeWitness, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import * as randomSource from '../../lib/random.ts';
 import type {MeasurementWordProblemGrade4, MeasurementWordProblemValue} from '../../types/problems.ts';
@@ -167,7 +167,7 @@ const expectIntegerAdditiveWidth = (labels: readonly string[], data: Measurement
 };
 
 const expectedSelectionCount = (labels: readonly string[]): number => {
-    if (!labels.includes(Scope.IntegerNumbers)) return 1;
+    if (!labels.includes(Scope.IntegerNumbers)) return labels.includes(Scope.DecimalNumbers) && labels.includes(Area.Addition) ? 2 : 1;
     const uppers = [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100];
     const upperIndex = uppers.findIndex(label => labels.includes(label));
     expect(upperIndex).toBeGreaterThanOrEqual(0);
@@ -181,11 +181,6 @@ const expectCanonicalRange = (
     labels: readonly string[], config: Record<string, unknown>, data: MeasurementWordProblemGrade4
 ) => {
     expect(labels).not.toContain(Scope.NumbersLargerZero);
-    if (data.numberKind !== 'integer') {
-        expect(config.range).toBe(false);
-        expect(labels.filter(label => canonicalRangeLabels.includes(label))).toEqual([]);
-        return;
-    }
     const range = config.range as CanonicalNumericRange;
     expect(range).toBeTruthy();
     expect(resolveCanonicalRangeFromLabels([...labels])).toEqual(range);
@@ -208,7 +203,7 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         expect(view.schema).toEqual({});
     });
 
-    it('checks 195 source selections without unresolved non-range dependency assessments', () => {
+    it('checks 200 source selections without unresolved dependency assessments', () => {
         const evaluator = createLabelDependencyEvaluator();
         const missingCounts = new Map<string, number>();
         let selectionCount = 0;
@@ -224,23 +219,23 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
                 expect(evaluation.context.status).toBe('eligible');
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
-                const missing = evaluation.assessments.filter(item => item.status === 'missing' && item.facet !== 'range');
+                const missing = evaluation.assessments.filter(item => item.status === 'missing');
                 expect(missing).toEqual([]);
                 for (const assessment of missing) {
                     missingCounts.set(assessment.facet, (missingCounts.get(assessment.facet) ?? 0) + 1);
                 }
             }
         }
-        expect(selectionCount).toBe(195);
+        expect(selectionCount).toBe(200);
         expect(Object.fromEntries(missingCounts)).toEqual({});
     });
 
     it.each([
-        {name: 'number kind and operation omitted', labels: [], count: 39},
-        {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 7},
+        {name: 'number kind and operation omitted', labels: [], count: 31},
+        {name: 'multiplication with number kind omitted', labels: [Area.Multiplication], count: 5},
         {name: 'integer kind with operation omitted', labels: [Scope.IntegerNumbers], count: 31},
         {name: 'fraction kind with operation omitted', labels: [Scope.FractionNumbers], count: 4},
-        {name: 'decimal kind with operation omitted', labels: [Scope.DecimalNumbers], count: 4}
+        {name: 'decimal kind with operation omitted', labels: [Scope.DecimalNumbers], count: 5}
     ])('preserves the complete semantic configuration set for $name', ({labels, count}) => {
         const precedingSchema = {measurementKind: generator.schema!.measurementKind,
             numberKind: generator.schema!.numberKind, operation: [arithmeticOperations, resolveDeclaredOperation] as const};
@@ -281,7 +276,6 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'fraction multiplication', labels: [Area.Multiplication, Scope.FractionNumbers, Scope.SingleDigitLargestOperand], kinds: ['fraction']},
         {name: 'decimal multiplication', labels: [Area.Multiplication, Scope.DecimalNumbers, Scope.SingleDigitLargestOperand], kinds: ['decimal']},
         {name: 'smallest width with omitted kind', labels: [Area.Multiplication, Scope.SingleDigitSmallestOperand], kinds: ['integer']},
-        {name: 'largest width with omitted kind', labels: [Area.Multiplication, Scope.SingleDigitLargestOperand], kinds: ['decimal', 'fraction']},
         {name: 'smallest width with omitted kind and operation', labels: [Scope.SingleDigitSmallestOperand], kinds: ['integer']}
     ])('admits the supported explicit role for $name', ({labels, kinds}) => {
         const current = admittedConfigurations(labels);
@@ -317,17 +311,18 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         }
     });
 
-    it('allows a partial largest-width request to select only integer addition/subtraction or noninteger multiplication', () => {
+    it('keeps a partial largest-width request integer unless the number kind is explicitly requested', () => {
         const current = admittedConfigurations([Scope.SingleDigitLargestOperand]);
         const semanticProfiles = [...new Set(current.configurations.map(entry =>
             JSON.stringify([operationValue(entry.config).operation, entry.config.numberKind])))].sort();
-        expect(semanticProfiles).toEqual([[Area.Addition, 'integer'], [Area.Subtraction, 'integer'],
-            [Area.Multiplication, 'decimal'], [Area.Multiplication, 'fraction']].map(profile => JSON.stringify(profile)).sort());
+        expect(semanticProfiles).toEqual([[Area.Addition, 'integer'], [Area.Subtraction, 'integer']]
+            .map(profile => JSON.stringify(profile)).sort());
         for (const entry of current.configurations) expectOperationRoles(entry.selection.labels, entry.config);
     });
 
     it.each([
         {name: 'integer multiplication with largest width', labels: [Area.Multiplication, Scope.IntegerNumbers, Scope.SingleDigitLargestOperand]},
+        {name: 'noninteger multiplication width without a number-kind request', labels: [Area.Multiplication, Scope.SingleDigitLargestOperand]},
         {name: 'fraction multiplication with smallest width', labels: [Area.Multiplication, Scope.FractionNumbers, Scope.SingleDigitSmallestOperand]},
         {name: 'decimal multiplication with smallest width', labels: [Area.Multiplication, Scope.DecimalNumbers, Scope.SingleDigitSmallestOperand]},
         {name: 'both multiplication bundles', labels: [Area.Multiplication, Scope.SingleDigitSmallestOperand, Scope.SingleDigitLargestOperand]},
@@ -345,7 +340,9 @@ describe('measurement word-problem declarations on existing Grade 4 targets', ()
         {name: 'subtraction with multiplication width', labels: [Area.Subtraction, Scope.SingleDigitSmallestOperand]},
         {name: 'one-digit addition above twenty', labels: [Area.Addition, Scope.IntegerNumbers, Scope.SingleDigitLargestOperand, Scope.NumbersSmaller100]},
         {name: 'two-digit addition within ten', labels: [Area.Addition, Scope.IntegerNumbers, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller10]},
-        {name: 'noninteger range rollout', labels: [Area.Addition, Scope.DecimalNumbers, Scope.NumbersSmaller5]},
+        {name: 'decimal addition with unsupported upper20', labels: [Area.Addition, Scope.DecimalNumbers, Scope.NumbersSmaller20]},
+        {name: 'fraction addition with unsupported upper10', labels: [Area.Addition, Scope.FractionNumbers, Scope.NumbersSmaller10]},
+        {name: 'decimal addition with unsupported positive floor', labels: [Area.Addition, Scope.DecimalNumbers, Scope.NumbersSmaller10, Scope.NumbersLarger5]},
         {name: 'impossible lower-bound division', labels: [Area.Division, Scope.IntegerNumbers, Scope.NumbersSmaller100, Scope.NumbersLarger10]}
     ])('rejects unsupported explicit claims for $name without rewriting the target', ({labels}) => {
         const target = partialTarget(labels);

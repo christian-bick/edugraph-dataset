@@ -2,9 +2,12 @@
 
 Read-only production review on 2026-11-01 at `d6fd3b94`, ontology `0.33.0`, on
 `codex/label-dependency-audit`. This extends the [range plan](canonical-range-labeling.md),
-not the earlier historical inventory. No proposed labeling change is implemented here.
+not the earlier historical inventory. The R4a–R4c proposal below was subsequently approved and
+implemented; its [acceptance record](canonical-range-labeling.md#r4c--decimal-addition-profiles-and-complete-batch-acceptance)
+supersedes the review-baseline counts. Current source range-presence findings are 517, with all
+1,247 normalized targets / 1,672 routes retained and 2,969 complete source selections.
 
-## Current position
+## Review baseline
 
 Fresh catalog matching finds **1,286 authored / 1,247 normalized targets, 1,672 routes,
 175 active producers, 336 active views and 354 matched producer/view pairs**. All 2,964 source
@@ -120,22 +123,22 @@ counts are implementation acceptance requirements, not a claim that future sampl
 
 ## Remaining queue after this batch
 
-The current source findings by owning directory are below. Counts refer to missing facets only;
+The source findings by owning directory are below, before and after R4. Counts refer to missing facets only;
 families with old bounds still require canonical review. They are not implementation-batch counts.
 
-| Family group | Missing source selections now | Next treatment |
-| --- | ---: | --- |
-| Arithmetic | 90 | Finite strategies first, then known facts/patterns/word problems; method-specific intermediates before written algorithms |
-| Counting and integer writing | 0 | Tighten existing bounds; review source variants and scalar-zero cases rather than treating presence as completion |
-| Fraction | 204 | Eight selections in R4a; then separate fraction-value tasks from explicit equivalence/model-count operations |
-| Number (decimal/rational/length) | 47 | Ordinary decimal values, comparisons and signed quantities; preserve each view's assessed relation |
-| Place value | 11 | Two selections in R4a; existing integer bounds additionally need coefficient/method and source review |
-| Measurement | 137 | Forty selections in R4b/R4c; conversion and number-line contracts next |
-| Currency | 18 | Trace cents, dollars, required conversion and group counts across the actual task |
-| Time, elapsed time and interval arithmetic | 26 | Bound assessed clock components/calculations, not timestamp storage |
-| Ratio | 10 | Include required ratio operands, conversion factors and results; finite profiles |
-| Algebra | 24 | Formal numeric expressions remain range-report eligible in some projections; keep them separate from the agreed sign/zero cutoff |
-| **Total** | **567** | No change to applicability policy |
+| Family group | Review baseline | After R4 | Next treatment |
+| --- | ---: | ---: | --- |
+| Arithmetic | 90 | 90 | Finite strategies first, then known facts/patterns/word problems; method-specific intermediates before written algorithms |
+| Counting and integer writing | 0 | 0 | Tighten existing bounds; review source variants and scalar-zero cases rather than treating presence as completion |
+| Fraction | 204 | 196 | Separate fraction-value tasks from explicit equivalence/model-count operations |
+| Number (decimal/rational/length) | 47 | 47 | Ordinary decimal values, comparisons and signed quantities; preserve each view's assessed relation |
+| Place value | 11 | 9 | Existing integer bounds additionally need coefficient/method and source review |
+| Measurement | 137 | 97 | Conversion and number-line contracts next |
+| Currency | 18 | 18 | Trace cents, dollars, required conversion and group counts across the actual task |
+| Time, elapsed time and interval arithmetic | 26 | 26 | Bound assessed clock components/calculations, not timestamp storage |
+| Ratio | 10 | 10 | Include required ratio operands, conversion factors and results; finite profiles |
+| Algebra | 24 | 24 | Formal numeric expressions remain range-report eligible in some projections; keep them separate from the agreed sign/zero cutoff |
+| **Total** | **567** | **517** | No change to applicability policy |
 
 Geometry, coordinate, shape and statistics tasks do not become mandatory range work merely
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range

@@ -17,7 +17,7 @@ import {
     resolveMeasurementOperandDigits,
     resolveMeasurementRange
 } from './range-profile.ts';
-import {resolveOptionalCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 
 export const measurementWordProblemKinds = [
     Scope.MeterScale,
@@ -70,7 +70,7 @@ export const spec: GeneratorSpec = {
         ...measurementRangeLabels, ...measurementRangeContext
     ], selected => {
         const labels = [...measurementRangeLabels, ...measurementRangeContext].filter(selected);
-        const range = resolveOptionalCanonicalRangeFromLabels(labels);
+        const range = resolveCanonicalRangeFromLabels(labels);
         return range !== undefined && permitsMeasurementRange(labels, range);
     })]
 };

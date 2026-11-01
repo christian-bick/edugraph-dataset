@@ -33,18 +33,21 @@ describe('measurement canonical range profiles', () => {
         expect(measurementRangeChoices.flat()).not.toContain(Scope.NumbersLargerZero);
     });
 
-    it('defaults fixed-bound noninteger tasks to upper5 and leaves decimal addition for its own profile checkpoint', () => {
+    it('defaults fixed-bound noninteger tasks to upper5 and permits both decimal-addition bounds', () => {
         for (const numberLabel of [Scope.FractionNumbers, Scope.DecimalNumbers]) for (const operation of operations) {
             const labels = [numberLabel, operation];
-            const [domain] = normalizeSchemaChoices({range: schema.range}, labels, 'generator');
-            const unprofiled = numberLabel === Scope.DecimalNumbers && operation === Area.Addition;
-            expect(domain.alternatives.map(choice => choice.labels)).toEqual(unprofiled ? [[]] : [[Scope.NumbersSmaller5]]);
-            expect(resolveMeasurementRange([...labels, ...(unprofiled ? [] : [Scope.NumbersSmaller5])]))
-                .toEqual(unprofiled ? false : createCanonicalNumericRange(5));
-            expect(resolveMeasurementRange([...labels, Scope.NumbersSmaller10])).toBeUndefined();
+            const addition = numberLabel === Scope.DecimalNumbers && operation === Area.Addition;
+            if (!addition) {
+                const [domain] = normalizeSchemaChoices({range: schema.range}, labels, 'generator');
+                expect(domain.alternatives.map(choice => choice.labels)).toEqual([[Scope.NumbersSmaller5]]);
+            }
+            expect(resolveMeasurementRange([...labels, Scope.NumbersSmaller5])).toEqual(createCanonicalNumericRange(5));
+            expect(resolveMeasurementRange([...labels, Scope.NumbersSmaller10]))
+                .toEqual(addition ? createCanonicalNumericRange(10) : undefined);
         }
         expect(resolveMeasurementRange([Scope.IntegerNumbers])).toBeUndefined();
-        expect(resolveMeasurementRange([])).toBe(false);
+        expect(resolveMeasurementRange([])).toBeUndefined();
+        expect(measurementRangeChoices).not.toContainEqual([]);
     });
 
     it('resolves every statically admitted joint profile before generation without consuming randomness', () => {
@@ -60,19 +63,15 @@ describe('measurement canonical range profiles', () => {
                     measurementKind: [Scope.MeterScale], operation: [operation], numberKind, operandDigits, range
                 });
                 const stub = generator.generate(resolved.config);
-                if (resolved.config.range) {
-                    const values = [...stub.data.operands.map(operand => operand.role === 'group-count'
-                        ? operand.count : operand.value.numerator / operand.value.denominator),
-                    stub.data.answer.numerator / stub.data.answer.denominator];
-                    expect(hasCanonicalRangeWitness(values, resolved.config.range)).toBe(true);
-                } else {
-                    expect(stub.data.numberKind).toBe('decimal');
-                    expect(stub.data.operation).toBe('addition');
-                    expect(resolved.resolvedLabels.some(label => measurementRangeChoices.flat().includes(label))).toBe(false);
-                }
+                const values = [...stub.data.operands.map(operand => operand.role === 'group-count'
+                    ? operand.count : operand.value.numerator / operand.value.denominator),
+                stub.data.answer.numerator / stub.data.answer.denominator];
+                expect(hasCanonicalRangeWitness(values, resolved.config.range!)).toBe(true);
             }
             expect(admitted).toBeGreaterThan(0);
-            if (!numberKind.includes(Scope.IntegerNumbers)) expect(admitted).toBe(1);
+            if (!numberKind.includes(Scope.IntegerNumbers)) expect(admitted).toBe(
+                numberKind.includes(Scope.DecimalNumbers) && operation === Area.Addition ? 2 : 1
+            );
         }
     });
 
@@ -123,6 +122,35 @@ describe('measurement canonical range profiles', () => {
         }
     });
 
+    it('resolves both decimal-addition bounds in each unit through planned and direct paths', () => {
+        for (const measurementKind of schema.measurementKind[2]) {
+            for (const [upper, maximum] of [[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10]] as const) {
+                const labels = [...measurementKind, Scope.DecimalNumbers, Area.Addition, upper];
+                for (const planned of [false, true]) {
+                    setSeed(`decimal-addition-${planned}-${labels.join('|')}`);
+                    const resolved = planned ? resolveSchemaChoices(schema, labels, {
+                        measurementKind, numberKind: [Scope.DecimalNumbers], operation: [Area.Addition],
+                        operandDigits: [], range: [upper]
+                    }) : extractConfig(schema, labels);
+                    expect(resolved.config.range).toEqual(createCanonicalNumericRange(maximum));
+                    expect(resolved.resolvedLabels).toContain(upper);
+                    expect(passes(resolved.resolvedLabels)).toBe(true);
+                    const {data} = generator.generate(resolved.config);
+                    expect(maximum === 10 ? [5.7] : [2.7, 3.7])
+                        .toContain(data.answer.numerator / data.answer.denominator);
+                }
+            }
+        }
+        for (const labels of [
+            [Scope.FractionNumbers, Area.Addition, Scope.NumbersSmaller10],
+            [Scope.DecimalNumbers, Area.Addition, Scope.NumbersLarger5, Scope.NumbersSmaller10],
+            [Scope.DecimalNumbers, Area.Addition, Scope.NumbersSmaller20]
+        ]) {
+            expect(passes(labels)).toBe(false);
+            expect(() => extractConfig(schema, [Scope.MeterScale, ...labels])).toThrow();
+        }
+    });
+
     it('includes group counts and hidden answers in both bound witnesses', () => {
         // The answer, rather than either operand, establishes the upper addition band.
         expect(measurementIntegerTuples('addition', createCanonicalNumericRange(20, 5), 1))
@@ -140,19 +168,19 @@ describe('measurement canonical range profiles', () => {
         expect(resolveMeasurementOperandDigits([Area.Addition])).toBe(false);
     });
 
-    it('adds only the fixed range annotation without changing other resolved fields or entropy in either path', () => {
+    it('adds only upper5 to the thirty-five fixed-bound contexts without changing other fields or entropy', () => {
         const {range: _range, ...withoutRange} = schema;
         const precedingSchema = {...withoutRange, operandDigits: [schema.operandDigits[0],
             resolveMeasurementWordProblemOperandDigits, measurementWordProblemOperandDigitChoices] as const};
         const measurementChoices = schema.measurementKind[2];
         for (const measurementKind of measurementChoices) for (const numberKind of numberChoices.slice(1)) {
             for (const operation of operations) {
+                if (numberKind.includes(Scope.DecimalNumbers) && operation === Area.Addition) continue;
                 const operandDigits = operation === Area.Multiplication ? [Scope.SingleDigitLargestOperand]
                     : operation === Area.Division ? [Scope.SingleDigitDivisor] : [];
                 const labels = [...measurementKind, ...numberKind, operation, ...operandDigits];
-                const rangeLabels = numberKind.includes(Scope.DecimalNumbers) && operation === Area.Addition
-                    ? [] : [Scope.NumbersSmaller5];
-                const range = rangeLabels.length ? createCanonicalNumericRange(5) : false;
+                const rangeLabels = [Scope.NumbersSmaller5];
+                const range = createCanonicalNumericRange(5);
                 for (const planned of [false, true]) {
                     const binding = {measurementKind, numberKind, operation: [operation], operandDigits};
                     setSeed(`noninteger-${planned}-${labels.join('|')}`);

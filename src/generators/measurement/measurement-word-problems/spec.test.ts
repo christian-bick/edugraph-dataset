@@ -72,7 +72,7 @@ describe('MeasurementWordProblemsGenerator spec integration', () => {
                             operandDigits: operandDigitBinding,
                             range: numberKind === 'integer' ? [operandDigitBinding.includes(Scope.TwoDigitLargestOperand)
                                 ? Scope.NumbersSmaller20 : Scope.NumbersSmaller5]
-                                : numberKind === 'decimal' && operation === 'addition' ? [] : [Scope.NumbersSmaller5]
+                                : [Scope.NumbersSmaller5]
                         });
                         const stub = generator.generate(resolved.config as MeasurementWordProblemsGeneratorConfig);
                         expect(stub.data).toMatchObject({measurementKind, numberKind, operation});
