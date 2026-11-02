@@ -29,8 +29,12 @@ const resolveZeroOccurrence = withLabelChoices(exactResolver((labels: string[]) 
     contextLabels: [...rangeLabels, ...widths], resolvedContext: true});
 const permitsRange = (labels: string[]): boolean => {
     if (!contextLabels.some(label => labels.includes(label))) return true;
-    return widths.filter(label => labels.includes(label)).length === 1
-        && zeros.filter(label => labels.includes(label)).length === 1 && admitsRequest(labels);
+    const selectedWidths = widths.filter(label => labels.includes(label));
+    const selectedZeros = zeros.filter(label => labels.includes(label));
+    const range = resolveCanonicalRangeFromLabels(labels);
+    return selectedWidths.length === 1 && selectedZeros.length === 1 && range !== undefined
+        && standardDivisionProfileCount(widths.indexOf(selectedWidths[0]!) + 1,
+            selectedZeros[0] === Scope.NumbersWithZero, range) > 0;
 };
 const resolveRange = withLabelChoices(exactResolver((labels: string[]) => {
     const range = resolveCanonicalRangeFromLabels(labels);
