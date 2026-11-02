@@ -1,5 +1,6 @@
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {
     StandardAlgorithmColumnStep,
@@ -147,14 +148,18 @@ export class StandardAlgorithmAddSubtractGenerator implements ProblemGenerator<
             );
         }
 
-        const minimum = Math.max(1, Math.ceil(config.range!.min));
-        const maximum = Math.floor(config.range!.max) - 1;
-        if (!Number.isSafeInteger(minimum) || !Number.isSafeInteger(maximum) || minimum > maximum) {
-            return null;
+        const range = config.range!;
+        if (typeof range !== 'object' || range === null || range.min !== 0
+            || ![1000, 10000, 100000, 1000000].includes(range.max)) {
+            throw new GeneratorValidationError('standard-algorithm-add-subtract', 'Expected a reviewed canonical upper bound without a positive lower descriptor.');
         }
-
+        const expected = createCanonicalNumericRange(range.max);
+        if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow) {
+            throw new GeneratorValidationError('standard-algorithm-add-subtract', 'Canonical range witnesses are missing or inconsistent.');
+        }
+        const minimum = 1;
+        const maximum = range.max - 1;
         const maximumDigitCount = String(maximum).length;
-        if (maximumDigitCount > placeColumns.length) return null;
 
         // Keeping both operands at the maximum permitted digit width prevents a leading
         // overflow column while still giving the view three to six aligned columns.

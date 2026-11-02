@@ -1,5 +1,5 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
@@ -8,6 +8,14 @@ const resolveOperation = selectExactLabelMap([
     [Area.AdditionStandardAlgorithm, 'addition'],
     [Area.SubtractionStandardAlgorithm, 'subtraction']
 ] as const);
+
+const upperBounds = [
+    [Scope.NumbersSmaller1000, createCanonicalNumericRange(1000)],
+    [Scope.NumbersSmaller10000, createCanonicalNumericRange(10000)],
+    [Scope.NumbersSmaller100000, createCanonicalNumericRange(100000)],
+    [Scope.NumbersSmaller1000000, createCanonicalNumericRange(1000000)]
+] as const;
+const resolveRange = selectExactLabelMap(upperBounds);
 
 export const spec: GeneratorSpec = {
     generatorId: 'standard-algorithm-add-subtract',
@@ -28,8 +36,8 @@ export const StandardAlgorithmAddSubtractGeneratorSchema = {
         resolveOperation
     ],
     range: [
-        deductCompatible([Scope.NumbersLarger100, Scope.NumbersSmaller1000000]),
-        resolveRangeFromLabels
+        upperBounds.map(([label]) => label),
+        resolveRange
     ]
 } as const;
 

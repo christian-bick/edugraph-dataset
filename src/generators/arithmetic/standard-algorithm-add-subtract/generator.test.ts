@@ -1,11 +1,12 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import * as random from '../../../lib/random.ts';
 import {StandardAlgorithmColumnStep, StandardAlgorithmProblem} from '../../../types/problems.ts';
 import {standardAlgorithmPresentation} from '../../../visuals/views/operations/operations-standard-algorithm/helpers.ts';
 import {StandardAlgorithmAddSubtractGenerator} from './generator.ts';
 
-const targetRange = {min: 1000, max: 1000000};
+const targetRange = createCanonicalNumericRange(1000000);
 
 const reconstructResult = (columns: readonly StandardAlgorithmColumnStep[]): number =>
     columns.reduce((value, column) => value + column.resultDigit * column.placeValue, 0);
@@ -57,6 +58,47 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
     const generator = new StandardAlgorithmAddSubtractGenerator();
     afterEach(() => vi.restoreAllMocks());
 
+    it('keeps every valid old upper corpus and bounds the actual instructed arithmetic, including carried or borrowed 1', () => {
+        for (const upper of [1000, 10000, 100000, 1000000]) for (const operation of ['addition', 'subtraction'] as const) {
+            const range = createCanonicalNumericRange(upper);
+            const fullWidthMinimum = 10 ** (String(upper - 1).length - 1);
+            expect(Math.max(100, fullWidthMinimum)).toBe(Math.max(1, fullWidthMinimum));
+            for (const seed of [0, 17, 77]) {
+                setSeed(seed);
+                const data = generator.generate({operation, range})!.data;
+                const values = [data.topValue, data.bottomValue, data.result,
+                    ...standardAlgorithmPresentation(data).columns.flatMap(column => column.calculation.match(/\d+/g)!.map(Number))];
+                expect(Math.min(...values)).toBe(1);
+                expect(hasCanonicalRangeWitness(values, range)).toBe(true);
+                expectExactColumns(data);
+            }
+        }
+        // The formerly advertised upper120 never had an operand interval.
+        expect(Math.max(100, 10 ** (String(119).length - 1))).toBeGreaterThan(Math.floor(119 / 2));
+    });
+
+    it.each([
+        [1000, 'addition', 0, 146, 645, 791, 3031295956],
+        [1000, 'addition', 17, 258, 715, 973, 3663131643],
+        [1000, 'addition', 77, 157, 255, 412, 3663131703],
+        [1000, 'subtraction', 0, 791, 146, 645, 3031295956],
+        [1000, 'subtraction', 17, 973, 258, 715, 3663131643],
+        [1000, 'subtraction', 77, 655, 298, 357, 3031296033],
+        [1000000, 'addition', 0, 234657, 582537, 817194, 2399460286],
+        [1000000, 'addition', 17, 362767, 544485, 907252, 3031295973],
+        [1000000, 'addition', 77, 266299, 682988, 949287, 1767624693],
+        [1000000, 'subtraction', 0, 817194, 234657, 582537, 2399460286],
+        [1000000, 'subtraction', 17, 829783, 264246, 565537, 1767624633],
+        [1000000, 'subtraction', 77, 949287, 266299, 682988, 1767624693]
+    ] as const)('retains pre-correction mathematical data and continuation for upper%i %s seed%i',
+        (upper, operation, seed, top, bottom, result, continuation) => {
+            setSeed(seed);
+            const data = generator.generate({operation, range: createCanonicalNumericRange(upper)})!.data;
+            expect([data.topValue, data.bottomValue, data.result]).toEqual([top, bottom, result]);
+            expect(getRandomState()).toBe(continuation);
+            expectExactColumns(data);
+        });
+
     it('strictly validates every required configuration field', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate({operation: 'addition'} as never)).toThrow();
@@ -98,7 +140,7 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
         'supports a three-column Grade 3 %s problem',
         operation => {
             setSeed(`grade-3-${operation}`);
-            const stub = generator.generate({operation, range: {min: 101, max: 1000}});
+            const stub = generator.generate({operation, range: createCanonicalNumericRange(1000)});
             expect(stub).not.toBeNull();
             expect(stub!.data.columns).toHaveLength(3);
             expect(stub!.data.topValue).toBeGreaterThanOrEqual(100);
@@ -107,16 +149,18 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
         }
     );
 
-    it('returns null when the range cannot hold two full-width positive operands and their result', () => {
-        expect(generator.generate({operation: 'addition', range: {min: 1000, max: 2000}})).toBeNull();
-        expect(generator.generate({operation: 'subtraction', range: {min: 10, max: 10}})).toBeNull();
+    it('rejects unreviewed ranges and the impossible former upper120 capability', () => {
+        expect(() => generator.generate({operation: 'addition', range: {min: 1000, max: 2000}} as never)).toThrow();
+        expect(() => generator.generate({operation: 'subtraction', range: createCanonicalNumericRange(120)})).toThrow();
+        expect(() => generator.generate({operation: 'addition', range: createCanonicalNumericRange(1000, 5)})).toThrow('positive lower');
+        expect(() => generator.generate({operation: 'addition', range: {...createCanonicalNumericRange(1000), maximumAbove: 0}})).toThrow('witnesses');
     });
 
     it('accepts a zero result digit when every instructed addition value is positive', () => {
         const draw = vi.spyOn(random, 'random')
             .mockReturnValueOnce(2.5 / 200) // 125 in the unchanged first-operand domain.
             .mockReturnValueOnce(8.5 / 385); // 185 in the unchanged second-operand domain.
-        const data = generator.generate({operation: 'addition', range: {min: 100, max: 1000}})!.data;
+        const data = generator.generate({operation: 'addition', range: createCanonicalNumericRange(1000)})!.data;
         expect(data).toMatchObject({topValue: 125, bottomValue: 185, result: 310});
         expect(data.columns[0]).toMatchObject({workingValue: 10, resultDigit: 0, regroupOut: 1});
         expectPositiveInstructedCalculations(data);
@@ -125,7 +169,7 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
 
     it('rejects the seed-4 zero-depletion borrow and keeps drawing from the same raw domain', () => {
         setSeed(4);
-        const seeded = generator.generate({operation: 'subtraction', range: {min: 100, max: 1000}})!;
+        const seeded = generator.generate({operation: 'subtraction', range: createCanonicalNumericRange(1000)})!;
         expect(seeded.data).not.toMatchObject({topValue: 815, bottomValue: 349, result: 466});
         expectPositiveInstructedCalculations(seeded.data);
 
@@ -134,7 +178,7 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
             .mockReturnValueOnce(91.5 / 275)
             .mockReturnValueOnce(2.5 / 200) // The next unchanged draws give 361 - 125.
             .mockReturnValueOnce(90.5 / 385);
-        const data = generator.generate({operation: 'subtraction', range: {min: 100, max: 1000}})!.data;
+        const data = generator.generate({operation: 'subtraction', range: createCanonicalNumericRange(1000)})!.data;
         expect(data).toMatchObject({topValue: 361, bottomValue: 125, result: 236});
         expectPositiveInstructedCalculations(data);
         expect(draw).toHaveBeenCalledTimes(4);
@@ -142,15 +186,15 @@ describe('StandardAlgorithmAddSubtractGenerator', () => {
 
     it('returns null after bounded rejection when every draw has a numerical zero operand', () => {
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
-        expect(generator.generate({operation: 'addition', range: {min: 100, max: 1000}})).toBeNull();
+        expect(generator.generate({operation: 'addition', range: createCanonicalNumericRange(1000)})).toBeNull();
         expect(draw).toHaveBeenCalledTimes(200);
     });
 
     it.each([
         {min: NaN, max: 1000}, {min: 100, max: Infinity},
         {min: 1001, max: 1000}, {min: 100, max: 10000001}
-    ])('returns null for unsupported magnitude bounds %j', range => {
-        expect(generator.generate({operation: 'addition', range})).toBeNull();
+    ])('rejects unsupported magnitude bounds %j', range => {
+        expect(() => generator.generate({operation: 'addition', range} as never)).toThrow();
     });
 
     it('rejects unsupported operation configurations', () => {

@@ -243,9 +243,9 @@ const grade4IntegerRoundingBuilder = new DatasetPermutationBuilder()
 const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger1000,
         Scope.NumbersSmaller1000000,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,

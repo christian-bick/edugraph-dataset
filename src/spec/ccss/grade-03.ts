@@ -284,9 +284,9 @@ const placeValuePartitioningWithin1000Builder = new DatasetPermutationBuilder()
 const standardAlgorithmWithin1000Builder = new DatasetPermutationBuilder()
     .addLabels([
         Scope.TwoOperands,
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
-        Scope.NumbersLarger100,
         Scope.NumbersSmaller1000,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,

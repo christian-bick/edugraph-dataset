@@ -1181,3 +1181,29 @@ sampled controls. Forty-three module tests,22 shared tests, direct/planned confi
 native replay, Question/Solution projection and the owned-file typecheck pass. Exact zero and
 maximum Mulberry32 draws exercise each sampling boundary. Evidence:
 `temp/range-autonomous/batch6/fraction-decimal/division-*.log` and the comparison JSON.
+
+## Sixth batch: integer-column source correction
+
+Four Grade3/4 targets incorrectly applied lower100/1000 to every required quantity even though
+their instructed carrying/borrowing calculations necessarily use1. The source standards require
+whole-number algorithms and an upper ceiling, not those global floors. Following the authorized
+source-correction strategy, remove the false floors and explicitly add IntegerNumbers. Removing
+only the floors was falsified: it admitted two unintended decimal routes.
+
+| Source / operation | Old suffix | Corrected suffix |
+| --- | --- | --- |
+| 3.NBT.A.2-standard-algorithms / addition | 9a1c4254 | 71ef3460 |
+| Same / subtraction | 786b9192 | a800be2e |
+| 4.NBT.B.4-standard-algorithm-add-subtract / addition | 79ac303a | f6e2d068 |
+| Same / subtraction | f8aa30b4 | d95a6bf6 |
+
+Every other source claim and all four route lineages remain. The four nonempty three-/six-column
+corpora retain their exact mathematical sampling; the advertised upper120 corpus was already
+impossible and is retired. Source-derived native IDs/seeds change normally. This corrects false
+claims without closing a missing-facet finding. Cumulative source-ID migrations are now38 raw /
+20 normalized; the verifier recognizes exactly these four additional transformations.
+
+Fifty-two focused tests /five files, eight direct/planned configurations,48 same-value Q/S
+projections,24 actual source draws/replays and pre-edit payload hashes pass. Complete types,
+module specs and CCSS standards checks pass. Evidence:
+`temp/range-autonomous/batch6/arithmetic/{integer-column-review.md,verify-integer-columns.json}`.
