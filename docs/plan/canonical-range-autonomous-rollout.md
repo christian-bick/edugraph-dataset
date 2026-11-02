@@ -1114,3 +1114,15 @@ exactly that missing competency. Both assertions remain unchanged. Thirty tests 
 pass. No production behavior or validation rule is relaxed. Evidence:
 `temp/range-autonomous/batch5/arithmetic/{pattern-consumer-fixtures,types-pattern-fixtures}.log`
 and `measurement-time/fixture-repair-{tests,types}.log`.
+
+## Fifth batch: weighted-sampler boundaries
+
+All7,672 tests then passed, but the percent generator's unreachable null-fallback branch left
+its branch coverage at50%, below the unchanged60% threshold. The cumulative weighted selection
+now uses an explicit loop with the last bucket as its total default, preserving the same draw law
+and floating-point behavior. Two thousand fixed-seed data/PRNG controls match the prior sampler.
+Four additional tests exercise both the zero draw and maximum possible Mulberry32 draw for
+every band, including inclusive final numerator choices. All28 focused tests pass, with100%
+statement/branch coverage for that generator, and final TypeScript passes. No test, timeout or
+coverage threshold is relaxed. Evidence: `temp/range-autonomous/batch5/percent/
+{sampler-before,sampler-after,boundary-coverage}.log`.

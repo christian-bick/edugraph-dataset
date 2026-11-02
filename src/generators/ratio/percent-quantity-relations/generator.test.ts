@@ -1,5 +1,6 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import * as randomModule from '../../../lib/random.ts';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {greatestCommonDivisor} from '../helpers.ts';
 import {PercentQuantityRelationsGenerator} from './generator.ts';
@@ -91,4 +92,28 @@ describe('PercentQuantityRelationsGenerator', () => {
         setSeed(88);
         expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
+
+    it.each([[100, 1, 100, 400, 4], [120, 101, 120, 400, 4],
+        [1000, 121, 150, 2666, 4], [10000, 1001, 150, 3333, 4]] as const)(
+        'supports both mathematical draw boundaries at upper%s', (upper, firstWhole, lastPercent, lastNumerator, lastDenominator) => {
+            const mock = vi.spyOn(randomModule, 'random');
+            try {
+                mock.mockReturnValue(0);
+                const first = generator.generate({range: createCanonicalNumericRange(upper)}).data;
+                expect(first.percent).toBe(1);
+                expect(first.whole).toEqual({numerator: firstWhole, denominator: 1});
+                // This is the maximum possible Mulberry32 draw, still strictly below1.
+                mock.mockReturnValue(0xffffffff / 0x100000000);
+                const last = generator.generate({range: createCanonicalNumericRange(upper)}).data;
+                expect(last.percent).toBe(lastPercent);
+                const divisor = greatestCommonDivisor(lastNumerator, lastDenominator);
+                expect(last.whole).toEqual({numerator: lastNumerator / divisor, denominator: lastDenominator / divisor});
+                for (const data of [first, last]) expect(hasCanonicalRangeWitness([100, data.percent,
+                    data.scaleFactor.numerator / data.scaleFactor.denominator, data.whole.numerator / data.whole.denominator,
+                    data.part.numerator / data.part.denominator], createCanonicalNumericRange(upper))).toBe(true);
+            } finally {
+                mock.mockRestore();
+            }
+        }
+    );
 });

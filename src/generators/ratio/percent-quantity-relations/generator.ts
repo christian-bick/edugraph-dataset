@@ -16,7 +16,13 @@ export class PercentQuantityRelationsGenerator implements ProblemGenerator<
         validateConfigFields('percent-quantity-relations', config, ['range']);
         const rows = percentRangeRows(config.range!);
         let remaining = random() * rows.reduce((sum, row) => sum + row.weight, 0);
-        const {percent, denominator, first, last} = rows.find(row => (remaining -= row.weight) < 0) ?? rows[rows.length - 1]!;
+        let selected = rows[rows.length - 1]!;
+        for (const row of rows) {
+            selected = row;
+            remaining -= row.weight;
+            if (remaining < 0) break;
+        }
+        const {percent, denominator, first, last} = selected;
         const scaleFactor = rational(percent, 100);
         const whole = rational(randomInteger(first, last), denominator);
         const part = rational(whole.numerator * scaleFactor.numerator,
