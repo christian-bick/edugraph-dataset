@@ -7,6 +7,7 @@ import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
 import {buildAlgebraicExpressionProblem} from '../algebra-expression-helpers.ts';
 import {AlgebraExpressionsGeneratorSchema, type AlgebraExpressionsGeneratorConfig} from './spec.ts';
 import {inputsMeetNumericProfile, profilesForRelation, type ExpressionInputs} from './numeric-profiles.ts';
+import {numericExpressionCaseCount, numericExpressionInputsAt} from './numeric-domain.ts';
 
 const generatorId = 'algebra-expressions';
 const integer = (minimum: number, maximum: number): number => minimum + Math.floor(random() * (maximum - minimum + 1));
@@ -50,7 +51,8 @@ function drawInputs(relation: string): ExpressionInputs {
     return inputs;
 }
 
-function mathematicalInstance(config: Required<AlgebraExpressionsGeneratorConfig>, inputs?: ExpressionInputs): AlgebraicExpressionProblem {
+function mathematicalInstance(config: Required<Pick<AlgebraExpressionsGeneratorConfig, 'relation' | 'power' | 'numericProfile'>>,
+    inputs?: ExpressionInputs): AlgebraicExpressionProblem {
     if (config.relation === 'modeling') return purchase();
     const {a, b, c} = inputs!;
     let {input} = inputs!;
@@ -112,6 +114,18 @@ export class AlgebraExpressionsGenerator implements ProblemGenerator<AlgebraicEx
             throw new GeneratorValidationError(generatorId, 'Choose a supported expression relation and its compatible power domain.');
         }
         const complete = {relation: config.relation, power: config.power, numericProfile: config.numericProfile!};
+        if (config.relation.startsWith('numeric-')) {
+            validateConfigFields(generatorId, config, ['range']);
+            if (!config.range) throw new GeneratorValidationError(generatorId, 'Choose a feasible canonical structural numeric range.');
+            const count = numericExpressionCaseCount(config.relation, config.numericProfile!, config.range);
+            if (!count) throw new GeneratorValidationError(generatorId, 'Choose a feasible canonical structural numeric range.');
+            const inputs = numericExpressionInputsAt(config.relation, config.numericProfile!,
+                config.range, Math.floor(random() * count));
+            return {data: mathematicalInstance(complete, inputs)};
+        }
+        if (config.range !== undefined && config.range !== false) {
+            throw new GeneratorValidationError(generatorId, 'Symbolic expressions have no adopted numeric range.');
+        }
         if (config.relation === 'modeling') return {data: mathematicalInstance(complete)};
         // The writer formerly selected its two conditional samplers through
         // sign/zero annotations. Keep their 50/50 mathematical mixture private

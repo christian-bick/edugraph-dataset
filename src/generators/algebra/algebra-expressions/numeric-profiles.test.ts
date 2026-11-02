@@ -7,6 +7,7 @@ import {AlgebraExpressionsGenerator} from './generator.ts';
 import {inputsMeetNumericProfile, numericProfileBundles, profilesForRelation, resolveNumericProfile,
     type ExpressionInputs, type AlgebraNumericProfile} from './numeric-profiles.ts';
 import {AlgebraExpressionsGeneratorSchema as schema} from './spec.ts';
+import {numericExpressionCaseCount, numericExpressionRangeProfiles} from './numeric-domain.ts';
 
 const numericRelations = ['numeric-terms', 'numeric-factors', 'numeric-sum', 'numeric-product',
     'numeric-quotient', 'numeric-grouped'] as const;
@@ -93,7 +94,8 @@ describe('algebra numeric-frame and visible-domain profiles', () => {
         for (const relation of numericRelations) for (const numericProfile of profilesForRelation(relation)) {
             for (let seed = 0; seed < 24; seed++) {
                 setSeed(seed);
-                const {data} = generator.generate({relation, power: 'none', numericProfile})!;
+                const ranges = numericExpressionRangeProfiles.filter(profile => numericExpressionCaseCount(relation, numericProfile, profile.range));
+                const {data} = generator.generate({relation, power: 'none', numericProfile, range: ranges[seed % ranges.length]!.range})!;
                 const participating = literals(data.structuralExpression.expression);
                 const primary = data.structuralRelations[0];
                 if (primary.kind === 'additive-components') {

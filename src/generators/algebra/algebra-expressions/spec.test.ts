@@ -18,6 +18,8 @@ import {spec as model, AlgebraExpressionModelViewSchema as modelSchema} from '..
 import {AlgebraExpressionsGenerator} from './generator.ts';
 import {AlgebraExpressionsGeneratorSchema, spec} from './spec.ts';
 import {numericProfileLabels, profilesForRelation} from './numeric-profiles.ts';
+import {numericExpressionCaseCount, numericExpressionRangeProfiles} from './numeric-domain.ts';
+import {expressionRangeLabels} from './range-profile.ts';
 
 const viewEntries = [[write, writeSchema], [parts, partsSchema], [grouped, groupedSchema], [evaluate, evaluateSchema],
     [formula, formulaSchema], [model, modelSchema]] as const;
@@ -34,7 +36,7 @@ const plan = (targetId: string, labels: readonly string[], entry: typeof viewEnt
 describe('algebra expression capability ownership and composition', () => {
     it('resolves complete mathematical bundles without invariant expression-kind or Ability claims', () => {
         expect(spec.generalLabels).toEqual([]);
-        expect(Object.keys(AlgebraExpressionsGeneratorSchema)).toEqual(['relation', 'power', 'numericProfile']);
+        expect(Object.keys(AlgebraExpressionsGeneratorSchema)).toEqual(['relation', 'power', 'numericProfile', 'range']);
         expect(findSchemaFallbackContractIssues(AlgebraExpressionsGeneratorSchema)).toEqual([]);
         const relationBundles = AlgebraExpressionsGeneratorSchema.relation[2];
         expect(relationBundles).toHaveLength(16);
@@ -48,7 +50,8 @@ describe('algebra expression capability ownership and composition', () => {
             if (power.length && !relation.includes(Area.NumericSubstitution as never)) continue;
             for (const numericProfile of profilesForRelation(config.relation!)) {
                 values.add(JSON.stringify({...config, numericProfile}));
-                const stub = new AlgebraExpressionsGenerator().generate({...config, numericProfile})!;
+                const range = numericExpressionRangeProfiles.find(profile => numericExpressionCaseCount(config.relation!, numericProfile, profile.range))?.range ?? false;
+                const stub = new AlgebraExpressionsGenerator().generate({...config, numericProfile, range})!;
                 expect(stub.data.structuralExpression.kind).toBe(relation.includes(Area.ArithmeticExpression as never) ? 'numeric' : 'symbolic');
             }
         }
@@ -79,7 +82,7 @@ describe('algebra expression capability ownership and composition', () => {
                     } else if ([parts.viewId, grouped.viewId].includes(intendedViewId)) {
                         supportedLabels.push(Scope.IntegerNumbers);
                     }
-                    expect(new Set(draw.labels.filter(label => !numericProfileLabels.includes(label as never))))
+                    expect(new Set(draw.labels.filter(label => !numericProfileLabels.includes(label as never) && !expressionRangeLabels.includes(label))))
                         .toEqual(new Set([...target.labels, ...supportedLabels]));
                     expect(draw.labels.filter(label => numericProfileLabels.includes(label as never)))
                         .toHaveLength(target.labels.includes(Area.ArithmeticExpression) ? 2 : 0);
@@ -109,7 +112,7 @@ describe('algebra expression capability ownership and composition', () => {
                 .toBe(!target.labels.includes(Area.Division));
             expect(plan('unsupported-joint', [...target.labels, Scope.NumbersWithNegatives, Scope.NumbersWithZero], entry).supported).toBe(false);
         }
-        expect(numericChoices).toBe(16);
+        expect(numericChoices).toBe(45);
     });
 
     it('annotates symbolic integer literals without exporting generic sign/zero classifications', () => {
@@ -159,7 +162,7 @@ describe('algebra expression capability ownership and composition', () => {
             const continuation = getRandomState();
             setSeed(seed);
             const direct = extractConfig(AlgebraExpressionsGeneratorSchema, target.labels);
-            expect(direct.config).toEqual(originalConfig);
+            expect(direct.config).toEqual({...originalConfig, range: false});
             expect(direct.resolvedLabels.filter(label => numericProfileLabels.includes(label as never))).toEqual([]);
             expect(getRandomState()).toBe(originalState);
             expect(generator.generate(direct.config)).toEqual(originalStub);
@@ -167,7 +170,7 @@ describe('algebra expression capability ownership and composition', () => {
             const input = {generatorSchema: AlgebraExpressionsGeneratorSchema, viewSchema: partsSchema, plan: result.plan,
                 sampleKey: `${target.id}#${spec.generatorId}#${parts.viewId}#train#question#inst:0`, seed, attempt: 1};
             const resolved = resolvePlannedConfigurations(input);
-            expect(resolved.generatorConfig).toEqual(originalConfig);
+            expect(resolved.generatorConfig).toEqual({...originalConfig, range: false});
             expect(resolved.generatorRandomState).toBe(originalState);
             const draw = generatePlannedDraw({...input, generator});
             expect(draw.stub!.data).toEqual(originalStub.data);
@@ -211,7 +214,7 @@ describe('algebra expression capability ownership and composition', () => {
         const result = plan('prescribed-phrase', labels, viewEntries[0]);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);
-        expect(result.plan.domains.filter(domain => domain.owner === 'generator').map(domain => domain.alternatives.length)).toEqual([1, 1, 1]);
+        expect(result.plan.domains.filter(domain => domain.owner === 'generator').map(domain => domain.alternatives.length)).toEqual([1, 1, 1, 1]);
         for (const extra of [Area.Term, Area.Factor, Area.Coefficient, Area.Addition, Area.Multiplication, Area.Division,
             Area.GroupingSymbol, Area.Operand, Area.NumericSubstitution, Area.OrderOfOperations, Area.AlgebraicModeling, Area.Exponentiation]) {
             expect(plan(`phrase-${extra}`, [...labels, extra], viewEntries[0]).supported).toBe(false);
@@ -234,7 +237,7 @@ describe('algebra expression capability ownership and composition', () => {
         for (let seed = 0; seed < 64; seed++) {
             const input = {generatorSchema: AlgebraExpressionsGeneratorSchema, viewSchema: writeSchema, plan: result.plan,
                 sampleKey: `${target.id}#${spec.generatorId}#${write.viewId}#train#question#inst:0`, seed, attempt: 1};
-            expect(resolvePlannedConfigurations(input).generatorConfig).toEqual({relation: 'plain', power: 'none', numericProfile: 0});
+            expect(resolvePlannedConfigurations(input).generatorConfig).toEqual({relation: 'plain', power: 'none', numericProfile: 0, range: false});
             const draw = generatePlannedDraw({...input, generator: new AlgebraExpressionsGenerator()});
             expect(draw.labels.filter(label => numericProfileLabels.includes(label as never))).toEqual([]);
             expect(draw.stub!.data.symbols[0].domain).toEqual({kind: 'rational', lower: null, upper: null, excludedValues: []});

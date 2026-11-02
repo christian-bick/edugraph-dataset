@@ -7,6 +7,8 @@ import {isAlgebraicExpressionProblem} from '../algebra-expression-helpers.ts';
 import {AlgebraExpressionsGenerator} from './generator.ts';
 import type {AlgebraExpressionsGeneratorConfig} from './spec.ts';
 import {profilesForRelation} from './numeric-profiles.ts';
+import {numericExpressionCaseCount, numericExpressionInputsAt, numericExpressionRangeProfiles} from './numeric-domain.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 type Fraction = readonly [bigint, bigint];
 const reduced = (numerator: bigint, denominator: bigint): Fraction => {
@@ -47,7 +49,10 @@ describe('canonical algebra expression mathematics', () => {
         for (let seed = 0; seed < 48; seed++) {
             setSeed(seed);
             const profiles = profilesForRelation(relation);
-            const stub = generator.generate({relation, power: 'none', numericProfile: profiles[seed % profiles.length]})!, data = stub.data;
+            const numericProfile = profiles[seed % profiles.length]!;
+            const ranges = numericExpressionRangeProfiles.filter(profile => numericExpressionCaseCount(relation, numericProfile, profile.range));
+            const stub = generator.generate({relation, power: 'none', numericProfile,
+                range: relation.startsWith('numeric-') ? ranges[seed % ranges.length]!.range : false})!, data = stub.data;
             expect(Object.keys(stub)).toEqual(['data']);
             expect(isAlgebraicExpressionProblem(data)).toBe(true);
             expect(fraction(data.substitution.finalValue)).toEqual(evaluate(data.expression, data.substitution.bindings));
@@ -137,8 +142,13 @@ describe('canonical algebra expression mathematics', () => {
         const plainDivision = generator.generate({relation: 'plain', power: 'none', numericProfile: 3})!.data;
         expect(plainDivision.expression.kind === 'binary' && plainDivision.expression.operation).toBe('division');
         expect(plainDivision.substitution.bindings[0].value).toEqual({numerator: 1, denominator: 2});
-        setSeed(54);
-        const quotient = generator.generate({relation: 'numeric-quotient', power: 'none', numericProfile: 3})!.data;
+        const range = createCanonicalNumericRange(5);
+        const count = numericExpressionCaseCount('numeric-quotient', 3, range);
+        const zeroTicket = Array.from({length: count}, (_, index) => index)
+            .find(index => numericExpressionInputsAt('numeric-quotient', 3, range, index).input.numerator === 0)!;
+        const draw = vi.spyOn(randomness, 'random').mockReturnValueOnce((zeroTicket + 0.5) / count);
+        const quotient = generator.generate({relation: 'numeric-quotient', power: 'none', numericProfile: 3, range})!.data;
+        draw.mockRestore();
         expect(quotient.substitution.bindings[0].value).toEqual({numerator: -1, denominator: 2});
         setSeed(54);
         const ordinary = generator.generate({relation: 'plain', power: 'none', numericProfile: 4})!.data;
@@ -166,9 +176,13 @@ describe('canonical algebra expression mathematics', () => {
     });
 
     it('retains the original numeric term frame with its unused zero subtotal under the supported negative/nonzero profile', () => {
-        vi.spyOn(randomness, 'random').mockReturnValueOnce(0).mockReturnValueOnce(1 / 6)
-            .mockReturnValueOnce(3 / 5).mockReturnValueOnce(5 / 17).mockReturnValueOnce(1 / 4);
-        const data = new AlgebraExpressionsGenerator().generate({relation: 'numeric-terms', power: 'none', numericProfile: 3})!.data;
+        const range = createCanonicalNumericRange(5), count = numericExpressionCaseCount('numeric-terms', 3, range);
+        const ticket = Array.from({length: count}, (_, index) => index).find(index => {
+            const inputs = numericExpressionInputsAt('numeric-terms', 3, range, index);
+            return inputs.a === 2 && inputs.b === 2 && inputs.c === 4 && inputs.input.numerator === -3 && inputs.input.denominator === 2;
+        })!;
+        vi.spyOn(randomness, 'random').mockReturnValueOnce((ticket + 0.5) / count);
+        const data = new AlgebraExpressionsGenerator().generate({relation: 'numeric-terms', power: 'none', numericProfile: 3, range})!.data;
         const expression = data.structuralExpression.expression;
         expect(nodes(expression).filter(node => node.kind === 'number').map(node => fraction(node.value)))
             .toEqual([[2n, 1n], [-3n, 2n], [2n, 1n], [-3n, 2n], [4n, 1n]]);

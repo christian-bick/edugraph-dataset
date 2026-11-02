@@ -1207,3 +1207,21 @@ Fifty-two focused tests /five files, eight direct/planned configurations,48 same
 projections,24 actual source draws/replays and pre-edit payload hashes pass. Complete types,
 module specs and CCSS standards checks pass. Evidence:
 `temp/range-autonomous/batch6/arithmetic/{integer-column-review.md,verify-integer-columns.json}`.
+
+## Sixth batch: definite numeric structural expressions
+
+The six fully numeric relations now resolve45 feasible sign/range cells before expression
+construction. Participating quantities follow the approved structural contract: literal inputs
+and explicitly assessed signed terms participate; unused evaluation totals/subtotals do not.
+The complete97,920 raw-path census retains97,770 paths and duplicate reduced-rational weights.
+The150 retired paths are exactly the approved isolated positive threshold5 cases.
+
+Compact integer tickets avoid rare-profile rejection and expression-tree catalogs. All21 routes
+and source claims remain,31→60 selections, closing16 baseline omissions. The eight symbolic
+range findings remain separate: an unbound variable cannot inherit a hidden sampled binding's
+bound. No new inference, graph policy, source or renderer change occurs.
+
+Sixty-seven focused tests /six files, every45-cell direct/planned configuration,270 boundary
+Question/Solution projections and240 actual native/replay controls pass. All448 unaffected
+symbolic/substitution/modeling controls preserve data and PRNG continuation. Evidence:
+`temp/range-autonomous/batch6/measurement-time/{algebra-focused.log,algebra-verification.json}`.

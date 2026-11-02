@@ -5,6 +5,9 @@ import {exactResolver, withLabelChoices, type ConfigFromSchema} from '../../../t
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 import {numericContextLabels, numericProfileChoices, numericProfileForLabels, numericProfileLabels,
     resolveNumericProfile} from './numeric-profiles.ts';
+import {resolveOptionalCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {expressionRangeChoices, expressionRangeLabels, expressionRangeContext, permitsExpressionRange,
+    resolveExpressionRange} from './range-profile.ts';
 
 const relations = [
     [[Area.AlgebraicExpression, Scope.RationalNumbers], 'plain'],
@@ -62,13 +65,18 @@ export const spec: GeneratorSpec = {
             {scope: 'generator', label: Scope.RationalNumbers}],
         predicate: labels => !labels.exact('target', Scope.RationalNumbers)
             || labels.exact('generator', Scope.RationalNumbers)
-    }]
+    }, generatorLabelRule('algebra-expression-canonical-range', [...expressionRangeLabels, ...expressionRangeContext], selected => {
+        const labels = [...expressionRangeLabels, ...expressionRangeContext].filter(selected);
+        const range = resolveOptionalCanonicalRangeFromLabels(labels);
+        return range !== undefined && permitsExpressionRange(labels, range);
+    })]
 };
 
 export const AlgebraExpressionsGeneratorSchema = {
     relation: [[...new Set(canonicalRelations.flatMap<string>(([labels]) => labels))],
         resolveRelation, canonicalRelations.map(([labels]) => labels)],
     power: [[Area.Exponentiation, Scope.IntegerExponent, Scope.PositiveExponent], selectExactLabelSetMap(powers), powers.map(([labels]) => labels)],
-    numericProfile: [numericProfileLabels, resolveNumericProfile, numericProfileChoices]
+    numericProfile: [numericProfileLabels, resolveNumericProfile, numericProfileChoices],
+    range: [expressionRangeLabels, resolveExpressionRange, expressionRangeChoices]
 } as const;
 export type AlgebraExpressionsGeneratorConfig = ConfigFromSchema<typeof AlgebraExpressionsGeneratorSchema>;
