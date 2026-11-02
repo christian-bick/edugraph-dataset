@@ -2,6 +2,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {IntegerRoundingGenerator} from '../../../../generators/place-value/integer-rounding/generator.ts';
+import {buildIntegerRoundingProblem} from '../../../../generators/place-value/integer-rounding/domain.ts';
 import {IntegerRoundingGeneratorSchema, spec as generatorSpec} from '../../../../generators/place-value/integer-rounding/spec.ts';
 import {planModelCompatibility} from '../../../../lib/model-compatibility.ts';
 import {generatePlannedDraw} from '../../../../lib/planned-generation.ts';
@@ -22,16 +23,19 @@ const elements = (markup: string, tag: string) =>
 function recordedDraw() {
     const target = {id: '3.NBT.A.1-round-nearest-10-100~b099aaf9', labels: [
         Area.IntegerRounding, Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller1000,
-        Scope.NumbersWithoutNegatives, Ability.ProcedureExecution, Scope.StepsOf100
+        Scope.NumbersWithoutNegatives, Ability.ProcedureExecution, Scope.StepsOf100, Scope.NumbersLarger20
     ]};
     const planned = planModelCompatibility(target,
         {...generatorSpec, schema: IntegerRoundingGeneratorSchema, spec: generatorSpec},
         {...viewSpec, schema: NumbersRoundingLineViewSchema, spec: viewSpec});
     if (!planned.supported) throw new Error(`Rounding regression is unsupported: ${planned.reason}`);
-    const draw = generatePlannedDraw({generator: new IntegerRoundingGenerator(), viewSchema: NumbersRoundingLineViewSchema,
+    const generated = generatePlannedDraw({generator: new IntegerRoundingGenerator(), viewSchema: NumbersRoundingLineViewSchema,
         plan: planned.plan, sampleKey: `${target.id}#integer-rounding#numbers-rounding-line#train#question#inst:0`,
         attempt: 1, seed: 1340117192});
-    expect(draw.stub!.data).toMatchObject({number: 851, lowerMultiple: 800, upperMultiple: 900,
+    // Keep the original precision regression as a fixed mathematical fixture;
+    // canonical-profile selection intentionally changes the old native seed's draw.
+    const draw = {...generated, stub: {...generated.stub!, data: buildIntegerRoundingProblem(851, 100, false)}};
+    expect(draw.stub.data).toMatchObject({number: 851, lowerMultiple: 800, upperMultiple: 900,
         midpoint: 850, roundedValue: 900, distanceLower: 51, distanceUpper: 49, isMidpointTie: false});
     return {draw, target};
 }

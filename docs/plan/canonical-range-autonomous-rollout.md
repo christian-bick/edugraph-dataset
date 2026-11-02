@@ -1422,3 +1422,22 @@ exact integer multiplicity checks, every weighted row bin,94 boundary Q/S projec
 native/replay/state controls pass. Targets retain their source competency, and payload/rendering
 contracts are unchanged. No missing-facet closure is claimed. Evidence:
 `temp/range-autonomous/batch6/measurement-time/classification-verification.json` and associated logs.
+
+## Sixth batch: integer rounding
+
+Required interval endpoints, midpoint and two distances determine canonical bounds. Compact
+index/offset rows partition all4,508,183 original frames into74 cells. Each cell conditions the
+original endpoint/tie law, including the old20% multi-digit tie component; the across-profile
+mixture changes normally. Grade4 numerals remain at least1000. Neither payload variant nor its
+number-line renderer changes.
+
+Fourteen reviewed per-step source variants retain all seven old IDs and routes, reaching21
+routes /74 selections. Twenty-three focused tests /six files, full types, complete finite support,
+74 actual selections/draws/replays and296 same-value Q/S projections pass. The old851/100 view
+fixture now supplies its truthful lower20 annotation explicitly. Obsolete availability resolution
+is replaced by exact domain feasibility. No missing-facet closure is claimed. Evidence:
+`temp/range-autonomous/batch6/arithmetic/verify-integer-rounding.json` and associated logs.
+
+Both this family and standard division distinguish partial early-provider feasibility from the
+final exact selected range cell. Hashed/string-seed broad requests and all-place controls cover
+that local resolver regression;82 tests /nine files pass with unchanged existing timeouts.

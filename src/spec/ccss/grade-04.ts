@@ -1,4 +1,5 @@
 import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
+import {expandUpperRangeVariants} from '../../lib/target-range-variants.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -231,16 +232,12 @@ const grade4IntegerRoundingBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller1000000,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([
-        [Scope.StepsOf10],
-        [Scope.StepsOf100],
-        [Scope.StepsOf1000],
-        [Scope.StepsOf10000],
-        [Scope.StepsOf100000]
-    ]);
+    .applyLabelVariants([Scope.StepsOf10, Scope.StepsOf100, Scope.StepsOf1000, Scope.StepsOf10000,
+        Scope.StepsOf100000].flatMap(place => expandUpperRangeVariants([
+        {labels: [place, Scope.NumbersSmaller1000000]}
+    ], {bands: place === Scope.StepsOf100000 ? [100000, 1000000] : [10000, 100000, 1000000]}).map(({labels}) => labels)));
 
 const standardAlgorithmAddSubtractBuilder = new DatasetPermutationBuilder()
     .addLabels([

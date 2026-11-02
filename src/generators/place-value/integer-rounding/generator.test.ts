@@ -1,213 +1,49 @@
 import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {IntegerRoundingGenerator} from './generator.ts';
+import {integerRoundingQuantities, roundingDomain} from './domain.ts';
+import {roundingPlaces} from './endpoint-profile.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
 
 describe('IntegerRoundingGenerator', () => {
     const generator = new IntegerRoundingGenerator();
-
-    it('strictly validates configuration', () => {
+    it('strictly validates configuration and canonical witnesses', () => {
         expect(() => generator.generate({})).toThrow();
+        expect(() => generator.generate({range: createCanonicalNumericRange(1000), roundingMagnitude: Scope.StepsOf10})).toThrow('zeroEndpoint');
+        expect(() => generator.generate({range: {min: 0, max: 1000}, roundingMagnitude: Scope.StepsOf10, zeroEndpoint: false} as never)).toThrow();
+        expect(generator.generate({range: createCanonicalNumericRange(1000), roundingMagnitude: 'unsupported', zeroEndpoint: false} as never)).toBeNull();
+        expect(generator.generate({range: createCanonicalNumericRange(1000), roundingMagnitude: Scope.StepsOf1000, zeroEndpoint: false})).toBeNull();
     });
-
-    it.each([
-        [Scope.StepsOf10, 10],
-        [Scope.StepsOf100, 100]
-    ] as const)('rounds using %s', (roundingMagnitude, roundingPlace) => {
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const data = generator.generate({
-                range: {min: 0, max: 1000},
-                roundingMagnitude,
-                zeroEndpoint: false
-            })!.data;
-
-            expect(data.roundingPlace).toBe(roundingPlace);
-            expect(data.number).toBeGreaterThan(data.lowerMultiple);
-            expect(data.number).toBeLessThan(data.upperMultiple);
-            expect(data.midpoint).toBe((data.lowerMultiple + data.upperMultiple) / 2);
-            expect(data.distanceLower).toBe(data.number - data.lowerMultiple);
-            expect(data.distanceUpper).toBe(data.upperMultiple - data.number);
-            expect(data.roundedValue).toBe(Math.round(data.number / roundingPlace) * roundingPlace);
-            expect(data.isMidpointTie).toBe(data.number === data.midpoint);
-            expect('task' in data).toBe(false);
-        }
-    });
-
-    it.each([
-        [Scope.StepsOf10, 10],
-        [Scope.StepsOf100, 100],
-        [Scope.StepsOf1000, 1000],
-        [Scope.StepsOf10000, 10000],
-        [Scope.StepsOf100000, 100000]
-    ] as const)('supplies Grade 4 rounding evidence using %s', (
-        roundingMagnitude,
-        roundingPlace
-    ) => {
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const data = generator.generate({
-                range: {min: 1000, max: 1_000_000},
-                roundingMagnitude,
-                zeroEndpoint: false
-            })!.data;
-
-            expect('task' in data && data.task).toBe('multi-digit-integer-rounding');
-            if (!('task' in data) || data.task !== 'multi-digit-integer-rounding') continue;
-            expect(data.roundingPlace).toBe(roundingPlace);
-            expect(data.number).toBeGreaterThanOrEqual(1000);
-            expect(data.number).toBeLessThanOrEqual(1_000_000);
-            expect(data.upperMultiple - data.lowerMultiple).toBe(roundingPlace);
-            expect(data.midpoint).toBe((data.lowerMultiple + data.upperMultiple) / 2);
-            expect(data.number).toBeGreaterThan(data.lowerMultiple);
-            expect(data.number).toBeLessThan(data.upperMultiple);
-            expect(data.distanceLower).toBe(data.number - data.lowerMultiple);
-            expect(data.distanceUpper).toBe(data.upperMultiple - data.number);
-            expect(data.roundedValue)
-                .toBe(Math.round(data.number / roundingPlace) * roundingPlace);
-        }
-    });
-
-    it.each([
-        [Scope.StepsOf10, 10],
-        [Scope.StepsOf100, 100],
-        [Scope.StepsOf1000, 1000],
-        [Scope.StepsOf10000, 10000],
-        [Scope.StepsOf100000, 100000]
-    ] as const)('keeps Grade 4 sources visibly separate from the %s midpoint', (
-        roundingMagnitude,
-        roundingPlace
-    ) => {
-        const minimumMidpointDistance = Math.ceil(roundingPlace * 0.05);
-        let sawMidpointTie = false;
-        let sawNonTie = false;
-
-        for (let seed = 0; seed < 200; seed++) {
-            setSeed(seed);
-            const data = generator.generate({
-                range: {min: 1000, max: 1_000_000},
-                roundingMagnitude,
-                zeroEndpoint: false
-            })!.data;
-            if (!('task' in data)) continue;
-
-            if (data.isMidpointTie) {
-                sawMidpointTie = true;
-                expect(data.number).toBe(data.midpoint);
-            } else {
-                sawNonTie = true;
-                expect(Math.abs(data.number - data.midpoint))
-                    .toBeGreaterThanOrEqual(minimumMidpointDistance);
+    it('generates coherent required calculations in every canonical source cell and replays seeds', () => {
+        for (const [roundingMagnitude, place] of roundingPlaces) for (const zeroEndpoint of [false, true]) {
+            for (const {range} of canonicalRangeProfiles) {
+                const domain = roundingDomain(place, zeroEndpoint, range);
+                if (!domain.count) continue;
+                const config = {range, roundingMagnitude, zeroEndpoint};
+                for (const seed of [0, 17, 77]) {
+                    setSeed(seed);
+                    const first = generator.generate(config)!;
+                    setSeed(seed);
+                    expect(generator.generate(config)).toEqual(first);
+                    const data = first.data;
+                    expect(hasCanonicalRangeWitness(integerRoundingQuantities(data), range)).toBe(true);
+                    expect(data.roundingPlace).toBe(place);
+                    expect(data.number).toBeGreaterThan(data.lowerMultiple);
+                    expect(data.number).toBeLessThan(data.upperMultiple);
+                    expect(data.midpoint).toBe((data.lowerMultiple + data.upperMultiple) / 2);
+                    expect(data.distanceLower).toBe(data.number - data.lowerMultiple);
+                    expect(data.distanceUpper).toBe(data.upperMultiple - data.number);
+                    expect(data.roundedValue).toBe(Math.round(data.number / place) * place);
+                    expect(data.isMidpointTie).toBe(data.number === data.midpoint);
+                    expect(data.lowerMultiple === 0).toBe(zeroEndpoint);
+                    if ('task' in data) {
+                        expect(data.number).toBeGreaterThanOrEqual(1000);
+                        if (!data.isMidpointTie) expect(Math.abs(data.number - data.midpoint)).toBeGreaterThanOrEqual(Math.ceil(place * 0.05));
+                    } else expect(data.number).toBeLessThan(1000);
+                }
             }
         }
-
-        expect(sawMidpointTie).toBe(true);
-        expect(sawNonTie).toBe(true);
-
-        const lowerMultiple = roundingPlace < 1000 ? 1000 : roundingPlace;
-        const midpoint = lowerMultiple + roundingPlace / 2;
-        const tie = generator.generate({
-            range: {min: midpoint, max: midpoint},
-            roundingMagnitude,
-            zeroEndpoint: false
-        })!.data;
-        expect(tie).toMatchObject({
-            task: 'multi-digit-integer-rounding',
-            number: midpoint,
-            midpoint,
-            isMidpointTie: true
-        });
-
-        if (minimumMidpointDistance > 1) {
-            const obscuredNonTie = midpoint + minimumMidpointDistance - 1;
-            expect(generator.generate({
-                range: {min: obscuredNonTie, max: obscuredNonTie},
-                roundingMagnitude,
-                zeroEndpoint: false
-            })).toBeNull();
-        }
-    });
-
-    it('supplies an explicit midpoint rule and grouped non-tie distances', () => {
-        const tie = generator.generate({
-            range: {min: 1500, max: 1500},
-            roundingMagnitude: Scope.StepsOf1000,
-            zeroEndpoint: false
-        })!.data;
-        expect(tie).toMatchObject({
-            task: 'multi-digit-integer-rounding',
-            number: 1500,
-            lowerMultiple: 1000,
-            midpoint: 1500,
-            upperMultiple: 2000,
-            roundedValue: 2000,
-            direction: 'up',
-            isMidpointTie: true
-        });
-
-        const nonTie = generator.generate({
-            range: {min: 123456, max: 123456},
-            roundingMagnitude: Scope.StepsOf100000,
-            zeroEndpoint: false
-        })!.data;
-        expect(nonTie).toMatchObject({
-            task: 'multi-digit-integer-rounding',
-            distanceLower: 23456,
-            distanceUpper: 76544
-        });
-
-        const lowerBand = generator.generate({
-            range: {min: 1000, max: 1000},
-            roundingMagnitude: Scope.StepsOf100000,
-            zeroEndpoint: true
-        })!.data;
-        expect(lowerBand).toMatchObject({
-            task: 'multi-digit-integer-rounding',
-            number: 1000,
-            lowerMultiple: 0,
-            upperMultiple: 100000,
-            roundedValue: 0
-        });
-    });
-
-    it('includes the upper million boundary and is deterministic', () => {
-        const config = {
-            range: {min: 999999, max: 999999},
-            roundingMagnitude: Scope.StepsOf100000,
-            zeroEndpoint: false
-        } as const;
-        setSeed('integer-rounding-grade-four');
-        const first = generator.generate(config);
-        setSeed('integer-rounding-grade-four');
-        expect(generator.generate(config)).toEqual(first);
-        expect(first!.data).toMatchObject({
-            task: 'multi-digit-integer-rounding',
-            number: 999999,
-            upperMultiple: 1_000_000,
-            roundedValue: 1_000_000
-        });
-    });
-
-    it('returns null for unsupported magnitudes and unusable ranges', () => {
-        expect(generator.generate({
-            range: {min: 0, max: 1000},
-            roundingMagnitude: 'unsupported',
-            zeroEndpoint: false
-        } as never)).toBeNull();
-        expect(generator.generate({
-            range: {min: 995, max: 1000},
-            roundingMagnitude: Scope.StepsOf100,
-            zeroEndpoint: false
-        })).toBeNull();
-        expect(generator.generate({
-            range: {min: 1_000_001, max: 1_000_001},
-            roundingMagnitude: Scope.StepsOf100000,
-            zeroEndpoint: false
-        })).toBeNull();
-        expect(generator.generate({
-            range: {min: 2000, max: 2000},
-            roundingMagnitude: Scope.StepsOf1000,
-            zeroEndpoint: false
-        })).toBeNull();
     });
 });

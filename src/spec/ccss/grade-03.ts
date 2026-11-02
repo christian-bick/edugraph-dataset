@@ -1,4 +1,5 @@
 import DatasetPermutationBuilder, {toTargets} from '../../lib/dataset-permutation-builder.ts';
+import {expandUpperRangeVariants} from '../../lib/target-range-variants.ts';
 import { Ability, Area, Scope } from 'edugraph-ts';
 import {
     BeyondScopeEntry,
@@ -320,10 +321,11 @@ const integerRoundingBuilder = new DatasetPermutationBuilder()
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
-        Scope.NumbersSmaller1000,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.StepsOf10], [Scope.StepsOf100]]);
+    .applyLabelVariants([Scope.StepsOf10, Scope.StepsOf100].flatMap(place => expandUpperRangeVariants([
+        {labels: [place, Scope.NumbersSmaller1000]}
+    ], {bands: place === Scope.StepsOf10 ? [10, 20, 100, 120, 1000] : [100, 1000]}).map(({labels}) => labels)));
 
 const oneDigitTimesMultipleOfTenBuilder = new DatasetPermutationBuilder()
     .addLabels([
