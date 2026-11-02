@@ -1164,3 +1164,20 @@ Thirty-four focused tests pass; all40 native draws/replays and direct/planned co
 agree. Both rendering modes expose the counts in all140 projections of the complete support.
 Evidence: `temp/range-autonomous/batch6/shape/{tests.log,verification.json}`. Overall source and
 coverage acceptance follows after the remaining sixth-batch slices stabilize.
+
+## Sixth batch: standard decimal division
+
+Eight canonical upper profiles cover the largest existing declared source corpus, retaining all
+16,592,798 coefficient paths, supplied precision variants and four-scenario preimage weights.
+The former cap mixture changes as accepted; no new source envelope or source-cap parameter is
+introduced. Required normalization factors, normalized values and actual long-division work
+participate. A raw coefficient cap is not confused with the canonical mathematical maximum.
+Exact final remainder0 rules out a positive lower claim.
+
+The existing target and single route remain, one→eight selections, closing one source omission.
+There are no payload, renderer or target changes. The complete row/mass census, all20,530 finite
+prefix cases /33,174 supplied-trim traces and analytic tail bounds establish full support, beyond
+sampled controls. Forty-three module tests,22 shared tests, direct/planned configuration checks,
+native replay, Question/Solution projection and the owned-file typecheck pass. Exact zero and
+maximum Mulberry32 draws exercise each sampling boundary. Evidence:
+`temp/range-autonomous/batch6/fraction-decimal/division-*.log` and the comparison JSON.

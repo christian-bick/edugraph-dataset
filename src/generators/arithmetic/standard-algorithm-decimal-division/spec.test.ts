@@ -15,15 +15,14 @@ describe('standard decimal division schema', () => {
             ...mathematics, Scope.ArabicNumerals, Ability.ProcedureExecution
         ])!;
         expect(problem.data.kind).toBe('decimal-standard-division');
-        expect(problem.data.dividend.coefficient).toBeLessThanOrEqual(999999);
-        expect(problem.labels).toEqual([]);
+        expect(problem.data.dividend.coefficient).toBeLessThanOrEqual(1000000);
+        expect(problem.labels).toHaveLength(1);
     });
     it.each([[Scope.NumbersSmaller100000, 100000], [Scope.NumbersSmaller1000000, 1000000]] as const)(
         'resolves real mathematical range %s', (label, bound) => {
             const problem = generateWithLabels(new StandardAlgorithmDecimalDivisionGenerator(), [...mathematics, label])!;
             expect(problem.labels).toEqual([label]);
-            expect(problem.data.dividend.coefficient).toBeLessThanOrEqual(bound);
-            expect(problem.data.quotient.coefficient).toBeLessThanOrEqual(bound);
+            expect(problem.data.normalization.dividend.coefficient / 10 ** problem.data.normalization.dividend.scale).toBeLessThanOrEqual(bound);
         }
     );
     it('does not select the canonical relation from learner Ability', () => {

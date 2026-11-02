@@ -2,7 +2,8 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalStandardDivisionProblem, DecimalStandardDivisionStep} from '../../../types/problems.ts';
-import {alignedDecimalCoefficient, decimalPowerOfTen, exactDecimal, parseExactDecimal, validateMagnitudeRange} from '../standard-decimal-helpers.ts';
+import {alignedDecimalCoefficient, decimalPowerOfTen, exactDecimal, parseExactDecimal} from '../standard-decimal-helpers.ts';
+import {standardDecimalDivisionCases} from './domain.ts';
 import {StandardAlgorithmDecimalDivisionGeneratorSchema, type StandardAlgorithmDecimalDivisionGeneratorConfig} from './spec.ts';
 
 const generatorId = 'standard-algorithm-decimal-division';
@@ -80,22 +81,16 @@ export class StandardAlgorithmDecimalDivisionGenerator implements ProblemGenerat
 
     generate(config: StandardAlgorithmDecimalDivisionGeneratorConfig): ProblemStub<DecimalStandardDivisionProblem> {
         validateConfigFields(generatorId, config, ['range']);
-        const cap = validateMagnitudeRange(config.range, generatorId);
-        const profiles = [0, 1, 2, 3].flatMap(divisorScale => [0, 1, 2].flatMap(quotientScale =>
-            [2, 3, 4, 5, 8, 12, 15, 16, 25, 40, 125, 250, 1005].map(divisorCoefficient => ({
-                divisorScale, quotientScale, divisorCoefficient,
-                minimum: divisorCoefficient >= 10 * 10 ** divisorScale ? 0
-                    : Math.ceil(10 * 10 ** (divisorScale + quotientScale) / divisorCoefficient),
-                maximum: Math.floor(cap / divisorCoefficient)
-            })).filter(profile => divisorScale + quotientScale > 0 && profile.minimum <= profile.maximum)));
-        const profile = profiles[randomInteger(0, profiles.length - 1)]!;
-        const {divisorCoefficient, divisorScale, quotientScale} = profile;
-        const scenario = randomInteger(0, 3);
-        let quotientCoefficient = randomInteger(profile.minimum, profile.maximum);
-        if (scenario === 0 && profile.minimum === 0) quotientCoefficient = 0;
-        if (scenario === 1 && Math.floor(quotientCoefficient / 5) * 5 >= profile.minimum) {
-            quotientCoefficient = Math.floor(quotientCoefficient / 5) * 5;
+        const cases = standardDecimalDivisionCases(config.range!);
+        let remaining = random() * cases.reduce((sum, entry) => sum + entry.weight, 0);
+        let profile = cases[cases.length - 1]!;
+        for (const entry of cases) {
+            remaining -= entry.weight;
+            if (remaining < 0) {profile = entry; break;}
         }
+        const {divisorCoefficient, divisorScale, quotientScale} = profile;
+        const quotientCoefficient = profile.first + profile.step
+            * randomInteger(0, Math.floor((profile.last - profile.first) / profile.step));
         const rawCoefficient = divisorCoefficient * quotientCoefficient;
         const rawScale = divisorScale + quotientScale;
         let maximumTrim = 0;

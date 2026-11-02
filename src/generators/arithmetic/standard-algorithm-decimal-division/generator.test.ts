@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import type {DecimalStandardDivisionProblem} from '../../../types/problems.ts';
 import {buildDecimalStandardDivisionProblem, StandardAlgorithmDecimalDivisionGenerator} from './generator.ts';
@@ -117,21 +118,21 @@ describe('standard decimal division configuration', () => {
 
     it('satisfies canonical labels and all magnitude bounds with genuine fine-scale/zero/extension variation', () => {
         const features = new Set<string>();
-        for (const max of [100000, 1000000, Number.MAX_SAFE_INTEGER]) {
-            const cap = max === Number.MAX_SAFE_INTEGER ? 999999 : max;
+        for (const max of [10, 20, 100, 120, 1000, 10000, 100000, 1000000]) {
             for (let seed = 0; seed < 240; seed++) {
                 setSeed(seed);
-                const data = generator.generate({range: {min: 0, max}}).data;
+                const range = createCanonicalNumericRange(max);
+                const data = generator.generate({range}).data;
                 assertDivision(data);
                 expect(Math.max(data.dividend.coefficient / 10 ** data.dividend.scale,
                     data.divisor.coefficient / 10 ** data.divisor.scale)).toBeGreaterThanOrEqual(10);
                 expect(data.dividend.scale + data.divisor.scale).toBeGreaterThan(0);
-                for (const value of [data.dividend.coefficient, data.divisor.coefficient, data.quotient.coefficient,
-                    data.normalization.dividend.coefficient, data.normalization.divisor, data.normalization.powerOfTen,
-                    ...data.steps.flatMap(step => [step.partialDividend, step.product, step.remainder])]) {
-                    expect(value).toBeGreaterThanOrEqual(0);
-                    expect(value).toBeLessThanOrEqual(cap);
-                }
+                expect(data.dividend.coefficient).toBeLessThanOrEqual(1000000);
+                expect(hasCanonicalRangeWitness([data.dividend.coefficient / 10 ** data.dividend.scale,
+                    data.divisor.coefficient / 10 ** data.divisor.scale, data.quotient.coefficient / 10 ** data.quotient.scale,
+                    data.normalization.dividend.coefficient / 10 ** data.normalization.dividend.scale,
+                    data.normalization.divisor, data.normalization.powerOfTen,
+                    ...data.steps.flatMap(step => [step.partialDividend, step.product, step.remainder])], range)).toBe(true);
                 if (data.dividend.coefficient === 0) features.add('zero');
                 if ([data.dividend, data.divisor].some(value => value.scale >= 3 && value.coefficient % 10 ** value.scale !== 0)) features.add('fine');
                 if (data.normalization.dividend.scale > 0) features.add('decimal-normalized');
@@ -147,12 +148,12 @@ describe('standard decimal division configuration', () => {
         let larger = false;
         for (let seed = 0; seed < 30; seed++) {
             setSeed(seed);
-            const first = generator.generate({range: {min: 0, max: 100000}});
+            const first = generator.generate({range: createCanonicalNumericRange(100000)});
             setSeed(seed);
-            expect(generator.generate({range: {min: 0, max: 100000}})).toEqual(first);
+            expect(generator.generate({range: createCanonicalNumericRange(100000)})).toEqual(first);
             expect(Object.keys(first)).toEqual(['data']);
             setSeed(seed);
-            const second = generator.generate({range: {min: 0, max: 1000000}}).data;
+            const second = generator.generate({range: createCanonicalNumericRange(1000000)}).data;
             if (second.dividend.coefficient > 100000 || second.quotient.coefficient > 100000) larger = true;
         }
         expect(larger).toBe(true);
