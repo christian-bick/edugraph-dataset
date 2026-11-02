@@ -19,7 +19,7 @@ describe('CountingClassifySortGenerator schema', () => {
         expect(result).not.toBeNull();
         expect(result!.data.relation).toBe(relation);
         expect(result!.labels).toContain(label);
-        expect(result!.data.numObjects).toBeLessThanOrEqual(10);
+        expect(Math.max(...Object.values(result!.data.categories))).toBeLessThanOrEqual(10);
         expect(result!.data.ascendingGroups.flat()).toHaveLength(3);
         if (relation === 'least') expect(result!.data.minimumCategories).toHaveLength(1);
         if (relation === 'most') expect(result!.data.maximumCategories).toHaveLength(1);
@@ -37,7 +37,7 @@ describe('CountingClassifySortGenerator schema', () => {
             let result = null;
             for (let seed = 1; seed <= 100 && !result; seed++) {
                 setSeed(seed);
-                result = generateWithLabels(generator, [Scope.NumbersLarger5, Scope.NumbersSmaller20, relation]);
+                result = generateWithLabels(generator, [Scope.NumbersLarger5, Scope.NumbersSmaller10, relation]);
             }
             expect(result).not.toBeNull();
             expect(result!.labels).toContain(Scope.NumbersLarger5);

@@ -1407,3 +1407,18 @@ One hundred five focused tests /13 files, exact supply/path-weight proofs,1,282 
 88 native/replay/state controls, direct/planned configurations and final types pass. No adapter,
 inference, payload or renderer changes occur; no missing-facet closure is claimed. Evidence:
 `temp/range-autonomous/batch6/measurement-time/counting-verification.json` and associated logs.
+
+## Sixth batch: category counting and ordering
+
+All three consumers assess category cardinalities; the unasked stored total does not enter the
+range. Compact multinomial weights retain the original category-placement law without expanding
+individual placement paths. Of1,142 count allocations, only the approved5/5/5 singleton-magnitude
+allocation retires (34,650 duplicate paths); it never occurred under the old active total10 cap.
+Every original relation-feasible sorting allocation remains, including permitted ties.
+
+Five reviewed upper5 source variants sit beside the original per-category upper10 requests.
+All five old routes remain, reaching ten routes /15 selections. Fifty-six focused tests /ten files,
+exact integer multiplicity checks, every weighted row bin,94 boundary Q/S projections and60
+native/replay/state controls pass. Targets retain their source competency, and payload/rendering
+contracts are unchanged. No missing-facet closure is claimed. Evidence:
+`temp/range-autonomous/batch6/measurement-time/classification-verification.json` and associated logs.

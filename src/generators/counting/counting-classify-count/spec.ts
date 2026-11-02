@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {classificationRangeSchema} from '../canonical-classification-schema.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-classify-count',
@@ -16,10 +16,7 @@ export const spec: GeneratorSpec = {
 
 
 export const CountingClassifyCountGeneratorSchema = {
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
-        resolveRangeFromLabels
-    ]
+    range: classificationRangeSchema
 } as const;
 
 export type CountingClassifyCountGeneratorConfig = ConfigFromSchema<typeof CountingClassifyCountGeneratorSchema>;

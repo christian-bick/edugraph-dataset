@@ -18,7 +18,7 @@ describe('CountingClassifyCountGenerator Spec Integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.numObjects).toBeGreaterThanOrEqual(0);
-        expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
+        expect(Math.max(...Object.values(stub!.data.categories))).toBeLessThanOrEqual(10);
         expect(stub!.data).not.toHaveProperty('items');
         
         const categories = stub!.data.categories;
@@ -28,11 +28,12 @@ describe('CountingClassifyCountGenerator Spec Integration', () => {
 
     it('should respect custom bounds from labels', () => {
         const stub = generateWithLabels(generator, [
-            Scope.NumbersLarger10,
-            Scope.NumbersSmaller20,
+            Scope.NumbersLarger5,
+            Scope.NumbersSmaller10,
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeGreaterThanOrEqual(10);
+        expect(Math.min(...Object.values(stub!.data.categories))).toBeGreaterThanOrEqual(5);
+        expect(Math.max(...Object.values(stub!.data.categories))).toBeLessThanOrEqual(10);
         expect(stub!.data.numObjects).toBeLessThanOrEqual(20);
     });
 });

@@ -1,7 +1,7 @@
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {classificationRangeSchema} from '../canonical-classification-schema.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 
 export const spec: GeneratorSpec = {
@@ -17,10 +17,7 @@ export const spec: GeneratorSpec = {
 
 
 export const CountingClassifySortGeneratorSchema = {
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller20]),
-        resolveRangeFromLabels
-    ],
+    range: classificationRangeSchema,
     relation: [
         [Scope.Least, Scope.Most, Scope.AscendingOrder, Scope.DescendingOrder],
         selectExactLabelMap([

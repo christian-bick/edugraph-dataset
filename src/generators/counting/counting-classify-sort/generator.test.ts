@@ -1,97 +1,52 @@
-import {beforeEach, describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {CountingClassifySortProblem} from '../../../types/problems.ts';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as randomness from '../../../lib/random.ts';
 import {CountingClassifySortGenerator} from './generator.ts';
-import {CountingClassifySortGeneratorConfig} from './spec.ts';
-
-const relations = ['least', 'most', 'ascending', 'descending'] as const;
+import {classificationRangeProfiles, classificationRows} from '../canonical-classification-domains.ts';
 
 describe('CountingClassifySortGenerator', () => {
     const generator = new CountingClassifySortGenerator();
-    beforeEach(() => setSeed(42));
-
-    it('has the counting type and rejects incomplete configuration', () => {
+    afterEach(() => vi.restoreAllMocks());
+    it('rejects incomplete and unknown relation configuration', () => {
         expect(generator.type).toBe('counting');
         expect(() => generator.generate({})).toThrow('range');
-        expect(() => generator.generate({range: {min: 1, max: 10}})).toThrow('relation');
-        expect(() => generator.generate({range: {min: 1, max: 10}, relation: 'unknown'} as unknown as CountingClassifySortGeneratorConfig))
-            .toThrow('Unknown category-count relation');
+        expect(() => generator.generate({range: classificationRangeProfiles[0]!.range})).toThrow('relation');
+        expect(() => generator.generate({range: classificationRangeProfiles[0]!.range, relation: 'unknown'} as never)).toThrow('Unknown category-count relation');
     });
-
-    it.each([
-        {min: 1, max: 2}, {min: 8, max: 4}, {min: 1, max: 3},
-        {min: 5, max: 14}, {min: 5, max: 15}, {min: 10, max: 20},
-        {min: NaN, max: 10}, {min: Infinity, max: 10}, {min: 1, max: Infinity}, {min: 1, max: 4.5}
-    ])('returns null when the range cannot produce a valid instance: %j', range => {
-        for (const relation of relations) expect(generator.generate({range, relation})).toBeNull();
-    });
-
-    it.each(relations)('preserves every mathematical witness for %s', relation => {
-        const samples: CountingClassifySortProblem[] = [];
-        for (let seed = 1; seed <= 100; seed++) {
-            setSeed(seed);
-            const result = generator.generate({range: {min: 1, max: 10}, relation});
-            if (!result) continue;
-            const data = result.data;
-            samples.push(data);
-            expect(data.relation).toBe(relation);
-            expect(data).not.toHaveProperty('answer');
-            expect(data).not.toHaveProperty('items');
-            expect(data.numObjects).toBeGreaterThanOrEqual(3);
-            expect(data.numObjects).toBeLessThanOrEqual(10);
-            expect(Object.values(data.categories).reduce((sum, count) => sum + count, 0)).toBe(data.numObjects);
-            expect(data.ascendingGroups.flat().sort()).toEqual(['A', 'B', 'C']);
-            expect(data.ascendingGroups.length).toBeGreaterThan(1);
-            data.ascendingGroups.forEach((group, index) => {
-                const count = data.categories[group[0]!]!;
-                expect(count).toBeGreaterThan(0);
-                expect(group.every(category => data.categories[category] === count)).toBe(true);
-                if (index > 0) expect(count).toBeGreaterThan(data.categories[data.ascendingGroups[index - 1]![0]!]!);
-            });
-            expect(data.minimumCategories).toEqual(data.ascendingGroups[0]);
-            expect(data.maximumCategories).toEqual(data.ascendingGroups.at(-1));
-            if (relation === 'least') expect(data.minimumCategories).toHaveLength(1);
-            if (relation === 'most') expect(data.maximumCategories).toHaveLength(1);
-        }
-        expect(samples.length).toBeGreaterThan(0);
-        if (relation === 'least') expect(samples.some(data => data.maximumCategories.length === 2)).toBe(true);
-        if (relation === 'most') expect(samples.some(data => data.minimumCategories.length === 2)).toBe(true);
-        if (relation === 'ascending' || relation === 'descending') {
-            expect(samples.some(data => data.minimumCategories.length === 2)).toBe(true);
-            expect(samples.some(data => data.maximumCategories.length === 2)).toBe(true);
-        }
-    });
-
-    it('uses the integer lower bound and repeats exactly for the same seed', () => {
-        const config = {range: {min: 2.2, max: 20}, relation: 'ascending'} as const;
-        let checked = 0;
-        for (let seed = 1; seed <= 20; seed++) {
-            setSeed(seed);
-            const first = generator.generate(config);
-            setSeed(seed);
-            expect(generator.generate(config)).toEqual(first);
-            if (first) {
-                expect(first.data.numObjects).toBeGreaterThanOrEqual(9);
-                expect(Object.values(first.data.categories).every(count => count >= 3)).toBe(true);
-                checked++;
+    it.each(['least', 'most', 'ascending', 'descending'] as const)('retains every feasible weighted allocation for %s', relation => {
+        const draw = vi.spyOn(randomness, 'random');
+        for (const {range} of classificationRangeProfiles) {
+            const rows = classificationRows(range, relation), totalWeight = rows.reduce((sum, row) => sum + row.weight, 0);
+            let offset = 0;
+            for (const row of rows) {
+                draw.mockClear().mockReturnValue((offset + row.weight / 2) / totalWeight);
+                const data = generator.generate({range, relation})!.data;
+                expect(Object.values(data.categories)).toEqual(row.counts);
+                expect(data.numObjects).toBe(row.counts.reduce((sum, count) => sum + count, 0));
+                expect(data.relation).toBe(relation);
+                expect(data).not.toHaveProperty('answer');
+                expect(data).not.toHaveProperty('items');
+                const ascending = [...new Set(row.counts)].sort((a, b) => a - b);
+                expect(data.ascendingGroups).toEqual(ascending.map(count => Object.keys(data.categories).filter(category => data.categories[category] === count)));
+                expect(data.minimumCategories).toEqual(data.ascendingGroups[0]);
+                expect(data.maximumCategories).toEqual(data.ascendingGroups.at(-1));
+                if (relation === 'least') expect(data.minimumCategories).toHaveLength(1);
+                if (relation === 'most') expect(data.maximumCategories).toHaveLength(1);
+                expect(draw).toHaveBeenCalledTimes(1);
+                offset += row.weight;
             }
         }
-        expect(checked).toBeGreaterThan(0);
+        expect(classificationRangeProfiles.flatMap(({range}) => classificationRows(range, relation))
+            .some(row => new Set(row.counts).size === 2)).toBe(true);
     });
-
-    it.each(relations)('respects the lower bound in each category and the total for %s', relation => {
-        let checked = 0;
-        for (let seed = 1; seed <= 100; seed++) {
-            setSeed(seed);
-            const result = generator.generate({range: {min: 5, max: 20}, relation});
-            if (!result) continue;
-            checked++;
-            for (const count of [...Object.values(result.data.categories), result.data.numObjects]) {
-                expect(Number.isSafeInteger(count)).toBe(true);
-                expect(count).toBeGreaterThanOrEqual(5);
-                expect(count).toBeLessThanOrEqual(20);
-            }
+    it('replays with one draw, including category floors, and rejects impossible ranges without entropy', () => {
+        for (const {range} of classificationRangeProfiles) {
+            randomness.setSeed(42); randomness.random(); const continuation = randomness.getRandomState();
+            randomness.setSeed(42); const first = generator.generate({range, relation: 'ascending'});
+            expect(randomness.getRandomState()).toBe(continuation);
+            randomness.setSeed(42); expect(generator.generate({range, relation: 'ascending'})).toEqual(first);
         }
-        expect(checked).toBeGreaterThan(0);
+        const draw = vi.spyOn(randomness, 'random');
+        expect(generator.generate({range: {min: 0, max: 3} as never, relation: 'least'})).toBeNull();
+        expect(draw).not.toHaveBeenCalled();
     });
 });

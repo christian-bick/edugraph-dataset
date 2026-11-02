@@ -342,7 +342,7 @@ const classifyCountBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Area.ShapeRecognition],
-    ]);
+    ]).applyUpperRangeVariants({bands: [5, 10]});
 
 // --- K.MD.B.3: Sort the categories by count ---
 const sortByCountBuilder = new DatasetPermutationBuilder()
@@ -363,7 +363,7 @@ const sortByCountBuilder = new DatasetPermutationBuilder()
     ])
     .applyLabelVariants([
         [Area.ShapeRecognition],
-    ]);
+    ]).applyUpperRangeVariants({bands: [5, 10]});
 
 // Supporting subskill of K.MD.B.3: identify one endpoint before ordering every category.
 // The standard asks for complete ordering; least/most selection is our curricular decomposition.
@@ -377,7 +377,7 @@ const selectByCountBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller10,
         Ability.ProcedureExecution
     ])
-    .applyLabelVariants([[Scope.Least], [Scope.Most]]);
+    .applyLabelVariants([[Scope.Least], [Scope.Most]]).applyUpperRangeVariants({bands: [5, 10]});
 
 // ==========================================
 // 5. Geometry (K.G)
