@@ -60,8 +60,8 @@ fractions35, measurement30, currency11 and symbolic algebra8. The last two
 concern34 already-labelled routes with unresolved precision and must not be added to omission
 totals. These13 questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
-or authorize producer splits. Sixth-batch full-suite acceptance is pending in the rollout ledger
-until its final coverage run completes.
+or authorize producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
+1,009 files and all generator coverage thresholds; dataset acceptance remains separate.
 
 ## Review baseline (historical)
 

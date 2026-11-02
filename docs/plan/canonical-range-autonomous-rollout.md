@@ -1668,3 +1668,30 @@ exact mass/duplicate/endpoint checks remain, including their aggregate assertion
 focused checks pass with coverage instrumentation; the two expensive cases take24.3s/16.8s.
 No production behavior, timeout or threshold changes. Evidence:
 `temp/range-autonomous/batch6/estimation-proof-regression.log`.
+
+## Sixth batch: final acceptance
+
+Implementation checkpoint `61470ffe` passes all **7,705 tests /1,009 files** with
+`VITEST_MAX_WORKERS=2`. Every generator meets the unchanged85% statement /60% branch thresholds.
+Overall generator coverage is98.76% statements /97.20% branches /100% functions /99.31% lines.
+All seven repository checks pass, including types, documentation, specs, target coverage,
+stored split integrity and strict annotation validation. Existing timeout and coverage limits
+remain unchanged; regression fixtures retain their semantic checks. The two new exhaustive
+proofs use independent operation cases.
+
+An additional exact comparison with previous push `9fe08da9` reconstructs all1,770 prior routes
+and proves all remain covered, with230 additions and no losses. Thirteen normalized IDs migrate
+since that push; two were already migrated earlier, so the cumulative baseline accounting stays
+45 raw /27 normalized. The Name refinement's full mathematical union is proved separately.
+Evidence: `temp/range-autonomous/batch6/previous-push-route-lineage.json`.
+
+This accepts the implemented ordinary work and source-backed local repairs. The remaining99
+source range omissions and34 already-labelled precision routes still need the13 documented
+contract/policy decisions. Source readiness and dataset acceptance are therefore incomplete.
+The Area allowlist, generic matching, dependency policy and existing inference callbacks remain
+unchanged. No dataset regeneration or live VQA is performed; all2,918 stored images/cache entries
+remain at their prior accepted state. Root README.md and DOCS.md contain no batch-specific edits.
+
+Final logs: `temp/range-autonomous/batch6/{check-final.log,coverage-final.log}`. Earlier failed
+coverage attempts are retained as `coverage-first.log` and `coverage-second.log`; the green
+combined run is authoritative. Module-specific finite proofs and replay evidence are linked above.

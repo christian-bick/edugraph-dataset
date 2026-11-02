@@ -3,9 +3,9 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the target-expansion helper, first eight-family adoption, R4/R5 and five
-[autonomous batches](canonical-range-autonomous-rollout.md) are accepted; the sixth has completed
-its source work and is undergoing full-suite acceptance. These batches preserve
+Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
+[autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
+checks. These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
 **1,528 normalized targets /2,000 routes and4,602 complete selections**, with **99 range-presence
@@ -774,6 +774,6 @@ entry-document cleanup and six subsequent source batches. They close418 baseline
 omissions:517→99. The current source has1,528 normalized targets,2,000 routes and4,602 complete
 selections. Every earlier route lineage remains, with45 raw /27 normalized IDs migrating through
 the recorded source corrections. Ordinary profile/local-repair work is complete; the remaining
-13 contract/policy topics include two already-labelled precision reviews. Source gates pass;
-sixth-batch full-suite acceptance is pending until its final coverage run completes. The stored
+13 contract/policy topics include two already-labelled precision reviews. Source gates and the
+complete7,705-test /1,009-file coverage suite pass; all generator thresholds hold. The stored
 dataset and VQA cache remain unchanged, and range validation remains report-only.
