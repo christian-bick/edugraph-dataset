@@ -332,7 +332,7 @@ const concreteRegroupingBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.AdditionPlaceValuePartitioning],
         [Area.SubtractionPlaceValuePartitioning]
-    ]);
+    ]).applyUpperRangeVariants({bands: [10, 20, 100, 120, 1000]});
 
 // --- 2.NBT.B.7: Relate a concrete model to a written method ---
 const modelToWrittenMethodBuilder = new DatasetPermutationBuilder()
@@ -347,7 +347,7 @@ const modelToWrittenMethodBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.AdditionPlaceValuePartitioning],
         [Area.SubtractionPlaceValuePartitioning]
-    ]);
+    ]).applyUpperRangeVariants({bands: [10, 20, 100, 120, 1000]});
 
 // --- 2.NBT.B.8: Ten or one hundred more or less ---
 // We intentionally ignore the standard's pedagogically arbitrary 900 cutoff for
@@ -380,7 +380,7 @@ const explainStrategiesBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.AdditionPlaceValuePartitioning],
         [Area.SubtractionPlaceValuePartitioning]
-    ]);
+    ]).applyUpperRangeVariants({bands: [5, 10, 20, 100, 120, 1000]});
 
 // ==========================================
 // 3. Measurement and Data (2.MD)

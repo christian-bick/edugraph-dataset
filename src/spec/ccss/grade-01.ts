@@ -333,7 +333,7 @@ const createPlaceValueAdditionBuilder = (presentationLabels: string[]): DatasetP
             Scope.NumbersSmaller100,
             Ability.ProcedureUnderstanding,
             ...presentationLabels
-        ]));
+        ])).applyUpperRangeVariants({bands: [20, 100]});
 
 // --- 1.NBT.C.4: Add within 100 using place-value models and explanations ---
 const concretePlaceValueAdditionBuilder = createPlaceValueAdditionBuilder([Scope.PhysicalNumbers]);
@@ -369,14 +369,16 @@ const createPlaceValueSubtractionBuilder = (presentationLabels: string[]): Datas
             Area.PlaceValue,
             Scope.TwoOperands,
             Scope.MultiplesOf10,
-            Scope.NumbersSmaller100,
             Scope.NumbersWithoutNegatives,
             Ability.ProcedureUnderstanding,
             ...presentationLabels
         ])
         .applyLabelVariants([
-            [Scope.NumbersWithoutZero],
-            [Scope.NumbersWithZero]
+            [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
+            [Scope.NumbersWithoutZero, Scope.NumbersSmaller100],
+            [Scope.NumbersWithZero, Scope.NumbersSmaller10],
+            [Scope.NumbersWithZero, Scope.NumbersSmaller20],
+            [Scope.NumbersWithZero, Scope.NumbersSmaller100]
         ]);
 
 // --- 1.NBT.C.6: Subtract multiples of 10 using place-value models and explanations ---

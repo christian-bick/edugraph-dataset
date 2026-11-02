@@ -59,11 +59,11 @@ describe('Grade-1 coefficient-zero/result-zero separation', () => {
         }
     });
 
-    it('closes all nine current Grade-1 source omissions with exhaustive configuration outcomes', () => {
+    it('preserves exhaustive zero declarations across both Grade-1 source bands', () => {
         const targets = gradeOne.filter(target => target.id.startsWith('1.NBT.C.4-')
             && target.labels.includes(Area.AdditionPlaceValuePartitioning)
             && target.labels.includes(Scope.TwoDigitLargestOperand));
-        expect(targets).toHaveLength(9);
+        expect(targets).toHaveLength(18);
         const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
             schema: PlaceValueArithmeticGeneratorSchema, spec};
         for (const target of targets) {

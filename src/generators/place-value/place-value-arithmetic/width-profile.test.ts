@@ -125,7 +125,7 @@ describe('reviewed owner-specific resolver contract', () => {
         if (!match.supported) throw new Error(match.reason);
         const selections = enumerateDependencyAuditSelections(match.plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength(3);
+        expect(selections.selections).toHaveLength(2);
         for (const selection of selections.selections) {
             const resolved = resolveDependencyAuditAnnotation({id: 'test-width', plan: match.plan,
                 selection, generator: model, view: consumer});
@@ -141,7 +141,7 @@ describe('reviewed owner-specific resolver contract', () => {
                 for (let seed = 0; seed < 20; seed++) {
                     rng.setSeed(seed);
                     const stub = generateWithLabels(new PlaceValueArithmeticGenerator(),
-                        [operation, Scope.NumbersSmaller1000, width])!;
+                        [operation, width === Scope.SingleDigitLargestOperand ? Scope.NumbersSmaller10 : Scope.NumbersSmaller1000, width])!;
                     expect(stub.labels).toContain(width);
                     expect(Math.max(stub.data.num1, stub.data.num2) <= 9)
                         .toBe(width === Scope.SingleDigitLargestOperand);
@@ -167,7 +167,7 @@ describe('reviewed owner-specific resolver contract', () => {
             coefficientPresence: true, largestOperandProfile: 'single'})).toBeNull();
         for (const width of ['single', 'multiple'] as const) {
             const result = generator.generate({...base, operation: Area.Subtraction, requireZero: true,
-                coefficientPresence: true, largestOperandProfile: width})!;
+                coefficientPresence: true, largestOperandProfile: width, range: {min: 0, max: width === 'single' ? 10 : 1000}})!;
             expect(result.data.answer).toBe(0);
             expect(result.data.num1).toBe(result.data.num2);
             expect(result.data.num1 <= 9).toBe(width === 'single');

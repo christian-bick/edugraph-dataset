@@ -279,7 +279,7 @@ const placeValuePartitioningWithin1000Builder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.AdditionPlaceValuePartitioning],
         [Area.SubtractionPlaceValuePartitioning]
-    ]);
+    ]).applyUpperRangeVariants({bands: [10, 20, 100, 120, 1000]});
 
 const standardAlgorithmWithin1000Builder = new DatasetPermutationBuilder()
     .addLabels([

@@ -1339,3 +1339,35 @@ excludes number-line consumers from this writing payload.
 Fifty-eight focused tests /five files, owned types, the complete1m membership census,2,700 replay
 controls, both actual name/reading consumers and random endpoints pass. Evidence:
 `temp/range-autonomous/batch6/name/{proof.md,source-lineage.json}` and associated logs.
+
+## Sixth batch: complete place-value arithmetic bounds
+
+The existing three consumers assess complete H/T/O counts and required place arithmetic. Positive
+whole-tens subtraction instead assesses the three tens counts. In every branch the whole result
+(addition) or minuend (subtraction) dominates all required quantities. A required quantity is always
+below5: an empty count, exchange1, a small no-regroup input/difference, or a small tens count.
+Independent consumer review confirms this common interpretation; no quantity policy changes.
+
+Canonical upper5/10/20/100/120/1000 profiles retain all775,251 original general pairs and every
+fixed-width/whole-tens pair. The sampler now honors inclusive endpoints and conditions its bounded
+proposal on an actual maximum witness. Conditional sampling changes are accepted. Payload evidence
+construction, all three renderers and the existing width-inference callback remain unchanged.
+Reviewed pure owner resolvers preserve exhaustive static annotations and prevent broad direct
+requests from choosing an infeasible early operation/width.
+
+Source review adds52 raw /44 normalized variants across Grade1 addition/subtraction, Grade2
+concrete/written/explanation and the equivalent Grade3 partitioning alias. All old source IDs and
+equivalences remain. The separate tens-bundle upper20 source also admits one valid20−10 route.
+Combined verification retains all22 old routes, reaching67 routes /75 selections,150 native
+draws/replays/Q/S projections and268 direct original-target draws. Feeding supplementary zero
+annotations back into target-only equality selection is deliberately avoided in this validation.
+
+The model/written-method views' old upper10 rejection was not a valid complete boundary under
+SPEC-V3: it rejected genuine10−10 and regrouping at10. Producer feasibility now excludes the
+unsuitable ten-bundle request itself, so both obsolete guards are removed. Written-method
+Formalization participation remains. No rendering changes are needed.
+
+All120 focused tests /12 files and fresh types pass, including the complete support partition,
+canonical quantity witnesses, real endpoint counterexamples, broad direct requests and static
+annotation resolution. No missing-facet closure or support retirement is claimed. Evidence:
+`temp/range-autonomous/batch6/place-value-arithmetic/{verification.json,range-proof.log,tests-final.log}`.

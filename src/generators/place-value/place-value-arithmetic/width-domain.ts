@@ -8,6 +8,7 @@ export interface WidthDomain {
     readonly regrouping: boolean;
     readonly zeroResult?: boolean;
     readonly coefficientZero?: boolean;
+    readonly maximumAbove?: number;
 }
 interface PairRow {
     readonly first: number;
@@ -27,14 +28,14 @@ export const hasCoefficientZero = (first: number, second: number, operation: Wid
 /** Complete finite support with the original uniform-first/uniform-second proposal weights. */
 export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): readonly PairRow[] {
     const key = JSON.stringify([domain.operation, domain.minimum, domain.maximum, domain.regrouping,
-        domain.zeroResult, domain.coefficientZero, width]);
+        domain.zeroResult, domain.coefficientZero, domain.maximumAbove, width]);
     const cached = cache.get(key);
     if (cached) return cached;
     const rows: PairRow[] = [];
     const {operation, minimum, maximum, regrouping} = domain;
     if (operation === 'subtraction' && domain.zeroResult) {
         if (!regrouping) for (let operand = minimum; operand <= maximum; operand++) {
-            if (domain.coefficientZero !== false && hasWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
+            if (operand > (domain.maximumAbove ?? -1) && domain.coefficientZero !== false && hasWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
                 weight: 1 / (maximum - minimum + 1)});
         }
         cache.set(key, rows);
@@ -48,6 +49,7 @@ export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): read
         const originalCount = secondMaximum - minimum + 1;
         const seconds: number[] = [];
         for (let second = minimum; second <= secondMaximum; second++) {
+            if ((operation === 'addition' ? first + second : first) <= (domain.maximumAbove ?? -1)) continue;
             if (!hasWidth(first, second, width)) continue;
             if (domain.coefficientZero !== undefined
                 && hasCoefficientZero(first, second, operation) !== domain.coefficientZero) continue;

@@ -12,7 +12,7 @@ describe('place-value-arithmetic-written-method view spec', () => {
             Scope.ArabicNumerals
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'require')).toEqual([Ability.Formalization]);
-        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toContain(Scope.NumbersSmaller10);
+        expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
         expect(PlaceValueArithmeticWrittenMethodViewSchema).toEqual({});
     });
 });

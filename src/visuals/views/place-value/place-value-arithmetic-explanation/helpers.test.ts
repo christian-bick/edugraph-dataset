@@ -32,7 +32,7 @@ const generate = (
         requireZero: options.zero ?? false,
         largestOperandProfile: 'legacy',
         coefficientPresence: operation === Area.Subtraction && options.multipleOf10 ? (options.zero ?? false) : true,
-        range: {min: 1, max: options.twoDigit || options.multipleOf10 ? 100 : 1000}
+        range: {min: 0, max: options.twoDigit || options.multipleOf10 ? 100 : 1000}
     });
     expect(stub).not.toBeNull();
     return stub!.data;

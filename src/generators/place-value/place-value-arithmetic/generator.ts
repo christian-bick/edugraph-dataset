@@ -11,6 +11,8 @@ import {
 } from '../../../types/problems.ts';
 import {PlaceValueArithmeticGeneratorConfig, PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
 import {samplePrimaryWidth} from './width-domain.ts';
+import {grade1AdditionPairs, grade1SubtractionPairs, operandProfile} from './pair-domain.ts';
+import {maximumAbove} from './range-profile.ts';
 
 type OperandPair = readonly [number, number];
 type Operation = PlaceValueArithmeticProblem['operation'];
@@ -23,65 +25,6 @@ const digits = (number: number): PlaceValueDigits => ({
     tens: Math.floor((number % 100) / 10),
     ones: number % 10
 });
-
-const operandProfile = (
-    config: PlaceValueArithmeticGeneratorConfig
-): PlaceValueArithmeticOperandProfile | null => {
-    if (config.requireSingleDigitSmallest && config.requireMultipleOf10) return null;
-    if (config.requireSingleDigitSmallest) {
-        return config.requireTwoDigitLargest ? 'two-digit-single-digit' : null;
-    }
-    if (config.requireMultipleOf10) {
-        return config.requireTwoDigitLargest
-            ? 'two-digit-multiple-of-ten'
-            : 'multiples-of-ten';
-    }
-    return config.requireTwoDigitLargest ? null : 'general';
-};
-
-const grade1AdditionPairs = (
-    profile: PlaceValueArithmeticOperandProfile,
-    minimum: number,
-    maximum: number,
-    requireRegrouping: boolean
-): OperandPair[] => {
-    const pairs: OperandPair[] = [];
-    if (profile === 'two-digit-single-digit') {
-        for (let twoDigit = Math.max(10, minimum); twoDigit <= Math.min(99, maximum); twoDigit++) {
-            for (let singleDigit = Math.max(1, minimum); singleDigit <= 9; singleDigit++) {
-                const answer = twoDigit + singleDigit;
-                const composesTen = twoDigit % 10 + singleDigit >= 10;
-                if (answer <= maximum && composesTen === requireRegrouping) {
-                    pairs.push([twoDigit, singleDigit]);
-                }
-            }
-        }
-    } else if (profile === 'two-digit-multiple-of-ten' && !requireRegrouping) {
-        for (let twoDigit = Math.max(10, minimum); twoDigit <= Math.min(99, maximum); twoDigit++) {
-            for (let multiple = 10; multiple <= Math.min(90, maximum); multiple += 10) {
-                if (twoDigit + multiple <= maximum) pairs.push([twoDigit, multiple]);
-            }
-        }
-    }
-    return pairs;
-};
-
-const grade1SubtractionPairs = (
-    minimum: number,
-    maximum: number,
-    requireZero: boolean
-): OperandPair[] => {
-    const pairs: OperandPair[] = [];
-    for (let minuend = 10; minuend <= Math.min(90, maximum); minuend += 10) {
-        if (minuend < minimum) continue;
-        for (let subtrahend = 10; subtrahend <= minuend; subtrahend += 10) {
-            if (subtrahend < minimum) continue;
-            const isZero = minuend === subtrahend;
-            if (isZero === requireZero) pairs.push([minuend, subtrahend]);
-        }
-    }
-    return pairs;
-};
 
 const additionEvidence = (
     num1: number,
@@ -254,12 +197,14 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
         const profile = operandProfile(config);
         if (profile === null) return null;
         const minimum = Math.max(1, Math.ceil(config.range!.min));
-        const maximum = Math.min(999, Math.floor(config.range!.max) - 1);
+        const maximum = Math.min(999, Math.floor(config.range!.max));
         if (!Number.isSafeInteger(minimum) || !Number.isSafeInteger(maximum) || minimum > maximum) {
             return null;
         }
 
         const requireRegrouping = config.requireRegrouping!;
+        if (config.range!.min !== 0 || ![5, 10, 20, 100, 120, 1000].includes(config.range!.max)) return null;
+        const floor = maximumAbove(config.range!.max);
         const requireZero = config.requireZero!;
         const coefficientPresence = config.coefficientPresence!;
         if (typeof coefficientPresence !== 'boolean') {
@@ -275,16 +220,17 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
         if (config.operation === Area.Addition) {
             if (requireZero || profile === 'multiples-of-ten') return null;
             pair = profile === 'general'
-                ? samplePrimaryWidth({operation: 'addition', minimum, maximum, regrouping: requireRegrouping,
+                ? samplePrimaryWidth({operation: 'addition', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,
                     coefficientZero: coefficientPresence}, primaryWidth)
-                : coefficientPresence ? choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping)) : null;
+                : coefficientPresence ? choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping)
+                    .filter(([a, b]) => a + b > floor)) : null;
         } else if (profile === 'multiples-of-ten') {
             if (requireRegrouping) return null;
             if (coefficientPresence !== requireZero) return null;
-            pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero));
+            pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero).filter(([a]) => a > floor));
         } else if (profile === 'general') {
             if (requireZero && requireRegrouping) return null;
-            pair = samplePrimaryWidth({operation: 'subtraction', minimum, maximum, regrouping: requireRegrouping,
+            pair = samplePrimaryWidth({operation: 'subtraction', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,
                 zeroResult: requireZero, coefficientZero: coefficientPresence}, primaryWidth);
         }
 

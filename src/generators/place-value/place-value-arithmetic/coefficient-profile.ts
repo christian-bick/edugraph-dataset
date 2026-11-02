@@ -1,9 +1,9 @@
 import {Area, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {PrimaryWidth, primaryWidthRows, WidthDomain} from './width-domain.ts';
 import {primaryWidthContext, primaryWidthLabels} from './width-profile.ts';
+import {widthRangeDomain} from './range-profile.ts';
 
 export const coefficientLabels = [Scope.NumbersWithZero, Scope.NumbersWithoutZero] as const;
 export const coefficientContext = [...primaryWidthContext.filter(label => !coefficientLabels.includes(label as never)),
@@ -14,9 +14,8 @@ const subtraction = (selected: Selected) => selected(Area.Subtraction) || select
 const width = (selected: Selected): PrimaryWidth => selected(Scope.SingleDigitLargestOperand) ? 'single'
     : selected(Scope.MultipleDigitLargestOperand) ? 'multiple' : 'legacy';
 const domain = (selected: Selected, zeroResult: boolean, coefficientZero: boolean): WidthDomain => {
-    const range = resolveRangeFromLabels(coefficientContext.filter(label => selected(label)));
     return {operation: addition(selected) ? 'addition' : 'subtraction',
-        minimum: Math.max(1, Math.ceil(range.min)), maximum: Math.min(999, Math.floor(range.max) - 1),
+        ...widthRangeDomain(coefficientContext.filter(label => selected(label))),
         regrouping: selected(Area.IntegerRegrouping), zeroResult, coefficientZero};
 };
 const hasPairs = (selected: Selected, zeroResult: boolean, presence: boolean) =>

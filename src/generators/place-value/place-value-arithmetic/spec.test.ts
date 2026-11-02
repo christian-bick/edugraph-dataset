@@ -79,7 +79,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
                 expect(stub!.data.num1).toBeGreaterThanOrEqual(10);
                 widths.add(String(stub!.data.num1).length);
             }
-            expect(widths).toEqual(new Set([2, 3]));
+            expect(widths).toEqual(new Set([3]));
         }
     );
 
@@ -269,7 +269,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
             {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
         expect(result).toMatchObject({supported: false, reason: 'incompatible-rules'});
         setSeed(0);
-        expect(generateWithLabels(new PlaceValueArithmeticGenerator(), labels)).toBeNull();
+        expect(() => generateWithLabels(new PlaceValueArithmeticGenerator(), labels)).toThrow(/cannot complete/);
     });
 
     it.each([

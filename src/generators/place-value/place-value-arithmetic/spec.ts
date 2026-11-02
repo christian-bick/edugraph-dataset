@@ -1,20 +1,33 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
 import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
+import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
+import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
 import {needsPrimaryWidth, permitsPrimaryWidth, primaryWidthContext, primaryWidthLabels,
     resolvePrimaryWidth} from './width-profile.ts';
 import {resolveResultZero} from './zero-result.ts';
 import {coefficientContext, coefficientLabels, permitsCoefficientProfile,
     resolveCoefficientPresence} from './coefficient-profile.ts';
+import {permitsPlaceValueRange, placeValueRangeLabels, placeValueRangeChoices,
+    placeValueRangeContext, resolvePlaceValueRange} from './range-profile.ts';
 
-const resolveOperation = selectExactLabelMap([
+const operationLabels = [Area.AdditionPlaceValuePartitioning, Area.SubtractionPlaceValuePartitioning,
+    Area.Addition, Area.Subtraction];
+const operationValue = selectExactLabelMap([
     [Area.AdditionPlaceValuePartitioning, Area.Addition],
     [Area.SubtractionPlaceValuePartitioning, Area.Subtraction],
     [Area.Addition, Area.Addition],
     [Area.Subtraction, Area.Subtraction]
 ] as const);
+const resolveOperation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
+    const selected = operationLabels.filter(label => labels.includes(label));
+    if (selected.length !== 1) return undefined;
+    const multiples = labels.includes(Scope.MultiplesOf10) || labels.includes(Scope.TwoDigitSmallestOperand);
+    // Without the two-digit addition profile, the whole-tens contract is positive/equal subtraction.
+    if (multiples && !labels.includes(Scope.TwoDigitLargestOperand) && selected[0] !== Area.Subtraction) return undefined;
+    return operationValue(labels);
+}), {kind: 'alternatives', alternatives: operationLabels.map(label => [label]),
+    contextLabels: [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]}));
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 
@@ -55,6 +68,12 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
         ],
         predicate: labels => permitsCoefficientProfile(label => labels.exact('generator', label),
             labels.exact('target', Scope.NumbersWithZero))
+    }, {
+        id: 'place-value-canonical-range',
+        dependencies: [...[...placeValueRangeLabels, ...placeValueRangeContext].map(label => ({scope: 'generator' as const, label})),
+            {scope: 'target', label: Scope.NumbersWithZero}],
+        predicate: labels => permitsPlaceValueRange([...placeValueRangeLabels, ...placeValueRangeContext]
+            .filter(label => labels.exact('generator', label)), labels.exact('target', Scope.NumbersWithZero))
     }],
     // SPEC-12: neither subtraction nor regrouping alone guarantees this width.
     // Conditional same-value bundles would change direct fallback sampling;
@@ -75,12 +94,7 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
 };
 
 export const PlaceValueArithmeticGeneratorSchema = {
-    operation: [[
-        Area.AdditionPlaceValuePartitioning,
-        Area.SubtractionPlaceValuePartitioning,
-        Area.Addition,
-        Area.Subtraction
-    ], resolveOperation],
+    operation: [operationLabels, resolveOperation, operationLabels.map(label => [label])],
     requireRegrouping: [
         [Area.IntegerRegrouping],
         hasLabel(Area.IntegerRegrouping)
@@ -112,8 +126,9 @@ export const PlaceValueArithmeticGeneratorSchema = {
         [[], ...primaryWidthLabels.map(label => [label])]
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
-        resolveRangeFromLabels
+        placeValueRangeLabels,
+        resolvePlaceValueRange,
+        placeValueRangeChoices
     ],
     coefficientPresence: [
         coefficientLabels,

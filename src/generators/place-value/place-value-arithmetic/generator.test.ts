@@ -109,7 +109,7 @@ describe('PlaceValueArithmeticGenerator', () => {
             expect(data.num1).toBeLessThan(100);
             expect(data.num2).toBeGreaterThanOrEqual(1);
             expect(data.num2).toBeLessThan(10);
-            expect(data.answer).toBeLessThan(100);
+            expect(data.answer).toBeLessThanOrEqual(100);
             expect(data.num1 % 10 + data.num2 % 10 >= 10).toBe(requireRegrouping);
             expect(data.regrouping.kind).toBe(requireRegrouping ? 'compose-ten' : 'none');
             expectExactEvidence(data);
@@ -128,7 +128,7 @@ describe('PlaceValueArithmeticGenerator', () => {
             expect(data.num1).toBeGreaterThanOrEqual(10);
             expect(data.num1).toBeLessThan(100);
             expect(data.num2 % 10).toBe(0);
-            expect(data.answer).toBeLessThan(100);
+            expect(data.answer).toBeLessThanOrEqual(100);
             expect(data.regrouping.kind).toBe('none');
             expectExactEvidence(data);
         }

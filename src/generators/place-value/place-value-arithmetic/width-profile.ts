@@ -3,6 +3,7 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {PrimaryWidth, primaryWidthRows, WidthDomain} from './width-domain.ts';
+import {widthRangeDomain} from './range-profile.ts';
 
 export const primaryWidthLabels = [Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand] as const;
 const operations = [Area.Addition, Area.AdditionPlaceValuePartitioning,
@@ -20,9 +21,8 @@ export const needsPrimaryWidth = (selected: Selected) => !existingWidth(selected
     && (addition(selected) || subtraction(selected) && !selected(Area.IntegerRegrouping));
 
 const domainFromLabels = (selected: Selected): WidthDomain => {
-    const range = resolveRangeFromLabels(rangeLabels.filter(label => selected(label)));
     return {operation: addition(selected) ? 'addition' : 'subtraction',
-        minimum: Math.max(1, Math.ceil(range.min)), maximum: Math.min(999, Math.floor(range.max) - 1),
+        ...widthRangeDomain(rangeLabels.filter(label => selected(label))),
         regrouping: selected(Area.IntegerRegrouping), zeroResult: selected(Scope.NumbersWithZero),
         coefficientZero: selected(Scope.NumbersWithoutZero) ? false : undefined};
 };
@@ -48,6 +48,7 @@ export const resolvePrimaryWidth = registerStaticResolver(withLabelChoices(exact
 ), {
     kind: 'alternatives', alternatives: [[], ...primaryWidthLabels.map(label => [label])],
     contextLabels: primaryWidthContext,
+    resolvedContext: true,
     defaults: [
         {whenAll: [Scope.SingleDigitSmallestOperand], labels: []},
         {whenAll: [Scope.TwoDigitLargestOperand], labels: []},
