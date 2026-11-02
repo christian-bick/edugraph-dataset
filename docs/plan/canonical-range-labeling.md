@@ -770,10 +770,10 @@ quantity decisions remain in the [remaining-family review](canonical-range-remai
 ### Subsequent autonomous checkpoints
 
 The [autonomous rollout ledger](canonical-range-autonomous-rollout.md) records the completed
-entry-document cleanup and five subsequent validated batches. They close 353 baseline
-range-presence omissions: 517→164. The current source has 1,324 normalized targets,
-1,770 routes and 3,841 complete selections. Every earlier route lineage remains, with
-34 raw/16 normalized target IDs migrating under the authorized integer-domain and fixed-bound source corrections.
-Source and complete coverage gates are recorded in the rollout ledger. The stored dataset and VQA
-cache remain unchanged. Standard-profile work continues through the reviewed queue while genuine
-projection/source-claim decisions stay separate; range validation remains report-only.
+entry-document cleanup and six subsequent source batches. They close418 baseline range-presence
+omissions:517→99. The current source has1,528 normalized targets,2,000 routes and4,602 complete
+selections. Every earlier route lineage remains, with45 raw /27 normalized IDs migrating through
+the recorded source corrections. Ordinary profile/local-repair work is complete; the remaining
+13 contract/policy topics include two already-labelled precision reviews. Source gates pass;
+sixth-batch full-suite acceptance is pending until its final coverage run completes. The stored
+dataset and VQA cache remain unchanged, and range validation remains report-only.

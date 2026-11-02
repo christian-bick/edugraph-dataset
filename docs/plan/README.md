@@ -43,7 +43,8 @@ These items are not newly scheduled by the archive move.
   Current source gates cover **1,528 normalized targets /2,000 routes and4,602 selections**,
   with99 range omissions remaining. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
   records11 missing-facet topics and two already-labelled precision topics; ordinary profile and
-  approved local-repair work is complete. Full-suite acceptance is recorded in the rollout ledger.
+  approved local-repair work is complete. Sixth-batch full-suite acceptance remains pending
+  in the rollout ledger until its final coverage run completes.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.

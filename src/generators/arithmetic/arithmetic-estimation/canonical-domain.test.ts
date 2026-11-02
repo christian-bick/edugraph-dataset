@@ -7,14 +7,17 @@ import {estimationRawRows, estimationRelation} from './numeric-domain.ts';
 import {estimationProposalCases, proposalSeedCount} from './proposal-domain.ts';
 
 const operations = ['addition', 'subtraction', 'multiplication', 'division'] as const;
+const expectedCells = {addition: 13, subtraction: 18, multiplication: 4, division: 12};
 const cellKey = (operation: string, zero: boolean, min: number, max: number) => `${operation}:${zero}:${min}:${max}`;
 const profiles = canonicalRangeProfiles.filter(({range}) => range.max <= 1000);
 
-describe('canonical estimation construction-context union', () => {
-    it('preserves every original declared-context pair/proposal path and its exact conditional probability', () => {
+describe.sequential('canonical estimation construction-context union', () => {
+    const proofCoverage = new Map<string, {contexts: number; cells: number; pairPaths: number; proposalPaths: number}>();
+
+    it.each(operations)('preserves every original %s declared-context pair/proposal path and its exact conditional probability', operation => {
         const expected = new Map<string, number>();
         let contexts = 0, pairPaths = 0, proposalPaths = 0;
-        for (const operation of operations) for (const maximum of [5, 10, 20, 100, 120, 1000]) {
+        for (const maximum of [5, 10, 20, 100, 120, 1000]) {
             for (const minimum of [0, 5, 10, 20, 100, 120].filter(minimum => minimum < maximum)) {
                 contexts++;
                 const source = {operation, minimum, maximum};
@@ -39,7 +42,7 @@ describe('canonical estimation construction-context union', () => {
             }
         }
         let cells = 0;
-        for (const operation of operations) for (const zero of [false, true]) for (const {range} of profiles) {
+        for (const zero of [false, true]) for (const {range} of profiles) {
             const domain = canonicalEstimationDomain(operation, zero, range);
             const mass = expected.get(cellKey(operation, zero, range.min, range.max)) ?? 0;
             expect(domain.weight).toBeCloseTo(mass, 9);
@@ -59,12 +62,23 @@ describe('canonical estimation construction-context union', () => {
                 }
             }
         }
-        expect(contexts).toBe(84);
-        expect(cells).toBe(47);
-        expect(expected.size).toBe(47);
-        expect(pairPaths).toBeGreaterThan(1000000);
-        expect(proposalPaths).toBeGreaterThan(10000000);
+        expect(contexts).toBe(21);
+        expect(cells).toBe(expectedCells[operation]);
+        expect(expected.size).toBe(expectedCells[operation]);
+        proofCoverage.set(operation, {contexts, cells, pairPaths, proposalPaths});
     }, 60000);
+
+    it('retains the complete84-context/47-cell proof and all pair/proposal paths across the four operations', () => {
+        expect([...proofCoverage.keys()].sort()).toEqual([...operations].sort());
+        const total = [...proofCoverage.values()].reduce((sum, value) => ({
+            contexts: sum.contexts + value.contexts, cells: sum.cells + value.cells,
+            pairPaths: sum.pairPaths + value.pairPaths, proposalPaths: sum.proposalPaths + value.proposalPaths
+        }), {contexts: 0, cells: 0, pairPaths: 0, proposalPaths: 0});
+        expect(total.contexts).toBe(84);
+        expect(total.cells).toBe(47);
+        expect(total.pairPaths).toBeGreaterThan(1000000);
+        expect(total.proposalPaths).toBeGreaterThan(10000000);
+    });
 
     it('retains legitimate proposals that disappear if construction floors are substituted or widened', () => {
         const small = estimationRelation({operation: 'subtraction', minimum: 0, maximum: 20}, 9, 10)!;

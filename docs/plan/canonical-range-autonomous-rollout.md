@@ -1660,3 +1660,11 @@ The new rounding proof is split across ten operation cases, retaining every row,
 partition, endpoint and CDF assertion,735,348 cores and232 cells. Existing timeouts are unchanged.
 All four files pass88 tests with coverage instrumentation. These are test-only follow-ups;
 production and source counts are unchanged. Full-suite revalidation follows.
+
+The next cold run passes all7,700 other tests but exposes the same granularity problem in the
+new combined estimation proof. It is now four sequential operation cases with the unchanged
+60-second per-case limit. All84 contexts,47 cells, complete original pair/proposal paths and
+exact mass/duplicate/endpoint checks remain, including their aggregate assertions. The seven
+focused checks pass with coverage instrumentation; the two expensive cases take24.3s/16.8s.
+No production behavior, timeout or threshold changes. Evidence:
+`temp/range-autonomous/batch6/estimation-proof-regression.log`.
