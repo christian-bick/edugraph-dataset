@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {RatioTablesGenerator} from './generator.ts';
 
 const generator = new RatioTablesGenerator();
@@ -15,7 +16,7 @@ describe('RatioTablesGenerator', () => {
         const instances = new Set<string>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({range: {min: 0, max}});
+            const range = createCanonicalNumericRange(max), {data} = generator.generate({range});
             expect(data.kind).toBe('ratio-table');
             expect(data.rows).toHaveLength(4);
             expect(new Set(data.rows.map(row => row.scale)).size).toBe(4);
@@ -26,8 +27,8 @@ describe('RatioTablesGenerator', () => {
                 expect(Number.isSafeInteger(row.consequent)).toBe(true);
                 expect(row.antecedent).toBeGreaterThan(0);
                 expect(row.consequent).toBeGreaterThan(0);
-                expect(row.antecedent).toBeLessThan(max);
-                expect(row.consequent).toBeLessThan(max);
+                expect(row.antecedent).toBeLessThanOrEqual(max);
+                expect(row.consequent).toBeLessThanOrEqual(max);
                 expect(row.antecedent).toBeLessThanOrEqual(data.coordinateScale.xMax);
                 expect(row.consequent).toBeLessThanOrEqual(data.coordinateScale.yMax);
                 expect(row.antecedent % data.coordinateScale.xStep).toBe(0);
@@ -36,6 +37,7 @@ describe('RatioTablesGenerator', () => {
             expect(data.coordinateScale.xMax / data.coordinateScale.xStep).toBeLessThanOrEqual(10);
             expect(data.coordinateScale.yMax / data.coordinateScale.yStep).toBeLessThanOrEqual(10);
             expect(Object.keys(data).sort()).toEqual(['base', 'coordinateScale', 'kind', 'quantities', 'rows']);
+            expect(hasCanonicalRangeWitness([...data.rows.flatMap(row => [row.antecedent, row.consequent]),3,4], range)).toBe(true);
             instances.add(JSON.stringify(data));
         }
         expect(instances.size).toBeGreaterThan(25);
@@ -43,8 +45,8 @@ describe('RatioTablesGenerator', () => {
 
     it('replays identical rows', () => {
         setSeed(48);
-        const first = generator.generate({range: {min: 0, max: 20}});
+        const first = generator.generate({range: createCanonicalNumericRange(20)});
         setSeed(48);
-        expect(generator.generate({range: {min: 0, max: 20}})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(20)})).toEqual(first);
     });
 });

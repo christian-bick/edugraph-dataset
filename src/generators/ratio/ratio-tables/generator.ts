@@ -1,8 +1,10 @@
-import {validateConfigFields} from '../../../lib/errors.ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {RatioTableProblem} from '../../../types/problems.ts';
-import {pick, randomInteger, ratioQuantities, ratioTable, validateMagnitudeRange} from '../helpers.ts';
+import {pick, ratioQuantities, ratioTable} from '../helpers.ts';
 import {RatioTablesGeneratorSchema, type RatioTablesGeneratorConfig} from './spec.ts';
+import {ratioTableBaseRows} from './numeric-domain.ts';
 
 export class RatioTablesGenerator implements ProblemGenerator<RatioTableProblem, RatioTablesGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -10,9 +12,13 @@ export class RatioTablesGenerator implements ProblemGenerator<RatioTableProblem,
 
     generate(config: RatioTablesGeneratorConfig): ProblemStub<RatioTableProblem> {
         validateConfigFields('ratio-tables', config, ['range']);
-        const maximum = Math.floor(validateMagnitudeRange('ratio-tables', config.range!) / 4);
+        const rows = ratioTableBaseRows(config.range!);
+        if (!rows.length) throw new GeneratorValidationError('ratio-tables', 'Expected a supported canonical table range.');
+        let ticket = random() * rows.reduce((sum, row) => sum + row.weight, 0);
+        const row = rows.find(row => (ticket -= row.weight) < 0) ?? rows[rows.length - 1]!;
+        const second = row.seconds[Math.floor(random() * row.seconds.length)]!;
         return {data: ratioTable(
-            [randomInteger(1, maximum), randomInteger(1, maximum)],
+            [row.first, second],
             pick(ratioQuantities), [1, 2, 3, 4]
         )};
     }

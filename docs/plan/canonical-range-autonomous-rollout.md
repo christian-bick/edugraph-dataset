@@ -1598,3 +1598,26 @@ at true random boundaries,456 planned/source replays, six Q/S consumers and the1
 counterexample pass. Broad direct tests add416 supported draws and64 expected rejections over
 32 hashed seeds per request. No inference or Area-policy change is introduced. Evidence:
 `temp/range-autonomous/batch6/general-division/{proof.md,comparison.json,census.json}`.
+
+## Sixth batch: required ratio-table construction and inverse recovery
+
+Source6.RP.A.3a and the original plan assess making equivalent-ratio tables, finding missing
+entries and plotting. Neither claims creative selection of arbitrary multipliers or alternative
+method selection. Construction now states its existing2×/3×/4× scales, retaining the headed-table
+VisualArticulation task. Missing values still require ProcedureInversion: the multiplier is
+recovered from the given entry, never supplied in Question. The existing row.scale evidence
+supports explicit recovery/reconstruction in Solution. Plotting is unchanged.
+
+Each task has a required value below5: construction factors2/3/4, recovered inverse factors3/4,
+or plotted origin0. Their maximum is the same final table/axis value4×max(base). Four canonical
+bands contain1/3/21/551 base pairs, retaining all576 pairs and2,304 numeric/context frames.
+Conditional pair weights remain uniform, every mathematical draw consumes the original three
+PRNG calls, and canonical source-profile selection changes the mixture in the accepted way.
+No endpoint retires or numeric envelope expands.
+
+All four old target IDs/routes remain without new matches or source edits. Selections grow
+four→16; the two eligible source omissions close. Plotting is outside the Area gate and receives
+no omission-closure credit. Twenty-two focused tests /five files, final types, complete native
+frame/quantity proofs,64 source receipt replays and192 retained old-payload projection controls
+pass. No inference, producer split, matcher or range-policy change is needed. Evidence:
+`temp/range-autonomous/batch6/measurement-time/ratio-table-verification.json` and associated logs.

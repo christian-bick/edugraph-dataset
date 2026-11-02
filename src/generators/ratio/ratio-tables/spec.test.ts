@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {generateWithLabels} from '../../../lib/utils.ts';
+import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {RatioTablesGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
@@ -13,7 +13,10 @@ describe('ratio-tables capabilities', () => {
         ])!;
         expect(problem.data.rows).toHaveLength(4);
         expect(problem.data.rows.every(row => row.antecedent < 100 && row.consequent < 100)).toBe(true);
-        expect(problem.labels).toEqual([]);
+        expect(problem.labels).toHaveLength(1);
+        expect([Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100])
+            .toContain(problem.labels[0]);
+        expect(findSchemaFallbackContractIssues(new RatioTablesGenerator().schema)).toEqual([]);
     });
 
     it('owns ratio equivalence and the whole-number domain', () => {
@@ -25,8 +28,8 @@ describe('ratio-tables capabilities', () => {
             const problem = generateWithLabels(new RatioTablesGenerator(), [label])!;
             expect(problem.labels).toContain(label);
             for (const row of problem.data.rows) {
-                expect(row.antecedent).toBeLessThan(max);
-                expect(row.consequent).toBeLessThan(max);
+                expect(row.antecedent).toBeLessThanOrEqual(max);
+                expect(row.consequent).toBeLessThanOrEqual(max);
             }
         }
     );

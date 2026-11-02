@@ -1,7 +1,8 @@
 import {Area, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import type {GeneratorSpec} from '../../../types/generator-spec.ts';
 import type {ConfigFromSchema} from '../../../types/schema.ts';
+import {ratioTableRangeProfiles} from './numeric-domain.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'ratio-tables',
@@ -9,7 +10,9 @@ export const spec: GeneratorSpec = {
 };
 
 export const RatioTablesGeneratorSchema = {
-    range: [[Scope.NumbersSmaller20, Scope.NumbersSmaller100], resolveRangeFromLabels]
+    range: [[...new Set(ratioTableRangeProfiles.flatMap(profile => profile.labels))],
+        selectExactLabelSetMap(ratioTableRangeProfiles.map(profile => [profile.labels, profile.range] as const)),
+        ratioTableRangeProfiles.map(profile => profile.labels)]
 } as const;
 
 export type RatioTablesGeneratorConfig = ConfigFromSchema<typeof RatioTablesGeneratorSchema>;

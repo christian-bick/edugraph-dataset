@@ -93,19 +93,34 @@ export function RatioTableView({task, payload, viewId}: {
         </Card>;
     }
     const construction = task === 'construction';
+    const multipliers = data.rows.slice(1).map(row => row.scale).join(', ');
+    const firstIncomplete = data.rows[data.rows.length - 2]!, lastIncomplete = data.rows[data.rows.length - 1]!;
+    const recoveries = [
+        {given: firstIncomplete.consequent, divisor: data.base[1], multiplier: firstIncomplete.scale,
+            factor: data.base[0], answer: firstIncomplete.antecedent},
+        {given: lastIncomplete.antecedent, divisor: data.base[0], multiplier: lastIncomplete.scale,
+            factor: data.base[1], answer: lastIncomplete.consequent}
+    ];
     const answerCell = (row: number, column: number) => construction ? row > 0
         : (row === data.rows.length - 2 && column === 0)
             || (row === data.rows.length - 1 && column === 1);
     return <Card title={construction ? 'Construct an equivalent-ratio table' : 'Find missing ratio-table values'}>
         <p className="mb-5 text-center text-lg">{construction
-            ? `Add ${data.rows.length - 1} different rows of positive whole-number quantities that have the same ratio as the first row.`
-            : 'Fill each blank so every row has the same ratio of the two quantities.'}</p>
+            ? `Multiply both quantities in the first row by ${multipliers} to construct the next ${data.rows.length - 1} rows, in that order.`
+            : 'Recover each incomplete row’s multiplier from its given entry, then use that multiplier to fill the blank.'}</p>
         <div className="mx-auto w-[620px]"><RatioTable data={data} title="Equivalent-ratio table"
             hidden={(row, column) => !solution && answerCell(row, column)}
             revealed={(row, column) => solution && answerCell(row, column)} /></div>
         <Evidence solution={solution}>{solution
-            ? <>{construction && <span className="mb-1 block font-semibold">One possible table</span>}{ratioEquivalence(data)}</>
-            : construction ? 'Keep the quantity order shown in the column headings.' : 'Use the complete rows to recover each missing value.'}</Evidence>
+            ? <>{construction && <span className="mb-1 block font-semibold">Completed table</span>}{ratioEquivalence(data)}</>
+            : construction ? 'Keep the quantity order shown in the column headings.' : 'Use the first row and the given entry to recover each multiplier.'}
+            {!construction && <div className="mt-3 space-y-3" data-ratio-recovery="true">
+                {recoveries.map((row, index) => <div className="rounded-lg border border-indigo-200 bg-white p-3" key={index}>
+                    <div className="font-mono">{row.given} ÷ {row.divisor} = {solution ? row.multiplier : <Blank />}</div>
+                    {solution && <div className="mt-1 font-mono">{row.factor} × {row.multiplier} = {row.answer}</div>}
+                </div>)}
+            </div>}
+        </Evidence>
     </Card>;
 }
 

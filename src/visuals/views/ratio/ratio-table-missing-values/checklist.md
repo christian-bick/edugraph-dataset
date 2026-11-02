@@ -1,2 +1,2 @@
-- **Identity:** Recover missing corresponding quantities from a fixed relationship in an equivalent-ratio table.
-- **Modes:** Question Mode leaves one antecedent and one consequent blank while preserving complete rows. Solution Mode fills the blanks and shows the equivalent ratios.
+- **Identity:** Work backward from each incomplete row’s given entry to recover its multiplier, then recover the missing corresponding quantity from the fixed ratio.
+- **Modes:** Question Mode leaves one antecedent, one consequent and their multiplier-recovery results blank while preserving the givens. Solution Mode shows the inverse recovery and uses each multiplier to fill the matching entry.

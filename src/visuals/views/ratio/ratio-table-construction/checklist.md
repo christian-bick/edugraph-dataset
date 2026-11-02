@@ -1,2 +1,2 @@
-- **Identity:** Construct several distinct positive whole-number rows equivalent to a given ordered ratio in a headed two-column table.
-- **Modes:** Question Mode gives the first row and leaves the other rows blank. Solution Mode provides one possible complete equivalent-ratio table.
+- **Identity:** Construct the specified multiples of a given ordered ratio as distinct positive whole-number rows in a headed two-column table.
+- **Modes:** Question Mode gives the first row and the required multipliers while leaving the new entries blank. Solution Mode fills those rows in the requested order.

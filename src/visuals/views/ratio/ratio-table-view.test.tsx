@@ -21,15 +21,15 @@ const payload = (solution: boolean): ViewRenderPayload<'ratio-table-construction
 const text = (markup: string) => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('ratio table projections', () => {
-    it('withholds complete construction rows and reveals a possible set of equivalent pairs', () => {
+    it('specifies the existing mathematical multipliers while withholding every constructed entry', () => {
         const questionMarkup = renderToStaticMarkup(<RatioTableView task="construction" payload={payload(false)} viewId="ratio-table-construction" />);
         const solutionMarkup = renderToStaticMarkup(<RatioTableView task="construction" payload={payload(true)} viewId="ratio-table-construction" />);
         const question = text(questionMarkup);
         const solution = text(solutionMarkup);
-        expect(question).toContain('Add 3 different rows');
+        expect(question).toContain('Multiply both quantities in the first row by 2, 3, 4');
         expect(question.match(/\?/g)).toHaveLength(6);
         expect(question).not.toContain('6 : 15');
-        expect(solution).toContain('One possible table');
+        expect(solution).toContain('Completed table');
         expect(solution).toContain('2 : 5 = 4 : 10 = 6 : 15 = 8 : 20');
         expect(questionMarkup).not.toContain('text-emerald-800');
         expect(solutionMarkup.match(/text-emerald-800/g)).toHaveLength(6);
@@ -42,10 +42,19 @@ describe('ratio table projections', () => {
         const solutionMarkup = renderToStaticMarkup(<RatioTableView task="missing-values" payload={payload(true)} viewId="ratio-table-missing-values" />);
         const question = text(questionMarkup);
         const solution = text(solutionMarkup);
-        expect(question.match(/\?/g)).toHaveLength(2);
+        expect(question.match(/\?/g)).toHaveLength(4);
         expect(question).not.toMatch(/\b6\b|\b20\b/);
         expect(solution).toContain('6 : 15');
         expect(solution).toContain('8 : 20');
+        expect(question).toContain('Recover each incomplete row’s multiplier from its given entry');
+        expect(question).toContain('15 ÷ 5 = ?');
+        expect(question).toContain('8 ÷ 2 = ?');
+        expect(question).not.toContain('15 ÷ 5 = 3');
+        expect(question).not.toContain('8 ÷ 2 = 4');
+        expect(solution).toContain('15 ÷ 5 = 3');
+        expect(solution).toContain('8 ÷ 2 = 4');
+        expect(solution).toContain('2 × 3 = 6');
+        expect(solution).toContain('5 × 4 = 20');
         expect(questionMarkup).not.toContain('text-emerald-800');
         expect(solutionMarkup.match(/text-emerald-800/g)).toHaveLength(2);
         expect(solutionMarkup).toMatch(/text-emerald-800[^>]*>6<\/td>/);
