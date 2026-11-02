@@ -1,35 +1,68 @@
 # Remaining numeric families and next range batch
 
-Read-only production review on 2026-11-01 at `d6fd3b94`, ontology `0.33.0`, on
-`codex/label-dependency-audit`. This extends the [range plan](canonical-range-labeling.md),
-not the earlier historical inventory. The R4a–R4c proposal below was subsequently approved and
-implemented; its [acceptance record](canonical-range-labeling.md#r4c--decimal-addition-profiles-and-complete-batch-acceptance)
-supersedes the review-baseline counts. The subsequently approved
-[R5 counting batch](canonical-range-labeling.md#r5--counting-oncounting-back-canonical-ranges)
-adds three upper5 targets while preserving all earlier target claims/routes. Current counts are
-1,250 normalized targets / 1,675 routes and 2,972 complete source selections. Range-presence
-findings remain 517 after R5: it tightens existing annotations rather than repairing missing ones.
-The [subsequent autonomous rollout](canonical-range-autonomous-rollout.md) closes 78 of those
-omissions and adds one reviewed source variant, retaining all earlier target claims/routes.
-The first autonomous batch reached1,251 normalized targets /1,676 routes, with439 range omissions.
-The second batch's combined source gates now pass at **1,264 normalized targets /1,692 routes,
-3,105 complete selections and410 range omissions**. It preserves every earlier target claim and
-route. Full coverage acceptance is recorded separately in the rollout ledger.
-The third batch's source gates pass at **1,270 normalized targets /1,698 routes,3,258 selections
-and369 range omissions**. The authorized [integer-domain source correction](canonical-range-integer-domain-correction.md)
-migrates30 raw/12 normalized IDs without losing routes, selections or source-equivalence lineage.
-The fourth batch's source gates pass at **1,293 normalized targets /1,730 routes,3,382 selections
-and332 range omissions**. Four further source-backed fixed-bound corrections migrate four raw
-and four normalized IDs; every earlier route lineage remains supported. Full acceptance is
-recorded in the rollout ledger after the complete coverage gate.
-The fifth batch's combined source gates pass at **1,324 normalized targets /1,770 routes,
-3,841 complete selections and164 range omissions**:168 further baseline omissions close.
-All previous claim/route lineages remain, with31 additive source variants and no new ID
-migrations. Full coverage acceptance passes all 7,676 tests / 975 files and all generator
-thresholds, as recorded in the rollout ledger. The next ordinary work includes already-labelled
-families whose legacy bounds still need tightening; omission counts alone do not establish completion.
+Current source review:2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
+This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
+review baseline below are historical; all subsequent implementation and acceptance evidence
+is in the [autonomous rollout ledger](canonical-range-autonomous-rollout.md).
 
-## Review baseline
+The sixth batch reaches **1,576 authored /1,528 normalized targets,2,000 routes and4,602
+complete selections**. Missing source range facets fall **164→99**, across11 producers.
+There are no non-range omissions, conflicts, contract errors, incomplete tuples, invalid
+contexts or pending/invalid inference. All119 selections using existing inference resolve
+exhaustively. Every earlier source/route lineage remains covered through45 raw /27 normalized
+explicitly recorded source corrections. No generic matching or Area-policy change is made.
+
+Relative to the fifth batch, reviewed source refinements add204 normalized targets,230 routes
+and761 selections. This meaningfully changes dataset weighting, as accepted. The current split
+rule allocates2,516 requested question/solution pairs (5,032 images before deduplication),
+including516 validation tuples. This is an estimate of future rendering scope, not a count of
+changed images or VQA calls. The stored2,918 images/cache and1,062 stored range findings remain
+unchanged. Source validation and full-suite acceptance are recorded separately from dataset acceptance.
+
+## Sixth batch: final review and decision boundaries
+
+The sixth batch implements the ordinary arithmetic, numerical algebra, writing, place-value,
+counting and offset work described in the [rollout ledger](canonical-range-autonomous-rollout.md).
+It also resolves five cases initially deferred for review. Unlike-fraction Questions now require
+their existing common-part scale; IntegerRegrouping distinguishes ten-tens exchange from counting
+hundred flats. Operation tables expose the already-assessed mathematical row. General division
+retains its required model/inverse reconstruction while omitting an unrequested numerical
+shortcut. Ratio tables specify their construction scales and preserve inverse multiplier recovery.
+These follow the approved source-correction, canonical-relation and question/solution alignment
+approaches. They require neither a new producer nor a quantity policy. Former questions Q3,
+Q5 and Q14 are therefore resolved rather than carried forward as approvals.
+
+The following questions concern mathematical meaning or a contract change. They are not deferred
+because their domains are large or because the implementation is difficult. The numeric examples
+are counterexamples to an unqualified shared range, not requests to change the agreed inclusive
+bound convention. Preserve every current route and supported mathematical outcome when resolving
+them. A valid consumer cannot be excluded merely to make another consumer's range truthful
+(SPEC-G3, IMPL-G4, IMPL-V11).
+
+| ID / remaining slice | Concrete question | Recommendation and consequence |
+| --- | --- | --- |
+| Q1 — numerical expressions,6 omissions | Does constructing/interpreting `2×(16+2)` assess only its syntax quantities (upper20), while evaluation also assesses18 and36 (upper100)? The structural Question explicitly says not to evaluate. | Confirm separate syntax and calculation contracts. A rare producer/payload separation can reuse the renderers and preserve all four routes; it needs the standing split confirmation. No unused result becomes a structural-task witness. |
+| Q2 — mixed powers,8 | Writing `3³` uses base/exponent3 (upper5); evaluation requires27 (upper100). Should those be separate mathematical contracts? | Confirm the same task separation before assigning a producer range. Present source routing cannot guarantee that a future valid target avoids the evaluation consumer. Preserve both tasks and all power frames. |
+| Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
+| Q6 — unit-dividend quotient,16 | Does `1/6÷6` require constructing36 fine parts, or sharing among6 recipients without that construction? | Distinguish fine-part construction from sharing/inverse mathematics, or approve the same explicitly required model in every Question. Merely reading denominator36 does not establish an assessed integer count36. |
+| Q7 — fraction products,7 | Should interpretation of `17/6×6` require alternate subtotal `17×6=102`, while story creation requires only17 selected parts/result17? | Confirm separate task contracts, or require that additional subtotal explicitly in every applicable Question. The latter broadens the story task; it is not a declaration-only repair. |
+| Q8 — fraction equivalence,7 | Does classification of `1/2=4/8` assess rational equality only, or the scaling count `2×4=8` too? | Distinguish equality recognition from generating/scaling part counts. Making scaling mandatory changes classification. Three explicitly multiplication/scaling-labelled configurations might instead justify a genuine semantic consumer boundary, but whether classification can truthfully carry those claims is itself unresolved; the flags currently leave the payload identical. No range-driven guard is added. |
+| Q9 — fraction scaling,5 | Comparison of5 and `5×3/2` explicitly avoids the product; explanation additionally requires the analogy `5×2=10`. Must that analogy be common to both? | Keep comparison and explanation mathematically distinct unless the additional analogy is intentionally required in both Questions. Existing equal-only routing does not provide a universal boundary. |
+| Q10 — generic unit scale,2 | In `5 large units=10 small units`, must comparison explicitly derive factor2, as the derivation consumer does? | Prefer distinct comparison and factor-derivation contracts, preserving their tasks. Requiring factor derivation in both is another option, but changes comparison rather than merely clarifying a required solution model. |
+| Q11 — named-unit equivalences,28 | Should one conversion and a five-row table share a range? From7km, the single conversion reaches7000m, while the table reaches11000m. | Confirm single-equivalence versus table contracts. A rare producer split can preserve all unit pairs and renderers. Trace the one-unit derivation quantity separately; it is not required by every table task. |
+| Q12 — currency,11 | Which numeric amounts define the range when `$1−75¢=25¢` or `75¢+75¢=$1.50` uses both named units? | Recommend values in each explicitly required unit, plus conversion quantities only where the task requires conversion. Confirm this convention before implementation. Preserve the explicitly wanted cents/dollars competency; no cents-only rendering or storage-based shortcut. |
+| Q13 — symbolic algebra,8 | Should the range describe written constants only, or be inapplicable to unbound structural tasks such as `3+x` and `3÷x`? | Prefer an explicit structural-task qualification after deciding the intended classifier pattern. A sampled hidden binding cannot bound all valid values. Preserve the existing algebra sign/zero cutoff. |
+| Q15 — Basic counting,20 already-labelled routes | Is the range for a totalN alone, or the explicitly requested sequence1..N? AtN=6 conservation supports lower5, but one-to-one enumeration does not. | Confirm total-only versus enumerated-count contracts; a rare producer split can preserve both. The valid cardinality consumer must also be considered, even without a present source route. No canonical Basic precision is claimed yet. |
+| Q16 — positive non-Name writing,14 already-labelled routes | At321, numeral reading uses scalar321; count writing explicitly assesses3hundreds/2tens/1one. Which task contract owns those counts? | Distinguish block/count quantities from scalar numeral reading/writing before refining the complete mixed roles. Preserve the nine canonical Name routes and three canonical fixed-zero routes; they are not open work. |
+
+The first eleven rows account for all99 remaining missing source facets: arithmetic15,
+fractions35, measurement30, currency11 and symbolic algebra8. The last two
+concern34 already-labelled routes with unresolved precision and must not be added to omission
+totals. These13 questions are contract/policy topics, not an estimated implementation-batch
+count. Current checks prove source consistency; they do not close the unresolved range work
+or authorize producer splits. Full-suite acceptance is recorded in the rollout ledger.
+
+## Review baseline (historical)
 
 Fresh catalog matching finds **1,286 authored / 1,247 normalized targets, 1,672 routes,
 175 active producers, 336 active views and 354 matched producer/view pairs**. All 2,964 source
@@ -143,7 +176,7 @@ and **517 remaining source range-presence findings**. The new range choices add 
 inside existing routes; no source permutation expansion is needed. These measurement preservation
 counts are implementation acceptance requirements, not a claim that future sampler code is verified.
 
-## Remaining queue after this batch
+## Historical queue after the fifth batch
 
 The source findings by owning directory are below, before and after R4. Counts refer to missing facets only;
 families with old bounds still require canonical review. They are not implementation-batch counts.
@@ -226,7 +259,7 @@ bound can have been valid before canonical adoption. Future changes must preserv
 claim and its witnesses (SPEC-G3, IMPL-G4, IMPL-V11), and may not stretch source labels to force
 coverage (TSPEC-6, TSPEC-13).
 
-### Next autonomous work after the fifth source checkpoint
+### Ordinary work identified after the fifth source checkpoint (completed in B6)
 
 At least27 remaining source omissions have a reviewed ordinary approach: six standard integer
 division selections, five standard decimal-method selections, and16 fully numeric algebraic

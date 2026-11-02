@@ -70,9 +70,12 @@ describe('category-count task matching', () => {
         });
     });
 
-    it('keeps the two standard-order targets and two supporting endpoint targets separately matched', () => {
+    it('keeps ordering and endpoint roles separately matched in both canonical bands', () => {
         const targets = ccssTargets.filter(target => /^K\.MD\.B\.3-(sort|select)-by-count~/.test(target.id));
-        expect(targets).toHaveLength(4);
+        expect(targets).toHaveLength(8);
+        for (const upper of [Scope.NumbersSmaller5, Scope.NumbersSmaller10]) {
+            expect(targets.filter(target => target.labels.includes(upper))).toHaveLength(4);
+        }
         for (const target of targets) {
             const isOrder = target.id.includes('-sort-by-count~');
             expect(target.labels.includes(Area.NumericOrder)).toBe(isOrder);

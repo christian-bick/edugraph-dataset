@@ -4,7 +4,7 @@ import {IntegerAddSubtractStrategiesGenerator} from '../generators/arithmetic/in
 import {PlaceValueExpandedGenerator} from '../generators/place-value/place-value-expanded/generator.ts';
 import {spec as strategyView} from '../visuals/views/operations/operations-add-subtract-strategy-understanding/spec.ts';
 import {spec as expandedView} from '../visuals/views/place-value/place-value-expanded-form/spec.ts';
-import {planCompatibility} from './compatibility.ts';
+import {createGenerationSelectionReceipt, planCompatibility} from './compatibility.ts';
 import {normalizeSchemaChoices} from './schema-choices.ts';
 import {enumerateDependencyAuditSelections} from './label-dependency-audit.ts';
 import {resolveDependencyAuditAnnotation} from './label-dependency-annotation-resolution.ts';
@@ -13,12 +13,11 @@ import {generatePlannedDraw, resolvePlannedConfigurations} from './planned-gener
 import {getRandomState} from './random.ts';
 import {extractSchemaLabels} from './utils.ts';
 import type {ProblemGenerator} from '../types/ml-engine.ts';
-import type {AnyModuleSpec} from '../types/module-spec.ts';
 import type {ViewSpec} from '../types/view-spec.ts';
-import type {GeneratorSpec} from '../types/generator-spec.ts';
+import type {AnyGeneratorSpec, GeneratorSpec} from '../types/generator-spec.ts';
 import {planModelCompatibility} from './model-compatibility.ts';
 
-const cases: {name: string; generator: ProblemGenerator & {spec: AnyModuleSpec & {generatorId: string}};
+const cases: {name: string; generator: ProblemGenerator & {spec: AnyGeneratorSpec};
     view: ViewSpec; targetLabels: string[]; expected: string; facet: string}[] = [
     ...[Scope.NumbersSmaller1000, Scope.NumbersSmaller1000000].flatMap(range =>
         [Scope.TwoOperands, Scope.ThreeOperands].map(count => ({
@@ -31,47 +30,54 @@ const cases: {name: string; generator: ProblemGenerator & {spec: AnyModuleSpec &
 describe('four expanded-form configuration inference acceptance cases', () => {
     it.each(cases)('proves $name and preserves planned draws in both modes', ({generator, view, targetLabels, expected, facet}) => {
         const spec = generator.spec;
-        const baseSpec = {generalLabels: spec.generalLabels};
+        const baseSpec = {...spec, inferredLabels: undefined};
         const identity = {targetId: 'inference-acceptance', generatorId: spec.generatorId, viewId: view.viewId};
         const planned = planCompatibility({identity, targetLabels, generatorLabels: spec.generalLabels,
-            viewLabels: view.generalLabels, fields: normalizeSchemaChoices(generator.schema, targetLabels, 'generator')});
+            viewLabels: view.generalLabels, generatorRules: spec.compatibility,
+            fields: normalizeSchemaChoices(generator.schema, targetLabels, 'generator')});
         if (!planned.supported) throw new Error(planned.reason);
         const plan = planned.plan;
         const originalPlan = structuredClone(plan);
         const selections = enumerateDependencyAuditSelections(plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength(1);
-        const selection = selections.selections[0];
+        expect(selections.selections.length).toBeGreaterThan(0);
         const evaluator = createLabelDependencyEvaluator();
-        expect(evaluator.evaluate(selection.labels).assessments).toContainEqual(expect.objectContaining({facet, status: 'missing'}));
-        const resolved = resolveDependencyAuditAnnotation({id: 'same-selection', plan, selection,
-            generator: {schema: generator.schema, spec}, view: {schema: {}, spec: view}});
-        expect(resolved.annotationResolution).toMatchObject({status: 'exhaustive', outcome: {
-            parentSelectionId: 'same-selection', inferredLabels: [expected]
-        }});
-        expect(resolved.declaredLabels).toEqual(selection.labels);
-        expect(evaluator.evaluate(resolved.labels).assessments).not.toContainEqual(expect.objectContaining({facet, status: 'missing'}));
-        expect(evaluator.evaluate(resolved.labels).conflicts).toEqual([]);
-        // These zero claims remain supplementary annotations rather than matching capabilities.
-        if (facet === 'zero') expect(extractSchemaLabels(generator.schema)).not.toContain(expected);
-        for (const mode of ['question', 'solution']) {
-            const input = {generator, viewSchema: {}, viewSpec: view, plan,
-                sampleKey: `${identity.targetId}#${identity.generatorId}#${identity.viewId}#train#${mode}#inst:0`, seed: 39, attempt: 1};
-            const plainConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: baseSpec});
-            const inferredConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: spec});
-            expect(inferredConfig.generatorConfig).toEqual(plainConfig.generatorConfig);
-            expect(inferredConfig.generatorRandomState).toBe(plainConfig.generatorRandomState);
-            expect(inferredConfig.view).toEqual(plainConfig.view);
-            const plain = generatePlannedDraw({...input, generatorSpec: baseSpec});
-            const continuation = getRandomState();
-            const enriched = generatePlannedDraw(input);
-            expect(enriched.stub).not.toBeNull();
-            expect(enriched.stub?.data).toEqual(plain.stub?.data);
-            expect(enriched.view).toEqual(plain.view);
-            expect(getRandomState()).toBe(continuation);
-            expect(enriched.replay).toEqual(plain.replay);
-            expect(enriched.labels).toEqual([...plain.labels, expected].sort());
-            expect(generatePlannedDraw({...input, replay: enriched.replay})).toEqual(enriched);
+        // Canonical lower bands create several valid bindings for the same upper request.
+        // Prove annotation-only inference independently for every admitted binding.
+        for (const selection of selections.selections) {
+            expect(evaluator.evaluate(selection.labels).assessments).toContainEqual(expect.objectContaining({facet, status: 'missing'}));
+            const resolved = resolveDependencyAuditAnnotation({id: 'same-selection', plan, selection,
+                generator: {schema: generator.schema, spec}, view: {schema: {}, spec: view}});
+            expect(resolved.annotationResolution).toMatchObject({status: 'exhaustive', outcome: {
+                parentSelectionId: 'same-selection', inferredLabels: [expected]
+            }});
+            expect(resolved.declaredLabels).toEqual(selection.labels);
+            expect(evaluator.evaluate(resolved.labels).assessments).not.toContainEqual(expect.objectContaining({facet, status: 'missing'}));
+            expect(evaluator.evaluate(resolved.labels).conflicts).toEqual([]);
+            // These zero claims remain supplementary annotations rather than matching capabilities.
+            if (facet === 'zero') expect(extractSchemaLabels(generator.schema)).not.toContain(expected);
+            for (const mode of ['question', 'solution']) {
+                const sampleKey = `${identity.targetId}#${identity.generatorId}#${identity.viewId}#train#${mode}#inst:0`;
+                const replay = {version: 1 as const, sampleKey, seed: 39, attempt: 1,
+                    selection: createGenerationSelectionReceipt(plan, selection.choices)};
+                const input = {generator, viewSchema: {}, viewSpec: view, plan,
+                    sampleKey, seed: 39, attempt: 1, replay};
+                const plainConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: baseSpec});
+                const inferredConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: spec});
+                expect(inferredConfig.generatorConfig).toEqual(plainConfig.generatorConfig);
+                expect(inferredConfig.generatorRandomState).toBe(plainConfig.generatorRandomState);
+                expect(inferredConfig.view).toEqual(plainConfig.view);
+                const plain = generatePlannedDraw({...input, generatorSpec: baseSpec});
+                const continuation = getRandomState();
+                const enriched = generatePlannedDraw(input);
+                expect(enriched.stub).not.toBeNull();
+                expect(enriched.stub?.data).toEqual(plain.stub?.data);
+                expect(enriched.view).toEqual(plain.view);
+                expect(getRandomState()).toBe(continuation);
+                expect(enriched.replay).toEqual(plain.replay);
+                expect(enriched.labels).toEqual([...plain.labels, expected].sort());
+                expect(generatePlannedDraw({...input, replay: enriched.replay})).toEqual(enriched);
+            }
         }
         expect(plan).toEqual(originalPlan);
     });

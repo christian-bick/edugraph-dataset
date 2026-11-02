@@ -1621,3 +1621,42 @@ no omission-closure credit. Twenty-two focused tests /five files, final types, c
 frame/quantity proofs,64 source receipt replays and192 retained old-payload projection controls
 pass. No inference, producer split, matcher or range-policy change is needed. Evidence:
 `temp/range-autonomous/batch6/measurement-time/ratio-table-verification.json` and associated logs.
+
+## Sixth batch: consolidated source verification
+
+The combined source reaches1,576 authored /1,528 normalized targets,2,000 matching routes and
+4,602 complete selections. Every baseline route lineage and competency remains covered.
+The exact cumulative45 raw /27 normalized source-ID corrections include the two-step ten-tens
+lineages and the three-successor Name interval refinement; they are not arbitrary target rewrites.
+The sixth batch adds204 normalized targets,230 routes and761 selections relative to the fifth.
+The current split allocation is2,516 requested pairs /5,032 images before deduplication,
+including516 validation tuples. These estimates do not predict changed-image or VQA-call counts.
+
+Missing source range facets fall164→99:27 ordinary arithmetic/numerical-algebra omissions,
+16 unlike-fraction omissions,18 general-division omissions, two operation-table omissions and
+two ratio-table omissions are repaired. No requirements are retired through policy changes.
+The report contains no missing non-range facets, conflicts, invalid contexts, contract errors,
+incomplete tuples or pending/invalid inference. All119 existing inference selections resolve
+exhaustively. No new inference callback, adapter, automatic completion, generic matching rule
+or Area-allowlist change is introduced.
+
+All seven repository checks pass, including full types, specs/ownership, source target coverage,
+documentation, stored split integrity and strict annotations. The source-only audit uses an
+explicitly empty dataset snapshot, keeping its99 findings separate from the unchanged1,062
+stored range findings. The [remaining backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+documents11 remaining missing-facet groups and two already-labelled precision topics
+(34 routes). No ordinary implementation case remains deferred for technical size or difficulty.
+Full-suite acceptance follows separately; source readiness and dataset acceptance remain incomplete.
+
+Evidence: `temp/range-autonomous/batch6/{global-verification.json,decision-source-audit.json,
+decision-inventory.json,check-final.log}`. Stored2,918 images and their VQA cache remain unchanged.
+
+The first combined coverage run found three obsolete fixture assumptions and one oversized new
+exhaustive test. The fixed-width addition fixture now requests its feasible upper100 band;
+category matching explicitly checks both reviewed bands and all eight targets. The existing
+inference acceptance test retains real compatibility rules and independently binds/replays every
+admitted lower-band selection, comparing inference on/off without changing configuration or RNG.
+The new rounding proof is split across ten operation cases, retaining every row, full proposal
+partition, endpoint and CDF assertion,735,348 cores and232 cells. Existing timeouts are unchanged.
+All four files pass88 tests with coverage instrumentation. These are test-only follow-ups;
+production and source counts are unchanged. Full-suite revalidation follows.

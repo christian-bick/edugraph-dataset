@@ -144,7 +144,9 @@ describe('generator configuration compatibility', () => {
         [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
         [Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping]
     ])('allows zero coefficients without changing %s into an equality', (...profile) => {
-        const labels = [...profile, Scope.NumbersWithZero, Scope.NumbersSmaller1000];
+        const upper = profile[0] === Area.AdditionPlaceValuePartitioning
+            ? Scope.NumbersSmaller100 : Scope.NumbersSmaller1000;
+        const labels = [...profile, Scope.NumbersWithZero, upper];
         const result = plan('place-value-arithmetic', labels);
         expect(result.supported).toBe(true);
         if (!result.supported) throw new Error(result.reason);

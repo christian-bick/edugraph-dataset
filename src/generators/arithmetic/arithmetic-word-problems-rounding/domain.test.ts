@@ -63,39 +63,33 @@ describe('rounding-story finite cores and monotone proposal intervals', () => {
         expect(countAtFloor.every(n => n > 0)).toBe(true);
     });
 
-    it('partitions every full proposal interval exactly, with valid monotone endpoints and original conditional CDF weights', () => {
-        let rows = 0, profiles = 0, errors = 0;
-        for (const profile of roundingOperationProfiles) {
-            const cores = roundingCores(profile.operations), covered = new Float64Array(cores.length);
-            for (const {range} of roundingRangeProfiles) {
-                const domain = roundingDomain(profile.operations, range);
-                if (domain.weight > 0) profiles++;
-                let before = 0;
-                for (let i = 0; i < cores.length; i++) {
-                    const row = cores[i]!, interval = canonicalProposalInterval(row, range);
-                    let count = 0;
-                    if (interval) {
-                        count = interval.upper - interval.lower + 1 - Number(row.answer >= interval.lower && row.answer <= interval.upper);
-                        covered[i]! += count;
-                        const first = interval.lower === row.answer ? interval.lower + 1 : interval.lower;
-                        const last = interval.upper === row.answer ? interval.upper - 1 : interval.upper;
-                        for (const P of [first, last]) {
-                            const Q = Math.round(P / row.roundingPlace) * row.roundingPlace;
-                            if (row.minimum <= 0 || P <= 0 || Q <= 0 || P < row.proposalLower || P > 1000000 || P === row.answer
-                                || !hasCanonicalRangeWitness([...values(row), P, Q], range)) errors++;
-                        }
+    it.each(roundingOperationProfiles)('partitions every full proposal interval exactly for $operations, with valid monotone endpoints and original conditional CDF weights', profile => {
+        let errors = 0;
+        const cores = roundingCores(profile.operations), covered = new Float64Array(cores.length);
+        for (const {range} of roundingRangeProfiles) {
+            const domain = roundingDomain(profile.operations, range);
+            let before = 0;
+            for (let i = 0; i < cores.length; i++) {
+                const row = cores[i]!, interval = canonicalProposalInterval(row, range);
+                let count = 0;
+                if (interval) {
+                    count = interval.upper - interval.lower + 1 - Number(row.answer >= interval.lower && row.answer <= interval.upper);
+                    covered[i]! += count;
+                    const first = interval.lower === row.answer ? interval.lower + 1 : interval.lower;
+                    const last = interval.upper === row.answer ? interval.upper - 1 : interval.upper;
+                    for (const P of [first, last]) {
+                        const Q = Math.round(P / row.roundingPlace) * row.roundingPlace;
+                        if (row.minimum <= 0 || P <= 0 || Q <= 0 || P < row.proposalLower || P > 1000000 || P === row.answer
+                            || !hasCanonicalRangeWitness([...values(row), P, Q], range)) errors++;
                     }
-                    const increment = domain.cumulative[i]! - before;
-                    if (Math.abs(increment - count / row.proposalCount) > 3e-11) errors++;
-                    before = domain.cumulative[i]!;
                 }
+                const increment = domain.cumulative[i]! - before;
+                if (Math.abs(increment - count / row.proposalCount) > 3e-11) errors++;
+                before = domain.cumulative[i]!;
             }
-            for (let i = 0; i < cores.length; i++) if (covered[i] !== cores[i]!.proposalCount) errors++;
-            rows += cores.length;
         }
+        for (let i = 0; i < cores.length; i++) if (covered[i] !== cores[i]!.proposalCount) errors++;
         expect(errors).toBe(0);
-        expect(rows).toBe(735348);
-        expect(profiles).toBe(232);
     });
 
     it('retains the original native floor20 constructors without introducing intermediate small-factor pools', () => {
@@ -124,8 +118,10 @@ describe('rounding-story finite cores and monotone proposal intervals', () => {
 
     it('constructs every feasible configuration at true zero/max Mulberry32 boundaries without rejecting or making false zero claims', () => {
         const draw = vi.spyOn(rng, 'random'), generator = new ArithmeticWordProblemsRoundingGenerator();
+        let profiles = 0;
         for (const profile of roundingOperationProfiles) for (const {range} of roundingRangeProfiles) {
             if (!roundingDomain(profile.operations, range).weight) continue;
+            profiles++;
             const operations = [profile.operations[0], profile.operations[1]].map(op => ({addition: Area.Addition, subtraction: Area.Subtraction, multiplication: Area.Multiplication, division: Area.Division})[op]) as unknown as TwoStepOperationLabels;
             for (const value of [0, (2 ** 32 - 1) / 2 ** 32]) {
                 draw.mockReset().mockReturnValue(value);
@@ -137,6 +133,7 @@ describe('rounding-story finite cores and monotone proposal intervals', () => {
                 expect(draw).toHaveBeenCalledTimes(2);
             }
         }
+        expect(profiles).toBe(232);
     });
 
     it('keeps the numerical-zero rounding boundary outside the positive story corpus', () => {
