@@ -86,7 +86,7 @@ const objectGroupParityBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Area.EvenDivisibility, Scope.EvenNumbers],
         [Area.UnevenDivisibility, Scope.OddNumbers]
-    ]);
+    ]).applyUpperRangeVariants({bands: [5, 10, 20]});
 
 // --- 2.OA.C.3: Express an even number as two equal addends ---
 const evenEqualAddendsBuilder = new DatasetPermutationBuilder()

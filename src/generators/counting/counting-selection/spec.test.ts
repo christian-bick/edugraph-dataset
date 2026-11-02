@@ -2,7 +2,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
-import {CountingBasicGeneratorSchema, spec as basicSpec} from '../counting-basic/spec.ts';
+import {spec as basicSpec} from '../counting-basic/spec.ts';
 import {CountingSelectionGenerator} from './generator.ts';
 import {CountingSelectionGeneratorSchema, spec} from './spec.ts';
 
@@ -13,7 +13,10 @@ describe('counting-selection spec', () => {
         expect(spec.generalLabels).toEqual(expect.arrayContaining([...basicSpec.generalLabels, Scope.NumbersWithoutZero]));
         expect(basicSpec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
         expect(extractSchemaLabels(CountingSelectionGeneratorSchema))
-            .toEqual(extractSchemaLabels(CountingBasicGeneratorSchema));
+            .not.toContain(Scope.NumbersLargerZero);
+        expect(extractSchemaLabels(CountingSelectionGeneratorSchema))
+            .toEqual(expect.arrayContaining([Scope.NumbersSmaller5, Scope.NumbersSmaller10,
+                Scope.NumbersSmaller20, Scope.NumbersLarger5, Scope.NumbersLarger10]));
         expect(Object.keys(CountingSelectionGeneratorSchema).sort()).toEqual(['parity', 'range']);
     });
 

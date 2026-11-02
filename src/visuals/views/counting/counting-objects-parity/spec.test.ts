@@ -41,7 +41,10 @@ describe('counting-objects-parity capabilities', () => {
         expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithoutZero]}, generator, view))
             .toMatchObject({matched: parity === Scope.OddNumbers});
         expect(matchTarget({...target, labels: [...target.labels, Scope.NumbersWithZero]}, generator, view).matched)
-            .toBe(true);
+            .toBe(parity === Scope.EvenNumbers);
+        // The odd zero-involving singleton belongs to the canonical U5 band.
+        expect(matchTarget({...target, labels: target.labels.map(label => label === Scope.NumbersSmaller20
+            ? Scope.NumbersSmaller5 : label).concat(Scope.NumbersWithZero)}, generator, view).matched).toBe(true);
         const assessment = createLabelDependencyEvaluator().evaluate(resolved.labels)
             .assessments.find(item => item.facet === 'zero');
         expect(assessment?.status).toBe('satisfied');

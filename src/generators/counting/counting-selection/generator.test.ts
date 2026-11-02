@@ -1,104 +1,76 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import * as randomSource from '../../../lib/random.ts';
+import * as randomness from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {CountingSelectionGenerator} from './generator.ts';
+import {countingSupplyRows, selectionCountingProfiles} from '../canonical-counting-domains.ts';
 
 describe('CountingSelectionGenerator', () => {
     const generator = new CountingSelectionGenerator();
     afterEach(() => vi.restoreAllMocks());
-
-    it('requires both range and subset parity configuration', () => {
+    it('requires range and requested-count parity', () => {
         expect(() => generator.generate(null as never)).toThrow();
         expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({range: {min: 0, max: 10}})).toThrow('parity');
+        expect(() => generator.generate({range: createCanonicalNumericRange(5)})).toThrow('parity');
         expect(() => generator.generate({parity: 'any'})).toThrow('range');
     });
-
-    it('is deterministic and consumes the requested-count draw before the supply draw', () => {
-        const config = {range: {min: 5, max: 20}, parity: 'any' as const};
-        randomSource.setSeed(42);
-        randomSource.random();
-        randomSource.random();
-        const afterTwoDraws = randomSource.getRandomState();
-        randomSource.setSeed(42);
-        const first = generator.generate(config)!;
-        expect(first.data.numObjects).toBe(14);
-        expect(randomSource.getRandomState()).toBe(afterTwoDraws);
-        randomSource.setSeed(42);
-        expect(generator.generate(config)).toEqual(first);
-        expect(randomSource.getRandomState()).toBe(afterTwoDraws);
-    });
-
-    it('samples every available count from the full inclusive interval with equal entropy intervals', () => {
-        for (let index = 0; index < 6; index++) {
-            const draw = vi.spyOn(randomSource, 'random')
-                .mockReturnValueOnce(0.4)
-                .mockReturnValueOnce((index + 0.5) / 6);
-            const data = generator.generate({range: {min: 1, max: 10}, parity: 'any'})!.data;
-            expect(data.numObjects).toBe(5);
-            expect(data.availableCount).toBe(5 + index);
-            expect(draw).toHaveBeenCalledTimes(2);
-            draw.mockRestore();
-        }
-    });
-
-    it.each([0, 0.999])('allows equal cardinalities away from the maximum and at it: draw %s', firstDraw => {
-        vi.spyOn(randomSource, 'random').mockReturnValueOnce(firstDraw).mockReturnValueOnce(0);
-        const data = generator.generate({range: {min: 5, max: 10}, parity: 'any'})!.data;
-        expect(data.numObjects).toBe(firstDraw === 0 ? 5 : 10);
-        expect(data.availableCount).toBe(data.numObjects);
-        expect(data.simpleAnswer).toBe(data.numObjects);
-        expect(Object.keys(data).sort()).toEqual(['availableCount', 'numObjects', 'simpleAnswer']);
-    });
-
-    it.each(['any', 'even', 'odd'] as const)('bounds both cardinalities for subset parity %s', parity => {
-        for (const range of [{min: 0, max: 10}, {min: 5, max: 20}, {min: 10, max: 20}]) {
-            for (let seed = 0; seed < 40; seed++) {
-                randomSource.setSeed(seed);
-                const data = generator.generate({range, parity})!.data;
-                for (const count of [data.numObjects, data.availableCount]) {
-                    expect(Number.isInteger(count)).toBe(true);
-                    expect(count).toBeGreaterThanOrEqual(Math.max(1, range.min));
-                    expect(count).toBeLessThanOrEqual(range.max);
+    it('retains every feasible pair in exact weighted row bins, drawing request before supply', () => {
+        const draw = vi.spyOn(randomness, 'random');
+        for (const parity of ['any', 'even', 'odd'] as const) for (const {range} of selectionCountingProfiles) {
+            const rows = countingSupplyRows(range, parity);
+            const total = rows.reduce((sum, row) => sum + row.weight, 0);
+            let offset = 0;
+            for (const row of rows) {
+                for (let available = row.first; available <= row.last; available++) {
+                    draw.mockReset().mockReturnValueOnce((offset + row.weight / 2) / total)
+                        .mockReturnValueOnce((available - row.first + .5) / (row.last - row.first + 1));
+                    expect(generator.generate({range, parity})!.data).toEqual({
+                        numObjects: row.requested, simpleAnswer: row.requested, availableCount: available,
+                        ...(parity === 'any' ? {} : {parity})
+                    });
+                    expect(draw).toHaveBeenCalledTimes(2);
                 }
-                expect(data.availableCount).toBeGreaterThanOrEqual(data.numObjects);
-                if (parity !== 'any') {
-                    expect(data.parity).toBe(parity);
-                    expect(data.numObjects % 2).toBe(parity === 'even' ? 0 : 1);
-                }
+                offset += row.weight;
             }
         }
     });
-
-    it.each([
-        ['even', 2, 3],
-        ['odd', 1, 2]
-    ] as const)('does not apply subset parity %s to the available collection', (parity, requested, available) => {
-        vi.spyOn(randomSource, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0.3);
-        const data = generator.generate({range: {min: 1, max: 5}, parity})!.data;
-        expect(data.numObjects).toBe(requested);
-        expect(data.availableCount).toBe(available);
-        expect(data.parity).toBe(parity);
+    it.each(['even', 'odd'] as const)('does not apply requested parity %s to the available collection', parity => {
+        const rows = countingSupplyRows(createCanonicalNumericRange(5), parity);
+        const row = rows[0]!;
+        vi.spyOn(randomness, 'random').mockReturnValueOnce(0)
+            .mockReturnValueOnce((1.5) / (row.last - row.first + 1));
+        const data = generator.generate({range: createCanonicalNumericRange(5), parity})!.data;
+        expect(data.numObjects % 2).toBe(parity === 'even' ? 0 : 1);
+        expect(data.availableCount).toBe(data.numObjects + 1);
     });
-
-    it('supports a singleton range with equal requested and available counts', () => {
-        expect(generator.generate({range: {min: 5, max: 5}, parity: 'odd'})!.data)
-            .toEqual({numObjects: 5, availableCount: 5, simpleAnswer: 5, parity: 'odd'});
+    it('retains equality away from threshold singletons and excludes only threshold equality', () => {
+        const range = createCanonicalNumericRange(10, 5);
+        const rows = countingSupplyRows(range, 'any');
+        const row = rows.find(row => row.requested === 6)!;
+        const total = rows.reduce((sum, row) => sum + row.weight, 0);
+        const before = rows.slice(0, rows.indexOf(row)).reduce((sum, row) => sum + row.weight, 0);
+        vi.spyOn(randomness, 'random').mockReturnValueOnce((before + row.weight / 2) / total).mockReturnValueOnce(0);
+        expect(generator.generate({range, parity: 'any'})!.data).toEqual({
+            numObjects: 6, simpleAnswer: 6, availableCount: 6});
+        for (const threshold of [5, 10, 20]) {
+            const all = selectionCountingProfiles.flatMap(({range}) => countingSupplyRows(range, 'any'));
+            expect(all.some(row => row.requested === threshold && row.first <= threshold && row.last >= threshold)).toBe(false);
+        }
     });
-
-    it.each([
-        {min: 10, max: 5}, {min: 0, max: 0}, {min: -2, max: -1},
-        {min: 1.5, max: 10}, {min: 1, max: 10.5},
-        {min: NaN, max: 10}, {min: 1, max: Infinity},
-        {min: -Infinity, max: 10}, {min: 1, max: Number.MAX_SAFE_INTEGER + 1}
-    ])('rejects invalid or empty integer bounds without drawing: %j', range => {
-        const draw = vi.spyOn(randomSource, 'random');
-        expect(generator.generate({range, parity: 'any'})).toBeNull();
-        expect(draw).not.toHaveBeenCalled();
+    it('replays deterministically with exactly two draws', () => {
+        const config = {range: createCanonicalNumericRange(20, 5), parity: 'any' as const};
+        randomness.setSeed(42); randomness.random(); randomness.random(); const continuation = randomness.getRandomState();
+        randomness.setSeed(42); const first = generator.generate(config);
+        expect(first).not.toBeNull(); expect(randomness.getRandomState()).toBe(continuation);
+        randomness.setSeed(42); expect(generator.generate(config)).toEqual(first);
+        expect(randomness.getRandomState()).toBe(continuation);
     });
-
-    it('rejects an infeasible subset parity without drawing a supply', () => {
-        const draw = vi.spyOn(randomSource, 'random');
-        expect(generator.generate({range: {min: 1, max: 1}, parity: 'even'})).toBeNull();
+    it('rejects invalid and noncanonical bounds without drawing', () => {
+        const draw = vi.spyOn(randomness, 'random');
+        for (const range of [{min: 10, max: 5}, {min: 0, max: 0}, {min: 1.5, max: 10},
+            {min: NaN, max: 10}, {min: 0, max: Infinity}, {min: 5, max: 5},
+            {...createCanonicalNumericRange(5), minimumBelow: 10}]) {
+            expect(generator.generate({range: range as never, parity: 'any'})).toBeNull();
+        }
         expect(draw).not.toHaveBeenCalled();
     });
 });

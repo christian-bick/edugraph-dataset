@@ -135,9 +135,15 @@ const howManyBuilder = new DatasetPermutationBuilder()
         Ability.ProcedureExecution
     ])
     .applyLabelVariants([
+        [Scope.LinearArrangement, Scope.NumbersSmaller5],
+        [Scope.LinearArrangement, Scope.NumbersSmaller10],
         [Scope.LinearArrangement, Scope.NumbersSmaller20],
+        [Scope.CircularArrangement, Scope.NumbersSmaller5],
+        [Scope.CircularArrangement, Scope.NumbersSmaller10],
         [Scope.CircularArrangement, Scope.NumbersSmaller20],
+        [Scope.ScatteredArrangement, Scope.NumbersSmaller5],
         [Scope.ScatteredArrangement, Scope.NumbersSmaller10],
+        [Scope.BoxArrangement, Scope.NumbersSmaller5],
         [Scope.BoxArrangement, Scope.NumbersSmaller10]
     ]);
 

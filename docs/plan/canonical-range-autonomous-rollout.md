@@ -1388,3 +1388,22 @@ place-value arithmetic route resolves20−10 through the coordinated sampler rep
 Twenty-three focused tests,54 complete Q/S projections,52 own native/replay controls plus four
 new-sibling controls and full types pass. No payload or renderer change occurs. Evidence:
 `temp/range-autonomous/batch6/measurement-time/teen-tens-verification.json` and associated logs.
+
+## Sixth batch: count-out selection and parity grouping
+
+Count-out profiles use both requested and available counts under the agreed supply contract.
+All207 retained pairs preserve the largest existing cap20 conditional request/supply weights
+using compact integer-weighted rows and two draws. Only the three approved singleton pairs
+5/5,10/10,20/20 retire. Parity grouping includes N, two groups, group size and remainder;
+all20 original counts remain, including singleton odd and zero-remainder distinctions.
+
+Ten reviewed source variants cover the relevant per-arrangement count-out bands and parity
+upper5/10/20 bands. All five old owned routes remain, reaching14 routes /22 selections.
+The same source additions admit11 Basic counting routes; those retain their existing true
+bounds but are not claimed canonical, pending their separate projection interpretation.
+Basic and conservation production remain unchanged.
+
+One hundred five focused tests /13 files, exact supply/path-weight proofs,1,282 Q/S projections,
+88 native/replay/state controls, direct/planned configurations and final types pass. No adapter,
+inference, payload or renderer changes occur; no missing-facet closure is claimed. Evidence:
+`temp/range-autonomous/batch6/measurement-time/counting-verification.json` and associated logs.
