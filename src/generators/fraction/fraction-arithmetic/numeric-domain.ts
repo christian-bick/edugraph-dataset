@@ -1,15 +1,29 @@
 import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
-import type {FractionArithmeticOperation, FractionParts} from '../../../types/problems.ts';
+import type {FractionArithmeticOperation, FractionParts, MixedFractionValue, UnlikeFractionOperand} from '../../../types/problems.ts';
 
 const denominators = [2, 3, 4, 6, 8] as const;
-export function fractionArithmeticUpperBounds(task: string): readonly number[] {
-    if (task.startsWith('unlike-')) return [];
+export function fractionArithmeticUpperBounds(task: string, operation?: FractionArithmeticOperation): readonly number[] {
+    if (task.startsWith('unlike-mixed-')) return operation === 'addition' ? [20, 100] : [10, 20, 100];
+    if (task.startsWith('unlike-')) return task.includes('-improper') && operation === 'addition' ? [10, 20, 100] : [5, 10, 20, 100];
     if (task === 'tenths-hundredths-addition') return [100];
     if (task === 'whole-number-fraction-product-proper') return [10];
     if (task === 'decompose-mixed' || task === 'whole-number-fraction-product-improper') return [5, 10, 20, 100];
     if (task === 'mixed-operation') return [10, 20, 100];
     return ['fraction-operation', 'decompose-proper', 'unit-fraction-multiple'].includes(task) ? [5, 10] : [];
+}
+
+/** Renaming in the prescribed common-part model assesses the part counts and
+ * conversion arithmetic. Original notation alone is not a separate quantity. */
+export function unlikeArithmeticMaximum(operation: FractionArithmeticOperation,
+    first: UnlikeFractionOperand | MixedFractionValue, second: UnlikeFractionOperand | MixedFractionValue,
+    commonDenominator: number): number {
+    const firstCount = (('whole' in first ? first.whole : 0) * first.denominator + first.numerator)
+        * commonDenominator / first.denominator;
+    const secondCount = (('whole' in second ? second.whole : 0) * second.denominator + second.numerator)
+        * commonDenominator / second.denominator;
+    return Math.max(commonDenominator, firstCount, secondCount,
+        operation === 'addition' ? firstCount + secondCount : firstCount - secondCount);
 }
 type WeightedDenominator = Readonly<{denominator: FractionParts; weight: number}>;
 export type BinaryFractionCase = WeightedDenominator & Readonly<{firstNumerator: number; secondNumerator: number}>;

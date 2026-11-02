@@ -1509,3 +1509,26 @@ algorithm remains once in tests. The interpreted-remainder producer and shared r
 builder are unchanged. Evidence:
 `temp/range-autonomous/batch6/arithmetic/{verify-letter.json,verify-estimation.json}` and
 `temp/range-autonomous/batch6/rounding-story/{proof.md,direct-census.json}`.
+
+## Sixth batch: unlike-fraction required model scale
+
+The existing source competency assesses equivalent renaming and calculation, without requiring
+independent selection of a least common denominator. The approved question/solution alignment
+therefore applies: both model and word Questions now specify the existing common-part scale.
+Conversion factors, replacement numerators and the result remain blank. Every old least/nonleast
+denominator outcome and the complete mathematical support remain; the two checklists agree.
+
+Canonical upper5/10/20/100 profiles partition all4,908 original overlapping pool paths. Weights
+retain each old path's relative probability conditional on its band; across-band sampling changes
+in the agreed way. Required whole1 rules out positive floors and singleton retirement. The
+improper-subtraction upper5 corner remains, including5/4−1 with common denominator4.
+Explicit legacy direct calls retain their original unconstrained-domain behavior; matched
+selections cannot use that unlabelled value.
+
+All eight original unlike routes and target IDs remain. Their choices grow16→55 and all16
+missing source facets close. The complete fraction-arithmetic family keeps24 routes, growing
+55→94 selections; the other16 routes retain their exact39 choices. Eighty-five focused tests /
+nine files, fresh types, complete native-path/original-pool proofs, all55 planned/direct/replay
+and true-random-boundary checks, and both consumers' Q/S projections pass. No source edit,
+inference, matcher, graph, or Area-allowlist change is needed. Evidence:
+`temp/range-autonomous/batch6/unlike/{proof.md,census.json,comparison.json}`.

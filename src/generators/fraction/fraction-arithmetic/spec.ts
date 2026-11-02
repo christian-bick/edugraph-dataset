@@ -155,8 +155,8 @@ const rangeMappings = [[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10],
 const rangeLabels = rangeMappings.map(([label]) => label);
 const selectRange = selectExactLabelMap(rangeMappings.map(([label, upper]) => [label, createCanonicalNumericRange(upper)] as const));
 const rangeContext = [...fractionArithmeticTaskLabels, Area.Addition, Area.Subtraction, Area.Multiplication];
-// Unlike-denominator work retains its existing mathematical corpus without a
-// range claim while its hidden common-denominator choice is reviewed.
+// Retain the original unconstrained value for legacy direct calls; matched
+// selections require one of the reviewed canonical capabilities below.
 export const originalFractionArithmeticRange: CanonicalNumericRange = {
     min: 0, max: Number.MAX_SAFE_INTEGER, maximumAbove: -1, minimumBelow: 5
 };
@@ -166,8 +166,8 @@ const resolveArithmeticRange = withLabelChoices(exactResolver((labels: string[])
     if (!rangeContext.some(label => labels.includes(label))) return range ?? originalFractionArithmeticRange;
     const task = resolveTask(labels);
     if (!task) return undefined;
-    if (task.startsWith('unlike-')) return range ? undefined : originalFractionArithmeticRange;
-    return range && fractionArithmeticUpperBounds(task).includes(range.max) ? range : undefined;
+    const operation = labels.includes(Area.Subtraction) ? 'subtraction' : 'addition';
+    return range && fractionArithmeticUpperBounds(task, operation).includes(range.max) ? range : undefined;
 }), {kind: 'alternatives', alternatives: rangeChoices, contextLabels: rangeContext, resolvedContext: true});
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
@@ -214,8 +214,8 @@ export const spec: GeneratorSpec = {
     }), generatorLabelRule('fraction-task-range', [...rangeContext, ...rangeLabels], selected => {
         const task = resolveTask(rangeContext.filter(selected));
         const upper = rangeMappings.find(([label]) => selected(label))?.[1];
-        return !!task && (task.startsWith('unlike-') ? upper === undefined
-            : upper !== undefined && fractionArithmeticUpperBounds(task).includes(upper));
+        const operation = selected(Area.Subtraction) ? 'subtraction' : 'addition';
+        return !!task && upper !== undefined && fractionArithmeticUpperBounds(task, operation).includes(upper);
     })],
     generalLabels: [
         Area.Equation,

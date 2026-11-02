@@ -21,7 +21,7 @@ import {
     FractionArithmeticGeneratorConfig,
     FractionArithmeticGeneratorSchema
 } from './spec.ts';
-import {binaryFractionCases, fractionDecompositionCases, mixedFractionCases, validateFractionArithmeticRange, wholeFractionProductCases} from './numeric-domain.ts';
+import {binaryFractionCases, fractionDecompositionCases, mixedFractionCases, unlikeArithmeticMaximum, validateFractionArithmeticRange, wholeFractionProductCases} from './numeric-domain.ts';
 import type {CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 const DENOMINATORS = [2, 3, 4, 6, 8] as const satisfies readonly FractionParts[];
@@ -401,25 +401,42 @@ for (const firstDenominator of DENOMINATORS) {
 }
 
 /** Preserve overlapping original pool paths when conditioning on an evidenced input class. */
-export function unlikeFractionMagnitudeRows(operation: FractionArithmeticOperation, magnitude: 'proper' | 'improper') {
+export function unlikeFractionMagnitudeRows(operation: FractionArithmeticOperation, magnitude?: 'proper' | 'improper', range?: CanonicalNumericRange) {
+    if (range) validateFractionArithmeticRange(range);
     return FRACTION_PROFILES.map(profile => {
             const original = fractionPools[operation][profile];
             const retained = original.filter(candidate => {
                 const proper = candidate.first.numerator < candidate.first.denominator
                     || candidate.second.numerator < candidate.second.denominator;
-                return proper === (magnitude === 'proper');
+                const maximum = unlikeArithmeticMaximum(operation, candidate.first, candidate.second, candidate.commonDenominator);
+                return (!magnitude || proper === (magnitude === 'proper'))
+                    && (!range || maximum <= range.max && maximum > range.maximumAbove);
             });
             return {profile, originalCount: original.length, retained, weight: retained.length / original.length};
         }).filter(pool => pool.retained.length > 0);
 }
 
+/** Keep the straight/regroup/nonleast overlap with its original pool mass. */
+export function unlikeMixedRangeRows(operation: FractionArithmeticOperation, range?: CanonicalNumericRange) {
+    if (range) validateFractionArithmeticRange(range);
+    return MIXED_PROFILES.map(profile => {
+        const original = mixedPools[operation][profile];
+        const retained = original.filter(candidate => {
+            const maximum = unlikeArithmeticMaximum(operation, candidate.first, candidate.second, candidate.commonDenominator);
+            return !range || maximum <= range.max && maximum > range.maximumAbove;
+        });
+        return {profile, originalCount: original.length, retained, weight: retained.length / original.length};
+    }).filter(pool => pool.retained.length > 0);
+}
+
 const generateUnlikeFractionOperation = (
     operation: FractionArithmeticOperation,
-    magnitude?: 'proper' | 'improper'
+    magnitude?: 'proper' | 'improper', range?: CanonicalNumericRange
 ): UnlikeFractionOperationProblem => {
     let sample: UnlikeFractionSample;
-    if (magnitude) {
-        const pools = unlikeFractionMagnitudeRows(operation, magnitude);
+    if (magnitude || range) {
+        const pools = unlikeFractionMagnitudeRows(operation, magnitude, range);
+        if (!pools.length) throw new GeneratorValidationError('fraction-arithmetic', 'No unlike source cases support this canonical range.');
         let position = random() * pools.reduce((sum, pool) => sum + pool.weight, 0);
         const pool = pools.find(candidate => (position -= candidate.weight) < 0) ?? pools[pools.length - 1]!;
         sample = pick(pool.retained);
@@ -430,9 +447,10 @@ const generateUnlikeFractionOperation = (
 };
 
 const generateUnlikeMixedOperation = (
-    operation: FractionArithmeticOperation
+    operation: FractionArithmeticOperation, range?: CanonicalNumericRange
 ): UnlikeMixedOperationProblem => {
-    const sample = pick(mixedPools[operation][pick(MIXED_PROFILES)]);
+    const sample = range ? pick(weighted(unlikeMixedRangeRows(operation, range)).retained)
+        : pick(mixedPools[operation][pick(MIXED_PROFILES)]);
     return createUnlikeMixedOperationProblem(
         operation, sample.first, sample.second, sample.commonDenominator
     )!;
@@ -484,18 +502,18 @@ export class FractionArithmeticGenerator implements ProblemGenerator<
             || config.task === 'unlike-fraction-operation-improper-equivalence'
             || config.task === 'unlike-mixed-operation'
             || config.task === 'unlike-mixed-operation-equivalence') {
-            if (config.range!.min !== 0 || config.range!.max !== Number.MAX_SAFE_INTEGER) {
-                throw new GeneratorValidationError('fraction-arithmetic', 'Unlike-denominator source work has no reviewed canonical range profile yet.');
-            }
+            // Preserve the existing direct-only unconstrained API. Matched
+            // source selections always resolve a canonical range capability.
+            const range = config.range!.min === 0 && config.range!.max === Number.MAX_SAFE_INTEGER ? undefined : config.range!;
             if (config.usesCommonDenominator) {
                 throw new GeneratorValidationError(
                     'fraction-arithmetic',
                     'Unlike original denominators cannot also request CommonDenominator.'
                 );
             }
-            return {data: config.task.startsWith('unlike-mixed-operation') ? generateUnlikeMixedOperation(operation)
+            return {data: config.task.startsWith('unlike-mixed-operation') ? generateUnlikeMixedOperation(operation, range)
                 : generateUnlikeFractionOperation(operation, config.task === 'unlike-fraction-operation' ? undefined
-                    : config.task.includes('-proper') ? 'proper' : 'improper')};
+                    : config.task.includes('-proper') ? 'proper' : 'improper', range)};
         }
         if (!config.usesCommonDenominator) {
             throw new GeneratorValidationError(

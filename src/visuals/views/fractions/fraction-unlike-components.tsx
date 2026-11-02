@@ -107,7 +107,7 @@ const BlankConversion = ({original, position}: {original: string; position: stri
             {original} = ________
         </div>
         <div className="mt-2 text-center text-xs font-semibold text-slate-500">
-            Choose a common denominator and show the same factor above and below.
+            Rename the amount in the required common parts. Show the same factor above and below.
         </div>
     </div>
 );
@@ -143,7 +143,8 @@ export const UnlikeFractionArithmeticWork = ({
 }) => (
     <div className="space-y-4">
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-bold text-slate-700">
-            Both amounts use the same one-mile whole. Their original partitions differ.
+            Use a common-part model with {data.commonDenominator} equal parts per one-mile whole.
+            {' '}Rename both amounts in these parts, then calculate.
         </div>
         <div className="grid grid-cols-2 gap-4">
             <PartitionedBars

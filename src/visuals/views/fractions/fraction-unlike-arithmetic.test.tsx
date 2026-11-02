@@ -106,6 +106,8 @@ describe('unlike-denominator fraction arithmetic views', () => {
             expect(question).toContain('1/4');
             expect(question).toContain('repeat(3, minmax(0, 1fr))');
             expect(question).toContain('repeat(4, minmax(0, 1fr))');
+            expect(question).toContain('Use a common-part model with 24 equal parts per one-mile whole.');
+            expect(question).not.toContain('Choose a common denominator');
             expect(question).not.toContain('8/24');
             expect(question).not.toContain('6/24');
             expect(question).not.toContain('14/24');

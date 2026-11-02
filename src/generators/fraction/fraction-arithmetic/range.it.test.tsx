@@ -10,7 +10,7 @@ import {FractionArithmeticView} from '../../../visuals/views/fractions/fraction-
 import {presentFractionArithmeticProblem} from '../../../visuals/views/fractions/fraction-arithmetic-presentation.ts';
 import {FractionArithmeticGenerator} from './generator.ts';
 import {fractionArithmeticUpperBounds} from './numeric-domain.ts';
-import {FractionArithmeticGeneratorSchema as schema, originalFractionArithmeticRange, spec} from './spec.ts';
+import {FractionArithmeticGeneratorSchema as schema, spec} from './spec.ts';
 
 const requests = [
     [Area.Addition, Scope.FractionNumbers, Scope.ProperFractions, Scope.CommonDenominator],
@@ -68,14 +68,17 @@ describe('fraction arithmetic range integration', () => {
         expect(combinations).toBe(24);
     });
 
-    it('retains unlike-denominator selections without declaring an unproved range', () => {
+    it('completes unlike-denominator selections with a reviewed common-part range', () => {
         for (const numberKind of [Scope.FractionNumbers, Scope.MixedNumbers]) for (const operation of [Area.Addition, Area.Subtraction]) {
             const labels = [operation, numberKind, Scope.UnlikeDenominators, Scope.ProperFractions];
             const direct = extractConfig(schema, labels);
-            expect(direct.config.range).toEqual(originalFractionArithmeticRange);
-            expect(direct.resolvedLabels.some(label => rangePairs.some(([bound]) => label === bound))).toBe(false);
+            expect(direct.resolvedLabels.some(label => rangePairs.some(([bound]) => label === bound))).toBe(true);
             expect(new FractionArithmeticGenerator().generate(direct.config).data.task.startsWith('unlike-')).toBe(true);
-            for (const [bound] of rangePairs) expect(() => extractConfig(schema, [...labels, bound])).toThrow();
+            for (const [bound, upper] of rangePairs) {
+                if (fractionArithmeticUpperBounds(direct.config.task!, operation === Area.Addition ? 'addition' : 'subtraction').includes(upper))
+                    expect(extractConfig(schema, [...labels, bound]).config.range).toEqual(createCanonicalNumericRange(upper));
+                else expect(() => extractConfig(schema, [...labels, bound])).toThrow();
+            }
         }
     });
 });
