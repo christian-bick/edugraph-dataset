@@ -56,7 +56,7 @@ describe('PlaceValueScalingGenerator', () => {
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
             const hasZeroCoefficient = seed % 2 === 0;
-            const problem = generator.generate({hasZeroCoefficient}).data;
+            const problem = generator.generate({hasZeroCoefficient, coefficientMinimum: 1}).data;
             expectValidScaling(problem);
             expect(problem.digits.includes(0)).toBe(hasZeroCoefficient);
             exponents.add(problem.rightPlace.exponent);
@@ -69,9 +69,9 @@ describe('PlaceValueScalingGenerator', () => {
 
     it('is deterministic under the project RNG', () => {
         setSeed('place-value-scaling');
-        const first = generator.generate({hasZeroCoefficient: true});
+        const first = generator.generate({hasZeroCoefficient: true, coefficientMinimum: 1});
         setSeed('place-value-scaling');
-        const second = generator.generate({hasZeroCoefficient: true});
+        const second = generator.generate({hasZeroCoefficient: true, coefficientMinimum: 1});
 
         expect(second).toEqual(first);
     });
@@ -79,6 +79,8 @@ describe('PlaceValueScalingGenerator', () => {
     it('rejects missing and malformed coefficient profiles', () => {
         expect(() => generator.generate({} as never)).toThrow();
         expect(() => generator.generate({hasZeroCoefficient: 'yes'} as never)).toThrow();
+        expect(() => generator.generate({hasZeroCoefficient: true, coefficientMinimum: 5})).toThrow();
+        expect(() => generator.generate({hasZeroCoefficient: false, coefficientMinimum: 3} as never)).toThrow();
     });
 
     it('preserves every zero pattern, repeated digit and adjacent position', () => {
@@ -97,7 +99,10 @@ describe('PlaceValueScalingGenerator', () => {
                         return hasZeroCoefficient ? 1 - absence : absence;
                     });
                     const firstZero = zeroPlaces[0] ?? -1;
-                    const choices = [(repeatedDigit - 0.5) / 9, middle(positionWeights, left)];
+                    const coefficientMinimum = !hasZeroCoefficient && repeatedDigit >= 5 ? 5 : 1;
+                    const repeatDraw = hasZeroCoefficient ? (repeatedDigit - 0.5) / 9 : coefficientMinimum === 5
+                        ? (repeatedDigit - 4.5) / 5 : middle([16, 16, 16, 16, 15, 15, 15, 15, 15], repeatedDigit - 1);
+                    const choices = [repeatDraw, middle(positionWeights, left)];
                     if (hasZeroCoefficient) choices.push(middle(otherPlaces.map((_, index) =>
                         8 ** index * 9 ** (otherPlaces.length - index - 1)), otherPlaces.indexOf(firstZero)));
                     for (let index = 0; index < 6; index++) {
@@ -108,13 +113,64 @@ describe('PlaceValueScalingGenerator', () => {
                         expect(positive && zeroPlaces.includes(index)).toBe(false);
                     }
                     random.mockReset().mockImplementation(() => choices.shift()!);
-                    const problem = generator.generate({hasZeroCoefficient}).data;
+                    const problem = generator.generate({hasZeroCoefficient, coefficientMinimum}).data;
                     expectValidScaling(problem);
                     expect(problem.leftPlace.digitIndex).toBe(left);
                     expect(problem.repeatedDigit).toBe(repeatedDigit);
                     expect(problem.digits.flatMap((digit, index) => digit === 0 ? [index] : [])).toEqual(zeroPlaces);
                     expect(choices).toHaveLength(0);
                 }
+            }
+        }
+    });
+
+    it('retains each original coefficient vector in exactly one strongest-floor profile', () => {
+        const counts = {zero: 0, low: 0, high: 0};
+        for (let repeated = 1; repeated <= 9; repeated++) for (let left = 0; left < 5; left++) {
+            const free = [0, 1, 2, 3, 4, 5].filter(index => index !== left && index !== left + 1);
+            for (let code = 0; code < 9 ** 4; code++) {
+                const digits = [repeated, repeated, repeated, repeated, repeated, repeated];
+                let rest = code;
+                for (const index of free) {
+                    const choice = rest % 9;
+                    rest = Math.floor(rest / 9);
+                    digits[index] = choice >= repeated ? choice + 1 : choice;
+                }
+                if (digits[0] === 0) continue;
+                counts[digits.includes(0) ? 'zero' : Math.min(...digits) < 5 ? 'low' : 'high']++;
+            }
+        }
+        expect(counts).toEqual({zero: 84681, low: 177920, high: 6400});
+    });
+
+    it('constructs every first-low position without rejection and honors the exact random endpoints', () => {
+        const draw = vi.spyOn(rng, 'random');
+        const weights = [16, 16, 16, 16, 15, 15, 15, 15, 15];
+        const midpoint = (values: number[], index: number) => (values.slice(0, index).reduce((a, b) => a + b, 0)
+            + values[index]! / 2) / values.reduce((a, b) => a + b, 0);
+        for (let repeated = 5; repeated <= 9; repeated++) for (let left = 0; left < 5; left++) {
+            const position = [0, 1, 2, 3, 4].map(i => (8 / 9) ** (i === 0 ? 4 : 3));
+            const free = [0, 1, 2, 3, 4, 5].filter(i => i !== left && i !== left + 1);
+            for (let low = 0; low < 4; low++) {
+                const inputs = [midpoint(weights, repeated - 1), midpoint(position, left),
+                    midpoint([2048, 1024, 512, 256], low), 0, 0, 0, 0];
+                draw.mockReset().mockImplementation(() => inputs.shift()!);
+                const data = generator.generate({hasZeroCoefficient: false, coefficientMinimum: 1}).data;
+                expect(data.repeatedDigit).toBe(repeated);
+                expect(data.leftPlace.digitIndex).toBe(left);
+                expect(data.digits[free[low]!]).toBe(1);
+                expect(data.digits.filter((_, i) => free.slice(0, low).includes(i)).every(d => d >= 5)).toBe(true);
+                expect(inputs).toEqual([]);
+            }
+        }
+        for (const config of [{hasZeroCoefficient: true, coefficientMinimum: 1},
+            {hasZeroCoefficient: false, coefficientMinimum: 1}, {hasZeroCoefficient: false, coefficientMinimum: 5}] as const) {
+            for (const endpoint of [0, (2 ** 32 - 1) / 2 ** 32]) {
+                draw.mockReset().mockReturnValue(endpoint);
+                const data = generator.generate(config).data;
+                expectValidScaling(data);
+                expect(data.digits.includes(0)).toBe(config.hasZeroCoefficient);
+                expect(Math.min(...data.digits) >= 5).toBe(config.coefficientMinimum === 5);
             }
         }
     });

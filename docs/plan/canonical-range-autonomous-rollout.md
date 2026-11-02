@@ -1259,3 +1259,23 @@ traces, rank/CDF checks, all compact-case random endpoints,2,400 stress draws/re
 native configurations/Q/S projections pass. The original seed105 zero-free mathematical frame
 remains constructible. Evidence:
 `temp/range-autonomous/batch6/fraction-decimal/add-sub-proof.md` and its accompanying logs.
+
+## Sixth batch: strongest floor for integer place scaling
+
+The existing six-coefficient contract partitions all269,001 original vectors into84,681 with
+zero,177,920 positive vectors with a coefficient below5, and6,400 with every coefficient at
+least5. The last group adds matching-capable lower5; the existing upper1m is already tight.
+The conditional repeated-digit and first-low-position construction preserves every vector and
+its old relative proposal weight without rejection. The zero-containing branch retains its
+exact mathematics/PRNG continuation in512 controls. The other profile outcomes change normally.
+
+The single source target/route remains, two→three selections. No target, payload, renderer,
+inference or graph changes occur, and no missing-facet closure is claimed. Seventeen focused
+scaling tests, the complete vector census, first-low/random-endpoint cases, all six actual native
+draws/replays, direct/planned configurations and Q/S rendering pass. Evidence:
+`temp/range-autonomous/batch6/scaling/{tests.log,verification.json}`.
+
+The shape provider follow-up also completes broad range-only direct requests using only feasible
+shape alternatives. Exact shape requests remain exact, including Rectangle/Square specialization;
+no matching rule or shared resolver changes. All original nine routes /20 selections and40 native
+draws/replays remain, with35 shape/consumer tests passing.

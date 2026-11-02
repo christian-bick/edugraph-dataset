@@ -26,8 +26,7 @@ const randomInteger = (minimum: number, maximum: number): number =>
 const randomItem = <T>(items: readonly T[]): T =>
     items[Math.floor(random() * items.length)]!;
 
-const createOtherDigit = (repeatedDigit: number, requirePositive: boolean): number => {
-    const minimum = requirePositive ? 1 : 0;
+const createOtherDigit = (repeatedDigit: number, minimum: number): number => {
     return randomItem(
         Array.from({length: 10 - minimum}, (_, index) => index + minimum)
             .filter(digit => digit !== repeatedDigit)
@@ -64,12 +63,17 @@ export class PlaceValueScalingGenerator implements ProblemGenerator<
     schema = PlaceValueScalingGeneratorSchema;
 
     generate(config: PlaceValueScalingGeneratorConfig): ProblemStub<PlaceValueScalingProblem> {
-        validateConfigFields('place-value-scaling', config, ['hasZeroCoefficient']);
-        if (typeof config.hasZeroCoefficient !== 'boolean') {
-            throw new GeneratorValidationError('place-value-scaling', 'Expected a boolean zero-coefficient profile.');
+        validateConfigFields('place-value-scaling', config, ['hasZeroCoefficient', 'coefficientMinimum']);
+        if (typeof config.hasZeroCoefficient !== 'boolean' || ![1, 5].includes(config.coefficientMinimum!)
+            || config.hasZeroCoefficient && config.coefficientMinimum === 5) {
+            throw new GeneratorValidationError('place-value-scaling', 'Choose a feasible zero/floor coefficient profile.');
         }
 
-        const repeatedDigit = randomInteger(1, 9);
+        const highMinimum = config.coefficientMinimum === 5;
+        // In the no-zero corpus each other digit has eight choices. A high
+        // repeated digit leaves 15/16 of these vectors with a coefficient<5.
+        const repeatedDigit = highMinimum ? randomInteger(5, 9) : config.hasZeroCoefficient
+            ? randomInteger(1, 9) : 1 + weightedIndex([16, 16, 16, 16, 15, 15, 15, 15, 15]);
         // Preserve the old distribution conditional on coefficient presence: the old
         // adjacent position is uniform, and each other nonleading digit has nine choices.
         const leftDigitIndex = weightedIndex([0, 1, 2, 3, 4].map(left => {
@@ -81,11 +85,16 @@ export class PlaceValueScalingGenerator implements ProblemGenerator<
         // digits. These disjoint blocks retain every zero pattern without double counting.
         const firstZero = config.hasZeroCoefficient ? otherPlaces[weightedIndex(otherPlaces.map((_, index) =>
             8 ** index * 9 ** (otherPlaces.length - index - 1)))]! : -1;
+        const freePlaces = [0, 1, 2, 3, 4, 5].filter(index => index !== leftDigitIndex && index !== leftDigitIndex + 1);
+        const firstLow = !config.hasZeroCoefficient && !highMinimum && repeatedDigit >= 5
+            ? freePlaces[weightedIndex(freePlaces.map((_, index) => 4 ** index * 4 * 8 ** (3 - index)))]! : -1;
         const digitAt = (index: number): number =>
             index === leftDigitIndex || index === leftDigitIndex + 1
                 ? repeatedDigit
                 : index === firstZero ? 0
-                    : createOtherDigit(repeatedDigit, index === 0 || !config.hasZeroCoefficient || index < firstZero);
+                    : index === firstLow ? randomInteger(1, 4)
+                        : createOtherDigit(repeatedDigit, highMinimum || firstLow >= 0 && index < firstLow ? 5
+                            : index === 0 || !config.hasZeroCoefficient || index < firstZero ? 1 : 0);
         const digits: PlaceValueScalingProblem['digits'] = [
             digitAt(0),
             digitAt(1),

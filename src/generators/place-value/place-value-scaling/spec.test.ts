@@ -49,4 +49,16 @@ describe('PlaceValueScalingGenerator spec integration', () => {
         expect(stub!.data.task).toBe('adjacent-place-scaling');
         expect(stub!.data.leftPlace.value).toBe(stub!.data.rightPlace.value * 10);
     });
+
+    it('selects a strongest lower5 only when all six assessed coefficients support it', () => {
+        for (const labels of [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero], [Scope.NumbersLarger5]]) {
+            for (let seed = 0; seed < 60; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(generator, labels)!;
+                const minimum = Math.min(...stub.data.digits);
+                expect(stub.labels.includes(Scope.NumbersLarger5)).toBe(minimum >= 5);
+                if (labels.includes(Scope.NumbersLarger5)) expect(stub.labels).toContain(Scope.NumbersWithoutZero);
+            }
+        }
+    });
 });
