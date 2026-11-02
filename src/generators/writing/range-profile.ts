@@ -1,4 +1,4 @@
-import {Area, Scope, deductCompatible} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {CANONICAL_RANGE_THRESHOLDS, createCanonicalNumericRange, type CanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import {GeneratorValidationError} from '../../lib/errors.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
@@ -7,7 +7,16 @@ import {selectExactMatch} from '../../lib/resolvers.ts';
 import {compositionalResolver, exactResolver, withLabelChoices} from '../../types/schema.ts';
 import {resolveWritingZero} from './zero-profile.ts';
 
-export const writingRangeLabels: readonly string[] = deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]);
+// Preserve the former declared inventory/order. Compatibility inspects these
+// exact alternatives; capability deduction must not define its boundaries.
+export const writingRangeLabels: readonly string[] = [
+    Scope.NumbersLarger10, Scope.NumbersLarger100, Scope.NumbersLarger1000,
+    Scope.NumbersLarger10000, Scope.NumbersLarger100000, Scope.NumbersLarger120,
+    Scope.NumbersLarger20, Scope.NumbersLarger5, Scope.NumbersLargerZero,
+    Scope.NumbersSmaller10, Scope.NumbersSmaller100, Scope.NumbersSmaller1000,
+    Scope.NumbersSmaller10000, Scope.NumbersSmaller100000, Scope.NumbersSmaller1000000,
+    Scope.NumbersSmaller120, Scope.NumbersSmaller20, Scope.NumbersSmaller5
+];
 const upperLabels = writingRangeLabels.filter(label => label.includes('/NumbersSmaller'));
 const lowerLabels = writingRangeLabels.filter(label => label.includes('/NumbersLarger'));
 export const legacyWritingRanges = [[], ...upperLabels.map(label => [label])].flatMap(upper =>

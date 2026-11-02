@@ -1371,3 +1371,8 @@ All120 focused tests /12 files and fresh types pass, including the complete supp
 canonical quantity witnesses, real endpoint counterexamples, broad direct requests and static
 annotation resolution. No missing-facet closure or support retirement is claimed. Evidence:
 `temp/range-autonomous/batch6/place-value-arithmetic/{verification.json,range-proof.log,tests-final.log}`.
+
+The Name spec follow-up makes its18-label legacy inventory explicit in the same original order.
+This removes a prohibited deductCompatible origin from compatibility inspection (SPEC-V4)
+without changing a label, fallback, resolver value or validator. All36 writing tests pass,
+including exact old-inventory equality and every non-Name configuration/PRNG control.

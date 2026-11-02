@@ -145,6 +145,7 @@ describe('scalar name canonical profiles and legacy isolation', () => {
     });
 
     it('leaves every old non-name source binding, resolved config, same-seed payload and random continuation identical', () => {
+        expect(schema.range[0]).toEqual(oldSchema.range[0]);
         let routes = 0;
         for (const target of allSources.filter(t => !t.labels.includes(Area.NumberNameNotation)))
             for (const view of [readingViewSpec, standardViewSpec, strokeViewSpec, countViewSpec]) {
