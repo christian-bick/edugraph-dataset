@@ -33,24 +33,26 @@ describe('PlaceValueTeenGenerator Spec Integration', () => {
         expect(spec.generalLabels).not.toContain(Area.PartitionOfCollections);
     });
 
-    it('supports both bounds of the teen-number range', () => {
+    it('bounds the required extra ones as well as ten and the complete teen quantity', () => {
         expect(extractSchemaLabels(PlaceValueTeenGeneratorSchema)).toEqual(expect.arrayContaining([
-            Scope.NumbersLarger10,
+            Scope.NumbersLarger5,
             Scope.NumbersSmaller20
         ]));
 
         const stub = generateWithLabels(generator, [
             Area.PlaceValue,
-            Scope.NumbersLarger10,
+            Scope.NumbersLarger5,
             Scope.NumbersSmaller20
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.labels).toEqual(expect.arrayContaining([
-            Scope.NumbersLarger10,
+            Scope.NumbersLarger5,
             Scope.NumbersSmaller20
         ]));
         expect(stub!.data.target).toBeGreaterThan(10);
         expect(stub!.data.target).toBeLessThan(20);
+        expect(stub!.data.ones).toBeGreaterThanOrEqual(5);
+        expect(extractSchemaLabels(PlaceValueTeenGeneratorSchema)).not.toContain(Scope.NumbersLarger10);
     });
 
     it('should throw an error if range configuration is missing', () => {

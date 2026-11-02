@@ -2,6 +2,8 @@ import {PlaceValueHundredsBundlesGenerator} from '../place-value-hundreds-bundle
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {PlaceValueBundlesGenerator} from './generator.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {tensRangeProfiles} from './numeric-domain.ts';
 
 describe('PlaceValueBundlesGenerator', () => {
     const generator = new PlaceValueBundlesGenerator();
@@ -9,24 +11,24 @@ describe('PlaceValueBundlesGenerator', () => {
     it('strictly validates required configuration', () => {
         expect(() => generator.generate({} as any)).toThrow();
         expect(() => generator.generate({
-            range: {min: 20, max: 10}
+            range: {...createCanonicalNumericRange(10), min: 20}
         })).toThrow();
     });
 
     it('generates a whole-ten value inside a small range', () => {
         const stub = generator.generate({
-            range: {min: 0, max: 20}
+            range: createCanonicalNumericRange(20)
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.target).toBe(stub!.data.tens * 10);
-        expect([10, 20]).toContain(stub!.data.target);
+        expect(stub!.data.target).toBe(20);
     });
 
     it('resolves an inclusive upper bound of 10 to exactly one ten', () => {
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 10}
+                range: createCanonicalNumericRange(10)
             });
 
             expect(stub).not.toBeNull();
@@ -44,7 +46,7 @@ describe('PlaceValueBundlesGenerator', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generator.generate({
-                range: {min: 0, max: 100}
+                range: tensRangeProfiles[seed % tensRangeProfiles.length]!.range
             });
             expect(stub).not.toBeNull();
             expect(stub!.data.tens).toBeGreaterThanOrEqual(1);
@@ -57,10 +59,8 @@ describe('PlaceValueBundlesGenerator', () => {
         expect(targets.size).toBeGreaterThan(1);
     });
 
-    it('returns null when the resolved range contains no positive multiple of ten', () => {
-        expect(generator.generate({
-            range: {min: 0, max: 9}
-        })).toBeNull();
+    it('rejects a canonical band containing no required complete ten', () => {
+        expect(() => generator.generate({range: createCanonicalNumericRange(5)})).toThrow();
     });
 
     it('represents ten tens as one hundred for the narrow hundreds range', () => {

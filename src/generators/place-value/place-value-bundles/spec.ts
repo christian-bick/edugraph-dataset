@@ -1,7 +1,8 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
-import {ConfigFromSchema} from '../../../types/schema.ts';
+import {ConfigFromSchema, withLabelChoices} from '../../../types/schema.ts';
+import {tensRangeProfiles} from './numeric-domain.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-bundles',
@@ -15,10 +16,12 @@ export const spec: GeneratorSpec = {
     ]
 };
 
+const rangeChoices = tensRangeProfiles.map(profile => profile.labels);
 export const PlaceValueBundlesGeneratorSchema = {
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
-        resolveRangeFromLabels
+        [...new Set(rangeChoices.flat())],
+        withLabelChoices(selectExactLabelSetMap(tensRangeProfiles.map(profile => [profile.labels, profile.range] as const)),
+            {kind: 'alternatives', alternatives: rangeChoices, relation: 'capability'}), rangeChoices
     ]
 } as const;
 

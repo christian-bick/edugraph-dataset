@@ -3,6 +3,7 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {PlaceValueTensBundlesProblem} from '../../../types/problems.ts';
 import {PlaceValueBundlesGeneratorConfig, PlaceValueBundlesGeneratorSchema} from './spec.ts';
+import {tensRowsForRange} from './numeric-domain.ts';
 
 export class PlaceValueBundlesGenerator implements ProblemGenerator<PlaceValueTensBundlesProblem, PlaceValueBundlesGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
@@ -10,28 +11,8 @@ export class PlaceValueBundlesGenerator implements ProblemGenerator<PlaceValueTe
 
     generate(config: PlaceValueBundlesGeneratorConfig): ProblemStub<PlaceValueTensBundlesProblem> | null {
         validateConfigFields('place-value-bundles', config, ['range']);
-        const range = config.range!;
-
-        if (range.min > range.max) {
-            throw new GeneratorValidationError(
-                'place-value-bundles',
-                `Invalid range bounds: min (${range.min}) exceeds max (${range.max}).`
-            );
-        }
-
-
-        const minTens = Math.max(1, Math.ceil(range.min / 10));
-        const maxTens = Math.min(9, Math.floor(range.max / 10));
-        if (minTens > maxTens) return null;
-
-        const tens = minTens + Math.floor(random() * (maxTens - minTens + 1));
-
-        return {
-            data: {
-                tens,
-                ones: 0,
-                target: tens * 10
-            }
-        };
+        const rows = tensRowsForRange(config.range!);
+        if (!rows.length) throw new GeneratorValidationError('place-value-bundles', 'Choose a supported canonical tens-bundle range.');
+        return {data: {...rows[Math.floor(random() * rows.length)]!}};
     }
 }

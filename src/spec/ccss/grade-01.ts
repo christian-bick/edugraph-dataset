@@ -293,7 +293,8 @@ const multiplesOfTenBuilder = new DatasetPermutationBuilder()
         Scope.NumbersSmaller100,
         Scope.PhysicalNumbers,
         Ability.ProcedureUnderstanding
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [10, 20, 100]});
 
 // --- 1.NBT.B.3: Compare two two-digit numbers by tens and ones ---
 // Inclusive ontology bounds describe canonical bands; the comparison producer's local

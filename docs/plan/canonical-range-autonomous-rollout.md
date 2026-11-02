@@ -1376,3 +1376,15 @@ The Name spec follow-up makes its18-label legacy inventory explicit in the same 
 This removes a prohibited deductCompatible origin from compatibility inspection (SPEC-V4)
 without changing a label, fallback, resolver value or validator. All36 writing tests pass,
 including exact old-inventory equality and every non-Name configuration/PRNG control.
+
+## Sixth batch: teens and tens bundles
+
+All nine teen and nine tens-bundle values remain. Profiles use the required ten/ones sum or
+bundle count/unit/total, with no threshold retirement. Teens keep all four source routes and
+gain two truthful floor alternatives; tens add upper10/20 beside the original100 target.
+All six old family routes remain, reaching eight routes /13 selections. The additional upper20
+place-value arithmetic route resolves20−10 through the coordinated sampler repair above.
+
+Twenty-three focused tests,54 complete Q/S projections,52 own native/replay controls plus four
+new-sibling controls and full types pass. No payload or renderer change occurs. Evidence:
+`temp/range-autonomous/batch6/measurement-time/teen-tens-verification.json` and associated logs.

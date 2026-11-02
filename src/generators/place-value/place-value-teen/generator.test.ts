@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest';
 import {PlaceValueTeenGenerator} from './generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 describe('PlaceValueTeenGenerator', () => {
     let generator: PlaceValueTeenGenerator;
@@ -16,20 +17,20 @@ describe('PlaceValueTeenGenerator', () => {
 
     it('should generate valid place value teen stubs with range within teen boundaries', () => {
         const stub = generator.generate({
-            range: { min: 12, max: 18 }
-        });
-        expect(stub).not.toBeNull();
-        expect(stub!.data.ones).toBeGreaterThanOrEqual(2);
-        expect(stub!.data.ones).toBeLessThanOrEqual(8);
-        expect(stub!.data.target).toBe(10 + stub!.data.ones);
-    });
-
-    it('should clamp bounds if range exceeds teen boundaries', () => {
-        const stub = generator.generate({
-            range: { min: 5, max: 25 }
+            range: createCanonicalNumericRange(20)
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.ones).toBeGreaterThanOrEqual(1);
+        expect(stub!.data.ones).toBeLessThanOrEqual(4);
+        expect(stub!.data.target).toBe(10 + stub!.data.ones);
+    });
+
+    it('honors a strongest lower bound on the extra ones', () => {
+        const stub = generator.generate({
+            range: createCanonicalNumericRange(20, 5)
+        });
+        expect(stub).not.toBeNull();
+        expect(stub!.data.ones).toBeGreaterThanOrEqual(5);
         expect(stub!.data.ones).toBeLessThanOrEqual(9);
         expect(stub!.data.target).toBe(10 + stub!.data.ones);
     });
@@ -39,7 +40,7 @@ describe('PlaceValueTeenGenerator', () => {
         // teen invariant must still stay strictly within 11-19 for every seed.
         for (let s = 0; s < 50; s++) {
             setSeed(s);
-            const stub = generator.generate({ range: { min: 0, max: 20 } });
+            const stub = generator.generate({ range: createCanonicalNumericRange(20, s % 2 === 0 ? 0 : 5) });
             expect(stub).not.toBeNull();
             expect(stub!.data.ones).toBeGreaterThanOrEqual(1);
             expect(stub!.data.ones).toBeLessThanOrEqual(9);
@@ -53,7 +54,7 @@ describe('PlaceValueTeenGenerator', () => {
     });
 
     it('should throw validation error if range bounds are invalid', () => {
-        expect(() => generator.generate({ range: { min: 100, max: 10 } })).toThrow();
-        expect(() => generator.generate({ range: { min: 18, max: 12 } })).toThrow();
+        expect(() => generator.generate({ range: createCanonicalNumericRange(10) })).toThrow();
+        expect(() => generator.generate({ range: createCanonicalNumericRange(20, 10) })).toThrow();
     });
 });
