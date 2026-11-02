@@ -95,7 +95,7 @@ describe('fraction division word-problem family separation', () => {
         expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
     });
 
-    it('retains the three general targets with thirty-four exhaustive range/group bindings', () => {
+    it('retains the three general targets with thirty-eight exhaustive range/group bindings', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === generalId)!;
         const quotientView = views.find(candidate => candidate.viewId === quotientId)!;
@@ -110,7 +110,7 @@ describe('fraction division word-problem family separation', () => {
             const selections = enumerateDependencyAuditSelections(result.plan);
             expect(selections.status).toBe('complete');
             expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 11
-                : target.labels.includes(Scope.FractionDividend) ? 10 : 13);
+                : target.labels.includes(Scope.FractionDividend) ? 14 : 13);
             for (const selection of selections.selections) {
                 bindings++;
                 const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
@@ -133,7 +133,7 @@ describe('fraction division word-problem family separation', () => {
                     sampleKey: sampleKey.replace(generalId, quotientId)})).toThrow(/does not belong/);
             }
         }
-        expect(bindings).toBe(34);
+        expect(bindings).toBe(38);
     }, 30_000);
 
     it('retains all five legacy target routes with sixteen zero/nonzero range bindings', () => {

@@ -111,7 +111,7 @@ function ExecutionTask({data, isSolutionView}: TaskProps) {
         <DivisionExpression data={data} showQuotient={isSolutionView} solution={isSolutionView} />
         <NumericalGroupModel data={data} blankFrame={false} constructed={false} />
         {isSolutionView && <Answer>
-            <p className="font-mono font-semibold">{divisionFactor(data.dividend)} × {divisionFactor(data.reciprocal)} = {originalDivisionFraction(data.reciprocalProduct)} = {divisionNumber(data.quotient)}</p>
+            <p className="font-mono font-semibold">{divisionFactor(data.inverse.quotientFactor)} × {divisionFactor(data.inverse.divisorFactor)} = {originalDivisionOperand(data.inverse.reconstructedDividend)}</p>
             <ModelSummary data={data} />
         </Answer>}
         <AdditionalRelation data={data} solution={isSolutionView} />
@@ -138,7 +138,6 @@ function InverseTask({data, isSolutionView}: TaskProps) {
         {isSolutionView ? <Answer>
             <p className="font-mono font-semibold">(a/b) ÷ (c/d) = (a × d)/(b × c)</p>
             <p className="mt-2">Multiplying by c/d cancels the nonzero c and d factors, leaving a/b.</p>
-            <p className="mt-2 font-mono font-semibold">{divisionFactor(data.dividend)} × {divisionFactor(data.reciprocal)} = {originalDivisionFraction(data.reciprocalProduct)} = {divisionNumber(data.quotient)}</p>
             <p className="mt-2 font-mono font-semibold">{divisionFactor(data.inverse.quotientFactor)} × {divisionFactor(data.inverse.divisorFactor)}
                 {data.multiplicationWitness && <> = {originalDivisionFraction(data.multiplicationWitness.unreducedProduct)}</>}
                 {' '}= {originalDivisionOperand(data.inverse.reconstructedDividend)}</p>

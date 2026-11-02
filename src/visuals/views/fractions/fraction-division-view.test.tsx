@@ -78,7 +78,8 @@ describe('general fraction division task projections', () => {
         expect(groupWidths).toHaveLength(4);
         expect(groupWidths[3]! / groupWidths[2]!).toBeCloseTo(5 / 9, 12);
         expect(text(solution)).toContain('1 complete divisor-sized group and 5/9 of another group (5 of its 9 equal ticks)');
-        expect(text(solution)).toContain('(7/6) × (4/3) = 28/18 = 14/9');
+        expect(text(solution)).toContain('(14/9) × (3/4) = 7/6');
+        expect(text(solution)).not.toContain('(7/6) × (4/3)');
     });
 
     it('gives model construction only a blank frame until the completed drawing is revealed in green', () => {
@@ -140,6 +141,31 @@ describe('general fraction division task projections', () => {
         expect(question).not.toContain('leaving a/b');
         expect(text(solution)).toContain('(a/b) ÷ (c/d) = (a × d)/(b × c)');
         expect(text(solution)).toContain('(14/9) × (3/4) = 42/36 = 7/6');
+        expect(text(solution)).not.toContain('(7/6) × (4/3)');
+    });
+
+    it('uses the requested reconstruction instead of an optional reciprocal calculation at the former band boundary', () => {
+        const sixth: FractionDivisionRelationProblem = {
+            kind: 'fraction-division-relation', operandProfile: 'fraction-by-fraction',
+            dividend: {numerator: 1, denominator: 6}, divisor: {numerator: 1, denominator: 6},
+            quotient: {numerator: 1, denominator: 1}, reciprocal: {numerator: 6, denominator: 1},
+            reciprocalProduct: {numerator: 6, denominator: 6},
+            inverse: {quotientFactor: {numerator: 1, denominator: 1}, divisorFactor: {numerator: 1, denominator: 6}, reconstructedDividend: {numerator: 1, denominator: 6}},
+            model: {kind: 'common-unit-groups', ticksPerWhole: 6, dividendTicks: 1, divisorTicks: 1,
+                completeGroups: 1, remainderTicks: 0, fractionalGroup: {numerator: 0, denominator: 1}, coverageTicks: 6,
+                groups: [{startTick: 0, endTick: 1, filledTicks: 1}]},
+            context: {kind: 'sharing', material: 'juice', measureUnit: 'liter', groupUnit: 'batch',
+                totalMeasure: {numerator: 1, denominator: 6}, groupCount: {numerator: 1, denominator: 6}, measurePerGroup: {numerator: 1, denominator: 1}}
+        };
+        for (const task of ['division-execution', 'division-inverse-explanation'] as const) {
+            const solution = text(render(task, true, sixth));
+            expect(solution).toContain('1 × (1/6) = 1/6');
+            expect(solution).not.toContain('(1/6) × 6');
+            expect(solution).not.toContain('6/6');
+            expect(solution).toContain('1 complete divisor-sized group');
+        }
+        expect(text(render('division-inverse-explanation', true, sixth))).toContain('(a/b) ÷ (c/d) = (a × d)/(b × c)');
+        expect(sixth.reciprocal).toEqual({numerator: 6, denominator: 1});
     });
 
     it.each(['division-execution', 'division-interpretation', 'division-story-creation', 'division-model-construction'] as const)(

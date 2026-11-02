@@ -6,7 +6,7 @@ import {divisionOperandDistribution, type DivisionGroupCountProfile, type Divisi
 const gcd = (a: number, b: number): number => b ? gcd(b, a % b) : a;
 const cache = new Map<string, readonly WeightedDivisionOperands[]>();
 export const hasSharedDivisionRange = (profile: DivisionOperandProfile, group: DivisionGroupCountProfile): boolean =>
-    profile !== 'fraction-by-fraction-proper' && !(profile === 'integer-by-fraction-proper' && group === 'zero');
+    divisionOperandDistribution(profile, group).length > 0;
 
 /** The prescribed model assesses complete groups and the tick counts of a last
  * fractional group. Stored frame sizes and pure notation coefficients are not

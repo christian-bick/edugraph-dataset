@@ -9,6 +9,7 @@ import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {FractionDivisionRelationsGenerator} from './generator.ts';
 import {FractionDivisionRelationsGeneratorSchema, spec} from './spec.ts';
 import type {FractionDivisionRelationProblem} from '../../../types/problems.ts';
+import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 
 const magnitudeOf = (data: FractionDivisionRelationProblem): Scope => {
     const operand = data.operandProfile === 'integer-by-fraction' ? data.divisor : data.dividend;
@@ -89,7 +90,7 @@ describe('fraction-division-relations capabilities', () => {
         expect(execution!.data).not.toHaveProperty('prompt');
     });
 
-    it('retains eleven original operand/group profiles within thirty-four range bindings and replays their claims', () => {
+    it('retains eleven original operand/group profiles within thirty-eight range bindings and replays their claims', () => {
         expect(spec).not.toHaveProperty('inferredLabels');
         expect(findSchemaFallbackContractIssues(FractionDivisionRelationsGeneratorSchema)).toEqual([]);
         const result = planCompatibility({identity: {targetId: 'division-profiles', generatorId: spec.generatorId, viewId: 'proof'},
@@ -99,7 +100,7 @@ describe('fraction-division-relations capabilities', () => {
         if (!result.supported) throw new Error(result.reason);
         const enumeration = enumerateDependencyAuditSelections(result.plan);
         expect(enumeration.status).toBe('complete');
-        expect(enumeration.selections).toHaveLength(34);
+        expect(enumeration.selections).toHaveLength(38);
         const configs = new Set<string>();
         for (const selection of enumeration.selections) {
             expect(selection.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as Scope)))
@@ -123,7 +124,7 @@ describe('fraction-division-relations capabilities', () => {
                 expect(getRandomState()).toBe(state);
             }
         }
-        expect(configs.size).toBe(34);
+        expect(configs.size).toBe(38);
         expect(new Set([...configs].map(value => { const {operandProfile, groupCountProfile} = JSON.parse(value);
             return `${operandProfile}:${groupCountProfile}`; })).size).toBe(11);
     });
@@ -143,6 +144,32 @@ describe('fraction-division-relations capabilities', () => {
         expect(result.supported).toBe(false);
         expect(() => extractConfig(FractionDivisionRelationsGeneratorSchema, contradictory)).toThrow(/cannot complete/);
         expect(() => extractConfig(FractionDivisionRelationsGeneratorSchema, [...labels, Scope.NumbersWithZero, Scope.NumbersWithoutZero]))
-            .toThrow(/Ambiguous exact label mapping/);
+            .toThrow(/cannot complete|Ambiguous exact label mapping/);
+    });
+
+    it('resolves feasible broad canonical range requests over32 hashed seeds without selecting an empty operand/group cell', () => {
+        const queries = [
+            ...[Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100]
+                .flatMap(upper => [[upper], [upper, Scope.NumbersWithZero], [upper, Scope.NumbersWithoutZero]]),
+            [Scope.NumbersSmaller100, Scope.NumbersWithoutZero, Scope.ProperFractions],
+            [Scope.NumbersSmaller100, Scope.NumbersWithoutZero, Scope.ProperFractions, Scope.FractionDividend],
+            [Scope.NumbersSmaller100, Scope.NumbersWithZero, Scope.ProperFractions, Scope.IntegerDividend]
+        ];
+        for (const labels of queries) {
+            const match = planModelCompatibility({id: 'broad-canonical-division', labels},
+                {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: FractionDivisionRelationsGeneratorSchema, spec},
+                {viewId: 'proof', generalLabels: [], schema: {}, spec: {viewId: 'proof', generalLabels: []}});
+            for (let seed = 0; seed < 32; seed++) {
+                setSeed(`broad-division:${labels.join('|')}:${seed}`);
+                if (!match.supported) {
+                    expect(() => extractConfig(FractionDivisionRelationsGeneratorSchema, labels)).toThrow();
+                    continue;
+                }
+                const resolved = extractConfig(FractionDivisionRelationsGeneratorSchema, labels);
+                const data = new FractionDivisionRelationsGenerator().generate(resolved.config).data;
+                expect(data.model.completeGroups === 0).toBe(resolved.config.groupCountProfile === 'zero');
+                expect(resolved.resolvedLabels).toEqual(expect.arrayContaining(labels));
+            }
+        }
     });
 });

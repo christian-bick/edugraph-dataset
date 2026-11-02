@@ -1573,3 +1573,28 @@ same-value Q/S projections and12 real-source receipt replays pass. Sampling and 
 identities change within the accepted profile adoption; mathematical support and same-value
 rendering stay intact. Evidence:
 `temp/range-autonomous/batch6/arithmetic/verify-operation-table.json`.
+
+## Sixth batch: general division without an unrelated numerical shortcut
+
+The complete claim/source audit establishes that the execution Question requires the common-part
+model and inverse explanation requires quotient×original divisor. No declaration or source
+requires the extra numerical dividend×reciprocal shortcut printed in their Solutions. Replace
+only that shortcut with the existing inverse reconstruction; retain the required models,
+symbolic ad/bc formula, cancellation explanation and every reciprocal payload/validation field.
+An independent second review confirms the source interpretation. This is the approved local
+competency-focused cleanup, not blanket removal of a supporting model or a new task contract.
+
+The remaining911 original operand rows join the previously adopted3,485. All4,396 weighted rows
+partition into38 canonical cells, preserving original conditional probabilities and the31
+earlier cells' exact rows/order/two-draw continuation. No frame or endpoint retires. All six
+valid consumers now share the existing assessed-group quantity interpretation. The three
+formerly unlabelled configurations use ordinary precise bands, closing all18 source omissions.
+All18 target IDs/routes remain, with204→228 selections and no source edits.
+
+The obsolete unbounded sentinel and empty range alternatives are removed. A local feasibility
+provider prevents broad direct requests from choosing an empty operand/group cell; generic
+resolution and matching are unchanged. Eighty-three tests /12 files, owned types, all38 cells
+at true random boundaries,456 planned/source replays, six Q/S consumers and the1/6÷1/6
+counterexample pass. Broad direct tests add416 supported draws and64 expected rejections over
+32 hashed seeds per request. No inference or Area-policy change is introduced. Evidence:
+`temp/range-autonomous/batch6/general-division/{proof.md,comparison.json,census.json}`.

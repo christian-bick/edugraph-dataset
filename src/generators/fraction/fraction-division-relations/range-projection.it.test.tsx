@@ -8,7 +8,7 @@ import {GeneralFractionDivisionBody} from '../../../visuals/views/fractions/frac
 import {FractionDivisionRelationsGenerator} from './generator.ts';
 import {divisionRangeRows, hasSharedDivisionRange} from './numeric-domain.ts';
 import {divisionOperandDistribution} from './operand-profiles.ts';
-import {FractionDivisionRelationsGeneratorSchema as schema, originalDivisionRange, spec} from './spec.ts';
+import {FractionDivisionRelationsGeneratorSchema as schema, spec} from './spec.ts';
 
 const profiles = [
     [[Scope.FractionDividend, Scope.FractionDivisor, Scope.ProperFractions], 'fraction-by-fraction-proper'],
@@ -24,7 +24,7 @@ const matcher = (labels: string[]) => planModelCompatibility({id: 'shared-divisi
     {viewId: 'division-proof', generalLabels: [], schema: {}, spec: {viewId: 'division-proof', generalLabels: []}});
 
 describe('common-part division range projections', () => {
-    it('exposes31 settled bands across all six Question/Solution task leaves', () => {
+    it('exposes38 settled bands across all six Question/Solution task leaves', () => {
         let combinations = 0;
         for (const [roles, profile] of profiles) for (const group of ['zero', 'positive'] as const) {
             if (!divisionOperandDistribution(profile, group).length || !hasSharedDivisionRange(profile, group)) continue;
@@ -53,18 +53,15 @@ describe('common-part division range projections', () => {
                 combinations++;
             }
         }
-        expect(combinations).toBe(31);
+        expect(combinations).toBe(38);
     });
 
-    it('retains the three reciprocal-sensitive configurations without a range claim', () => {
+    it('completes every feasible operand/group choice with a canonical range', () => {
         for (const [roles, profile] of profiles) for (const group of ['zero', 'positive'] as const) {
-            if (hasSharedDivisionRange(profile, group)) continue;
-            const labels = [...roles, group === 'zero' ? Scope.NumbersWithZero : Scope.NumbersWithoutZero];
-            const result = extractConfig(schema, labels);
-            expect(result.config.range).toEqual(originalDivisionRange);
-            expect(result.resolvedLabels.some(label => ranges.some(([upper]) => upper === label))).toBe(false);
-            expect(matcher(labels).supported).toBe(true);
-            for (const [bound] of ranges) expect(matcher([...labels, bound]).supported).toBe(false);
+            if (!hasSharedDivisionRange(profile, group)) continue;
+            const result = extractConfig(schema, [...roles, group === 'zero' ? Scope.NumbersWithZero : Scope.NumbersWithoutZero]);
+            expect(result.config.range!.max).toBeLessThanOrEqual(100);
+            expect(result.resolvedLabels.some(label => ranges.some(([upper]) => upper === label))).toBe(true);
         }
     });
 

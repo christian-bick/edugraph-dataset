@@ -142,7 +142,7 @@ describe('supplied general division model migrations', () => {
         }
     });
 
-    it.each(cases)('$newId retains three real targets, thirty-four range selections and replay ownership', entry => {
+    it.each(cases)('$newId retains three real targets, thirty-eight range selections and replay ownership', entry => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === entry.newId)!;
         const quotientView = views.find(candidate => candidate.viewId === entry.oldId)!;
@@ -158,7 +158,7 @@ describe('supplied general division model migrations', () => {
             const selections = enumerateDependencyAuditSelections(result.plan);
             expect(selections.status).toBe('complete');
             expect(selections.selections).toHaveLength(target.labels.includes(Scope.IntegerDivisor) ? 11
-                : target.labels.includes(Scope.FractionDividend) ? 10 : 13);
+                : target.labels.includes(Scope.FractionDividend) ? 14 : 13);
             for (const selection of selections.selections) {
                 checked++;
                 const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
@@ -182,7 +182,7 @@ describe('supplied general division model migrations', () => {
                 }
             }
         }
-        expect(checked).toBe(34);
+        expect(checked).toBe(38);
     }, 30_000);
 
     it('retains sixteen legacy routes with fourteen zero and seventy nonzero range choices', () => {
