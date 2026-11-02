@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {ArithmeticPatternsGenerator} from '../../../generators/arithmetic/arithmetic-patterns/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {operationTableProblem} from '../../../generators/arithmetic/arithmetic-operation-table/domain.ts';
 import {
     ArithmeticOperationTablePatternProblem,
     ArithmeticRecurrencePatternProblem
@@ -19,8 +20,7 @@ import {
     recurrenceOperation,
     recurrenceRule,
     recurrenceStart,
-    selectMissingTermIndex,
-    selectTableFocusOperand
+    selectMissingTermIndex
 } from './pattern-table-helpers.ts';
 
 const generator = new ArithmeticPatternsGenerator();
@@ -54,25 +54,22 @@ describe('getPatternTaskIdentity', () => {
 });
 
 describe('canonical pattern projections', () => {
-    it('derives and validates operation-table presentation without a focused-row payload field', () => {
+    it('derives and validates presentation from the canonical mathematical row relation', () => {
         for (const operation of ['addition', 'multiplication'] as const) {
-            const table: ArithmeticOperationTablePatternProblem = {
-                kind: 'operation-table',
-                operation,
-                operands: [0, 1, 2, 3, 4, 5, 6],
-                values: Array.from({length: 7}, (_, row) => Array.from(
-                    {length: 7},
-                    (_, column) => operation === 'addition' ? row + column : row * column
-                ))
-            };
+            const table = operationTableProblem(operation, 3);
             expect(isValidOperationTable(table)).toBe(true);
-            expect(operationTableRule(table, 3)).toBe(
+            expect(operationTableRule(table)).toBe(
                 operation === 'addition' ? 'Increase by 1' : 'Increase by 3'
             );
             expect(isValidOperationTable({
                 ...table,
                 values: table.values.map((row, index) => index === 2 ? [99, ...row.slice(1)] : row)
             })).toBe(false);
+            for (const rowRelation of [undefined, null, {...table.rowRelation, fixedOperand: 6},
+                {...table.rowRelation, inputs: [0]}, {...table.rowRelation, outputs: [99]},
+                {...table.rowRelation, difference: -1}]) {
+                expect(isValidOperationTable({...table, rowRelation} as ArithmeticOperationTablePatternProblem)).toBe(false);
+            }
         }
     });
 
@@ -184,19 +181,16 @@ describe('canonical pattern projections', () => {
 
     it('resolves a safe fingerprint-visible missing-term index from seeded view entropy', () => {
         const indices = new Set<number>();
-        const focusOperands = new Set<number>();
         for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
             indices.add(selectMissingTermIndex());
-            setSeed(seed);
-            focusOperands.add(selectTableFocusOperand());
         }
         expect([...indices].sort()).toEqual([2, 3, 4]);
-        expect([...focusOperands].sort()).toEqual([2, 3, 4, 5]);
     });
 
     it('rejects malformed operation-table dimensions', () => {
         const malformed: ArithmeticOperationTablePatternProblem = {
+            ...operationTableProblem('addition', 3),
             kind: 'operation-table',
             operation: 'addition',
             operands: [0, 1, 2, 3],

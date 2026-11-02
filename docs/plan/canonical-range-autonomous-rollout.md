@@ -1554,3 +1554,22 @@ No producer split, new label, inference, matcher, graph or quantity convention i
 This tightens existing bounds and closes a reviewed contract issue, without claiming missing-facet
 credit. Evidence: `temp/range-autonomous/batch6/measurement-time/flat-hundreds-verification.json`
 and associated test/type logs.
+
+## Sixth batch: operation-table mathematical row relation
+
+The source3.OA.D.9, original implementation and current checklist already assess one highlighted
+row, not every other table cell. A canonical mathematical row relation now records its fixed
+operand, variable inputs, outputs and constant difference. This is an Ability-neutral relation
+under IMPL-G8/IMPL-V8; the removed presentation focusRow flag is not reintroduced. The complete
+unchanged operation table remains context, and the existing view highlights the supplied relation.
+
+All eight original operation/row states remain. Addition rows2/3/4 use upper10 and row5 upper20;
+multiplication rows2/3 use upper20 and rows4/5 upper100. Required input0 preserves the zero
+claim and rules out positive floors. Both existing targets/IDs/routes remain, with two→four
+canonical selections and exactly two missing-facet closures. No source edit or split is needed.
+
+Thirty-five focused tests /six files, final types and specs, all48 captured byte-identical
+same-value Q/S projections and12 real-source receipt replays pass. Sampling and native replay
+identities change within the accepted profile adoption; mathematical support and same-value
+rendering stay intact. Evidence:
+`temp/range-autonomous/batch6/arithmetic/verify-operation-table.json`.

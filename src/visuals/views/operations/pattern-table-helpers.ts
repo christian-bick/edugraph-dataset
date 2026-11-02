@@ -19,10 +19,6 @@ export function selectMissingTermIndex(): number {
     return 2 + Math.floor(random() * 3);
 }
 
-export function selectTableFocusOperand(): number {
-    return 2 + Math.floor(random() * 4);
-}
-
 export function getPatternTaskIdentity(task: PatternTableTask) {
     if (task === 'generate') {
         return {
@@ -186,10 +182,9 @@ export function featureOptions(data: ArithmeticRecurrencePatternProblem): string
 }
 
 export function operationTableRule(
-    data: ArithmeticOperationTablePatternProblem,
-    focusOperand: number
+    data: ArithmeticOperationTablePatternProblem
 ): string {
-    return `Increase by ${data.operation === 'addition' ? 1 : focusOperand}`;
+    return `Increase by ${data.rowRelation.difference}`;
 }
 
 export function isValidOperationTable(data: ArithmeticOperationTablePatternProblem): boolean {
@@ -203,7 +198,14 @@ export function isValidOperationTable(data: ArithmeticOperationTablePatternProbl
             && row.length === data.operands.length
             && row.every((value, columnIndex) => value === (data.operation === 'addition'
                 ? data.operands[rowIndex]! + data.operands[columnIndex]!
-                : data.operands[rowIndex]! * data.operands[columnIndex]!)));
+                : data.operands[rowIndex]! * data.operands[columnIndex]!)))
+        && data.rowRelation !== null && typeof data.rowRelation === 'object'
+        && [2, 3, 4, 5].includes(data.rowRelation.fixedOperand)
+        && Array.isArray(data.rowRelation.inputs) && data.rowRelation.inputs.length === data.operands.length
+        && data.rowRelation.inputs.every((value, index) => value === data.operands[index])
+        && Array.isArray(data.rowRelation.outputs) && data.rowRelation.outputs.length === data.operands.length
+        && data.rowRelation.outputs.every((value, index) => value === data.values[data.rowRelation.fixedOperand]![index])
+        && data.rowRelation.difference === (data.operation === 'addition' ? 1 : data.rowRelation.fixedOperand);
 }
 
 const isSafeInteger = (value: unknown): value is number =>

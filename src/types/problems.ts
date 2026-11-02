@@ -690,6 +690,13 @@ export type ArithmeticOperationTablePatternProblem = {
     operation: ArithmeticPatternOperation;
     operands: readonly number[];
     values: readonly (readonly number[])[];
+    /** Canonical binary row relation; the complete table supplies its mathematical context. */
+    rowRelation: {
+        fixedOperand: number;
+        inputs: readonly number[];
+        outputs: readonly number[];
+        difference: number;
+    };
 };
 
 export type ArithmeticPatternRecurrence =

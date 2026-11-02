@@ -24,7 +24,6 @@ interface PatternTableViewProps {
     payload: RenderPayload<AbstractProblem<ArithmeticPatternProblem>>;
     viewId: string;
     missingTermIndex?: number;
-    focusOperand?: number;
 }
 
 function fail(viewId: string, message: string): never {
@@ -39,7 +38,7 @@ function rotate<T>(values: readonly T[], seed: number): T[] {
 function validatePattern(viewId: string, data: ArithmeticPatternProblem) {
     validateProblemData(viewId, data, ['kind']);
     if (data.kind === 'operation-table') {
-        validateProblemData(viewId, data, ['operation', 'operands', 'values']);
+        validateProblemData(viewId, data, ['operation', 'operands', 'values', 'rowRelation']);
         if (!isValidOperationTable(data)) {
             fail(viewId, 'The supplied operation table must be mathematically coherent.');
         }
@@ -81,15 +80,15 @@ function ChoiceGrid({options, answer, isSolutionView}: {
     );
 }
 
-function OperationTableTask({data, seed, isSolutionView, focusOperand}: {
+function OperationTableTask({data, seed, isSolutionView}: {
     data: ArithmeticOperationTablePatternProblem;
     seed: number;
     isSolutionView: boolean;
-    focusOperand: number;
 }) {
     const identity = getPatternTaskIdentity(undefined);
+    const focusOperand = data.rowRelation.fixedOperand;
     const focusIndex = data.operands.indexOf(focusOperand);
-    const answer = operationTableRule(data, focusOperand);
+    const answer = operationTableRule(data);
     const options = rotate([answer, `Increase by ${data.operation === 'addition' ? 2 : focusOperand + 1}`, 'Stay the same'], seed);
     return (
         <div className="w-[700px] rounded-2xl bg-white p-7 font-sans shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
@@ -193,8 +192,7 @@ export const PatternTableView = ({
     mode,
     payload,
     viewId,
-    missingTermIndex,
-    focusOperand
+    missingTermIndex
 }: PatternTableViewProps) => {
     const {problem, isSolutionView, seed} = payload;
     validatePattern(viewId, problem.data);
@@ -202,14 +200,10 @@ export const PatternTableView = ({
         if (mode !== 'legacy-classification') {
             fail(viewId, 'The recurrence-pattern view requires a recurrence model.');
         }
-        if (!Number.isInteger(focusOperand) || !problem.data.operands.includes(focusOperand!)) {
-            fail(viewId, 'The operation-table view requires a valid configured focus operand.');
-        }
         return <OperationTableTask
             data={problem.data}
             seed={seed}
             isSolutionView={isSolutionView}
-            focusOperand={focusOperand!}
         />;
     }
     if (mode === 'legacy-classification') {

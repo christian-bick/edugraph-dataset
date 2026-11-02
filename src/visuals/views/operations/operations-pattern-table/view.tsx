@@ -12,12 +12,11 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-pattern-table'>;
 }
 
-const OperationsPatternTableCore = ({config, payload}: CoreProps) => (
+const OperationsPatternTableCore = ({payload}: CoreProps) => (
     <PatternTableView
         mode="legacy-classification"
         payload={payload}
         viewId={VIEW_ID}
-        focusOperand={config.focusOperand}
     />
 );
 

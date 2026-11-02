@@ -1,7 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {ArithmeticPatternsGenerator} from '../../../generators/arithmetic/arithmetic-patterns/generator.ts';
-import {ArithmeticOperationTableGenerator} from '../../../generators/arithmetic/arithmetic-operation-table/generator.ts';
+import {operationTableProblem} from '../../../generators/arithmetic/arithmetic-operation-table/domain.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {AbstractProblem, RenderPayload} from '../../../types/ml-engine.ts';
@@ -15,8 +15,7 @@ import {PatternTableView} from './pattern-table-view.tsx';
 const generator = new ArithmeticPatternsGenerator();
 
 function tableProblem(): ArithmeticOperationTablePatternProblem {
-    setSeed(17);
-    return new ArithmeticOperationTableGenerator().generate({operation: 'multiplication'})!.data;
+    return operationTableProblem('multiplication', 3);
 }
 
 function recurrenceProblem(withLaw: boolean): ArithmeticRecurrencePatternProblem {
@@ -48,7 +47,6 @@ describe('pattern leaf renderers', () => {
                     mode="legacy-classification"
                     payload={payload(tableProblem(), isSolutionView)}
                     viewId="pattern-legacy-classification"
-                    focusOperand={3}
                 />
             );
             expect(markup).not.toContain('Invalid problem data');
@@ -145,7 +143,6 @@ describe('pattern leaf renderers', () => {
                 mode="legacy-classification"
                 payload={payload(recurrenceProblem(false), false)}
                 viewId="pattern-table-only"
-                focusOperand={3}
             />
         )).toThrow('requires an operation-table model');
     });

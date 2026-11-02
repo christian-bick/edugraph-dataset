@@ -1,2 +1,3 @@
 - **Identity:** A highlighted operation-table row requires classifying its arithmetic pattern into one of the supplied rule categories.
 - **Modes:** Question Mode keeps all rule choices neutral; Solution Mode highlights only the supplied classification.
+- **Mathematical evidence:** The producer supplies the fixed operand, variable inputs, results and constant difference of the row under study. Highlight that relation; other rows retain their role as table context rather than additional assessed calculations.
