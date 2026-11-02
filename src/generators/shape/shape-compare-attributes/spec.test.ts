@@ -53,4 +53,14 @@ describe('shape-compare-attributes generator spec', () => {
         expect(ShapeCompareAttributesGeneratorSchema.range[1]([Area.Cube, Scope.NumbersSmaller100])).toBeUndefined();
         expect(ShapeCompareAttributesGeneratorSchema.range[1]([Area.Cube, Scope.NumbersSmaller20, Scope.NumbersLarger5])).toBeUndefined();
     });
+
+    it('completes broad range-only requests with a feasible comparison shape', () => {
+        for (const label of [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20]) {
+            for (let seed = 0; seed < 60; seed++) {
+                setSeed(seed);
+                const stub = generateWithLabels(new ShapeCompareAttributesGenerator(), [label])!;
+                expect(stub.labels).toContain(label);
+            }
+        }
+    });
 });

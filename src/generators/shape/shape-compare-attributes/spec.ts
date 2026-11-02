@@ -12,14 +12,20 @@ export const comparisonShapes = [
     [Area.Cone, 'cone'], [Area.Cylinder, 'cylinder'], [Area.Sphere, 'sphere']
 ] as const;
 const shapeLabels = comparisonShapes.map(([label]) => label);
-const resolveShape = selectExactLabelMap(comparisonShapes);
+const shapeValue = selectExactLabelMap(comparisonShapes);
 const rangeChoices = canonicalRangeProfiles.filter(({range}) =>
     range.min === 0 && [5, 10, 20].includes(range.max)).map(({labels}) => labels);
 const rangeLabels = rangeChoices.flat();
+const resolveShape = withLabelChoices(exactResolver((labels: string[]) => {
+    if (shapeLabels.filter(label => labels.includes(label)).length !== 1) return undefined;
+    const shape = shapeValue(labels);
+    const range = resolveCanonicalRangeFromLabels(labels);
+    return shape && (!range || comparisonTickets(shape, range).length > 0) ? shape : undefined;
+}), {kind: 'alternatives', alternatives: shapeLabels.map(label => [label]), contextLabels: rangeLabels, resolvedContext: true});
 const permitsRange = (labels: string[]) => {
     const range = resolveCanonicalRangeFromLabels(labels);
     if (!range || range.min !== 0 || ![5, 10, 20].includes(range.max)) return false;
-    const shape = resolveShape(labels);
+    const shape = shapeValue(labels);
     return !shape || comparisonTickets(shape, range).length > 0;
 };
 const resolveRange = withLabelChoices(exactResolver((labels: string[]) =>
@@ -40,7 +46,7 @@ export const spec: GeneratorSpec = {
 };
 
 export const ShapeCompareAttributesGeneratorSchema = {
-    shape: [shapeLabels, resolveShape],
+    shape: [shapeLabels, resolveShape, shapeLabels.map(label => [label])],
     range: [rangeLabels, resolveRange, rangeChoices]
 } as const;
 
