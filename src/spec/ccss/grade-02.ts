@@ -198,7 +198,8 @@ const numberNamesBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersSmaller1000,
         Ability.TextualArticulation
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100, 120, 1000]});
 
 // --- 2.NBT.A.3: Write expanded form ---
 const expandedFormBuilder = new DatasetPermutationBuilder()

@@ -1,9 +1,10 @@
 import {GeneratorSpec} from '../../types/generator-spec.ts';
-import {Area, Scope, deductCompatible} from 'edugraph-ts';
+import {Area, Scope} from 'edugraph-ts';
 import {ConfigFromSchema} from '../../types/schema.ts';
 import {resolveRangeFromLabels} from '../../lib/ontology.ts';
-import {selectExactMatch} from '../../lib/resolvers.ts';
-import {resolveWritingZero, writingZeroContext} from './zero-profile.ts';
+import {writingZeroContext} from './zero-profile.ts';
+import {nameRangeForLabels, resolveNameAwareWritingZero, resolveWritingRange, writingRangeFallbacks,
+    writingNotationLabels, resolveWritingNotation, writingRangeLabels} from './range-profile.ts';
 import {generatorLabelRule} from '../compatibility-rules.ts';
 
 export const spec: GeneratorSpec<typeof WritingGeneratorSchema> = {
@@ -19,7 +20,20 @@ export const spec: GeneratorSpec<typeof WritingGeneratorSchema> = {
         return range.max > 1000 && range.max <= 1_000_000
             ? absence && Math.floor(range.max) >= Math.max(1, Math.ceil(range.min))
             : true;
-    })],
+    }), {
+        id: 'writing-range-adoption',
+        dependencies: [{scope: 'generator', label: Area.NumberNameNotation},
+            ...[Scope.NumbersWithZero, Scope.NumbersWithoutZero].map(label => ({scope: 'generator' as const, label})),
+            ...writingRangeLabels.flatMap(label => [{scope: 'target' as const, label}, {scope: 'generator' as const, label}])],
+        predicate: labels => {
+            if (!labels.exact('generator', Area.NumberNameNotation))
+                return writingRangeLabels.every(label => labels.exact('target', label) === labels.exact('generator', label));
+            const range = nameRangeForLabels(writingRangeLabels.filter(label => labels.exact('generator', label)));
+            return !!range && !labels.exact('generator', Scope.NumbersLargerZero)
+                && (labels.exact('generator', Scope.NumbersWithZero) ? range.max === 5
+                : labels.exact('generator', Scope.NumbersWithoutZero));
+        }
+    }],
     // SPEC-12: zero absence depends on both the zero selector and legacy range.
     // Range-only bundles overclaim explicit zero; a blanket false-selector default
     // also overclaims the number-line origin. Larger bounded requests already
@@ -41,17 +55,17 @@ export const spec: GeneratorSpec<typeof WritingGeneratorSchema> = {
 
 export const WritingGeneratorSchema = {
     notationFamily: [
-        [Area.DigitNotation, Area.NumerationWithIntegers, Area.NumberNameNotation],
-        selectExactMatch
+        writingNotationLabels, resolveWritingNotation, writingNotationLabels.map(label => [label])
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        resolveWritingZero,
+        resolveNameAwareWritingZero,
         [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
     ],
     range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        resolveRangeFromLabels
+        writingRangeLabels,
+        resolveWritingRange,
+        writingRangeFallbacks
     ]
 } as const;
 

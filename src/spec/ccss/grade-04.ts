@@ -183,9 +183,11 @@ const readWriteBaseTenNumeralsBuilder = new DatasetPermutationBuilder()
 const writeNumberNamesBuilder = new DatasetPermutationBuilder().addLabels([
     Area.NumberNameNotation,
     Scope.Base10,
-    Scope.NumbersLarger1000,
-    Scope.NumbersSmaller1000000,
     Ability.TextualArticulation
+]).applyLabelVariants([
+    [Scope.NumbersLarger1000, Scope.NumbersSmaller10000],
+    [Scope.NumbersLarger10000, Scope.NumbersSmaller100000],
+    [Scope.NumbersLarger100000, Scope.NumbersSmaller1000000]
 ]);
 
 const writeExpandedFormBuilder = new DatasetPermutationBuilder().addLabels([

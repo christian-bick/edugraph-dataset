@@ -49,7 +49,8 @@ describe('writing scalar-zero choices', () => {
 
     it('admits only scalar zero absence throughout the existing positive Grade 4 range', () => {
         for (const notation of [Area.DigitNotation, Area.NumberNameNotation]) {
-            const target = {id: 'positive-writing', labels: [notation, ...positiveRange]};
+            const bounds = notation === Area.NumberNameNotation ? [Scope.NumbersLarger1000, Scope.NumbersSmaller10000] : positiveRange;
+            const target = {id: 'positive-writing', labels: [notation, ...bounds]};
             const result = planModelCompatibility(target, model, view);
             expect(result.supported).toBe(true);
             if (!result.supported) throw new Error('Expected the positive writing target to remain supported.');

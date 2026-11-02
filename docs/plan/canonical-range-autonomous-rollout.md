@@ -1313,3 +1313,29 @@ Twenty-eight focused tests /five files, full types, independent comparison again
 100..999999, native selection of every retained numeral, all18 actual source bindings/replays
 and Question/Solution projections pass. Unauthored undefined-cardinality/noncanonical mocks are
 replaced with actual declared-domain checks. Evidence: `temp/range-autonomous/batch6/expanded/`.
+
+## Sixth batch: scalar number names
+
+The existing NumberNameNotation configuration isolates a scalar competency without a producer
+split. Nine canonical scalar cells retain999,991 positive names from the original inclusive
+1..1m union. Exactly the nine approved positive threshold singletons retire, including1m.
+Explicit scalar0 remains supported at upper5; neither original Name source target selected it.
+No notation digit becomes an extra quantity. Fixed-value payloads and rendering remain unchanged.
+
+Grade2 adds five upper variants while retaining `2.NBT.A.3-number-names~422051de`. Grade4's broad
+interval becomes the reviewed correlated pairs lower1000/upper10k, lower10k/upper100k and
+lower100k/upper1m. The old `4.NBT.A.2-write-number-names~fba25e32` has successors `dc5f566a`,
+`f1a1b29c` and `0a31fd82`, respectively. Their union preserves all its nonthreshold values.
+This is the approved explicit-lower target refinement; generic matching is unchanged. The
+cumulative verifier records the three successors and exactly39 raw /21 normalized ID migrations.
+
+Writing now has26 routes/selections, including nine Name cells. All17 other writing routes retain
+their exact admitted bindings, direct resolved label order, configurations, same-seed payloads
+and PRNG continuation. A notation-qualified range wrapper preserves that legacy behavior;
+the existing inferredLabels body/API remains unchanged. All26 cells resolve annotations
+exhaustively. No view guard was added: the existing WholeNumberLengthProblem boundary already
+excludes number-line consumers from this writing payload.
+
+Fifty-eight focused tests /five files, owned types, the complete1m membership census,2,700 replay
+controls, both actual name/reading consumers and random endpoints pass. Evidence:
+`temp/range-autonomous/batch6/name/{proof.md,source-lineage.json}` and associated logs.

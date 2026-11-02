@@ -4,6 +4,9 @@ import {samplePositiveWholeNumber} from '../number/whole-number-values.ts';
 import {createWholeNumberPlaceValues} from '../../lib/whole-number-notation.ts';
 import {WritingGeneratorConfig, WritingGeneratorSchema, spec} from "./spec.ts";
 import {GeneratorValidationError, validateConfigFields} from "../../lib/errors.ts";
+import {Area} from 'edugraph-ts';
+import {random} from '../../lib/random.ts';
+import {nameIntegerInterval} from './range-profile.ts';
 
 export class WritingGenerator implements ProblemGenerator<WritingProblem, WritingGeneratorConfig> {
     type: AbstractProblem['type'] = 'writing';
@@ -17,6 +20,11 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
             throw new GeneratorValidationError('writing', 'Expected a boolean scalar-zero selector.');
         }
 
+        if (config.notationFamily === Area.NumberNameNotation) {
+            const [first, last] = nameIntegerInterval(resolvedRange, config.requireZero);
+            const number = first === last ? first : first + Math.floor(random() * (last - first + 1));
+            return {data: number <= 1000 ? {number} : {number, placeValues: createWholeNumberPlaceValues(number)}};
+        }
         if (config.requireZero) {
             if (resolvedRange.min > 0 || resolvedRange.max < 0) return null;
             return {data: {number: 0}};

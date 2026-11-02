@@ -69,6 +69,10 @@ describe('WritingGenerator Spec Integration', () => {
                 Scope.NumbersSmaller1000, Scope.NumbersSmaller1000000]) {
                 for (const zero of [[], [Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]) {
                     const labels = [...notation, maximum, ...zero];
+                    if (notation.includes(Area.NumberNameNotation) && zero.includes(Scope.NumbersWithZero)) {
+                        expect(() => extractConfig(generator.schema, labels)).toThrow();
+                        continue;
+                    }
                     for (const seed of [0, 17, 2026]) {
                         const draws = [oldSpec, spec].map(owner => {
                             setSeed(seed);
@@ -171,11 +175,12 @@ describe('WritingGenerator Spec Integration', () => {
         Area.NumberNameNotation
     ] as const)('resolves Grade 4 %s through one million', notationFamily => {
         setSeed(404);
+        const maximum = notationFamily === Area.NumberNameNotation ? Scope.NumbersSmaller10000 : Scope.NumbersSmaller1000000;
         const stub = generateWithLabels(generator, [
             notationFamily,
             Scope.Base10,
             Scope.NumbersLarger1000,
-            Scope.NumbersSmaller1000000
+            maximum
         ]);
 
         expect(stub).not.toBeNull();
@@ -185,7 +190,7 @@ describe('WritingGenerator Spec Integration', () => {
         expect(stub!.labels).toEqual(expect.arrayContaining([
             notationFamily,
             Scope.NumbersLarger1000,
-            Scope.NumbersSmaller1000000
+            maximum
         ]));
     });
 });

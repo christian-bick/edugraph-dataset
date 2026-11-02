@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../lib/random.ts';
 import {WritingGenerator} from './generator.ts';
 import {Area} from 'edugraph-ts';
@@ -81,13 +82,13 @@ describe('WritingGenerator', () => {
         setSeed(81);
         const numberNameData = generator.generate({
             notationFamily: Area.NumberNameNotation,
-            range: {min: 1001, max: 999_999},
+            range: createCanonicalNumericRange(10000, 1000),
             requireZero: false
         })!.data;
         setSeed(81);
         const digitData = generator.generate({
             notationFamily: Area.DigitNotation,
-            range: {min: 1001, max: 999_999},
+            range: {min: 1001, max: 9999},
             requireZero: false
         })!.data;
 
