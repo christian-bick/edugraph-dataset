@@ -22,6 +22,12 @@ The fourth batch's source gates pass at **1,293 normalized targets /1,730 routes
 and332 range omissions**. Four further source-backed fixed-bound corrections migrate four raw
 and four normalized IDs; every earlier route lineage remains supported. Full acceptance is
 recorded in the rollout ledger after the complete coverage gate.
+The fifth batch's combined source gates pass at **1,324 normalized targets /1,770 routes,
+3,841 complete selections and164 range omissions**:168 further baseline omissions close.
+All previous claim/route lineages remain, with31 additive source variants and no new ID
+migrations. Full coverage acceptance passes all 7,676 tests / 975 files and all generator
+thresholds, as recorded in the rollout ledger. The next ordinary work includes already-labelled
+families whose legacy bounds still need tightening; omission counts alone do not establish completion.
 
 ## Review baseline
 
@@ -144,17 +150,17 @@ families with old bounds still require canonical review. They are not implementa
 
 | Family group | Review baseline | After R4/R5 | Current | Next treatment |
 | --- | ---: | ---: | ---: | --- |
-| Arithmetic | 90 | 90 | 77 | Known facts/strategies adopted; continue written algorithms and larger numeric families |
-| Counting and integer writing | 0 | 0 | 0 | Tighten existing bounds; review shared projections and scalar-zero cases |
-| Fraction | 204 | 196 | 169 | Separate fraction values from explicitly assessed model/scaling counts |
-| Number (decimal/rational/length) | 47 | 47 | 14 | Remaining signed contexts; decimal place comparison adopted |
+| Arithmetic | 90 | 90 | 28 | Standard division, remaining decimal methods and numerical-expression review; mixed-power/table/overflow decisions |
+| Counting and integer writing | 0 | 0 | 0 | Sequences and one-step closure adopted; review remaining scalar/model and offset-count projections |
+| Fraction | 204 | 196 | 69 | Unlike, model-count and reciprocal projection contracts; all remaining configurations reviewed |
+| Number (decimal/rational/length) | 47 | 47 | 0 | Presence gaps closed, including all signed-context profiles |
 | Place value | 11 | 9 | 0 | Presence gaps closed; broader method/source review remains separate |
 | Measurement | 137 | 97 | 30 | Rulers/measurement lines adopted; shared-projection decisions remain |
-| Currency | 18 | 18 | 14 | Banknotes/pennies adopted; trace other cents/dollars and required counts |
+| Currency | 18 | 18 | 11 | Banknotes/pennies/nickels and dime subtraction adopted; mixed-unit quantity convention remains |
 | Time, elapsed time and interval arithmetic | 26 | 26 | 0 | Canonical component/split profiles implemented; endpoint retirements recorded |
-| Ratio | 10 | 10 | 4 | Remaining ratio-table and percentage quantity review |
-| Algebra | 24 | 24 | 24 | Formal numeric tasks under unchanged range qualification |
-| **Total** | **567** | **517** | **332** | No change to applicability policy |
+| Ratio | 10 | 10 | 2 | Percent profiles adopted; ratio-table task contract remains |
+| Algebra | 24 | 24 | 24 | Sixteen fully numeric structural selections are ordinary next work; eight unbound symbolic/writer cases need a quantity policy |
+| **Total** | **567** | **517** | **164** | No change to applicability policy |
 
 Geometry, coordinate, shape and statistics tasks do not become mandatory range work merely
 because their payloads contain numbers. Preserve the full resolved Area gate. Existing range
@@ -219,6 +225,43 @@ These are rollout observations, not blanket old-contract violations. An existing
 bound can have been valid before canonical adoption. Future changes must preserve the matched
 claim and its witnesses (SPEC-G3, IMPL-G4, IMPL-V11), and may not stretch source labels to force
 coverage (TSPEC-6, TSPEC-13).
+
+### Next autonomous work after the fifth source checkpoint
+
+At least27 remaining source omissions have a reviewed ordinary approach: six standard integer
+division selections, five standard decimal-method selections, and16 fully numeric algebraic
+structural selections. Six numerical-expression findings have a confirmed syntax/calculation
+projection mismatch, rather than a technical-size blocker. Existing bounded families with loose
+claims also remain in the review, independently of these presence counts. A four-target integer-
+column source correction is already justified: the method's required carried/borrowed1 contradicts
+old lower100/1000 labels. The source standard demands whole numbers but no such global minimum;
+adding IntegerNumbers prevents inappropriate decimal matches. The sampler's existing full-width
+minimum preserves every old fixed-seed draw. This uses the authorized source-correction strategy.
+
+For numeric structural algebra, the approved D-NUMERIC-STRUCTURE interpretation already supplies
+the boundary: actual literals and complete signed terms where assessed, excluding unused whole
+expression totals/subtotals. For example, identifying structure in9×(8+6) uses9,8,6, whereas
+9×8−6×8+5 includes complete signed terms72 and−48. These are finite numeric configurations;
+they do not require bounds on unbound variables. The other eight symbolic/writer selections
+cannot inherit the sampled hidden binding:3+x permits arbitrarily large x, and3÷x permits nonzero
+x arbitrarily close to zero. Their range interpretation remains a separate policy question.
+
+Do not close a gap solely because its current source routes happen to avoid a disagreeing
+projection. All admitted generator/view configurations must remain truthful, including a new
+target using the same existing capabilities. A payload-compatible consumer can be excluded by
+a genuine semantic type/task boundary; an incidental current-source correlation is insufficient.
+All69 remaining fraction configurations have been checked on that basis. Ten currently happen
+to reach only consistent projections, but their other admitted consumers are valid mathematical
+tasks whose required quantities differ. None has a truthful existing exclusion that would make
+a new range declaration universal. The other59 already disagree across current routes. Do not
+add guards solely to steer a range claim away from a valid consumer.
+
+The11 remaining currency cases require a shared quantity convention. The exact existing case
+$1−75¢=25¢ yields minimum1/maximum75 from displayed numeric amounts, but minimum25/maximum100
+if normalized to cents. The earlier operand-width contract deliberately compares monetary amounts,
+so parsing numeral magnitudes or normalizing storage is not an established solution. Mixed bills/
+coins additionally raise whether the unshown100 conversion identity is a required task quantity.
+Keep these questions separate from the three cents-only slices already repaired.
 
 ## Validation and acceptance
 

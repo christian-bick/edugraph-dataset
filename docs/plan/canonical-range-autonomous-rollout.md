@@ -1075,7 +1075,8 @@ by truthful intermediate Area declarations. The fixed area-model view now requir
 target's DivisionPartialQuotients competency through the existing positive task-precondition
 helper. All seven previous routes already request it and remain; there are no new family routes.
 No grade/target-ID guard, blacklist, target mutation or matcher change is introduced. Selections
-ten→28, closing exactly six baseline omissions; the four Grade4 selections were already ranged.
+ten→28, closing exactly six baseline omissions. The four Grade4 selections were outside the
+Area policy because of ImperfectDivisibility; their optional canonicalization receives no closure credit.
 
 Sixty-one tests/eight files pass, including full support/uniqueness/path-weight and required-quantity
 proofs,168 Question/Solution projections, all28 configuration cells and56 native draws/replays.
@@ -1126,3 +1127,25 @@ every band, including inclusive final numerator choices. All28 focused tests pas
 statement/branch coverage for that generator, and final TypeScript passes. No test, timeout or
 coverage threshold is relaxed. Evidence: `temp/range-autonomous/batch5/percent/
 {sampler-before,sampler-after,boundary-coverage}.log`.
+
+## Fifth batch: complete acceptance
+
+The committed implementation passes the full 7,676-test / 975-file coverage suite with two
+workers. Overall coverage is 98.64% statements / 97.13% branches / 100% functions / 99.20% lines;
+every generator meets the unchanged thresholds. Complete CCSS checks, TypeScript, documentation
+references and whitespace checks pass. Evidence is in `temp/range-autonomous/batch5/`, including
+`coverage-accepted.log`, `check-final.log`, `types-final.log` and `global-verification.json`.
+
+The source now contains **1,364 authored / 1,324 normalized targets, 1,770 routes and 3,841
+complete selections**. Exactly 168 more baseline range omissions close: 332→164. The fifth batch
+adds 31 reviewed source variants and 40 routes, with no new target-ID migrations. Cumulative
+verification from `16f09717` preserves every earlier route lineage through exactly the previously
+authorized 34 raw / 16 normalized source-ID migrations. There are no unmatched targets,
+conflicts, incomplete tuples, contract errors or strict annotation failures.
+
+Native allocation is 1,770 train plus 448 validation pairs: 2,218 requested pairs / 4,436 images
+before deduplication. These are source estimates. The 2,918 stored images, VQA cache and 1,062
+stored range findings remain unchanged; range stays report-only. Further ordinary work includes
+the reviewed decimal methods, numeric structural tasks, standard division and legacy bounds
+already present on counting/place-value families. Concrete quantity/projection decisions stay
+separate and do not stop those repairs.

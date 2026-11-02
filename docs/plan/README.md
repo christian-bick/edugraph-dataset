@@ -37,10 +37,11 @@ These items are not newly scheduled by the archive move.
   leaving 517 source findings with unchanged targets/routes. The approved counting-on/back batch
   adds three upper5 target variants and canonical sampling while retaining all earlier coverage:
   **1,250 normalized targets / 1,675 routes**. Separate projection/quantity-contract cases remain.
-  The [autonomous rollout](canonical-range-autonomous-rollout.md) records four subsequent batches:
+  The [autonomous rollout](canonical-range-autonomous-rollout.md) records five subsequent batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
-  then nine families/37 closures. Current source gates pass at **1,293 normalized targets /1,730 routes**,
-  with332 range omissions remaining. All earlier route lineages remain supported through the authorized
+  then nine families/37 closures and a fifth batch with 168 further closures. Current source gates
+  pass at **1,324 normalized targets / 1,770 routes**, with 164 range omissions remaining.
+  All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
   Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.

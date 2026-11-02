@@ -3,11 +3,11 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Status: the target-expansion helper, first eight-family adoption, R4/R5 and four
-[autonomous batches](canonical-range-autonomous-rollout.md) are accepted. Those batches cover
-50 further families, preserving earlier competency/route lineages while adding reviewed source
-variants and applying the authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,293 normalized targets /1,730 routes and3,382 complete selections**, with **332 range-presence
+Status: the target-expansion helper, first eight-family adoption, R4/R5 and five
+[autonomous batches](canonical-range-autonomous-rollout.md) are accepted. Those batches preserve
+earlier competency/route lineages while adding reviewed source variants and applying the
+authorized integer-domain and fixed-bound source corrections. The accepted source covers
+**1,324 normalized targets / 1,770 routes and 3,841 complete selections**, with **164 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md) separates further standard
 profile work from concrete projection/quantity issues. The original inventory remains historical.
@@ -768,9 +768,9 @@ quantity decisions remain in the [remaining-family review](canonical-range-remai
 ### Subsequent autonomous checkpoints
 
 The [autonomous rollout ledger](canonical-range-autonomous-rollout.md) records the completed
-entry-document cleanup and four subsequent validated batches. They update50 producer families
-and close185 baseline range-presence omissions:517→332. The current source has1,293 normalized
-targets,1,730 routes and3,382 complete selections. Every earlier route lineage remains, with
+entry-document cleanup and five subsequent validated batches. They close 353 baseline
+range-presence omissions: 517→164. The current source has 1,324 normalized targets,
+1,770 routes and 3,841 complete selections. Every earlier route lineage remains, with
 34 raw/16 normalized target IDs migrating under the authorized integer-domain and fixed-bound source corrections.
 Source and complete coverage gates are recorded in the rollout ledger. The stored dataset and VQA
 cache remain unchanged. Standard-profile work continues through the reviewed queue while genuine
