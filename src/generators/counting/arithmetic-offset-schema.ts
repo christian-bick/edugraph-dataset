@@ -1,9 +1,5 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
 import {selectExactLabelMap, selectExactLabelSetMap} from '../../lib/resolvers.ts';
-
-/** Ten/hundred offsets retain their independently reviewed legacy range contract. */
-export const legacyOffsetRange = [deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]), resolveRangeFromLabels] as const;
 
 export const arithmeticOffsetDirection = [
     [Area.Increment, Area.Decrement],

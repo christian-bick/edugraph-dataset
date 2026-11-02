@@ -1450,3 +1450,20 @@ source coverage, capabilities and mathematical support are unchanged. The regres
 hashed seeds, including standard division;157 focused tests /16 files pass. Evidence:
 `temp/range-autonomous/batch6/direct-review-tests.log` and
 `temp/range-autonomous/batch6/arithmetic/root-independent-review.md`.
+
+## Sixth batch: ten/hundred place-value offsets
+
+Both methods explicitly assess1 ten/hundred and the start/result place counts. Canonical upper
+profiles therefore have no positive floor. All2,736 original source frames remain;384 source
+and384 one-step same-seed payload/PRNG controls are exact. All six original routes remain,
+with24 native/direct/planned/replay checks and5,472 complete Q/S projections.
+
+The six source aliases remove their false lower10/100 claim and explicitly retain
+NumbersWithoutZero, already guaranteed by the former source floor. This keeps their original
+positive-primary domain and sampling. Latent smaller-primary configurations remain available
+through truthful ordinary zero profiles. No new selector, split, inference or endpoint retirement
+is needed. The shared one-step builder is extracted without changing its behavior.
+
+Eighty-seven focused tests /11 files, fresh types and ownership checks pass. Exact old/new IDs,
+claim changes and retained frames are recorded in
+`temp/range-autonomous/batch6/measurement-time/offset-source-verification.json`.

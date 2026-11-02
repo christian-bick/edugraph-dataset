@@ -1,100 +1,83 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {createCanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
-import {sampleGenerationPlan} from '../../lib/compatibility.ts';
+import {enumerateDependencyAuditSelections} from '../../lib/label-dependency-audit.ts';
 import {planModelCompatibility, type ViewChoiceModel} from '../../lib/model-compatibility.ts';
-import {bindingsForSelection} from '../../lib/planned-generation.ts';
-import {resolveSchemaChoices} from '../../lib/schema-choices.ts';
-import {countingOffsetStarts, type CountingOffsetOperandProfile} from './counting-offset.ts';
+import {bindingsForSelection, resolvePlannedConfigurations} from '../../lib/planned-generation.ts';
+import {createGenerationSelectionReceipt} from '../../lib/compatibility.ts';
+import {extractConfig} from '../../lib/utils.ts';
 import {CountingIncDecGeneratorSchema, spec as oneSpec} from './counting-inc-dec/spec.ts';
 import {CountingTenOffsetGeneratorSchema, spec as tenSpec} from './counting-ten-offset/spec.ts';
 import {CountingHundredOffsetGeneratorSchema, spec as hundredSpec} from './counting-hundred-offset/spec.ts';
 
-const view: ViewChoiceModel = {
-    viewId: 'offset-evidence', generalLabels: [], schema: {},
-    spec: {viewId: 'offset-evidence', generalLabels: []}
-};
-const lowerBounds = [
-    [Scope.NumbersLargerZero, 0], [Scope.NumbersLarger5, 5], [Scope.NumbersLarger10, 10],
-    [Scope.NumbersLarger20, 20], [Scope.NumbersLarger100, 100], [Scope.NumbersLarger120, 120]
-] as const;
-const upperBounds = [
-    [Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10], [Scope.NumbersSmaller20, 20],
-    [Scope.NumbersSmaller100, 100], [Scope.NumbersSmaller120, 120], [Scope.NumbersSmaller1000, 1000]
-] as const;
-const profiles: readonly [readonly string[], CountingOffsetOperandProfile, number | null][] = [
-    [[], 'unrestricted', null], [[Scope.TwoDigitLargestOperand], 'two-digit', 2],
-    [[Scope.ThreeDigitLargestOperand], 'three-digit', 3]
-];
-const modules = [
-    {step: 1, schema: CountingIncDecGeneratorSchema, spec: oneSpec, profiles: profiles.slice(0, 1)},
-    {step: 10, schema: CountingTenOffsetGeneratorSchema, spec: tenSpec, profiles},
-    {step: 100, schema: CountingHundredOffsetGeneratorSchema, spec: hundredSpec, profiles: [profiles[0], profiles[2]]}
-] as const;
+const view: ViewChoiceModel = {viewId: 'offset-evidence', generalLabels: [], schema: {},
+    spec: {viewId: 'offset-evidence', generalLabels: []}};
+const widths = [[[], 'unrestricted', null], [[Scope.TwoDigitLargestOperand], 'two-digit', 2],
+    [[Scope.ThreeDigitLargestOperand], 'three-digit', 3]] as const;
 
-describe('counting offset semantic feasibility', () => {
-    it.each(modules)('plans exactly the feasible selected labels for offset $step', ({step, schema, spec, profiles: supportedProfiles}) => {
-        const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
-        for (const [lower, min] of lowerBounds) {
-            for (const [upper, max] of upperBounds.filter(([label]) => (schema.range[0] as readonly string[]).includes(label))) {
-                for (const [profileLabels, operandProfile, digitCount] of supportedProfiles) {
-                    for (const [label, direction] of [[Area.Increment, 'inc'], [Area.Decrement, 'dec']] as const) {
-                        const labels = [...(step === 1 && min === 0 ? [] : [lower]), upper, label, ...profileLabels];
-                        const context = `${spec.generatorId}: ${JSON.stringify({min, max, direction, operandProfile})}`;
-                        const expectedStarts = Array.from({length: max}, (_, index) => index + 1).filter(start => {
-                            const result = direction === 'inc' ? start + step : start - step;
-                            return [start, step, result].every(value => value >= min && value <= max)
-                                && result > 0 && !/0/.test(`${start}${result}`)
-                                && (digitCount === null || start >= step && String(start).length === digitCount);
-                        });
-                        const planned = planModelCompatibility({id: 'offset-domain', labels}, model, view);
-                        expect(planned.supported, context).toBe(expectedStarts.length > 0);
-                        expect(countingOffsetStarts({range: {min, max}, direction}, step, operandProfile), context)
-                            .toEqual(expectedStarts);
-                        if (!planned.supported) continue;
-                        const bindings = bindingsForSelection(planned.plan, sampleGenerationPlan(planned.plan, () => 0));
-                        const resolved = resolveSchemaChoices(schema, labels, bindings.generator);
-                        expect(resolved.config.range, context).toEqual(step === 1 ? createCanonicalNumericRange(max) : {min, max});
-                        expect(resolved.config.direction, context).toBe(direction);
-                        if ('operandProfile' in resolved.config) expect(resolved.config.operandProfile, context).toBe(operandProfile);
-                        expect(resolved.resolvedLabels, context).toEqual(expect.arrayContaining(labels));
-                    }
-                }
-            }
-        }
-    });
-
+describe('offset semantic feasibility', () => {
     it.each([
-        [10, CountingTenOffsetGeneratorSchema, tenSpec, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller20],
-        [100, CountingHundredOffsetGeneratorSchema, hundredSpec, Scope.ThreeDigitLargestOperand, Scope.NumbersSmaller120]
-    ] as const)('keeps only a feasible direction for a tight profiled offset %i request', (step, schema, spec, profile, upper) => {
-        const labels = [Scope.NumbersLargerZero, upper, profile];
-        const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
-        const planned = planModelCompatibility({id: 'tight-offset', labels}, model, view);
-        expect(planned.supported).toBe(true);
-        if (!planned.supported) throw new Error(planned.reason);
-        for (const draw of [0, 0.5, 0.999]) {
-            const bindings = bindingsForSelection(planned.plan, sampleGenerationPlan(planned.plan, () => draw));
-            const resolved = resolveSchemaChoices(schema, labels, bindings.generator);
-            expect(resolved.config.direction).toBe('dec');
-            expect(resolved.resolvedLabels).toContain(Area.Decrement);
-            expect(countingOffsetStarts(resolved.config, step, resolved.config.operandProfile!)).not.toEqual([]);
+        {step: 10, schema: CountingTenOffsetGeneratorSchema, spec: tenSpec, widths},
+        {step: 100, schema: CountingHundredOffsetGeneratorSchema, spec: hundredSpec, widths: [widths[0], widths[2]]}
+    ] as const)('plans exactly the complete finite feasible contexts for step$step', ({step, schema, spec, widths}) => {
+        for (const upper of schema.range[0]) {
+            const maximum = Number(upper.split('/NumbersSmaller')[1]), range = createCanonicalNumericRange(maximum);
+            for (const [profileLabels, , digits] of widths) for (const [directionLabel, direction] of [[Area.Increment, 'inc'], [Area.Decrement, 'dec']] as const)
+                for (const [zeroLabel, requireZero] of [[Scope.NumbersWithZero, true], [Scope.NumbersWithoutZero, false]] as const) {
+                    const labels = [upper, ...profileLabels, directionLabel, zeroLabel];
+                    const expected = Array.from({length: maximum}, (_, index) => index + 1).filter(start => {
+                        const result = start + (direction === 'inc' ? step : -step);
+                        if (result < 1 || result > maximum || /0/.test(`${start}/${result}`)
+                            || digits !== null && (start < step || String(start).length !== digits)
+                            || Math.max(start, result) <= range.maximumAbove) return false;
+                        const coefficients = [start, result].flatMap(number => maximum > 100
+                            ? [Math.floor(number / 100), Math.floor(number % 100 / 10), number % 10]
+                            : [Math.floor(number / 10), number % 10]);
+                        return coefficients.includes(0) === requireZero;
+                    });
+                    const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
+                    const result = planModelCompatibility({id: 'offset-domain', labels}, model, view);
+                    expect(result.supported, labels.join(',')).toBe(expected.length > 0);
+                    if (!result.supported) continue;
+                    const enumeration = enumerateDependencyAuditSelections(result.plan);
+                    expect(enumeration.status).toBe('complete');
+                    expect(enumeration.selections).toHaveLength(1);
+                    const receipt = createGenerationSelectionReceipt(result.plan, enumeration.selections[0]!.choices);
+                    const bindings = bindingsForSelection(result.plan, receipt);
+                    expect(bindings.generator).toHaveProperty('requireZero');
+                    const resolved = resolvePlannedConfigurations({generatorSchema: schema, viewSchema: {}, plan: result.plan,
+                        sampleKey: `offset-domain#${spec.generatorId}#offset-evidence#train#question#inst:0`, seed: 1, attempt: 1,
+                        replay: {version: 1, sampleKey: `offset-domain#${spec.generatorId}#offset-evidence#train#question#inst:0`,
+                            seed: 1, attempt: 1, selection: receipt}});
+                    expect(extractConfig(schema, enumeration.selections[0]!.labels).config).toEqual(resolved.generatorConfig);
+                    expect(resolved.generatorConfig).toEqual({direction, operandProfile: digits === null ? 'unrestricted'
+                        : digits === 2 ? 'two-digit' : 'three-digit', requireZero, range});
+                }
         }
     });
-
-    it('rejects every one-step direction bundle when the selected lower bound excludes one', () => {
-        const choices = CountingIncDecGeneratorSchema.direction[1].labelChoices!;
-        if (choices.kind !== 'alternatives') throw new Error('Expected explicit direction alternatives');
-        expect(choices.alternatives).toHaveLength(6);
-        for (const direction of choices.alternatives!) {
-            const labels = [Scope.NumbersLarger5, Scope.NumbersSmaller20, ...direction];
-            const planned = planModelCompatibility({id: 'unit-operand-bound', labels}, {
-                generatorId: oneSpec.generatorId, generalLabels: oneSpec.generalLabels,
-                schema: CountingIncDecGeneratorSchema, spec: oneSpec
-            }, view);
-            expect(planned.supported).toBe(false);
-            if (planned.supported) throw new Error('The fixed operand 1 is outside the requested range');
-            expect(planned.reason).toBe('uncovered-target');
+    it.each([
+        [CountingTenOffsetGeneratorSchema, tenSpec, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller20],
+        [CountingHundredOffsetGeneratorSchema, hundredSpec, Scope.ThreeDigitLargestOperand, Scope.NumbersSmaller120]
+    ] as const)('retains only the feasible decrement for a tight profiled zero-involving request', (schema, spec, profile, upper) => {
+        const labels = [upper, profile, Scope.NumbersWithZero];
+        const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
+        const result = planModelCompatibility({id: 'tight-offset', labels}, model, view);
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error(result.reason);
+        for (const selection of enumerateDependencyAuditSelections(result.plan).selections) {
+            const direct = extractConfig(schema, selection.labels).config;
+            expect(direct.direction).toBe('dec');
         }
+        for (let seed = 0; seed < 32; seed++) expect(extractConfig(schema, labels).config.direction).toBe('dec');
+    });
+    it('rejects positive global floors for all three mathematical steps', () => {
+        for (const lower of [Scope.NumbersLarger5, Scope.NumbersLarger10, Scope.NumbersLarger100])
+            for (const [schema, spec] of [[CountingIncDecGeneratorSchema, oneSpec],
+                [CountingTenOffsetGeneratorSchema, tenSpec], [CountingHundredOffsetGeneratorSchema, hundredSpec]] as const) {
+                const result = planModelCompatibility({id: 'unit1-outside-floor', labels: [
+                    lower, Scope.NumbersSmaller1000, Area.Increment]}, {
+                    generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec}, view);
+                expect(result.supported).toBe(false);
+            }
     });
 });

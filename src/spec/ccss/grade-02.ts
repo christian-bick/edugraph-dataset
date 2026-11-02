@@ -365,8 +365,8 @@ const placeValueOffsetsBuilder = new DatasetPermutationBuilder()
         [Area.Decrement]
     ])
     .applyLabelVariants([
-        [Scope.StepsOf10, Scope.NumbersLarger10],
-        [Scope.StepsOf100, Scope.NumbersLarger100]
+        [Scope.StepsOf10, Scope.NumbersWithoutZero],
+        [Scope.StepsOf100, Scope.NumbersWithoutZero]
     ]);
 
 // --- 2.NBT.B.9: Explain addition and subtraction strategies ---

@@ -1,74 +1,64 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
-import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {extractConfig, extractSchemaLabels, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {CountingHundredOffsetGenerator} from './generator.ts';
 import {spec} from './spec.ts';
 
-describe('counting-hundred-offset spec', () => {
+describe('counting-hundred-offset declarations', () => {
+    const generator = new CountingHundredOffsetGenerator();
     const countingLabels = [Scope.Before, Scope.After, Scope.AdditiveCount, Scope.SubtractiveCount];
-
-    it('declares its fixed mathematical family as an invariant', () => {
-        expect(spec.generalLabels).toEqual(expect.arrayContaining([Scope.StepsOf100]));
-        expect(new CountingHundredOffsetGenerator().schema).not.toHaveProperty('stepMagnitude');
-    });
-
-    it('supports arithmetic directions without sequence-position or counting capabilities', () => {
-        const labels = [...spec.generalLabels, ...extractSchemaLabels(new CountingHundredOffsetGenerator().schema)];
+    it('retains the fixed step and arithmetic direction without sequence/counting claims', () => {
+        const labels = [...spec.generalLabels, ...extractSchemaLabels(generator.schema)];
+        expect(spec.generalLabels).toContain(Scope.StepsOf100);
         expect(labels).toEqual(expect.arrayContaining([Area.Increment, Area.Decrement]));
         for (const label of countingLabels) expect(labels).not.toContain(label);
+        expect(generator.schema).not.toHaveProperty('stepMagnitude');
+        expect(spec).not.toHaveProperty('inferredLabels');
     });
-
-    it('supports only the optional three-digit largest-operand profile', () => {
-        const generator = new CountingHundredOffsetGenerator();
-        const supported = extractSchemaLabels(generator.schema);
-        expect(supported).toContain(Scope.ThreeDigitLargestOperand);
-        expect(supported).not.toContain(Scope.TwoDigitLargestOperand);
-        expect(spec.generalLabels).not.toContain(Scope.ThreeDigitLargestOperand);
-        for (const direction of [Area.Increment, Area.Decrement]) {
-            const labels = [Scope.NumbersLarger100, Scope.NumbersSmaller1000, direction, Scope.ThreeDigitLargestOperand];
-            expect(extractConfig(generator.schema, labels).config.operandProfile).toBe('three-digit');
-            const stub = generateWithLabels(generator, labels)!;
-            expect(stub.labels).toContain(Scope.ThreeDigitLargestOperand);
-            expect(String(Math.max(stub.data.numObjects, stub.data.stepSize))).toHaveLength(3);
-            expect(stub.data.numObjects).toBeGreaterThanOrEqual(stub.data.stepSize);
+    it('makes zero involvement requestable and rejects false global floors', () => {
+        expect(spec.generalLabels).not.toContain(Scope.NumbersWithoutZero);
+        expect(extractSchemaLabels(generator.schema)).toEqual(expect.arrayContaining([Scope.NumbersWithZero, Scope.NumbersWithoutZero]));
+        expect(extractSchemaLabels(generator.schema)).not.toContain(Scope.NumbersLargerZero);
+        expect(extractSchemaLabels(generator.schema)).not.toContain(Scope.NumbersLarger10);
+        expect(extractSchemaLabels(generator.schema)).not.toContain(Scope.NumbersLarger100);
+        expect(findSchemaFallbackContractIssues(generator.schema)).toEqual([]);
+    });
+    it('keeps optional widths separate from canonical whole-task ranges', () => {
+        for (const [profile, operandProfile, upper] of [[Scope.ThreeDigitLargestOperand, 'three-digit', Scope.NumbersSmaller1000]] as const) {
+            for (const direction of [Area.Increment, Area.Decrement]) {
+                const labels = [upper, direction, profile, Scope.NumbersWithoutZero];
+                setSeed(1234); const before = getRandomState();
+                const config = extractConfig(generator.schema, labels).config;
+                expect(config.operandProfile).toBe(operandProfile);
+                expect(config.requireZero).toBe(false);
+                expect(getRandomState()).toBe(before);
+                const stub = generateWithLabels(generator, labels)!;
+                expect(stub.labels).toEqual(expect.arrayContaining(labels));
+                expect(String(stub.data.numObjects)).toHaveLength(3);
+            }
         }
+        expect(extractSchemaLabels(generator.schema)).not.toContain(Scope.TwoDigitLargestOperand);
     });
-
-    it('preserves small starting operands without inventing a profile claim', () => {
-        const generator = new CountingHundredOffsetGenerator();
-        const labels = [Scope.NumbersSmaller120, Area.Increment];
-        expect(extractConfig(generator.schema, labels).config.operandProfile).toBe('unrestricted');
+    it('preserves unprofiled small-primary mathematics with truthful visible-zero labels', () => {
+        const labels = [Scope.NumbersSmaller120, Area.Increment, Scope.NumbersWithZero];
+        const config = extractConfig(generator.schema, labels).config;
+        expect(config.operandProfile).toBe('unrestricted');
         const stub = generateWithLabels(generator, labels)!;
-        expect(stub.data.numObjects).toBeLessThan(stub.data.stepSize);
+        expect(stub.data.numObjects).toBeLessThan(100);
+        expect([...Object.values(stub.data.startPlaceValue), ...Object.values(stub.data.resultPlaceValue)]).toContain(0);
         expect(stub.labels).not.toContain(Scope.TwoDigitLargestOperand);
         expect(stub.labels).not.toContain(Scope.ThreeDigitLargestOperand);
     });
-
-    it.each([[Area.Increment, 'inc'], [Area.Decrement, 'dec']] as const)(
-        'resolves %s without inventing a counting or sequence-position claim', (direction, incDecType) => {
-            for (let seed = 0; seed < 30; seed++) {
-                setSeed(seed);
-                const stub = generateWithLabels(new CountingHundredOffsetGenerator(), [Scope.NumbersSmaller1000, direction])!;
-                expect(stub.data.stepSize).toBe(100);
-                expect(stub.data.incDecType).toBe(incDecType);
-                expect(stub.data.incDecAnswer).toBe(stub.data.numObjects + (incDecType === 'inc' ? 100 : -100));
-                expect(stub.labels.filter(label => label === Area.Increment || label === Area.Decrement)).toEqual([direction]);
-                for (const label of countingLabels) expect(stub.labels).not.toContain(label);
-            }
-        }
-    );
-
-    it('keeps the same payload family and emits the chosen arithmetic direction when it is unspecified', () => {
+    it('resolves an unspecified direction only among feasible arithmetic choices', () => {
         const seen = new Set<string>();
-        for (let seed = 0; seed < 30; seed++) {
+        for (let seed = 0; seed < 32; seed++) {
             setSeed(seed);
-            const stub = generateWithLabels(new CountingHundredOffsetGenerator(), [Scope.NumbersSmaller1000])!;
-            const {data} = stub;
-            expect(data.stepSize).toBe(100);
-            seen.add(data.incDecType);
-            const expectedDirection = data.incDecType === 'inc' ? Area.Increment : Area.Decrement;
-            expect(stub.labels.filter(label => label === Area.Increment || label === Area.Decrement)).toEqual([expectedDirection]);
+            const stub = generateWithLabels(generator, [Scope.NumbersSmaller1000, Scope.ThreeDigitLargestOperand, Scope.NumbersWithoutZero])!;
+            seen.add(stub.data.incDecType);
+            expect(stub.data.stepSize).toBe(100);
+            expect(stub.labels.filter(label => label === Area.Increment || label === Area.Decrement))
+                .toEqual([stub.data.incDecType === 'inc' ? Area.Increment : Area.Decrement]);
             for (const label of countingLabels) expect(stub.labels).not.toContain(label);
         }
         expect([...seen].sort()).toEqual(['dec', 'inc']);

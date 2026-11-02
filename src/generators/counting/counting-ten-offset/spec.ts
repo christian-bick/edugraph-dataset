@@ -1,23 +1,15 @@
 import {Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
-import {CountingIncDecGeneratorSchema, spec as baseSpec} from '../counting-inc-dec/spec.ts';
-import {arithmeticOffsetDirection, arithmeticOffsetOperandProfile, legacyOffsetRange} from '../arithmetic-offset-schema.ts';
-import {tenOffsetRangeRules} from '../counting-offset-compatibility.ts';
+import {spec as baseSpec} from '../counting-inc-dec/spec.ts';
+import {arithmeticOffsetOperandProfile} from '../arithmetic-offset-schema.ts';
+import {placeValueOffsetRule, placeValueOffsetSchema} from '../counting-offset-compatibility.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'counting-ten-offset',
-    compatibility: tenOffsetRangeRules,
-    generalLabels: [...baseSpec.generalLabels.filter(label => label !== Scope.StepsOf1), Scope.StepsOf10, Scope.TwoOperands]
+    compatibility: [placeValueOffsetRule(10)],
+    generalLabels: [...baseSpec.generalLabels.filter(label => label !== Scope.StepsOf1 && label !== Scope.NumbersWithoutZero),
+        Scope.StepsOf10, Scope.TwoOperands]
 };
-export const CountingTenOffsetGeneratorSchema = {
-    ...CountingIncDecGeneratorSchema,
-    direction: arithmeticOffsetDirection,
-    operandProfile: arithmeticOffsetOperandProfile,
-    range: [
-        legacyOffsetRange[0].filter(label =>
-            label !== Scope.NumbersSmaller5 && label !== Scope.NumbersSmaller10),
-        legacyOffsetRange[1]
-    ]
-} as const;
+export const CountingTenOffsetGeneratorSchema = placeValueOffsetSchema(10, arithmeticOffsetOperandProfile);
 export type CountingTenOffsetGeneratorConfig = ConfigFromSchema<typeof CountingTenOffsetGeneratorSchema>;

@@ -1,62 +1,62 @@
-import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as randomness from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {CountingTenOffsetGenerator} from './generator.ts';
+import {placeValueOffsetRangeProfiles, placeValueOffsetStarts} from '../place-value-offset-domain.ts';
+import {countingOffsetStarts} from '../counting-offset.ts';
 
 describe('CountingTenOffsetGenerator', () => {
     const generator = new CountingTenOffsetGenerator();
-
-    it('generates complete, consistent counting-ten-offset evidence', () => {
-        for (let seed = 0; seed < 50; seed++) {
-            setSeed(seed);
-            const data = generator.generate({range: {min: 1, max: 999}, direction: 'inc', operandProfile: 'unrestricted'})!.data;
-            expect(data.stepSize).toBe(10);
-            expect(data.incDecAnswer).toBe(data.numObjects + 10);
-            const start = data.startPlaceValue;
-            const result = data.resultPlaceValue;
-            expect(data.numObjects).toBe((start.hundreds ?? 0) * 100 + start.tens * 10 + start.ones);
-            expect(data.incDecAnswer).toBe((result.hundreds ?? 0) * 100 + result.tens * 10 + result.ones);
-        }
-    });
-
-    it('is deterministic for a seed and configuration', () => {
-        setSeed('counting-ten-offset');
-        const first = generator.generate({range: {min: 1, max: 999}, direction: 'inc', operandProfile: 'unrestricted'});
-        setSeed('counting-ten-offset');
-        expect(generator.generate({range: {min: 1, max: 999}, direction: 'inc', operandProfile: 'unrestricted'})).toEqual(first);
-    });
-
-    it('validates configuration before generating evidence', () => {
+    afterEach(() => vi.restoreAllMocks());
+    it('requires every mathematical selector', () => {
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({})).toThrow();
-        expect(() => generator.generate({range: {min: 1, max: 100}, direction: 'inc'})).toThrow('operandProfile');
-        expect(generator.generate({range: {min: 1, max: 9}, direction: 'inc', operandProfile: 'unrestricted'})).toBeNull();
+        expect(() => generator.generate({})).toThrow('range');
+        expect(() => generator.generate({range: createCanonicalNumericRange(1000), direction: 'inc',
+            operandProfile: 'unrestricted'})).toThrow('requireZero');
     });
-
-    it('preserves the same step for decrementing', () => {
-        const data = generator.generate({range: {min: 1, max: 999}, direction: 'dec', operandProfile: 'unrestricted'})!.data;
-        expect(data.incDecAnswer).toBe(data.numObjects - 10);
+    it('uniformly projects every canonical range, direction, width and zero profile in one draw', () => {
+        const draw = vi.spyOn(randomness, 'random');
+        for (const {range} of placeValueOffsetRangeProfiles(10)) for (const direction of ['inc', 'dec'] as const)
+            for (const operandProfile of ['unrestricted', 'two-digit', 'three-digit'] as const)
+                for (const requireZero of [false, true]) {
+                    const starts = placeValueOffsetStarts(10, range, direction, operandProfile, requireZero);
+                    draw.mockClear();
+                    if (!starts.length) {
+                        expect(generator.generate({range, direction, operandProfile, requireZero})).toBeNull();
+                        expect(draw).not.toHaveBeenCalled(); continue;
+                    }
+                    for (let bin = 0; bin < starts.length; bin++) {
+                        draw.mockClear().mockReturnValue((bin + .5) / starts.length);
+                        const data = generator.generate({range, direction, operandProfile, requireZero})!.data;
+                        expect(data.numObjects).toBe(starts[bin]);
+                        expect(data.incDecAnswer).toBe(data.numObjects + (direction === 'inc' ? 10 : -10));
+                        expect(data.stepSize).toBe(10);
+                        expect(data.simpleAnswer).toBe(data.numObjects);
+                        const coefficients = [...Object.values(data.startPlaceValue), ...Object.values(data.resultPlaceValue)];
+                        expect(coefficients.includes(0)).toBe(requireZero);
+                        expect(draw).toHaveBeenCalledTimes(1);
+                    }
+                }
     });
-
-    it.each(['inc', 'dec'] as const)('keeps three-digit starts separate from whole-task bounds for %s', direction => {
-        for (let seed = 0; seed < 30; seed++) {
-            setSeed(seed);
-            const data = generator.generate({range: {min: 10, max: 1000}, direction, operandProfile: 'three-digit'})!.data;
-            expect(data.numObjects).toBeGreaterThanOrEqual(100);
-            expect(data.numObjects).toBeLessThanOrEqual(999);
-            for (const value of [data.numObjects, data.stepSize, data.incDecAnswer]) {
-                expect(value).toBeGreaterThanOrEqual(10);
-                expect(value).toBeLessThanOrEqual(1000);
+    it('preserves the complete old source support after correcting its false global floor', () => {
+        for (const direction of ['inc', 'dec'] as const) {
+            for (const [upper, operandProfile] of [[100, 'two-digit'], [1000, 'three-digit']] as const) {
+                expect(placeValueOffsetStarts(10, createCanonicalNumericRange(upper), direction, operandProfile, false))
+                    .toEqual(countingOffsetStarts({range: {min: 10, max: upper}, direction}, 10, operandProfile));
             }
         }
-        expect(generator.generate({range: {min: 100, max: 1000}, direction, operandProfile: 'three-digit'})).toBeNull();
     });
-
-    it.each(['inc', 'dec'] as const)('enforces a two-digit largest starting operand for %s', direction => {
-        for (let seed = 0; seed < 30; seed++) {
-            setSeed(seed);
-            const data = generator.generate({range: {min: 1, max: 1000}, direction, operandProfile: 'two-digit'})!.data;
-            expect(data.numObjects).toBeGreaterThanOrEqual(data.stepSize);
-            expect(String(data.numObjects)).toHaveLength(2);
-        }
+    it('replays deterministically and rejects malformed range/direction without entropy', () => {
+        const config = {range: createCanonicalNumericRange(1000), direction: 'inc' as const,
+            operandProfile: 'three-digit' as const, requireZero: false};
+        randomness.setSeed(42); randomness.random(); const continuation = randomness.getRandomState();
+        randomness.setSeed(42); const first = generator.generate(config);
+        expect(first).not.toBeNull(); expect(randomness.getRandomState()).toBe(continuation);
+        randomness.setSeed(42); expect(generator.generate(config)).toEqual(first);
+        const draw = vi.spyOn(randomness, 'random');
+        expect(generator.generate({...config, range: {min: 1, max: 999} as never})).toBeNull();
+        expect(generator.generate({...config, direction: 'bad'} as never)).toBeNull();
+        expect(generator.generate({...config, requireZero: 'bad'} as never)).toBeNull();
+        expect(draw).not.toHaveBeenCalled();
     });
 });

@@ -57,11 +57,15 @@ export function generateCountingOffset<TStep extends 1 | 10 | 100>(
     if (validStarts.length === 0) return null;
 
     const numObjects = validStarts[Math.floor(random() * validStarts.length)];
-    const incDecAnswer = incDecType === 'inc'
-        ? numObjects + stepSize
-        : numObjects - stepSize;
+    return {data: buildCountingOffsetProblem(numObjects, incDecType, stepSize, resolvedRange.max)};
+}
 
-    const useHundreds = resolvedRange.max > 100;
+/** The same canonical place counts feed the one-step and place-value-offset families. */
+export function buildCountingOffsetProblem<TStep extends 1 | 10 | 100>(
+    numObjects: number, incDecType: 'inc' | 'dec', stepSize: TStep, maximum: number
+): CountingOffsetProblem<TStep> {
+    const incDecAnswer = incDecType === 'inc' ? numObjects + stepSize : numObjects - stepSize;
+    const useHundreds = maximum > 100;
     const decompose = (value: number) => useHundreds
         ? {
             hundreds: Math.floor(value / 100),
@@ -74,14 +78,12 @@ export function generateCountingOffset<TStep extends 1 | 10 | 100>(
         };
 
     return {
-        data: {
-            numObjects,
-            incDecType,
-            incDecAnswer,
-            simpleAnswer: numObjects,
-            stepSize,
-            startPlaceValue: decompose(numObjects),
-            resultPlaceValue: decompose(incDecAnswer)
-        }
+        numObjects,
+        incDecType,
+        incDecAnswer,
+        simpleAnswer: numObjects,
+        stepSize,
+        startPlaceValue: decompose(numObjects),
+        resultPlaceValue: decompose(incDecAnswer)
     };
 }
