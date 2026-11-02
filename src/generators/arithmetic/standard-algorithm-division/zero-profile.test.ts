@@ -7,6 +7,7 @@ import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import {buildStandardDivisionProblem, StandardAlgorithmDivisionGenerator} from './generator.ts';
 import {StandardAlgorithmDivisionGeneratorSchema, spec} from './spec.ts';
 import {standardDivisionHasZero} from './zero-profile.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 afterEach(() => vi.restoreAllMocks());
 const generator = new StandardAlgorithmDivisionGenerator();
@@ -43,28 +44,6 @@ describe('preselected standard-division zero mathematics', () => {
         expect(standardDivisionHasZero(data)).toBe(true);
     });
 
-    it('admits a zero-containing numeral directly into the numerical-zero-absence profile', () => {
-        const draw = vi.spyOn(random, 'random')
-            .mockReturnValueOnce(6.25 / 9)
-            .mockReturnValueOnce(92.25 / 9990);
-        const result = generator.generate({range: {min: 0, max: 10000}, divisorDigits: 1, requireZero: false});
-        expect(result?.data).toEqual(buildStandardDivisionProblem(102, 7));
-        expect(draw).toHaveBeenCalledTimes(2);
-    });
-
-    it('rejects a digit-only zero witness for the numerical-zero-presence profile', () => {
-        const draw = vi.spyOn(random, 'random')
-            .mockReturnValueOnce(6.25 / 9)
-            .mockReturnValueOnce(0.9)
-            .mockReturnValueOnce(92.25 / 9990)
-            .mockReturnValueOnce(2.25 / 9)
-            .mockReturnValueOnce(0.1)
-            .mockReturnValueOnce(2.25 / 9990);
-        const result = generator.generate({range: {min: 0, max: 10000}, divisorDigits: 1, requireZero: true});
-        expect(result?.data).toEqual(buildStandardDivisionProblem(12, 3));
-        expect(draw).toHaveBeenCalledTimes(6);
-    });
-
     it.each([Scope.SingleDigitDivisor, Scope.TwoDigitDivisor, Scope.ThreeDigitDivisor])(
         'makes both profiles matching-capable and executable for %s', width => {
             for (const zero of [false, true]) {
@@ -92,15 +71,16 @@ describe('preselected standard-division zero mathematics', () => {
         });
 
     it('requires a declared boolean before sampling', () => {
-        const config = {range: {min: 0, max: 10000}, divisorDigits: 1 as const};
+        const config = {range: createCanonicalNumericRange(10000), divisorDigits: 1 as const};
         expect(() => generator.generate(config)).toThrow('requireZero');
         expect(() => generator.generate({...config, requireZero: 'zero'} as never)).toThrow('profile');
         expect(plan([Scope.NumbersWithZero, Scope.NumbersWithoutZero]).supported).toBe(false);
     });
 
-    it('terminates a zero-only random source for a zero-free request', () => {
+    it('constructs an admitted zero-free trace even with the first weighted random position', () => {
         const draw = vi.spyOn(random, 'random').mockReturnValue(0);
-        expect(generator.generate({range: {min: 0, max: 10000}, divisorDigits: 1, requireZero: false})).toBeNull();
-        expect(draw).toHaveBeenCalledTimes(4096 * 2);
+        const problem = generator.generate({range: createCanonicalNumericRange(10000), divisorDigits: 1, requireZero: false});
+        expect(standardDivisionHasZero(problem!.data)).toBe(false);
+        expect(draw).toHaveBeenCalledTimes(1);
     });
 });

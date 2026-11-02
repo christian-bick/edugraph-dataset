@@ -37,8 +37,8 @@ describe('standard-algorithm-division capability resolution', () => {
     it.each([[Scope.NumbersSmaller10000, 10000], [Scope.NumbersSmaller100000, 100000]] as const)(
         'resolves the true magnitude capability %s', (label, bound) => {
             const problem = generateWithLabels(new StandardAlgorithmDivisionGenerator(), [...mathematicalLabels, label])!;
-            expect(problem.data.dividend).toBeLessThan(bound);
-            expect(problem.data.divisor).toBeLessThan(bound);
+            expect(problem.data.dividend).toBeLessThanOrEqual(bound);
+            expect(problem.data.divisor).toBeLessThanOrEqual(bound);
             expect(problem.labels).toContain(label);
         }
     );

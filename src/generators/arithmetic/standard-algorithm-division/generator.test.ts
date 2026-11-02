@@ -1,13 +1,15 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import type {StandardDivisionProblem} from '../../../types/problems.ts';
 import {buildStandardDivisionProblem, StandardAlgorithmDivisionGenerator} from './generator.ts';
 import type {StandardAlgorithmDivisionGeneratorConfig} from './spec.ts';
+import {standardDivisionDomain, standardDivisionDomainRow, standardDivisionQuantities} from './domain.ts';
 
 const generator = new StandardAlgorithmDivisionGenerator();
 const config = (divisorDigits: 1 | 2 | 3 = 3, max = 100000): StandardAlgorithmDivisionGeneratorConfig => ({
-    range: {min: 0, max}, divisorDigits, requireZero: true
+    range: createCanonicalNumericRange(max), divisorDigits, requireZero: true
 });
 
 const assertTrace = (data: StandardDivisionProblem): void => {
@@ -91,7 +93,7 @@ describe('standard-algorithm-division mathematical trace', () => {
 describe('standard-algorithm-division configuration and variation', () => {
     it('rejects empty and incomplete configuration', () => {
         expect(() => generator.generate({})).toThrow(GeneratorValidationError);
-        expect(() => generator.generate({range: {min: 0, max: 10000}})).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({range: createCanonicalNumericRange(10000)})).toThrow(GeneratorValidationError);
         expect(() => generator.generate({divisorDigits: 1})).toThrow(GeneratorValidationError);
     });
 
@@ -107,21 +109,22 @@ describe('standard-algorithm-division configuration and variation', () => {
     });
 
     it('keeps every positional witness within the selected bound for all three divisor widths', () => {
-        for (const max of [10000, 100000, Number.MAX_SAFE_INTEGER]) {
+        for (const max of [10000, 100000]) {
             for (const width of [1, 2, 3] as const) {
                 for (let seed = 0; seed < 100; seed++) {
                     setSeed(seed);
                     const data = generator.generate(config(width, max))!.data;
-                    const bound = max === Number.MAX_SAFE_INTEGER ? 100000 : max;
+                    const bound = max;
                     expect(data.dividend).toBeGreaterThanOrEqual(10);
-                    expect(data.dividend).toBeLessThan(bound);
+                    expect(data.dividend).toBeLessThanOrEqual(bound);
                     expect(String(data.divisor)).toHaveLength(width);
-                    expect(data.quotient).toBeLessThan(bound);
-                    expect(data.remainder).toBeLessThan(bound);
+                    expect(hasCanonicalRangeWitness(standardDivisionQuantities(data), createCanonicalNumericRange(max))).toBe(true);
+                    expect(data.quotient).toBeLessThanOrEqual(bound);
+                    expect(data.remainder).toBeLessThanOrEqual(bound);
                     data.steps.forEach(step => {
-                        expect(step.partialDividend).toBeLessThan(bound);
-                        expect(step.product).toBeLessThan(bound);
-                        expect(step.nextBringDown?.partialDividend ?? 0).toBeLessThan(bound);
+                        expect(step.partialDividend).toBeLessThanOrEqual(bound);
+                        expect(step.product).toBeLessThanOrEqual(bound);
+                        expect(step.nextBringDown?.partialDividend ?? 0).toBeLessThanOrEqual(bound);
                     });
                     assertTrace(data);
                 }
@@ -129,16 +132,18 @@ describe('standard-algorithm-division configuration and variation', () => {
         }
     });
 
-    it('produces exact, imperfect, zero-quotient, internal-zero and trailing-zero instances', () => {
+    it('retains exact, imperfect, zero-quotient, internal-zero and trailing-zero support', () => {
         const observed = new Set<string>();
-        for (let seed = 0; seed < 160; seed++) {
-            setSeed(seed);
-            const data = generator.generate(config(3))!.data;
-            if (data.remainder === 0) observed.add('exact');
-            if (data.remainder > 0) observed.add('imperfect');
-            if (data.quotient === 0) observed.add('zero');
-            if (/\d0\d/.test(String(data.quotient))) observed.add('internal-zero');
-            if (data.quotient > 0 && data.quotient % 10 === 0) observed.add('trailing-zero');
+        for (const upper of [1000, 10000, 100000]) {
+            const domain = standardDivisionDomain(3, true, createCanonicalNumericRange(upper));
+            for (let index = 0; index < domain.rows.length / 6; index++) {
+                const row = standardDivisionDomainRow(domain, index);
+                if (row.firstRemainder === 0) observed.add('exact');
+                if (row.lastRemainder > 0) observed.add('imperfect');
+                if (row.quotient === 0) observed.add('zero');
+                if (/\d0\d/.test(String(row.quotient))) observed.add('internal-zero');
+                if (row.quotient > 0 && row.quotient % 10 === 0) observed.add('trailing-zero');
+            }
         }
         expect([...observed].sort()).toEqual(['exact', 'imperfect', 'internal-zero', 'trailing-zero', 'zero']);
     });

@@ -1225,3 +1225,37 @@ Sixty-seven focused tests /six files, every45-cell direct/planned configuration,
 Question/Solution projections and240 actual native/replay controls pass. All448 unaffected
 symbolic/substitution/modeling controls preserve data and PRNG continuation. Evidence:
 `temp/range-autonomous/batch6/measurement-time/{algebra-focused.log,algebra-verification.json}`.
+
+## Sixth batch: standard integer division
+
+All99,890,010 original dividend/divisor pairs remain within their existing99,999 ceiling, grouped
+into48 canonical cells. Compact quotient/remainder intervals retain the old zero-scenario mixture
+and uniform zero-free conditional masses. Quotient digits participate where they multiply the
+divisor; ordinary bring-down glyphs do not add quantities. The backward-remainder argument and
+complete small-divisor remainder checks prove the strongest lower distinction.
+
+The existing Grade6 target/route remains, six→48 selections, closing six omissions. No source,
+payload or renderer changes occur. Early provider resolvers now consider declared range requests
+so broad direct requests cannot choose an empty branch. Eighty-four focused tests /seven files,
+full types and module specs pass. Independent positional traces cover every compact row boundary;
+192 same-value Q/S projections,144 all-cell configuration/replay checks and six actual source
+draws/replays pass. Evidence:
+`temp/range-autonomous/batch6/arithmetic/verify-standard-division.json` and the associated logs.
+
+## Sixth batch: standard decimal column addition/subtraction
+
+Twenty-six feasible range/zero profiles partition the largest existing raw-coefficient corpus
+of1m. Weighted top prefixes and exact digit/borrow ranks preserve its conditional nested source
+law without the former2048-draw rejection exhaustion. Every old mathematical frame remains;
+the old cap mixture and retry continuation change as accepted for profile sampling. The actual
+required quantities never exceed100k, so the unsupported explicit1m upper capability retires;
+neither current source target requested it.
+
+Required unit counts, working sums/differences and positive carry/borrow quantities establish
+the bounds; the existing zero predicate is unchanged. No target, payload or renderer changes
+occur. Both routes remain, four→26 selections, closing four omissions. Sixty-five focused tests /
+seven files, complete types, the1m digit census,495,450 independent low-coefficient subtraction
+traces, rank/CDF checks, all compact-case random endpoints,2,400 stress draws/replays and all
+native configurations/Q/S projections pass. The original seed105 zero-free mathematical frame
+remains constructible. Evidence:
+`temp/range-autonomous/batch6/fraction-decimal/add-sub-proof.md` and its accompanying logs.
