@@ -48,13 +48,20 @@ export const spec: GeneratorSpec = {
     ]
 };
 
-const resolveOperation = selectExactLabelMap([
-    [Area.Addition, 'addition'],
-    [Area.Multiplication, 'multiplication']
-] as const);
+const resolveOperation = withLabelChoices(exactResolver((labels: string[]) => {
+    const operation = operationFromLabels(labels);
+    const zero = labels.includes(Scope.NumbersWithZero), nonzero = labels.includes(Scope.NumbersWithoutZero);
+    const property = patternProperty(labels.includes(Area.CommutativeLaw), labels.includes(Area.AssociativeLaw),
+        labels.includes(Area.DistributiveLaw) || zero);
+    const requested = rangeLabels.filter(label => labels.includes(label));
+    if (operation === undefined || property === undefined || zero && nonzero || nonzero && property === 'distributive') return undefined;
+    return ranges.some(profile => requested.every(label => profile.labels.includes(label))
+        && patternDomain(operation, property, profile.range).length > 0) ? operation : undefined;
+}), {kind: 'alternatives', alternatives: [[Area.Addition], [Area.Multiplication]], contextLabels: [
+    Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw, Scope.NumbersWithZero, Scope.NumbersWithoutZero, ...rangeLabels]});
 
 export const ArithmeticPatternsGeneratorSchema = {
-    operation: [[Area.Addition, Area.Multiplication], resolveOperation],
+    operation: [[Area.Addition, Area.Multiplication], resolveOperation, [[Area.Addition], [Area.Multiplication]]],
     useCommutativeLaw: [[Area.CommutativeLaw], hasLabel(Area.CommutativeLaw)],
     useAssociativeLaw: [[Area.AssociativeLaw], hasLabel(Area.AssociativeLaw)],
     useDistributiveLaw: [

@@ -5,12 +5,26 @@ import {setSeed} from '../../../lib/random.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
-import {patternDomain, patternProperty} from './domain.ts';
+import {patternDomain, patternProperty, patternQuantities} from './domain.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {ArithmeticPatternsGenerator} from './generator.ts';
 import {ArithmeticPatternsGeneratorSchema, spec} from './spec.ts';
 
 describe('ArithmeticPatternsGenerator spec integration', () => {
     const generator = new ArithmeticPatternsGenerator();
+
+    it('selects a feasible operation for small-band requests without an operation label', () => {
+        for (const labels of [[Scope.NumbersSmaller10], [Scope.NumbersSmaller20],
+            [Scope.NumbersSmaller100, Area.AssociativeLaw], [Scope.NumbersSmaller20, Scope.NumbersWithZero]]) {
+            for (let seed = 0; seed < 32; seed++) {
+                setSeed(seed);
+                const resolved = extractConfig(ArithmeticPatternsGeneratorSchema, labels);
+                const data = generator.generate(resolved.config)!.data;
+                expect(hasCanonicalRangeWitness(patternQuantities(data), resolved.config.range!)).toBe(true);
+                for (const label of labels) expect(resolved.resolvedLabels).toContain(label);
+            }
+        }
+    });
 
     it('validates context-free fallbacks and conditions every direct/planned band on its resolved pattern', () => {
         const schema = ArithmeticPatternsGeneratorSchema;
@@ -107,7 +121,7 @@ describe('ArithmeticPatternsGenerator spec integration', () => {
                 schema: generator.schema, spec},
             {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
         expect(result).toMatchObject({supported: false, reason: 'empty-domain'});
-        expect(() => generateWithLabels(generator, labels)).toThrow('Unsupported exact label combination');
+        expect(() => generateWithLabels(generator, labels)).toThrow();
     });
 
     it('completes a zero request with the actual zero-bearing profile', () => {

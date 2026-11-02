@@ -5,6 +5,8 @@ import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} fro
 import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {multiplicationDomain} from './domain.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {partialProductQuantities} from './domain.ts';
 import {MultiDigitMultiplicationGenerator} from './generator.ts';
 import {spec, MultiDigitMultiplicationGeneratorSchema as schema} from './spec.ts';
 
@@ -18,6 +20,17 @@ const profiles = [
 
 describe('MultiDigitMultiplicationGenerator spec integration', () => {
     const generator = new MultiDigitMultiplicationGenerator();
+
+    it('selects a feasible width before resolving a broad small-range request', () => {
+        for (const rangeLabels of [[Scope.NumbersSmaller5], [Scope.NumbersSmaller10],
+            [Scope.NumbersSmaller100, Scope.NumbersLarger5]]) for (let seed = 0; seed < 32; seed++) {
+            setSeed(seed);
+            const resolved = extractConfig(schema, rangeLabels);
+            const data = generator.generate(resolved.config)!.data;
+            expect(hasCanonicalRangeWitness(partialProductQuantities(data), resolved.config.range!)).toBe(true);
+            for (const label of rangeLabels) expect(resolved.resolvedLabels).toContain(label);
+        }
+    });
 
     it('keeps direct and planned ranges equivalent for every feasible width/band cell', () => {
         expect(findSchemaFallbackContractIssues(schema)).toEqual([]);

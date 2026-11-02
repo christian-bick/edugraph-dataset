@@ -12,14 +12,14 @@ const divisorProfiles = [
     [Scope.TwoDigitDivisor]
 ] as const;
 
-const resolveDivisorDigits = selectExactLabelSetMap([
+const divisorDigitsFromLabels = selectExactLabelSetMap([
     [divisorProfiles[0], 1],
     [divisorProfiles[1], 2],
     // The two-digit domain also has a zero-free conditional mathematical profile.
     [[Scope.TwoDigitDivisor, Scope.NumbersWithoutZero], 2]
 ] as const);
 
-const resolveDividendDigits = selectExactLabelMap([
+const dividendDigitsFromLabels = selectExactLabelMap([
     [Scope.SingleDigitDividend, 1],
     [Scope.TwoDigitDividend, 2],
     [Scope.ThreeDigitDividend, 3],
@@ -43,6 +43,27 @@ const ranges = canonicalRangeProfiles.filter(({range}) => range.max <= 10000 && 
         .some(zero => partialQuotientDomain(dividend, divisor, zero, range).count > 0))));
 const rangeChoices = ranges.map(({labels}) => labels);
 const rangeLabels = [...new Set(rangeChoices.flat())];
+const feasible = ranges.flatMap(profile => [1, 2, 3, 4].flatMap(dividend => [1, 2].flatMap(divisor => [false, true].flatMap(zero =>
+    partialQuotientDomain(dividend, divisor, zero, profile.range).count > 0
+        ? [{labels: [...profile.labels, dividendLabels[dividend - 1]!, divisor === 1 ? Scope.SingleDigitDivisor : Scope.TwoDigitDivisor,
+            zero ? Scope.NumbersWithZero : Scope.NumbersWithoutZero, ...(divisor === 1 ? [Area.ImperfectDivisibility] : [])]}] : []))));
+const feasibilityLabels = [...contextLabels, ...rangeLabels, Area.ImperfectDivisibility];
+const admitsRequest = (labels: string[]) => feasible.some(profile => feasibilityLabels.filter(label => labels.includes(label))
+    .every(label => profile.labels.includes(label)));
+const resolveDivisorDigits = withLabelChoices(exactResolver((labels: string[]) => {
+    const digits = divisorDigitsFromLabels(labels);
+    return digits !== undefined && admitsRequest(labels) ? digits : undefined;
+}), {...divisorDigitsFromLabels.labelChoices!, contextLabels: [...dividendLabels, ...rangeLabels, Scope.NumbersWithZero]});
+const resolveDividendDigits = withLabelChoices(exactResolver((labels: string[]) => {
+    const digits = dividendDigitsFromLabels(labels);
+    return digits !== undefined && admitsRequest(labels) ? digits : undefined;
+}), {...dividendDigitsFromLabels.labelChoices!, contextLabels: [...rangeLabels, Scope.SingleDigitDivisor,
+    Scope.TwoDigitDivisor, Scope.NumbersWithZero, Scope.NumbersWithoutZero], resolvedContext: true});
+const resolveZero = withLabelChoices(exactResolver((labels: string[]) => {
+    const zero = resolvePartialQuotientZero(labels);
+    return zero !== undefined && admitsRequest(labels) ? zero : undefined;
+}), {...resolvePartialQuotientZero.labelChoices!, contextLabels: [...dividendLabels, Scope.SingleDigitDivisor,
+    Scope.TwoDigitDivisor, ...rangeLabels], resolvedContext: true});
 const resolveRange = withLabelChoices(exactResolver((labels: string[]) => {
     const range = resolveCanonicalRangeFromLabels(labels);
     return range && permitsRange(labels, range) ? range : undefined;
@@ -92,11 +113,12 @@ export const MultiDigitDivisionGeneratorSchema = {
             Scope.ThreeDigitDividend,
             Scope.FourDigitDividend
         ],
-        resolveDividendDigits
+        resolveDividendDigits,
+        dividendLabels.map(label => [label])
     ],
     requireZero: [
         [Scope.NumbersWithZero, Scope.NumbersWithoutZero],
-        resolvePartialQuotientZero,
+        resolveZero,
         [[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]
     ],
     range: [rangeLabels, resolveRange, rangeChoices]

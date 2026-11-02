@@ -22,7 +22,7 @@ const operandDigitProfileFallbacks = [
     [Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]
 ] as const;
 
-const resolveOperandDigitProfile = selectExactLabelSetMap([
+const operandDigitProfileFromLabels = selectExactLabelSetMap([
     [operandDigitProfileFallbacks[0], 'one-by-one'],
     [operandDigitProfileFallbacks[1], 'one-by-two'],
     [operandDigitProfileFallbacks[2], 'one-by-three'],
@@ -42,6 +42,12 @@ const ranges = canonicalRangeProfiles.filter(({range}) => range.max <= 100000 &&
     && profiles.some(profile => multiplicationDomain(profile, range).length > 0));
 const rangeChoices = ranges.map(({labels}) => labels);
 const rangeLabels = [...new Set(rangeChoices.flat())];
+const resolveOperandDigitProfile = withLabelChoices(exactResolver((labels: string[]) => {
+    const profile = operandDigitProfileFromLabels(labels);
+    const requested = rangeLabels.filter(label => labels.includes(label));
+    return profile && ranges.some(range => requested.every(label => range.labels.includes(label))
+        && multiplicationDomain(profile, range.range).length > 0) ? profile : undefined;
+}), {...operandDigitProfileFromLabels.labelChoices!, contextLabels: rangeLabels});
 const resolveRange = withLabelChoices(exactResolver((labels: string[]) => {
     const range = resolveCanonicalRangeFromLabels(labels);
     return range && permitsRange(labels, range) ? range : undefined;

@@ -5,6 +5,8 @@ import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} fro
 import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {partialQuotientDomain} from './domain.ts';
+import {partialQuotientQuantities} from './domain.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {MultiDigitDivisionGenerator} from './generator.ts';
 import {spec, MultiDigitDivisionGeneratorSchema as schema} from './spec.ts';
 
@@ -18,6 +20,19 @@ const twoDigitProfiles = legacyProfiles.slice(1);
 
 describe('MultiDigitDivisionGenerator spec integration', () => {
     const generator = new MultiDigitDivisionGenerator();
+
+    it('selects feasible width and zero providers before resolving partial range requests', () => {
+        for (const labels of [[Scope.NumbersSmaller10], [Scope.NumbersSmaller1000, Scope.NumbersWithZero],
+            [Scope.NumbersSmaller1000, Scope.NumbersWithoutZero], [Scope.NumbersSmaller1000, Scope.NumbersLarger5]]) {
+            for (let seed = 0; seed < 32; seed++) {
+                setSeed(seed);
+                const resolved = extractConfig(schema, labels);
+                const data = generator.generate(resolved.config)!.data;
+                expect(hasCanonicalRangeWitness(partialQuotientQuantities(data), resolved.config.range!)).toBe(true);
+                for (const label of labels) expect(resolved.resolvedLabels).toContain(label);
+            }
+        }
+    });
 
     it('keeps every feasible width/zero/band cell equivalent in direct and planned resolution', () => {
         expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
@@ -34,6 +49,11 @@ describe('MultiDigitDivisionGenerator spec integration', () => {
                 const direct = extractConfig(schema, target);
                 const bindings = Object.fromEntries(normalizeSchemaChoices(schema, target, 'generator')
                     .map(field => [field.field, field.alternatives[0]!.labels]));
+                // A range-aware resolver now rejects the contradictory extra absence
+                // alternative rather than silently ignoring its conflict with presence.
+                bindings.divisorDigits = divisor === 1
+                    ? [Scope.SingleDigitDivisor, Area.ImperfectDivisibility, Scope.NumbersWithoutZero]
+                    : [Scope.TwoDigitDivisor, ...(!zero ? [Scope.NumbersWithoutZero] : [])];
                 bindings.range = labels;
                 const planned = resolveSchemaChoices(schema, target, bindings);
                 expect(planned.config).toEqual(direct.config);

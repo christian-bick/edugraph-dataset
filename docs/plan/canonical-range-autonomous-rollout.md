@@ -1279,3 +1279,17 @@ The shape provider follow-up also completes broad range-only direct requests usi
 shape alternatives. Exact shape requests remain exact, including Rectangle/Square specialization;
 no matching rule or shared resolver changes. All original nine routes /20 selections and40 native
 draws/replays remain, with35 shape/consumer tests passing.
+
+## Sixth batch: broad direct requests in three earlier families
+
+The recurrence, partial-product and partial-quotient provider resolvers now consider later
+range/zero requests before choosing a branch. This repairs supported broad requests that could
+previously select an infeasible width/operation in the direct path. Existing alternatives,
+mathematical domains, native plans and shared resolution are unchanged.
+
+All28 routes and101 emitted selections remain exactly the same. Eighty-five focused tests /
+13 files, full types, module specs and84 fixed-seed native payload/view controls pass. Small-band
+and zero/floor direct requests pass32-seed controls. One manual fixture now selects its intended
+consistent binding instead of combining conflicting zero claims; all28-cell assertions remain.
+No source edits or missing-facet closures are claimed. Evidence:
+`temp/range-autonomous/batch6/arithmetic/verify-fallbacks.json`.
