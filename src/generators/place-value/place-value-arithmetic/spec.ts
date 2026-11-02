@@ -22,12 +22,14 @@ const operationValue = selectExactLabelMap([
 const resolveOperation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
     const selected = operationLabels.filter(label => labels.includes(label));
     if (selected.length !== 1) return undefined;
+    const fixedAddition = labels.includes(Scope.SingleDigitSmallestOperand) || labels.includes(Scope.TwoDigitLargestOperand);
+    if (fixedAddition && operationValue(labels) !== Area.Addition) return undefined;
     const multiples = labels.includes(Scope.MultiplesOf10) || labels.includes(Scope.TwoDigitSmallestOperand);
     // Without the two-digit addition profile, the whole-tens contract is positive/equal subtraction.
     if (multiples && !labels.includes(Scope.TwoDigitLargestOperand) && selected[0] !== Area.Subtraction) return undefined;
     return operationValue(labels);
 }), {kind: 'alternatives', alternatives: operationLabels.map(label => [label]),
-    contextLabels: [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]}));
+    contextLabels: [Scope.MultiplesOf10, Scope.SingleDigitSmallestOperand, Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]}));
 
 import {generatorLabelRule} from '../../compatibility-rules.ts';
 

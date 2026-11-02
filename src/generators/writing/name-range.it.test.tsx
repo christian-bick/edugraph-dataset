@@ -194,4 +194,16 @@ describe('scalar name canonical profiles and legacy isolation', () => {
         expect(() => nameIntegerInterval({...base, minimumBelow: 100}, false)).toThrow();
         expect(() => nameIntegerInterval(base, true)).toThrow();
     });
+
+    it('completes an unbounded explicit zero-name request without treating the missing upper as incompatible', () => {
+        for (let seed = 0; seed < 32; seed++) {
+            rng.setSeed(`zero-name:${seed}`);
+            const resolved = extractConfig(schema, [Area.NumberNameNotation, Scope.NumbersWithZero]);
+            const stub = new WritingGenerator().generate(resolved.config)!;
+            expect(stub.data.number).toBe(0);
+            expect(resolved.resolvedLabels).toContain(Scope.NumbersSmaller5);
+            expect(resolved.resolvedLabels).toContain(Scope.NumbersWithZero);
+        }
+        expect(() => extractConfig(schema, [Area.NumberNameNotation, Scope.NumbersWithZero, Scope.NumbersSmaller10])).toThrow();
+    });
 });

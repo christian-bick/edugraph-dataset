@@ -1441,3 +1441,12 @@ is replaced by exact domain feasibility. No missing-facet closure is claimed. Ev
 Both this family and standard division distinguish partial early-provider feasibility from the
 final exact selected range cell. Hashed/string-seed broad requests and all-place controls cover
 that local resolver regression;82 tests /nine files pass with unchanged existing timeouts.
+
+Independent direct-path review also found two supported requests whose early providers could
+reject a valid later configuration. Explicit zero number names now allow an unspecified upper
+bound to complete to5, while an explicitly incompatible upper remains rejected. Fixed-width
+place-value requests choose the supported addition operation before range resolution. Existing
+source coverage, capabilities and mathematical support are unchanged. The regression suite uses
+hashed seeds, including standard division;157 focused tests /16 files pass. Evidence:
+`temp/range-autonomous/batch6/direct-review-tests.log` and
+`temp/range-autonomous/batch6/arithmetic/root-independent-review.md`.

@@ -63,7 +63,7 @@ describe('standard-division canonical configuration and projections', () => {
             const labels = [Area.DivisionStandardAlgorithm, Scope.IntegerNumbers, Ability.ProcedureExecution, ...additional];
             expect(plan(labels).supported).toBe(true);
             for (let seed = 0; seed < 32; seed++) {
-                setSeed(seed);
+                setSeed(`broad-standard-division-${seed}`);
                 const resolved = extractConfig(StandardAlgorithmDivisionGeneratorSchema, labels);
                 const data = generator.generate(resolved.config)!.data;
                 expect(hasCanonicalRangeWitness(standardDivisionQuantities(data), resolved.config.range!)).toBe(true);

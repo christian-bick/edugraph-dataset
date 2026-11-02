@@ -38,7 +38,7 @@ export const writingNotationLabels = [Area.DigitNotation, Area.NumerationWithInt
 export const resolveWritingNotation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
     const notation = selectExactMatch(labels, writingNotationLabels);
     if (notation === Area.NumberNameNotation && labels.includes(Scope.NumbersWithZero)
-        && resolveRangeFromLabels(labels).max !== 5) return undefined;
+        && upperLabels.some(label => labels.includes(label)) && resolveRangeFromLabels(labels).max !== 5) return undefined;
     return notation;
 }), {kind: 'alternatives', alternatives: writingNotationLabels.map(label => [label]),
     contextLabels: [...writingRangeLabels, Scope.NumbersWithZero, Scope.NumbersWithoutZero]}));

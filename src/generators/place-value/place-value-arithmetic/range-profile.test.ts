@@ -92,5 +92,15 @@ describe('canonical place-value arithmetic domains', () => {
             expect(stub.data.num1).toBe(20);
             expect(stub.data.num2).toBe(10);
         }
+        for (const profile of [[Scope.SingleDigitSmallestOperand], [Scope.MultiplesOf10]]) {
+            for (let seed = 0; seed < 64; seed++) {
+                setSeed(`fixed-addition:${profile[0]}:${seed}`);
+                const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [Area.PlaceValue,
+                    Scope.TwoDigitLargestOperand, Scope.NumbersSmaller100, ...profile])!;
+                expect(stub.data.operation).toBe('addition');
+                expect(stub.data.num1).toBeGreaterThanOrEqual(10);
+                expect(stub.data.num1).toBeLessThan(100);
+            }
+        }
     });
 });
