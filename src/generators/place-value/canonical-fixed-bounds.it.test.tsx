@@ -3,7 +3,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../lib/canonical-numeric-range.ts';
-import {getRandomState, setSeed} from '../../lib/random.ts';
+import {getRandomState, random, setSeed} from '../../lib/random.ts';
 import {generateWithLabels} from '../../lib/utils.ts';
 import {spec as kindergarten} from '../../spec/ccss/kindergarten.ts';
 import {spec as gradeTwo} from '../../spec/ccss/grade-02.ts';
@@ -16,16 +16,18 @@ describe('source bounds for fixed numerical competencies', () => {
         const fixed = gradeTwo.filter(target => target.id.startsWith('2.NBT.A.1a-ten-tens-make-hundred~'));
         const broader = gradeTwo.filter(target => target.id.startsWith('2.NBT.A.1b-hundreds~'));
         expect(fixed).toHaveLength(2);
-        expect(broader).toHaveLength(2);
+        expect(broader).toHaveLength(4);
         expect(new Set(fixed.flatMap(target => target.labels.filter(label =>
             label === Ability.DirectUnderstanding || label === Ability.ProcedureUnderstanding))).size).toBe(2);
         const generator = new PlaceValueHundredsBundlesGenerator();
         for (const target of fixed) {
             expect(target.labels).toContain(Scope.NumbersSmaller100);
             expect(target.labels).not.toContain(Scope.NumbersSmaller120);
+            expect(target.labels).toContain(Area.IntegerRegrouping);
             for (const seed of [0, 31, 99]) {
                 setSeed(seed);
-                const old = generator.generate({range: {min: 0, max: 120}})!;
+                const old = {data: {hundreds: 1, tens: 10, ones: 0, target: 100} as const};
+                random(); // The original fixed hundred sampler also consumed one draw.
                 const continuation = getRandomState();
                 setSeed(seed);
                 const current = generateWithLabels(generator, target.labels)!;
@@ -35,13 +37,14 @@ describe('source bounds for fixed numerical competencies', () => {
                 expect(hasCanonicalRangeWitness([1, 10, current.data.target], createCanonicalNumericRange(100))).toBe(true);
                 expect(hasCanonicalRangeWitness([1, 10, current.data.target], createCanonicalNumericRange(120))).toBe(false);
                 for (const task of ['completion', 'explanation'] as const) for (const isSolutionView of [false, true]) {
-                    const render = (data: typeof old.data) => renderToStaticMarkup(createElement(HundredsBundlesRenderer,
+                    const render = (data: typeof current.data) => renderToStaticMarkup(createElement(HundredsBundlesRenderer,
                         {data, task, isSolutionView, viewId: 'place-value-hundreds-bundles'}));
                     expect(render(current.data)).toBe(render(old.data));
                 }
             }
         }
-        for (const target of broader) expect(target.labels).toContain(Scope.NumbersSmaller1000);
+        expect(broader.filter(target => target.labels.includes(Scope.NumbersSmaller1000))).toHaveLength(2);
+        expect(broader.filter(target => target.labels.includes(Scope.NumbersSmaller100))).toHaveLength(2);
         const draw = generateWithLabels(generator, broader[0]!.labels)!;
         expect(draw.data.tens).toBe(0);
     });

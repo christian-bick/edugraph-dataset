@@ -129,6 +129,7 @@ const numberArrayEquationBuilder = new DatasetPermutationBuilder()
 const tenTensMakeHundredBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.PlaceValue,
+        Area.IntegerRegrouping,
         Scope.MultiplesOf100,
         Scope.NumbersSmaller100,
         Scope.NumbersWithoutZero,
@@ -153,7 +154,7 @@ const hundredsBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Ability.DirectUnderstanding],
         [Ability.ProcedureUnderstanding]
-    ]);
+    ]).applyUpperRangeVariants({bands: [100, 1000]});
 
 // --- 2.NBT.A.2: Count and skip-count within 1000 ---
 const countWithin1000Builder = new DatasetPermutationBuilder()

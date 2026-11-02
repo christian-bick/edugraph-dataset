@@ -1532,3 +1532,25 @@ nine files, fresh types, complete native-path/original-pool proofs, all55 planne
 and true-random-boundary checks, and both consumers' Q/S projections pass. No source edit,
 inference, matcher, graph, or Area-allowlist change is needed. Evidence:
 `temp/range-autonomous/batch6/unlike/{proof.md,census.json,comparison.json}`.
+
+## Sixth batch: explicit hundred regrouping and flat counts
+
+The existing IntegerRegrouping Area describes the ten-tens exchange, so an ordinary mathematical
+schema choice replaces the erroneous use of range.max as a model selector. Both current renderers
+already support the two supplied models unchanged. Three flat profiles retain hundreds1,2..4
+and5..9 at upper100, upper1000/no positive lower and lower5/upper1000 respectively. The fixed
+ten-tens exchange retains upper100/no lower, including its explicitly assessed1 hundred.
+
+All ten original model states remain; no endpoint retires. The two ten-tens source aliases restore
+the omitted IntegerRegrouping claim, while both old flat IDs remain and gain two upper100 source
+variants. Four→six routes and four→eight selections preserve every prior competency lineage.
+The exact ten-tens predecessor IDs b3136955/5ede9391 become8d50751f/1391040d. These are the
+same two lineages whose upper120 was previously corrected to100, so the cumulative baseline
+migration count remains45 raw /27 normalized, not an additional two.
+
+Thirty-eight focused tests /eight files, complete state and40 same-value Q/S projection controls,
+32 native/direct/planned/replay checks and64 fixed-exchange PRNG continuation controls pass.
+No producer split, new label, inference, matcher, graph or quantity convention is introduced.
+This tightens existing bounds and closes a reviewed contract issue, without claiming missing-facet
+credit. Evidence: `temp/range-autonomous/batch6/measurement-time/flat-hundreds-verification.json`
+and associated test/type logs.

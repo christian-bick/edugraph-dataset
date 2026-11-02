@@ -1,10 +1,15 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
+import {Area, Scope} from 'edugraph-ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {hundredsBundleRangeChoices, hundredsBundleRangeLabels, resolveHundredsBundleRange} from './range-profile.ts';
 
 export const spec: GeneratorSpec = {
     generatorId: 'place-value-hundreds-bundles',
+    compatibility: [generatorLabelRule('hundreds-regrouping-range',
+        [Area.IntegerRegrouping, ...hundredsBundleRangeLabels], selected =>
+            resolveHundredsBundleRange([Area.IntegerRegrouping, ...hundredsBundleRangeLabels].filter(selected)) !== undefined)],
     generalLabels: [
         Area.PlaceValue,
         Scope.IntegerNumbers,
@@ -16,10 +21,8 @@ export const spec: GeneratorSpec = {
 };
 
 export const PlaceValueHundredsBundlesGeneratorSchema = {
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000]),
-        resolveRangeFromLabels
-    ]
+    requireRegrouping: [[Area.IntegerRegrouping], hasLabel(Area.IntegerRegrouping)],
+    range: [hundredsBundleRangeLabels, resolveHundredsBundleRange, hundredsBundleRangeChoices]
 } as const;
 
 export type PlaceValueHundredsBundlesGeneratorConfig = ConfigFromSchema<typeof PlaceValueHundredsBundlesGeneratorSchema>;

@@ -63,18 +63,19 @@ describe('PlaceValueBundlesGenerator', () => {
         expect(() => generator.generate({range: createCanonicalNumericRange(5)})).toThrow();
     });
 
-    it('represents ten tens as one hundred for the narrow hundreds range', () => {
+    it('represents an explicit ten-tens exchange as one hundred', () => {
         const data = new PlaceValueHundredsBundlesGenerator().generate({
-            range: {min: 1, max: 120}
+            range: createCanonicalNumericRange(100), requireRegrouping: true
         })!.data;
         expect(data).toEqual({hundreds: 1, tens: 10, ones: 0, target: 100});
     });
 
     it('generates one through nine complete hundreds', () => {
-        for (let seed = 0; seed < 40; seed++) {
+        for (const range of [createCanonicalNumericRange(100), createCanonicalNumericRange(1000),
+            createCanonicalNumericRange(1000, 5)]) for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
             const data = new PlaceValueHundredsBundlesGenerator().generate({
-                range: {min: 1, max: 1000}
+                range, requireRegrouping: false
             })!.data;
             expect(data.hundreds).toBeGreaterThanOrEqual(1);
             expect(data.hundreds).toBeLessThanOrEqual(9);
