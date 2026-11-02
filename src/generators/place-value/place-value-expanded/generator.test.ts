@@ -1,5 +1,6 @@
 import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {PlaceValueExpandedGenerator} from './generator.ts';
 
@@ -17,7 +18,7 @@ describe('PlaceValueExpandedGenerator', () => {
         for (let seed = 0; seed < 40; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                range: {min: 100, max: 1000},
+                range: createCanonicalNumericRange(1000),
                 operandCardinality
             })!.data;
             expect(data.number).toBeGreaterThanOrEqual(100);
@@ -33,8 +34,8 @@ describe('PlaceValueExpandedGenerator', () => {
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
             const data = generator.generate({
-                range: {min: 1000, max: 1_000_000},
-                operandCardinality: undefined
+                range: createCanonicalNumericRange(1000000),
+                operandCardinality: Scope.TwoOperands
             })!.data;
 
             expect('task' in data && data.task).toBe('multi-digit-expanded-form');
@@ -48,27 +49,10 @@ describe('PlaceValueExpandedGenerator', () => {
         }
     });
 
-    it('includes the exact one-million boundary', () => {
-        const data = generator.generate({
-            range: {min: 1_000_000, max: 1_000_000},
-            operandCardinality: undefined
-        })!.data;
-
-        expect(data).toMatchObject({
-            task: 'multi-digit-expanded-form',
-            number: 1_000_000,
-            terms: [1_000_000]
-        });
-        expect(generator.generate({
-            range: {min: 1_000_000, max: 1_000_000},
-            operandCardinality: Scope.TwoOperands
-        })).toBeNull();
-    });
-
     it('is deterministic for Grade 4 expansions', () => {
         const config = {
-            range: {min: 1000, max: 1_000_000},
-            operandCardinality: undefined
+            range: createCanonicalNumericRange(1000000),
+            operandCardinality: Scope.TwoOperands
         } as const;
         setSeed('place-value-expanded-grade-four');
         const first = generator.generate(config);

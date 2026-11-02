@@ -7,6 +7,7 @@ import {
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {PlaceValueExpandedProblem} from '../../../types/problems.ts';
 import {PlaceValueExpandedGeneratorConfig, PlaceValueExpandedGeneratorSchema, spec} from './spec.ts';
+import {expandedNumbers} from './domain.ts';
 
 function expandedTerms(number: number): number[] {
     return createWholeNumberPlaceValues(number)
@@ -19,50 +20,19 @@ export class PlaceValueExpandedGenerator implements ProblemGenerator<PlaceValueE
     schema = PlaceValueExpandedGeneratorSchema;
     readonly spec = spec;
 
-    generate(config: PlaceValueExpandedGeneratorConfig): ProblemStub<PlaceValueExpandedProblem> | null {
-        validateConfigFields('place-value-expanded', config, ['range']);
+    generate(config: PlaceValueExpandedGeneratorConfig): ProblemStub<PlaceValueExpandedProblem> {
+        validateConfigFields('place-value-expanded', config, ['range', 'operandCardinality']);
         const range = config.range!;
-        if (range.max <= 1000) {
-            validateConfigFields('place-value-expanded', config, ['range', 'operandCardinality']);
-        }
         const requiredTerms = config.operandCardinality === Scope.TwoOperands
             ? 2
             : config.operandCardinality === Scope.ThreeOperands
                 ? 3
                 : undefined;
 
-        if (range.max > 1000) {
-            const min = Math.max(1000, Math.ceil(range.min));
-            const max = Math.min(1_000_000, Math.floor(range.max));
-            if (min > max) return null;
-
-            for (let attempt = 0; attempt < 10_000; attempt++) {
-                const number = Math.floor(random() * (max - min + 1)) + min;
-                const terms = expandedTerms(number);
-                if (requiredTerms !== undefined && terms.length !== requiredTerms) continue;
-                const placeValues = createWholeNumberPlaceValues(number);
-                return {
-                    data: {
-                        task: 'multi-digit-expanded-form',
-                        number,
-                        terms,
-                        placeValues
-                    }
-                };
-            }
-
-            return null;
-        }
-
-        const min = Math.max(100, Math.ceil(range.min));
-        const max = Math.min(999, Math.floor(range.max));
-        if (min > max) return null;
-
-        const candidates = Array.from({length: max - min + 1}, (_, index) => min + index)
-            .filter(number => requiredTerms === undefined || expandedTerms(number).length === requiredTerms);
-        if (candidates.length === 0) return null;
-
-        const number = candidates[Math.floor(random() * candidates.length)];
+        const candidates = expandedNumbers(range, requiredTerms!);
+        const number = candidates[Math.floor(random() * candidates.length)]!;
+        if (range.max > 1000) return {data: {task: 'multi-digit-expanded-form', number,
+            terms: expandedTerms(number), placeValues: createWholeNumberPlaceValues(number)}};
         return {
             data: {
                 number,

@@ -1,11 +1,14 @@
-import {Area, deductCompatible, Scope} from 'edugraph-ts';
-import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
-import {selectExactMatch} from '../../../lib/resolvers.ts';
+import {Area, Scope} from 'edugraph-ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
+import {generatorLabelRule} from '../../compatibility-rules.ts';
+import {expandedCardinalityLabels, expandedRangeChoices, expandedRangeLabels, resolveExpandedCardinality, resolveExpandedRange} from './range-profile.ts';
 
 export const spec: GeneratorSpec<typeof PlaceValueExpandedGeneratorSchema> = {
     generatorId: 'place-value-expanded',
+    compatibility: [generatorLabelRule('expanded-form-cardinality-floor',
+        [Scope.ThreeOperands, Scope.NumbersLarger10, Scope.NumbersLarger20], selected =>
+            !selected(Scope.ThreeOperands) || !selected(Scope.NumbersLarger10) && !selected(Scope.NumbersLarger20))],
     generalLabels: [
         Area.PlaceValue,
         Area.Sum,
@@ -14,9 +17,9 @@ export const spec: GeneratorSpec<typeof PlaceValueExpandedGeneratorSchema> = {
         Scope.NumbersWithoutNegatives,
         Scope.MultipleDigitLargestOperand
     ],
-    // SPEC-12: zero participation follows the existing range branch and term count.
-    // A global/cardinality-only declaration would overclaim; branch aliases would
-    // change legacy fallback sampling. Keep the existing mathematical schema intact.
+    // SPEC-12: preserve the existing configuration-only zero annotation API.
+    // Canonical profiles retain its range-branch and term-count meanings;
+    // these supplementary claims remain excluded from matching.
     // Legacy terms are all positive; the larger branch exposes every coefficient,
     // with at least four places but only two or three nonzero terms.
     inferredLabels: [{
@@ -33,14 +36,8 @@ export const spec: GeneratorSpec<typeof PlaceValueExpandedGeneratorSchema> = {
 };
 
 export const PlaceValueExpandedGeneratorSchema = {
-    range: [
-        deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]),
-        resolveRangeFromLabels
-    ],
-    operandCardinality: [
-        [Scope.TwoOperands, Scope.ThreeOperands],
-        selectExactMatch
-    ]
+    operandCardinality: [expandedCardinalityLabels, resolveExpandedCardinality, expandedCardinalityLabels.map(label => [label])],
+    range: [expandedRangeLabels, resolveExpandedRange, expandedRangeChoices]
 } as const;
 
 export type PlaceValueExpandedGeneratorConfig = ConfigFromSchema<typeof PlaceValueExpandedGeneratorSchema>;

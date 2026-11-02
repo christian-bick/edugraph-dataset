@@ -1293,3 +1293,23 @@ and zero/floor direct requests pass32-seed controls. One manual fixture now sele
 consistent binding instead of combining conflicting zero claims; all28-cell assertions remain.
 No source edits or missing-facet closures are claimed. Evidence:
 `temp/range-autonomous/batch6/arithmetic/verify-fallbacks.json`.
+
+## Sixth batch: integer expanded form
+
+All15,714 authored two-/three-term numerals remain:891 three-digit expansions and14,823
+larger sparse numerals. The legacy quantity set contains the numeral and nonzero sum terms;
+the larger branch retains its previously accepted complete coefficient-strip contract. Eighteen
+canonical cardinality/range profiles replace rejection with one uniform numeral draw. No endpoint
+is retired, and no payload or rendering changes occur.
+
+Reviewed source bands add four targets: Grade2 upper120 beside1000, and Grade4 upper10k/100k
+beside1m. Every old ID/claim remains, three→seven routes and four→18 selections. Upper-only
+requests admit feasible strongest-lower completions through the existing capability-alternative
+metadata; generic matching is unchanged. The existing inferredLabels body/API remains unchanged.
+The two new pure configuration wrappers are registered by exact reviewed identity, and every
+actual source cell proves exhaustive static annotation resolution.
+
+Twenty-eight focused tests /five files, full types, independent comparison against all integers
+100..999999, native selection of every retained numeral, all18 actual source bindings/replays
+and Question/Solution projections pass. Unauthored undefined-cardinality/noncanonical mocks are
+replaced with actual declared-domain checks. Evidence: `temp/range-autonomous/batch6/expanded/`.

@@ -195,7 +195,7 @@ const writeExpandedFormBuilder = new DatasetPermutationBuilder().addLabels([
     Scope.Base10,
     Scope.NumbersSmaller1000000,
     Ability.Formalization
-]);
+]).applyUpperRangeVariants({bands: [10000, 100000, 1000000]});
 
 const compareMultiDigitNumbersBuilder = new DatasetPermutationBuilder()
     .addLabels([

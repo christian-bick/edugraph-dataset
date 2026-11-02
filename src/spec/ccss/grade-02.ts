@@ -213,7 +213,8 @@ const expandedFormBuilder = new DatasetPermutationBuilder()
     .applyLabelVariants([
         [Scope.TwoOperands],
         [Scope.ThreeOperands]
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [120, 1000]});
 
 // --- 2.NBT.A.4: Compare three-digit numbers ---
 const compareThreeDigitBuilder = new DatasetPermutationBuilder()

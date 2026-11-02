@@ -2,6 +2,8 @@ import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import {resolveInferredLabels} from '../../../lib/inferred-labels.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {expandedNumbers} from './domain.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {PlaceValueExpandedGeneratorSchema, spec} from './spec.ts';
 import {PlaceValueExpandedGenerator} from './generator.ts';
@@ -10,14 +12,14 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
     const generator = new PlaceValueExpandedGenerator();
 
     it.each([
-        [Scope.NumbersLarger100, Scope.NumbersSmaller1000, Scope.TwoOperands, Scope.NumbersWithoutZero],
-        [Scope.NumbersLarger100, Scope.NumbersSmaller1000, Scope.ThreeOperands, Scope.NumbersWithoutZero],
-        [Scope.NumbersLarger1000, Scope.NumbersSmaller1000000, Scope.TwoOperands, Scope.NumbersWithZero],
-        [Scope.NumbersLarger1000, Scope.NumbersSmaller1000000, Scope.ThreeOperands, Scope.NumbersWithZero]
+        [[Scope.NumbersLarger5], Scope.NumbersSmaller1000, Scope.TwoOperands, Scope.NumbersWithoutZero],
+        [[Scope.NumbersLarger5], Scope.NumbersSmaller1000, Scope.ThreeOperands, Scope.NumbersWithoutZero],
+        [[], Scope.NumbersSmaller1000000, Scope.TwoOperands, Scope.NumbersWithZero],
+        [[], Scope.NumbersSmaller1000000, Scope.ThreeOperands, Scope.NumbersWithZero]
     ] as const)('infers zero participation from branch and cardinality: %s / %s / %s', (minimum, maximum, cardinality, expected) => {
         for (let seed = 0; seed < 24; seed++) {
             setSeed(seed);
-            const stub = generateWithLabels(generator, [minimum, maximum, cardinality]);
+            const stub = generateWithLabels(generator, [...minimum, maximum, cardinality]);
             expect(stub).not.toBeNull();
             expect(stub!.labels).toContain(expected);
             expect(stub!.labels).not.toContain(expected === Scope.NumbersWithZero
@@ -36,18 +38,17 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
     });
 
     it('uses the exact existing branch boundary, including a zero glyph without a zero-valued term', () => {
-        const config = {range: {min: 101, max: 1000}, operandCardinality: Scope.TwoOperands};
+        const config = {range: createCanonicalNumericRange(1000), operandCardinality: Scope.TwoOperands};
         expect(resolveInferredLabels({spec, schema: PlaceValueExpandedGeneratorSchema,
             config, labels: [], owner: 'generator'})).toEqual([Scope.NumbersWithoutZero]);
-        const example = generator.generate({range: {min: 101, max: 101}, operandCardinality: Scope.TwoOperands})!;
-        expect(example.data).toEqual({number: 101, terms: [100, 1]});
+        expect(expandedNumbers(createCanonicalNumericRange(120), 2)).toContain(101);
         expect(resolveInferredLabels({spec, schema: PlaceValueExpandedGeneratorSchema,
-            config: {range: {min: 1000, max: 1001}, operandCardinality: Scope.TwoOperands},
+            config: {range: createCanonicalNumericRange(10000), operandCardinality: Scope.TwoOperands},
             labels: [], owner: 'generator'})).toEqual([Scope.NumbersWithZero]);
     });
 
     it.each([
-        {range: {min: 1000, max: 1000000}, operandCardinality: undefined},
+        {range: createCanonicalNumericRange(1000000), operandCardinality: undefined},
         {range: undefined, operandCardinality: Scope.TwoOperands},
         {range: undefined, operandCardinality: undefined}
     ])('does not infer when the complete configuration provides no universal claim: %j', config => {
@@ -57,13 +58,9 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
 
     it('leaves direct unconstrained high-range inference empty', () => {
         expect(resolveInferredLabels({spec, schema: PlaceValueExpandedGeneratorSchema,
-            config: {range: {min: 1111, max: 1111}, operandCardinality: undefined},
+            config: {range: createCanonicalNumericRange(10000), operandCardinality: undefined},
             labels: [], owner: 'generator'})).toEqual([]);
-        const data = generator.generate({range: {min: 1111, max: 1111}, operandCardinality: undefined})!.data;
-        expect('task' in data && data.task).toBe('multi-digit-expanded-form');
-        if ('task' in data && data.task === 'multi-digit-expanded-form') {
-            expect(data.placeValues.every(place => place.digit > 0)).toBe(true);
-        }
+        expect(() => generator.generate({range: createCanonicalNumericRange(10000), operandCardinality: undefined})).toThrow();
     });
 
     it.each([
@@ -75,7 +72,7 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
             Area.Sum,
             Scope.ArabicNumerals,
             Scope.Base10,
-            Scope.NumbersLarger100,
+            Scope.NumbersLarger5,
             Scope.NumbersSmaller1000,
             operandCardinality,
             Ability.Formalization
@@ -91,7 +88,6 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
             Area.Sum,
             Scope.ArabicNumerals,
             Scope.Base10,
-            Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000,
             Ability.Formalization
         ]);
@@ -99,7 +95,6 @@ describe('PlaceValueExpandedGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect('task' in stub!.data && stub!.data.task).toBe('multi-digit-expanded-form');
         expect(stub!.labels).toEqual(expect.arrayContaining([
-            Scope.NumbersLarger1000,
             Scope.NumbersSmaller1000000
         ]));
     });
