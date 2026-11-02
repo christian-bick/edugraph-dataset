@@ -2,13 +2,12 @@ import {GeneratorValidationError, validateConfigFields} from '../../../lib/error
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalStandardAddSubtractColumn, DecimalStandardAddSubtractProblem} from '../../../types/problems.ts';
-import {alignedDecimalCoefficient, decimalPowerOfTen, exactDecimal, parseExactDecimal, validateMagnitudeRange} from '../standard-decimal-helpers.ts';
+import {alignedDecimalCoefficient, exactDecimal, parseExactDecimal} from '../standard-decimal-helpers.ts';
+import {sampleDecimalColumnPair, standardDecimalColumnCases} from './domain.ts';
 import {StandardAlgorithmDecimalAddSubtractGeneratorSchema, type StandardAlgorithmDecimalAddSubtractGeneratorConfig} from './spec.ts';
-import {hasDecimalColumnZero} from './zero-profile.ts';
 
 const generatorId = 'standard-algorithm-decimal-add-subtract';
 type Operation = DecimalStandardAddSubtractProblem['operation'];
-const randomInteger = (minimum: number, maximum: number): number => minimum + Math.floor(random() * (maximum - minimum + 1));
 
 /** Exact original numeral forms and every aligned carry/borrow column. */
 export function buildDecimalStandardAddSubtractProblem(operation: Operation, topNumeral: string, bottomNumeral: string): DecimalStandardAddSubtractProblem {
@@ -52,41 +51,13 @@ export function buildDecimalStandardAddSubtractProblem(operation: Operation, top
     };
 }
 
-/** Concrete precision and regrouping variation stays inside the resolved math domain. */
-function sampleNumerals(operation: Operation, ceiling: number): readonly [string, string] {
-    const variant = randomInteger(0, 3);
-    if (variant === 2) {
-        if (operation === 'addition') {
-            const overflowWholes = [99, 999].filter(whole => (whole + 1) * 1000 <= ceiling);
-            const whole = overflowWholes[randomInteger(0, overflowWholes.length - 1)]!;
-            const fractional = randomInteger(991, 999);
-            return [exactDecimal(whole * 1000 + fractional, 3).numeral, exactDecimal(1000 - fractional, 3).numeral];
-        }
-        const whole = randomInteger(1, Math.floor((ceiling - 5) / 10000)) * 10;
-        return [exactDecimal(whole * 1000 + 5, 3).numeral, exactDecimal(randomInteger(17, 95), 3).numeral];
-    }
-    if (variant === 3) {
-        const whole = randomInteger(10, Math.floor(ceiling / 1000));
-        return operation === 'addition'
-            ? [exactDecimal(whole * 1000 + randomInteger(0, Math.min(999, ceiling - whole * 1000)), 3).numeral,
-                exactDecimal(0, randomInteger(0, 3)).numeral]
-            : [exactDecimal(whole * 1000, 3).numeral, exactDecimal(whole * 100, 2).numeral];
-    }
-    const scale = randomInteger(1, 3);
-    const bottomScale = randomInteger(0, variant === 1 ? scale - 1 : scale);
-    const topCoefficient = randomInteger(10 * decimalPowerOfTen(scale), operation === 'addition' ? Math.floor(ceiling / 2) : ceiling);
-    const remaining = operation === 'addition' ? ceiling - topCoefficient : topCoefficient;
-    const bottomCoefficient = randomInteger(0, Math.floor(remaining / decimalPowerOfTen(scale - bottomScale)));
-    return [exactDecimal(topCoefficient, scale).numeral, exactDecimal(bottomCoefficient, bottomScale).numeral];
-}
-
 export class StandardAlgorithmDecimalAddSubtractGenerator implements ProblemGenerator<
     DecimalStandardAddSubtractProblem, StandardAlgorithmDecimalAddSubtractGeneratorConfig
 > {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = StandardAlgorithmDecimalAddSubtractGeneratorSchema;
 
-    generate(config: StandardAlgorithmDecimalAddSubtractGeneratorConfig): ProblemStub<DecimalStandardAddSubtractProblem> | null {
+    generate(config: StandardAlgorithmDecimalAddSubtractGeneratorConfig): ProblemStub<DecimalStandardAddSubtractProblem> {
         validateConfigFields(generatorId, config, ['operation', 'range', 'zeroPresence']);
         if (config.operation !== 'addition' && config.operation !== 'subtraction') {
             throw new GeneratorValidationError(generatorId, 'Operation must be addition or subtraction.');
@@ -94,15 +65,16 @@ export class StandardAlgorithmDecimalAddSubtractGenerator implements ProblemGene
         if (typeof config.zeroPresence !== 'boolean') {
             throw new GeneratorValidationError(generatorId, 'Zero presence must be a boolean.');
         }
-        const ceiling = validateMagnitudeRange(config.range, generatorId);
-        // Condition the unchanged proposal law. Both profiles have positive support
-        // at every admitted cap (e.g. 11.1+11.1 and 33.3-11.1 are zero-free).
-        // A numeric exhaustion uses the normal deterministic pipeline retry, IMPL-G1.
-        for (let attempt = 0; attempt < 2048; attempt++) {
-            const [top, bottom] = sampleNumerals(config.operation, ceiling);
-            const data = buildDecimalStandardAddSubtractProblem(config.operation, top, bottom);
-            if (hasDecimalColumnZero(data) === config.zeroPresence) return {data};
+        const cases = standardDecimalColumnCases(config.operation, config.range!, config.zeroPresence);
+        let remaining = random() * cases.reduce((sum, entry) => sum + entry.weight, 0);
+        let selected = cases[cases.length - 1]!;
+        for (const entry of cases) {
+            remaining -= entry.weight;
+            if (remaining < 0) {selected = entry; break;}
         }
-        return null;
+        const pair = sampleDecimalColumnPair(selected, config.range!, config.zeroPresence, random);
+        return {data: buildDecimalStandardAddSubtractProblem(config.operation,
+            exactDecimal(pair.top, pair.topScale, generatorId).numeral,
+            exactDecimal(pair.bottom, pair.bottomScale, generatorId).numeral)};
     }
 }

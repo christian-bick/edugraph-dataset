@@ -1,5 +1,6 @@
 import {Area, Scope} from 'edugraph-ts';
 import {afterEach, describe, expect, it, vi} from 'vitest';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {createGenerationSelectionReceipt} from '../../../lib/compatibility.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
@@ -10,6 +11,7 @@ import {spec as view} from '../../../visuals/views/operations/operations-decimal
 import {buildDecimalStandardAddSubtractProblem, StandardAlgorithmDecimalAddSubtractGenerator} from './generator.ts';
 import {StandardAlgorithmDecimalAddSubtractGeneratorSchema, spec} from './spec.ts';
 import {hasDecimalColumnZero} from './zero-profile.ts';
+import {nonzeroDecimalDigitsAtMost, standardDecimalColumnCases} from './domain.ts';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -38,20 +40,27 @@ describe('decimal standard add/sub zero profiles', () => {
             topDigit: 7, bottomDigit: 2, regroupIn: 1, workingValue: 10, resultDigit: 0
         });
         expect(hasDecimalColumnZero(data)).toBe(false);
+        const range = createCanonicalNumericRange(10000), blocks = standardDecimalColumnCases('addition', range, false);
+        const index = blocks.findIndex(b => b.kind === 'regular' && b.scale === 1 && b.bottomScale === 1);
+        const block = blocks[index]!;
+        if (block.kind !== 'regular' || !block.nonzero) throw Error('Missing original equal-precision source');
+        const at = 37797 - block.first;
+        const total = blocks.reduce((n, b) => n + b.weight, 0);
+        const inputs = [(blocks.slice(0, index).reduce((n, b) => n + b.weight, 0) + block.weight / 2) / total,
+            ((block.nonzero[at - 1] ?? 0) + block.nonzero[at]!) / 2 / block.nonzero[block.nonzero.length - 1]!,
+            (nonzeroDecimalDigitsAtMost(38254) - nonzeroDecimalDigitsAtMost(9) + 0.5)
+                / (nonzeroDecimalDigitsAtMost(62203) - nonzeroDecimalDigitsAtMost(9))];
+        vi.spyOn(rng, 'random').mockImplementation(() => inputs.shift()!);
+        expect(new StandardAlgorithmDecimalAddSubtractGenerator().generate({operation: 'addition', range, zeroPresence: false}).data).toEqual(data);
+        expect(inputs).toEqual([]);
 
-        // The unchanged variant0 proposal still supports this exact mathematical frame.
-        vi.spyOn(rng, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0)
-            .mockReturnValueOnce(0.75).mockReturnValueOnce(37697.5 / 49901)
-            .mockReturnValueOnce(38255.5 / 62204);
-        expect(new StandardAlgorithmDecimalAddSubtractGenerator().generate({operation: 'addition',
-            range: {min: 0, max: 100000}, zeroPresence: false})!.data).toEqual(data);
     });
 
     it('replays the corrected seed-105 profiles and rejects its old unsupported zero claim', () => {
         const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
         const oldProposal = buildDecimalStandardAddSubtractProblem('addition', '3779.7', '3825.5');
         for (const zeroPresence of [false, true]) {
-            const config = {operation: 'addition' as const, range: {min: 0, max: 100000}, zeroPresence};
+            const config = {operation: 'addition' as const, range: createCanonicalNumericRange(100000), zeroPresence};
             rng.setSeed(105);
             const first = generator.generate(config)!;
             expect(first).not.toBeNull();
@@ -78,26 +87,6 @@ describe('decimal standard add/sub zero profiles', () => {
         expect(hasDecimalColumnZero(exhausted)).toBe(true);
     });
 
-    it.each(['addition', 'subtraction'] as const)('retains positive-probability %s witnesses for both profiles at every cap', operation => {
-        for (const max of [100000, 1000000, Number.MAX_SAFE_INTEGER]) for (const zeroPresence of [false, true]) {
-            const ceiling = max === Number.MAX_SAFE_INTEGER ? 999999 : max;
-            const top = operation === 'addition' ? 111 : 333;
-            const bottom = zeroPresence ? operation === 'addition' ? 0 : 333 : 111;
-            const maximumTop = operation === 'addition' ? Math.floor(ceiling / 2) : ceiling;
-            const remaining = operation === 'addition' ? ceiling - top : top;
-            // Interior draws of the unchanged variant0 / scale1 / equal-precision proposal.
-            vi.spyOn(rng, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0)
-                .mockReturnValueOnce(0.75).mockReturnValueOnce((top - 100 + 0.5) / (maximumTop - 100 + 1))
-                .mockReturnValueOnce((bottom + 0.5) / (remaining + 1));
-            const data = new StandardAlgorithmDecimalAddSubtractGenerator().generate({operation,
-                range: {min: 0, max}, zeroPresence})!.data;
-            expect(data.top.numeral).toBe(operation === 'addition' ? '11.1' : '33.3');
-            expect(data.bottom.numeral).toBe(zeroPresence ? operation === 'addition' ? '0.0' : '33.3' : '11.1');
-            expect(hasDecimalColumnZero(data)).toBe(zeroPresence);
-            vi.restoreAllMocks();
-        }
-    });
-
     it('includes the exhausted quantity before a chained borrow, even with nonzero visible digits', () => {
         const data = buildDecimalStandardAddSubtractProblem('subtraction', '31.1', '11.2');
         expect([data.top, data.bottom, data.result].every(value => !value.numeral.includes('0'))).toBe(true);
@@ -107,16 +96,15 @@ describe('decimal standard add/sub zero profiles', () => {
         expect(hasDecimalColumnZero(data)).toBe(true);
     });
 
-    it.each(['addition', 'subtraction'] as const)('has both nonempty %s profiles at every cap and completes stress draws', operation => {
+    it.each(['addition', 'subtraction'] as const)('has both nonempty %s profiles at every band and replays stress draws', operation => {
         const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
-        for (const max of [100000, 1000000, Number.MAX_SAFE_INTEGER]) {
-            // Equal-precision variant0 supports each positive witness with nonzero
-            // proposal probability; variant3 supports actual zero operands/results.
+        for (const max of [20, 100, 120, 1000, 10000, 100000]) {
+            // The original nonzero competency witnesses remain mathematically supported.
             const witness = operation === 'addition' ? ['11.1', '11.1'] : ['33.3', '11.1'];
             expect(hasDecimalColumnZero(buildDecimalStandardAddSubtractProblem(operation, witness[0]!, witness[1]!))).toBe(false);
             for (const zeroPresence of [false, true]) for (let seed = 0; seed < 100; seed++) {
                 rng.setSeed(seed);
-                const config = {operation, range: {min: 0, max}, zeroPresence};
+                const config = {operation, range: createCanonicalNumericRange(max), zeroPresence};
                 const first = generator.generate(config);
                 expect(first).not.toBeNull();
                 expect(hasDecimalColumnZero(first!.data)).toBe(zeroPresence);
@@ -128,16 +116,10 @@ describe('decimal standard add/sub zero profiles', () => {
         }
     });
 
-    it('uses the normal numeric retry outcome instead of making a false claim on exhaustion', () => {
-        vi.spyOn(rng, 'random').mockReturnValue(0.99); // variant3 always has an actual zero
-        expect(new StandardAlgorithmDecimalAddSubtractGenerator().generate({operation: 'addition',
-            range: {min: 0, max: 100000}, zeroPresence: false})).toBeNull();
-    });
-
     it('rejects an invalid profile before consuming mathematical proposal randomness', () => {
         const random = vi.spyOn(rng, 'random');
         expect(() => new StandardAlgorithmDecimalAddSubtractGenerator().generate({operation: 'addition',
-            range: {min: 0, max: 100000},
+            range: createCanonicalNumericRange(100000),
             // @ts-expect-error External configuration must also satisfy runtime profile validation.
             zeroPresence: 'true'})).toThrow('Zero presence must be a boolean.');
         expect(random).not.toHaveBeenCalled();
@@ -149,7 +131,7 @@ describe('decimal standard add/sub zero profiles', () => {
             schema: StandardAlgorithmDecimalAddSubtractGeneratorSchema, spec};
         const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
         for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
-            const labels = [operation, zero, ...view.generalLabels];
+            const labels = [operation, zero, Scope.NumbersSmaller100, ...view.generalLabels];
             const match = planModelCompatibility({id: 'decimal-standard', labels}, model, consumer);
             expect(match.supported).toBe(true);
             if (!match.supported) throw new Error(match.reason);

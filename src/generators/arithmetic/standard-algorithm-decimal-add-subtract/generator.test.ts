@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {getRandomState, setSeed} from '../../../lib/random.ts';
 import type {DecimalStandardAddSubtractProblem} from '../../../types/problems.ts';
 import {buildDecimalStandardAddSubtractProblem, StandardAlgorithmDecimalAddSubtractGenerator} from './generator.ts';
 import type {StandardAlgorithmDecimalAddSubtractGeneratorConfig} from './spec.ts';
@@ -8,7 +9,7 @@ import type {StandardAlgorithmDecimalAddSubtractGeneratorConfig} from './spec.ts
 const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
 type Operation = DecimalStandardAddSubtractProblem['operation'];
 const config = (operation: Operation = 'addition', max = 100000): StandardAlgorithmDecimalAddSubtractGeneratorConfig =>
-    ({operation, range: {min: 0, max}, zeroPresence: true});
+    ({operation, range: createCanonicalNumericRange(max), zeroPresence: true});
 
 function assertTrace(data: DecimalStandardAddSubtractProblem): void {
     const scale = Math.max(data.top.scale, data.bottom.scale);
@@ -92,75 +93,69 @@ describe('decimal standard addition/subtraction exact traces', () => {
 });
 
 describe('decimal standard addition/subtraction configured generation', () => {
-    it('rejects empty, incomplete, invalid operation and invalid real magnitude configuration', () => {
-        for (const invalid of [{}, {operation: 'addition'}, {range: {min: 0, max: 100000}},
-            {...config(), operation: 'multiply'}, {...config(), operation: 1}, {...config(), range: {min: 0, max: 10000}}]) {
+    it('rejects missing fields, unsupported operations and incomplete/noncanonical bounds', () => {
+        for (const invalid of [{}, {operation: 'addition'}, {range: createCanonicalNumericRange(100)},
+            {...config(), operation: 'multiply'}, {...config(), operation: 1}, {...config(), range: {min: 0, max: 10000}},
+            {...config(), range: createCanonicalNumericRange(1000000)}])
             expect(() => generator.generate(invalid as StandardAlgorithmDecimalAddSubtractGeneratorConfig)).toThrow(GeneratorValidationError);
-        }
     });
 
-    it('proves the numeric bounds and reviewed corpus properties for every operation/range', () => {
-        for (const max of [100000, 1000000, Number.MAX_SAFE_INTEGER]) {
-            const ceiling = max === Number.MAX_SAFE_INTEGER ? 999999 : max;
-            for (const operation of ['addition', 'subtraction'] as const) {
-                const observed = new Set<string>();
-                for (let seed = 0; seed < 80; seed++) {
+    it('retains precision/regrouping support while every native draw satisfies its canonical scalar and column bounds', () => {
+        for (const operation of ['addition', 'subtraction'] as const) {
+            const observed = new Set<string>();
+            for (const max of [10, 20, 100, 120, 1000, 10000, 100000]) for (const zeroPresence of [true, false]) {
+                if (!zeroPresence && max === 10) continue;
+                for (let seed = 0; seed < 30; seed++) {
                     setSeed(seed);
-                    const data = generator.generate(config(operation, max))!.data;
+                    const range = createCanonicalNumericRange(max), data = generator.generate({...config(operation, max), zeroPresence}).data;
                     assertTrace(data);
-                    expect(data.operation).toBe(operation);
-                    expect(data.top.coefficient >= 10 * 10 ** data.top.scale || data.bottom.coefficient >= 10 * 10 ** data.bottom.scale).toBe(true);
-                    expect(Math.max(data.top.scale, data.bottom.scale)).toBeGreaterThan(0);
-                    for (const value of [data.top.coefficient, data.bottom.coefficient, data.result.coefficient,
-                        data.alignment.topCoefficient, data.alignment.bottomCoefficient,
-                        ...data.columns.flatMap(column => [column.workingValue, column.resultDigit])]) {
-                        expect(value).toBeGreaterThanOrEqual(0);
-                        expect(value).toBeLessThanOrEqual(ceiling);
-                    }
+                    const topWidth = data.top.numeral.split('.')[0]!.length, bottomWidth = data.bottom.numeral.split('.')[0]!.length;
+                    const quantities = [data.top.coefficient / 10 ** data.top.scale, data.bottom.coefficient / 10 ** data.bottom.scale,
+                        data.result.coefficient / 10 ** data.result.scale, ...data.columns.flatMap(c => [c.workingValue,
+                            ...(c.placeExponent < topWidth ? [c.topDigit] : []), ...(c.placeExponent < bottomWidth ? [c.bottomDigit] : []),
+                            ...(c.regroupIn > 0 ? [c.regroupIn] : []), ...(operation === 'subtraction' ? [c.resultDigit] : [])])];
+                    expect(hasCanonicalRangeWitness(quantities, range)).toBe(true);
+                    expect(data.top.coefficient).toBeLessThanOrEqual(1000000);
+                    expect(data.result.coefficient).toBeLessThanOrEqual(1000000);
+                    expect(data.top.scale > 0 || data.bottom.scale > 0).toBe(true);
                     if (data.top.scale === 3 || data.bottom.scale === 3) observed.add('thousandths');
                     if (data.top.scale !== data.bottom.scale) observed.add('different-precision');
-                    if (data.columns.some(column => column.regroupOut === 1)) observed.add('regroup');
+                    if (data.columns.some(c => c.regroupOut === 1)) observed.add('regroup');
                     if (data.result.coefficient === 0) observed.add('zero-result');
                     if (data.columns.at(-1)!.topDigit === 0 && data.columns.at(-1)!.regroupIn === 1) observed.add('overflow');
-                    if (data.columns.filter(column => column.regroupOut === 1).length >= 2) observed.add('cascade');
+                    if (data.columns.filter(c => c.regroupOut === 1).length >= 2) observed.add('cascade');
                 }
-                for (const property of ['thousandths', 'different-precision', 'regroup']) expect(observed.has(property)).toBe(true);
-                expect(observed.has(operation === 'addition' ? 'overflow' : 'zero-result')).toBe(true);
-                if (operation === 'subtraction') expect(observed.has('cascade')).toBe(true);
             }
+            for (const feature of ['thousandths', 'different-precision', 'regroup']) expect(observed.has(feature)).toBe(true);
+            expect(observed.has(operation === 'addition' ? 'overflow' : 'zero-result')).toBe(true);
+            if (operation === 'subtraction') expect(observed.has('cascade')).toBe(true);
         }
     });
 
-    it('makes magnitude config affect the canonical mathematical coefficients', () => {
-        let larger = false;
-        for (let seed = 0; seed < 20; seed++) {
+    it('makes its mathematical range select distinct canonical value bands', () => {
+        for (const operation of ['addition', 'subtraction'] as const) for (let seed = 0; seed < 20; seed++) {
             setSeed(seed);
-            const small = generator.generate(config('addition', 100000))!.data;
+            const small = generator.generate(config(operation, 20)).data;
             setSeed(seed);
-            const large = generator.generate(config('addition', 1000000))!.data;
-            if (large.alignment.topCoefficient > 100000 || large.result.coefficient > 100000) larger = true;
-            expect(small.result.coefficient).toBeLessThanOrEqual(100000);
+            const large = generator.generate(config(operation, 100000)).data;
+            const scalar = (data: DecimalStandardAddSubtractProblem) => operation === 'addition'
+                ? data.result.coefficient / 10 ** data.result.scale : data.top.coefficient / 10 ** data.top.scale;
+            expect(scalar(small)).toBeLessThanOrEqual(20);
+            expect(scalar(large)).toBeGreaterThan(10000);
         }
-        expect(larger).toBe(true);
     });
 
-    it.each([100000, 1000000])('includes the exact inclusive coefficient boundary %i', max => {
-        let boundary: DecimalStandardAddSubtractProblem | undefined;
-        for (let seed = 0; seed < 80; seed++) {
-            setSeed(seed);
-            const data = generator.generate(config('addition', max))!.data;
-            if (data.result.coefficient === max) { boundary = data; break; }
+    it('retains both original overflow boundaries and replays the native random continuation', () => {
+        for (const whole of [99, 999]) {
+            const data = buildDecimalStandardAddSubtractProblem('addition', `${whole}.991`, '0.009');
+            expect(data.result.coefficient).toBe((whole + 1) * 1000);
+            assertTrace(data);
         }
-        expect(boundary?.result.coefficient).toBe(max);
-        expect(boundary?.result.numeral).toBe(max === 100000 ? '100.000' : '1000.000');
-        assertTrace(boundary!);
-    });
-
-    it('replays deterministically and returns only canonical data', () => {
         setSeed(149);
-        const first = generator.generate(config('subtraction'));
+        const first = generator.generate(config('subtraction')), state = getRandomState();
         setSeed(149);
         expect(generator.generate(config('subtraction'))).toEqual(first);
-        expect(Object.keys(first!)).toEqual(['data']);
+        expect(getRandomState()).toBe(state);
+        expect(Object.keys(first)).toEqual(['data']);
     });
 });

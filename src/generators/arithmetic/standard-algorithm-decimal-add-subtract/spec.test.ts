@@ -22,11 +22,11 @@ describe('decimal standard add/sub capability resolution', () => {
             expect(Math.max(problem.data.top.scale, problem.data.bottom.scale)).toBeGreaterThan(0);
         });
 
-    it.each([[Scope.NumbersSmaller100000, 100000], [Scope.NumbersSmaller1000000, 1000000]] as const)(
+    it.each([[Scope.NumbersSmaller100, 100], [Scope.NumbersSmaller100000, 100000]] as const)(
         'resolves the real magnitude constraint %s', (label, cap) => {
             const problem = generateWithLabels(new StandardAlgorithmDecimalAddSubtractGenerator(), [...common, Area.AdditionStandardAlgorithm, label])!;
             expect(problem.labels).toContain(label);
-            expect(problem.data.result.coefficient).toBeLessThanOrEqual(cap);
+            expect(problem.data.result.coefficient / 10 ** problem.data.result.scale).toBeLessThanOrEqual(cap);
         });
 
     it('keeps exact canonical generation independent of the requested learner action', () => {
