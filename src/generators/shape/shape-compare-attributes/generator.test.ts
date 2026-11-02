@@ -4,6 +4,8 @@ import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {ShapeComparisonAttribute, ShapeComparisonName} from '../../../types/problems.ts';
 import {ShapeCompareAttributesGenerator} from './generator.ts';
+import {comparisonRanges, comparisonTickets} from './numeric-domain.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 
 const CASES = [
     [Area.Triangle, 'triangle', '2d'],
@@ -38,31 +40,56 @@ describe('ShapeCompareAttributesGenerator', () => {
 
     it('rejects missing and unsupported shape configuration', () => {
         expect(() => generator.generate({} as never)).toThrow(GeneratorValidationError);
-        expect(() => generator.generate({shape: 'unsupported'} as never)).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({shape: 'unsupported', range: createCanonicalNumericRange(5)} as never)).toThrow(GeneratorValidationError);
+        expect(() => generator.generate({shape: 'triangle', range: createCanonicalNumericRange(20)})).toThrow(GeneratorValidationError);
     });
 
-    it.each(CASES)('authors coherent same-dimensional comparisons for %s', (label, expectedShape, dimension) => {
+    it.each(CASES)('authors coherent same-dimensional comparisons for %s', (_label, expectedShape, dimension) => {
         const seenAttributes = new Set<ShapeComparisonAttribute>();
 
-        for (let seed = 0; seed < 100; seed++) {
-            setSeed(seed);
-            const stub = generator.generate({shape: label});
-            const data = stub.data;
-            const [first, second] = data.shapes;
+        for (const range of comparisonRanges.filter(range => comparisonTickets(expectedShape, range).length > 0)) {
+            for (let seed = 0; seed < 60; seed++) {
+                setSeed(seed);
+                const stub = generator.generate({shape: expectedShape, range});
+                const data = stub.data;
+                const [first, second] = data.shapes;
 
-            seenAttributes.add(data.attribute);
-            expect(data.dimension).toBe(dimension);
-            expect(first.shape).toBe(expectedShape);
-            expect(second.shape).not.toBe(first.shape);
-            expect(COUNTS[first.shape][data.attribute]).toBe(first.count);
-            expect(COUNTS[second.shape][data.attribute]).toBe(second.count);
-            expect(first.count).not.toBe(second.count);
-            expect(data.answer).toBe(first.count > second.count ? first.shape : second.shape);
-            expect(data.relation).toBe('more');
+                seenAttributes.add(data.attribute);
+                expect(data.dimension).toBe(dimension);
+                expect(first.shape).toBe(expectedShape);
+                expect(second.shape).not.toBe(first.shape);
+                expect(COUNTS[first.shape][data.attribute]).toBe(first.count);
+                expect(COUNTS[second.shape][data.attribute]).toBe(second.count);
+                expect(first.count).not.toBe(second.count);
+                expect(data.answer).toBe(first.count > second.count ? first.shape : second.shape);
+                expect(data.relation).toBe('more');
+                expect(hasCanonicalRangeWitness([first.count, second.count], range)).toBe(true);
+            }
         }
 
         expect(seenAttributes).toEqual(new Set(
             dimension === '2d' ? ['sides', 'vertices'] : ['faces', 'vertices', 'edges']
         ));
+    });
+
+    it('partitions every original ordered comparison and preserves its conditional draw weight', () => {
+        for (const [, shape, dimension] of CASES) {
+            const attributes: ShapeComparisonAttribute[] = dimension === '2d'
+                ? ['sides', 'vertices'] : ['faces', 'vertices', 'edges'];
+            const original = new Map<string, number>();
+            for (const attribute of attributes) {
+                const partners = CASES.filter(([, candidate, otherDimension]) =>
+                    dimension === otherDimension && shape !== candidate
+                    && COUNTS[shape][attribute] !== COUNTS[candidate][attribute]);
+                for (const [, partner] of partners) original.set(`${attribute}:${partner}`, 12 / partners.length);
+            }
+            const counts = new Map<string, number>();
+            for (const range of comparisonRanges) for (const frame of comparisonTickets(shape, range)) {
+                const key = `${frame.attribute}:${frame.shapes[1].shape}`;
+                counts.set(key, (counts.get(key) ?? 0) + 1);
+                expect(hasCanonicalRangeWitness(frame.shapes.map(item => item.count), range)).toBe(true);
+            }
+            expect(counts).toEqual(original);
+        }
     });
 });

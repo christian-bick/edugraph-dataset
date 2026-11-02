@@ -1149,3 +1149,18 @@ stored range findings remain unchanged; range stays report-only. Further ordinar
 the reviewed decimal methods, numeric structural tasks, standard division and legacy bounds
 already present on counting/place-value families. Concrete quantity/projection decisions stay
 separate and do not stop those repairs.
+
+## Sixth batch: existing shape-comparison claims
+
+The existing upper20 declaration is tightened into upper5/10/20 profiles for the two explicitly
+compared attribute counts. All 70 original ordered shape/attribute/partner frames remain, with
+their original uniform-attribute then uniform-partner weights conditioned on the selected band.
+Every comparison has a required count below5, so no positive floor is claimed. The existing
+geometric Areas remain outside the mandatory range gate; this is repair of an explicit range
+claim and receives no missing-facet closure credit.
+
+All nine source routes remain, nine→20 selections, with no target, payload or renderer changes.
+Thirty-four focused tests pass; all40 native draws/replays and direct/planned configurations
+agree. Both rendering modes expose the counts in all140 projections of the complete support.
+Evidence: `temp/range-autonomous/batch6/shape/{tests.log,verification.json}`. Overall source and
+coverage acceptance follows after the remaining sixth-batch slices stabilize.

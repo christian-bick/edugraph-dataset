@@ -1,90 +1,20 @@
-import {Area} from 'edugraph-ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
-import {
-    ShapeCompareAttributesProblem,
-    ShapeComparisonAttribute,
-    ShapeComparisonName
-} from '../../../types/problems.ts';
+import {ShapeCompareAttributesProblem} from '../../../types/problems.ts';
 import {ShapeCompareAttributesGeneratorConfig, ShapeCompareAttributesGeneratorSchema} from './spec.ts';
-
-type ShapeDefinition = {
-    dimension: ShapeCompareAttributesProblem['dimension'];
-    counts: Partial<Record<ShapeComparisonAttribute, number>>;
-};
-
-const SHAPES_BY_LABEL: Readonly<Record<string, ShapeComparisonName>> = {
-    [Area.Triangle]: 'triangle',
-    [Area.Square]: 'square',
-    [Area.Rectangle]: 'rectangle',
-    [Area.Hexagon]: 'hexagon',
-    [Area.Circle]: 'circle',
-    [Area.Cube]: 'cube',
-    [Area.Cone]: 'cone',
-    [Area.Cylinder]: 'cylinder',
-    [Area.Sphere]: 'sphere'
-};
-
-const DEFINITIONS: Readonly<Record<ShapeComparisonName, ShapeDefinition>> = {
-    triangle: {dimension: '2d', counts: {sides: 3, vertices: 3}},
-    square: {dimension: '2d', counts: {sides: 4, vertices: 4}},
-    rectangle: {dimension: '2d', counts: {sides: 4, vertices: 4}},
-    hexagon: {dimension: '2d', counts: {sides: 6, vertices: 6}},
-    circle: {dimension: '2d', counts: {sides: 0, vertices: 0}},
-    cube: {dimension: '3d', counts: {faces: 6, vertices: 8, edges: 12}},
-    cone: {dimension: '3d', counts: {faces: 1, vertices: 1, edges: 1}},
-    cylinder: {dimension: '3d', counts: {faces: 2, vertices: 0, edges: 2}},
-    sphere: {dimension: '3d', counts: {faces: 0, vertices: 0, edges: 0}}
-};
-
-const ATTRIBUTES_BY_DIMENSION = {
-    '2d': ['sides', 'vertices'],
-    '3d': ['faces', 'vertices', 'edges']
-} as const satisfies Readonly<Record<ShapeCompareAttributesProblem['dimension'], readonly ShapeComparisonAttribute[]>>;
+import {comparisonTickets} from './numeric-domain.ts';
 
 export class ShapeCompareAttributesGenerator implements ProblemGenerator<ShapeCompareAttributesProblem, ShapeCompareAttributesGeneratorConfig> {
     type: AbstractProblem['type'] = 'shape';
     schema = ShapeCompareAttributesGeneratorSchema;
 
     generate(config: ShapeCompareAttributesGeneratorConfig): ProblemStub<ShapeCompareAttributesProblem> {
-        validateConfigFields('shape-compare-attributes', config, ['shape']);
-        const shape1 = SHAPES_BY_LABEL[config.shape!];
-        if (!shape1) {
-            throw new GeneratorValidationError('shape-compare-attributes', 'The selected shape is unsupported.');
-        }
-
-        const definition = DEFINITIONS[shape1];
-        const attributes = ATTRIBUTES_BY_DIMENSION[definition.dimension];
-        const attribute = attributes[Math.floor(random() * attributes.length)];
-        const val1 = definition.counts[attribute]!;
-        const pool = (Object.keys(DEFINITIONS) as ShapeComparisonName[]).filter(candidate => {
-            const candidateDefinition = DEFINITIONS[candidate];
-            return candidate !== shape1
-                && candidateDefinition.dimension === definition.dimension
-                && candidateDefinition.counts[attribute] !== val1;
-        });
-        if (pool.length === 0) {
-            throw new GeneratorValidationError(
-                'shape-compare-attributes',
-                'The selected shape has no same-dimensional comparison partner.'
-            );
-        }
-        const shape2 = pool[Math.floor(random() * pool.length)];
-        const val2 = DEFINITIONS[shape2].counts[attribute]!;
-        const answer = val1 > val2 ? shape1 : shape2;
-
-        return {
-            data: {
-                dimension: definition.dimension,
-                attribute,
-                shapes: [
-                    {shape: shape1, count: val1},
-                    {shape: shape2, count: val2}
-                ],
-                relation: 'more',
-                answer
-            }
-        };
+        validateConfigFields('shape-compare-attributes', config, ['shape', 'range']);
+        const tickets = comparisonTickets(config.shape!, config.range!);
+        if (tickets.length === 0) throw new GeneratorValidationError(
+            'shape-compare-attributes', 'The shape and range have no unequal comparison.');
+        const frame = tickets[Math.floor(random() * tickets.length)]!;
+        return {data: {...frame, shapes: [{...frame.shapes[0]}, {...frame.shapes[1]}]}};
     }
 }
