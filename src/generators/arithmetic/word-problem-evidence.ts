@@ -1,6 +1,6 @@
 import {random} from '../../lib/random.ts';
 import {ProblemStub} from '../../types/ml-engine.ts';
-import {ArithmeticOperation, ArithmeticWordProblemTwoStep, ArithmeticWordProblemLetterEquation, ArithmeticWordProblemRounding, ArithmeticWordProblemInterpretedRemainder} from '../../types/problems.ts';
+import {ArithmeticOperation, ArithmeticWordProblemTwoStep, ArithmeticWordProblemRounding, ArithmeticWordProblemInterpretedRemainder} from '../../types/problems.ts';
 
 type Values = Pick<
     ArithmeticWordProblemTwoStep,
@@ -21,107 +21,10 @@ const roundingPlaceFor = (value: number): RoundingPlace => {
 const roundTo = (value: number, place: RoundingPlace): number =>
     Math.round(value / place) * place;
 
-const applyOperation = (left: number, right: number, operation: ArithmeticOperation): number => {
-    if (operation === 'addition') return left + right;
-    if (operation === 'subtraction') return left - right;
-    if (operation === 'multiplication') return left * right;
-    return left / right;
-};
-
 const randomInteger = (minimum: number, maximum: number): number | null => {
     if (minimum > maximum) return null;
     return minimum + Math.floor(random() * (maximum - minimum + 1));
 };
-
-const valuesInRange = (values: Values, minimum: number, maximum: number): boolean =>
-    Object.values(values).every(value =>
-        Number.isInteger(value) && value >= minimum && value <= maximum
-    );
-
-export function generateGrade4Values(
-    operations: NamedOperations,
-    minimum: number,
-    maximum: number,
-    minimumAnswer = minimum
-): Values | null {
-    const operandMinimum = Math.max(2, minimum);
-    const operandLimit = Math.min(maximum, 50);
-    if (operandMinimum > operandLimit) return null;
-
-    const draw = (limit = operandLimit): number | null => randomInteger(
-        operandMinimum,
-        Math.max(operandMinimum, limit)
-    );
-    const sequence = operations.join('-');
-
-    for (let attempt = 0; attempt < 1_000; attempt++) {
-        let values: Values | null = null;
-
-        if (sequence === 'subtraction-subtraction') {
-            const answer = draw();
-            const num3 = draw();
-            const num2 = draw();
-            if (answer === null || num3 === null || num2 === null) return null;
-            const intermediate = answer + num3;
-            values = {num1: intermediate + num2, num2, num3, intermediate, answer};
-        } else if (sequence === 'division-division') {
-            const answer = draw();
-            const num3 = draw(12);
-            const num2 = draw(12);
-            if (answer === null || num3 === null || num2 === null) return null;
-            const intermediate = answer * num3;
-            values = {num1: intermediate * num2, num2, num3, intermediate, answer};
-        } else if (sequence === 'division-addition') {
-            const intermediate = draw();
-            const num2 = draw(12);
-            const num3 = draw();
-            if (intermediate === null || num2 === null || num3 === null) return null;
-            values = {
-                num1: intermediate * num2,
-                num2,
-                num3,
-                intermediate,
-                answer: intermediate + num3
-            };
-        } else if (sequence === 'division-subtraction') {
-            const answer = draw();
-            const num3 = draw();
-            const num2 = draw(12);
-            if (answer === null || num3 === null || num2 === null) return null;
-            const intermediate = answer + num3;
-            values = {
-                num1: intermediate * num2,
-                num2,
-                num3,
-                intermediate,
-                answer
-            };
-        } else if (sequence === 'multiplication-division') {
-            const num1 = draw();
-            const factor = draw(10);
-            const num3 = draw(10);
-            if (num1 === null || factor === null || num3 === null) return null;
-            const num2 = factor * num3;
-            const intermediate = num1 * num2;
-            values = {num1, num2, num3, intermediate, answer: num1 * factor};
-        } else {
-            const multiplicationLimit = sequence === 'multiplication-multiplication'
-                ? Math.min(operandLimit, Math.max(operandMinimum, Math.floor(Math.cbrt(maximum))))
-                : operandLimit;
-            const num1 = draw(multiplicationLimit);
-            const num2 = draw(multiplicationLimit);
-            const num3 = draw(multiplicationLimit);
-            if (num1 === null || num2 === null || num3 === null) return null;
-            const intermediate = applyOperation(num1, num2, operations[0]);
-            const answer = applyOperation(intermediate, num3, operations[1]);
-            values = {num1, num2, num3, intermediate, answer};
-        }
-
-        if (valuesInRange(values, minimum, maximum) && values.answer >= minimumAnswer) return values;
-    }
-
-    return null;
-}
 
 export function generateInterpretedRemainder(
     minimum: number,
@@ -144,19 +47,6 @@ export function generateInterpretedRemainder(
         quotient,
         remainder
     }};
-}
-
-export function buildLetterEquation(
-    values: Values,
-    operations: NamedOperations
-): ArithmeticWordProblemLetterEquation {
-    return {
-        kind: 'letter-equation',
-        operands: [values.num1, values.num2, values.num3],
-        operations,
-        intermediate: values.intermediate,
-        answer: values.answer
-    };
 }
 
 export function buildRounding(

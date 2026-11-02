@@ -124,7 +124,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 setSeed(seed);
                 const stub = equationGenerator.generate({
                     operations,
-                    range: {min: 0, max: 1_000_000}
+                    range: createCanonicalNumericRange(1000000)
                 });
                 expect(stub).not.toBeNull();
                 expect(stub!.data.kind).toBe('letter-equation');
@@ -142,7 +142,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         setSeed(12);
         const stub = equationGenerator.generate({
             operations: [Area.Addition, Area.Division],
-            range: {min: 0, max: 1_000_000}
+            range: createCanonicalNumericRange(1000000)
         });
         expect(stub).not.toBeNull();
         expect(stub!.data.kind).toBe('letter-equation');
@@ -166,7 +166,7 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 setSeed(seed);
                 const stub = roundingGenerator.generate({
                     operations,
-                    range: {min: 0, max: 1_000_000}
+                    range: createCanonicalNumericRange(1000000)
                 });
                 expect(stub).not.toBeNull();
                 expect(stub!.data.kind).toBe('rounding');
@@ -197,9 +197,9 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
                 ? [Area.Division, Area.Division] as const
                 : [Area.Multiplication, Area.Addition] as const;
             setSeed(`grade4-${task}`);
-            const first = generators[task].generate({operations, range: {min: 0, max: 1_000_000}});
+            const first = generators[task].generate({operations, range: createCanonicalNumericRange(1000000)});
             setSeed(`grade4-${task}`);
-            const second = generators[task].generate({operations, range: {min: 0, max: 1_000_000}});
+            const second = generators[task].generate({operations, range: createCanonicalNumericRange(1000000)});
             expect(second).toEqual(first);
         }
     });
@@ -212,10 +212,10 @@ describe('ArithmeticWordProblemsTwoStepGenerator', () => {
         expect(remainderGenerator.generate({
             range: {min: 5, max: 5}
         })).toBeNull();
-        expect(equationGenerator.generate({
+        expect(() => equationGenerator.generate({
             operations: [Area.Addition, Area.Addition],
             range: {min: 50, max: 51}
-        })).toBeNull();
+        } as never)).toThrow();
         for (const operations of operationSequences) {
             expect(() => generator.generate({
                 operations,

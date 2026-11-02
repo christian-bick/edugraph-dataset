@@ -27,7 +27,8 @@ describe('arithmetic-word-problems-rounding spec', () => {
     });
 
     it('keeps matching capabilities unchanged and constrains every added numeric quantity by the resolved range', () => {
-        expect(ArithmeticWordProblemsRoundingGeneratorSchema).toBe(TwoStepExtendedGeneratorSchema);
+        expect(ArithmeticWordProblemsRoundingGeneratorSchema).not.toBe(TwoStepExtendedGeneratorSchema);
+        expect(ArithmeticWordProblemsRoundingGeneratorSchema.operations).toBe(TwoStepExtendedGeneratorSchema.operations);
         for (const [rangeLabel, maximum] of [[Scope.NumbersSmaller100, 100], [Scope.NumbersSmaller1000, 1000],
             [Scope.NumbersSmaller1000000, 1_000_000]] as const) {
             for (let seed = 0; seed < 32; seed++) {

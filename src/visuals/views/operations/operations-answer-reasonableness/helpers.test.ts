@@ -4,8 +4,9 @@ import {ArithmeticEstimationGenerator} from '../../../../generators/arithmetic/a
 import {setSeed} from '../../../../lib/random.ts';
 import {ArithmeticEstimationProblem} from '../../../../types/problems.ts';
 import {estimationProposalForSeed} from '../../../../generators/arithmetic/arithmetic-estimation/proposal-domain.ts';
-import {estimationProfileMass} from '../../../../generators/arithmetic/arithmetic-estimation/numeric-domain.ts';
 import {operationNames} from '../../../../generators/arithmetic/helpers.ts';
+import {createCanonicalNumericRange} from '../../../../lib/canonical-numeric-range.ts';
+import {canonicalEstimationDomain} from '../../../../generators/arithmetic/arithmetic-estimation/canonical-domain.ts';
 import {resolveEstimationClaim as readClaim} from './helpers.ts';
 type Relation = Omit<ArithmeticEstimationProblem, 'proposal'>;
 const resolveEstimationClaim = (data: Relation, seed: number) => {
@@ -158,21 +159,21 @@ describe('answer reasonableness projection', () => {
         expect(readClaim(canonical)).toEqual(readClaim(canonical));
     });
 
-    it.each([{min: 0, max: 10}, {min: 0, max: 20}, {min: 0, max: 1000}, {min: 30, max: 1000}])(
+    it.each([createCanonicalNumericRange(10), createCanonicalNumericRange(20), createCanonicalNumericRange(1000, 10), createCanonicalNumericRange(1000, 20)])(
         'supports both verdicts for every operation across seeded emitted data in %j', range => {
             const generator = new ArithmeticEstimationGenerator();
             for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const) {
                 for (let seed = 0; seed < 12; seed++) {
                     setSeed(seed);
-                    const zeroPresence = estimationProfileMass({operation: operationNames[operation],
-                        minimum: range.min, maximum: range.max}, true) > 0;
+                    const zeroPresence = canonicalEstimationDomain(operationNames[operation], true, range).weight > 0;
+                    if (!zeroPresence && canonicalEstimationDomain(operationNames[operation], false, range).weight === 0) continue;
                     const generated = generator.generate({operation, range, zeroPresence});
                     expect(generated).not.toBeNull();
                     for (const claimSeed of [2 * seed, 2 * seed + 1]) {
                         const claim = resolveEstimationClaim(generated!.data, claimSeed);
                         expect(claim.isReasonable).toBe(claimSeed % 2 === 0);
                         expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]
-                            .every(value => value >= range.min && value <= range.max)).toBe(true);
+                            .every(value => value >= generated!.data.numberDomain.min && value <= generated!.data.numberDomain.max)).toBe(true);
                     }
                 }
             }

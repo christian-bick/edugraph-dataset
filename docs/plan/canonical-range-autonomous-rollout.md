@@ -1467,3 +1467,45 @@ is needed. The shared one-step builder is extracted without changing its behavio
 Eighty-seven focused tests /11 files, fresh types and ownership checks pass. Exact old/new IDs,
 claim changes and retained frames are recorded in
 `temp/range-autonomous/batch6/measurement-time/offset-source-verification.json`.
+
+## Sixth batch: letter equations, estimation and rounding stories
+
+The coordinated source checkpoint refines three already-labelled word families. It preserves
+all old source IDs and the original ten matching operation sequences; generic matching and
+rendering remain unchanged. The shared Grade3 estimation/story source adds16 variants;
+Grade4 letter equations add73 and rounding stories add27. Each producer admits only its
+feasible cells. No artificial guard is introduced to force identical sibling route sets.
+
+Letter equations use compact affine intervals within their existing999,999 ceiling. All748,013
+old native primitive frames and1,984 additional floor20 construction corners remain, along
+with the six further ordered operation pairs supported by direct configuration. The expanded
+scalar domain contains7,775,149,648 frames and238 matching-selected canonical cells. Uniform
+finite-frame selection changes sampling within the agreed direction without balancing classes.
+The family grows from10 to83 routes; all238 cells draw/replay and952 same-value Q/S controls
+pass. Sixty focused tests /ten files and the independent72-context old-domain proof pass.
+
+Estimation retains all84 old construction contexts, including their complete pair/proposal
+paths and exact unsigned32 proposal masses. Construction context remains internal validation
+metadata: distinct contexts can support distinct legitimate proposals for the same operands.
+Forty-seven canonical cells retain the full union, including19−9 with proposed15 and241−121
+with proposed122. All four old routes remain, reaching18 routes /47 selections. Sixty-three
+focused tests /eight files,47 native draws/replays and188 same-value Q/S controls pass. Only
+the new exhaustive proof has an explicit60-second budget; existing timeouts are unchanged.
+
+Rounding stories retain735,348 finite cores across the ten matching sequences, plus245,588
+cores in the six existing direct-only ordered pairs. Their complete original proposal intervals
+partition by exact integer counts into232 matching-selected and122 direct-only canonical cells.
+Weighted core selection followed by a uniform admitted proposal conditions the existing-support
+union; no rejection cap, cap expansion or balancing is added. All required operands,
+intermediate/exact/rounded/proposed quantities are included. Positivity holds throughout each
+interval, including the true random endpoints. The rounding-place name remains precision
+metadata, not a separate operand.
+
+All eight old story routes remain, reaching50 routes /134 selections. Ninety focused tests /
+11 files plus four exhaustive direct-only tests,2,320 native draws/replays and every actual
+source binding pass. The direct-only review required added proof, not production changes.
+The former shared rejection constructor now has no callers and is removed; its exact control
+algorithm remains once in tests. The interpreted-remainder producer and shared rounding evidence
+builder are unchanged. Evidence:
+`temp/range-autonomous/batch6/arithmetic/{verify-letter.json,verify-estimation.json}` and
+`temp/range-autonomous/batch6/rounding-story/{proof.md,direct-census.json}`.

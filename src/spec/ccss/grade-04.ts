@@ -52,7 +52,6 @@ const multistepLetterEquationBuilder = new DatasetPermutationBuilder()
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
-        Scope.NumbersSmaller1000000,
         Ability.TextualReception,
         Ability.Formalization
     ])
@@ -67,18 +66,27 @@ const multistepLetterEquationBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction, Area.Multiplication],
         [Area.Subtraction, Area.Division],
         [Area.Multiplication, Area.Division]
-    ]);
+    ].flatMap(operations => expandUpperRangeVariants([{labels: [...operations, Scope.NumbersSmaller1000000]}], {
+        bands: operations.length === 2 && (operations.includes(Area.Addition) && operations.includes(Area.Subtraction)
+            || operations.includes(Area.Addition) && operations.includes(Area.Division)
+            || operations.includes(Area.Subtraction) && operations.includes(Area.Multiplication))
+            ? [5, 10, 20, 100, 120, 1000, 10000, 100000, 1000000]
+            : [10, 20, 100, 120, 1000, 10000, 100000, 1000000]
+    }).map(({labels}) => labels)));
 
 const multistepReasonablenessBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.IntegerRounding,
         Scope.MultiStep,
-        Scope.NumbersSmaller1000000,
         Ability.TextualReception,
         Ability.PlausibilityEvaluation,
         Ability.ProcedureUnderstanding
     ])
-    .applyLabelVariants([[Area.Addition], [Area.Subtraction], [Area.Multiplication], [Area.Division]]);
+    .applyLabelVariants([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division].flatMap(operation =>
+        expandUpperRangeVariants([{labels: [operation, Scope.NumbersSmaller1000000]}], {
+            bands: operation === Area.Division ? [20, 100, 120, 1000, 10000, 100000, 1000000]
+                : [10, 20, 100, 120, 1000, 10000, 100000, 1000000]
+        }).map(({labels}) => labels)));
 
 const factorPairsBuilder = new DatasetPermutationBuilder().addLabels([
     Area.FactorsAndMultiples,

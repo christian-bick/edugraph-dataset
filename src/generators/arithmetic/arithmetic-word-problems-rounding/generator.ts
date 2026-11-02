@@ -1,10 +1,12 @@
-import {validateConfigFields} from '../../../lib/errors.ts';
+import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import {ArithmeticWordProblemRounding} from '../../../types/problems.ts';
 import {ArithmeticWordProblemsRoundingGeneratorConfig, ArithmeticWordProblemsRoundingGeneratorSchema} from './spec.ts';
 import {operationNames} from '../helpers.ts';
-import {generateGrade4Values, buildRounding} from '../word-problem-evidence.ts';
+import {buildRounding} from '../word-problem-evidence.ts';
 import {generateRoundingProposal} from './proposal-domain.ts';
+import {random} from '../../../lib/random.ts';
+import {canonicalProposalInterval, roundingDomain, selectRoundingCore} from './domain.ts';
 export class ArithmeticWordProblemsRoundingGenerator implements ProblemGenerator<ArithmeticWordProblemRounding, ArithmeticWordProblemsRoundingGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticWordProblemsRoundingGeneratorSchema;
@@ -14,15 +16,12 @@ export class ArithmeticWordProblemsRoundingGenerator implements ProblemGenerator
         const operations = config.operations!;
         if (operations === 'unsupported') return null;
         const namedOperations = [operationNames[operations[0]], operationNames[operations[1]]] as const;
-        const minimum = Math.max(1, Math.ceil(config.range!.min));
-        const domainMaximum = Math.min(1_000_000, Math.floor(config.range!.max));
-        const maximum = Math.min(999_999, domainMaximum);
-        if (minimum > maximum) return null;
-        // The smallest supported rounding place is ten: answers below five round to zero.
-        const values = generateGrade4Values(namedOperations, minimum, maximum, Math.max(5, minimum));
-        if (!values) return null;
-        const data = {...buildRounding(values, namedOperations), numberDomain: {min: minimum, max: domainMaximum}};
-        const proposal = generateRoundingProposal(data);
+        if (!namedOperations.every(Boolean)) throw new GeneratorValidationError('arithmetic-word-problems-rounding', 'Select two supported operations.');
+        const range = config.range!, domain = roundingDomain(namedOperations, range);
+        const row = selectRoundingCore(domain, random());
+        const data = {...buildRounding({num1: row.a, num2: row.b, num3: row.c, intermediate: row.intermediate, answer: row.answer}, namedOperations),
+            numberDomain: {min: Math.max(1, range.min), max: range.max}};
+        const proposal = generateRoundingProposal(data, canonicalProposalInterval(row, range)!);
         return proposal ? {data: {...data, proposal}} : null;
     }
 }

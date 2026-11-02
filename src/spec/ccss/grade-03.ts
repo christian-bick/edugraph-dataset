@@ -214,7 +214,6 @@ const fourOperationTwoStepBuilder = new DatasetPermutationBuilder()
 const answerReasonablenessBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.IntegerRounding,
-        Scope.NumbersSmaller1000,
         Ability.PlausibilityEvaluation
     ])
     .applyLabelVariants([
@@ -222,7 +221,9 @@ const answerReasonablenessBuilder = new DatasetPermutationBuilder()
         [Area.Subtraction],
         [Area.Multiplication],
         [Area.Division]
-    ]);
+    ].flatMap(operations => expandUpperRangeVariants([{labels: [...operations, Scope.NumbersSmaller1000]}], {
+        bands: [10, 20, 100, 120, 1000]
+    }).map(({labels}) => labels)));
 
 // --- 3.OA.D.9: Identify arithmetic patterns ---
 const identifyArithmeticPatternsBuilder = new DatasetPermutationBuilder()

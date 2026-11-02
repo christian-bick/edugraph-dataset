@@ -3,7 +3,8 @@ import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-
 import {ArithmeticWordProblemLetterEquation} from '../../../types/problems.ts';
 import {ArithmeticWordProblemsLetterEquationGeneratorConfig, ArithmeticWordProblemsLetterEquationGeneratorSchema} from './spec.ts';
 import {operationNames} from '../helpers.ts';
-import {generateGrade4Values, buildLetterEquation} from '../word-problem-evidence.ts';
+import {random} from '../../../lib/random.ts';
+import {letterEquationDomain, letterEquationFrame} from './domain.ts';
 export class ArithmeticWordProblemsLetterEquationGenerator implements ProblemGenerator<ArithmeticWordProblemLetterEquation, ArithmeticWordProblemsLetterEquationGeneratorConfig> {
     type: AbstractProblem['type'] = 'arithmetic';
     schema = ArithmeticWordProblemsLetterEquationGeneratorSchema;
@@ -13,10 +14,7 @@ export class ArithmeticWordProblemsLetterEquationGenerator implements ProblemGen
         const operations = config.operations!;
         if (operations === 'unsupported') return null;
         const namedOperations = [operationNames[operations[0]], operationNames[operations[1]]] as const;
-        const minimum = Math.max(1, Math.ceil(config.range!.min));
-        const maximum = Math.min(999_999, Math.floor(config.range!.max));
-        if (minimum > maximum) return null;
-        const values = generateGrade4Values(namedOperations, minimum, maximum);
-        return values ? {data: buildLetterEquation(values, namedOperations)} : null;
+        const domain = letterEquationDomain(namedOperations, config.range!);
+        return domain.count ? {data: letterEquationFrame(domain, namedOperations, Math.floor(random() * domain.count))} : null;
     }
 }

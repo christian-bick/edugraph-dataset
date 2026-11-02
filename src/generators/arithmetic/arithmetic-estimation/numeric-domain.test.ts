@@ -1,14 +1,17 @@
 import {Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
-import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {getRandomState} from '../../../lib/random.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
 import type {ArithmeticOperation} from '../../../types/problems.ts';
 import {spec as view} from '../../../visuals/views/operations/operations-answer-reasonableness/spec.ts';
 import {ArithmeticEstimationGenerator} from './generator.ts';
-import {estimationProfileMass, estimationRelation, estimationRelationHasZero, estimationRows,
-    hasEstimationProfile, sampleEstimation} from './numeric-domain.ts';
+import {estimationRelation, estimationRawRows} from './numeric-domain.ts';
+import {estimationProposalCases, proposalSeedCount} from './proposal-domain.ts';
 import {ArithmeticEstimationGeneratorSchema, spec} from './spec.ts';
+import {canonicalRangeProfiles} from '../../../lib/canonical-range-labels.ts';
+import {hasCanonicalEstimationProfile} from './canonical-domain.ts';
+import {operationNames} from '../helpers.ts';
 
 const operations = ['addition', 'subtraction', 'multiplication', 'division'] as const;
 const apply = (a: number, b: number, operation: ArithmeticOperation) => operation === 'addition' ? a + b
@@ -35,47 +38,27 @@ describe('finite estimation operand/proposal domain', () => {
                     .every(value => Number.isInteger(value) && value >= minimum! && value <= maximum!)) continue;
                 expected.add(`${a}:${b}`);
             }
-            const rows = estimationRows(domain);
-            let originalMass = 0;
+            const rows = [...estimationRawRows(domain)];
+            let originalMass = 0, proposalMass = 0;
             for (const row of rows) {
                 const secondMin = operation === 'division' ? Math.max(2, minimum!) : low;
                 const secondMax = operation === 'addition' || operation === 'subtraction' ? maximum! - row.first
                     : operation === 'multiplication' ? Math.min(49, Math.floor(maximum! / row.first))
                         : Math.min(80, Math.floor(maximum! / row.first));
                 expect(row.pairWeight).toBe(1 / (firstMax - low + 1) / (secondMax - secondMin + 1));
-                for (const second of row.seconds) {
-                    const data = estimationRelation(domain, row.first, second)!;
+                for (let second = row.secondMin; second <= row.secondMax; second++) {
+                    const data = estimationRelation(domain, row.first, second);
+                    if (!data) continue;
+                    const proposals = estimationProposalCases(data);
+                    if (!proposals.length) continue;
                     if (!expected.delete(`${data.num1}:${data.num2}`)) throw new Error('Added or duplicated an old mathematical pair.');
+                    if (proposals.reduce((sum, proposal) => sum + proposal.seeds, 0) !== proposalSeedCount) throw new Error('Original proposal seed mass changed.');
+                    proposalMass += row.pairWeight * proposals.reduce((sum, proposal) => sum + proposal.seeds, 0) / proposalSeedCount;
+                    originalMass += row.pairWeight;
                 }
-                expect(row.totalMass.every(mass => mass === 1)).toBe(true);
-                expect(row.zeroMass.every(mass => mass >= 0 && mass <= 1)).toBe(true);
-                originalMass += row.pairWeight * row.seconds.length;
             }
             expect(expected.size).toBe(0);
-            expect(estimationProfileMass(domain, false) + estimationProfileMass(domain, true)).toBeCloseTo(originalMass, 10);
-            for (const presence of [false, true]) expect(hasEstimationProfile(domain, presence))
-                .toBe(estimationProfileMass(domain, presence) > 0);
-        }
-    });
-
-    it.each(operations)('constructs every feasible %s zero profile without rare-event retries', operation => {
-        const domain = {operation, minimum: 0, maximum: 1000};
-        for (const zeroPresence of [false, true]) {
-            if (estimationProfileMass(domain, zeroPresence) === 0) {
-                expect(sampleEstimation(domain, zeroPresence)).toBeNull();
-                continue;
-            }
-            for (let seed = 0; seed < 60; seed++) {
-                setSeed(seed);
-                const data = sampleEstimation(domain, zeroPresence)!;
-                expect(data).not.toBeNull();
-                expect(estimationRelationHasZero(data) || data.proposal.proposedAnswer === 0
-                    || data.proposal.roundedProposedAnswer === 0).toBe(zeroPresence);
-                const state = getRandomState();
-                setSeed(seed);
-                expect(sampleEstimation(domain, zeroPresence)).toEqual(data);
-                expect(getRandomState()).toBe(state);
-            }
+            expect(proposalMass).toBeCloseTo(originalMass, 10);
         }
     });
 
@@ -83,13 +66,14 @@ describe('finite estimation operand/proposal domain', () => {
         const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
             schema: ArithmeticEstimationGeneratorSchema, spec};
         const consumer = {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view};
-        for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
+        for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const) {
             for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
                 const labels = [operation, Scope.NumbersSmaller1000, zero, ...view.generalLabels];
                 const state = getRandomState();
                 const matched = planModelCompatibility({id: 'estimation', labels}, model, consumer);
                 expect(getRandomState()).toBe(state);
-                expect(matched.supported).toBe(operation !== Area.Multiplication || zero === Scope.NumbersWithoutZero);
+                expect(matched.supported).toBe(canonicalRangeProfiles.filter(({range}) => range.max === 1000)
+                    .some(({range}) => hasCanonicalEstimationProfile(operationNames[operation], zero === Scope.NumbersWithZero, range)));
                 if (matched.supported) {
                     const task = generateWithLabels(new ArithmeticEstimationGenerator(), labels)!;
                     expect(task.labels).toContain(zero);

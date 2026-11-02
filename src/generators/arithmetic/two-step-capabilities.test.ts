@@ -5,8 +5,6 @@ import {getRandomState, setSeed} from '../../lib/random.ts';
 import {extractConfig} from '../../lib/utils.ts';
 import {resolveTwoStepOperations} from './helpers.ts';
 import {TwoStepExtendedGeneratorSchema} from './two-step-capabilities.ts';
-import {ArithmeticWordProblemsRoundingGenerator} from './arithmetic-word-problems-rounding/generator.ts';
-import {ArithmeticWordProblemsLetterEquationGenerator} from './arithmetic-word-problems-letter-equation/generator.ts';
 import {ArithmeticWordProblemsInterpretedRemainderGenerator} from './arithmetic-word-problems-interpreted-remainder/generator.ts';
 
 describe('extended two-step family contract preservation', () => {
@@ -16,8 +14,7 @@ describe('extended two-step family contract preservation', () => {
             range: [deductCompatible([Scope.NumbersLargerZero, Scope.NumbersSmaller1000000]), resolveRangeFromLabels]
         } as const;
         expect(TwoStepExtendedGeneratorSchema).toEqual(original);
-        for (const constructor of [ArithmeticWordProblemsRoundingGenerator, ArithmeticWordProblemsLetterEquationGenerator,
-            ArithmeticWordProblemsInterpretedRemainderGenerator]) {
+        for (const constructor of [ArithmeticWordProblemsInterpretedRemainderGenerator]) {
             const generator = new constructor();
             const previousSchema = generator instanceof ArithmeticWordProblemsInterpretedRemainderGenerator ? {range: original.range} : original;
             for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {

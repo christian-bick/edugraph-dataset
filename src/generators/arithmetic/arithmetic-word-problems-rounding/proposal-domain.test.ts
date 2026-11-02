@@ -84,6 +84,23 @@ describe('bounded rounding proposal domain', () => {
         expect(entropy.calls).toBe(1);
     });
 
+    it('conditions the same rank law on intervals that omit the exact answer', () => {
+        const data = context(1, 1000, 150, 100);
+        for (const [allowed, expected] of [[{lower: 100, upper: 110}, Array.from({length: 11}, (_, i) => 100 + i)],
+            [{lower: 149, upper: 151}, [149, 151]], [{lower: 900, upper: 900}, [900]]] as const) {
+            for (let i = 0; i < expected.length; i++) {
+                entropy.value = (i + 0.5) / expected.length;
+                expect(generateRoundingProposal(data, allowed)?.proposedAnswer).toBe(expected[i]);
+            }
+        }
+        for (const allowed of [{lower: 0, upper: 100}, {lower: 100, upper: 1001}, {lower: 100, upper: 99},
+            {lower: NaN, upper: 100}, {lower: 150, upper: 150}]) {
+            const before = entropy.calls;
+            expect(generateRoundingProposal(data, allowed)).toBeNull();
+            expect(entropy.calls).toBe(before);
+        }
+    });
+
     it('returns null without randomness for a valid singleton containing only the exact answer', () => {
         expect(generateRoundingProposal(context(100, 100, 100, 100))).toBeNull();
         expect(entropy.calls).toBe(0);

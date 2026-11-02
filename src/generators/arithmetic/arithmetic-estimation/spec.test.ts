@@ -7,6 +7,9 @@ import {resolveEstimationClaim} from '../../../visuals/views/operations/operatio
 import {OperationsAnswerReasonablenessViewSchema, spec as viewSpec} from '../../../visuals/views/operations/operations-answer-reasonableness/spec.ts';
 import {ArithmeticEstimationGenerator} from './generator.ts';
 import {ArithmeticEstimationGeneratorSchema, spec} from './spec.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {resolveCanonicalRangeFromLabels} from '../../../lib/canonical-range-labels.ts';
+import {estimationQuantities} from './canonical-domain.ts';
 
 const equationTargets = [Area.Addition, Area.Subtraction].map(operation => ({
     id: `small-number-${operation.split('/').at(-1)}`,
@@ -48,7 +51,7 @@ describe('ArithmeticEstimationGenerator spec integration', () => {
             expect(draw.stub).not.toBeNull();
             expect(draw.stub!.labels).toContain(Scope.NumbersSmaller20);
             const data = draw.stub!.data;
-            expect(data.numberDomain).toEqual({min: 0, max: 20});
+            expect(hasCanonicalRangeWitness(estimationQuantities(data), resolveCanonicalRangeFromLabels(draw.labels)!)).toBe(true);
             const claim = resolveEstimationClaim(data);
             expect(claim.isReasonable).toBe(claim.roundedProposedAnswer === claim.roundedEstimatedAnswer);
             expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]

@@ -51,6 +51,15 @@ function prepare(target = targets[0], seed = 0) {
     };
 }
 
+function originalZeroFixture() {
+    const payload = prepare({...zeroRoundingTarget, labels: [...zeroRoundingTarget.labels, Scope.NumbersWithZero]}, 1789219894);
+    // Preserve this mathematical regression independently of canonical-profile resampling.
+    payload.problem.data = {numberDomain: {min: 0, max: 1000}, num1: 384, num2: 16, operation: 'division',
+        roundedNum1: 380, roundedNum2: 20, roundingPlace: 10, exactAnswer: 24, estimatedAnswer: 19,
+        proposal: {proposedAnswer: 2, roundedProposedAnswer: 0}};
+    return payload;
+}
+
 describe('answer reasonableness domain rendering', () => {
     it.each([...targets, ...estimationTargets])('renders both modes and verdicts for fixture $id', target => {
         for (const seed of [0, 1]) {
@@ -73,7 +82,7 @@ describe('answer reasonableness domain rendering', () => {
     });
 
     it('requires the zero-producing comparison method for the original division failure without revealing its answer', () => {
-        const payload = prepare(zeroRoundingTarget, 1789219894);
+        const payload = originalZeroFixture();
         expect(payload.problem.data).toEqual({
             numberDomain: {min: 0, max: 1000}, num1: 384, num2: 16, operation: 'division',
             roundedNum1: 380, roundedNum2: 20, roundingPlace: 10, exactAnswer: 24, estimatedAnswer: 19,
@@ -95,7 +104,7 @@ describe('answer reasonableness domain rendering', () => {
     });
 
     it.each([0, 1, 2, 3, 4])('preserves the canonical zero rounding for boundary proposal %i', proposedAnswer => {
-        const payload = prepare(zeroRoundingTarget, 1789219894);
+        const payload = originalZeroFixture();
         payload.problem.data = {...payload.problem.data, proposal: {proposedAnswer, roundedProposedAnswer: 0}};
         const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
         const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
@@ -118,7 +127,7 @@ describe('answer reasonableness domain rendering', () => {
         [{roundedNum1: 1}, 'mathematically inconsistent'],
         [{operation: 'division', num2: 0, roundedNum2: 0}, 'mathematically inconsistent']
     ] as const)('rejects malformed mathematical evidence %j', (overrides, expectedError) => {
-        const payload = prepare();
+        const payload = prepare({...targets[0], labels: [...targets[0]!.labels, Scope.NumbersWithZero]});
         payload.problem.data = {...payload.problem.data, ...overrides} as ArithmeticEstimationProblem;
         expect(() => renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />)).toThrow(expectedError);
     });
