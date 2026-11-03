@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidFractionScaleComparison} from '../fraction-scale-comparison-helpers.ts';
+import {isValidFractionScaleRelation} from '../fraction-scale-comparison-helpers.ts';
 import {FractionScaleComparisonBody} from '../fraction-scale-comparison-view.tsx';
 import {FractionsScalingComparisonViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -15,9 +15,9 @@ export const FractionsScalingComparisonCore = ({payload}: {
     const {data} = payload.problem;
     validateProblemData(VIEW_ID, data, [
         'kind', 'reference', 'scaleFactor', 'product', 'relation',
-        'onePart', 'partDifferenceCount', 'wholeNumberAnalogy'
+        'onePart', 'partDifferenceCount'
     ]);
-    if (!isValidFractionScaleComparison(data)) {
+    if (!isValidFractionScaleRelation(data)) {
         throw new ViewValidationError(VIEW_ID, 'Fraction factor, product, relation, and equal-part witnesses must agree exactly.');
     }
     return <FractionScaleComparisonBody data={data} task="comparison" isSolutionView={payload.isSolutionView} />;

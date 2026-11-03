@@ -1,13 +1,11 @@
-import type {FractionScaleComparisonProblem} from '../../../types/problems.ts';
+import type {FractionScaleComparisonProblem, FractionScaleRelationProblem} from '../../../types/problems.ts';
 import {formatOriginalScaleFraction, formatScaleRational} from './fraction-scale-comparison-helpers.ts';
 
 export type FractionScaleTask = 'comparison' | 'explanation';
 
-interface Props {
-    data: FractionScaleComparisonProblem;
-    task: FractionScaleTask;
-    isSolutionView: boolean;
-}
+type TaskData = {data: FractionScaleRelationProblem; task: 'comparison'}
+    | {data: FractionScaleComparisonProblem; task: 'explanation'};
+type Props = TaskData & {isSolutionView: boolean};
 
 const symbol: Record<FractionScaleComparisonProblem['relation'], string> = {
     greater: '>', less: '<', equal: '='
@@ -17,7 +15,7 @@ const relationWords: Record<FractionScaleComparisonProblem['relation'], string> 
     greater: 'greater than', less: 'less than', equal: 'equal to'
 };
 
-function EqualParts({data}: {data: FractionScaleComparisonProblem}) {
+function EqualParts({data}: {data: FractionScaleComparisonProblem | FractionScaleRelationProblem}) {
     const {numerator: selectedParts, denominator: referenceParts} = data.scaleFactor;
     const unitWidth = 590 / Math.max(selectedParts, referenceParts);
     const x = 126;
@@ -48,7 +46,7 @@ function Analogy({data}: {data: FractionScaleComparisonProblem}) {
     </div>;
 }
 
-function Solution({data, task}: {data: FractionScaleComparisonProblem; task: FractionScaleTask}) {
+function Solution({data, task}: TaskData) {
     const q = formatScaleRational(data.reference);
     const factor = formatOriginalScaleFraction(data.scaleFactor);
     const {numerator: a, denominator: b} = data.scaleFactor;
@@ -64,14 +62,17 @@ function Solution({data, task}: {data: FractionScaleComparisonProblem; task: Fra
     </div>;
 }
 
-export function FractionScaleComparisonBody({data, task, isSolutionView}: Props) {
+export function FractionScaleComparisonBody(props: Props) {
+    const {data, task, isSolutionView} = props;
     const q = formatScaleRational(data.reference);
     const factor = formatOriginalScaleFraction(data.scaleFactor);
     return <main className="w-[820px] rounded-2xl bg-white p-6 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
         <h1 className="text-center text-[23px] font-bold leading-snug text-slate-900">
             {task === 'comparison'
                 ? 'Without finding the exact product, compare it with the original quantity.'
-                : 'Explain why multiplying by this fraction changes the original quantity as it does.'}
+                : data.relation === 'equal'
+                    ? 'Explain how multiplying by this fraction affects the original quantity.'
+                    : 'Explain why multiplying by this fraction changes the original quantity as it does.'}
         </h1>
         <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50 px-6 py-4 text-center text-[26px] font-bold text-violet-950">
             Original: {q} &nbsp; · &nbsp; Factor: {factor}
@@ -82,11 +83,13 @@ export function FractionScaleComparisonBody({data, task, isSolutionView}: Props)
         {task === 'explanation' && !isSolutionView && <div className="mt-4"><Analogy data={data} /></div>}
         <div className="mt-4">
             {isSolutionView
-                ? <Solution data={data} task={task} />
+                ? <Solution {...props} />
                 : <div className="rounded-xl border-2 border-dashed border-slate-300 px-5 py-4 text-[17px] leading-relaxed text-slate-700">
                     {task === 'comparison'
                         ? 'Choose >, <, or =. Explain how the fraction factor compares with 1: ____________________'
-                        : 'Compare the fraction factor with 1. Explain in words how equal parts show whether the product grows or shrinks: ____________________'}
+                        : data.relation === 'equal'
+                            ? 'Compare the fraction factor with 1. Explain in words how equal parts show whether the product grows, shrinks, or stays the same: ____________________'
+                            : 'Compare the fraction factor with 1. Explain in words how equal parts show whether the product grows or shrinks: ____________________'}
                 </div>}
         </div>
     </main>;

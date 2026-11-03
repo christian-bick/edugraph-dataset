@@ -3405,9 +3405,10 @@ export type FractionScaleRational = Readonly<{
  * `onePart` is q/b: b such parts reconstruct q and a reconstruct `product`.
  * `partDifferenceCount` is signed a - b, an exact witness for how the two
  * quantities differ in those equal parts. `wholeNumberAnalogy` records the
- * familiar enlargement 2q > q using the same reference q. These are
- * mathematical facts shared by comparison and explanation views. A view
- * selects its own learner question, unknown placement, wording, and display.
+ * familiar enlargement 2q > q using the same reference q. This analogy-bearing
+ * family supports the explanation view. Exact product and signed difference
+ * remain canonical mathematics even when a projection does not evaluate them.
+ * A view selects its own learner question, unknown placement, wording, and display.
  */
 export type FractionScaleComparisonProblem = Readonly<{
     kind: 'fraction-scale-comparison';
@@ -3421,6 +3422,22 @@ export type FractionScaleComparisonProblem = Readonly<{
         factor: 2;
         product: FractionScaleRational;
     }>;
+}>;
+
+/**
+ * Equal-part scaling relation without an additional whole-number analogy.
+ * It retains the original a/b factor, q/b part, exact product, signed a-b
+ * difference and comparison from FractionScaleComparisonProblem. The comparison
+ * task uses q, a, b, q/b and one, without requiring the exact product or difference.
+ */
+export type FractionScaleRelationProblem = Readonly<{
+    kind: 'fraction-scale-relation';
+    reference: FractionScaleRational;
+    scaleFactor: FractionScaleRational;
+    product: FractionScaleRational;
+    relation: 'greater' | 'less' | 'equal';
+    onePart: FractionScaleRational;
+    partDifferenceCount: number;
 }>;
 
 export type FractionArithmeticOperation = 'addition' | 'subtraction';
@@ -5759,7 +5776,7 @@ export interface ViewTypeMap {
     'fractions-area-tiling-understanding': FractionRectangleAreaProblem;
     'fractions-rectangle-area': FractionRectangleAreaProblem;
     'fractions-area-product-construction': FractionRectangleAreaProblem;
-    'fractions-scaling-comparison': FractionScaleComparisonProblem;
+    'fractions-scaling-comparison': FractionScaleRelationProblem;
     'fractions-scaling-explanation': FractionScaleComparisonProblem;
     'fractions-interpretation-model': FractionArithmeticProblem;
     'fractions-operation-model': FractionArithmeticProblem;

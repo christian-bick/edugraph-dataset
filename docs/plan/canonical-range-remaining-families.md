@@ -5,10 +5,11 @@ largest-magnitude reinterpretation was withdrawn. Q1/Q2 producer splits and thei
 [consumer adoption](canonical-range-labeling.md#q1q2-syntax-and-calculation-contracts), followed by
 the [Q6 unit-division separation](canonical-range-labeling.md#q6-source-verification) and
 [Q7 fraction-product separation](canonical-range-labeling.md#q7-source-verification), followed by
-the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification), are implemented.
-Current source coverage is **1,528 normalized targets / 2,000 routes / 4,699 selections**, with
-**55 missing range facets across six producers**. Q1/Q2 closed 14 source omissions, Q6
-closed another 16, Q7 seven and Q8 seven; eight decision topics remain, including the same two precision topics covering
+the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification) and
+[Q9 relation/analogy separation](canonical-range-labeling.md#q9-source-verification), are implemented.
+Current source coverage is **1,528 normalized targets / 2,000 routes / 4,706 selections**, with
+**50 missing range facets across five producers**. Q1/Q2 closed 14 source omissions, Q6
+closed another 16, Q7 seven, Q8 seven and Q9 five; seven decision topics remain, including the same two precision topics covering
 34 already-labelled routes.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
@@ -53,7 +54,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
-| Q9 — fraction scaling,5 | Comparison of5 and `5×3/2` explicitly avoids the product; explanation additionally requires the analogy `5×2=10`. Must that analogy be common to both? | Keep comparison and explanation mathematically distinct unless the additional analogy is intentionally required in both Questions. Existing equal-only routing does not provide a universal boundary. |
 | Q10 — generic unit scale,2 | In `5 large units=10 small units`, must comparison explicitly derive factor2, as the derivation consumer does? | Prefer distinct comparison and factor-derivation contracts, preserving their tasks. Requiring factor derivation in both is another option, but changes comparison rather than merely clarifying a required solution model. |
 | Q11 — named-unit equivalences,28 | Should one conversion and a five-row table share a range? From7km, the single conversion reaches7000m, while the table reaches11000m. | Confirm single-equivalence versus table contracts. A rare producer split can preserve all unit pairs and renderers. Trace the one-unit derivation quantity separately; it is not required by every table task. |
 | Q12 — currency,11 | Which numeric amounts define the range when `$1−75¢=25¢` or `75¢+75¢=$1.50` uses both named units? | Recommend values in each explicitly required unit, plus conversion quantities only where the task requires conversion. Confirm this convention before implementation. Preserve the explicitly wanted cents/dollars competency; no cents-only rendering or storage-based shortcut. |
@@ -79,10 +79,16 @@ cells; only unsupported multiplication/scaling claims are excluded from classifi
 The [Q8 source verification](canonical-range-labeling.md#q8-source-verification) closes seven
 omissions while preserving all eight fraction pairs and all seven current source routes.
 
-The first six rows account for all 55 remaining missing source facets: arithmetic 1,
-fractions 5, measurement 30, currency 11 and symbolic algebra 8. The last two
+Q9 is resolved by separate analogy-free scale relations and analogy-bearing scaling models.
+The [Q9 source verification](canonical-range-labeling.md#q9-source-verification) closes five
+omissions, preserves all five source target/view lineages and retains all 140 mathematical
+states in each family. The exact product and signed difference remain canonical witnesses
+without becoming unrequested calculations or range/sign/zero quantities.
+
+The first five rows account for all 50 remaining missing source facets: arithmetic 1,
+measurement 30, currency 11 and symbolic algebra 8. The last two
 concern 34 already-labelled routes with unresolved precision and must not be added to omission
-totals. These eight questions are contract/policy topics, not an estimated implementation-batch
+totals. These seven questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
 or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.

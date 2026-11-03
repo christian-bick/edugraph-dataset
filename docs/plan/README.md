@@ -44,9 +44,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7 and Q8, current source gates cover **1,528 normalized targets / 2,000 routes and 4,699 selections**,
-  with 55 range omissions across six producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records six missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
+  After Q1/Q2, Q6, Q7, Q8 and Q9, current source gates cover **1,528 normalized targets / 2,000 routes and 4,706 selections**,
+  with 50 range omissions across five producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records five missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -69,6 +69,12 @@ These items are not newly scheduled by the archive move.
   part-count ranges. All eight pairs and seven current routes remain, with 384 unchanged shared
   control renderings and separate checks of all seven legitimate consumers. All 116 focused tests
   pass with full generator/domain coverage; native verification covers 84 images captured twice.
+  Q9's [source verification](canonical-range-labeling.md#q9-source-verification) closes five
+  further omissions with separate fractional-scale relation and analogy contracts, preserving
+  all five source lineages and 140 native states per family. Independent checks cover all 280
+  payloads and conditional weights; native verification covers 28 images captured twice.
+  All 90 focused tests and unchanged coverage thresholds pass, with full coverage of both
+  generators and the shared renderer/validation helper.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.

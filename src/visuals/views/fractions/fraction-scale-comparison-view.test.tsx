@@ -1,6 +1,6 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
-import type {FractionScaleComparisonProblem} from '../../../types/problems.ts';
+import type {FractionScaleComparisonProblem, FractionScaleRelationProblem} from '../../../types/problems.ts';
 import {isValidFractionScaleComparison} from './fraction-scale-comparison-helpers.ts';
 import {FractionScaleComparisonBody} from './fraction-scale-comparison-view.tsx';
 
@@ -16,15 +16,20 @@ const caseFor = (numerator: number, denominator: number,
     wholeNumberAnalogy: {factor: 2, product: {numerator: 8, denominator: 1}}
 });
 
+const comparisonFor = (data: FractionScaleComparisonProblem): FractionScaleRelationProblem => {
+    const {wholeNumberAnalogy: _analogy, kind: _kind, ...mathematics} = data;
+    return {kind: 'fraction-scale-relation', ...mathematics};
+};
+
 describe('fraction scaling comparison views', () => {
     it.each([
         [5, 3, 'greater'], [2, 3, 'less'], [3, 3, 'equal']
     ] as const)('accepts the %i/%i %s witness and shows its relation only in Solution Mode', (a, b, relation) => {
         const data = caseFor(a, b, relation);
         expect(isValidFractionScaleComparison(data)).toBe(true);
-        const question = renderToStaticMarkup(<FractionScaleComparisonBody data={data}
+        const question = renderToStaticMarkup(<FractionScaleComparisonBody data={comparisonFor(data)}
             task="comparison" isSolutionView={false} />);
-        const solution = renderToStaticMarkup(<FractionScaleComparisonBody data={data}
+        const solution = renderToStaticMarkup(<FractionScaleComparisonBody data={comparisonFor(data)}
             task="comparison" isSolutionView={true} />);
         expect(question).toContain('Choose &gt;, &lt;, or =');
         expect(question).toContain(`${a}/${b}`);
@@ -46,6 +51,18 @@ describe('fraction scaling comparison views', () => {
         expect(question).not.toContain('2 &lt; 3');
         expect(solution).toContain('2 &lt; 3');
         expect(solution).not.toContain('8/3');
+    });
+
+    it('keeps future equality explanations open with neutral wording and preserves equal-part reasoning', () => {
+        const data = caseFor(3, 3, 'equal');
+        const question = renderToStaticMarkup(<FractionScaleComparisonBody data={data} task="explanation" isSolutionView={false} />);
+        const solution = renderToStaticMarkup(<FractionScaleComparisonBody data={data} task="explanation" isSolutionView={true} />);
+        expect(question).toContain('Explain how multiplying by this fraction affects the original quantity.');
+        expect(question).toContain('grows, shrinks, or stays the same');
+        expect(question).not.toContain('leaves the original quantity unchanged');
+        expect(question).not.toContain('3 = 3');
+        expect(solution).toContain('3 = 3');
+        expect(solution).toContain('Because 3 parts are equal to 3 parts');
     });
 
     it('rejects inconsistent exact mathematics and sign claims', () => {

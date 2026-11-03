@@ -10,17 +10,18 @@ records the implementation and source verification scope. The approved Q6
 [partition/sharing separation](#q6-unit-fraction-division-contracts) and Q7
 [fraction-product separation](#q7-fraction-product-contracts) are also implemented. Q8 retains
 the existing producer with [shared part-count ranges](#q8-fraction-equivalence-part-counts).
+Q9 separates [fractional-scale relations and whole-number analogies](#q9-fractional-scale-relation-and-analogy-contracts).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7 and Q8 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7, Q8 and Q9 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,699 complete selections**, with **55 range-presence
+**1,528 normalized targets /2,000 routes and4,706 complete selections**, with **50 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records8 remaining contract/policy questions, including two already-labelled precision topics.
+records7 remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -427,6 +428,95 @@ This focused acceptance does not claim full-suite or canonical dataset acceptanc
 Evidence is under `temp/range-decisions/batch4-q8/` and
 `temp/spec-plans/ccss/range-q8-2026-11-03/`. Canonical dataset regeneration and independent
 Question/Solution VQA remain separate acceptance gates.
+
+## Q9 fractional-scale relation and analogy contracts
+
+Approved 2026-11-04 after Q8, from `aa32eb1f`. Keep the comparison's existing request to
+compare without finding the exact product, and retain the explanation's given whole-number
+analogy. For reference 5 and factor `3/2`, comparison uses upper5; explanation also gives
+`5 × 2 = 10` and therefore uses upper10. Both contracts include the explicitly assessed
+selected/reference part counts: factor `11/6` needs upper20 even when its rational product
+is below ten.
+
+| Production consumer | Existing source family | Mathematical contract and adoption | Verification |
+| --- | --- | --- | --- |
+| `fractions-scaling-comparison` | Three `5.NF.B.5a` greater/less/equal routes | Adopt `fraction-scale-relations` / `FractionScaleRelationProblem`, omitting only the unused analogy; preserve the current task, blank and equal-part reasoning | Both modes, all three profiles and seven canonical cells, unchanged rendering for identical mathematics |
+| `fractions-scaling-explanation` | Two `5.NF.B.5b` greater/less routes | Retain `fraction-scaling` / `FractionScaleComparisonProblem`, including the exact `2q` analogy in both modes | Both modes and all seven cells, including the valid future equal profile |
+
+Establish the nominal payload discriminants, `ViewTypeMap`, shared renderer/validation adoption
+and minimum producer changes serially through a passing typecheck before parallel role work
+(IMPL-8). The shared renderer accepts correlated task/data variants, and the analogy projection
+requires its own complete mathematical family. Keep all current route/target claims and all
+future native profiles. No range-driven consumer exclusion or new task is needed.
+
+Reference `q`, fraction factor `a/b`, exact product and comparison relation are canonical
+mathematics. `q/b` and signed `a-b` are structured mathematical witnesses; the `2q` enlargement
+belongs only to the analogy-bearing family (SPEC-11, IMPL-G8). Relevant range quantities are
+`q`, `a/b`, `q/b`, the integer part counts `a` and `b`, and unit one, plus two and `2q` for
+the analogy family. The unused exact product, its unreduced storage numerator and signed
+difference do not become required calculations or range/sign/zero quantities. Preserve existing
+positive/nonzero ownership and do not add an exact-product calculation to either task.
+
+The original law selects `q` uniformly from 2..5 and `b` uniformly from 2..6, then selects
+`a` uniformly from 1..`b-1` or `b+1`..`2b-1`; equality fixes `a=b`. Each family retains
+60 greater, 60 less and 20 equal states. Preserve the exact conditional weights within each
+preselected range, including two native draws for equality and three otherwise, without
+rejection. The accepted range-selection direction permits changes to the global mixture
+and seeded output. Comparison has 16/40/4 greater states in upper5/10/20, 40/20 less and
+16/4 equal states in upper5/10. Analogy has 4/52/4 greater, 10/50 less and 4/16 equal states.
+Each family therefore has seven feasible profile/range cells and no positive lower descriptor.
+
+Capture the protected baseline before mutations, then verify source lineages, conditional
+weights, direct/planned generation, exact receipt replay, PRNG continuation and both native
+render modes. Canonical dataset regeneration and independent VQA remain separate gates.
+
+### Q9 source verification
+
+The serial shared-type/consumer gate passes before independent test and verification work
+(IMPL-8). All five source target/view lineages remain: three comparison routes migrate to
+`fraction-scale-relations`, and two explanation routes retain `fraction-scaling`. Matching
+records exactly these three producer substitutions, with no target additions/removals, claim
+edits, disposition changes or unmatched targets. Current selections grow 5→12: seven comparison
+and five explanation selections. Global source coverage is 1,528 normalized targets /2,000
+routes /4,706 complete selections.
+
+The source dependency audit uses an empty dataset snapshot. It closes all five Q9 range
+omissions, leaving 50 across five producers. Non-range omissions, conflicts, contract errors,
+incomplete tuples, invalid contexts and pending/invalid inference remain zero; all 119 existing
+inference selections resolve exhaustively. Seven decision topics remain, including the same
+two precision topics covering 34 already-labelled routes.
+
+An independent oracle verifies all 280 family-specific payloads and exact native/conditional
+weights across 14 cells. All states remain reachable across 1,349 seeded draws, with exact
+two-draw equality and three-draw strict-profile PRNG continuation. All 12 current selections
+pass 96 planned draws, direct resolution and exact receipt replay; all 14 future profile/range
+admissions pass. The 520 unchanged native renderings and all 80 protected source renderings are
+byte-identical. Only the 40 future equality-explanation Question/Solution renderings receive
+the approved neutral header and three-way wording. No current strict task text changes.
+
+Native browser verification covers all 12 current selections plus both future equality-analogy
+cells: 28 Question/Solution images, each captured twice with identical bytes (56 captures),
+without browser errors or error cards. Visual inspection includes the same `5 × 3/2` example
+in comparison upper5 and explanation upper10, plus future equality Question/Solution modes.
+The Question keeps its relation blank and states no equality verdict. This is source smoke
+verification, separate from canonical dataset or VQA acceptance.
+
+Final repository types, generator/view contracts, labels, documentation, source standards and
+the scoped implementation audit pass. Full `npm run check` retains the same stale-artifact
+failures in the unchanged local 1,944-row dataset: missing recorded generation plans/receipts
+fail split integrity, and strict stored annotations retain 4,006 failures. The earlier full-suite
+timeout limitations remain recorded in Q1/Q2 and Q6. No timeouts, skip markers or coverage
+thresholds change, and canonical regeneration/VQA acceptance is not claimed.
+
+Focused coverage passes all 90 tests across nine files, with none excluded. Both generators,
+the shared renderer and its validation helper have 100% statement /100% branch coverage. The
+weighted mathematical domain has 98.55% /98%; overall affected-code coverage is 99.23% /99.2%.
+All pass the unchanged 85% statement /60% branch thresholds. The 36 persistent integration
+tests include every native conditional-weight interval midpoint and both edges, all 14 future
+cells, exact source replay, nominal/runtime boundaries and malformed mathematical witnesses.
+
+Evidence is under `temp/range-decisions/batch5-q9/` and
+`temp/spec-plans/ccss/range-q9-2026-11-04/`.
 
 ## Accepted direction
 
