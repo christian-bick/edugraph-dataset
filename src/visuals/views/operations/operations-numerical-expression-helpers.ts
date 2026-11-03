@@ -1,4 +1,5 @@
-import type {ArithmeticOperation, NumericalExpressionNode, NumericalExpressionProblem} from '../../../types/problems.ts';
+import type {ArithmeticOperation, NumericalExpressionNode, NumericalExpressionProblem,
+    NumericalExpressionStructureNode, NumericalExpressionStructureProblem} from '../../../types/problems.ts';
 import {ViewValidationError} from '../../helpers/validation.ts';
 
 const symbols: Record<ArithmeticOperation, string> = {
@@ -15,7 +16,7 @@ const groupPair = (seed: number, level: number) =>
 
 /** Displays the supplied expression tree without evaluating its hidden values. */
 export const formatNumericalExpression = (
-    node: NumericalExpressionNode,
+    node: NumericalExpressionStructureNode,
     seed: number,
     groupLevel = 0
 ): string => {
@@ -28,19 +29,19 @@ export const formatNumericalExpression = (
 };
 
 /** Shows the operands and operations while leaving explicit grouping for the learner to add. */
-export const formatWithoutGroups = (node: NumericalExpressionNode): string => {
+export const formatWithoutGroups = (node: NumericalExpressionStructureNode): string => {
     if (node.kind === 'number') return String(node.value);
     if (node.kind === 'group') return formatWithoutGroups(node.expression);
     return `${formatWithoutGroups(node.left)} ${symbols[node.operation]} ${formatWithoutGroups(node.right)}`;
 };
 
 /** Verbalizes structure, including operation order, but never reads calculated node values. */
-export const describeNumericalExpression = (node: NumericalExpressionNode): string => {
+export const describeNumericalExpression = (node: NumericalExpressionStructureNode): string => {
     if (node.kind === 'number') return String(node.value);
     if (node.kind === 'group') return describeNumericalExpression(node.expression);
     if (node.operation === 'addition' || node.operation === 'multiplication') {
-        const terms: NumericalExpressionNode[] = [];
-        const collect = (part: NumericalExpressionNode): void => {
+        const terms: NumericalExpressionStructureNode[] = [];
+        const collect = (part: NumericalExpressionStructureNode): void => {
             if (part.kind === 'operation' && part.operation === node.operation) {
                 collect(part.left);
                 collect(part.right);
@@ -63,7 +64,7 @@ export const describeNumericalExpression = (node: NumericalExpressionNode): stri
     }
 };
 
-export const hasExplicitGroup = (node: NumericalExpressionNode): boolean => {
+export const hasExplicitGroup = (node: NumericalExpressionStructureNode): boolean => {
     if (node.kind === 'group') return true;
     if (node.kind === 'number') return false;
     return hasExplicitGroup(node.left) || hasExplicitGroup(node.right);
@@ -101,10 +102,12 @@ const closeEnough = (actual: number, expected: number): boolean =>
     Math.abs(actual - expected) <= 1e-9 * Math.max(1, Math.abs(expected));
 
 /** Checks the recursive mathematical witness before it reaches a renderer. */
-export const validateNumericalExpression = (
+export function validateNumericalExpression(
     viewId: string,
-    data: NumericalExpressionProblem
-): void => {
+    input: unknown
+): asserts input is NumericalExpressionProblem {
+    const data = input as NumericalExpressionProblem;
+    if (!data || typeof data !== 'object') throw new ViewValidationError(viewId, 'Expression data is invalid.');
     let count = 0;
     const inspect = (node: NumericalExpressionNode, depth: number): void => {
         count++;
@@ -119,7 +122,7 @@ export const validateNumericalExpression = (
             }
             return;
         }
-        if (node.kind !== 'operation' || !(node.operation in symbols)) {
+        if (node.kind !== 'operation' || !Object.hasOwn(symbols, node.operation)) {
             throw new ViewValidationError(viewId, 'Expression operation is invalid.');
         }
         inspect(node.left, depth + 1);
@@ -148,4 +151,41 @@ export const validateNumericalExpression = (
             throw new ViewValidationError(viewId, 'Multiplicative comparison does not match the expression.');
         }
     }
-};
+}
+
+/** A structure contract validates grammar and literal values without inventing evaluated work. */
+export function validateNumericalExpressionStructure(viewId: string, input: unknown): asserts input is NumericalExpressionStructureProblem {
+    const data = input as NumericalExpressionStructureProblem;
+    if (!data || typeof data !== 'object') throw new ViewValidationError(viewId, 'Expression data is invalid.');
+    let count = 0;
+    const inspect = (node: NumericalExpressionStructureNode, depth: number): void => {
+        if (++count > 64 || depth > 16 || !node || typeof node !== 'object') {
+            throw new ViewValidationError(viewId, 'Expression structure is invalid.');
+        }
+        if (node.kind === 'number') {
+            if (!validNumber(node.value)) throw new ViewValidationError(viewId, 'Expression literal is invalid.');
+            return;
+        }
+        if ('value' in node) throw new ViewValidationError(viewId, 'Structural expressions must not contain evaluated values.');
+        if (node.kind === 'group') return inspect(node.expression, depth + 1);
+        if (node.kind !== 'operation' || !Object.hasOwn(symbols, node.operation)) {
+            throw new ViewValidationError(viewId, 'Expression operation is invalid.');
+        }
+        inspect(node.left, depth + 1);
+        inspect(node.right, depth + 1);
+    };
+    inspect(data.expression, 0);
+    if (data.multiplicativeComparison) {
+        const {factor, reference} = data.multiplicativeComparison;
+        inspect(reference, 0);
+        const root = data.expression;
+        const compared = root.kind === 'operation' && root.right.kind === 'group'
+            ? root.right.expression : root.kind === 'operation' ? root.right : undefined;
+        if (!validNumber(factor) || factor <= 0 || root.kind !== 'operation'
+            || root.operation !== 'multiplication' || root.left.kind !== 'number'
+            || root.left.value !== factor || !compared
+            || JSON.stringify(compared) !== JSON.stringify(reference)) {
+            throw new ViewValidationError(viewId, 'Multiplicative comparison does not match the expression.');
+        }
+    }
+}

@@ -6,7 +6,8 @@ import {
     formatNumericalExpression,
     formatWithoutGroups,
     hasExplicitGroup,
-    validateNumericalExpression
+    validateNumericalExpression,
+    validateNumericalExpressionStructure
 } from './operations-numerical-expression-helpers.ts';
 
 export type NumericalExpressionViewId =
@@ -27,6 +28,11 @@ interface Props {
     viewId: NumericalExpressionViewId;
 }
 
+const calculationData = (viewId: string, data: unknown) => {
+    validateNumericalExpression(viewId, data);
+    return data;
+};
+
 const AnswerSpace = () => (
     <div className="mt-5 min-h-20 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-5 py-4 text-slate-400">
         Your response
@@ -44,7 +50,8 @@ export const OperationsNumericalExpressionView = ({mode, payload, viewId}: Props
     const {problem, isSolutionView, seed} = payload;
     const data = problem.data;
     validateProblemData(viewId, data, ['expression']);
-    validateNumericalExpression(viewId, data);
+    const calculation = mode === 'grouping-evaluate' ? calculationData(viewId, data) : undefined;
+    if (!calculation) validateNumericalExpressionStructure(viewId, data);
     const hasGroup = hasExplicitGroup(data.expression);
     if ((mode === 'grouping-write' || mode === 'grouping-evaluate')
         && !hasGroup) {
@@ -80,14 +87,14 @@ export const OperationsNumericalExpressionView = ({mode, payload, viewId}: Props
                 : <AnswerSpace />}
         </>}
 
-        {mode === 'grouping-evaluate' && <>
+        {calculation && <>
             <p className="text-lg">Find the value. Evaluate inside the grouping symbols first.</p>
             <Expression>{expression}</Expression>
             {isSolutionView
                 ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
                     <div className="mb-3 text-sm font-semibold text-emerald-800">Calculation steps</div>
                     <ol className="space-y-2 pl-6">
-                        {expressionEvaluationSteps(data.expression).map((step, index) =>
+                        {expressionEvaluationSteps(calculation.expression).map((step, index) =>
                             <li key={index} className="list-decimal text-lg">
                                 <span className="mr-2 text-sm text-slate-500">
                                     {step.inGroup ? 'Inside grouping:' : 'Then:'}
@@ -96,7 +103,7 @@ export const OperationsNumericalExpressionView = ({mode, payload, viewId}: Props
                             </li>)}
                     </ol>
                     <div className="mt-4 border-t border-emerald-200 pt-3 text-xl font-bold">
-                        Value: {data.expression.value}
+                        Value: {calculation.expression.value}
                     </div>
                 </div>
                 : <div className="mt-5 text-xl font-semibold">Value: <span className="ml-2 inline-block w-28 border-b-2 border-slate-400" /></div>}

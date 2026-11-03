@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import type {ExactNumericalExpressionNode, SignedRational} from '../../../types/problems.ts';
 import {isNumericalPowerExpressionProblem} from '../numerical-power-helpers.ts';
 import {NumericalPowerExpressionsGenerator} from './generator.ts';
@@ -54,7 +55,8 @@ describe('real mathematical structure and exponent sampling', () => {
                 setSeed(seed);
                 const profiles = structure === 'single-power' && exponents === 'positive' ? [1, 2, 3] : [1, 2, 3, 4];
                 const numericProfile = profiles[seed % profiles.length]! as 1 | 2 | 3 | 4;
-                const stub = generator.generate({structure, exponents, numericProfile})!;
+                const upper = structure === 'single-power' && numericProfile % 2 === 0 ? 5 : [5, 10, 20, 100][Math.floor(seed / profiles.length) % 4]!;
+                const stub = generator.generate({structure, exponents, numericProfile, range: createCanonicalNumericRange(upper)})!;
                 const data = stub.data;
                 expect(Object.keys(stub)).toEqual(['data']);
                 expect(Object.keys(data).sort()).toEqual(['expression', 'finalValue', 'kind', 'nodeValues', 'powerFacts', 'precedenceWitness', 'reductions']);
@@ -117,7 +119,7 @@ describe('real mathematical structure and exponent sampling', () => {
         for (let seed = 0; seed < 192; seed++) {
             setSeed(seed);
             const {data} = generator.generate({structure: 'mixed-precedence', exponents: 'allow-zero',
-                numericProfile: (seed % 4 + 1) as 1 | 2 | 3 | 4})!;
+                numericProfile: (seed % 4 + 1) as 1 | 2 | 3 | 4, range: createCanonicalNumericRange([5, 10, 20, 100][Math.floor(seed / 4) % 4]!)})!;
             const ids = data.reductions.map(step => step.targetNodeId);
             if (ids.includes('left-sum') && ids.includes('product') && data.powerFacts.length === 1) {
                 expect(ids.indexOf('power')).toBeLessThan(ids.indexOf('product'));
@@ -134,11 +136,13 @@ describe('real mathematical structure and exponent sampling', () => {
 
     it('replays exact data and rejects empty, missing or false mathematical config', () => {
         const generator = new NumericalPowerExpressionsGenerator();
-        const config = {structure: 'mixed-precedence', exponents: 'positive', numericProfile: 1} as const;
+        const config = {structure: 'mixed-precedence', exponents: 'positive', numericProfile: 1, range: createCanonicalNumericRange(100)} as const;
         setSeed(31); const first = generator.generate(config);
         setSeed(31); expect(generator.generate(config)).toEqual(first);
         for (const value of [null, undefined, {}, {structure: 'single-power'}, {exponents: 'positive'},
-            {...config, structure: 'write'}, {...config, structure: []}, {...config, exponents: 'negative'}, {...config, exponents: false}]) {
+            {...config, structure: 'write'}, {...config, structure: []}, {...config, exponents: 'negative'}, {...config, exponents: false},
+            {...config, range: false}, {...config, range: createCanonicalNumericRange(100, 5)},
+            {...config, range: {...config.range, maximumAbove: 5}}]) {
             expect(() => generator.generate(value as never)).toThrow(GeneratorValidationError);
         }
     });

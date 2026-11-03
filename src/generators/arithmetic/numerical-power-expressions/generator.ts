@@ -5,7 +5,8 @@ import type {ArithmeticOperation, ExactNumericalExpressionNode, ExactNumericExpr
 import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
 import {buildNumericalPowerExpressionProblem} from '../numerical-power-helpers.ts';
 import {NumericalPowerExpressionsGeneratorSchema, type NumericalPowerExpressionsGeneratorConfig} from './spec.ts';
-import {permitsNumericValues, sampleSinglePower} from './numeric-profiles.ts';
+import {permitsNumericValues, sampleSinglePowerCandidate} from './numeric-profiles.ts';
+import {isPowerRange, powerExpressionFitsRange, singlePowerRangeCandidates} from './range-profile.ts';
 
 const generatorId = 'numerical-power-expressions';
 const constraints: ExactNumericExpressionConstraints = {domain: 'rational', maximumAbsoluteValue: {numerator: 100, denominator: 1},
@@ -59,27 +60,27 @@ export class NumericalPowerExpressionsGenerator implements ProblemGenerator<Nume
     schema = NumericalPowerExpressionsGeneratorSchema;
 
     generate(config: NumericalPowerExpressionsGeneratorConfig): ProblemStub<NumericalPowerExpressionProblem> | null {
-        validateConfigFields(generatorId, config, ['structure', 'exponents', 'numericProfile']);
+        validateConfigFields(generatorId, config, ['structure', 'exponents', 'numericProfile', 'range']);
         if ((config.structure !== 'single-power' && config.structure !== 'mixed-precedence')
             || (config.exponents !== 'allow-zero' && config.exponents !== 'positive')
-            || ![1, 2, 3, 4].includes(config.numericProfile!)) {
+            || ![1, 2, 3, 4].includes(config.numericProfile!) || !isPowerRange(config.range)) {
             throw new GeneratorValidationError(generatorId, 'Choose a supported mathematical expression structure and exponent domain.');
         }
         const positive = config.exponents === 'positive';
         let expression: ExactNumericalExpressionNode;
         if (config.structure === 'single-power') {
-            const sample = sampleSinglePower(positive, config.numericProfile!);
+            const sample = sampleSinglePowerCandidate(singlePowerRangeCandidates(positive, config.numericProfile!, config.range));
             if (!sample) throw new GeneratorValidationError(generatorId, 'Choose a feasible single-power numeric profile.');
             expression = {id: 'power', kind: 'power', base: literal('power-base', sample.base), exponent: sample.exponent};
         } else {
             // Keep the original correlated scenario sampler, conditioned on a profile
             // already selected by configuration. No labels are read from a candidate.
-            // Scenario zero gives each profile probability at least 1/1152;
-            // the bounded retry failure is below 5e-13 and retries remain pipeline-owned.
+            // Canonical bands condition the same mathematical support; retries remain pipeline-owned.
             for (let attempt = 0; attempt < 32768; attempt++) {
                 const data = buildNumericalPowerExpressionProblem(mixedExpression(positive), constraints);
                 if (permitsNumericValues([...data.nodeValues.map(item => item.value.numerator),
-                    ...data.powerFacts.map(fact => fact.exponent)], config.numericProfile!)) return {data};
+                    ...data.powerFacts.map(fact => fact.exponent)], config.numericProfile!)
+                    && powerExpressionFitsRange(data, config.range)) return {data};
             }
             return null;
         }

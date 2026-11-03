@@ -21,9 +21,10 @@ These items are not newly scheduled by the archive move.
 
 - **Canonical numeric ranges:** the [range-labeling plan](canonical-range-labeling.md) starts
   the separately agreed review of tightest bounds, relevant target-band expansion and generator
-  guarantees. The [2026-11-03 largest-magnitude clarification](canonical-range-labeling.md#largest-magnitude-clarification-2026-11-03)
-  now requires ontology and range-contract alignment before further backlog implementation.
-  The following acceptance counts describe the preceding minimum/maximum contract.
+  guarantees. The current ontology's minimum/maximum interpretation is retained; the proposed
+  largest-magnitude reinterpretation was withdrawn. [Q1/Q2 syntax/calculation separation](canonical-range-labeling.md#q1q2-syntax-and-calculation-contracts)
+  is implemented with source verification; it closes 14 additional range omissions. The following
+  historical counts lead to the current checkpoint below.
   Its [inventory](canonical-range-inventory.csv) describes review-baseline competency
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
   permutations and sampling changes are accepted. Strongest lower profiles, threshold-singleton
@@ -43,11 +44,15 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  Current source gates cover **1,528 normalized targets /2,000 routes and4,602 selections**,
-  with99 range omissions remaining. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records11 missing-facet topics and two already-labelled precision topics; ordinary profile and
+  After Q1/Q2, current source gates cover **1,528 normalized targets /2,000 routes and4,645 selections**,
+  with85 range omissions remaining. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records nine missing-facet topics and two already-labelled precision topics; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
+  Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
+  independent range/replay proofs, native rendering and the stale local dataset's failing artifact
+  gates. Its 116 focused tests and four generator coverage thresholds pass; full coverage hits
+  existing timeouts reproduced on untouched pre-batch code.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.

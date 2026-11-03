@@ -16,8 +16,21 @@ export type NumericalExpressionNode =
     }
     | {kind: 'group'; expression: NumericalExpressionNode; value: number};
 
+/** Written numerical structure: only literals have values; no operation is evaluated. */
+export type NumericalExpressionStructureNode =
+    | {kind: 'number'; value: number}
+    | {kind: 'operation'; operation: ArithmeticOperation;
+        left: NumericalExpressionStructureNode; right: NumericalExpressionStructureNode}
+    | {kind: 'group'; expression: NumericalExpressionStructureNode};
+
+/** A mathematical expression and optional structural factor relation, without calculated values. */
+export type NumericalExpressionStructureProblem = {
+    expression: NumericalExpressionStructureNode;
+    multiplicativeComparison?: {reference: NumericalExpressionStructureNode; factor: number};
+};
+
 /**
- * Ability-neutral expression data shared by writing, evaluation, and interpretation views.
+ * Exact numerical calculation data, including each operation's result.
  * When present, the expression is structurally `factor` times `reference`; their exact
  * values must satisfy that relation without requiring either value to be shown to a learner.
  */
@@ -4343,6 +4356,13 @@ export type NumericalPowerExpressionProblem = Readonly<{
     precedenceWitness: ExactNumericPrecedenceWitness | null;
 }>;
 
+/** A literal power as written mathematics, without its value or an evaluation trace. */
+export type NumericalPowerExpressionSyntaxProblem = Readonly<{
+    kind: 'numerical-power-expression-syntax';
+    expression: Readonly<{id: string; kind: 'power';
+        base: Extract<ExactNumericalExpressionNode, {kind: 'number'}>; exponent: number}>;
+}>;
+
 /**
  * Builder policy constrains all exact numeric values, exponents and intermediates. The
  * absolute-value bound is not a separate numerator/denominator or decimal-storage cap.
@@ -5420,7 +5440,7 @@ export interface ViewTypeMap {
     'algebra-equivalent-expression-generate': AlgebraExpressionEquivalenceProblem;
     'algebra-expression-equivalence-judge': AlgebraExpressionEquivalenceProblem;
     'numerical-power-expression-evaluate': NumericalPowerExpressionProblem;
-    'numerical-power-expression-write': NumericalPowerExpressionProblem;
+    'numerical-power-expression-write': NumericalPowerExpressionSyntaxProblem;
     'algebra-expression-write': AlgebraicExpressionProblem;
     'algebra-expression-parts': AlgebraicExpressionProblem;
     'algebra-subexpression-interpretation': AlgebraicExpressionProblem;
@@ -5440,10 +5460,10 @@ export interface ViewTypeMap {
     'ratio-table-comparison': RatioTableComparisonProblem;
     'operations-vertical': ArithmeticProblem;
     'operations-vertical-inversion': ArithmeticProblem;
-    'operations-grouping-write': NumericalExpressionProblem;
+    'operations-grouping-write': NumericalExpressionStructureProblem;
     'operations-grouping-evaluate': NumericalExpressionProblem;
-    'operations-numerical-expression-write': NumericalExpressionProblem;
-    'operations-numerical-expression-interpretation': NumericalExpressionProblem;
+    'operations-numerical-expression-write': NumericalExpressionStructureProblem;
+    'operations-numerical-expression-interpretation': NumericalExpressionStructureProblem;
     'operations-standard-algorithm': StandardAlgorithmProblem;
     'operations-known-fact-derivation': KnownFactDerivationProblem;
     'operations-known-fact-inversion': KnownFactDerivationProblem;

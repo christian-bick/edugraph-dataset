@@ -16,7 +16,7 @@ describe('exact expression structure/exponent capability bundles', () => {
     it('owns precisely the reviewed invariants and two genuine mathematical choices', () => {
         expect(spec.generalLabels).toEqual([Area.ArithmeticExpression, Area.Exponentiation,
             Scope.IntegerExponent, Scope.RationalNumbers]);
-        expect(Object.keys(NumericalPowerExpressionsGeneratorSchema)).toEqual(['structure', 'exponents', 'numericProfile']);
+        expect(Object.keys(NumericalPowerExpressionsGeneratorSchema)).toEqual(['structure', 'exponents', 'numericProfile', 'range']);
         expect(NumericalPowerExpressionsGeneratorSchema.structure[2]).toEqual([[], [Area.OrderOfOperations]]);
         expect(NumericalPowerExpressionsGeneratorSchema.exponents[2]).toEqual([[], [Scope.PositiveExponent]]);
         expect(findSchemaFallbackContractIssues(NumericalPowerExpressionsGeneratorSchema)).toEqual([]);
@@ -33,10 +33,9 @@ describe('exact expression structure/exponent capability bundles', () => {
         }
     });
 
-    it('executes all four real authored plans with exact claims and actual fixed-view declarations', () => {
-        const targets = [...activeTargets, ...implementationTodos].filter(target => target.id.startsWith('6.EE.A.1-evaluate-power-expressions~')
-            || target.id.startsWith('6.EE.A.1-write-power-expressions~'));
-        expect(targets).toHaveLength(4);
+    it('executes both real evaluation plans with exact claims and actual fixed-view declarations', () => {
+        const targets = [...activeTargets, ...implementationTodos].filter(target => target.id.startsWith('6.EE.A.1-evaluate-power-expressions~'));
+        expect(targets).toHaveLength(2);
         for (const target of targets) {
             const writing = target.labels.includes(Ability.Formalization);
             const view = writing ? writingView : evaluationView;
@@ -53,10 +52,12 @@ describe('exact expression structure/exponent capability bundles', () => {
                     sampleKey: `${target.id}#${spec.generatorId}#${view.viewId}#train#question#inst:0`, seed, attempt: 1});
                 const numeric = [Scope.NumbersWithNegatives, Scope.NumbersWithoutNegatives,
                     Scope.NumbersWithZero, Scope.NumbersWithoutZero];
-                expect(new Set(draw.labels.filter(label => !numeric.includes(label as never))))
+                const ranges = [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20, Scope.NumbersSmaller100];
+                expect(new Set(draw.labels.filter(label => !numeric.includes(label as never) && !ranges.includes(label as never))))
                     .toEqual(new Set([...target.labels, Scope.RationalNumbers, Scope.Base10,
                         ...(writing ? [Scope.NumbersSmaller5] : [])]));
                 expect(draw.labels.filter(label => numeric.includes(label as never))).toHaveLength(2);
+                expect(draw.labels.filter(label => ranges.includes(label as never))).toHaveLength(1);
                 expect(draw.stub!.data.precedenceWitness === null).toBe(writing);
                 if (target.labels.includes(Scope.PositiveExponent)) expect(draw.stub!.data.powerFacts.every((fact: ExactPowerFact) => fact.exponent > 0)).toBe(true);
             }

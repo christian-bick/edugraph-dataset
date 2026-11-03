@@ -1,7 +1,8 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
-import type {NumericalExpressionProblem} from '../../../types/problems.ts';
+import type {NumericalExpressionNode, NumericalExpressionProblem, NumericalExpressionStructureNode,
+    NumericalExpressionStructureProblem} from '../../../types/problems.ts';
 import {
     NumericalExpressionMode,
     NumericalExpressionViewId,
@@ -11,7 +12,8 @@ import {
     describeNumericalExpression,
     expressionEvaluationSteps,
     formatNumericalExpression,
-    validateNumericalExpression
+    validateNumericalExpression,
+    validateNumericalExpressionStructure
 } from './operations-numerical-expression-helpers.ts';
 
 const reference = {
@@ -60,6 +62,11 @@ const ungroupedComparison: NumericalExpressionProblem = {
 
 const visibleText = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
+const structure = (node: NumericalExpressionNode): NumericalExpressionStructureNode => node.kind === 'number'
+    ? {kind: 'number', value: node.value}
+    : node.kind === 'group' ? {kind: 'group', expression: structure(node.expression)}
+        : {kind: 'operation', operation: node.operation, left: structure(node.left), right: structure(node.right)};
+
 const render = (
     mode: NumericalExpressionMode,
     viewId: NumericalExpressionViewId,
@@ -67,8 +74,12 @@ const render = (
     isSolutionView = false,
     seed = 0
 ) => {
+    const syntax: NumericalExpressionStructureProblem = {expression: structure(data.expression),
+        ...(data.multiplicativeComparison ? {multiplicativeComparison: {
+            factor: data.multiplicativeComparison.factor, reference: structure(data.multiplicativeComparison.reference)
+        }} : {})};
     const payload: ViewRenderPayload<NumericalExpressionViewId> = {
-        problem: {type: 'arithmetic', data, labels: []},
+        problem: {type: 'arithmetic', data: mode === 'grouping-evaluate' ? data : syntax, labels: []},
         viewId, targetLabels: [], isSolutionView, seed
     };
     return renderToStaticMarkup(<OperationsNumericalExpressionView
@@ -77,6 +88,14 @@ const render = (
 };
 
 describe('numerical expression view family', () => {
+    it('keeps evaluated values out of the syntax contract and requires them for calculation', () => {
+        const syntax = {expression: structure(grouped.expression)};
+        expect(() => validateNumericalExpressionStructure('syntax', syntax)).not.toThrow();
+        expect(() => validateNumericalExpressionStructure('syntax', grouped)).toThrow('must not contain evaluated values');
+        expect(() => validateNumericalExpression('calculation', syntax)).toThrow('value is invalid');
+        expect(() => validateNumericalExpression('calculation', grouped)).not.toThrow();
+    });
+
     it('requires learner-added grouping and never displays the evaluated values in writing modes', () => {
         const question = render('grouping-write', 'operations-grouping-write', grouped);
         const solution = render('grouping-write', 'operations-grouping-write', grouped, true);

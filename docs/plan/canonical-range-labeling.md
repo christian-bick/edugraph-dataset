@@ -3,19 +3,21 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Current direction, 2026-11-03: the [largest-magnitude clarification](#largest-magnitude-clarification-2026-11-03)
-changes the intended lower-range interpretation. The implementation and acceptance counts below
-describe the preceding minimum/maximum contract. They do not establish acceptance of this new direction.
+Current direction, 2026-11-03: retain the pinned ontology's inclusive minimum/maximum definitions.
+The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax and calculation
+contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
+records the implementation and source verification scope.
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. These batches preserve
+checks. The first Q1/Q2 decision batch also passes its focused and independent source checks.
+These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,602 complete selections**, with **99 range-presence
+**1,528 normalized targets /2,000 routes and4,645 complete selections**, with **85 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records13 concrete contract/policy questions, including two already-labelled precision topics.
+records11 remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -29,60 +31,105 @@ independent Question/Solution evaluation remain unchanged.
 
 ## Largest-magnitude clarification (2026-11-03)
 
-While reviewing Q1/Q2, the user clarified that range labels are defined from the larger end:
-the problem's numbers determine the range when they are larger, otherwise the solution does.
-Both bounds therefore classify the largest relevant magnitude across the problem and its solution.
+The user withdrew the largest-magnitude interpretation recorded in documentation commit
+`e9b4335a` after reviewing ontology `0.33.0`. Retain the existing inclusive bounds on every
+relevant magnitude: the lower describes their minimum and the upper describes their maximum.
+No ontology revision, shared range-policy migration or change to the previously approved
+threshold-singleton exclusion is needed for Q1/Q2.
 
-| User example | Intended labels |
-| --- | --- |
-| `3^3 = 27` | `NumbersLarger20`, `NumbersSmaller100` |
-| `90 - 80 = 10` | `NumbersLarger20`, `NumbersSmaller100` |
+The observability clarification remains: include quantities observable in the problem or
+solution and quantities required by a necessary solution step. A hidden required answer counts;
+an unused evaluation stored in a payload does not. Thus writing `3^3` without evaluating uses
+upper5, while evaluating it uses upper100; neither has a positive lower because 3 is an input.
+For `90 - 80 = 10`, lower10/upper100 remains correct. The boundary example `10 + 10 = 20`
+retains lower10/upper20 under the existing convention.
 
-This supersedes the lower-bound direction in the [earlier source review](canonical-range-source-review.md#strongest-lower-bounds),
-which chose a lower label from the minimum relevant absolute value. Upper-bound selection already
-uses the maximum. The clarification does not approve the proposed Q1/Q2 producer splits or settle
-which quantities belong to a task whose requested solution is itself an unevaluated expression.
+## Q1/Q2 syntax and calculation contracts
 
-### Ontology and implementation prerequisite
+The user approved separate mathematical producers and payloads for syntax and calculation,
+including schema, shared-type and consumer adoption, validation and a batch commit. Preserve
+the existing learner tasks and source competencies. Mathematical helpers and renderers remain
+shared where they need no task-specific evaluation. Apply IMPL-8 before parallel implementation.
 
-The pinned ontology `0.33.0` defines `NumbersLarger20` as requiring every numerical input or result
-to have absolute value at least 20. Its other concrete lower descriptors use the same universal
-input/result convention. Consequently, the clarified examples cannot receive their intended lower
-label under that package's definitions. An ontology revision and adoption must precede content
-acceptance under the new interpretation; editing annotations alone would leave VQA using the old meaning.
+| Production consumer | Target family | Payload and adoption | Verification |
+| --- | --- | --- | --- |
+| `operations-grouping-write` | `5.OA.A.1-use-grouping` | `NumericalExpressionStructureProblem`; format structure without evaluated operation/group values | Grouped Q/S rendering and structure validation |
+| `operations-grouping-evaluate` | `5.OA.A.1-evaluate-grouped-expressions` | Retain `NumericalExpressionProblem` and exact steps; producer becomes `arithmetic-numerical-expression-calculations` | Exact steps, hidden Question answer, wrong-family rejection |
+| `operations-numerical-expression-write` | `5.OA.A.2-write-numerical-expression` | Structural payload; retain prescribed prose and unevaluated expression solution | Both structure choices, Q/S rendering |
+| `operations-numerical-expression-interpretation` | `5.OA.A.2-interpret-numerical-expression` | Structural payload retains the factor/reference relation | Grouped/ungrouped comparison evidence without evaluation |
+| `numerical-power-expression-write` | `5.OA.A.2-write-numerical-expression`, `6.EE.A.1-write-power-expressions` | `NumericalPowerExpressionSyntaxProblem` from `numerical-power-expression-syntax`; literal base/exponent only; upper5 moves from view to producer | Exact notation, 0^0 rejection, both exponent domains, Q/S rendering |
+| `numerical-power-expression-evaluate` | `6.EE.A.1-evaluate-power-expressions` | Retain `NumericalPowerExpressionProblem`, exact values, facts, reductions and precedence evidence | Single/mixed calculations, all six frames, exact intermediate ranges and Q/S rendering |
 
-The implementation also applies the old lower convention in more than one place:
-`src/lib/canonical-numeric-range.ts` tests the minimum against the lower bound, and module-specific
-feasibility checks and constructive samplers independently constrain operands and other quantities.
-Changing that shared witness alone would not migrate their supported mathematical domains.
+The existing `arithmetic-numerical-expressions` ID becomes the structural producer. Its exact
+calculation sibling preserves the old mathematical domain. Power calculation helpers, formatters
+and independent calculation fixtures retain their contracts; only the writing leaf narrows its
+accepted family. Each leaf's nominal type boundary must reject the opposite mathematical family
+in matching (SPEC-V6, IMPL-G6, IMPL-V8).
 
-Proceed in batches: settle the open conventions below, align the ontology definitions and relations,
-adopt the revised package, then migrate shared profiles and their producer/consumer families with
-explicit target/route lineage and mathematical-support checks. Reassess the 13-topic backlog under
-the settled contract before deciding which producer splits remain necessary. Source verification,
-canonical regeneration and independent Question/Solution VQA remain separate acceptance stages.
+Baseline: eight distinct normalized target IDs, nine target/generator/view routes and 25 admitted
+selections across Q1/Q2. Fourteen selections lack a range facet: six numerical-expression and
+eight power-evaluation selections. Preserve every target/view lineage, recording generator-ID
+migration explicitly. Profile sampling may change the mixture as already accepted; verify complete
+source support and conditional weights rather than relying on random examples.
 
-### Conventions still to settle
+### Q1/Q2 source verification
 
-- **Exact thresholds:** the examples do not determine how to label a maximum exactly equal to a
-  catalog threshold. Choosing both the smallest inclusive upper and the strongest inclusive lower
-  would produce `NumbersLarger20` plus `NumbersSmaller20` for `10 + 10 = 20`; equal-threshold pairs
-  currently conflict in the ontology. A possible adjacent-band convention uses lower10/upper20
-  for that example. The existing exclusion of cases where every magnitude equals one threshold
-  does not settle mixed-magnitude examples such as this one. Preserve them pending the decision.
-- **Unevaluated solutions:** `3^3 = 27` settles evaluation. A task explicitly asking to write `3^3`
-  without evaluating has `3^3` as its requested solution. Whether 27 still defines that task's
-  range remains to be decided before Q1/Q2 implementation or producer splitting.
+All nine target/view lineages remain, with no target additions, removals or label edits. Four pairs
+migrate to the appropriate new producer: grouped evaluation and the three power-writing routes.
+The other five pairs retain their IDs and gain precise generation plans. Affected selections grow
+25 to 68: 18 expression-syntax, seven expression-calculation, 11 power-syntax and 32 power-calculation.
+Global source coverage remains 1,528 normalized targets and 2,000 routes, with 4,645 selections.
 
-This documentation checkpoint records the clarification and its consequences. It does not change
-ontology provenance, source labels, samplers, stored images or VQA records, and closes none of the
-99 source omissions or 34 precision routes recorded under the preceding contract.
+The source-only dependency audit uses an explicitly empty dataset snapshot. It closes all 14 Q1/Q2
+range omissions, leaving 85 across nine other producers. It reports zero non-range omissions,
+conflicts, contract errors, incomplete tuples, invalid contexts or pending/invalid inference.
+All 119 existing inference selections still resolve exhaustively. The 34 already-labelled precision
+routes remain separate from these omission counts.
+
+Q1's independent finite proof preserves all 12,401 original calculation paths and the conditional
+source weights. Syntax retains 12,399: only the all5 and all10 ungrouped literal triples retire under
+the previously approved threshold-singleton exclusion. Seven syntax and 14 calculation profiles
+partition their respective domains. Catalog declarations contain only these reviewed cells;
+sampling domains build lazily, and an import guard prevents their construction during model loading.
+Q2 retains all 468 original weighted single-power paths across the two exponent domains and all six
+mixed calculation frames. Exact rational range checks include every required power intermediate,
+never the numerator or denominator as a storage-based magnitude.
+
+The independent full-catalog oracle checks all 68 selections with 24 seeds: 1,632 draws and 1,632
+exact replays. Persistent integration tests independently check nominal family isolation, all nine
+source lineages, range/sign/zero semantics and planned replay. The shared-type contract passed a
+typecheck before generator/view work proceeded independently (IMPL-8).
+
+Native browser verification renders 20 Question/Solution samples across all six views and nine
+target/view lineages. All 40 repeated captures are byte-identical; representative screenshots are
+visually inspected for task identity, answer withholding, complete calculation evidence and layout.
+This is a native smoke check, not canonical dataset or VQA acceptance.
+
+Repository check stages 1–5 pass: types, generator/view contracts, labels, documentation and source
+standards. The local generated snapshot is older than the accepted source: it has 1,944 rows and
+neither affected original producer, rather than the historical 2,918-image accepted snapshot.
+Its split check fails for missing recorded generation plans/receipts; the strict stored-annotation
+gate reports 4,006 failures. Those rows and validation implementations are unchanged by this batch.
+The source-only audit above establishes source closure without hiding these artifact failures.
+Focused coverage passes all 116 tests across 20 files. Each of the four affected generator bodies
+has 100% statement and branch coverage and passes the repository's coverage thresholds.
+The full `npm run test:coverage` attempt is blocked by two existing five-second timeouts in
+`label-dependencies.test.ts` and the 30-second catalog setup timeout in `compatibility-rules.test.ts`.
+An isolated coverage run against an untouched archive of pre-batch HEAD reproduces exactly those
+failures: 181 tests pass, two time out and 60 are skipped after the setup timeout. No timeout,
+test or threshold is relaxed; full-suite acceptance remains unresolved.
+
+Evidence is under `temp/range-decisions/batch1/`: focused logs, `independent-oracle.json`,
+`source-audit.json`, `check.log`, `scoped-coverage.log`, `coverage-gate.log`,
+`baseline-timeouts.log` and `renders/manifest.json`. The matching report is under
+`temp/spec-plans/ccss/range-decisions-2026-11-03/`. Canonical regeneration and independent
+Question/Solution VQA remain a separate dataset acceptance stage; stored findings and cached
+verdicts are not closed by this source batch.
 
 ## Accepted direction
 
-These earlier agreements describe the preceding contract. The 2026-11-03 clarification above
-supersedes their minimum-based lower-bound interpretation; other directions still require review
-where the new semantics affect them.
+These agreements retain their minimum/maximum interpretation. The withdrawn reinterpretation
+above does not change their ontology, matching or endpoint semantics.
 
 - Use the tightest supported catalog bounds for the mathematical quantities involved in the
   competency. Preserve the inclusive absolute-value definitions and the
@@ -830,9 +877,9 @@ quantity decisions remain in the [remaining-family review](canonical-range-remai
 
 The [autonomous rollout ledger](canonical-range-autonomous-rollout.md) records the completed
 entry-document cleanup and six subsequent source batches. They close418 baseline range-presence
-omissions:517→99. The current source has1,528 normalized targets,2,000 routes and4,602 complete
+omissions:517→99. At that checkpoint, the source has1,528 normalized targets,2,000 routes and4,602 complete
 selections. Every earlier route lineage remains, with45 raw /27 normalized IDs migrating through
-the recorded source corrections. Ordinary profile/local-repair work is complete; the remaining
+the recorded source corrections. Ordinary profile/local-repair work is complete; the then-remaining
 13 contract/policy topics include two already-labelled precision reviews. Source gates and the
 complete7,705-test /1,009-file coverage suite pass; all generator thresholds hold. The stored
 dataset and VQA cache remain unchanged, and range validation remains report-only.

@@ -2,6 +2,7 @@ import {Area, Scope} from 'edugraph-ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {random} from '../../../lib/random.ts';
 import {makeSignedRational} from '../../number/signed-rational-helpers.ts';
+import type {SignedRational} from '../../../types/problems.ts';
 
 export const numericProfileBundles = [
     [Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero],
@@ -10,6 +11,7 @@ export const numericProfileBundles = [
     [Scope.NumbersWithNegatives, Scope.NumbersWithZero]
 ] as const;
 export type NumericProfile = 1 | 2 | 3 | 4;
+export type SinglePowerCandidate = {base: SignedRational; exponent: number; weight: number};
 export const numericProfileLabels = [...new Set(numericProfileBundles.flat())];
 
 export const resolveNumericProfile = withLabelChoices(exactResolver((labels: string[]): NumericProfile | undefined => {
@@ -30,8 +32,8 @@ export const permitsNumericValues = (numerators: readonly number[], profile: Num
     && numerators.some(value => value === 0) === (profile % 2 === 0);
 
 /** The original exponent/denominator/numerator/sign draws, before rational reduction. */
-export function singlePowerCandidates(positiveExponent: boolean, profile: NumericProfile) {
-    const candidates = [];
+export function singlePowerCandidates(positiveExponent: boolean, profile: NumericProfile): SinglePowerCandidate[] {
+    const candidates: SinglePowerCandidate[] = [];
     const exponentCount = positiveExponent ? 3 : 4;
     for (let exponent = positiveExponent ? 1 : 0; exponent <= 3; exponent++) {
         for (let denominator = 1; denominator <= 4; denominator++) {
@@ -53,7 +55,11 @@ export function singlePowerCandidates(positiveExponent: boolean, profile: Numeri
 }
 
 export function sampleSinglePower(positiveExponent: boolean, profile: NumericProfile) {
-    const candidates = singlePowerCandidates(positiveExponent, profile);
+    return sampleSinglePowerCandidate(singlePowerCandidates(positiveExponent, profile));
+}
+
+/** Condition the original finite draw law without discarding duplicate weighted paths. */
+export function sampleSinglePowerCandidate(candidates: readonly SinglePowerCandidate[]) {
     if (!candidates.length) return null;
     let remaining = random() * candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
     return candidates.find(candidate => (remaining -= candidate.weight) < 0) ?? candidates[candidates.length - 1]!;

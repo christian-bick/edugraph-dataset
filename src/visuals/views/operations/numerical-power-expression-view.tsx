@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react';
-import type {ExactNumericReductionEvidence, ExactPowerFact, NumericalPowerExpressionProblem} from '../../../types/problems.ts';
+import type {ExactNumericalExpressionNode, ExactNumericReductionEvidence, ExactPowerFact, NumericalPowerExpressionProblem} from '../../../types/problems.ts';
 import {ExactNumericExpression, exactNumericValue, PrescribedNumericCalculation} from './numerical-power-expression-format.tsx';
 
 const Card = ({children}: {children: ReactNode}) => <main className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900" style={{width: 780, maxWidth: '96vw'}}>{children}</main>;
@@ -46,7 +46,7 @@ export function NumericalPowerEvaluationBody({data, isSolutionView}: {data: Nume
 }
 
 /** The fixed writing task projects syntax into necessary prose and withholds all calculated work. */
-export function NumericalPowerWritingBody({data, isSolutionView}: {data: NumericalPowerExpressionProblem; isSolutionView: boolean}) {
+export function NumericalPowerWritingBody({data, isSolutionView}: {data: {expression: ExactNumericalExpressionNode}; isSolutionView: boolean}) {
     return <Card><h1 className="mb-4 text-2xl font-bold">Write a power expression</h1><p>Write one numerical expression for the prescribed calculation. Use exponent notation. Do not find its value.</p>
         <div className="mt-4 rounded-xl bg-slate-100 p-5 text-lg leading-relaxed" data-role="power-prescribed-prose"><PrescribedNumericCalculation node={data.expression} /></div>
         {isSolutionView ? <Answer><h2 className="text-lg font-semibold">Numerical expression</h2><div data-role="power-written-answer"><MathLine><ExactNumericExpression node={data.expression} /></MathLine></div></Answer>

@@ -1,11 +1,13 @@
 # Remaining numeric families and next range batch
 
-Update, 2026-11-03: the [largest-magnitude clarification](canonical-range-labeling.md#largest-magnitude-clarification-2026-11-03)
-requires ontology and range-contract alignment before this backlog can be implemented as written.
-The following counts and recommendations retain the sixth-batch baseline under the preceding
-minimum/maximum interpretation. Q1/Q2 producer splits remain undecided.
+Update, 2026-11-03: retain the current ontology's minimum/maximum interpretation; the proposed
+largest-magnitude reinterpretation was withdrawn. Q1/Q2 producer splits and their
+[consumer adoption](canonical-range-labeling.md#q1q2-syntax-and-calculation-contracts) are implemented.
+Current source coverage is **1,528 normalized targets /2,000 routes /4,645 selections**, with
+**85 missing range facets across nine producers**. Q1/Q2 close 14 source omissions; 11 decision
+topics remain, including the same two precision topics covering 34 already-labelled routes.
 
-Current source review:2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
+Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
 review baseline below are historical; all subsequent implementation and acceptance evidence
 is in the [autonomous rollout ledger](canonical-range-autonomous-rollout.md).
@@ -46,8 +48,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
-| Q1 — numerical expressions,6 omissions | Does constructing/interpreting `2×(16+2)` assess only its syntax quantities (upper20), while evaluation also assesses18 and36 (upper100)? The structural Question explicitly says not to evaluate. | Confirm separate syntax and calculation contracts. A rare producer/payload separation can reuse the renderers and preserve all four routes; it needs the standing split confirmation. No unused result becomes a structural-task witness. |
-| Q2 — mixed powers,8 | Writing `3³` uses base/exponent3 (upper5); evaluation requires27 (upper100). Should those be separate mathematical contracts? | Confirm the same task separation before assigning a producer range. Present source routing cannot guarantee that a future valid target avoids the evaluation consumer. Preserve both tasks and all power frames. |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
 | Q6 — unit-dividend quotient,16 | Does `1/6÷6` require constructing36 fine parts, or sharing among6 recipients without that construction? | Distinguish fine-part construction from sharing/inverse mathematics, or approve the same explicitly required model in every Question. Merely reading denominator36 does not establish an assessed integer count36. |
 | Q7 — fraction products,7 | Should interpretation of `17/6×6` require alternate subtotal `17×6=102`, while story creation requires only17 selected parts/result17? | Confirm separate task contracts, or require that additional subtotal explicitly in every applicable Question. The latter broadens the story task; it is not a declaration-only repair. |
@@ -60,12 +60,16 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | Q15 — Basic counting,20 already-labelled routes | Is the range for a totalN alone, or the explicitly requested sequence1..N? AtN=6 conservation supports lower5, but one-to-one enumeration does not. | Confirm total-only versus enumerated-count contracts; a rare producer split can preserve both. The valid cardinality consumer must also be considered, even without a present source route. No canonical Basic precision is claimed yet. |
 | Q16 — positive non-Name writing,14 already-labelled routes | At321, numeral reading uses scalar321; count writing explicitly assesses3hundreds/2tens/1one. Which task contract owns those counts? | Distinguish block/count quantities from scalar numeral reading/writing before refining the complete mixed roles. Preserve the nine canonical Name routes and three canonical fixed-zero routes; they are not open work. |
 
-The first eleven rows account for all99 remaining missing source facets: arithmetic15,
+Q1/Q2 are resolved by the approved syntax/calculation separation, with all nine source target/view
+lineages preserved and 14 omissions closed. Their source proofs and native render verification are
+recorded in the [batch acceptance](canonical-range-labeling.md#q1q2-source-verification).
+
+The first nine rows account for all85 remaining missing source facets: arithmetic1,
 fractions35, measurement30, currency11 and symbolic algebra8. The last two
 concern34 already-labelled routes with unresolved precision and must not be added to omission
-totals. These13 questions are contract/policy topics, not an estimated implementation-batch
+totals. These11 questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
-or authorize producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
+or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.
 
 ## Review baseline (historical)

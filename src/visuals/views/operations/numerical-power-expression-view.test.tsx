@@ -3,6 +3,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {isNumericalPowerExpressionProblem} from '../../../generators/arithmetic/numerical-power-helpers.ts';
+import {buildNumericalPowerExpressionSyntaxProblem} from '../../../generators/arithmetic/numerical-power-syntax-helpers.ts';
 import type {ExactNumericalExpressionNode as Node, NumericalPowerExpressionProblem} from '../../../types/problems.ts';
 import {ExactNumericExpression, PrescribedNumericCalculation} from './numerical-power-expression-format.tsx';
 import {NumericalPowerEvaluationBody, NumericalPowerWritingBody} from './numerical-power-expression-view.tsx';
@@ -131,8 +132,21 @@ afterAll(() => vi.unstubAllGlobals());
 const leaf = (index: number, data: unknown, solution: boolean) => renderToStaticMarkup(createElement(cores[index]!, {config: {}, payload: {problem: {type: 'arithmetic', data, labels: []}, targetLabels: [], seed: 13, isSolutionView: solution}}));
 
 describe('both full-uniform numeric leaf boundaries', () => {
-    it('accepts every independent uniform oracle in both modes, independent of production matching', () => {
-        for (const data of numericalPowerOracles) for (const index of [0, 1]) for (const solution of [false, true]) expect(leaf(index, data, solution)).not.toMatch(/NaN|undefined|null/);
+    it('accepts exact calculation oracles only in the evaluation leaf', () => {
+        for (const data of numericalPowerOracles) for (const solution of [false, true]) {
+            expect(leaf(0, data, solution)).not.toMatch(/NaN|undefined|null/);
+            expect(() => leaf(1, data, solution)).toThrow('Validation Error');
+        }
+    });
+    it('accepts literal power syntax without calculated metadata only in the writing leaf', () => {
+        for (const data of [powerZeroOracle, powerFractionOracle, powerOneDecimalOracle]) {
+            if (data.expression.kind !== 'power' || data.expression.base.kind !== 'number') throw new Error('Invalid syntax fixture.');
+            const syntax = buildNumericalPowerExpressionSyntaxProblem({...data.expression, base: data.expression.base});
+            for (const solution of [false, true]) {
+                expect(leaf(1, syntax, solution)).not.toMatch(/NaN|undefined|null/);
+                expect(() => leaf(0, syntax, solution)).toThrow('Validation Error');
+            }
+        }
     });
     it('rejects malformed/sparse/forged traces and cyclic syntax with ViewValidationError', () => {
         const cyclic: Record<string, unknown> = {id: 'cycle', kind: 'group'}; cyclic.expression = cyclic;
@@ -146,7 +160,7 @@ describe('both full-uniform numeric leaf boundaries', () => {
         expect(evaluate.NumericalPowerExpressionEvaluateViewSchema).toEqual({});
         expect(write.NumericalPowerExpressionWriteViewSchema).toEqual({});
         expect(evaluate.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Ability.ProcedureExecution]);
-        expect(write.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10, Scope.NumbersSmaller5,
+        expect(write.spec.generalLabels).toEqual([Scope.ArabicNumerals, Scope.Base10,
             Ability.Formalization, Ability.TextualReception]);
         const boundary = write.spec.compatibility!.find(rule => rule.id === 'numerical-power-writing-evidence')!;
         expect(boundary.dependencies).toEqual([{scope: 'generator', label: Area.OrderOfOperations}]);

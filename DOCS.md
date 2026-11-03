@@ -67,6 +67,10 @@ Generators own canonical mathematical payloads and their invariants. Views own p
 and the learner action requested from that payload. Shared types carry the mathematical evidence
 needed by consumers without encoding a particular layout or task projection. Specialized views
 use precise entries in `ViewTypeMap`; shared renderers use explicit unions of supported contracts.
+Written expression structure and evaluated calculations can be separate mathematical payload
+families while reusing formatting and rendering helpers. Model matching uses their named contracts,
+so a syntax consumer does not implicitly accept a calculation producer through TypeScript's
+structural assignability.
 Target requirements remain independent learner-task participation policies. Schema resolution
 translates ontology-backed capabilities into typed configuration for the owning role before
 generation or rendering.
