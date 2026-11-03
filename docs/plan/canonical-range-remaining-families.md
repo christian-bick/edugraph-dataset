@@ -1,5 +1,10 @@
 # Remaining numeric families and next range batch
 
+Update, 2026-11-03: the [largest-magnitude clarification](canonical-range-labeling.md#largest-magnitude-clarification-2026-11-03)
+requires ontology and range-contract alignment before this backlog can be implemented as written.
+The following counts and recommendations retain the sixth-batch baseline under the preceding
+minimum/maximum interpretation. Q1/Q2 producer splits remain undecided.
+
 Current source review:2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
 review baseline below are historical; all subsequent implementation and acceptance evidence

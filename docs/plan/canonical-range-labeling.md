@@ -3,6 +3,10 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
+Current direction, 2026-11-03: the [largest-magnitude clarification](#largest-magnitude-clarification-2026-11-03)
+changes the intended lower-range interpretation. The implementation and acceptance counts below
+describe the preceding minimum/maximum contract. They do not establish acceptance of this new direction.
+
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
 checks. These batches preserve
@@ -23,7 +27,62 @@ Earlier range exclusions describe that initiative's scope; they are not approval
 change the current validator. The existing Area allowlist, algebra sign/zero cutoff and
 independent Question/Solution evaluation remain unchanged.
 
+## Largest-magnitude clarification (2026-11-03)
+
+While reviewing Q1/Q2, the user clarified that range labels are defined from the larger end:
+the problem's numbers determine the range when they are larger, otherwise the solution does.
+Both bounds therefore classify the largest relevant magnitude across the problem and its solution.
+
+| User example | Intended labels |
+| --- | --- |
+| `3^3 = 27` | `NumbersLarger20`, `NumbersSmaller100` |
+| `90 - 80 = 10` | `NumbersLarger20`, `NumbersSmaller100` |
+
+This supersedes the lower-bound direction in the [earlier source review](canonical-range-source-review.md#strongest-lower-bounds),
+which chose a lower label from the minimum relevant absolute value. Upper-bound selection already
+uses the maximum. The clarification does not approve the proposed Q1/Q2 producer splits or settle
+which quantities belong to a task whose requested solution is itself an unevaluated expression.
+
+### Ontology and implementation prerequisite
+
+The pinned ontology `0.33.0` defines `NumbersLarger20` as requiring every numerical input or result
+to have absolute value at least 20. Its other concrete lower descriptors use the same universal
+input/result convention. Consequently, the clarified examples cannot receive their intended lower
+label under that package's definitions. An ontology revision and adoption must precede content
+acceptance under the new interpretation; editing annotations alone would leave VQA using the old meaning.
+
+The implementation also applies the old lower convention in more than one place:
+`src/lib/canonical-numeric-range.ts` tests the minimum against the lower bound, and module-specific
+feasibility checks and constructive samplers independently constrain operands and other quantities.
+Changing that shared witness alone would not migrate their supported mathematical domains.
+
+Proceed in batches: settle the open conventions below, align the ontology definitions and relations,
+adopt the revised package, then migrate shared profiles and their producer/consumer families with
+explicit target/route lineage and mathematical-support checks. Reassess the 13-topic backlog under
+the settled contract before deciding which producer splits remain necessary. Source verification,
+canonical regeneration and independent Question/Solution VQA remain separate acceptance stages.
+
+### Conventions still to settle
+
+- **Exact thresholds:** the examples do not determine how to label a maximum exactly equal to a
+  catalog threshold. Choosing both the smallest inclusive upper and the strongest inclusive lower
+  would produce `NumbersLarger20` plus `NumbersSmaller20` for `10 + 10 = 20`; equal-threshold pairs
+  currently conflict in the ontology. A possible adjacent-band convention uses lower10/upper20
+  for that example. The existing exclusion of cases where every magnitude equals one threshold
+  does not settle mixed-magnitude examples such as this one. Preserve them pending the decision.
+- **Unevaluated solutions:** `3^3 = 27` settles evaluation. A task explicitly asking to write `3^3`
+  without evaluating has `3^3` as its requested solution. Whether 27 still defines that task's
+  range remains to be decided before Q1/Q2 implementation or producer splitting.
+
+This documentation checkpoint records the clarification and its consequences. It does not change
+ontology provenance, source labels, samplers, stored images or VQA records, and closes none of the
+99 source omissions or 34 precision routes recorded under the preceding contract.
+
 ## Accepted direction
+
+These earlier agreements describe the preceding contract. The 2026-11-03 clarification above
+supersedes their minimum-based lower-bound interpretation; other directions still require review
+where the new semantics affect them.
 
 - Use the tightest supported catalog bounds for the mathematical quantities involved in the
   competency. Preserve the inclusive absolute-value definitions and the

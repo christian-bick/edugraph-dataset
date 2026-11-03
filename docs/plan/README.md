@@ -21,7 +21,10 @@ These items are not newly scheduled by the archive move.
 
 - **Canonical numeric ranges:** the [range-labeling plan](canonical-range-labeling.md) starts
   the separately agreed review of tightest bounds, relevant target-band expansion and generator
-  guarantees. Its [inventory](canonical-range-inventory.csv) describes review-baseline competency
+  guarantees. The [2026-11-03 largest-magnitude clarification](canonical-range-labeling.md#largest-magnitude-clarification-2026-11-03)
+  now requires ontology and range-contract alignment before further backlog implementation.
+  The following acceptance counts describe the preceding minimum/maximum contract.
+  Its [inventory](canonical-range-inventory.csv) describes review-baseline competency
   definitions and bounds; it is not an automatically approved expansion list. Increased meaningful
   permutations and sampling changes are accepted. Strongest lower profiles, threshold-singleton
   exclusion and all source-review recommendations were approved on 2026-11-01. The opt-in expansion
