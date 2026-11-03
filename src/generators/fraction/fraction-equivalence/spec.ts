@@ -1,5 +1,6 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel} from '../../../lib/resolvers.ts';
+import {hasLabel, selectExactLabelMap} from '../../../lib/resolvers.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema} from '../../../types/schema.ts';
 
@@ -16,7 +17,11 @@ export const spec: GeneratorSpec = {
 
 export const FractionEquivalenceGeneratorSchema = {
     usesMultiplication: [[Area.Multiplication], hasLabel(Area.Multiplication)],
-    usesProportionalScaling: [[Area.ProportionalScaling], hasLabel(Area.ProportionalScaling)]
+    usesProportionalScaling: [[Area.ProportionalScaling], hasLabel(Area.ProportionalScaling)],
+    range: [[Scope.NumbersSmaller5, Scope.NumbersSmaller10], selectExactLabelMap([
+        [Scope.NumbersSmaller5, createCanonicalNumericRange(5)],
+        [Scope.NumbersSmaller10, createCanonicalNumericRange(10)]
+    ])]
 } as const;
 
 export type FractionEquivalenceGeneratorConfig = ConfigFromSchema<

@@ -14,28 +14,27 @@ const payload = <T,>(data: T, isSolutionView: boolean): RenderPayload<AbstractPr
 });
 
 describe('equivalence payload families', () => {
-    it('renders every admitted scaling and whole-number family in both modes', () => {
-        for (let seed = 0; seed < 20; seed++) {
-            setSeed(seed);
-            const proper = new FractionEquivalenceGenerator().generate({
-                usesMultiplication: true,
-                usesProportionalScaling: false
-            }).data;
-            const tenths = new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude: 'proper'}).data;
-            const whole = new FractionWholeEquivalenceGenerator().generate({range: createCanonicalNumericRange([5, 10, 20, 100][seed % 4]!)}).data;
-            for (const solution of [false, true]) {
-                for (const mode of ['formalization', 'explanation'] as const) {
-                    for (const data of [proper, tenths]) {
-                        expect(() => renderToStaticMarkup(<FractionEquivalenceView mode={mode} payload={payload(data, solution)} viewId="test" />)).not.toThrow();
-                    }
-                    for (const data of [proper, tenths, whole]) {
-                        expect(renderToStaticMarkup(<FractionLineView mode={mode} payload={payload(data, solution)} />)).toContain('<svg');
-                    }
+    it.each(Array.from({length: 20}, (_, seed) => seed))('renders every admitted scaling and whole-number family in both modes for seed%s', seed => {
+        setSeed(seed);
+        const proper = new FractionEquivalenceGenerator().generate({
+            usesMultiplication: true,
+            usesProportionalScaling: false,
+            range: createCanonicalNumericRange(seed % 2 ? 10 : 5)
+        }).data;
+        const tenths = new FractionTenthsEquivalenceGenerator().generate({fractionMagnitude: 'proper'}).data;
+        const whole = new FractionWholeEquivalenceGenerator().generate({range: createCanonicalNumericRange([5, 10, 20, 100][seed % 4]!)}).data;
+        for (const solution of [false, true]) {
+            for (const mode of ['formalization', 'explanation'] as const) {
+                for (const data of [proper, tenths]) {
+                    expect(() => renderToStaticMarkup(<FractionEquivalenceView mode={mode} payload={payload(data, solution)} viewId="test" />)).not.toThrow();
                 }
-                const classification = renderToStaticMarkup(<FractionLineView mode="classification" payload={payload(proper, solution)} />);
-                expect(classification.includes('>same point</text>')).toBe(solution);
-                expect(renderToStaticMarkup(<FractionEquivalenceView mode="classification" payload={payload(proper, solution)} viewId="test" />)).toContain('equivalent');
+                for (const data of [proper, tenths, whole]) {
+                    expect(renderToStaticMarkup(<FractionLineView mode={mode} payload={payload(data, solution)} />)).toContain('<svg');
+                }
             }
+            const classification = renderToStaticMarkup(<FractionLineView mode="classification" payload={payload(proper, solution)} />);
+            expect(classification.includes('>same point</text>')).toBe(solution);
+            expect(renderToStaticMarkup(<FractionEquivalenceView mode="classification" payload={payload(proper, solution)} viewId="test" />)).toContain('equivalent');
         }
     });
 });

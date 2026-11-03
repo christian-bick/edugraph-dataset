@@ -379,8 +379,8 @@ const FractionEquivalenceLine = ({
     const prompt = isClassification
         ? `Do ${firstNotation} and ${canonicalSecondNotation} locate the same point?`
         : explainScaling
-            ? `Complete ${firstNotation} = ${unknownNotation}. Use the number line to explain why the value stays the same.`
-            : `Complete ${firstNotation} = ${unknownNotation}. Use the number line.`;
+            ? `Complete ${firstNotation} = ${unknownNotation}. Use the number line and the part-count scaling to explain why the value stays the same.`
+            : `Complete ${firstNotation} = ${unknownNotation}. Use the number line and the part-count scaling.`;
     const explanation = `${firstNotation} and ${canonicalSecondNotation} locate the same point because both fraction terms are multiplied by ${data.scaleFactor}.`;
 
     return (
@@ -437,6 +437,11 @@ const FractionEquivalenceLine = ({
                     {isClassification && !isSolutionView ? '' : 'same point'}
                 </text>
             </svg>
+
+            {!isClassification && <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-center font-mono text-sm font-bold text-blue-800">
+                Scale each part count by {data.scaleFactor}: {data.first.numerator} × {data.scaleFactor} = {isSolutionView ? data.second.numerator : '?'};
+                {' '}{data.first.denominator} × {data.scaleFactor} = {data.second.denominator}
+            </div>}
 
             <div className={`rounded-xl border-2 px-5 py-4 text-center text-lg font-semibold ${
                 isSolutionView

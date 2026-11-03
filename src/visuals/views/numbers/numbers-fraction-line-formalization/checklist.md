@@ -1,2 +1,2 @@
-- **Identity:** One number line requires completing a fraction equality from aligned points or a whole-number composition.
-- **Modes:** Question Mode withholds the requested notation; Solution Mode reveals it while retaining the same partitions and co-located values.
+- **Identity:** One number line requires completing a fraction equality from aligned points or a whole-number composition. Proper-fraction completion supplies the scaling of both part counts.
+- **Modes:** Question Mode withholds the requested notation and the proper-fraction numerator product; Solution Mode reveals them while retaining the same partitions and co-located values.

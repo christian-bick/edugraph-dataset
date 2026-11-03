@@ -8,18 +8,19 @@ The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax a
 contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
 records the implementation and source verification scope. The approved Q6
 [partition/sharing separation](#q6-unit-fraction-division-contracts) and Q7
-[fraction-product separation](#q7-fraction-product-contracts) are also implemented.
+[fraction-product separation](#q7-fraction-product-contracts) are also implemented. Q8 retains
+the existing producer with [shared part-count ranges](#q8-fraction-equivalence-part-counts).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6 and Q7 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7 and Q8 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,692 complete selections**, with **62 range-presence
+**1,528 normalized targets /2,000 routes and4,699 complete selections**, with **55 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records9 remaining contract/policy questions, including two already-labelled precision topics.
+records8 remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -340,6 +341,92 @@ acceptance.
 Evidence is under
 `temp/range-decisions/batch3-q7/` and `temp/spec-plans/ccss/range-q7-2026-11-03/`.
 Canonical dataset regeneration and independent Question/Solution VQA remain separate acceptance.
+
+## Q8 fraction-equivalence part counts
+
+Approved after Q7, from `0ac3fcc7`, with the user's correction that `1/2 = 4/8`
+explicitly represents four selected parts out of eight equal parts. Those counts matter
+even in equality recognition: upper10 is required. The earlier proposed upper5 recognition
+versus upper10 calculation distinction was incorrect for this family. Retain the existing
+`fraction-equivalence` producer and `ProperFractionUnitScalingProblem` payload; no mathematical
+producer or type split is needed.
+
+| Production consumer | Contract and adoption | Preservation check |
+| --- | --- | --- |
+| `fractions-equivalence-model`, `numbers-fraction-line-classification` | Equality recognition with the explicit selected/total part counts; exclude selected multiplication/scaling claims because these tasks do not require that method | Both modes and both range cells; original classification content unchanged |
+| `fractions-equivalence-completion-model`, `fractions-equivalence-explanation-model` | Retain the existing numerator/denominator multiplication scaffold | All four mathematical flag combinations; retain tenths/hundredths arms |
+| `numbers-fraction-line-formalization`, `numbers-fraction-line-explanation` | Make the existing proper-fraction scaling method explicit with a matching part-count scaffold, keeping the missing numerator hidden in Questions | All four flag combinations; retain tenths/hundredths and whole-number arms unchanged |
+| `fractions-equivalence-unit-scaling` | Retain the unit multiplier and existing proportional-scaling target requirement | Both range cells; exact numerator/denominator scaling and unit value one |
+
+Preselect upper5/upper10 before generation. The eight native uniformly sampled pairs partition
+into one upper5 pair (`1/2 = 2/4`) and seven upper10 pairs. Preserve all eight outcomes and the
+one-draw uniform law within each selected cell, independently of the two existing mathematical
+flags. The accepted profile-selection direction permits changes to the global mixture and seeded
+outputs. No positive lower descriptor applies. Relevant quantities include the represented part
+counts; this does not turn every fraction storage numerator into a separately assessed integer.
+
+The classification compatibility boundary follows the selected shared labels and the actual
+task demands, not a range difference or producer configuration field. It preserves both existing
+classification source routes and all their mathematical outcomes. No target, ontology, generic
+matching or other producer change is planned. Capture the clean baseline before source mutations,
+then verify all seven current source routes, all seven legitimate consumers and their shared
+payload arms.
+
+### Q8 source verification
+
+Completed 2026-11-04 from the protected `0ac3fcc7` baseline.
+
+All seven current source target/view lineages remain. The matching comparison has no added or
+removed targets, semantic pairs, label edits or disposition changes; only these seven plans change.
+Proper-fraction selections grow 7→14, while the ten shared tenths/whole routes retain all 24
+selections. Global coverage is 1,528 normalized targets /2,000 routes /4,699 complete selections.
+
+The source dependency audit uses an empty dataset snapshot. It closes all seven Q8 omissions,
+leaving 55 range facets across six producers. Non-range omissions, conflicts, contract errors,
+incomplete tuples, invalid contexts and pending/invalid inference remain zero; all 119 existing
+inference selections still resolve exhaustively. Eight decision topics remain, including the two
+precision topics covering 34 already-labelled routes.
+
+The independent oracle reconstructs all eight original pairs and four flag combinations without
+the production domain table. It verifies exact conditional probabilities 1 and 1/7, 512 native
+draws and their single-draw PRNG continuation. All 38 real selections have eight planned/direct
+draws and exact receipt replays: 112 proper-fraction draws and 192 shared-control draws.
+All 384 shared-control Question/Solution renderings remain byte-identical, together with their
+configurations, labels, plans, payloads and receipts. Of the 112 protected proper renderings,
+80 remain unchanged and 32 gain only the approved proper-line scaffold and prompt.
+
+The seven-consumer native mathematical matrix contains 448 Question/Solution renderings:
+320 unchanged and 128 proper-line clarifications. Both ranges are retained in every legitimate
+context. All 56 future selected-claim cases resolve as intended: 40 admitted and 16 excluded by
+the classification evidence boundary or the existing unit-scaling target requirement. No payload,
+type, target or ontology migration is needed, and the scoped implementation audit has no findings.
+
+Native browser verification covers all 17 real proper/shared routes and their 38 selections,
+plus four selections on two future proper-fraction formalization routes. All 84 Question/Solution
+images have byte-identical repeated captures (168 captures), with no browser errors or error
+cards. Visual inspection covers the new proper-line Question/Solution scaffold, classification,
+future formalization, unit scaling and unchanged whole-number controls. This is source smoke
+verification, not canonical dataset or VQA acceptance.
+
+Repository types, generator/view contracts, labels, documentation and source standards checks
+pass. Full `npm run check` still fails on the unchanged local 1,944-row dataset: split integrity
+has missing recorded generation plans/receipts, and strict stored annotations retain 4,006
+failures. The earlier full-suite timeout limitations remain recorded in Q1/Q2 and Q6; no timeout,
+skip marker or coverage threshold changes are made.
+
+Focused coverage passes all 116 tests across 15 files, with none excluded. The generator,
+new mathematical domain helper and shared bar renderer each have 100% statement /100% branch
+coverage and pass the unchanged 85% /60% thresholds. Overall affected-code coverage is
+95.7% statement /96.17% branch. Forty persistent integration tests cover all seven source
+lineages, both range cells, every mathematical flag combination, future consumer applicability,
+exact receipt replay and the shared payload arms. Twenty-two validation-contract tests reject
+malformed part counts, incoherent scaling, wrong families and unsupported task modes with typed
+errors. The existing 20-seed shared-family rendering checks retain every seed and assertion.
+This focused acceptance does not claim full-suite or canonical dataset acceptance.
+
+Evidence is under `temp/range-decisions/batch4-q8/` and
+`temp/spec-plans/ccss/range-q8-2026-11-03/`. Canonical dataset regeneration and independent
+Question/Solution VQA remain separate acceptance gates.
 
 ## Accepted direction
 

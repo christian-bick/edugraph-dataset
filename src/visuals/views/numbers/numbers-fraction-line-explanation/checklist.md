@@ -1,2 +1,2 @@
-- **Identity:** One number line requires completing an equivalent-fraction relation and explaining the shared scaling that preserves the point.
-- **Modes:** Question Mode withholds the requested value and explanation; Solution Mode reveals both while retaining the aligned partition evidence.
+- **Identity:** One number line requires completing an equivalent-fraction relation and explaining the shared scaling that preserves the point. Proper fractions supply multiplication of both part counts.
+- **Modes:** Question Mode withholds the requested value, proper-fraction numerator product and explanation; Solution Mode reveals them while retaining the aligned partition evidence.

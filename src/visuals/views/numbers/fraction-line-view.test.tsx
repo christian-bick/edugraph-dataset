@@ -6,6 +6,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     FractionLineProblem,
     FractionNumberLineProblem,
+    ProperFractionUnitScalingProblem,
     TenthsToHundredthsProblem,
     WholeNumberFractionEquivalenceProblem
 } from '../../../types/problems.ts';
@@ -24,6 +25,7 @@ const payload = (
 
 const render = (data: FractionLineProblem, mode: FractionLineMode, isSolutionView = false) =>
     renderToStaticMarkup(<FractionLineView mode={mode} payload={payload(data, isSolutionView)} />);
+const visible = (markup: string) => markup.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ');
 
 const wholeNumberData: WholeNumberFractionEquivalenceProblem = {
     task: 'represent-whole-as-fraction',
@@ -49,6 +51,20 @@ function wholeTenthsData(): TenthsToHundredthsProblem {
 }
 
 describe('fraction-line Ability projections', () => {
+    it.each(['formalization', 'explanation'] as const)('supplies part-count scaling for proper-fraction %s without revealing the missing numerator', mode => {
+        const data: ProperFractionUnitScalingProblem = {task: 'relate-equivalent-fractions',
+            first: {numerator: 1, denominator: 2}, second: {numerator: 4, denominator: 8},
+            scaleFactor: 4, unitMultiplier: {numerator: 4, denominator: 4, value: 1}, relation: 'equal'};
+        const question = visible(render(data, mode)), solution = visible(render(data, mode, true));
+        expect(question).toContain('part-count scaling');
+        expect(question).toContain('1 × 4 = ?; 2 × 4 = 8');
+        expect(question).not.toContain('1 × 4 = 4');
+        expect(solution).toContain('1 × 4 = 4; 2 × 4 = 8');
+        const classification = visible(render(data, 'classification'));
+        expect(classification).toContain('Do 1/2 and 4/8 locate the same point?');
+        expect(classification).not.toContain('part-count scaling');
+        expect(classification).not.toContain('×');
+    });
     it('derives fraction notation from the numeric location relation', () => {
         const question = render(locationData, 'articulation');
         const solution = render(locationData, 'articulation', true);
