@@ -1,2 +1,2 @@
 - **Identity:** The full measured quantity q is divided into b equal parts in each copy, and a blue parts are selected; the learner explains how this represents (a/b) × q.
-- **Modes:** Question Mode shows the measured ruler and selected parts without their value or product explanation. Solution Mode identifies q/b, counts the selected parts across copies, and connects their total to (a × q) ÷ b.
+- **Modes:** Question Mode shows the measured ruler and selected parts and explicitly requests both calculation orders: divide q by b before multiplying by a, and multiply a by q before dividing by b. Solution Mode identifies q/b, counts the selected parts across copies, and shows both exact derivations, including the multiply-first subtotal.

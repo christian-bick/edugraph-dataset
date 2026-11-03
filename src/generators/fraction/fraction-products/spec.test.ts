@@ -47,7 +47,8 @@ describe('fraction-products schema integration', () => {
             expect(selectedProfile === 'mixed-equation' ? selectedProfile : selectedProfile.replace(/-(im)?proper$/, ''))
                 .toBe(productProfile);
             const expectedLabels = [...selected, selectedProfile.endsWith('-proper')
-                ? Scope.ProperFractions : Scope.ImproperFractions];
+                ? Scope.ProperFractions : Scope.ImproperFractions,
+                Scope[`NumbersSmaller${resolved.config.range!.max}` as keyof typeof Scope]];
             expect(new Set(resolved.resolvedLabels)).toEqual(new Set<string>(expectedLabels));
 
             setSeed(17);

@@ -3230,7 +3230,6 @@ export type FractionProductMixedOperand = Readonly<{
 }>;
 
 type FractionProductCommon = Readonly<{
-    kind: 'fraction-product';
     sharedWhole: 1;
     /** Dimensionless a/b factor and measured reference quantity q. */
     multiplierValue: FractionProductValue;
@@ -3250,8 +3249,6 @@ type FractionProductCommon = Readonly<{
         copyCount: number;
         availablePartCount: number;
         onePartValue: FractionProductValue;
-        /** a × q, before division by b. */
-        scaledQuantity: FractionProductValue;
     }>;
     /** Explicit dimensioned equality in the Area.Equation mathematical profile. */
     equationWitness?: Readonly<{
@@ -3277,8 +3274,9 @@ type FractionProductCommon = Readonly<{
  *
  * Let multiplierValue = a/b and quantityValue = q. The partition witness has
  * equalPartsPerCopy = b, selectedPartCount = a, copyCount = ceil(a/b),
- * availablePartCount = copyCount × b, onePartValue = q/b, and
- * scaledQuantity = a × q. Each copy is the entire measured quantity q, divided
+ * availablePartCount = copyCount × b and onePartValue = q/b.
+ * The derivation family additionally carries scaledQuantity = a × q.
+ * Each copy is the entire measured quantity q, divided
  * into b equal parts; exactly a of these parts are selected across the copies.
  * Thus product = a × (q/b) = (a × q)/b. All equalities are exact rational
  * cross-products. The numerator and denominator have distinct model roles,
@@ -3288,10 +3286,10 @@ type FractionProductCommon = Readonly<{
  * six units; its original denominator is at most six.
  * `equationWitness`, when present, repeats multiplierValue × quantityValue =
  * product as factor × referenceMeasure = productMeasure with meter units; no prompt, blank, or requested
- * reasoning is stored in the payload. All three views accept both operand forms
- * and both presence states of the optional witness.
+ * reasoning is stored in the payload. Each leaf accepts both operand forms
+ * and both presence states of the optional witness within its named family.
  */
-export type FractionProductProblem = FractionProductCommon & (
+type FractionProductOperandForms = (
     | Readonly<{
         operandForm: 'fractions';
         multiplier: FractionProductFractionOperand;
@@ -3303,6 +3301,22 @@ export type FractionProductProblem = FractionProductCommon & (
         quantity: FractionProductMixedOperand;
     }>
 );
+
+/** Equal-part product with the equivalent multiply-first derivation a*q/b. */
+export type FractionProductProblem = FractionProductCommon & FractionProductOperandForms & Readonly<{
+    kind: 'fraction-product';
+    partition: FractionProductCommon['partition'] & Readonly<{
+        /** a × q, before division by b. */
+        scaledQuantity: FractionProductValue;
+    }>;
+}>;
+
+/** The exact product of a selected q/b parts, without an additional a*q subtotal. */
+export type FractionProductRelationProblem = FractionProductCommon & FractionProductOperandForms & Readonly<{
+    kind: 'fraction-product-relation';
+}>;
+
+export type FractionProductContent = FractionProductProblem | FractionProductRelationProblem;
 
 /** An exact positive rational measured in the outer rectangle's chosen unit. */
 export type FractionRectangleAreaRational = Readonly<{
@@ -5740,8 +5754,8 @@ export interface ViewTypeMap {
     'fractions-general-division-word-problem': FractionDivisionRelationProblem;
     'fractions-division-model-construction': FractionDivisionRelationProblem;
     'fractions-product-partition-interpretation': FractionProductProblem;
-    'fractions-product-story-creation': FractionProductProblem;
-    'fractions-product-word-problem': FractionProductProblem;
+    'fractions-product-story-creation': FractionProductRelationProblem;
+    'fractions-product-word-problem': FractionProductRelationProblem;
     'fractions-area-tiling-understanding': FractionRectangleAreaProblem;
     'fractions-rectangle-area': FractionRectangleAreaProblem;
     'fractions-area-product-construction': FractionRectangleAreaProblem;

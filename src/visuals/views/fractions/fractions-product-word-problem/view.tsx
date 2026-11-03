@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidFractionProduct} from '../fraction-product-helpers.ts';
+import {isValidFractionProductRelation} from '../fraction-product-helpers.ts';
 import {FractionProductBody} from '../fraction-product-view.tsx';
 import {FractionsProductWordProblemViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -17,7 +17,7 @@ export const FractionsProductWordProblemCore = ({payload}: {
         'kind', 'sharedWhole', 'operandForm', 'multiplier', 'quantity',
         'multiplierValue', 'quantityValue', 'product', 'context', 'partition'
     ]);
-    if (!isValidFractionProduct(data)) {
+    if (!isValidFractionProductRelation(data)) {
         throw new ViewValidationError(VIEW_ID, 'Fraction factors, measured quantity, and equal-part evidence must agree exactly.');
     }
     return <FractionProductBody data={data} isSolutionView={payload.isSolutionView} task="word-problem" />;

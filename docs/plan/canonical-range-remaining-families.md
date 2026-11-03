@@ -3,10 +3,11 @@
 Update, 2026-11-03: retain the current ontology's minimum/maximum interpretation; the proposed
 largest-magnitude reinterpretation was withdrawn. Q1/Q2 producer splits and their
 [consumer adoption](canonical-range-labeling.md#q1q2-syntax-and-calculation-contracts), followed by
-the [Q6 unit-division separation](canonical-range-labeling.md#q6-source-verification), are implemented.
-Current source coverage is **1,528 normalized targets / 2,000 routes / 4,677 selections**, with
-**69 missing range facets across eight producers**. Q1/Q2 closed 14 source omissions and Q6
-closed another 16; 10 decision topics remain, including the same two precision topics covering
+the [Q6 unit-division separation](canonical-range-labeling.md#q6-source-verification) and
+[Q7 fraction-product separation](canonical-range-labeling.md#q7-source-verification), are implemented.
+Current source coverage is **1,528 normalized targets / 2,000 routes / 4,692 selections**, with
+**62 missing range facets across seven producers**. Q1/Q2 closed 14 source omissions, Q6
+closed another 16 and Q7 another seven; nine decision topics remain, including the same two precision topics covering
 34 already-labelled routes.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
@@ -51,7 +52,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
-| Q7 — fraction products,7 | Should interpretation of `17/6×6` require alternate subtotal `17×6=102`, while story creation requires only17 selected parts/result17? | Confirm separate task contracts, or require that additional subtotal explicitly in every applicable Question. The latter broadens the story task; it is not a declaration-only repair. |
 | Q8 — fraction equivalence,7 | Does classification of `1/2=4/8` assess rational equality only, or the scaling count `2×4=8` too? | Distinguish equality recognition from generating/scaling part counts. Making scaling mandatory changes classification. Three explicitly multiplication/scaling-labelled configurations might instead justify a genuine semantic consumer boundary, but whether classification can truthfully carry those claims is itself unresolved; the flags currently leave the payload identical. No range-driven guard is added. |
 | Q9 — fraction scaling,5 | Comparison of5 and `5×3/2` explicitly avoids the product; explanation additionally requires the analogy `5×2=10`. Must that analogy be common to both? | Keep comparison and explanation mathematically distinct unless the additional analogy is intentionally required in both Questions. Existing equal-only routing does not provide a universal boundary. |
 | Q10 — generic unit scale,2 | In `5 large units=10 small units`, must comparison explicitly derive factor2, as the derivation consumer does? | Prefer distinct comparison and factor-derivation contracts, preserving their tasks. Requiring factor derivation in both is another option, but changes comparison rather than merely clarifying a required solution model. |
@@ -69,10 +69,14 @@ Q6 is resolved by separate fine-part partition and recipient-sharing contracts, 
 existing quotient producer for the other operand roles. The [Q6 source verification](canonical-range-labeling.md#q6-source-verification)
 closes all 16 unit-dividend omissions and preserves all ten source target/view lineages.
 
-The first eight rows account for all 69 remaining missing source facets: arithmetic 1,
-fractions 19, measurement 30, currency 11 and symbolic algebra 8. The last two
+Q7 is resolved by separate multiply-first derivation and equal-part relation contracts. The
+[Q7 source verification](canonical-range-labeling.md#q7-source-verification) closes all seven
+fraction-product omissions and preserves all four source target/view lineages.
+
+The first seven rows account for all 62 remaining missing source facets: arithmetic 1,
+fractions 12, measurement 30, currency 11 and symbolic algebra 8. The last two
 concern 34 already-labelled routes with unresolved precision and must not be added to omission
-totals. These 10 questions are contract/policy topics, not an estimated implementation-batch
+totals. These nine questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
 or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.

@@ -2,7 +2,7 @@ import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {FractionProductsGenerator} from '../../../generators/fraction/fraction-products/generator.ts';
+import {FractionProductFixtureGenerator as FractionProductsGenerator, productRelationFixture} from '../../../generators/fraction/fraction-product-fixtures.ts';
 import type {FractionProductProblem} from '../../../types/problems.ts';
 import {spec as interpretationSpec} from './fractions-product-partition-interpretation/spec.ts';
 import {spec as storySpec} from './fractions-product-story-creation/spec.ts';
@@ -13,6 +13,8 @@ const leafIds = [
     'fractions-product-story-creation',
     'fractions-product-word-problem'
 ] as const;
+const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
+    'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const;
 type LeafId = typeof leafIds[number];
 type Core = ComponentType<{payload: unknown}>;
 let cores: Record<LeafId, Core>;
@@ -34,19 +36,17 @@ afterAll(() => vi.unstubAllGlobals());
 
 const render = (id: LeafId, data: FractionProductProblem, isSolutionView: boolean) =>
     renderToStaticMarkup(createElement(cores[id], {payload: {
-        problem: {type: 'fraction', data, labels: []}, viewId: id,
+        problem: {type: 'fraction', data: id === 'fractions-product-partition-interpretation' ? data : productRelationFixture(data), labels: []}, viewId: id,
         targetLabels: [], isSolutionView, seed: 1
     }}));
 
 describe('fraction product leaf contracts', () => {
-    it('evidences the declared bars and number lines for every producer profile in both modes', () => {
+    it.each(profiles)('evidences the declared bars and number lines for %s in both modes', productProfile => {
         const generator = new FractionProductsGenerator();
         expect(interpretationSpec.generalLabels).toContain(Scope.Numberline);
         expect(storySpec.generalLabels).toContain(Scope.Numberline);
         expect(interpretationSpec.generalLabels).toContain(Scope.BarModel);
         expect(storySpec.generalLabels).toContain(Scope.BarModel);
-        for (const productProfile of ['fraction-partition-proper', 'fraction-partition-improper',
-            'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const) {
             for (let seed = 0; seed < 20; seed++) {
                 setSeed(`fraction-product-leaf-${productProfile}-${seed}`);
                 const data = generator.generate({productProfile}).data;
@@ -69,7 +69,6 @@ describe('fraction product leaf contracts', () => {
                     }
                 }
             }
-        }
     });
 
     it('rejects a contradictory partition in every leaf', () => {

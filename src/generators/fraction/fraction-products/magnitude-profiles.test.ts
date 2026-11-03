@@ -1,48 +1,51 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
 import * as rng from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {generateWithLabels} from '../../../lib/utils.ts';
+import {fractionProductDomain, fractionProductNativeDomain} from '../fraction-product-domain.ts';
 import {FractionProductsGenerator} from './generator.ts';
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('fraction-product multiplier magnitude profiles', () => {
     it.each(['proper', 'improper'] as const)('retains every original %s multiplier and conditional numerator weight', magnitude => {
-        const generator = new FractionProductsGenerator();
-        const random = vi.spyOn(rng, 'random');
+        const rows = fractionProductNativeDomain(`fraction-equation-${magnitude}`);
+        const total = rows.reduce((sum, row) => sum + row.weight, 0);
         const seen = new Set<string>();
-        for (let denominator = 2; denominator <= 6; denominator++) {
-            const count = magnitude === 'proper' ? denominator - 1 : 2 * denominator - 1;
-            const first = magnitude === 'proper' ? 1 : denominator + 1;
-            const frequencies = new Map<number, number>();
-            for (let index = 0; index < count; index++) {
-                random.mockReturnValueOnce((denominator - 2 + 0.5) / 5)
-                    .mockReturnValueOnce((index + 0.5) / count)
-                    .mockReturnValueOnce(0).mockReturnValueOnce(0).mockReturnValueOnce(0);
-                const data = generator.generate({productProfile: `fraction-equation-${magnitude}`}).data;
-                const candidate = first + index;
-                const expected = magnitude === 'improper' && candidate === 2 * denominator ? candidate + 1 : candidate;
-                expect(data.multiplierValue).toEqual({numerator: expected, denominator});
-                expect(data.multiplierValue.numerator < denominator).toBe(magnitude === 'proper');
-                frequencies.set(expected, (frequencies.get(expected) ?? 0) + 1);
-                seen.add(`${expected}/${denominator}`);
+        for (let b = 2; b <= 6; b++) {
+            const factors = new Map<number, number>();
+            for (const row of rows.filter(row => row.multiplier.denominator === b)) {
+                if (row.multiplier.form !== 'fraction') throw new Error('Expected original fractional factors.');
+                const a = row.multiplier.numerator;
+                factors.set(a, (factors.get(a) ?? 0) + row.weight);
+                seen.add(`${a}/${b}`);
+                expect(a < b).toBe(magnitude === 'proper');
             }
-            if (magnitude === 'improper') {
-                expect(frequencies.has(2 * denominator)).toBe(false);
-                // The old sampler maps its whole-number draw to the adjacent numerator.
-                expect(frequencies.get(2 * denominator + 1)).toBe(2);
-                expect([...frequencies.values()].reduce((sum, frequency) => sum + frequency, 0)).toBe(count);
-            } else expect([...frequencies.values()].every(frequency => frequency === 1)).toBe(true);
+            const denominatorTotal = [...factors.values()].reduce((sum, weight) => sum + weight, 0);
+            expect(denominatorTotal * 5).toBe(total);
+            const count = magnitude === 'proper' ? b - 1 : 2 * b - 1;
+            for (const [a, weight] of factors) {
+                const multiplicity = magnitude === 'improper' && a === 2 * b + 1 ? 2 : 1;
+                expect(BigInt(weight) * 5n * BigInt(count)).toBe(BigInt(total) * BigInt(multiplicity));
+            }
+            if (magnitude === 'improper') expect(factors.has(2 * b)).toBe(false);
         }
         expect(seen.size).toBe(magnitude === 'proper' ? 15 : 30);
     });
 
     it('grounds proper involvement in the explicit multiplier even when other fractions are improper', () => {
-        vi.spyOn(rng, 'random').mockReturnValueOnce(0.9).mockReturnValueOnce(0.9)
-            .mockReturnValueOnce(0).mockReturnValueOnce(0.9).mockReturnValueOnce(0);
+        const domain = fractionProductDomain('derivation', 'fraction-equation-proper', createCanonicalNumericRange(20));
+        const index = domain.findIndex(row => row.multiplier.form === 'fraction' && row.quantity.form === 'fraction'
+            && row.multiplier.numerator === 5 && row.multiplier.denominator === 6
+            && row.quantity.numerator === 5 && row.quantity.denominator === 2);
+        expect(index).toBeGreaterThanOrEqual(0);
+        const total = domain.reduce((sum, row) => sum + row.weight, 0);
+        const preceding = domain.slice(0, index).reduce((sum, row) => sum + row.weight, 0);
+        vi.spyOn(rng, 'random').mockReturnValueOnce((preceding + domain[index]!.weight / 2) / total).mockReturnValueOnce(0);
         const generated = generateWithLabels(new FractionProductsGenerator(), [
             Area.Multiplication, Area.Equation, Scope.FractionNumbers,
-            Scope.SingleFrameOfReference, Scope.ProperFractions
+            Scope.SingleFrameOfReference, Scope.ProperFractions, Scope.NumbersSmaller20
         ])!;
         expect(generated.labels).toContain(Scope.ProperFractions);
         expect(generated.data.multiplierValue).toEqual({numerator: 5, denominator: 6});

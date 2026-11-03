@@ -7,18 +7,19 @@ Current direction, 2026-11-03: retain the pinned ontology's inclusive minimum/ma
 The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax and calculation
 contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
 records the implementation and source verification scope. The approved Q6
-[partition/sharing separation](#q6-unit-fraction-division-contracts) is also implemented.
+[partition/sharing separation](#q6-unit-fraction-division-contracts) and Q7
+[fraction-product separation](#q7-fraction-product-contracts) are also implemented.
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2 and Q6 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6 and Q7 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,677 complete selections**, with **69 range-presence
+**1,528 normalized targets /2,000 routes and4,692 complete selections**, with **62 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records10 remaining contract/policy questions, including two already-labelled precision topics.
+records9 remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -238,6 +239,107 @@ not a claim that the full test suite or stored dataset is accepted.
 Evidence is under `temp/range-decisions/batch2-q6/`; matching snapshots and the exact ten-pair
 migration report are under `temp/spec-plans/ccss/range-q6-2026-11-03/`. Stored rows and cached
 VQA findings are unchanged.
+
+## Q7 fraction-product contracts
+
+Approved after Q6, from `40792489`. Keep the interpretation's complete derivation separate
+from the existing story and word-problem method. Retain the current ontology and observability
+convention. For `17/6 × 6`, interpretation explicitly requires the intermediate `17 × 6 = 102`
+(upper120); story and word tasks use selected parts and the product 17 (upper20). A stored
+numerator 102 in `102/6` alone is not an independently assessed integer quantity.
+
+| Production consumer | Existing source family | Mathematical contract and adoption | Verification |
+| --- | --- | --- | --- |
+| `fractions-product-partition-interpretation` | `5.NF.B.4a-partition-product` | Retain `fraction-products` / `FractionProductProblem`, including `partition.scaledQuantity`; clarify that the Question requests both existing calculation orders | Both modes, exact `q/b` and `a×q` witnesses, necessary hidden intermediate |
+| `fractions-product-story-creation` | `5.NF.B.4a-create-product-story` | Adopt `fraction-product-relations` / `FractionProductRelationProblem`, omitting the unused `scaledQuantity`; preserve the given equal-parts model and story request | Story/answer withholding, original quantities, exact unit-bearing Solution |
+| `fractions-product-word-problem` | Both fraction and mixed-number `5.NF.B.6` targets | Adopt the same relation family, retaining the prose-first task, required partition method and contextual equation | Both original operand forms, blank Question equation/answer, exact Solution model |
+
+Each family retains all five native mathematical profiles and legitimate future combinations,
+not only the profiles selected by today's routes. No new view, target or range-driven rejection
+is required (SPEC-V6, IMPL-G6, IMPL-V8). Shared mathematical helpers and the renderer may be
+reused; establish types, `ViewTypeMap` and minimum adoption serially through a passing typecheck
+before independent role work (IMPL-8).
+
+For a valid future equation-profile story, supply its multiplication equality with the product
+blank in Question mode; this preserves the equation claim without adding a learner action.
+Today's story and interpretation routes use partition profiles without that witness, so their
+equation display stays unchanged. Word Questions retain their prose-first equation/answer blank.
+
+Operands, product and equal-part relations are canonical mathematics; `q/b`, model counts and
+the interpretation's `a×q` are structured evidence; material and units are semantic context.
+Neither producer stores a learner action or prose (SPEC-11, IMPL-G8). Relevant counts are
+selected parts `a`, parts per copy `b` and copy count. The unused aggregate `availablePartCount`
+does not become a required total merely because all cells are drawn: at `a=7,b=6`, the task
+selects seven parts without asking for a count of all twelve available cells. Likewise, mixed
+quantity numerators are rational storage unless actually used as integer quantities.
+
+The native law has 6,150 weighted operand paths, collapsing to 5,670 distinct states, each
+with two equally likely materials. Preserve denominator and conditional numerator probabilities,
+the improper sampler's doubled weight at `2b+1`, the partition profiles' half-whole/half-fraction
+quantity choice, and every original fraction/mixed notation. Range selection conditions that law
+within a preselected canonical cell; the resulting global mixture and seeded outcomes may change
+under the previously accepted range-profile sampling direction. All supported outcomes remain.
+
+Independent finite-domain verification confirms 20 full-derivation and 13 relation cells across
+the five profiles. Every case has `q/b < 5`, so no positive lower
+descriptor applies. Keep the three views' existing zero-label ownership unchanged.
+
+### Q7 source verification
+
+All four target/view lineages remain, with no target additions, removals, claim edits or
+disposition changes. Three routes migrate to the relation producer; the interpretation route
+retains its ID and gains the precise range plan. Affected selections grow 7→22: nine
+interpretation, five story, five fraction-word and three mixed-word. Global coverage remains
+1,528 normalized targets /2,000 routes, with 4,692 complete selections.
+
+The dependency audit uses an explicitly empty dataset snapshot. It closes all seven Q7 range
+omissions, leaving 62 across seven producers. Non-range omissions, conflicts, contract errors,
+incomplete tuples, invalid contexts and pending/invalid inference remain zero; all 119 existing
+inference selections still resolve exhaustively. The 34 already-labelled precision routes are
+separate from these omission counts.
+
+An independent oracle reconstructs the original law without production range helpers. It checks
+all 11,340 original material-inclusive outcome weights and all 22,680 family-specific payloads
+and conditional weights across 33 cells. Every weighted selector midpoint is checked, as are
+1,056 seeded native draws and their PRNG continuation. The full-catalog route proof covers all
+22 selections with 176 planned draws, direct resolutions and exact receipt replays.
+
+The protected pre-batch baseline contains four routes, seven selections, 56 draws and 112
+Question/Solution renderings. All 96 controls remain byte-identical: every Solution plus all
+story and word Questions. The 16 interpretation Questions differ only by the approved request
+for both calculation orders. Forty-seven malformed, wrong-family and invalid-configuration
+checks pass. Original operands, exact products, model geometry, units and materials are retained;
+only the accepted range-conditioned mixture/seed changes and Question clarification apply.
+
+Native browser verification covers every source selection: 44 Question/Solution images across
+three views and four routes, with 88 byte-identical repeated captures and no browser errors or
+error cards. Visual inspection includes the same `17/6 × 6` interpretation/story example and
+mixed-number word Questions/Solutions, checking answer withholding, both derivations and layout.
+This is native source smoke verification, not canonical dataset or VQA acceptance.
+
+Schema checks cover both standalone range fallbacks and complete profile/range contexts.
+Direct extraction conditions unspecified choices on a feasible pair; the same static cells
+constrain planned generation. Native weighted pools construct lazily during generation, not
+catalog loading. The scoped implementation audit of both generators and all three consumers
+reports no findings.
+
+Final types, generator/view contracts, labels, documentation and source standards checks pass.
+The unchanged local 1,944-row dataset still fails split integrity for missing recorded replay
+plans/receipts, and the stored-annotation gate retains its 4,006 failures. The earlier full-suite
+timeout limitations remain recorded in the Q1/Q2 and Q6 checkpoints; this batch does not claim
+their resolution or change timeouts, skip markers or coverage thresholds.
+
+Focused coverage passes all 106 tests across 11 files, with none excluded. Both generator
+bodies have 100% statement /100% branch coverage and pass the unchanged 85% /60% thresholds.
+The shared mathematical helper reaches 97.89% /98.14%; overall affected-code coverage is
+98.13% /98.27%. The 21 persistent integration tests include all five profiles on each valid
+consumer, exact source replay, future equation-story evidence and counterexamples excluding
+unused cell totals and stored numerators. Scoped coverage does not claim full-suite or dataset
+acceptance.
+
+Evidence is under
+`temp/range-decisions/batch3-q7/` and `temp/spec-plans/ccss/range-q7-2026-11-03/`.
+Canonical dataset regeneration and independent Question/Solution VQA remain separate acceptance.
 
 ## Accepted direction
 

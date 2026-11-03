@@ -1,7 +1,9 @@
 import type {
     FractionProductFractionOperand,
     FractionProductMixedOperand,
+    FractionProductContent,
     FractionProductProblem,
+    FractionProductRelationProblem,
     FractionProductValue
 } from '../../../types/problems.ts';
 
@@ -32,9 +34,9 @@ const validMixedOperand = (value: FractionProductMixedOperand | undefined): bool
     && Number.isSafeInteger(value.improperNumerator)
     && value.improperNumerator === value.whole * value.denominator + value.fractionNumerator;
 
-/** Validates both original notations and each exact q/b partition/product witness. */
-export function isValidFractionProduct(data: FractionProductProblem): boolean {
-    if (!data || data.kind !== 'fraction-product' || data.sharedWhole !== 1
+/** Validates original notations and the common equal-parts product relation. */
+function validCommon(data: FractionProductContent): boolean {
+    if (!data || data.sharedWhole !== 1
         || !validValue(data.multiplierValue) || !validValue(data.quantityValue)
         || !validValue(data.product) || !data.context
         || (data.context.material !== 'ribbon' && data.context.material !== 'rope')
@@ -52,9 +54,7 @@ export function isValidFractionProduct(data: FractionProductProblem): boolean {
         || data.partition.copyCount !== Math.ceil(a / b)
         || data.partition.availablePartCount !== data.partition.copyCount * b
         || !validValue(data.partition.onePartValue)
-        || !validValue(data.partition.scaledQuantity)
         || !productEquals(data.quantityValue, {numerator: 1, denominator: b}, data.partition.onePartValue)
-        || !productEquals(data.quantityValue, {numerator: a, denominator: 1}, data.partition.scaledQuantity)
         || !productEquals(data.multiplierValue, data.quantityValue, data.product)
         || !productEquals({numerator: a, denominator: 1}, data.partition.onePartValue, data.product)) return false;
 
@@ -79,6 +79,26 @@ export function isValidFractionProduct(data: FractionProductProblem): boolean {
             || !equal(witness.productMeasure, data.product)) return false;
     }
     return true;
+}
+
+/** The interpretation contract requires the exact multiply-first subtotal. */
+export function isValidFractionProduct(value: unknown): value is FractionProductProblem {
+    try {
+        if (!value || typeof value !== 'object' || !('kind' in value) || value.kind !== 'fraction-product') return false;
+        const data = value as FractionProductProblem;
+        return validCommon(data) && validValue(data.partition.scaledQuantity)
+            && productEquals(data.quantityValue, {numerator: data.partition.selectedPartCount, denominator: 1}, data.partition.scaledQuantity);
+    } catch { return false; }
+}
+
+/** Story relations reject unused multiply-first evidence from the other family. */
+export function isValidFractionProductRelation(value: unknown): value is FractionProductRelationProblem {
+    try {
+        if (!value || typeof value !== 'object' || !('kind' in value) || value.kind !== 'fraction-product-relation'
+            || 'scaledQuantity' in value) return false;
+        const data = value as FractionProductRelationProblem;
+        return !!data.partition && !('scaledQuantity' in data.partition) && validCommon(data);
+    } catch { return false; }
 }
 
 export const formatProductValue = (value: FractionProductValue): string =>

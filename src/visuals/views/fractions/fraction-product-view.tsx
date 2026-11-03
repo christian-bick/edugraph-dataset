@@ -1,21 +1,21 @@
-import type {FractionProductProblem} from '../../../types/problems.ts';
+import type {FractionProductContent, FractionProductProblem, FractionProductRelationProblem} from '../../../types/problems.ts';
 import {formatProductOperand, formatProductValue, measureProductValue} from './fraction-product-helpers.ts';
 
 export type FractionProductTask = 'partition-interpretation' | 'story-creation' | 'word-problem';
 
-interface Props {
-    data: FractionProductProblem;
-    isSolutionView: boolean;
-    task: FractionProductTask;
-}
+type ModeProps<T> = {data: T; isSolutionView: boolean};
+type Props = {isSolutionView: boolean} & (
+    | {data: FractionProductProblem; task: 'partition-interpretation'}
+    | {data: FractionProductRelationProblem; task: 'story-creation' | 'word-problem'}
+);
 
-const multiplication = (data: FractionProductProblem): string =>
+const multiplication = (data: FractionProductContent): string =>
     `${formatProductOperand(data.multiplier)} × ${formatProductOperand(data.quantity)}`;
 
-const unitWord = (data: FractionProductProblem): string =>
+const unitWord = (data: FractionProductContent): string =>
     data.product.numerator <= data.product.denominator ? 'meter' : 'meters';
 
-function PartitionModel({data, showZeroReference = true}: {data: FractionProductProblem; showZeroReference?: boolean}) {
+function PartitionModel({data, showZeroReference = true}: {data: FractionProductContent; showZeroReference?: boolean}) {
     const x = 132;
     const rulerWidth = 560;
     const value = data.quantityValue.numerator / data.quantityValue.denominator;
@@ -54,11 +54,11 @@ function PartitionModel({data, showZeroReference = true}: {data: FractionProduct
     </svg>;
 }
 
-function ProductEquation({data, isSolutionView}: Omit<Props, 'task'>) {
+function ProductEquation({data, isSolutionView}: ModeProps<FractionProductContent>) {
     return <div className={`mt-4 rounded-xl border-2 p-4 text-center font-mono text-2xl font-bold ${
         isSolutionView ? 'border-emerald-400 bg-emerald-50 text-emerald-950'
             : 'border-slate-200 bg-slate-50 text-slate-900'}`}>
-        {multiplication(data)}{isSolutionView && <> = {formatProductValue(data.product)}</>}
+        {multiplication(data)}{isSolutionView ? <> = {formatProductValue(data.product)}</> : data.equationWitness ? ' = ______' : null}
     </div>;
 }
 
@@ -85,9 +85,9 @@ function PartitionExplanation({data}: {data: FractionProductProblem}) {
     </>;
 }
 
-function PartitionInterpretationTask({data, isSolutionView}: Omit<Props, 'task'>) {
+function PartitionInterpretationTask({data, isSolutionView}: ModeProps<FractionProductProblem>) {
     return <>
-        <p className="text-base text-slate-700">Explain how the equal parts and blue sections represent the fraction product. What do the numerator and denominator each tell you?</p>
+        <p className="text-base text-slate-700">Explain how the equal parts and blue sections represent the fraction product. What do the numerator and denominator each tell you?{!isSolutionView && <> Show both calculation orders: divide the complete quantity by the denominator and multiply by the numerator; then multiply the numerator by the complete quantity before dividing by the denominator.</>}</p>
         <ProductEquation data={data} isSolutionView={isSolutionView} />
         <div className="mt-3"><PartitionModel data={data} /></div>
         {isSolutionView ? <Answer><PartitionExplanation data={data} /></Answer>
@@ -95,7 +95,7 @@ function PartitionInterpretationTask({data, isSolutionView}: Omit<Props, 'task'>
     </>;
 }
 
-function exampleStory(data: FractionProductProblem): string {
+function exampleStory(data: FractionProductContent): string {
     const q = measureProductValue(data.quantityValue);
     const copies = data.partition.copyCount;
     const b = data.partition.equalPartsPerCopy;
@@ -106,7 +106,7 @@ function exampleStory(data: FractionProductProblem): string {
     return `For a weaving project, ${setup} into ${b} equal pieces. The project uses ${a} of these pieces. How many meters of ${data.context.material} are used?`;
 }
 
-function StoryCreationTask({data, isSolutionView}: Omit<Props, 'task'>) {
+function StoryCreationTask({data, isSolutionView}: ModeProps<FractionProductRelationProblem>) {
     return <>
         <p className="text-base text-slate-700">Write a {data.context.material} story for this product. Preserve the full measured quantity, its equal partitions, and the selected parts.</p>
         <ProductEquation data={data} isSolutionView={isSolutionView} />
@@ -116,7 +116,7 @@ function StoryCreationTask({data, isSolutionView}: Omit<Props, 'task'>) {
     </>;
 }
 
-function storyProblem(data: FractionProductProblem): string {
+function storyProblem(data: FractionProductContent): string {
     const factor = formatProductOperand(data.multiplier);
     const reference = measureProductValue(data.quantityValue);
     const usePhrase = data.multiplierValue.numerator < data.multiplierValue.denominator
@@ -124,7 +124,7 @@ function storyProblem(data: FractionProductProblem): string {
     return `A reference ${data.context.material} is ${reference} long. A weaving project uses ${usePhrase}. How many meters of ${data.context.material} does the project use?`;
 }
 
-function WordProblemTask({data, isSolutionView}: Omit<Props, 'task'>) {
+function WordProblemTask({data, isSolutionView}: ModeProps<FractionProductRelationProblem>) {
     return <>
         <p className="rounded-xl bg-indigo-50 p-5 text-lg leading-relaxed text-indigo-950">{storyProblem(data)}</p>
         <p className="mt-3 text-base text-slate-700">Use an equal-parts bar model with a measured number line to solve the story.
@@ -149,14 +149,13 @@ const titles: Record<FractionProductTask, string> = {
     'word-problem': 'Solve a fraction-product story'
 };
 
-export function FractionProductBody({data, isSolutionView, task}: Props) {
-    const common = {data, isSolutionView};
+export function FractionProductBody(props: Props) {
     return <main className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm"
         style={{width: 840, maxWidth: '95vw'}}>
         <div className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">Fraction of a measured quantity</div>
-        <h1 className="mb-3 mt-2 text-2xl font-bold">{titles[task]}</h1>
-        {task === 'partition-interpretation' ? <PartitionInterpretationTask {...common} />
-            : task === 'story-creation' ? <StoryCreationTask {...common} />
-                : <WordProblemTask {...common} />}
+        <h1 className="mb-3 mt-2 text-2xl font-bold">{titles[props.task]}</h1>
+        {props.task === 'partition-interpretation' ? <PartitionInterpretationTask {...props} />
+            : props.task === 'story-creation' ? <StoryCreationTask {...props} />
+                : <WordProblemTask {...props} />}
     </main>;
 }

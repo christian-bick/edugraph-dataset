@@ -44,9 +44,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2 and Q6, current source gates cover **1,528 normalized targets / 2,000 routes and 4,677 selections**,
-  with 69 range omissions across eight producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records eight missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
+  After Q1/Q2, Q6 and Q7, current source gates cover **1,528 normalized targets / 2,000 routes and 4,692 selections**,
+  with 62 range omissions across seven producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records seven missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -58,6 +58,12 @@ These items are not newly scheduled by the archive move.
   all 300 finite unit-family outcomes and 1,408 unchanged legacy Question/Solution rendering comparisons;
   native verification covers 56 images, each captured twice (112 captures). Affected coverage and
   the existing timeout and stale-artifact limitations are recorded in that verification checkpoint.
+  Q7's [source verification](canonical-range-labeling.md#q7-source-verification) closes seven
+  further omissions while preserving all four affected source target/view lineages. Independent
+  proofs cover all 22,680 family payloads and exact conditional weights across 33 cells, with 96
+  unchanged Question/Solution rendering comparisons and 16 clarified interpretation Questions.
+  Native verification covers 44 images, each captured twice (88 captures). Its verification
+  checkpoint records affected coverage checks and the timeout and stale-artifact limitations.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.

@@ -1,9 +1,10 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {FractionProductsGenerator} from '../../../generators/fraction/fraction-products/generator.ts';
+import {FractionProductFixtureGenerator as FractionProductsGenerator, productRelationFixture} from '../../../generators/fraction/fraction-product-fixtures.ts';
 import {formatProductValue} from './fraction-product-helpers.ts';
 import {FractionProductBody} from './fraction-product-view.tsx';
+import {buildFractionProduct} from '../../../generators/fraction/fraction-product-domain.ts';
 
 const generator = new FractionProductsGenerator();
 const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
@@ -15,15 +16,29 @@ const sample = (productProfile: typeof profiles[number]) => {
 const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 
 describe('fraction product task projections', () => {
+    it('requires both interpretation orders while leaving the story at its equal-parts relation', () => {
+        const data = buildFractionProduct({operandForm: 'fractions', multiplier: {form: 'fraction', numerator: 17, denominator: 6},
+            quantity: {form: 'fraction', numerator: 6, denominator: 1}}, 'fraction-partition-improper', 'ribbon');
+        const question = visible(renderToStaticMarkup(<FractionProductBody data={data} task="partition-interpretation" isSolutionView={false} />));
+        const solution = visible(renderToStaticMarkup(<FractionProductBody data={data} task="partition-interpretation" isSolutionView />));
+        const story = visible(renderToStaticMarkup(<FractionProductBody data={productRelationFixture(data)} task="story-creation" isSolutionView />));
+        expect(question).toContain('Show both calculation orders:');
+        expect(question).toContain('multiply the numerator by the complete quantity before dividing by the denominator');
+        expect(question).not.toContain('102');
+        expect(solution).toContain('(17 × 6) ÷ 6 = 102 ÷ 6');
+        expect(story).toContain('uses 17 of these pieces');
+        expect(story).not.toContain('102 ÷ 6');
+    });
     it.each(profiles)(
         '%s keeps the three requested actions distinct in Q/S', productProfile => {
             const data = sample(productProfile);
+            const relation = productRelationFixture(data);
             const partitionQ = renderToStaticMarkup(<FractionProductBody data={data} task="partition-interpretation" isSolutionView={false} />);
             const partitionS = renderToStaticMarkup(<FractionProductBody data={data} task="partition-interpretation" isSolutionView />);
-            const storyQ = renderToStaticMarkup(<FractionProductBody data={data} task="story-creation" isSolutionView={false} />);
-            const storyS = renderToStaticMarkup(<FractionProductBody data={data} task="story-creation" isSolutionView />);
-            const wordQ = renderToStaticMarkup(<FractionProductBody data={data} task="word-problem" isSolutionView={false} />);
-            const wordS = renderToStaticMarkup(<FractionProductBody data={data} task="word-problem" isSolutionView />);
+            const storyQ = renderToStaticMarkup(<FractionProductBody data={relation} task="story-creation" isSolutionView={false} />);
+            const storyS = renderToStaticMarkup(<FractionProductBody data={relation} task="story-creation" isSolutionView />);
+            const wordQ = renderToStaticMarkup(<FractionProductBody data={relation} task="word-problem" isSolutionView={false} />);
+            const wordS = renderToStaticMarkup(<FractionProductBody data={relation} task="word-problem" isSolutionView />);
 
             expect(partitionQ).toContain('Each row is the complete');
             expect(partitionQ).toContain('Blue sections are selected');
@@ -31,13 +46,13 @@ describe('fraction product task projections', () => {
             const captionY = Number(partitionQ.match(/<text x="20" y="(\d+)"[^>]*>Each row/)?.[1]);
             const zeroTickY = Number(partitionQ.match(/<text x="132" y="(\d+)"[^>]*>0 m/)?.[1]);
             expect(zeroTickY - captionY).toBeGreaterThanOrEqual(24);
-            expect(visible(partitionQ)).not.toContain(' = ');
+            expect(visible(partitionQ).includes(' = ')).toBe(data.equationWitness !== undefined);
             expect(visible(partitionQ)).not.toContain('One part is');
             expect(visible(partitionS)).toContain('One part is');
             expect(visible(partitionS)).toContain('÷');
 
             expect(visible(storyQ)).toContain('My story:');
-            expect(visible(storyQ)).not.toContain(' = ');
+            expect(visible(storyQ).includes(' = ')).toBe(data.equationWitness !== undefined);
             expect(visible(storyQ)).not.toContain('Example story:');
             expect(visible(storyS)).toContain('Example story:');
             expect(visible(storyS)).not.toContain('= ______');
@@ -71,7 +86,7 @@ describe('fraction product task projections', () => {
             setSeed(`fraction-product-singular-${seed}`);
             const data = generator.generate({productProfile: 'fraction-equation-proper'}).data;
             if (data.product.numerator > data.product.denominator) continue;
-            const solution = visible(renderToStaticMarkup(<FractionProductBody data={data}
+            const solution = visible(renderToStaticMarkup(<FractionProductBody data={productRelationFixture(data)}
                 task="word-problem" isSolutionView />));
             const value = formatProductValue(data.product);
             expect(solution).toContain(`${value} meter`);

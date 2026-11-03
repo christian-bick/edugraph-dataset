@@ -1,5 +1,8 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {fractionProductDomain, fractionProductUpperBounds} from '../fraction-product-domain.ts';
 import type {FractionProductProblem, FractionProductValue} from '../../../types/problems.ts';
 import {FractionProductsGenerator} from './generator.ts';
 import type {FractionProductsGeneratorConfig} from './spec.ts';
@@ -8,10 +11,13 @@ const generator = new FractionProductsGenerator();
 const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
     'fraction-equation-proper', 'fraction-equation-improper', 'mixed-equation'] as const;
 type Profile = typeof profiles[number];
+afterEach(() => vi.restoreAllMocks());
 
 const sample = (productProfile: Profile, seed: string): FractionProductProblem => {
     setSeed(seed);
-    return generator.generate({productProfile}).data;
+    const bounds = fractionProductUpperBounds('derivation', productProfile);
+    const index = Number.parseInt(seed.split('-').at(-1)!, 10) || 0;
+    return generator.generate({productProfile, range: createCanonicalNumericRange(bounds[index % bounds.length]!)}).data;
 };
 
 const equals = (first: FractionProductValue, second: FractionProductValue): boolean =>
@@ -23,6 +29,28 @@ const positiveRational = ({numerator, denominator}: FractionProductValue): boole
         && Number.isSafeInteger(denominator) && denominator > 0;
 
 describe('fraction-products exact multiplication', () => {
+    it.each(profiles)('%s honors every canonical cell and both material choices', productProfile => {
+        const random = vi.spyOn(rng, 'random');
+        for (const upper of fractionProductUpperBounds('derivation', productProfile)) {
+            const range = createCanonicalNumericRange(upper), rows = fractionProductDomain('derivation', productProfile, range);
+            for (const [draw, expected] of [[0, rows[0]!], [1 - Number.EPSILON, rows.at(-1)!]] as const) {
+                for (const material of [0.25, 0.75]) {
+                    random.mockReturnValueOnce(draw).mockReturnValueOnce(material);
+                    const stub = generator.generate({productProfile, range}), data = stub.data;
+                    expect(Object.keys(stub)).toEqual(['data']);
+                    expect(data.multiplier).toEqual(expected.multiplier);
+                    expect(data.quantity).toEqual(expected.quantity);
+                    expect(data).not.toHaveProperty('weight');
+                    expect(data.context.material).toBe(material < 0.5 ? 'ribbon' : 'rope');
+                    const {numerator: a, denominator: b} = data.multiplierValue, {numerator: q, denominator: c} = data.quantityValue;
+                    expect(data.partition.scaledQuantity).toEqual({numerator: a * q, denominator: c});
+                    const maximum = Math.max(a / b, q / c, a * q / (b * c), q / (b * c), a, b, Math.ceil(a / b), a * q / c);
+                    expect(maximum).toBeGreaterThan(range.maximumAbove);
+                    expect(maximum).toBeLessThanOrEqual(range.max);
+                }
+            }
+        }
+    });
     it.each(profiles)('preserves original operands and complete partition math in %s', profile => {
         const seen = new Set<string>();
         for (let seed = 0; seed < 160; seed++) {
@@ -135,7 +163,12 @@ describe('fraction-products exact multiplication', () => {
         }
         expect(() => generator.generate({} as FractionProductsGeneratorConfig))
             .toThrow(/Required field "productProfile"/);
-        expect(() => generator.generate({productProfile: 'unknown'} as unknown as
-            FractionProductsGeneratorConfig)).toThrow(/Unsupported product profile/);
+        expect(() => generator.generate({productProfile: 'unknown', range: createCanonicalNumericRange(5)} as unknown as
+            FractionProductsGeneratorConfig)).toThrow(/supported.*profile/i);
+        for (const config of [null, undefined, {productProfile: 'mixed-equation'}, {range: createCanonicalNumericRange(5)},
+            {productProfile: 'fraction-equation-proper', range: createCanonicalNumericRange(100)},
+            {productProfile: 'mixed-equation', range: {...createCanonicalNumericRange(10), minimumBelow: 0}}]) {
+            expect(() => generator.generate(config as never)).toThrow();
+        }
     });
 });

@@ -1,8 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import type {FractionProductProblem} from '../../../types/problems.ts';
-import {FractionProductsGenerator} from '../../../generators/fraction/fraction-products/generator.ts';
-import {formatProductOperand, isValidFractionProduct} from './fraction-product-helpers.ts';
+import {FractionProductFixtureGenerator as FractionProductsGenerator, productRelationFixture} from '../../../generators/fraction/fraction-product-fixtures.ts';
+import {formatProductOperand, isValidFractionProduct, isValidFractionProductRelation} from './fraction-product-helpers.ts';
 
 const generator = new FractionProductsGenerator();
 const profiles = ['fraction-partition-proper', 'fraction-partition-improper',
@@ -54,5 +54,22 @@ describe('fraction product view contract', () => {
         expect(data.operandForm).toBe('mixed-numbers');
         expect(formatProductOperand(data.multiplier)).toMatch(/^\d+ \d+\/\d+$/);
         expect(formatProductOperand(data.quantity)).toMatch(/^\d+ \d+\/\d+$/);
+    });
+
+    it('requires the derivation subtotal only in its own family and rejects smuggled coarse evidence', () => {
+        const fine = sample('fraction-partition-improper'), relation = productRelationFixture(fine);
+        expect(isValidFractionProduct(fine)).toBe(true);
+        expect(isValidFractionProductRelation(relation)).toBe(true);
+        expect(isValidFractionProduct(relation)).toBe(false);
+        expect(isValidFractionProductRelation(fine)).toBe(false);
+        expect(isValidFractionProduct({...fine, partition: {...fine.partition, scaledQuantity: undefined}})).toBe(false);
+        expect(isValidFractionProduct({...fine, partition: {...fine.partition, scaledQuantity: {numerator: 999, denominator: 1}}})).toBe(false);
+        expect(isValidFractionProductRelation({...relation, scaledQuantity: undefined})).toBe(false);
+        expect(isValidFractionProductRelation({...relation, partition: {...relation.partition, scaledQuantity: undefined}})).toBe(false);
+        expect(isValidFractionProductRelation({...relation, partition: undefined})).toBe(false);
+        for (const invalid of [undefined, null, {}, 1, 'fraction-product']) {
+            expect(isValidFractionProduct(invalid)).toBe(false);
+            expect(isValidFractionProductRelation(invalid)).toBe(false);
+        }
     });
 });
