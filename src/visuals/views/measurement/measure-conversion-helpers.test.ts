@@ -4,6 +4,7 @@ import {conversionValueRangeProfiles, conversionValueTuples} from '../../../gene
 import {MeasurementUnitEquivalencesGenerator} from '../../../generators/measurement/measurement-unit-equivalences/generator.ts';
 import {MeasurementUnitScaleGenerator} from '../../../generators/measurement/measurement-unit-scale/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {MeasurementConversionPairId, MeasurementConversionValuesProblem} from '../../../types/problems.ts';
 import {isValidUnitEquivalenceSequence} from '../../helpers/measurement-conversion.ts';
 import {
@@ -37,7 +38,7 @@ describe('measure-conversion validation', () => {
         const combinations = new Set<string>();
         for (let seed = 0; seed < 100; seed++) {
             setSeed(seed);
-            const data = segmentGenerator.generate({}).data;
+            const data = segmentGenerator.generate({range: createCanonicalNumericRange(seed % 2 ? 20 : 10)}).data;
             combinations.add(`${data.largeUnitCount}:${data.unitsPerLarge}`);
             expect(isValidGenericUnitScaleRelation(data)).toBe(true);
         }
@@ -52,6 +53,7 @@ describe('measure-conversion validation', () => {
             {smallUnitCount: 9}, {smallUnitCount: 8.5}
         ]) expect(isValidGenericUnitScaleRelation({...valid, ...change})).toBe(false);
         expect(isValidGenericUnitScaleRelation(null as never)).toBe(false);
+        expect(isValidGenericUnitScaleRelation({...valid, kind: 'generic-unit-count-relation'} as never)).toBe(false);
     });
 
     it('formats hundredths and unit grammar without floating-point rounding', () => {

@@ -1,3 +1,3 @@
-- **Identity:** An equivalent measurement or equal-length partition asks the learner to derive a qualitative or exact relation between larger and smaller units.
+- **Identity:** An equivalent measurement asks the learner to derive a one-unit relation; a generic equal-length partition asks for the scale factor and which unit size needs more units.
 - **Measurement scales:** A measurement-scale scope is evidenced by visible quantity values and named units. It does not require a physical measuring instrument.
 - **Modes:** Question Mode withholds the relational conclusion or one-unit factor; Solution Mode reveals that result and the derivation from the visible equivalent quantities.

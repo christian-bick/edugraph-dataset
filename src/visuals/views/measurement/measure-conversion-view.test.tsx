@@ -126,7 +126,10 @@ describe('fixed measurement conversion tasks', () => {
                 const data = {largeUnitCount, unitsPerLarge, smallUnitCount: largeUnitCount * unitsPerLarge};
                 const question = visible(renderDerivation(data, false));
                 const solution = visible(renderDerivation(data, true));
-                expect(question).toContain('Which unit size needs more units?');
+                expect(question).toContain('Find the scale factor from large-unit counts to small-unit counts');
+                expect(question).toContain('explain which unit size needs more units.');
+                expect(question).toContain(`${largeUnitCount} × □ = ${data.smallUnitCount}`);
+                expect(question).not.toContain(`${largeUnitCount} × ${unitsPerLarge} = ${data.smallUnitCount}`);
                 expect(question).toContain('Conclusion: ______ units need a larger count.');
                 expect(question).not.toContain('Smaller units need a larger count:');
                 expect(solution).toContain(`Smaller units need a larger count: ${data.smallUnitCount} &gt; ${largeUnitCount}.`);

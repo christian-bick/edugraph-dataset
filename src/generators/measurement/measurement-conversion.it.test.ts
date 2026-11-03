@@ -11,7 +11,8 @@ const expectedViews = new Map([
         'measure-conversion-derivation', 'measure-conversion-to-smaller', 'measure-conversion-table'
     ]],
     ['measurement-conversion-values', ['measure-conversion-bidirectional']],
-    ['measurement-unit-scale', ['measure-conversion-derivation', 'measure-unit-scale-relation']]
+    ['measurement-unit-scale', ['measure-conversion-derivation']],
+    ['measurement-unit-count-relations', ['measure-unit-scale-relation']]
 ]);
 const viewPaths = new Map([
     ['measure-conversion-derivation', 'measurement/measure-conversion-derivation'],
@@ -37,7 +38,7 @@ describe('unit-relation payload contracts', () => {
         const viewIds = new Set([...expectedViews.values()].flat());
         const generators = generatorCatalog.filter(generator => expectedViews.has(generator.generatorId));
         const views = viewCatalog.filter(view => viewIds.has(view.viewId));
-        expect(generators).toHaveLength(3);
+        expect(generators).toHaveLength(4);
         expect(views).toHaveLength(5);
 
         // No ontology precondition is needed to distinguish these payload families.
@@ -63,7 +64,8 @@ describe('unit-relation payload contracts', () => {
         const [[generators, views], targets] = await Promise.all([
             loadConversionCatalog(), loadMatchingTargets('ccss')
         ]);
-        const conversionGenerators = generators.filter(generator => generator.generatorId !== 'measurement-unit-scale');
+        const conversionGenerators = generators.filter(generator =>
+            ['measurement-unit-equivalences', 'measurement-conversion-values'].includes(generator.generatorId));
         const families = [
             '4.MD.A.1-relative-unit-sizes',
             '4.MD.A.1-convert-larger-to-smaller',

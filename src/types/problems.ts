@@ -1701,6 +1701,17 @@ export type GenericUnitScaleRelationProblem = {
     unitsPerLarge: number;
 };
 
+/**
+ * Equal-length partitions with positive integer largeUnitCount in 3..6 and
+ * smallUnitCount equal to two or three times that count. The payload supplies
+ * only the two counts, without a numerical units-per-large factor.
+ */
+export type GenericUnitCountRelationProblem = {
+    kind: 'generic-unit-count-relation';
+    largeUnitCount: number;
+    smallUnitCount: number;
+};
+
 export type MeasurementUnitEquivalence = {
     largerValue: number;
     smallerValue: number;
@@ -5634,7 +5645,7 @@ export interface ViewTypeMap {
     'measure-length-decimal': MeasurementStandardProblem;
     'measure-length-decimal-drawing': MeasurementStandardProblem;
     'measure-select-tool': MeasurementToolSelectionProblem;
-    'measure-unit-scale-relation': GenericUnitScaleRelationProblem;
+    'measure-unit-scale-relation': GenericUnitCountRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;
     'measure-conversion-to-smaller': UnitEquivalenceSequenceProblem;
     'measure-conversion-bidirectional': MeasurementConversionValuesProblem;

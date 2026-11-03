@@ -3,7 +3,7 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Current direction, 2026-11-03: retain the pinned ontology's inclusive minimum/maximum definitions.
+Current direction, 2026-11-04: retain the pinned ontology's inclusive minimum/maximum definitions.
 The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax and calculation
 contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
 records the implementation and source verification scope. The approved Q6
@@ -11,17 +11,18 @@ records the implementation and source verification scope. The approved Q6
 [fraction-product separation](#q7-fraction-product-contracts) are also implemented. Q8 retains
 the existing producer with [shared part-count ranges](#q8-fraction-equivalence-part-counts).
 Q9 separates [fractional-scale relations and whole-number analogies](#q9-fractional-scale-relation-and-analogy-contracts).
+Q10 separates [generic unit counts and scale-factor derivation](#q10-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8 and Q9 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7, Q8, Q9 and Q10 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,706 complete selections**, with **50 range-presence
-omissions** remaining. The
+**1,528 normalized targets / 2,000 routes and 4,710 complete selections**, with **48 range-presence
+omissions across four producers** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records7 remaining contract/policy questions, including two already-labelled precision topics.
+records six remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -517,6 +518,102 @@ cells, exact source replay, nominal/runtime boundaries and malformed mathematica
 
 Evidence is under `temp/range-decisions/batch5-q9/` and
 `temp/spec-plans/ccss/range-q9-2026-11-04/`.
+
+## Q10 generic unit-count and scale-factor contracts
+
+Approved 2026-11-04 after Q9, from `ed4a821d`. Keep count comparison separate from
+deriving the scale factor. For five large units and ten small units, comparison uses the
+two counts and supports lower5/upper10; factor derivation also requires two and therefore
+has no positive lower descriptor. Preserve every original count pair and both current
+Grade 2 source routes.
+
+| Production consumer | Mathematical contract and adoption | Preservation check |
+| --- | --- | --- |
+| `measure-unit-scale-relation` in `measure` | Adopt `measurement-unit-count-relations` / `GenericUnitCountRelationProblem`, with nominal kind and large/small counts only | Both modes and all four range cells; original comparison content unchanged |
+| Generic arm of `measure-conversion-derivation` in `measurement` | Retain `measurement-unit-scale` / `GenericUnitScaleRelationProblem`, including the factor | Both cells; clarify only Question Mode with an explicit factor request and `large count × □ = small count`; retain the qualitative conclusion and unchanged Solution |
+| Named-unit derivation, conversion-to-smaller and conversion-table arms; numeric bidirectional conversion | Preserve `UnitEquivalenceSequenceProblem`, `MeasurementConversionValuesProblem`, all existing producer/view pairs and the complete shared union | Every current route/configuration plus valid future unit pairs and mathematical arms; identical rendering for identical data |
+
+Establish the new nominal type, comparison `ViewTypeMap` entry and minimum producing/consuming
+adoption serially through a passing typecheck before independent role work (IMPL-8). Keep
+`MeasurementConversionProblem = GenericUnitScaleRelationProblem | UnitEquivalenceSequenceProblem`
+unchanged. The shared derivation must not reject a valid named-unit arm to simplify the generic
+range contract (SPEC-G3, IMPL-G6, IMPL-V11). No target or ontology changes are needed.
+
+Counts and their equal-length relation are canonical mathematics; the factor-bearing family
+also supplies the exact integer count multiplier (SPEC-11, IMPL-G8). The comparison projection
+does not recover or render that multiplier. The derivation Question currently asks only for the
+qualitative comparison although its Solution includes the factor. Make that already-shown
+factor a requested unknown without revealing it, adding no new mathematical quantity one.
+The current generic derivation Solution and all named-unit projections stay unchanged.
+
+The eight native frames select the large count uniformly from 3..6, then factor uniformly
+from 2..3. Preserve two draws and the exact conditional law within each preselected cell;
+in a cell containing large count five once and six twice, the first-draw masses are 1/3 and
+2/3. The accepted range-selection direction permits changed global mixture and seeded outputs.
+Comparison has three states in lower0/upper10, one in lower0/upper20, one in lower5/upper10
+and three in lower5/upper20. Derivation has four upper10 and four upper20 states, all with
+no positive lower. Zero here denotes an omitted positive lower descriptor, not a zero value.
+
+Capture the clean baseline before source mutations, including every shared named-unit arm.
+Then verify conditional support, direct/planned configurations, exact receipt replay, PRNG
+continuation, native rendering and unchanged shared controls. Canonical dataset regeneration
+and independent VQA remain separate acceptance gates.
+
+### Q10 source verification
+
+The serial shared-type/consumer gate passes before independent verification (IMPL-8).
+Both source target/view lineages remain: comparison migrates to
+`measurement-unit-count-relations`, while factor derivation retains `measurement-unit-scale`.
+Matching records exactly one approved producer-pair substitution and one changed factor-generation
+plan, with no target additions/removals, claim edits, disposition changes or unmatched targets.
+Generic selections grow 2→6: four count-comparison cells and two factor-derivation cells.
+Global source coverage remains 1,528 normalized targets / 2,000 routes, with 4,710 complete selections.
+
+The source dependency audit uses an empty dataset snapshot. It closes both Q10 range omissions,
+leaving 48 across four producers. Non-range omissions, conflicts, contract errors, incomplete
+tuples, invalid contexts and pending/invalid inference remain zero; all 119 existing inference
+selections resolve exhaustively. Six decision topics remain, including the same two precision
+topics covering 34 already-labelled routes.
+
+The independent finite oracle preserves all eight original count pairs in both families:
+16 payload projections across six cells. Twenty-four exhaustive sampler-interval proofs establish
+the exact uniform conditional probabilities. All states remain reachable in 39 seeded draws,
+with exact two-draw PRNG continuation. All six generic selections pass 48 planned draws,
+direct resolution and exact receipt replay. The complete shared-consumer union retains all
+49 named-unit routes / 80 selections, with identical configurations, labels, semantic plans,
+receipts, payloads and PRNG continuation across 640 protected draws. Operational matching input
+hashes refresh with source provenance; the named-control semantic plan hashes remain unchanged.
+
+All 1,280 protected named-unit source renderings and all 336 renderings of the 56 native
+named equivalence sequences are byte-identical. For the eight generic native pairs, all
+16 comparison renderings and eight factor-derivation Solutions remain byte-identical; only
+the eight derivation Questions receive the approved factor request and `large count × □ = small count`
+scaffold. The original generic source controls likewise retain 24 renderings and clarify only
+their eight derivation Questions. No named-unit arm or comparison task changes.
+
+Native browser verification covers all six generic selections plus five representative named-unit
+control selections across all five leaves: 22 Question/Solution images, each captured twice
+with identical bytes (44 captures), without browser errors or error cards. This is source smoke
+verification, separate from canonical dataset regeneration or independent VQA acceptance.
+
+Focused coverage passes all 111 tests across ten files. Both generators, the comparison leaf,
+the shared conversion renderer and its validation helper have 100% statement / 100% branch
+coverage. The mathematical domain has 97.14% / 96.77%; overall affected-code coverage is
+99.37% / 99.4%, with 100% function coverage. The unchanged coverage gate passes all six
+affected files, without exclusions, timeout changes or threshold changes. Final TypeScript
+revalidation also passes after the native-entrypoint mount/reused-root test.
+
+The first five source stages of full `npm run check` pass, including types, generator/view
+contracts, labels, documentation and source standards. Only its two stored-artifact stages fail
+on the unchanged local 1,944-row dataset: missing recorded generation plans/receipts fail split
+integrity, and strict annotation validation retains 4,006 existing failures. That snapshot has
+1,396 eligible rows and 2,324 missing annotation-facet assessments, with zero conflicts or
+incomplete tuples. These are existing artifact limitations, not source failures; canonical
+regeneration and independent VQA acceptance remain unclaimed.
+
+Evidence is under `temp/range-decisions/batch6-q10/` (`baseline-summary.json`,
+`verification-after.json`, `source-audit.json` and `renders/`) and
+`temp/spec-plans/ccss/range-q10-2026-11-04/`.
 
 ## Accepted direction
 

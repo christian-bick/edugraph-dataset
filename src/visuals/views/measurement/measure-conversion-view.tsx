@@ -117,7 +117,10 @@ const GenericUnitScale = ({data, isSolutionView}: {
                         </div>
                     </>
                 ) : (
-                    <div className="font-bold">Conclusion: ______ units need a larger count.</div>
+                    <>
+                        <div className="font-mono text-base font-bold">{large} × □ = {small}</div>
+                        <div className="font-bold">Conclusion: ______ units need a larger count.</div>
+                    </>
                 )}
             </div>
         </>
@@ -364,7 +367,9 @@ export const MeasureConversionDerivationView = ({payload}: {
         }
         return (
             <ConversionFrame title="Derive a unit-size relation"
-                prompt="The same length is measured with large units and small units. Which unit size needs more units?">
+                prompt={payload.isSolutionView
+                    ? 'The same length is measured with large units and small units. Which unit size needs more units?'
+                    : 'Find the scale factor from large-unit counts to small-unit counts, and explain which unit size needs more units.'}>
                 <GenericUnitScale data={data} isSolutionView={payload.isSolutionView} />
             </ConversionFrame>
         );

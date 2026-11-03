@@ -52,7 +52,8 @@ export const isValidMeasurementConversionValues = (data: MeasurementConversionVa
     });
 };
 
-export const isValidGenericUnitScaleRelation = (data: GenericUnitScaleRelationProblem): boolean => Boolean(data)
+export const isValidGenericUnitScaleRelation = (data: GenericUnitScaleRelationProblem): boolean => typeof data === 'object'
+    && data !== null && !('kind' in data)
     && Number.isSafeInteger(data.largeUnitCount)
     && data.largeUnitCount >= 3
     && data.largeUnitCount <= 6

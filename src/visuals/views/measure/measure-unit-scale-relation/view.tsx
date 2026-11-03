@@ -17,16 +17,16 @@ function UnitRow({count, small}: {count: number; small: boolean}) {
     );
 }
 
-const MeasureUnitScaleRelationCore = ({config: _config, payload}: CoreProps) => {
+export const MeasureUnitScaleRelationCore = ({config: _config, payload}: CoreProps) => {
     const data = payload.problem.data;
     validateProblemData('measure-unit-scale-relation', data, [
-        'largeUnitCount',
-        'smallUnitCount',
-        'unitsPerLarge'
+        'kind', 'largeUnitCount', 'smallUnitCount'
     ]);
     if (
-        data.smallUnitCount !== data.largeUnitCount * data.unitsPerLarge
-        || data.unitsPerLarge <= 1
+        data.kind !== 'generic-unit-count-relation' || 'unitsPerLarge' in data
+        || !Number.isSafeInteger(data.largeUnitCount) || data.largeUnitCount < 3 || data.largeUnitCount > 6
+        || !Number.isSafeInteger(data.smallUnitCount)
+        || data.smallUnitCount !== data.largeUnitCount * 2 && data.smallUnitCount !== data.largeUnitCount * 3
     ) {
         throw new ViewValidationError('measure-unit-scale-relation', 'Expected equivalent unit partitions of one length.');
     }
