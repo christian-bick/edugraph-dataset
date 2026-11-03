@@ -13,12 +13,6 @@ const relationProfiles = [
     [[Scope.FractionNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient'],
     [[Area.Equation, Scope.IntegerDividend, Scope.IntegerDivisor,
         Scope.FractionQuotient, Scope.NumbersWithoutNegatives], 'whole-sharing-equation'],
-    [[Scope.FractionDividend, Scope.IntegerDivisor,
-        Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-dividend-basic'],
-    [[Area.Multiplication, Scope.FractionDividend, Scope.IntegerDivisor,
-        Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-dividend-inverse'],
-    [[Area.Equation, Scope.FractionDividend, Scope.IntegerDivisor,
-        Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-dividend-equation'],
     [[Scope.IntegerDividend, Scope.FractionDivisor,
         Scope.UnitFractions, Scope.NumbersWithoutNegatives], 'unit-divisor-basic'],
     [[Area.Multiplication, Scope.IntegerDividend, Scope.FractionDivisor,
@@ -31,9 +25,7 @@ const relationProfiles = [
 // Integer presence does not classify the necessarily required quotient as integral.
 // Keep the original bundles as same-value aliases so unchanged requests remain exact.
 const canonicalProfiles = relationProfiles.map(([labels, value]) => [
-    labels.some(label => label === Scope.FractionDividend)
-        ? [...labels, Scope.NumbersWithoutZero]
-        : value === 'whole-sharing-equation'
+    value === 'whole-sharing-equation'
             ? [...labels, Scope.IntegerNumbers, Scope.TwoOperands, Scope.SingleDigitLargestOperand] : labels,
     value
 ] as const);
@@ -45,8 +37,7 @@ const zeroAbsenceAliases = [...new Map([...canonicalProfiles, ...relationProfile
     .map(entry => [JSON.stringify([...entry[0]].sort()), entry])).values()];
 const exactProfile = selectExactLabelSetMap([
     ...canonicalProfiles,
-    ...relationProfiles.filter(([labels, value]) => labels.some(label => label === Scope.FractionDividend)
-        || value === 'whole-sharing-equation'),
+    ...relationProfiles.filter(([, value]) => value === 'whole-sharing-equation'),
     ...zeroAbsenceAliases,
     // These broad requests already select fraction-as-quotient; preserve that choice.
     [[Scope.NumbersWithoutZero], 'fraction-as-quotient'],
@@ -97,8 +88,7 @@ export const spec: GeneratorSpec = {
             const role = quotientRangeRole([Scope.FractionNumbers, Scope.FractionDividend, Scope.IntegerDividend,
                 Scope.IntegerDivisor, Scope.FractionDivisor].filter(selected));
             const upper = quotientRangeMappings.find(([label]) => selected(label))?.[1];
-            return !!role && (role === 'unit-dividend' ? upper === undefined
-                : upper !== undefined && quotientUpperBounds(role, selected(Scope.NumbersWithZero)).includes(upper));
+            return !!role && upper !== undefined && quotientUpperBounds(role, selected(Scope.NumbersWithZero)).includes(upper);
         })]
 };
 
@@ -109,7 +99,6 @@ export const FractionQuotientModelGeneratorSchema = {
         Scope.FractionNumbers,
         Scope.IntegerDividend,
         Scope.IntegerDivisor,
-        Scope.FractionDividend,
         Scope.FractionDivisor,
         Scope.FractionQuotient,
         Scope.IntegerNumbers,

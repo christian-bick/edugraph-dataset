@@ -5,7 +5,8 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import {FractionDivisionRelationsGenerator} from '../../../generators/fraction/fraction-division-relations/generator.ts';
-import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
+import {FractionQuotientFixtureGenerator as FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
+import {sharingFixture} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
 import {FractionQuotientBody, type FractionQuotientTask} from './fraction-quotient-view.tsx';
 import {spec as modelSpec} from './fractions-division-model-construction/spec.ts';
 import {spec as executionSpec} from './fractions-general-division-execution/spec.ts';
@@ -163,8 +164,9 @@ describe('general fraction division leaf contracts', () => {
                 for (const id of legacyLeafIds) {
                     for (const isSolutionView of [false, true]) {
                         const task = id.replace('fractions-', '') as FractionQuotientTask;
-                        const original = renderToStaticMarkup(<FractionQuotientBody data={data} task={task} isSolutionView={isSolutionView} />);
-                        expect(render(id, data, isSolutionView)).toBe(original);
+                        const projected = ['fractions-division-execution', 'fractions-division-interpretation'].includes(id) ? data : sharingFixture(data);
+                        const original = renderToStaticMarkup(<FractionQuotientBody data={projected} task={task} isSolutionView={isSolutionView} />);
+                        expect(render(id, projected, isSolutionView)).toBe(original);
                         if (id === 'fractions-division-execution') {
                             // Even scalar zero retains a proportional one-meter reference bar.
                             // The empty dividend text alone would not evidence BarModel.

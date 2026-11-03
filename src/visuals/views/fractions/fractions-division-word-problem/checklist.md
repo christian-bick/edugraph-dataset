@@ -1,2 +1,2 @@
-- **Identity:** A real-world sharing, measured-group, or missing-rectangle-side story supplies the division quantities in prose and asks for the corresponding quotient with units.
-- **Modes:** Question Mode withholds the solved equation and unit-bearing answer. Solution Mode shows a coherent supporting model, original division equation, exact quotient, and contextual answer.
+- **Identity:** A real-world sharing or measured-group story supplies the division quantities in prose and asks for the corresponding quotient with units. A unit-fraction sharing model represents the given fractional amount divided among recipients.
+- **Modes:** Question Mode withholds the solved equation and unit-bearing answer. Solution Mode shows a coherent supporting model, original division equation, exact quotient, and contextual answer. When a unit-sharing multiplication check is requested, its result is withheld in Question Mode and completed in Solution Mode.

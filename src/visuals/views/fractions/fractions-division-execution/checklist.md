@@ -1,2 +1,2 @@
-- **Identity:** The learner calculates the missing quotient from the original division expression and a countable equal-part model.
+- **Identity:** The learner calculates the missing quotient from the original division expression and a countable equal-part model. A unit-fraction dividend uses fine parts of the same one-meter whole.
 - **Modes:** Question Mode leaves the quotient blank while retaining the operands and partition. Solution Mode gives the exact quotient and relates it to the visible shares or groups.

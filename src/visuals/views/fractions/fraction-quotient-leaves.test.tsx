@@ -3,8 +3,9 @@ import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
-import type {FractionQuotientProblem} from '../../../types/problems.ts';
+import {FractionQuotientFixtureGenerator as FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
+import {sharingFixture} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
+import type {FractionPartitionQuotientProblem as FractionQuotientProblem} from '../../../types/problems.ts';
 
 const leafIds = [
     'fractions-quotient-interpretation', 'fractions-division-interpretation',
@@ -43,23 +44,21 @@ afterAll(() => vi.unstubAllGlobals());
 
 const render = (id: LeafId, data: FractionQuotientProblem, isSolutionView: boolean) =>
     renderToStaticMarkup(createElement(cores[id], {payload: {
-        problem: {type: 'fraction', data, labels: []}, viewId: id,
+        problem: {type: 'fraction', data: ['fractions-division-story-creation', 'fractions-division-inverse-explanation', 'fractions-division-word-problem'].includes(id) ? sharingFixture(data) : data, labels: []}, viewId: id,
         targetLabels: [], isSolutionView, seed: 1
     }}));
 
 describe('fraction quotient leaf contracts', () => {
-    it('accepts all eight mathematical profiles in all six leaves and both modes', () => {
+    it.each(profiles)('accepts %s in its correct family in every leaf and both modes', relationProfile => {
         const generator = new FractionQuotientModelGenerator();
-        for (const relationProfile of profiles) {
-            for (let seed = 0; seed < 12; seed++) {
-                setSeed(`fraction-quotient-leaf-${relationProfile}-${seed}`);
-                const numericProfile = relationProfile === 'fraction-as-quotient' ? seed % 2 ? 'proper' : 'improper'
-                    : relationProfile.startsWith('unit-dividend-') ? 'nonzero' : seed % 2 ? 'zero' : 'nonzero';
-                const data = generator.generate({range: quotientFixtureRange(relationProfile, numericProfile), relationProfile, numericProfile}).data;
-                for (const id of leafIds) {
-                    expect(() => render(id, data, false)).not.toThrow();
-                    expect(() => render(id, data, true)).not.toThrow();
-                }
+        for (let seed = 0; seed < 12; seed++) {
+            setSeed(`fraction-quotient-leaf-${relationProfile}-${seed}`);
+            const numericProfile = relationProfile === 'fraction-as-quotient' ? seed % 2 ? 'proper' : 'improper'
+                : relationProfile.startsWith('unit-dividend-') ? 'nonzero' : seed % 2 ? 'zero' : 'nonzero';
+            const data = generator.generate({range: quotientFixtureRange(relationProfile, numericProfile), relationProfile, numericProfile}).data;
+            for (const id of leafIds) {
+                expect(() => render(id, data, false)).not.toThrow();
+                expect(() => render(id, data, true)).not.toThrow();
             }
         }
     });

@@ -1,2 +1,2 @@
-- **Identity:** A division expression and scaled model are supplied, and the learner writes a real-world story preserving the quantities, units, and division roles: sharing, measured groups, or rectangle area and sides.
+- **Identity:** A division expression and scaled model are supplied, and the learner writes a real-world story preserving the quantities, units, and sharing or measured-group roles. Unit-fraction sharing partitions the given fractional amount among recipients; when a multiplication relation accompanies it, that relation describes the same shares.
 - **Modes:** Question Mode leaves the story unwritten. Solution Mode gives a coherent story question with the same operands, units, and quotient meaning.

@@ -3026,7 +3026,6 @@ export type FractionQuotientEquationWitness = Readonly<{
 }>;
 
 type FractionQuotientCommon = Readonly<{
-    kind: 'fraction-quotient';
     /** The original operand roles are retained; dividend ÷ divisor = quotient. */
     dividend: FractionQuotientValue;
     divisor: FractionQuotientValue;
@@ -3048,7 +3047,7 @@ type FractionQuotientCommon = Readonly<{
 }>;
 
 /**
- * Three exact, Ability-neutral interpretations of division. All values are
+ * Exact, Ability-neutral whole-sharing and whole-by-unit-fraction division. All values are
  * nonnegative; divisors are nonzero. Whole counts and original unit-fraction
  * denominators are small enough to draw: whole counts are at most 6, integer
  * divisors are 1–6, unit-fraction denominators are 2–6, and explicit part
@@ -3058,9 +3057,9 @@ type FractionQuotientCommon = Readonly<{
  * In whole-by-whole, a whole units divided among b recipients gives the
  * unreduced quotient a/b, even when a is zero or divisible by b. Cutting each
  * whole into b parts gives a×b total parts and a parts per recipient.
- * In unit-fraction-by-whole, 1/b of a measured unit shared among n recipients
- * becomes n pieces of size 1/(b×n), one per recipient. In whole-by-unit-fraction,
- * n whole measured units contain n×b groups of size 1/b; n may be zero.
+ * In whole-by-unit-fraction, n whole measured units contain n×b groups of
+ * size 1/b; n may be zero. Unit-fraction dividends have separate partition
+ * and sharing contracts below.
  * These original roles and typed quantity units support sharing and group-count
  * stories without embedding task wording, a requested unknown, or answer prose.
  *
@@ -3071,7 +3070,7 @@ type FractionQuotientCommon = Readonly<{
  * optional `multiplicationWitness` records the literal numerator/denominator
  * product of quotient and divisor before reduction, equal to the dividend.
  */
-export type FractionQuotientProblem = FractionQuotientCommon & (
+export type FractionQuotientProblem = FractionQuotientCommon & Readonly<{kind: 'fraction-quotient'}> & (
     | Readonly<{
         orientation: 'whole-by-whole';
         model: Readonly<{
@@ -3081,21 +3080,6 @@ export type FractionQuotientProblem = FractionQuotientCommon & (
             partsPerWhole: number;
             totalParts: number;
             partsPerRecipient: number;
-        }>;
-        story: Readonly<{
-            material: 'ribbon' | 'rope';
-            measureUnit: 'meter';
-            recipientUnit: 'person';
-        }>;
-    }>
-    | Readonly<{
-        orientation: 'unit-fraction-by-whole';
-        model: Readonly<{
-            kind: 'unit-part-sharing';
-            wholePartitionCount: number;
-            recipientCount: number;
-            refinedPartitionCount: number;
-            sharedFineParts: number;
         }>;
         story: Readonly<{
             material: 'ribbon' | 'rope';
@@ -3118,6 +3102,29 @@ export type FractionQuotientProblem = FractionQuotientCommon & (
         }>;
     }>
 );
+
+/** One unit is partitioned into b parts and then b*n fine parts; n of the
+ * fine parts comprise the original dividend, with one allocated per recipient. */
+export type FractionUnitPartitionProblem = FractionQuotientCommon & Readonly<{
+    kind: 'fraction-unit-partition';
+    orientation: 'unit-fraction-by-whole';
+    model: Readonly<{kind: 'unit-part-sharing'; wholePartitionCount: number;
+        recipientCount: number; refinedPartitionCount: number; sharedFineParts: number}>;
+    story: Readonly<{material: 'ribbon' | 'rope'; measureUnit: 'meter'; recipientUnit: 'person'}>;
+}>;
+
+/** The GIVEN fractional amount is shared among n recipients. Its exact share
+ * is 1/(b*n), but that denominator is not an assessed whole-unit part count. */
+export type FractionUnitSharingProblem = FractionQuotientCommon & Readonly<{
+    kind: 'fraction-unit-sharing';
+    orientation: 'unit-fraction-by-whole';
+    recipientCount: number;
+    story: Readonly<{material: 'ribbon' | 'rope'; measureUnit: 'meter'; recipientUnit: 'person'}>;
+}>;
+
+export type FractionPartitionQuotientProblem = FractionQuotientProblem | FractionUnitPartitionProblem;
+export type FractionSharingQuotientProblem = FractionQuotientProblem | FractionUnitSharingProblem;
+export type FractionQuotientContent = FractionQuotientProblem | FractionUnitPartitionProblem | FractionUnitSharingProblem;
 
 export type FractionDivisionContext =
     | {
@@ -3200,7 +3207,7 @@ export type FractionDivisionRelationProblem = {
 };
 
 /** The five shared division tasks preserve the legacy producer while admitting general operands. */
-export type FractionDivisionProblem = FractionQuotientProblem | FractionDivisionRelationProblem;
+export type FractionDivisionProblem = FractionQuotientContent | FractionDivisionRelationProblem;
 
 /** Positive exact rational value; original operand forms need not be reduced. */
 export type FractionProductValue = Readonly<{
@@ -5720,16 +5727,16 @@ export interface ViewTypeMap {
     'fractions-compare-models': FractionComparisonProblem;
     'fractions-benchmark-estimate': FractionBenchmarkArithmeticProblem;
     'fractions-benchmark-reasonableness': FractionBenchmarkArithmeticProblem;
-    'fractions-quotient-interpretation': FractionQuotientProblem;
-    'fractions-division-interpretation': FractionQuotientProblem;
+    'fractions-quotient-interpretation': FractionPartitionQuotientProblem;
+    'fractions-division-interpretation': FractionPartitionQuotientProblem;
     'fractions-general-division-interpretation': FractionDivisionRelationProblem;
-    'fractions-division-execution': FractionQuotientProblem;
+    'fractions-division-execution': FractionPartitionQuotientProblem;
     'fractions-general-division-execution': FractionDivisionRelationProblem;
-    'fractions-division-story-creation': FractionQuotientProblem;
+    'fractions-division-story-creation': FractionSharingQuotientProblem;
     'fractions-general-division-story-creation': FractionDivisionRelationProblem;
-    'fractions-division-inverse-explanation': FractionQuotientProblem;
+    'fractions-division-inverse-explanation': FractionSharingQuotientProblem;
     'fractions-general-division-inverse-explanation': FractionDivisionRelationProblem;
-    'fractions-division-word-problem': FractionQuotientProblem;
+    'fractions-division-word-problem': FractionSharingQuotientProblem;
     'fractions-general-division-word-problem': FractionDivisionRelationProblem;
     'fractions-division-model-construction': FractionDivisionRelationProblem;
     'fractions-product-partition-interpretation': FractionProductProblem;

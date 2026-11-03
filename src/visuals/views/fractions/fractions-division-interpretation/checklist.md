@@ -1,2 +1,2 @@
-- **Identity:** The original division operands and a consistently scaled model are visible; the learner interprets the quotient as a share size, a quantity of equal groups, or a rectangle side.
-- **Modes:** Question Mode withholds the quotient's meaning. Solution Mode explains the share size, groups-worth, or side length and gives the quotient with its contextual unit.
+- **Identity:** The original division operands and a consistently scaled model are visible; the learner interprets the quotient as a share size or quantity of equal groups. A unit-fraction dividend retains the refinement of the same one-meter whole.
+- **Modes:** Question Mode withholds the quotient's meaning. Solution Mode explains the shares or groups and gives the quotient with its contextual unit.

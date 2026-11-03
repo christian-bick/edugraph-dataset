@@ -2,7 +2,7 @@ import {createRoot} from 'react-dom/client';
 import type {ViewRenderPayload} from '../../../../types/ml-engine.ts';
 import {validateProblemData, ViewValidationError} from '../../../helpers/validation.ts';
 import {withConfig} from '../../withConfig.tsx';
-import {isValidFractionQuotient} from '../fraction-quotient-helpers.ts';
+import {isValidFractionPartitionQuotient} from '../fraction-quotient-helpers.ts';
 import {FractionQuotientBody} from '../fraction-quotient-view.tsx';
 import {FractionsQuotientInterpretationViewSchema} from './spec.ts';
 import '../../../../tailwind.css';
@@ -14,7 +14,7 @@ export const FractionsQuotientInterpretationCore = ({payload}: {
 }) => {
     const {data} = payload.problem;
     validateProblemData(VIEW_ID, data, ['kind', 'orientation', 'dividend', 'divisor', 'quotient', 'inverse', 'model', 'story']);
-    if (!isValidFractionQuotient(data)) {
+    if (!isValidFractionPartitionQuotient(data)) {
         throw new ViewValidationError(VIEW_ID, 'Division, model, and inverse evidence must agree exactly.');
     }
     return <FractionQuotientBody data={data} isSolutionView={payload.isSolutionView} task="quotient-interpretation" />;

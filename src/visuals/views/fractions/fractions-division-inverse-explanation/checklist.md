@@ -1,2 +1,2 @@
-- **Identity:** The original division and its quotient are shown; the learner explains how multiplying the quotient by the original divisor rebuilds the dividend.
+- **Identity:** The original division and its quotient are shown; the learner explains how multiplying the quotient by the original divisor rebuilds the dividend. For unit-fraction sharing, the strip represents the given fractional amount divided among recipients.
 - **Modes:** Question Mode leaves the reconstruction and reason blank. Solution Mode shows the exact inverse multiplication and links the groups or shares to the original amount.

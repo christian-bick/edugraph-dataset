@@ -14,8 +14,6 @@ import {FractionQuotientModelGenerator} from './generator.ts';
 import {fractionNotationPairs, numericProfiles, resolveNumericProfile} from './numeric-profiles.ts';
 import {FractionQuotientModelGeneratorSchema as schema, spec} from './spec.ts';
 
-const unitDividend = [Scope.FractionDividend, Scope.IntegerDivisor, Scope.UnitFractions,
-    Scope.NumbersWithoutNegatives];
 const unitDivisor = [Scope.IntegerDividend, Scope.FractionDivisor, Scope.UnitFractions,
     Scope.NumbersWithoutNegatives];
 const wholeSharing = [Area.Equation, Scope.IntegerDividend, Scope.IntegerDivisor,
@@ -25,9 +23,6 @@ const requestCases = [
     [[Scope.NumbersWithoutZero], 'fraction-as-quotient', ['proper', 'improper']],
     [[Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero], 'fraction-as-quotient', ['proper', 'improper']],
     [wholeSharing, 'whole-sharing-equation', ['zero', 'nonzero']],
-    [unitDividend, 'unit-dividend-basic', ['nonzero']],
-    [[Area.Multiplication, ...unitDividend], 'unit-dividend-inverse', ['nonzero']],
-    [[Area.Equation, ...unitDividend], 'unit-dividend-equation', ['nonzero']],
     [unitDivisor, 'unit-divisor-basic', ['zero', 'nonzero']],
     [[Area.Multiplication, ...unitDivisor], 'unit-divisor-inverse', ['zero', 'nonzero']],
     [[Area.Equation, ...unitDivisor], 'unit-divisor-equation', ['zero', 'nonzero']]
@@ -69,11 +64,11 @@ describe('fraction quotient finite numeric profiles', () => {
         }
     });
 
-    it('retains thirteen original completions while adding twenty-six range bindings', () => {
+    it('retains all ten non-unit-dividend completions and twenty-three range bindings', () => {
         const resolved = planned([]);
-        expect(resolved).toHaveLength(26);
-        expect(new Set(resolved.map(item => `${item.config.relationProfile}:${item.config.numericProfile}`)).size).toBe(13);
-        expect(new Set(resolved.map(item => item.config.relationProfile)).size).toBe(8);
+        expect(resolved).toHaveLength(23);
+        expect(new Set(resolved.map(item => `${item.config.relationProfile}:${item.config.numericProfile}`)).size).toBe(10);
+        expect(new Set(resolved.map(item => item.config.relationProfile)).size).toBe(5);
     });
 
     it('partitions every original notation pair exactly once with its original conditional probability', () => {
@@ -153,7 +148,7 @@ describe('fraction quotient finite numeric profiles', () => {
     it('rejects profile combinations that change original operand roles or make unsupported zero claims', () => {
         const generator = new FractionQuotientModelGenerator();
         expect(() => generator.generate({range: quotientFixtureRange('fraction-as-quotient', 'zero'), relationProfile: 'fraction-as-quotient', numericProfile: 'zero'})).toThrow(/incompatible/);
-        expect(() => generator.generate({range: quotientFixtureRange('unit-dividend-basic', 'zero'), relationProfile: 'unit-dividend-basic', numericProfile: 'zero'})).toThrow(/incompatible/);
+        expect(() => generator.generate({range: quotientFixtureRange('unit-dividend-basic', 'zero'), relationProfile: 'unit-dividend-basic', numericProfile: 'zero'} as never)).toThrow(/Unsupported relation profile/);
         expect(() => generator.generate({range: quotientFixtureRange('unit-divisor-basic', 'proper'), relationProfile: 'unit-divisor-basic', numericProfile: 'proper'})).toThrow(/incompatible/);
     });
 });

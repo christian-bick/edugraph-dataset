@@ -6,18 +6,19 @@ Started 2026-10-31 on `codex/label-dependency-audit`, from
 Current direction, 2026-11-03: retain the pinned ontology's inclusive minimum/maximum definitions.
 The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax and calculation
 contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
-records the implementation and source verification scope.
+records the implementation and source verification scope. The approved Q6
+[partition/sharing separation](#q6-unit-fraction-division-contracts) is also implemented.
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The first Q1/Q2 decision batch also passes its focused and independent source checks.
+checks. The Q1/Q2 and Q6 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets /2,000 routes and4,645 complete selections**, with **85 range-presence
+**1,528 normalized targets /2,000 routes and4,677 complete selections**, with **69 range-presence
 omissions** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records11 remaining contract/policy questions, including two already-labelled precision topics.
+records10 remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -125,6 +126,118 @@ Evidence is under `temp/range-decisions/batch1/`: focused logs, `independent-ora
 `temp/spec-plans/ccss/range-decisions-2026-11-03/`. Canonical regeneration and independent
 Question/Solution VQA remain a separate dataset acceptance stage; stored findings and cached
 verdicts are not closed by this source batch.
+
+## Q6 unit-fraction division contracts
+
+Approved after Q1/Q2 on 2026-11-03, from `c65e754b`. Preserve sharing/inverse/story tasks
+separately from construction and interpretation of a whole's fine-part model. The current
+ontology and observability convention remain unchanged. A denominator in rational notation
+is not an independently assessed integer count; an explicitly constructed whole-part count is.
+
+The existing producer retains whole-by-whole and whole-by-unit-fraction mathematics. Two
+unit-dividend producers separate a complete one-meter partition from a fractional amount
+shared among recipients. Operands, quotient and inverse are canonical mathematics; optional
+equation/multiplication witnesses and explicit partition counts are structured evidence;
+material and measurement/recipient units are semantic context. No producer owns task wording,
+an unknown placement or answer prose (SPEC-11, IMPL-G8).
+
+| Production consumer | Existing source families | Mathematical contract and projection | Verification |
+| --- | --- | --- | --- |
+| `fractions-quotient-interpretation` | `5.NF.B.3-interpret-quotient` | Existing whole quotient; allow the fine-part family for valid future unit-dividend notation, where the denominator is explicitly interpreted as an integer divisor | Preserve notation controls; reject relation-only unit sharing |
+| `fractions-division-interpretation` | `5.NF.B.7a`, `5.NF.B.7b`, `6.NS.A.1` | Whole quotient or `FractionUnitPartitionProblem`; retain the full one-meter refinement model and quotient interpretation | Both modes, whole-part counts and all three Grade 6 relation profiles |
+| `fractions-division-execution` | `5.NF.B.7a`, `5.NF.B.7b`, `6.NS.A.1` | Whole quotient or `FractionUnitPartitionProblem`; retain model-based execution, BarModel and optional equation/inverse evidence | Withheld quotient/check unknowns in Questions; complete evidence in Solutions |
+| `fractions-division-story-creation` | `5.NF.B.7a`, `5.NF.B.7b`, `6.NS.A.1` | Whole quotient or `FractionUnitSharingProblem`; show the given fractional amount shared among recipients without constructing a refined whole | Original quantities/story demand, optional witnesses and both modes |
+| `fractions-division-inverse-explanation` | `5.NF.B.7a`, `5.NF.B.7b`, `6.NS.A.1` | Whole quotient or `FractionUnitSharingProblem`; preserve exact multiplication reconstruction and recipient shares | Question supplies quotient but withholds reconstruction/reason; exact Solution check |
+| `fractions-division-word-problem` | `5.NF.B.3`, `5.NF.B.7c`, `6.NS.A.1` | Whole quotient or `FractionUnitSharingProblem`; retain the prose-first sharing problem and contextual equation | Standalone Question, units, quotient withholding and complete Solution |
+
+The independent general-division producer and its six leaves, including
+`fractions-division-model-construction`, are outside this migration and remain negative controls.
+Each mathematical family must be accepted only by its legitimate consumer group; no range-driven
+guard may remove a valid task (SPEC-V6, SPEC-V7, IMPL-G6, IMPL-V8, IMPL-V11).
+
+Baseline: the old quotient producer has 22 routes and 104 admitted selections. Q6 accounts for
+10 routes/16 selections; the other 12 routes/88 selections are preservation controls. Capture
+matching, complete control configurations and seeded mathematics before edits. Establish the
+shared types, `ViewTypeMap` and minimum adoption in one serial transition; require a passing
+typecheck before independent role work (IMPL-8).
+
+For each basic/inverse/equation profile, the original native domain is the 25 ordered pairs
+`d,n ∈ {2,…,6}`, with each material equally likely. Preserve every pair and conditional weight.
+Fine-part counts `d×n` partition into upper5/10/20/100 with 1/7/11/6 pairs. Recipient-only
+sharing partitions into upper5/10 with 20/5 pairs. Required fractions below 1 prevent a positive
+lower descriptor in both families. Resolve the band before generation, then sample pairs uniformly
+inside that cell and choose the material with its original equal weight. Band selection changes
+the overall unit-case mixture and seeded outcomes within the previously accepted profile-sampling
+scope; the twelve non-unit routes retain their original generation behavior.
+Explicit `UnitFractions` requests default to the basic relation unless multiplication/equation
+is requested. Broader Grade 6 requests retain all three planned relation alternatives. Direct,
+unqualified extraction uses the basic default; explicit relation requests retain all three native
+profiles. These are module declarations; generic extraction and compatibility APIs are unchanged.
+The existing broad fraction-notation target still uses its whole-number producer; qualified future
+unit notation accepts the fine-part family only.
+
+The sharing story's inverse profile supplies the equivalent multiplication relation without
+adding a learner action. Its Question withholds the share; its Solution shows exact reconstruction.
+A valid future inverse word-problem profile similarly withholds/completes its multiplication
+check. Current word-problem source routes retain their contextual equation. None constructs a
+whole with `d×n` fine parts or treats a written denominator as that integer quantity.
+
+### Q6 source verification
+
+All ten unit-dividend target/view lineages migrate to the appropriate new producer, with no
+target additions, removals or claim edits. Their selections grow 16→48: 32 fine-part and 16
+recipient-sharing. The twelve other quotient routes retain all 88 selections. Global coverage
+remains 1,528 normalized targets /2,000 routes, with 4,677 complete selections.
+
+The source-only dependency audit explicitly uses an empty dataset snapshot. It closes all 16
+Q6 range omissions, leaving 69 across eight producers. Non-range omissions, conflicts, contract
+errors, incomplete tuples, invalid contexts and pending/invalid inference remain zero; all 119
+existing inference selections still resolve exhaustively. The 34 already-labelled precision
+routes remain outside the omission count.
+
+An independent baseline oracle checks every original control plan/configuration, resolved label
+set, replay receipt and PRNG continuation over 704 draws. All 1,408 legacy Question/Solution
+renderings remain byte-identical after the final renderer changes. It also checks 384 migrated
+planned draws and all 300 native unit outcomes: 25 operand pairs, two materials, three relation
+profiles and two mathematical families. These proofs preserve support and conditional weights;
+they do not claim unchanged unit-case seed outputs or global mixture.
+
+Persistent integration independently verifies the four-producer/twelve-view acceptance matrix,
+all 22 quotient routes /136 selections, 1,088 planned draws and exact replays, rational/count
+ranges, future notation compatibility, malformed payload rejection and inverse evidence. The
+shared-type transition passed its typecheck before parallel implementation proceeded (IMPL-8).
+The scoped generator/view implementation audit reports no findings.
+
+Native browser smoke verification renders 56 Question/Solution images across all six views and
+22 routes. All 112 repeated captures are byte-identical, with no browser errors or error cards.
+Representative fine-part, sharing, story and word-problem images are visually inspected for
+answer withholding, mathematical evidence and layout. This is source smoke verification;
+canonical dataset regeneration and independent Question/Solution VQA remain separate acceptance.
+
+Final TypeScript, generator/view contract, label, documentation and source standards checks pass.
+The full repository command still fails against the unchanged 1,944-row local dataset: missing
+recorded generation plans/receipts prevent split verification, and the stored-annotation gate
+reports the same 4,006 failures as before Q6. Source closure above does not close these artifact
+findings or the earlier full-suite timeouts recorded for Q1/Q2.
+
+Coverage verification separates six unchanged general-division stress cases from the affected
+checks. An untouched `c65e754b` archive reproduces the exhaustive leaf's 66.4-second runtime
+against its 30-second limit, and all five additional integration rendering timeouts against their
+original five-second limits. The final focused command excludes exactly these six cases; no test
+skip marker, timeout or coverage threshold changes. Its initial broader attempt is retained too.
+The affected quotient leaf checks now run separately for each profile with all original seeds,
+views and modes. Migration tests retain every range/replay assertion while sharing one stateless
+dependency evaluator per test instead of rebuilding its ontology indexes for each selection.
+
+Final focused coverage passes all 116 selected tests across 17 files, with exactly the six
+baseline stress cases excluded. The three generator bodies and shared mathematical helper reach
+98.64% statement /98.7% branch coverage overall: the retained quotient body has 97.29% /97.5%,
+and each new producer and the shared helper has 100% /100%. All three producers pass the
+repository's unchanged 85% statement /60% branch thresholds. This is scoped coverage acceptance,
+not a claim that the full test suite or stored dataset is accepted.
+Evidence is under `temp/range-decisions/batch2-q6/`; matching snapshots and the exact ten-pair
+migration report are under `temp/spec-plans/ccss/range-q6-2026-11-03/`. Stored rows and cached
+VQA findings are unchanged.
 
 ## Accepted direction
 

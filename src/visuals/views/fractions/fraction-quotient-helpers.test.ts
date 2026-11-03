@@ -2,8 +2,11 @@ import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotie
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
 import type {FractionQuotientProblem} from '../../../types/problems.ts';
-import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
-import {formatOriginalFraction, isValidFractionQuotient} from './fraction-quotient-helpers.ts';
+import {FractionQuotientFixtureGenerator as FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
+import {formatOriginalFraction, isValidFractionPartitionQuotient as isValidFractionQuotient} from './fraction-quotient-helpers.ts';
+import {isValidFractionQuotient as isValidLegacyQuotient, isValidFractionSharingQuotient,
+    isValidFractionUnitPartition, isValidFractionUnitSharing} from './fraction-quotient-helpers.ts';
+import {buildUnitPartitionProblem, buildUnitSharingProblem} from '../../../generators/fraction/fraction-unit-sharing-domain.ts';
 
 const generator = new FractionQuotientModelGenerator();
 const profiles = [
@@ -56,5 +59,24 @@ describe('fraction quotient view contract', () => {
     it('retains unreduced fraction notation, including integral and zero forms', () => {
         expect(formatOriginalFraction({numerator: 0, denominator: 4})).toBe('0/4');
         expect(formatOriginalFraction({numerator: 6, denominator: 3})).toBe('6/3');
+    });
+
+    it('keeps the fine and sharing contracts distinct at runtime', () => {
+        const fine = buildUnitPartitionProblem(3, 4, 'unit-dividend-equation', 'ribbon');
+        const sharing = buildUnitSharingProblem(3, 4, 'unit-dividend-inverse', 'rope');
+        expect(isValidFractionUnitPartition(fine)).toBe(true);
+        expect(isValidFractionUnitSharing(sharing)).toBe(true);
+        expect(isValidLegacyQuotient(fine)).toBe(false);
+        expect(isValidLegacyQuotient(sharing)).toBe(false);
+        expect(isValidFractionUnitPartition(sharing)).toBe(false);
+        expect(isValidFractionUnitSharing(fine)).toBe(false);
+        expect(isValidFractionQuotient(sharing)).toBe(false);
+        expect(isValidFractionSharingQuotient(fine)).toBe(false);
+        expect(isValidFractionUnitPartition({...fine, model: undefined})).toBe(false);
+        expect(isValidFractionUnitPartition({...fine, model: {...fine.model, refinedPartitionCount: 11}})).toBe(false);
+        expect(isValidFractionUnitSharing({...sharing, recipientCount: 3})).toBe(false);
+        for (const key of ['model', 'wholePartitionCount', 'refinedPartitionCount', 'sharedFineParts']) {
+            expect(isValidFractionUnitSharing({...sharing, [key]: undefined})).toBe(false);
+        }
     });
 });

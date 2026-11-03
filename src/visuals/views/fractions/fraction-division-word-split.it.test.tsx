@@ -101,6 +101,7 @@ describe('fraction division word-problem family separation', () => {
         const quotientView = views.find(candidate => candidate.viewId === quotientId)!;
         const targets = grade6Targets.filter(target => target.id.startsWith('6.NS.A.1-fraction-division-word-problems~'));
         expect(targets).toHaveLength(3);
+        const evaluator = createLabelDependencyEvaluator();
         let bindings = 0;
         for (const target of targets) {
             const result = matchTarget(target, generator, generalView);
@@ -113,7 +114,7 @@ describe('fraction division word-problem family separation', () => {
                 : target.labels.includes(Scope.FractionDividend) ? 14 : 13);
             for (const selection of selections.selections) {
                 bindings++;
-                const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
+                const evaluation = evaluator.evaluate(selection.labels);
                 expect(evaluation.conflicts).toEqual([]);
                 expect(evaluation.assessments.find(assessment => assessment.facet === 'zero')?.status).toBe('satisfied');
                 const sampleKey = `${target.id}#fraction-division-relations#${generalId}#train#question#inst:0`;
@@ -136,11 +137,11 @@ describe('fraction division word-problem family separation', () => {
         expect(bindings).toBe(38);
     }, 30_000);
 
-    it('retains all five legacy target routes with sixteen zero/nonzero range bindings', () => {
+    it('retains the three non-unit legacy target routes with fourteen zero/nonzero range bindings', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-quotient-model')!;
         const generalView = views.find(candidate => candidate.viewId === generalId)!;
         const quotientView = views.find(candidate => candidate.viewId === quotientId)!;
-        expect(quotientView.problemType).toBe('FractionQuotientProblem');
+        expect(quotientView.problemType).toBe('FractionSharingQuotientProblem');
         let tuples = 0, withZero = 0, withoutZero = 0;
         for (const target of [...grade5Targets, ...grade6Targets]) {
             const result = matchTarget(target, generator, quotientView);
@@ -154,7 +155,9 @@ describe('fraction division word-problem family separation', () => {
             }
             expect(matchTarget(target, generator, generalView)).toEqual({matched: false, reason: 'incompatible-type'});
         }
-        expect({tuples, withZero, withoutZero}).toEqual({tuples: 5, withZero: 4, withoutZero: 12});
+        // The two unit-dividend word routes migrated to the sharing producer;
+        // fraction-unit-sharing-contracts.it.test.tsx verifies those lineages.
+        expect({tuples, withZero, withoutZero}).toEqual({tuples: 3, withZero: 4, withoutZero: 10});
         const data = new FractionQuotientModelGenerator().generate({range: quotientFixtureRange('unit-divisor-equation', 'zero'), relationProfile: 'unit-divisor-equation', numericProfile: 'zero'}).data;
         const generalData = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'), operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: true, withMultiplication: false}).data;

@@ -8,7 +8,6 @@ import type {FractionQuotientModelGeneratorConfig} from './spec.ts';
 const generator = new FractionQuotientModelGenerator();
 const profiles = [
     'fraction-as-quotient', 'whole-sharing-equation',
-    'unit-dividend-basic', 'unit-dividend-inverse', 'unit-dividend-equation',
     'unit-divisor-basic', 'unit-divisor-inverse', 'unit-divisor-equation'
 ] as const;
 
@@ -91,24 +90,6 @@ describe('fraction-quotient-model exact division', () => {
                     expect(totalParts).toBe(wholeUnitCount * recipientCount);
                     expect(totalParts).toBeLessThanOrEqual(36);
                     expect(partsPerRecipient).toBe(wholeUnitCount);
-                    expect(data.story.recipientUnit).toBe('person');
-                    break;
-                }
-                case 'unit-fraction-by-whole': {
-                    const {wholePartitionCount, recipientCount,
-                        refinedPartitionCount, sharedFineParts} = data.model;
-                    expect(data.model.kind).toBe('unit-part-sharing');
-                    expect(wholePartitionCount).toBeGreaterThanOrEqual(2);
-                    expect(wholePartitionCount).toBeLessThanOrEqual(6);
-                    expect(recipientCount).toBeGreaterThanOrEqual(2);
-                    expect(recipientCount).toBeLessThanOrEqual(6);
-                    expect(data.dividend).toEqual({numerator: 1, denominator: wholePartitionCount});
-                    expect(data.divisor).toEqual({numerator: recipientCount, denominator: 1});
-                    expect(data.quotient).toEqual({numerator: 1,
-                        denominator: wholePartitionCount * recipientCount});
-                    expect(refinedPartitionCount).toBe(wholePartitionCount * recipientCount);
-                    expect(refinedPartitionCount).toBeLessThanOrEqual(36);
-                    expect(sharedFineParts).toBe(recipientCount);
                     expect(data.story.recipientUnit).toBe('person');
                     break;
                 }

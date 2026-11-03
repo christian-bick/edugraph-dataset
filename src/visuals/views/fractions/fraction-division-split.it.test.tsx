@@ -146,9 +146,12 @@ describe('supplied general division model migrations', () => {
         const generator = generators.find(candidate => candidate.generatorId === 'fraction-division-relations')!;
         const generalView = views.find(candidate => candidate.viewId === entry.newId)!;
         const quotientView = views.find(candidate => candidate.viewId === entry.oldId)!;
-        expect(quotientView.problemType).toBe('FractionQuotientProblem');
+        expect(quotientView.problemType).toBe(entry.oldId === 'fractions-division-execution'
+            || entry.oldId === 'fractions-division-interpretation'
+            ? 'FractionPartitionQuotientProblem' : 'FractionSharingQuotientProblem');
         const targets = grade6Targets.filter(target => target.id.startsWith(entry.targetPrefix));
         expect(targets).toHaveLength(3);
+        const evaluator = createLabelDependencyEvaluator();
         let checked = 0;
         for (const target of targets) {
             const result = matchTarget(target, generator, generalView);
@@ -161,7 +164,7 @@ describe('supplied general division model migrations', () => {
                 : target.labels.includes(Scope.FractionDividend) ? 14 : 13);
             for (const selection of selections.selections) {
                 checked++;
-                const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
+                const evaluation = evaluator.evaluate(selection.labels);
                 expect(evaluation.conflicts).toEqual([]);
                 expect(evaluation.assessments.find(assessment => assessment.facet === 'zero')?.status).toBe('satisfied');
                 for (const mode of ['question', 'solution']) {
@@ -185,7 +188,7 @@ describe('supplied general division model migrations', () => {
         expect(checked).toBe(38);
     }, 30_000);
 
-    it('retains sixteen legacy routes with fourteen zero and seventy nonzero range choices', () => {
+    it('retains eight non-unit legacy routes with fourteen zero and fifty-six nonzero range choices', () => {
         const generator = generators.find(entry => entry.generatorId === 'fraction-quotient-model')!;
         let withZero = 0, withoutZero = 0, tuples = 0;
         for (const entry of cases) {
@@ -204,6 +207,8 @@ describe('supplied general division model migrations', () => {
                 expect(matchTarget(target, generator, wrongView)).toEqual({matched: false, reason: 'incompatible-type'});
             }
         }
-        expect({tuples, withZero, withoutZero}).toEqual({tuples: 16, withZero: 14, withoutZero: 70});
+        // Unit-dividend lineages now belong to their partition/sharing producers
+        // and are verified in fraction-unit-sharing-contracts.it.test.tsx.
+        expect({tuples, withZero, withoutZero}).toEqual({tuples: 8, withZero: 14, withoutZero: 56});
     });
 });

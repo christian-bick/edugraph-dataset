@@ -8,7 +8,7 @@ import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig} from '../../../lib/utils.ts';
 import {FractionQuotientBody} from '../../../visuals/views/fractions/fraction-quotient-view.tsx';
 import {FractionQuotientModelGenerator} from './generator.ts';
-import {originalQuotientRange, quotientRangeMappings, quotientRangeRole, quotientUpperBounds} from './range-profile.ts';
+import {quotientRangeMappings, quotientRangeRole, quotientUpperBounds} from './range-profile.ts';
 import {FractionQuotientModelGeneratorSchema as schema, spec} from './spec.ts';
 
 const notation = [Scope.FractionNumbers, Scope.NumbersWithoutNegatives];
@@ -55,12 +55,12 @@ describe('fraction quotient range integration', () => {
         expect(bindings).toBe(23);
     });
 
-    it('keeps unit-dividend bindings unlabelled while preserving their original direct and planned configuration', () => {
+    it('leaves unit-dividend competencies to their separate mathematical producers', () => {
         const labels = [Scope.FractionDividend, Scope.IntegerDivisor, Scope.UnitFractions, Scope.NumbersWithoutNegatives];
-        const direct = extractConfig(schema, labels);
-        expect(direct.config.range).toEqual(originalQuotientRange);
-        expect(direct.resolvedLabels.some(label => quotientRangeMappings.some(([rangeLabel]) => rangeLabel === label))).toBe(false);
-        expect(new FractionQuotientModelGenerator().generate(direct.config).data.orientation).toBe('unit-fraction-by-whole');
-        for (const [bound] of quotientRangeMappings) expect(() => extractConfig(schema, [...labels, bound])).toThrow();
+        const result = planModelCompatibility({id: 'moved-unit-dividend', labels},
+            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
+            {viewId: 'proof', generalLabels: [], schema: {}, spec: {viewId: 'proof', generalLabels: []}});
+        expect(result.supported).toBe(false);
+        expect(schema.relationProfile[0]).not.toContain(Scope.FractionDividend);
     });
 });

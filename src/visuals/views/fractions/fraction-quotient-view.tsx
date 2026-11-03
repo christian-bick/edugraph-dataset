@@ -1,4 +1,4 @@
-import type {FractionQuotientProblem, FractionQuotientValue} from '../../../types/problems.ts';
+import type {FractionQuotientContent, FractionQuotientValue, FractionUnitSharingProblem} from '../../../types/problems.ts';
 import {formatOriginalFraction, formatQuotientValue, measure} from './fraction-quotient-helpers.ts';
 
 export type FractionQuotientTask = 'quotient-interpretation' | 'division-interpretation'
@@ -6,7 +6,7 @@ export type FractionQuotientTask = 'quotient-interpretation' | 'division-interpr
     | 'division-word-problem';
 
 interface Props {
-    data: FractionQuotientProblem;
+    data: FractionQuotientContent;
     isSolutionView: boolean;
     task: FractionQuotientTask;
 }
@@ -14,15 +14,15 @@ interface Props {
 const naturalNumber = (value: number, singular: string, plural: string): string =>
     `${value} ${value === 1 ? singular : plural}`;
 
-const expression = (data: FractionQuotientProblem): string =>
+const expression = (data: FractionQuotientContent): string =>
     `${formatQuotientValue(data.dividend)} ÷ ${formatQuotientValue(data.divisor)}`;
 
-const displayedQuotient = (data: FractionQuotientProblem): string =>
+const displayedQuotient = (data: FractionQuotientContent): string =>
     data.orientation === 'whole-by-whole'
         ? formatOriginalFraction(data.quotient)
         : formatQuotientValue(data.quotient);
 
-function storyQuestion(data: FractionQuotientProblem): string {
+function storyQuestion(data: FractionQuotientContent): string {
     const material = data.story.material;
     if (data.orientation === 'whole-by-unit-fraction') {
         const length = measure(data.dividend);
@@ -36,18 +36,33 @@ function storyQuestion(data: FractionQuotientProblem): string {
         : `A ${material} measures ${length}. It is shared equally among ${naturalNumber(data.divisor.numerator, 'person', 'people')}. How many meters does each person receive?`;
 }
 
-const answerWithUnit = (data: FractionQuotientProblem): string =>
+const answerWithUnit = (data: FractionQuotientContent): string =>
     data.orientation === 'whole-by-unit-fraction'
         ? naturalNumber(data.quotient.numerator, 'piece', 'pieces')
         : data.orientation === 'whole-by-whole'
             ? `${displayedQuotient(data)} ${data.quotient.numerator > 0 && data.quotient.numerator <= data.quotient.denominator ? 'meter' : 'meters'}`
             : measure(data.quotient);
 
-function Model({data}: {data: FractionQuotientProblem}) {
+function SharingStrip({data}: {data: FractionUnitSharingProblem}) {
+    const width = 570, x = 100, n = data.recipientCount;
+    return <svg viewBox="0 0 760 155" className="h-[155px] w-[760px] max-w-full" role="img"
+        aria-label={`The given ${formatQuotientValue(data.dividend)}-meter amount shared among ${n} recipients`}>
+        <text x="22" y="27" className="fill-slate-700 text-[15px] font-bold">Given amount: {measure(data.dividend)}</text>
+        {Array.from({length: n}, (_, index) => <g key={index}>
+            <rect x={x + index * width / n} y="48" width={width / n} height="45"
+                fill={['#bfdbfe', '#bbf7d0', '#fde68a', '#fecaca', '#ddd6fe', '#fed7aa'][index]} stroke="#475569" strokeWidth="1.5" />
+            <text x={x + (index + 0.5) * width / n} y="76" textAnchor="middle" className="fill-slate-900 text-[14px] font-bold">P{index + 1}</text>
+        </g>)}
+        <text x="380" y="132" textAnchor="middle" className="fill-slate-600 text-[13px]">The given fractional length is split into {n} equal shares.</text>
+    </svg>;
+}
+
+function Model({data}: {data: FractionQuotientContent}) {
     const x = 100;
     const width = 570;
     const y0 = 39;
-    if (data.orientation === 'unit-fraction-by-whole') {
+    if (data.kind === 'fraction-unit-sharing') return <SharingStrip data={data} />;
+    if (data.kind === 'fraction-unit-partition') {
         const base = data.model.wholePartitionCount;
         const fine = data.model.refinedPartitionCount;
         return <svg viewBox="0 0 760 195" className="h-[195px] w-[760px] max-w-full" role="img"
@@ -111,11 +126,12 @@ function Model({data}: {data: FractionQuotientProblem}) {
     </svg>;
 }
 
-function modelExplanation(data: FractionQuotientProblem): string {
+function modelExplanation(data: FractionQuotientContent): string {
     if (data.orientation === 'whole-by-whole') {
         return `${data.model.wholeUnitCount} whole meters are split among ${data.model.recipientCount} people. Each person gets ${data.model.partsPerRecipient} parts of size 1/${data.model.partsPerWhole} meter, or ${answerWithUnit(data)}.`;
     }
-    if (data.orientation === 'unit-fraction-by-whole') {
+    if (data.kind === 'fraction-unit-sharing') return `The ${measure(data.dividend)} amount is split equally among ${data.recipientCount} people. Each person gets one equal share, or ${answerWithUnit(data)}.`;
+    if (data.kind === 'fraction-unit-partition') {
         return `The ${measure(data.dividend)} amount is split equally among ${data.model.recipientCount} people. The whole has ${data.model.refinedPartitionCount} equal fine parts; each person gets one, or ${answerWithUnit(data)}.`;
     }
     return `${data.model.wholeUnitCount} whole meters contain ${data.model.groupCount} parts of size ${measure(data.divisor)}. The quotient counts ${answerWithUnit(data)}.`;
@@ -172,7 +188,7 @@ function InterpretationTask({data, isSolutionView}: Omit<Props, 'task'>) {
     </>;
 }
 
-function ExecutionEquation({data, showAnswer}: {data: FractionQuotientProblem; showAnswer: boolean}) {
+function ExecutionEquation({data, showAnswer}: {data: FractionQuotientContent; showAnswer: boolean}) {
     const witness = data.equationWitness;
     if (!witness) return null;
     const unknownGroupCount = data.orientation === 'whole-by-unit-fraction';
@@ -215,6 +231,15 @@ function StoryCreationTask({data, isSolutionView}: Omit<Props, 'task'>) {
         <p className="text-base text-slate-700">Write a {data.story.material} story that matches this division. Make the original quantities and the question clear.</p>
         <Expression data={data} showAnswer={isSolutionView} />
         <div className="mt-4"><Model data={data} /></div>
+        {data.kind === 'fraction-unit-sharing' && data.multiplicationWitness && <div
+            className="mt-3 rounded-xl bg-slate-50 p-3 text-center" data-evidence="story-multiplication-relation">
+            <div className="text-sm text-slate-600">The same equal shares, written with multiplication:</div>
+            <div className="mt-1 font-mono font-bold">
+                {isSolutionView ? displayedQuotient(data) : '______'} × {formatQuotientValue(data.divisor)}
+                {isSolutionView && <> = {formatOriginalFraction(data.multiplicationWitness.unreducedProduct)}</>}
+                {' = '}{formatQuotientValue(data.multiplicationWitness.reconstructedDividend)}
+            </div>
+        </div>}
         {isSolutionView ? <Answer>Example story: {storyQuestion(data)} The answer is {answerWithUnit(data)}.</Answer>
             : <Blank>My story: ____________________________________________________</Blank>}
     </>;
@@ -251,12 +276,22 @@ function WordProblemTask({data, isSolutionView}: Omit<Props, 'task'>) {
                     {formatQuotientValue(data.equationWitness.groupCount)} × {formatQuotientValue(data.equationWitness.measurePerGroup)}
                     {' '}= {formatQuotientValue(data.equationWitness.totalMeasure)}
                 </div>}
+                {data.kind === 'fraction-unit-sharing' && data.multiplicationWitness && <div
+                    className="mt-2 font-mono" data-evidence="word-multiplication-check">
+                    {displayedQuotient(data)} × {formatQuotientValue(data.divisor)}
+                    {' = '}{formatOriginalFraction(data.multiplicationWitness.unreducedProduct)}
+                    {' = '}{formatQuotientValue(data.multiplicationWitness.reconstructedDividend)}
+                </div>}
             </Answer>
-        </> : <Blank>Equation: ____________________ &nbsp; Answer with units: ____________________</Blank>}
+        </> : <Blank>Equation: ____________________ &nbsp; Answer with units: ____________________
+            {data.kind === 'fraction-unit-sharing' && data.multiplicationWitness && <div className="mt-2">
+                Check by multiplication: ____________________
+            </div>}
+        </Blank>}
     </>;
 }
 
-function Expression({data, showAnswer}: {data: FractionQuotientProblem; showAnswer: boolean}) {
+function Expression({data, showAnswer}: {data: FractionQuotientContent; showAnswer: boolean}) {
     return <div className="mt-4 rounded-xl bg-slate-100 p-4 text-center font-mono text-2xl font-bold text-slate-900">
         {expression(data)} = {showAnswer ? displayedQuotient(data) : '______'}
     </div>;

@@ -3,7 +3,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it, vi} from 'vitest';
 import * as randomModule from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
-import {FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-model/generator.ts';
+import {FractionQuotientFixtureGenerator as FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
 import {FractionQuotientBody} from './fraction-quotient-view.tsx';
 import {formatQuotientValue} from './fraction-quotient-helpers.ts';
 
