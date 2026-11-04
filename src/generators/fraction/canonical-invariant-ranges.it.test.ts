@@ -4,7 +4,6 @@ import * as rng from '../../lib/random.ts';
 import { createCanonicalNumericRange, hasCanonicalRangeWitness } from '../../lib/canonical-numeric-range.ts';
 import { planModelCompatibility } from '../../lib/model-compatibility.ts';
 import { DecimalNotationGenerator } from './decimal-notation/generator.ts';
-import { DecimalNotationGeneratorSchema, spec as notationSpec } from './decimal-notation/spec.ts';
 import { DecimalComparisonGenerator } from '../number/decimal-comparison/generator.ts';
 import { DecimalComparisonGeneratorSchema, spec as decimalComparisonSpec } from '../number/decimal-comparison/spec.ts';
 import { FractionComparisonGenerator } from './fraction-comparison/generator.ts';
@@ -20,8 +19,7 @@ const rational = (value: {
 const check = (values: number[]) => expect(hasCanonicalRangeWitness(values, range)).toBe(true);
 describe('invariant canonical ranges for bounded fractional values', () => {
     it('provides a matching-capable upper5 without a new configuration choice', () => {
-        for (const [spec, schema, task] of [[notationSpec, DecimalNotationGeneratorSchema, []],
-            [decimalComparisonSpec, DecimalComparisonGeneratorSchema, [Area.NumericEquality, Scope.Equal]],
+        for (const [spec, schema, task] of [[decimalComparisonSpec, DecimalComparisonGeneratorSchema, [Area.NumericEquality, Scope.Equal]],
             [fractionComparisonSpec, FractionComparisonGeneratorSchema, [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater]],
             [benchmarkSpec, FractionBenchmarkArithmeticGeneratorSchema, [Area.Addition]]] as const) {
             expect(spec.generalLabels).toContain(Scope.NumbersSmaller5);
@@ -32,7 +30,7 @@ describe('invariant canonical ranges for bounded fractional values', () => {
             expect(planModelCompatibility({ id: 'fraction-upper5', labels: [...task, Scope.NumbersSmaller5, Ability.ProcedureExecution] }, generator, view).supported, spec.generatorId).toBe(true);
         }
     });
-    it('covers all99 notation representations, bounding values rather than storage coefficients', () => {
+    it('covers all99 notation representations with their assessed fraction part counts', () => {
         const random = vi.spyOn(rng, 'random');
         const generator = new DecimalNotationGenerator();
         let count = 0;
@@ -40,9 +38,10 @@ describe('invariant canonical ranges for bounded fractional values', () => {
             const numerators = Array.from({ length: denominator - 1 }, (_, i) => i + 1).filter(n => denominator === 10 || n % 10 !== 0);
             for (const [index, numerator] of numerators.entries()) {
                 random.mockReturnValueOnce(denominator === 10 ? 0.25 : 0.75).mockReturnValueOnce((index + 0.5) / numerators.length);
-                const { data } = generator.generate({});
+                const profile = createCanonicalNumericRange(denominator);
+                const { data } = generator.generate({range: profile});
                 expect(data.value).toMatchObject({ numerator, denominator });
-                check([rational(data.value), data.sharedWhole]);
+                expect(hasCanonicalRangeWitness([rational(data.value), data.sharedWhole, numerator, denominator], profile)).toBe(true);
                 count++;
             }
         }

@@ -4,6 +4,7 @@ import {setSeed} from '../../../lib/random.ts';
 import {generateWithLabels, labelSetHash} from '../../../lib/utils.ts';
 import {DecimalNotationGenerator} from './generator.ts';
 import {spec} from './spec.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 const targets = [
     ['fraction to decimal', [
@@ -57,10 +58,10 @@ const targets = [
 describe('DecimalNotationGenerator spec integration', () => {
     const generator = new DecimalNotationGenerator();
 
-    it('declares only the invariant decimal capabilities', () => {
+    it('keeps the invariant decimal capabilities separate from assessed part-count ranges', () => {
         expect(spec).toEqual({
             generatorId: 'decimal-notation',
-            generalLabels: [Area.DecimalNotation, Scope.DecimalNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersSmaller5]
+            generalLabels: [Area.DecimalNotation, Scope.DecimalNumbers, Scope.NumbersWithoutNegatives]
         });
     });
 
@@ -74,15 +75,23 @@ describe('DecimalNotationGenerator spec integration', () => {
         const stub = generateWithLabels(generator, [...labels]);
         expect(stub).not.toBeNull();
         expect(stub!.data.task).toBe('decimal-notation');
-        expect(stub!.labels).toEqual([]);
+        expect(stub!.labels).toEqual([stub!.data.value.denominator === 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller100]);
     });
 
     it('keeps label-driven and direct generation on the identical RNG path', () => {
-        const labels = [...targets[0][1]];
+        const labels = [...targets[0][1], Scope.NumbersSmaller10];
         setSeed('decimal-notation-label-path');
         const resolved = generateWithLabels(generator, labels);
         setSeed('decimal-notation-label-path');
-        const direct = generator.generate({});
+        const direct = generator.generate({range: createCanonicalNumericRange(10)});
         expect(resolved!.data).toEqual(direct.data);
+    });
+
+    it.each([10, 100] as const)('honors an explicit upper%s request', upper => {
+        const label = upper === 10 ? Scope.NumbersSmaller10 : Scope.NumbersSmaller100;
+        setSeed(`notation-profile-${upper}`);
+        const result = generateWithLabels(generator, [label]);
+        expect(result!.data.value.denominator).toBe(upper);
+        expect(result!.labels).toEqual([label]);
     });
 });

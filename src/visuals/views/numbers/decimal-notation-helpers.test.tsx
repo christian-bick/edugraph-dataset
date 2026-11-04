@@ -1,7 +1,8 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import {DecimalNotationGenerator} from '../../../generators/fraction/decimal-notation/generator.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {random, setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {DecimalNotationProblem} from '../../../types/problems.ts';
 import {
@@ -20,7 +21,9 @@ const generator = new DecimalNotationGenerator();
 
 const generate = (seed: string): DecimalNotationProblem => {
     setSeed(seed);
-    return generator.generate({}).data;
+    const upper = random() < 0.5 ? 10 : 100;
+    setSeed(seed);
+    return generator.generate({range: createCanonicalNumericRange(upper)}).data;
 };
 
 const findDecimal = (decimalNotation: string): DecimalNotationProblem => {

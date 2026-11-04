@@ -1,9 +1,13 @@
-import {describe, expect, it} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
+import * as rng from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {DecimalNotationProblem} from '../../../types/problems.ts';
 import {DecimalNotationGenerator} from './generator.ts';
 
 const generator = new DecimalNotationGenerator();
+const config = (upper: 10 | 100) => ({range: createCanonicalNumericRange(upper)});
+afterEach(() => vi.restoreAllMocks());
 
 const expectCanonicalProblem = (problem: DecimalNotationProblem): void => {
     const {value} = problem;
@@ -29,10 +33,15 @@ const expectCanonicalProblem = (problem: DecimalNotationProblem): void => {
 };
 
 describe('DecimalNotationGenerator', () => {
-    it('validates its invariant empty configuration', () => {
+    it('validates its selected mathematical range before consuming entropy', () => {
+        const draw = vi.spyOn(rng, 'random');
         expect(() => generator.generate(null as never)).toThrow('Configuration object');
-        expect(() => generator.generate({unexpected: true} as never))
-            .toThrow('does not accept configuration fields');
+        expect(() => generator.generate({} as never)).toThrow();
+        expect(() => generator.generate({...config(10), unexpected: true} as never)).toThrow('unexpected field');
+        for (const range of [createCanonicalNumericRange(5), createCanonicalNumericRange(100, 5),
+            {...createCanonicalNumericRange(10), maximumAbove: 0}, {...createCanonicalNumericRange(10), extra: true}])
+            expect(() => generator.generate({range})).toThrow('canonical tenths or hundredths range');
+        expect(draw).not.toHaveBeenCalled();
     });
 
     it('generates canonical tenths and nontrivial hundredths values', () => {
@@ -41,7 +50,7 @@ describe('DecimalNotationGenerator', () => {
         let sawHighHundredths = false;
         for (let seed = 0; seed < 300; seed++) {
             setSeed(`decimal-notation-${seed}`);
-            const problem = generator.generate({}).data;
+            const problem = generator.generate(config(seed % 2 === 0 ? 10 : 100)).data;
             expectCanonicalProblem(problem);
             denominators.add(problem.value.denominator);
             sawLeadingZero ||= problem.value.denominator === 100
@@ -56,8 +65,38 @@ describe('DecimalNotationGenerator', () => {
 
     it('is deterministic for the same repository seed', () => {
         setSeed('decimal-notation-determinism');
-        const first = generator.generate({});
+        const first = generator.generate(config(100));
         setSeed('decimal-notation-determinism');
-        expect(generator.generate({})).toEqual(first);
+        expect(generator.generate(config(100))).toEqual(first);
+    });
+
+    it.each([10, 100] as const)('retains every original numerator and uniform conditional ticket under upper%s', upper => {
+        const draw = vi.spyOn(rng, 'random');
+        const numerators = Array.from({length: upper - 1}, (_, index) => index + 1)
+            .filter(numerator => upper === 10 || numerator % 10 !== 0);
+        for (const [index, numerator] of numerators.entries()) {
+            draw.mockReturnValueOnce(0.37).mockReturnValueOnce((index + 0.5) / numerators.length);
+            const {data} = generator.generate(config(upper));
+            expectCanonicalProblem(data);
+            expect(data.value.numerator).toBe(numerator);
+            expect(data.value.denominator).toBe(upper);
+            expect(hasCanonicalRangeWitness([numerator, upper, numerator / upper, 1], config(upper).range)).toBe(true);
+        }
+        expect(draw).toHaveBeenCalledTimes(2 * numerators.length);
+    });
+
+    it('preserves original seeded payloads and two-draw continuation when conditioned on the selected denominator', () => {
+        const hundredths = Array.from({length: 99}, (_, i) => i + 1).filter(n => n % 10 !== 0);
+        for (let seed = 0; seed < 100; seed++) {
+            setSeed(`notation-legacy-${seed}`);
+            const denominator = rng.random() < 0.5 ? 10 : 100;
+            const ticket = rng.random();
+            const numerator = denominator === 10 ? 1 + Math.floor(ticket * 9)
+                : hundredths[Math.floor(ticket * hundredths.length)]!;
+            const continuation = rng.random();
+            setSeed(`notation-legacy-${seed}`);
+            expect(generator.generate(config(denominator)).data.value).toMatchObject({numerator, denominator});
+            expect(rng.random()).toBe(continuation);
+        }
     });
 });
