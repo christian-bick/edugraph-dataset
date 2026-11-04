@@ -3,22 +3,35 @@ import {ArithmeticProblem} from '../../../types/problems.ts';
 
 export type UnknownPart = 'num1' | 'num2' | 'num3' | 'answer';
 
-export type AppleGroupData = {
-    label: 'A' | 'B' | 'C';
-    part: Exclude<UnknownPart, 'answer'>;
+export type WordProblemQuantity = {
+    title: string;
+    unit: 'apple' | 'group' | 'friend';
+    part: UnknownPart;
     value: number;
 };
 
-export function getAppleGroups(data: ArithmeticProblem): AppleGroupData[] {
-    const groups: AppleGroupData[] = [
-        {label: 'A', part: 'num1', value: data.num1},
-        {label: 'B', part: 'num2', value: data.num2}
-    ];
+type QuantityRole = readonly [title: string, unit: WordProblemQuantity['unit']];
 
-    if (data.num3 !== undefined) {
-        groups.push({label: 'C', part: 'num3', value: data.num3});
-    }
-    return groups;
+/** Preserve each story quantity's unit; a friend or a group is not another apple amount. */
+export function getWordProblemQuantities(data: ArithmeticProblem): WordProblemQuantity[] {
+    const roles: Record<ArithmeticProblem['operation'], readonly QuantityRole[]> = data.num3 === undefined ? {
+        addition: [['Starting apples', 'apple'], ['Added apples', 'apple'], ['Total apples', 'apple']],
+        subtraction: [['Starting apples', 'apple'], ['Given away', 'apple'], ['Apples left', 'apple']],
+        multiplication: [['Groups', 'group'], ['Apples per group', 'apple'], ['Total apples', 'apple']],
+        division: [['Apples to share', 'apple'], ['Friends', 'friend'], ['Apples per friend', 'apple']]
+    } : {
+        addition: [['Red apples', 'apple'], ['Green apples', 'apple'], ['Yellow apples', 'apple'], ['Total apples', 'apple']],
+        subtraction: [['Starting apples', 'apple'], ['First given away', 'apple'], ['Then given away', 'apple'], ['Apples left', 'apple']],
+        multiplication: [['Crates', 'group'], ['Rows per crate', 'group'], ['Apples per row', 'apple'], ['Total apples', 'apple']],
+        division: [['Apples to share', 'apple'], ['Teams', 'group'], ['Friends per team', 'friend'], ['Apples per friend', 'apple']]
+    };
+    const quantities: Array<readonly [UnknownPart, number]> = [['num1', data.num1], ['num2', data.num2]];
+    if (data.num3 !== undefined) quantities.push(['num3', data.num3]);
+    quantities.push(['answer', data.answer]);
+    return quantities.map(([part, value], index) => {
+        const [title, unit] = roles[data.operation][index]!;
+        return {part, value, title, unit};
+    });
 }
 
 export function selectUnknownPart(seed: number, hasThirdOperand: boolean): UnknownPart {
@@ -55,6 +68,8 @@ export function getUnknownPart(
 
 export function getWordProblemText(data: ArithmeticProblem, unknownPart: UnknownPart): string {
     const {num1, num2, num3, answer, operation} = data;
+    const apples = (count: number) => `${count} apple${count === 1 ? '' : 's'}`;
+    const friends = (count: number) => `${count} friend${count === 1 ? '' : 's'}`;
 
     if (num3 !== undefined) {
         const values: Record<UnknownPart, number | string> = {
@@ -101,16 +116,16 @@ export function getWordProblemText(data: ArithmeticProblem, unknownPart: Unknown
             return `Some groups of ${num2} apples contain ${answer} apples altogether. How many groups are there?`;
         }
         if (unknownPart === 'num2') {
-            return `${num1} equal groups contain ${answer} apples altogether. How many apples are in each group?`;
+            return `${num1} equal group${num1 === 1 ? '' : 's'} contain${num1 === 1 ? 's' : ''} ${apples(answer)} altogether. How many apples are in each group?`;
         }
-        return `There are ${num1} groups with ${num2} apples in each group. How many apples are there altogether?`;
+        return `There ${num1 === 1 ? 'is' : 'are'} ${num1} group${num1 === 1 ? '' : 's'} with ${apples(num2)} in each group. How many apples are there altogether?`;
     }
 
     if (unknownPart === 'num1') {
-        return `Some apples are shared equally among ${num2} friends, giving each friend ${answer}. How many apples were shared?`;
+        return `Some apples are shared equally among ${friends(num2)}, giving each friend ${answer}. How many apples were shared?`;
     }
     if (unknownPart === 'num2') {
-        return `${num1} apples are shared equally among some friends, giving each friend ${answer}. How many friends are there?`;
+        return `${apples(num1)} ${num1 === 1 ? 'is' : 'are'} shared equally among some friends, giving each friend ${answer}. How many friends are there?`;
     }
-    return `${num1} apples are shared equally among ${num2} friends. How many apples does each friend get?`;
+    return `${apples(num1)} ${num1 === 1 ? 'is' : 'are'} shared equally among ${friends(num2)}. How many apples does each friend get?`;
 }

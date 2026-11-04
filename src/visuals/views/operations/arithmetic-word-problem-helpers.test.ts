@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {ArithmeticProblem} from '../../../types/problems.ts';
 import {
-    getAppleGroups,
+    getWordProblemQuantities,
     getUnknownPart,
     getWordProblemText,
     selectUnknownOperandPart,
@@ -9,7 +9,7 @@ import {
 } from './arithmetic-word-problem-helpers.ts';
 
 describe('operations-word-problem helpers', () => {
-    it('projects binary operands into two compact apple groups', () => {
+    it('projects binary operands and the result with their story roles', () => {
         const data: ArithmeticProblem = {
             num1: 3,
             num2: 5,
@@ -17,13 +17,14 @@ describe('operations-word-problem helpers', () => {
             answer: 8
         };
 
-        expect(getAppleGroups(data)).toEqual([
-            {label: 'A', part: 'num1', value: 3},
-            {label: 'B', part: 'num2', value: 5}
+        expect(getWordProblemQuantities(data)).toEqual([
+            {title: 'Starting apples', unit: 'apple', part: 'num1', value: 3},
+            {title: 'Added apples', unit: 'apple', part: 'num2', value: 5},
+            {title: 'Total apples', unit: 'apple', part: 'answer', value: 8}
         ]);
     });
 
-    it('adds the third operand group only for triple payloads', () => {
+    it('retains each triple operand and the result without recomputing them', () => {
         const data: ArithmeticProblem = {
             num1: 3,
             num2: 5,
@@ -32,10 +33,11 @@ describe('operations-word-problem helpers', () => {
             answer: 15
         };
 
-        expect(getAppleGroups(data)).toEqual([
-            {label: 'A', part: 'num1', value: 3},
-            {label: 'B', part: 'num2', value: 5},
-            {label: 'C', part: 'num3', value: 7}
+        expect(getWordProblemQuantities(data)).toEqual([
+            {title: 'Red apples', unit: 'apple', part: 'num1', value: 3},
+            {title: 'Green apples', unit: 'apple', part: 'num2', value: 5},
+            {title: 'Yellow apples', unit: 'apple', part: 'num3', value: 7},
+            {title: 'Total apples', unit: 'apple', part: 'answer', value: 15}
         ]);
     });
 
