@@ -5,8 +5,18 @@ import {createWholeNumberPlaceValues} from '../../../lib/whole-number-notation.t
 const cache = new Map<string, readonly number[]>();
 export const expandedRangeBounds = [
     ...[120, 1000].flatMap(upper => [0, 5, 10, 20].map(lower => [upper, lower] as const)),
-    ...[10000, 100000, 1000000].map(upper => [upper, 0] as const)
+    ...[0, 5, 10, 20, 100, 120].map(lower => [10000, lower] as const),
+    ...[0, 5, 10, 20, 100, 120, 1000].map(lower => [100000, lower] as const),
+    ...[0, 5, 10, 20, 100, 120, 1000, 10000].map(lower => [1000000, lower] as const)
 ];
+
+/** Three nonzero places require two places above the smallest term. */
+export function hasExpandedCardinalityDomain(upper: number, lower: number, cardinality: number): boolean {
+    if (![2, 3].includes(cardinality)
+        || !expandedRangeBounds.some(([max, min]) => upper === max && lower === min)) return false;
+    const largestThreeTermLower = upper <= 1000 ? 5 : upper === 10000 ? 20 : upper === 100000 ? 120 : 1000;
+    return cardinality === 2 || lower <= largestThreeTermLower;
+}
 
 /** Enumerate sparse numerals directly, instead of rejecting a million-wide
  * integer proposal. Leading digits are nonzero and all original cards2/3 remain. */
@@ -24,13 +34,13 @@ export function sparseExpandedNumbers(cardinality: number): readonly number[] {
 
 export function expandedQuantities(number: number): readonly number[] {
     const places = createWholeNumberPlaceValues(number);
-    return [number, ...places.filter(p => p.value > 0).map(p => p.value),
-        ...(number >= 1000 ? places.map(p => p.digit) : [])];
+    // The requested sum assesses each nonzero term. Place-strip digit glyphs
+    // represent the numeral and do not introduce further quantities (SPEC-G2).
+    return [number, ...places.filter(p => p.value > 0).map(p => p.value)];
 }
 
 export function expandedNumbers(range: CanonicalNumericRange, cardinality: number): readonly number[] {
-    if (!range || ![2, 3].includes(cardinality)
-        || !expandedRangeBounds.some(([upper, lower]) => range.max === upper && range.min === lower))
+    if (!range || !hasExpandedCardinalityDomain(range.max, range.min, cardinality))
         throw new GeneratorValidationError('place-value-expanded', 'Select an authored two/three-term canonical expanded-form domain.');
     const expected = createCanonicalNumericRange(range.max, range.min);
     if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)

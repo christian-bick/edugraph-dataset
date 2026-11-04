@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {beforeAll, describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
 import {IntegerAddSubtractStrategiesGenerator} from '../generators/arithmetic/integer-add-subtract-strategies/generator.ts';
 import {PlaceValueExpandedGenerator} from '../generators/place-value/place-value-expanded/generator.ts';
@@ -23,14 +23,20 @@ const cases: {name: string; generator: ProblemGenerator & {spec: AnyGeneratorSpe
         [Scope.TwoOperands, Scope.ThreeOperands].map(count => ({
             name: `expanded form ${range} ${count}`, generator: new PlaceValueExpandedGenerator(), view: expandedView,
             targetLabels: [Area.PlaceValue, Area.Sum, range, count],
-            expected: range === Scope.NumbersSmaller1000 ? Scope.NumbersWithoutZero : Scope.NumbersWithZero, facet: 'zero'
+            expected: Scope.NumbersWithoutZero, facet: 'zero'
         })))
 ];
 
-describe('four expanded-form configuration inference acceptance cases', () => {
+describe('four expanded-form cases migrated to invariant zero-absence declarations', () => {
+    let evaluator: ReturnType<typeof createLabelDependencyEvaluator>;
+    beforeAll(() => {evaluator = createLabelDependencyEvaluator();});
     it.each(cases)('proves $name and preserves planned draws in both modes', ({generator, view, targetLabels, expected, facet}) => {
         const spec = generator.spec;
-        const baseSpec = {...spec, inferredLabels: undefined};
+        expect(spec.inferredLabels).toBeUndefined();
+        expect(spec.generalLabels).toContain(expected);
+        // A redundant copy of the truthful annotation cannot change configuration,
+        // mathematical sampling, continuation or the already declared labels.
+        const redundantSpec = {...spec, inferredLabels: [{produces: [expected], infer: () => [expected]}]};
         const identity = {targetId: 'inference-acceptance', generatorId: spec.generatorId, viewId: view.viewId};
         const planned = planCompatibility({identity, targetLabels, generatorLabels: spec.generalLabels,
             viewLabels: view.generalLabels, generatorRules: spec.compatibility,
@@ -41,20 +47,22 @@ describe('four expanded-form configuration inference acceptance cases', () => {
         const selections = enumerateDependencyAuditSelections(plan);
         expect(selections.status).toBe('complete');
         expect(selections.selections.length).toBeGreaterThan(0);
-        const evaluator = createLabelDependencyEvaluator();
         // Canonical lower bands create several valid bindings for the same upper request.
-        // Prove annotation-only inference independently for every admitted binding.
+        // Each complete binding already carries the zero-absence invariant.
+        expect(planModelCompatibility({id: identity.targetId, labels: [...targetLabels, expected]},
+            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: generator.schema, spec},
+            {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view}).supported).toBe(true);
         for (const selection of selections.selections) {
-            expect(evaluator.evaluate(selection.labels).assessments).toContainEqual(expect.objectContaining({facet, status: 'missing'}));
+            expect(selection.labels).toContain(expected);
+            expect(evaluator.evaluate(selection.labels).assessments).not.toContainEqual(expect.objectContaining({facet, status: 'missing'}));
             const resolved = resolveDependencyAuditAnnotation({id: 'same-selection', plan, selection,
                 generator: {schema: generator.schema, spec}, view: {schema: {}, spec: view}});
-            expect(resolved.annotationResolution).toMatchObject({status: 'exhaustive', outcome: {
-                parentSelectionId: 'same-selection', inferredLabels: [expected]
-            }});
-            expect(resolved.declaredLabels).toEqual(selection.labels);
+            expect(resolved.annotationResolution.status).toBe('not_required');
+            expect(resolved.declaredLabels).toBeUndefined();
+            expect(resolved.labels).toEqual(selection.labels);
             expect(evaluator.evaluate(resolved.labels).assessments).not.toContainEqual(expect.objectContaining({facet, status: 'missing'}));
             expect(evaluator.evaluate(resolved.labels).conflicts).toEqual([]);
-            // These zero claims remain supplementary annotations rather than matching capabilities.
+            // The invariant supplies the capability, without adding a schema field.
             if (facet === 'zero') expect(extractSchemaLabels(generator.schema)).not.toContain(expected);
             for (const mode of ['question', 'solution']) {
                 const sampleKey = `${identity.targetId}#${identity.generatorId}#${identity.viewId}#train#${mode}#inst:0`;
@@ -62,12 +70,12 @@ describe('four expanded-form configuration inference acceptance cases', () => {
                     selection: createGenerationSelectionReceipt(plan, selection.choices)};
                 const input = {generator, viewSchema: {}, viewSpec: view, plan,
                     sampleKey, seed: 39, attempt: 1, replay};
-                const plainConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: baseSpec});
+                const plainConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: redundantSpec});
                 const inferredConfig = resolvePlannedConfigurations({...input, generatorSchema: generator.schema, generatorSpec: spec});
                 expect(inferredConfig.generatorConfig).toEqual(plainConfig.generatorConfig);
                 expect(inferredConfig.generatorRandomState).toBe(plainConfig.generatorRandomState);
                 expect(inferredConfig.view).toEqual(plainConfig.view);
-                const plain = generatePlannedDraw({...input, generatorSpec: baseSpec});
+                const plain = generatePlannedDraw({...input, generatorSpec: redundantSpec});
                 const continuation = getRandomState();
                 const enriched = generatePlannedDraw(input);
                 expect(enriched.stub).not.toBeNull();
@@ -75,7 +83,11 @@ describe('four expanded-form configuration inference acceptance cases', () => {
                 expect(enriched.view).toEqual(plain.view);
                 expect(getRandomState()).toBe(continuation);
                 expect(enriched.replay).toEqual(plain.replay);
-                expect(enriched.labels).toEqual([...plain.labels, expected].sort());
+                expect(enriched.labels).toEqual(plain.labels);
+                expect(enriched.labels.filter(label => label === expected)).toHaveLength(1);
+                expect(enriched.labels).not.toContain(Scope.NumbersWithZero);
+                expect(enriched.stub!.data.number).toBeGreaterThan(0);
+                expect(enriched.stub!.data.terms.every((term: number) => term > 0)).toBe(true);
                 expect(generatePlannedDraw({...input, replay: enriched.replay})).toEqual(enriched);
             }
         }
