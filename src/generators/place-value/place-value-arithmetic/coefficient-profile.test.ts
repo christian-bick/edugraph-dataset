@@ -86,7 +86,7 @@ describe('complete place-value coefficient presence profiles', () => {
                 for (const selection of selections.selections) {
                     const resolved = resolveDependencyAuditAnnotation({id: 'coefficient', plan: match.plan,
                         selection, generator: model, view: consumer});
-                    expect(resolved.annotationResolution.status).toBe('exhaustive');
+                    expect(resolved.annotationResolution.status).toBe('not_required');
                     expect(resolved.labels.includes(Scope.NumbersWithZero))
                         .not.toBe(resolved.labels.includes(Scope.NumbersWithoutZero));
                     const sampleKey = `coefficient#${spec.generatorId}#${view.viewId}#train#question#inst:0`;

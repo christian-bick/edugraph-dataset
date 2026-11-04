@@ -1,6 +1,9 @@
 import {beforeAll, describe, expect, it} from 'vitest';
 import {Area, Scope} from 'edugraph-ts';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {loadGeneratorModelCatalog, loadViewModelCatalog, type GeneratorModelDescriptor, type ViewModelDescriptor} from '../lib/model-catalog.ts';
+import {findLeafModules} from '../lib/module-resolver.ts';
 import {planModelCompatibility, type ViewChoiceModel} from '../lib/model-compatibility.ts';
 import {planCompatibility, sampleGenerationPlan} from '../lib/compatibility.ts';
 import {bindingsForSelection} from '../lib/planned-generation.ts';
@@ -13,9 +16,21 @@ import {PlaceValueArithmeticGenerator} from './place-value/place-value-arithmeti
 let generators: Map<string, GeneratorModelDescriptor>;
 let views: Map<string, ViewModelDescriptor>;
 beforeAll(async () => {
-    const [generatorCatalog, viewCatalog] = await Promise.all([loadGeneratorModelCatalog(), loadViewModelCatalog()]);
+    const generatorRoot = fileURLToPath(new URL('.', import.meta.url));
+    const viewRoot = fileURLToPath(new URL('../visuals/views/', import.meta.url));
+    const requiredGenerators = new Set([...cases.map(([generatorId]) => generatorId), 'measurement-length', 'comparison']);
+    const generatorEntries = new Map(findLeafModules(generatorRoot).filter(module => requiredGenerators.has(module.id))
+        .map(module => [module.id, resolve(module.absolutePath, 'spec.ts')]));
+    expect([...generatorEntries.keys()].sort()).toEqual([...requiredGenerators].sort());
+    const viewEntries = new Map([['measurement-line-plot', resolve(viewRoot, 'data/measurement-line-plot/spec.ts')]]);
+    const [generatorCatalog, viewCatalog] = await Promise.all([
+        loadGeneratorModelCatalog(generatorRoot, undefined, generatorEntries),
+        loadViewModelCatalog(viewRoot, undefined, viewEntries)
+    ]);
     generators = new Map(generatorCatalog.map(generator => [generator.generatorId, generator]));
     views = new Map(viewCatalog.map(view => [view.viewId, view]));
+    expect([...generators.keys()].sort()).toEqual([...requiredGenerators].sort());
+    expect([...views.keys()]).toEqual(['measurement-line-plot']);
 }, 30_000);
 
 const neutralView: ViewChoiceModel = {
@@ -94,9 +109,9 @@ const cases: readonly [string, string, readonly string[], readonly string[]][] =
         [Scope.Coins, Scope.QuarterDenomination], [Scope.Coins]],
     ['currency-arithmetic', 'denomination requires coins',
         [Scope.Banknotes], [Scope.Banknotes, Scope.QuarterDenomination]],
-    ['place-value-arithmetic', 'single-digit operand profile',
+    ['place-value-arithmetic', 'single-digit operand profile excludes whole-tens operands',
         [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand],
-        [Area.Addition, Scope.SingleDigitSmallestOperand]],
+        [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.MultiplesOf10]],
     ['place-value-arithmetic', 'two-digit addition coefficient zero',
         [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.NumbersWithZero],
         [Area.AdditionPlaceValuePartitioning, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.NumbersWithoutZero]],
@@ -104,8 +119,8 @@ const cases: readonly [string, string, readonly string[], readonly string[]][] =
         [Area.Addition, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand], [Area.Addition, Scope.MultiplesOf10]],
     ['place-value-arithmetic', 'multiple-ten regrouping',
         [Area.Subtraction, Scope.MultiplesOf10], [Area.Subtraction, Scope.MultiplesOf10, Area.IntegerRegrouping]],
-    ['place-value-arithmetic', 'subtraction operand profile',
-        [Area.Subtraction], [Area.Subtraction, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]],
+    ['place-value-arithmetic', 'subtraction operand profile excludes single-digit whole-tens operands',
+        [Area.Subtraction], [Area.Subtraction, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.MultiplesOf10]],
     ['place-value-arithmetic', 'regrouping requires a multiple-digit largest operand',
         [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero, Area.IntegerRegrouping],
         [Area.SubtractionPlaceValuePartitioning, Scope.NumbersWithZero, Area.IntegerRegrouping, Scope.SingleDigitLargestOperand]],
@@ -138,6 +153,32 @@ describe('generator configuration compatibility', () => {
         const result = plan(generator, rejected);
         expect(result.supported, 'unsupported semantic configuration').toBe(false);
         if (!result.supported) expect(result.reason).toBe('incompatible-rules');
+    });
+
+    it.each([
+        {description: 'addition with a single-digit smallest operand', labels: [Area.Addition, Scope.SingleDigitSmallestOperand]},
+        {description: 'general subtraction with exact two/single-digit operands',
+            labels: [Area.Subtraction, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]}
+    ])('admits approved width completion for $description without selecting a legacy addition domain', ({labels}) => {
+        const result = plan('place-value-arithmetic', labels);
+        expect(result.supported).toBe(true);
+        if (!result.supported) throw new Error(result.reason);
+        const receipt = sampleGenerationPlan(result.plan, () => 0);
+        const binding = bindingsForSelection(result.plan, receipt);
+        const generator = new PlaceValueArithmeticGenerator();
+        const resolved = resolveSchemaChoices(generator.schema, labels, binding.generator);
+        expect(resolved.config.requireSingleDigitSmallest).toBe(false);
+        expect(resolved.config.requireTwoDigitLargest).toBe(false);
+        setSeed(73);
+        const {data} = generator.generate(resolved.config)!;
+        expect(data.operandProfile).toBe('general');
+        expect(data.operation).toBe(labels[0] === Area.Addition ? 'addition' : 'subtraction');
+        expect(Math.min(data.num1, data.num2)).toBeGreaterThanOrEqual(1);
+        expect(Math.min(data.num1, data.num2)).toBeLessThan(10);
+        if (labels[0] === Area.Subtraction) {
+            expect(Math.max(data.num1, data.num2)).toBeGreaterThanOrEqual(10);
+            expect(Math.max(data.num1, data.num2)).toBeLessThan(100);
+        }
     });
 
     it.each([

@@ -4,14 +4,14 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
-import {grade1AdditionPairs, grade1SubtractionPairs, operandProfile} from './pair-domain.ts';
-import {primaryWidthRows} from './width-domain.ts';
-import type {PlaceValueArithmeticGeneratorConfig} from './spec.ts';
+import {grade1AdditionPairs, grade1SubtractionPairs} from './pair-domain.ts';
+import {exactPrimaryWidths, hasPrimaryWidth, primaryWidthRows} from './width-domain.ts';
 
 const bounds = [[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10],
     [Scope.NumbersSmaller20, 20], [Scope.NumbersSmaller100, 100],
     [Scope.NumbersSmaller120, 120], [Scope.NumbersSmaller1000, 1000]] as const;
 export const placeValueRangeLabels = bounds.map(([label]) => label);
+export const placeValueUpperBounds = bounds.map(([, upper]) => upper);
 export const placeValueRangeChoices = placeValueRangeLabels.map(label => [label]);
 export const maximumAbove = (upper: number): number => createCanonicalNumericRange(upper).maximumAbove;
 export const widthRangeDomain = (labels: string[]) => {
@@ -21,8 +21,9 @@ export const widthRangeDomain = (labels: string[]) => {
 };
 export const placeValueRangeContext = [Area.Addition, Area.AdditionPlaceValuePartitioning,
     Area.Subtraction, Area.SubtractionPlaceValuePartitioning, Area.IntegerRegrouping,
-    Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.MultiplesOf10,
-    Scope.SingleDigitLargestOperand, Scope.MultipleDigitLargestOperand,
+    Scope.SingleDigitSmallestOperand, Scope.TwoDigitSmallestOperand, Scope.ThreeDigitSmallestOperand,
+    Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand,
+    Scope.MultiplesOf10, Scope.MultipleDigitLargestOperand, Scope.MultipleDigitSmallestOperand,
     Scope.NumbersWithZero, Scope.NumbersWithoutZero];
 const baseRange = selectExactLabelMap(bounds.map(([label, upper]) => [label, {min: 0, max: upper}] as const));
 
@@ -34,32 +35,28 @@ export function permitsPlaceValueRange(labels: string[], originalZero?: boolean)
     const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
     const subtraction = selected(Area.Subtraction) || selected(Area.SubtractionPlaceValuePartitioning);
     if (!addition && !subtraction) return true;
-    const config: PlaceValueArithmeticGeneratorConfig = {
-        operation: addition ? Area.Addition : Area.Subtraction,
-        requireRegrouping: selected(Area.IntegerRegrouping),
-        requireSingleDigitSmallest: selected(Scope.SingleDigitSmallestOperand),
-        requireTwoDigitLargest: selected(Scope.TwoDigitLargestOperand),
-        requireMultipleOf10: selected(Scope.MultiplesOf10),
-        largestOperandProfile: selected(Scope.SingleDigitLargestOperand) ? 'single'
-            : selected(Scope.MultipleDigitLargestOperand) ? 'multiple' : 'legacy',
-        requireZero: false, coefficientPresence: false, range
-    };
-    const profile = operandProfile(config);
-    if (!profile || config.largestOperandProfile !== 'legacy' && profile !== 'general') return false;
-    const zeroResults = originalZero === undefined ? [false, true] : [originalZero];
+    const largest = [Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand];
+    const smallest = [Scope.SingleDigitSmallestOperand, Scope.TwoDigitSmallestOperand, Scope.ThreeDigitSmallestOperand];
+    const widths = exactPrimaryWidths.filter(width => largest.every((label, index) => !selected(label) || Number(width[0]) === index + 1)
+        && smallest.every((label, index) => !selected(label) || Number(width[1]) === index + 1)
+        && (!selected(Scope.MultipleDigitLargestOperand) || width[0] !== '1')
+        && (!selected(Scope.MultipleDigitSmallestOperand) || width[1] !== '1'));
+    const regrouping = selected(Area.IntegerRegrouping);
+    const zeroResults = originalZero === undefined ? [false, ...(selected(Scope.NumbersWithZero) ? [true] : [])] : [originalZero];
     const coefficients = selected(Scope.NumbersWithZero) ? [true]
         : selected(Scope.NumbersWithoutZero) ? [false] : [false, true];
     const minimum = 1, maximum = Math.min(999, range.max), floor = maximumAbove(range.max);
     return zeroResults.some(requestedZero => coefficients.some(coefficient => {
-        const equality = requestedZero && subtraction && !config.requireRegrouping;
-        if (profile === 'general') return primaryWidthRows({operation: addition ? 'addition' : 'subtraction',
-            minimum, maximum, maximumAbove: floor, regrouping: config.requireRegrouping!,
-            zeroResult: equality, coefficientZero: coefficient}, config.largestOperandProfile!).length > 0;
-        if (addition) return coefficient && profile !== 'multiples-of-ten'
-            && grade1AdditionPairs(profile, minimum, maximum, config.requireRegrouping!)
-                .some(([a, b]) => a + b > floor);
-        return profile === 'multiples-of-ten' && !config.requireRegrouping && coefficient === equality
-            && grade1SubtractionPairs(minimum, maximum, equality).some(([a]) => a > floor);
+        const equality = requestedZero && subtraction && !regrouping;
+        if (!selected(Scope.MultiplesOf10)) return widths.some(width => primaryWidthRows({operation: addition ? 'addition' : 'subtraction',
+            minimum, maximum, maximumAbove: floor, regrouping,
+            zeroResult: equality, coefficientZero: coefficient}, width).length > 0);
+        if (addition) return coefficient && !regrouping
+            && grade1AdditionPairs('two-digit-multiple-of-ten', minimum, maximum, false)
+                .some(([a, b]) => a + b > floor && widths.some(width => hasPrimaryWidth(a, b, width)));
+        return !regrouping && coefficient === equality
+            && grade1SubtractionPairs(minimum, maximum, equality)
+                .some(([a, b]) => a > floor && widths.some(width => hasPrimaryWidth(a, b, width)));
     }));
 }
 export const resolvePlaceValueRange = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) =>

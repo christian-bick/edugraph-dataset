@@ -3,140 +3,84 @@ import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../li
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
-import {needsPrimaryWidth, permitsPrimaryWidth, primaryWidthContext, primaryWidthLabels,
+import {primaryWidthLabels, primaryWidthChoices, primaryWidthFromLabels,
     resolvePrimaryWidth} from './width-profile.ts';
 import {resolveResultZero} from './zero-result.ts';
-import {coefficientContext, coefficientLabels, permitsCoefficientProfile,
-    resolveCoefficientPresence} from './coefficient-profile.ts';
-import {permitsPlaceValueRange, placeValueRangeLabels, placeValueRangeChoices,
-    placeValueRangeContext, resolvePlaceValueRange} from './range-profile.ts';
+import {coefficientLabels, resolveCoefficientPresence} from './coefficient-profile.ts';
+import {placeValueRangeLabels, placeValueRangeChoices, placeValueUpperBounds, resolvePlaceValueRange} from './range-profile.ts';
+import {originalOperandFlags, originalOperandLabels, resolveOriginalSingleDigit, resolveOriginalTwoDigit} from './operand-domain.ts';
+import {hasNativePairs, operandProfile} from './pair-domain.ts';
 
 const operationLabels = [Area.AdditionPlaceValuePartitioning, Area.SubtractionPlaceValuePartitioning,
     Area.Addition, Area.Subtraction];
 const operationValue = selectExactLabelMap([
-    [Area.AdditionPlaceValuePartitioning, Area.Addition],
-    [Area.SubtractionPlaceValuePartitioning, Area.Subtraction],
-    [Area.Addition, Area.Addition],
-    [Area.Subtraction, Area.Subtraction]
+    [Area.AdditionPlaceValuePartitioning, Area.Addition], [Area.SubtractionPlaceValuePartitioning, Area.Subtraction],
+    [Area.Addition, Area.Addition], [Area.Subtraction, Area.Subtraction]
 ] as const);
 const resolveOperation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
     const selected = operationLabels.filter(label => labels.includes(label));
-    if (selected.length !== 1) return undefined;
-    const fixedAddition = labels.includes(Scope.SingleDigitSmallestOperand) || labels.includes(Scope.TwoDigitLargestOperand);
-    if (fixedAddition && operationValue(labels) !== Area.Addition) return undefined;
-    const multiples = labels.includes(Scope.MultiplesOf10) || labels.includes(Scope.TwoDigitSmallestOperand);
-    // Without the two-digit addition profile, the whole-tens contract is positive/equal subtraction.
-    if (multiples && !labels.includes(Scope.TwoDigitLargestOperand) && selected[0] !== Area.Subtraction) return undefined;
-    return operationValue(labels);
-}), {kind: 'alternatives', alternatives: operationLabels.map(label => [label]),
-    contextLabels: [Scope.MultiplesOf10, Scope.SingleDigitSmallestOperand, Scope.TwoDigitSmallestOperand, Scope.TwoDigitLargestOperand]}));
+    if (selected.length === 1) return operationValue(labels);
+    if (selected.length > 1) return undefined;
+    // Preserve the legacy partial-request default. A bound operation is never
+    // reinterpreted from completed widths; the joint native-domain rule checks it.
+    const flags = originalOperandFlags(label => labels.includes(label));
+    return flags.requireTwoDigitLargest ? Area.Addition
+        : labels.includes(Scope.MultiplesOf10) ? Area.Subtraction : undefined;
+}), {kind: 'alternatives', alternatives: operationLabels.map(label => [label]), contextLabels: originalOperandLabels}));
 
-import {generatorLabelRule} from '../../compatibility-rules.ts';
-
+const nativeLabels = [...operationLabels, Area.IntegerRegrouping, Scope.MultiplesOf10,
+    ...primaryWidthLabels, ...coefficientLabels, ...placeValueRangeLabels];
 export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
     generatorId: 'place-value-arithmetic',
-    compatibility: [generatorLabelRule('place-value-operand-profile', [
-        Area.Addition, Area.AdditionPlaceValuePartitioning, Area.Subtraction, Area.SubtractionPlaceValuePartitioning,
-        Area.IntegerRegrouping, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand,
-        Scope.MultiplesOf10, Scope.NumbersWithZero, Scope.NumbersWithoutZero
-    ], selected => {
-        const singleDigit = selected(Scope.SingleDigitSmallestOperand);
-        const twoDigit = selected(Scope.TwoDigitLargestOperand);
-        const multiples = selected(Scope.MultiplesOf10);
-        const regrouping = selected(Area.IntegerRegrouping);
-        const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
-        if (singleDigit && multiples || singleDigit && !twoDigit || twoDigit && !singleDigit && !multiples) return false;
-        if (addition) {
-            // Two-digit Grade-1 operands expose zero hundreds in every consumer;
-            // the result-zero resolver keeps their actual arithmetic positive.
-            return !multiples || twoDigit && !regrouping;
-        }
-        if (twoDigit || singleDigit) return false;
-        // The whole-tens profile operates in one unit; its views do not expose
-        // the decomposition and partial differences of a partitioning strategy.
-        if (multiples && selected(Area.SubtractionPlaceValuePartitioning)) return false;
-        return !multiples || !regrouping;
-    }), generatorLabelRule('place-value-primary-width', [...primaryWidthLabels, ...primaryWidthContext], selected => {
-        const single = selected(Scope.SingleDigitLargestOperand);
-        const multiple = selected(Scope.MultipleDigitLargestOperand);
-        if (single && multiple) return false;
-        if (single || multiple) return permitsPrimaryWidth(selected, single ? 'single' : 'multiple');
-        return !needsPrimaryWidth(selected);
-    }), {
-        id: 'place-value-coefficient-zero',
+    compatibility: [{
+        id: 'place-value-native-width-profile',
         dependencies: [
-            ...[...coefficientContext, ...coefficientLabels].map(label => ({scope: 'generator' as const, label})),
-            {scope: 'target', label: Scope.NumbersWithZero}
+            ...nativeLabels.map(label => ({scope: 'generator' as const, label})),
+            ...[...originalOperandLabels, Scope.NumbersWithZero].map(label => ({scope: 'target' as const, label}))
         ],
-        predicate: labels => permitsCoefficientProfile(label => labels.exact('generator', label),
-            labels.exact('target', Scope.NumbersWithZero))
-    }, {
-        id: 'place-value-canonical-range',
-        dependencies: [...[...placeValueRangeLabels, ...placeValueRangeContext].map(label => ({scope: 'generator' as const, label})),
-            {scope: 'target', label: Scope.NumbersWithZero}],
-        predicate: labels => permitsPlaceValueRange([...placeValueRangeLabels, ...placeValueRangeContext]
-            .filter(label => labels.exact('generator', label)), labels.exact('target', Scope.NumbersWithZero))
+        predicate: query => {
+            const selected = (label: string) => query.exact('generator', label);
+            const operations = operationLabels.filter(selected);
+            const width = primaryWidthFromLabels(primaryWidthLabels.filter(selected));
+            const uppers = placeValueRangeLabels.filter(selected);
+            const presence = selected(Scope.NumbersWithZero);
+            if (operations.length !== 1 || !width || uppers.length !== 1 || presence === selected(Scope.NumbersWithoutZero)) return false;
+            const operation = operations[0] === Area.Addition || operations[0] === Area.AdditionPlaceValuePartitioning
+                ? Area.Addition : Area.Subtraction;
+            const regrouping = selected(Area.IntegerRegrouping);
+            const config: PlaceValueArithmeticGeneratorConfig = {
+                operation, requireRegrouping: regrouping,
+                ...originalOperandFlags(label => query.exact('target', label)),
+                requireMultipleOf10: selected(Scope.MultiplesOf10),
+                requireZero: query.exact('target', Scope.NumbersWithZero) && operation === Area.Subtraction && !regrouping,
+                largestOperandProfile: width, coefficientPresence: presence,
+                range: {min: 0, max: placeValueUpperBounds[placeValueRangeLabels.indexOf(uppers[0]!)]!}
+            };
+            const domain = operandProfile(config);
+            if (!domain) return false;
+            if (domain !== 'general' && (operation === Area.Addition ? domain === 'multiples-of-ten'
+                : domain !== 'multiples-of-ten' || operations[0] !== Area.Subtraction)) return false;
+            return hasNativePairs(config);
+        }
     }],
-    // SPEC-12: neither subtraction nor regrouping alone guarantees this width.
-    // Conditional same-value bundles would change direct fallback sampling;
-    // keep the existing choices and annotate their resolved conjunction only.
-    inferredLabels: [{
-        produces: [Scope.MultipleDigitLargestOperand],
-        infer: ({operation, requireRegrouping}) => operation === Area.Subtraction && requireRegrouping
-            ? [Scope.MultipleDigitLargestOperand]
-            : []
-    }],
-    generalLabels: [
-        Area.PlaceValue,
-        Scope.TwoOperands,
-        Scope.IntegerNumbers,
-        Scope.Base10,
-        Scope.NumbersWithoutNegatives
-    ]
+    generalLabels: [Area.PlaceValue, Scope.TwoOperands, Scope.IntegerNumbers,
+        Scope.Base10, Scope.NumbersWithoutNegatives]
 };
 
 export const PlaceValueArithmeticGeneratorSchema = {
     operation: [operationLabels, resolveOperation, operationLabels.map(label => [label])],
-    requireRegrouping: [
-        [Area.IntegerRegrouping],
-        hasLabel(Area.IntegerRegrouping)
-    ],
-    requireSingleDigitSmallest: [
-        [Scope.SingleDigitSmallestOperand],
-        hasLabel(Scope.SingleDigitSmallestOperand)
-    ],
-    requireTwoDigitLargest: [
-        [Scope.TwoDigitLargestOperand],
-        hasLabel(Scope.TwoDigitLargestOperand)
-    ],
-    requireMultipleOf10: [
-        [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand],
-        selectExactLabelSetMap([
-            [[], false],
-            [[Scope.MultiplesOf10], true],
-            [[Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand], true]
-        ] as const),
-        [[], [Scope.MultiplesOf10, Scope.TwoDigitSmallestOperand]]
-    ],
-    requireZero: [
-        [Scope.NumbersWithZero],
-        resolveResultZero
-    ],
-    largestOperandProfile: [
-        primaryWidthLabels,
-        resolvePrimaryWidth,
-        [[], ...primaryWidthLabels.map(label => [label])]
-    ],
-    range: [
-        placeValueRangeLabels,
-        resolvePlaceValueRange,
-        placeValueRangeChoices
-    ],
-    coefficientPresence: [
-        coefficientLabels,
-        resolveCoefficientPresence,
-        coefficientLabels.map(label => [label])
-    ]
+    requireRegrouping: [[Area.IntegerRegrouping], hasLabel(Area.IntegerRegrouping)],
+    requireSingleDigitSmallest: [originalOperandLabels, resolveOriginalSingleDigit],
+    requireTwoDigitLargest: [originalOperandLabels, resolveOriginalTwoDigit],
+    requireMultipleOf10: [[Scope.MultiplesOf10], selectExactLabelSetMap([
+        [[], false], [[Scope.MultiplesOf10], true]
+    ] as const), [[], [Scope.MultiplesOf10]]],
+    requireZero: [[Scope.NumbersWithZero], resolveResultZero],
+    // Resolve the range before completing widths in the direct helper path.
+    // Planned generation still resolves the authoritative joint assignment.
+    range: [placeValueRangeLabels, resolvePlaceValueRange, placeValueRangeChoices],
+    largestOperandProfile: [primaryWidthLabels, resolvePrimaryWidth, primaryWidthChoices],
+    coefficientPresence: [coefficientLabels, resolveCoefficientPresence, coefficientLabels.map(label => [label])]
 } as const;
 
 export type PlaceValueArithmeticGeneratorConfig = ConfigFromSchema<typeof PlaceValueArithmeticGeneratorSchema>;

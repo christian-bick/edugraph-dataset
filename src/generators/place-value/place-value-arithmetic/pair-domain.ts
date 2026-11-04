@@ -1,5 +1,8 @@
 import type {PlaceValueArithmeticOperandProfile} from '../../../types/problems.ts';
 import type {PlaceValueArithmeticGeneratorConfig} from './spec.ts';
+import {Area} from 'edugraph-ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {hasPrimaryWidth, primaryWidthRows} from './width-domain.ts';
 
 type OperandPair = readonly [number, number];
 
@@ -60,4 +63,22 @@ export const grade1SubtractionPairs = (
         }
     }
     return pairs;
+};
+
+/** Exact finite feasibility, including the retained original mathematical domain. */
+export const hasNativePairs = (config: PlaceValueArithmeticGeneratorConfig): boolean => {
+    const profile = operandProfile(config), range = config.range;
+    if (!profile || !range || range.min !== 0 || ![5, 10, 20, 100, 120, 1000].includes(range.max)) return false;
+    const maximum = Math.min(999, range.max), floor = createCanonicalNumericRange(range.max).maximumAbove;
+    const width = config.largestOperandProfile!;
+    if (profile === 'general') return primaryWidthRows({operation: config.operation === Area.Addition ? 'addition' : 'subtraction',
+        minimum: 1, maximum, maximumAbove: floor, regrouping: config.requireRegrouping!,
+        zeroResult: config.requireZero, coefficientZero: config.coefficientPresence}, width).length > 0;
+    if (config.operation === Area.Addition) return !config.requireZero && config.coefficientPresence === true
+        && grade1AdditionPairs(profile, 1, maximum, config.requireRegrouping!)
+            .some(([a, b]) => a + b > floor && hasPrimaryWidth(a, b, width));
+    return profile === 'multiples-of-ten' && !config.requireRegrouping
+        && config.coefficientPresence === config.requireZero
+        && grade1SubtractionPairs(1, maximum, config.requireZero!)
+            .some(([a, b]) => a > floor && hasPrimaryWidth(a, b, width));
 };

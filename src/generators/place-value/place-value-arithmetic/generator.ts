@@ -10,7 +10,7 @@ import {
     PlaceValueRegroupingEvidence
 } from '../../../types/problems.ts';
 import {PlaceValueArithmeticGeneratorConfig, PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
-import {samplePrimaryWidth} from './width-domain.ts';
+import {exactPrimaryWidths, hasPrimaryWidth, samplePrimaryWidth} from './width-domain.ts';
 import {grade1AdditionPairs, grade1SubtractionPairs, operandProfile} from './pair-domain.ts';
 import {maximumAbove} from './range-profile.ts';
 
@@ -211,10 +211,10 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
             throw new GeneratorValidationError('place-value-arithmetic', 'Expected a boolean coefficient presence profile.');
         }
         const primaryWidth = config.largestOperandProfile!;
-        if (!['legacy', 'single', 'multiple'].includes(primaryWidth)) {
+        if (!['legacy', 'single', 'multiple', ...exactPrimaryWidths].includes(primaryWidth)) {
             throw new GeneratorValidationError('place-value-arithmetic', 'Unsupported primary operand width profile.');
         }
-        if (primaryWidth !== 'legacy' && (profile !== 'general'
+        if (['single', 'multiple'].includes(primaryWidth) && (profile !== 'general'
             || primaryWidth === 'single' && config.operation === Area.Subtraction && requireRegrouping)) return null;
         let pair: OperandPair | null = null;
         if (config.operation === Area.Addition) {
@@ -223,11 +223,12 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
                 ? samplePrimaryWidth({operation: 'addition', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,
                     coefficientZero: coefficientPresence}, primaryWidth)
                 : coefficientPresence ? choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping)
-                    .filter(([a, b]) => a + b > floor)) : null;
+                    .filter(([a, b]) => a + b > floor && hasPrimaryWidth(a, b, primaryWidth))) : null;
         } else if (profile === 'multiples-of-ten') {
             if (requireRegrouping) return null;
             if (coefficientPresence !== requireZero) return null;
-            pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero).filter(([a]) => a > floor));
+            pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero)
+                .filter(([a, b]) => a > floor && hasPrimaryWidth(a, b, primaryWidth)));
         } else if (profile === 'general') {
             if (requireZero && requireRegrouping) return null;
             pair = samplePrimaryWidth({operation: 'subtraction', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,

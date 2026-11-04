@@ -79,7 +79,7 @@ describe('Grade-1 coefficient-zero/result-zero separation', () => {
             for (const selection of selections.selections) {
                 const resolved = resolveDependencyAuditAnnotation({id: target.id, plan: match.plan,
                     selection, generator: model, view: consumer});
-                expect(resolved.annotationResolution.status).toBe('exhaustive');
+                expect(resolved.annotationResolution.status).toBe('not_required');
                 expect(resolved.labels).toContain(Scope.NumbersWithZero);
                 expect(resolved.labels).not.toContain(Scope.NumbersWithoutZero);
             }

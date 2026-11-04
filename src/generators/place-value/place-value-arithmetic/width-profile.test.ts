@@ -11,6 +11,7 @@ import {PlaceValueArithmeticGenerator} from './generator.ts';
 import {PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
 import {primaryWidthRows, samplePrimaryWidth, WidthDomain} from './width-domain.ts';
 import {primaryWidthContext, resolvePrimaryWidth} from './width-profile.ts';
+import {capabilitySatisfies} from '../../../lib/ontology.ts';
 import {spec as explanation} from '../../../visuals/views/place-value/place-value-arithmetic-explanation/spec.ts';
 import {spec as concrete} from '../../../visuals/views/place-value/place-value-arithmetic-model/spec.ts';
 import {spec as written} from '../../../visuals/views/place-value/place-value-arithmetic-written-method/spec.ts';
@@ -103,18 +104,18 @@ describe('reviewed owner-specific resolver contract', () => {
                 }
             }
         }
-        expect(resolvePrimaryWidth([])).toBe('legacy');
-        expect(resolvePrimaryWidth([Scope.SingleDigitLargestOperand])).toBe('single');
-        expect(resolvePrimaryWidth([Scope.MultipleDigitLargestOperand])).toBe('multiple');
+        expect(resolvePrimaryWidth([])).toBeUndefined();
+        expect(resolvePrimaryWidth([Scope.SingleDigitLargestOperand])).toBe('11');
+        expect(resolvePrimaryWidth([Scope.MultipleDigitLargestOperand])).toBeUndefined();
         expect(primaryWidthContext).toContain(Scope.NumbersWithZero);
     });
 
     it.each([
-        ['2.NBT.B.9-explain-strategies~4203a811', explanation],
-        ['2.NBT.B.9-explain-strategies~dbec91bb', explanation],
-        ['2.NBT.B.7-concrete-regrouping~f5125172', concrete],
-        ['2.NBT.B.7-model-to-written-method~3cfc3d3f', written]
-    ] as const)('closes the real planned width omission without pending inference: %s', (id, view) => {
+        ['2.NBT.B.9-explain-strategies~4203a811', explanation, 5],
+        ['2.NBT.B.9-explain-strategies~dbec91bb', explanation, 4],
+        ['2.NBT.B.7-concrete-regrouping~f5125172', concrete, 5],
+        ['2.NBT.B.7-model-to-written-method~3cfc3d3f', written, 5]
+    ] as const)('closes the real planned width omission without pending inference: %s', (id, view, count) => {
         const target = gradeTwo.find(candidate => candidate.id === id)!;
         expect(target).toBeDefined();
         const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
@@ -125,13 +126,16 @@ describe('reviewed owner-specific resolver contract', () => {
         if (!match.supported) throw new Error(match.reason);
         const selections = enumerateDependencyAuditSelections(match.plan);
         expect(selections.status).toBe('complete');
-        expect(selections.selections).toHaveLength(2);
+        expect(selections.selections).toHaveLength(count);
         for (const selection of selections.selections) {
             const resolved = resolveDependencyAuditAnnotation({id: 'test-width', plan: match.plan,
                 selection, generator: model, view: consumer});
-            expect(resolved.annotationResolution.status).toBe('exhaustive');
+            expect(resolved.annotationResolution.status).toBe('not_required');
             expect(resolved.labels.some(label => new Set<string>([Scope.SingleDigitLargestOperand,
-                Scope.MultipleDigitLargestOperand]).has(label))).toBe(true);
+                Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand]).has(label))).toBe(true);
+            expect(resolved.labels.some(label => new Set<string>([Scope.SingleDigitSmallestOperand,
+                Scope.TwoDigitSmallestOperand, Scope.ThreeDigitSmallestOperand]).has(label))).toBe(true);
+            expect(resolved.labels).not.toContain(Scope.MultipleDigitLargestOperand);
         }
     });
 
@@ -142,7 +146,7 @@ describe('reviewed owner-specific resolver contract', () => {
                     rng.setSeed(seed);
                     const stub = generateWithLabels(new PlaceValueArithmeticGenerator(),
                         [operation, width === Scope.SingleDigitLargestOperand ? Scope.NumbersSmaller10 : Scope.NumbersSmaller1000, width])!;
-                    expect(stub.labels).toContain(width);
+                    expect(stub.labels.some(label => capabilitySatisfies(label, width))).toBe(true);
                     expect(Math.max(stub.data.num1, stub.data.num2) <= 9)
                         .toBe(width === Scope.SingleDigitLargestOperand);
                 }
@@ -150,7 +154,7 @@ describe('reviewed owner-specific resolver contract', () => {
         }
         const labels = [Area.Addition, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand,
             Scope.NumbersSmaller100];
-        expect(extractConfig(PlaceValueArithmeticGeneratorSchema, labels).config.largestOperandProfile).toBe('legacy');
+        expect(extractConfig(PlaceValueArithmeticGeneratorSchema, labels).config.largestOperandProfile).toBe('21');
     });
 
     it('requires an explicit profile and defends against invalid manual combinations', () => {

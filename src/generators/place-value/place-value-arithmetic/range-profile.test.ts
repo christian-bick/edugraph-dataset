@@ -11,6 +11,20 @@ import {PlaceValueArithmeticGenerator} from './generator.ts';
 
 const uppers = [5, 10, 20, 100, 120, 1000];
 const digits = (number: number) => [Math.floor(number / 100), Math.floor(number % 100 / 10), number % 10];
+// Frozen counts from the independent positive-operand arithmetic enumeration.
+// Every case checks its count as well as the complete canonical-band partition.
+const generalContexts = [
+    {operation: 'addition', regrouping: false, zeroResult: false, coefficientZero: false, expectedCount: 82944},
+    {operation: 'addition', regrouping: false, zeroResult: false, coefficientZero: true, expectedCount: 192807},
+    {operation: 'addition', regrouping: true, zeroResult: false, coefficientZero: false, expectedCount: 81648},
+    {operation: 'addition', regrouping: true, zeroResult: false, coefficientZero: true, expectedCount: 141102},
+    {operation: 'subtraction', regrouping: false, zeroResult: false, coefficientZero: false, expectedCount: 46656},
+    {operation: 'subtraction', regrouping: false, zeroResult: false, coefficientZero: true, expectedCount: 117720},
+    {operation: 'subtraction', regrouping: false, zeroResult: true, coefficientZero: false, expectedCount: 0},
+    {operation: 'subtraction', regrouping: false, zeroResult: true, coefficientZero: true, expectedCount: 999},
+    {operation: 'subtraction', regrouping: true, zeroResult: false, coefficientZero: false, expectedCount: 36288},
+    {operation: 'subtraction', regrouping: true, zeroResult: false, coefficientZero: true, expectedCount: 75087}
+] as const;
 function quantities(a: number, b: number, addition: boolean, regrouping: boolean) {
     const result = addition ? a + b : a - b;
     return [a, b, result, ...digits(a), ...digits(b), ...digits(result),
@@ -20,31 +34,31 @@ function quantities(a: number, b: number, addition: boolean, regrouping: boolean
 }
 
 describe('canonical place-value arithmetic domains', () => {
-    it('partitions every original general pair without endpoint loss and proves every required bound', () => {
-        let total = 0, errors = 0;
-        for (const operation of ['addition', 'subtraction'] as const) for (const regrouping of [false, true]) {
-            for (const zeroResult of operation === 'subtraction' && !regrouping ? [false, true] : [false]) {
-                for (const coefficientZero of [false, true]) {
-                    const base = {operation, minimum: 1, maximum: 999, regrouping, zeroResult, coefficientZero};
-                    const original = new Set(primaryWidthRows(base, 'legacy').flatMap(row => row.seconds.map(b => row.first * 1000 + b)));
-                    const retained = new Set<number>();
-                    for (const upper of uppers) {
-                        const range = createCanonicalNumericRange(upper);
-                        const rows = primaryWidthRows({...base, maximum: Math.min(999, upper), maximumAbove: maximumAbove(upper)}, 'legacy');
-                        for (const row of rows) for (const second of row.seconds) {
-                            const key = row.first * 1000 + second;
-                            if (retained.has(key) || !hasCanonicalRangeWitness(quantities(row.first, second,
-                                operation === 'addition', regrouping), range)) errors++;
-                            retained.add(key);
-                        }
-                    }
-                    if (original.size !== retained.size || [...original].some(key => !retained.has(key))) errors++;
-                    total += original.size;
+    it.each(generalContexts)('partitions every original $operation pair/regrouping=$regrouping/zero=$zeroResult/coefficient=$coefficientZero without endpoint loss',
+        ({operation, regrouping, zeroResult, coefficientZero, expectedCount}) => {
+            let errors = 0;
+            const base = {operation, minimum: 1, maximum: 999, regrouping, zeroResult, coefficientZero};
+            const original = new Set(primaryWidthRows(base, 'legacy').flatMap(row => row.seconds.map(b => row.first * 1000 + b)));
+            expect(original.size).toBe(expectedCount);
+            const retained = new Set<number>();
+            for (const upper of uppers) {
+                const range = createCanonicalNumericRange(upper);
+                const rows = primaryWidthRows({...base, maximum: Math.min(999, upper), maximumAbove: maximumAbove(upper)}, 'legacy');
+                for (const row of rows) for (const second of row.seconds) {
+                    const key = row.first * 1000 + second;
+                    if (retained.has(key) || !hasCanonicalRangeWitness(quantities(row.first, second,
+                        operation === 'addition', regrouping), range)) errors++;
+                    retained.add(key);
                 }
             }
-        }
-        expect(errors).toBe(0);
+            if (original.size !== retained.size || [...original].some(key => !retained.has(key))) errors++;
+            expect(errors).toBe(0);
+        });
+
+    it('retains the aggregate original general support across every independent context', () => {
+        const total = generalContexts.reduce((sum, context) => sum + context.expectedCount, 0);
         expect(total).toBeGreaterThan(500000);
+        expect(total).toBe(775251);
     });
 
     it('retains every original fixed-width addition and whole-tens subtraction across the bands', () => {

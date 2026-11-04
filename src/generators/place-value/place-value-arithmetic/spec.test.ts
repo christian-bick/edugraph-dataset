@@ -24,6 +24,10 @@ const invariantLabels = [
 const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
     schema: PlaceValueArithmeticGeneratorSchema, spec};
 const views = [modelView, writtenView, explanationView];
+const exactWidths = (a: number, b: number) => [
+    [Scope.SingleDigitLargestOperand, Scope.TwoDigitLargestOperand, Scope.ThreeDigitLargestOperand][String(Math.max(a, b)).length - 1]!,
+    [Scope.SingleDigitSmallestOperand, Scope.TwoDigitSmallestOperand, Scope.ThreeDigitSmallestOperand][String(Math.min(a, b)).length - 1]!
+];
 
 const generate = (labels: string[]) => generateWithLabels(
     new PlaceValueArithmeticGenerator(),
@@ -65,14 +69,15 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
     });
 
     it.each([Area.Subtraction, Area.SubtractionPlaceValuePartitioning])(
-        'annotates the guaranteed multi-digit largest operand for %s with borrowing', operation => {
+        'preselects the exact largest and smallest widths for %s with borrowing', operation => {
             const widths = new Set<number>();
             for (let seed = 0; seed < 32; seed++) {
                 setSeed(seed);
                 const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [operation,
                     Area.IntegerRegrouping, Scope.NumbersSmaller1000]);
                 expect(stub).not.toBeNull();
-                expect(stub!.labels).toContain(Scope.MultipleDigitLargestOperand);
+                expect(stub!.labels).toEqual(expect.arrayContaining(exactWidths(stub!.data.num1, stub!.data.num2)));
+                expect(stub!.labels).not.toContain(Scope.MultipleDigitLargestOperand);
                 expect(stub!.labels).not.toContain(Scope.TwoDigitLargestOperand);
                 expect(stub!.data.num1).toBeGreaterThan(stub!.data.num2);
                 expect(stub!.data.num1 % 10).toBeLessThan(stub!.data.num2 % 10);
@@ -91,9 +96,8 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         setSeed(9);
         const stub = generateWithLabels(new PlaceValueArithmeticGenerator(), [...labels, Scope.NumbersSmaller1000]);
         expect(stub).not.toBeNull();
-        const width = Math.max(stub!.data.num1, stub!.data.num2) <= 9
-            ? Scope.SingleDigitLargestOperand : Scope.MultipleDigitLargestOperand;
-        expect(stub!.labels).toContain(width);
+        expect(stub!.labels).toEqual(expect.arrayContaining(exactWidths(stub!.data.num1, stub!.data.num2)));
+        expect(stub!.labels).not.toContain(Scope.MultipleDigitLargestOperand);
     });
 
     it('makes a truthful borrowed width matching-capable and rejects single-digit borrowing', () => {
@@ -120,12 +124,13 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         const draw = generatePlannedDraw(input);
         const state = getRandomState();
         expect(draw.stub).not.toBeNull();
-        expect(draw.labels).toContain(Scope.MultipleDigitLargestOperand);
+        expect(draw.labels).toEqual(expect.arrayContaining(exactWidths(draw.stub!.data.num1, draw.stub!.data.num2)));
+        expect(draw.labels).not.toContain(Scope.MultipleDigitLargestOperand);
         expect(generatePlannedDraw({...input, replay: draw.replay})).toEqual(draw);
         expect(getRandomState()).toBe(state);
     });
 
-    it('preserves direct configuration, payload and entropy with unspecified operations as well', () => {
+    it('needs no inference or extra entropy for direct complete width annotations', () => {
         const generator = new PlaceValueArithmeticGenerator();
         const withoutInference = {...spec, inferredLabels: undefined};
         for (const operation of [[], [Area.Addition], [Area.Subtraction],
@@ -142,16 +147,17 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
                             stub, state: getRandomState()};
                     });
                     const expected = draws[0];
-                    const width = expected.config.operation === Area.Subtraction && expected.config.requireRegrouping
-                        ? [Scope.MultipleDigitLargestOperand] : [];
-                    expect(draws[1]).toEqual({...expected, labels: [...new Set([...expected.labels, ...width])]});
+                    expect(draws[1]).toEqual(expected);
+                    expect(expected.stub).not.toBeNull();
+                    expect(expected.labels).toEqual(expect.arrayContaining(exactWidths(expected.stub!.data.num1, expected.stub!.data.num2)));
                 }
             }
         }
         const {config} = extractConfig(generator.schema, [Area.Subtraction, Area.IntegerRegrouping,
             Scope.NumbersSmaller1000]);
         expect(resolveInferredLabels({spec, schema: generator.schema, config,
-            labels: [Scope.MultipleDigitLargestOperand], owner: 'generator'})).toEqual([Scope.MultipleDigitLargestOperand]);
+            labels: [Scope.ThreeDigitLargestOperand], owner: 'generator'})).toEqual([Scope.ThreeDigitLargestOperand]);
+        expect(spec.inferredLabels).toBeUndefined();
     });
 
     it('declares invariant math while parameterizing regrouping and operand constraints', () => {
@@ -263,13 +269,17 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         expect(stub!.labels).toEqual(expect.arrayContaining([strategy, Area.IntegerRegrouping]));
     });
 
-    it('does not attach a whole-tens width to general addition', () => {
+    it('supports an exact smallest-width request without inventing a whole-tens constraint', () => {
         const labels = [Area.Addition, Scope.TwoDigitSmallestOperand, Scope.NumbersSmaller1000];
         const result = planModelCompatibility({id: 'general-addition-width', labels}, model,
             {viewId: 'neutral', generalLabels: [], schema: {}, spec: {viewId: 'neutral', generalLabels: []}});
-        expect(result).toMatchObject({supported: false, reason: 'incompatible-rules'});
+        expect(result.supported).toBe(true);
         setSeed(0);
-        expect(() => generateWithLabels(new PlaceValueArithmeticGenerator(), labels)).toThrow(/cannot complete/);
+        const draw = generateWithLabels(new PlaceValueArithmeticGenerator(), labels)!;
+        expect(draw.data.operandProfile).toBe('general');
+        expect(Math.min(draw.data.num1, draw.data.num2)).toBeGreaterThanOrEqual(10);
+        expect(Math.min(draw.data.num1, draw.data.num2)).toBeLessThan(100);
+        expect(draw.labels).not.toContain(Scope.MultiplesOf10);
     });
 
     it.each([

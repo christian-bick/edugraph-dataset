@@ -1,8 +1,8 @@
 import {Area, Scope} from 'edugraph-ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
-import {PrimaryWidth, primaryWidthRows, WidthDomain} from './width-domain.ts';
-import {primaryWidthContext, primaryWidthLabels} from './width-profile.ts';
+import {primaryWidthRows, WidthDomain} from './width-domain.ts';
+import {primaryWidthContext, primaryWidthLabels, primaryWidthFromLabels} from './width-profile.ts';
 import {widthRangeDomain} from './range-profile.ts';
 
 export const coefficientLabels = [Scope.NumbersWithZero, Scope.NumbersWithoutZero] as const;
@@ -11,8 +11,7 @@ export const coefficientContext = [...primaryWidthContext.filter(label => !coeff
 type Selected = (label: string) => boolean;
 const addition = (selected: Selected) => selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
 const subtraction = (selected: Selected) => selected(Area.Subtraction) || selected(Area.SubtractionPlaceValuePartitioning);
-const width = (selected: Selected): PrimaryWidth => selected(Scope.SingleDigitLargestOperand) ? 'single'
-    : selected(Scope.MultipleDigitLargestOperand) ? 'multiple' : 'legacy';
+const width = (selected: Selected) => primaryWidthFromLabels(primaryWidthLabels.filter(label => selected(label))) ?? 'legacy';
 const domain = (selected: Selected, zeroResult: boolean, coefficientZero: boolean): WidthDomain => {
     return {operation: addition(selected) ? 'addition' : 'subtraction',
         ...widthRangeDomain(coefficientContext.filter(label => selected(label))),
