@@ -8,12 +8,14 @@ the [Q6 unit-division separation](canonical-range-labeling.md#q6-source-verifica
 the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification),
 [Q9 relation/analogy separation](canonical-range-labeling.md#q9-source-verification),
 [Q10 unit-count/factor separation](canonical-range-labeling.md#q10-source-verification),
-[Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification) and
-[Q12 monetary-unit ranges](canonical-range-labeling.md#q12-source-verification), are implemented.
+[Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification),
+[Q12 monetary-unit ranges](canonical-range-labeling.md#q12-source-verification) and
+[Q13 algebra range exclusion](canonical-range-labeling.md#q13-source-verification) are implemented.
 Current source coverage is **1,528 normalized targets / 2,000 routes / 4,740 selections**, with
-**nine missing range facets across two producers**. Q1/Q2 closed 14 source omissions, Q6
-closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; four decision topics remain, including the same two precision topics covering
-34 already-labelled routes.
+**one missing range facet in one producer**. Q1/Q2 closed 14 source omissions, Q6
+closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; Q13 retires eight
+algebra range obligations by policy. Three decision topics remain, including the same two
+precision topics covering 34 already-labelled routes.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
@@ -57,7 +59,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
-| Q13 — symbolic algebra,8 | Should the range describe written constants only, or be inapplicable to unbound structural tasks such as `3+x` and `3÷x`? | Prefer an explicit structural-task qualification after deciding the intended classifier pattern. A sampled hidden binding cannot bound all valid values. Preserve the existing algebra sign/zero cutoff. |
 | Q15 — Basic counting,20 already-labelled routes | Is the range for a totalN alone, or the explicitly requested sequence1..N? AtN=6 conservation supports lower5, but one-to-one enumeration does not. | Confirm total-only versus enumerated-count contracts; a rare producer split can preserve both. The valid cardinality consumer must also be considered, even without a present source route. No canonical Basic precision is claimed yet. |
 | Q16 — positive non-Name writing,14 already-labelled routes | At321, numeral reading uses scalar321; count writing explicitly assesses3hundreds/2tens/1one. Which task contract owns those counts? | Distinguish block/count quantities from scalar numeral reading/writing before refining the complete mixed roles. Preserve the nine canonical Name routes and three canonical fixed-zero routes; they are not open work. |
 
@@ -104,10 +105,18 @@ omissions while preserving all 18 routes, all 900 original ordered paths and the
 tasks. The 15 adopted selections retain their exact bindings, semantic plans and receipts;
 the remaining configurations gain 16 explicit range cells with their original conditional weights.
 
-The first two rows account for all nine remaining missing source facets: arithmetic 1
-and symbolic algebra 8. The last two
+Q13 is resolved by the approved range exclusion for all algebra tasks, including bound
+evaluation/modeling and both variable-role tasks. The
+[Q13 source verification](canonical-range-labeling.md#q13-source-verification) retires eight
+missing range obligations without claiming new numeric profiles. All 39 algebra selections
+and 45 numeric structural controls preserve their plans, seeded mathematics, receipts and
+rendering; the existing algebra sign/zero cutoff remains unchanged.
+All 369 focused tests across 11 files and the unchanged four-file coverage gate pass;
+the verification checkpoint records the earlier full-suite and stored-artifact limitations.
+
+The first row accounts for the one remaining missing source facet: arithmetic 1. The last two
 concern 34 already-labelled routes with unresolved precision and must not be added to omission
-totals. These four questions are contract/policy topics, not an estimated implementation-batch
+totals. These three questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
 or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.

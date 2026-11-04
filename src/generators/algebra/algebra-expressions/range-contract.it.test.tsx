@@ -86,7 +86,7 @@ describe('structural numeric range source and consumer contracts', () => {
         expect(checked).toBe(45);
     });
 
-    it('keeps eight unbound symbolic/writing findings explicitly deferred instead of bounding their hidden bindings', () => {
+    it('excludes numeric range from all eight unbound symbolic and writing selections', () => {
         const targets = gradeSix.filter(target => (target.id.startsWith('6.EE.A.2a-') || target.id.startsWith('6.EE.A.2b-'))
             && target.labels.includes(Area.AlgebraicExpression));
         expect(targets).toHaveLength(8);
@@ -99,7 +99,14 @@ describe('structural numeric range source and consumer contracts', () => {
             expect(selection).toHaveLength(1);
             expect(extractConfig(schema, selection[0]!.labels).config.range).toBe(false);
             expect(selection[0]!.labels.some(label => expressionRangeLabels.includes(label))).toBe(false);
-            expect(evaluator.evaluate(selection[0]!.labels).assessments.filter(item => item.status === 'missing').map(item => item.facet)).toEqual(['range']);
+            const evaluated = evaluator.evaluate(selection[0]!.labels);
+            expect(evaluated.assessments.some(item => item.facet === 'range')).toBe(false);
+            expect(evaluated.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            expect(evaluated.conflicts).toEqual([]);
+            const forbidden = numericExpressionRangeProfiles[0]!.labels;
+            expect(evaluator.evaluate([...selection[0]!.labels, ...forbidden]).conflicts).toEqual([
+                expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [...forbidden].sort()})
+            ]);
             expect(plan('unsupported-symbolic-bound', [...target.labels, ...numericExpressionRangeProfiles[0]!.labels], view).supported).toBe(false);
         }
     });

@@ -14,20 +14,23 @@ Q9 separates [fractional-scale relations and whole-number analogies](#q9-fractio
 Q10 separates [generic unit counts and scale-factor derivation](#q10-source-verification).
 Q11 separates [single named-unit equivalences and five-row sequences](#q11-source-verification).
 Q12 qualifies [currency amounts in their displayed monetary units](#q12-source-verification).
+Q13 excludes [algebra tasks from numeric range annotations](#q13-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11 and Q12 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12 and Q13 decision batches also pass their
+focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets / 2,000 routes and 4,740 complete selections**, with **nine range-presence
-omissions across two producers** remaining. The
+**1,528 normalized targets / 2,000 routes and 4,740 complete selections**, with **one range-presence
+omission in one producer** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records four remaining contract/policy questions, including two already-labelled precision topics.
+records three remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
-Stored annotations have not been regenerated for these range changes, and the range gate remains
-report-only. Source readiness and dataset acceptance remain separate gates.
+Stored annotations have not been regenerated for these range changes. Missing-range findings
+remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
+remain separate gates.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -838,6 +841,91 @@ Evidence is under `temp/range-decisions/batch8-q12/` (`baseline-summary.json`,
 `temp/spec-plans/ccss/range-q12-2026-11-04/`.
 Acceptance logs are `scoped-coverage.log`, `scoped-coverage-first.log`, `coverage-gate.log`,
 `types-final.log` and `check.log` in the Q12 evidence directory.
+
+## Q13 algebra range exclusion
+
+Approved 2026-11-04 after Q12, from `343eac6a`. The user first excluded unbound
+structural tasks, then broadened the decision: do not use numeric range labels for algebra
+tasks at all. This supersedes the proposed constants-only interpretation and includes bound
+substitution, evaluation, modeling and equation solving.
+
+Use the existing algebra sign/zero boundary: any resolved Area structurally within
+`AlgebraicExpression`, or within `Algebra` after ignoring the `Arithmetic` branch per Area.
+For range only, also include the `Variable` branch: the two current unknown/generalized
+variable-role tasks otherwise lie outside that boundary. Statistical/random variables are
+separate branches. Do not use algebraic representation as a task qualifier; arithmetic ratio
+tables legitimately use it. An additional arithmetic Area cannot mask an algebraic task. Pure `ArithmeticExpression`
+tasks and shared elementary arithmetic laws retain their numeric range classification.
+The pinned ontology's inclusive bound meanings and the existing sign/zero cutoff stay intact.
+
+Add a separate range exclusion to the annotation dependency policy. Qualifying algebra
+contexts must neither require nor permit `NumericRange` annotations, including contexts
+outside the completeness allowlist. The shared evaluator must enforce this from annotations;
+do not classify payloads, inspect module IDs or filter labels after generation. No new
+ontology descriptor or trigger grammar is needed for this broader decision.
+
+Inventory and remove existing algebra range claims at their authored owners, including
+explicit source requests, while preserving every task, supported mathematical outcome and
+non-range claim. Retain mathematical generation constraints where they still control the
+existing domain. Record any target-ID migration explicitly and verify exact route lineage,
+configuration, seeded mathematics, replay and equal-payload rendering against the baseline.
+The eight Q13 source omissions become inapplicable by policy; they are not eight newly
+qualified numeric profiles. Canonical regeneration and independent VQA remain separate gates.
+
+### Q13 source verification
+
+The resolved Area inventory covers 39 algebra selections on 37 source routes, including both
+variable-role tasks. None already supplies a numeric range annotation or an explicit target
+range request, so no generator, view, target label, task or ID migration is needed. Ordinary
+numeric `ArithmeticExpression` and elementary arithmetic-law contexts retain their range policy.
+
+The empty-snapshot source audit compares every one of the 4,740 subjects with Q12. Exactly
+eight missing range assessments retire under `LD-ALGEBRA-RANGE-01`; all other 4,732 evaluations
+and the complete selection coverage remain identical. Source coverage remains 1,528 normalized
+targets / 2,000 routes / 4,740 selections. One missing range facet remains, on
+`standard-algorithm-multiplication` target
+`5.NBT.B.5-multiplication-standard-algorithm~71786b7e`. Non-range omissions, conflicts,
+contract errors, incomplete tuples, invalid contexts and pending/invalid inference remain zero;
+all 119 existing inference selections resolve exhaustively. Three topics remain: multiplication
+overflow and the two already-labelled precision reviews covering 34 routes.
+
+The independent protected baseline and after comparison cover all six algebra producers and
+18 views: 43 routes / 84 selections, comprising 39 algebra selections and 45 numeric structural
+controls. All semantic plans, receipts, selected labels/configurations, 672 fixed-seed draws,
+direct generation from resolved configurations, PRNG continuation and receipt replays remain
+exact. All 1,344 Question/Solution SSR strings are byte-identical. Of 121 protected inputs,
+120 production/reference inputs remain unchanged; the policy graph is the sole exception.
+The evaluator engine and mathematical producer/view implementations remain unchanged.
+One existing annotation re-resolution error for the normalization selection on
+`6.EE.A.4-identify-equivalent-expressions~91b107b9` is recorded unchanged; its planned resolution,
+mathematical generation, replay and rendering all succeed. This policy batch does not repair
+that separate direct-resolver limitation.
+
+Native browser verification covers all 18 views and 26 source selections, including all eight
+retired-range lineages, both variable roles, bound algebra examples and numeric structural
+controls. All 52 Question/Solution images have byte-identical repeated captures (104 captures),
+with no browser errors or error cards. These checks use protected baseline payloads with current
+views and write only ignored temporary evidence; stored dataset images and caches remain untouched.
+
+Full-check source stages 1–5 pass, including TypeScript, specs, labels, documentation and
+standards. Final TypeScript revalidation after the updated policy integration assertion also
+passes. Existing artifact stages 6/7 still fail on the unchanged 1,944 stored rows without
+generation plans/receipts and 4,006 strict findings: 1,396 eligible rows, 2,277 missing facets,
+zero conflicts and zero incomplete tuples.
+
+All 369 focused tests across 11 files pass. Scoped coverage is 98.94% statements, 97.72%
+branches, 99.2% functions and 99.41% lines; the unchanged four-file coverage gate passes.
+The shared gate and policy graph have 100% statement/branch coverage, the evaluator has
+99.64% / 98.54%, and the audit has 96.87% / 90.47%. The first scoped run hit the existing
+five-second limit in three compound identity tests. Independent comparisons are now separate
+cases and reuse reference setup, retaining every assertion and the original timeouts and
+thresholds, with no exclusions. Earlier full-suite timeout limitations remain as recorded above;
+this scoped pass does not claim a new full-suite pass. Canonical dataset regeneration and
+independent VQA remain separate acceptance gates.
+Evidence is under `temp/range-decisions/batch9-q13/`, including `inventory-before.json`,
+`baseline.json`, `preservation-after.json`, `source-audit.json`, `renders/manifest.json` and
+`check.log`. Focused acceptance logs are `scoped-coverage-first.log`, `scoped-coverage.log`
+and `coverage-gate.log`.
 
 ## Accepted direction
 

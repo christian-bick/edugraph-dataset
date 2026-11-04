@@ -51,7 +51,7 @@ the architecture document's review order whenever a match, payload, or rendered 
 wrong; do not reconstruct these contracts from historical plans or workflow prose.
 
 Shared annotation validation reports missing label groups and conflicting claims within the
-label-dependency Area allowlist. The contextual algebra sign/zero exclusion also rejects forbidden
+label-dependency Area allowlist. The contextual algebra exclusions for range, sign and zero also reject forbidden
 claims outside that completeness scope. Labels come from matched declarations and resolved schema
 choices. Generation does not append or replace labels based on sampled data. The contract is
 documented in [label architecture](docs/label-architecture.md).
@@ -517,7 +517,8 @@ rebuild each dataset graph with `generate:dataset -- --spec=<module> --rebuild-g
   complete assignments from retained correlated groups and independent domains, bounded per
   tuple; an oversized space is explicitly uninspected. Stored rows are read through the logical
   dataset snapshot in both splits. Every eligible stored annotation set is checked. Targets remain partial requests.
-  Range checks assess label presence only and never calculate replacement bounds.
+  Range completeness checks assess label presence only and never calculate replacement bounds.
+  Contextual algebra exclusions reject range annotations even outside the completeness allowlist.
 * **Configuration inference**: Report schema version 4 retains `declaredLabels` and records
   `annotationResolution` separately from label-assignment enumeration. Reviewed singleton
   resolver contracts allow exhaustive evaluation of actual inferred outputs. Unknown complete

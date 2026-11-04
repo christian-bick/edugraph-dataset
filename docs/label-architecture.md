@@ -189,7 +189,7 @@ must be present, and every involved Area must be a structural descendant of Arit
 Intuitive Mathematics, or Formal Mathematics. Admitted-selection omissions remain advisory
 in static reports; strict completeness applies to actual artifact annotations. Selection conflicts
 and invalid contexts still fail. Targets remain partial requests, and matching never evaluates a payload.
-Range-presence findings remain report-only; range policy is unchanged.
+Missing-range findings remain report-only; contextual range exclusions produce conflicts.
 
 Generic sign/zero classification has a contextual algebra cutoff. If any resolved Area is
 structurally within `AlgebraicExpression`, or within `Algebra` without also being within
@@ -198,12 +198,20 @@ nor allowed as annotations. Evaluate the exception per Area: an additional `Addi
 not mask an algebraic modeling or equation-solving claim. Shared elementary arithmetic laws retain
 their arithmetic classification. `ArithmeticExpression` alone does not trigger the cutoff.
 
+Numeric range classification uses the same cutoff and additionally excludes Areas structurally
+within `Variable`, including unknown, generalized, independent and dependent variable roles.
+The `NumericRange` family is neither assessed for completeness nor allowed in these contexts.
+This includes bound substitution, evaluation, modeling and equation solving; it does not depend
+on whether a variable is unassigned or a numerical answer is requested. Statistical and random
+variable Areas are separate ontology branches. Algebraic representation alone does not establish
+an algebra task: arithmetic ratio tables retain their numeric ranges.
+
 The graph declares this through `exclusions` containing a trigger and facet names. Activated
 exclusions suppress only those facets' completeness assessments and report every supplied family
 member as an annotation conflict, including contexts outside the outer completeness allowlist.
 Targets and module declarations must express this cutoff before generation; validation does not
-filter labels or classify payloads. Positive/negative exponent scopes and numeric range scopes
-are separate families and retain their semantics. The optional `areaWithin` object selector's
+filter labels or classify payloads. Positive/negative exponent scopes remain separate from
+these excluded families and retain their semantics. The optional `areaWithin` object selector's
 `ignore` branches filter individual Areas for qualification only; they never remove Area labels.
 
 Numeric contexts do not universally require a numeral system or base. Base completeness

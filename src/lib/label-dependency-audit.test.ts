@@ -101,7 +101,8 @@ describe('deterministic annotation reports', () => {
         expect(report.subjects[1].targetAssociations).toEqual(second.targetAssociations);
         expect(first.labels).toEqual(subject('sample:a').labels);
         const markdown = formatLabelDependencyAudit(report);
-        expect(markdown).toContain('Range presence remains report-only');
+        expect(markdown).toContain('Range presence remains report-only; contextual range exclusions are enforced.');
+        expect(markdown).not.toContain('range-policy work is excluded');
         expect(markdown).toContain('limit_exceeded');
         expect(markdown).not.toMatch(/adapter|supplementary|replay|evidence/i);
         expect(markdown).toBe(formatLabelDependencyAudit(build([first, second])));
@@ -125,6 +126,99 @@ describe('deterministic annotation reports', () => {
         expect(report.findings).toEqual([]);
         expect(formatLabelDependencyAudit(report)).toContain('LD-ZERO-CONFLICT-01/zero');
     });
+
+    it('retires symbolic source range omissions while retaining numeric-structure obligations and exact annotations', () => {
+        const result = planCompatibility({identity: {targetId: 'structural-role', generatorId: 'g', viewId: 'v'},
+            targetLabels: [Area.Term], generatorLabels: [Area.Term, Scope.IntegerNumbers],
+            viewLabels: [Scope.ArabicNumerals, Ability.ConceptClassification], fields: [{
+                owner: 'generator', field: 'frame', alternatives: [
+                    {id: 'numeric', labels: [Area.ArithmeticExpression]},
+                    {id: 'symbolic', labels: [Area.AlgebraicExpression]}
+                ]
+            }]});
+        if (!result.supported) throw new Error('Structural fixture did not match.');
+        const originalPlan = JSON.stringify(result.plan);
+        const selections = enumerateDependencyAuditSelections(result.plan);
+        expect(selections.status).toBe('complete');
+        expect(selections.selections).toHaveLength(2);
+        const subjects: DependencyAuditSubject[] = selections.selections.map(selection => ({
+            ...subject(selection.labels.includes(Area.AlgebraicExpression) ? 'symbolic' : 'numeric'),
+            kind: 'selection', targetId: 'structural-role', labels: selection.labels,
+            planHash: result.plan.hash, variantHash: selection.variantHash
+        }));
+        const originalAnnotations = subjects.map(value => [...value.labels]);
+        const report = build(subjects);
+        const symbolic = report.subjects.find(value => value.id === 'symbolic')!;
+        expect(symbolic.evaluation.context.status).toBe('eligible');
+        expect(symbolic.evaluation.assessments).toEqual([
+            expect.objectContaining({ruleId: 'LD-NUM-01', facet: 'numberKind', status: 'satisfied'})
+        ]);
+        expect(symbolic.evaluation.conflicts).toEqual([]);
+        expect(report.findings.map(finding => finding.facet).sort()).toEqual(['range', 'sign', 'zero']);
+        expect(report.findings.every(finding => finding.subjects.length === 1 && finding.subjects[0] === 'numeric')).toBe(true);
+        expect(report.subjects.map(value => [value.id, value.labels])).toEqual(subjects
+            .map(value => [value.id, [...value.labels].sort()]).sort(([left], [right]) => String(left).localeCompare(String(right))));
+        expect(subjects.map(value => value.labels)).toEqual(originalAnnotations);
+        expect(JSON.stringify(result.plan)).toBe(originalPlan);
+    });
+
+    it('reports forbidden algebra ranges as conflicts without erasing them or arithmetic range omissions', () => {
+        const subjects = [
+            {...subject('symbolic'), labels: [Area.AlgebraicExpression, Scope.IntegerNumbers, Scope.NumbersSmaller20]},
+            {...subject('bound-equation'), labels: [Area.EquationSolving, Area.Addition, Scope.RationalNumbers, Scope.NumbersSmaller20]},
+            {...subject('arithmetic'), labels: [Area.Addition, Scope.IntegerNumbers,
+                Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]}
+        ];
+        const original = JSON.stringify(subjects);
+        const report = build(subjects);
+        expect(report.summary).toMatchObject({samples: 3, conflicts: 2,
+            contexts: {eligible: 2, outside_policy_scope: 1, invalid_context: 0},
+            assessments: {missing: 1}, samples_with_missing_dependencies: 0});
+        expect(report.findings).toEqual([
+            expect.objectContaining({ruleId: 'LD-NUM-01', facet: 'range', subjects: ['arithmetic']})
+        ]);
+        for (const id of ['symbolic', 'bound-equation']) {
+            const value = report.subjects.find(value => value.id === id)!;
+            expect(value.labels).toContain(Scope.NumbersSmaller20);
+            expect(value.evaluation.conflicts).toEqual([
+                expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [Scope.NumbersSmaller20]})
+            ]);
+        }
+        const markdown = formatLabelDependencyAudit(report);
+        expect(markdown).toContain('LD-ALGEBRA-RANGE-01/range');
+        expect(markdown).toContain('Range presence remains report-only; contextual range exclusions are enforced.');
+        expect(markdown).not.toContain('range-policy work is excluded');
+        expect(JSON.stringify(subjects)).toBe(original);
+    });
+
+    it.each([Area.UnknownVariable, Area.GeneralizedVariable])(
+        'preserves actual %s annotations and rejects only the future range claim', role => {
+            const actual: DependencyAuditSubject = {id: 'actual-role', kind: 'selection', targetId: 'variable-role',
+                generatorId: 'algebra-variable-models', viewId: 'algebra-variable-interpretation',
+                labels: [role, Ability.Interpretation]};
+            const ranged: DependencyAuditSubject = {...actual, id: 'ranged-role', kind: 'sample', labels: [
+                ...actual.labels, Scope.RationalNumbers, Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithoutZero, Scope.NumbersSmaller10
+            ]};
+            const original = JSON.stringify([actual, ranged]);
+            const report = build([actual, ranged]);
+            expect(report.summary).toMatchObject({selections: 1, samples: 1, conflicts: 1,
+                assessments: {missing: 0}, contexts: {eligible: 2, outside_policy_scope: 0}});
+            expect(report.findings).toEqual([]);
+            const actualResult = report.subjects.find(value => value.id === actual.id)!;
+            expect(actualResult.labels).toEqual([...actual.labels].sort());
+            expect(actualResult.evaluation.assessments).toEqual([]);
+            expect(actualResult.evaluation.conflicts).toEqual([]);
+            const rangedResult = report.subjects.find(value => value.id === ranged.id)!;
+            expect(rangedResult.labels).toEqual([...ranged.labels].sort());
+            expect(rangedResult.evaluation.assessments.map(value => [value.facet, value.status])).toEqual([
+                ['numberKind', 'satisfied'], ['sign', 'satisfied'], ['zero', 'satisfied']
+            ]);
+            expect(rangedResult.evaluation.conflicts).toEqual([
+                expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [Scope.NumbersSmaller10]})
+            ]);
+            expect(JSON.stringify([actual, ranged])).toBe(original);
+        });
     it('orders tuple coverage independently and renders incomplete-plan reasons', () => {
         const complete = {targetId: 'a', generatorId: 'g', viewId: 'v', status: 'complete' as const, total: '1', checked: 1};
         const invalid = {targetId: 'z', generatorId: 'g', viewId: 'v', status: 'invalid_plan' as const,

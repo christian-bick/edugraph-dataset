@@ -13,7 +13,11 @@ matching capabilities; representation completeness remains separate.
 The separately agreed [canonical range initiative](canonical-range-labeling.md), started
 2026-10-31, now reviews target-band expansion and mathematical range guarantees. Historical
 range exclusions below remain accurate for these completed checkpoints; the current range
-presence check stays report-only until the new initiative deliberately changes its contract.
+presence check stays report-only. The approved
+[Q13 algebra exclusion](canonical-range-labeling.md#q13-algebra-range-exclusion), 2026-11-04,
+additionally forbids range annotations in algebra and variable-role contexts. Its qualifier
+and the unchanged sign/zero boundary are documented in
+[label architecture](../label-architecture.md).
 
 ## Canonical acceptance and browser import repair (2026-10-30)
 

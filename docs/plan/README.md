@@ -17,7 +17,8 @@ These items are not newly scheduled by the archive move.
   is implemented: narrowing numeral/base obligations retires 38 source requirements without
   claiming annotation repairs. Representation completeness remains a separate, unestimated
   design question.
-  Range was excluded from that initiative and remains report-only in the current gate.
+  Range was excluded from that initiative. Missing-range findings remain report-only;
+  the approved algebra exclusions are enforced.
 
 - **Canonical numeric ranges:** the [range-labeling plan](canonical-range-labeling.md) starts
   the separately agreed review of tightest bounds, relevant target-band expansion and generator
@@ -44,9 +45,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11 and Q12, current source gates cover **1,528 normalized targets / 2,000 routes and 4,740 selections**,
-  with nine range omissions across two producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records two missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
+  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12 and Q13, current source gates cover **1,528 normalized targets / 2,000 routes and 4,740 selections**,
+  with one range omission in one producer. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records one missing-facet topic and two already-labelled precision topics covering 34 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -110,10 +111,20 @@ These items are not newly scheduled by the archive move.
   overall coverage is 99.5% statements / 97.79% branches with all functions and lines covered.
   The checkpoint records passing source checks and the existing full-suite timeout and
   stored-artifact limitations separately from dataset acceptance.
+  Q13's [source verification](canonical-range-labeling.md#q13-source-verification) retires eight
+  algebra range obligations under the approved exclusion for all algebra tasks. The other
+  4,732 source evaluations remain exact. All 43 protected routes / 84 selections preserve
+  their semantic plans, receipts, 672 seeded draws and 1,344 Question/Solution SSR strings,
+  including 45 numeric structural controls. Native browser verification covers all 18 views:
+  52 images captured twice with identical bytes (104 captures). All 369 focused tests across
+  11 files and the unchanged four-file coverage gate pass, with overall 98.94% statement /
+  97.72% branch coverage. Source checks and TypeScript pass; the checkpoint records the
+  existing direct-resolver, full-suite and stored-artifact limitations separately from dataset acceptance.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
-  Dataset acceptance is recorded separately in the main plan; range dependency diagnostics remain report-only.
+  Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
+  report-only; the algebra exclusions are enforced.
 
 - **Grade 6 CCSS implementation:** [grade-06.ts](../../src/spec/ccss/grade-06.ts) now contains
   83 reviewed competencies across all 42 leaves, represented by 192 implementation TODO

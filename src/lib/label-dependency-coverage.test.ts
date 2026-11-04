@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {Area, Scope} from 'edugraph-ts/generated';
+import {Ability, Area, Scope} from 'edugraph-ts/generated';
 import {labelDependencyCoverage} from '../validation/label-dependency-coverage.ts';
 import {createLabelDependencyEvaluator} from './label-dependencies.ts';
 import {ResolvedLabelContractError} from './label-contracts.ts';
@@ -175,6 +175,114 @@ describe('universal annotation dependency enforcement', () => {
             .toThrow('LD-ALGEBRA-POLARITY-01/sign');
     });
 
+    it.each([
+        {name: 'symbolic structure', areas: [Area.AlgebraicExpression], status: 'checked'},
+        {name: 'bound substitution with arithmetic', areas: [Area.NumericSubstitution, Area.Addition], status: 'outside_policy_scope'},
+        {name: 'equation solving with arithmetic', areas: [Area.EquationSolving, Area.Addition], status: 'outside_policy_scope'}
+    ])('strictly rejects range claims for $name in stored and admitted annotations', ({areas, status}) => {
+        const annotations = Object.freeze([...areas, Scope.RationalNumbers, Scope.ArabicNumerals]);
+        const forbidden = Object.freeze([...annotations, Scope.NumbersLarger20, Scope.NumbersSmaller100]);
+        for (const kind of ['sample', 'selection'] as const) {
+            const clean = assertLabelDependencyCoverage(input({kind, labels: annotations}));
+            expect(clean.status).toBe(status);
+            expect([...clean.checkedFacets, ...clean.reportOnlyFacets]
+                .some(facet => /\/(range|sign|zero)$/.test(facet))).toBe(false);
+            const result = assess({kind, labels: forbidden});
+            expect(result.status).toBe(status);
+            expect(result.failures).toEqual([
+                expect.objectContaining({code: 'contradiction', ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})
+            ]);
+            expect(() => assertLabelDependencyCoverage(input({kind, labels: forbidden})))
+                .toThrow('LD-ALGEBRA-RANGE-01/range');
+        }
+        expect(forbidden).toEqual([...annotations, Scope.NumbersLarger20, Scope.NumbersSmaller100]);
+    });
+
+    it('enforces algebra range exclusions from resolved Areas when stored Area annotations are incomplete', () => {
+        const annotations = Object.freeze([Area.Addition, Scope.IntegerNumbers, Scope.NumbersSmaller10]);
+        const result = assess({labels: annotations, resolvedAreas: [Area.Addition, Area.EquationSolving]});
+        expect(result.status).toBe('outside_policy_scope');
+        expect(result.failures).toEqual([
+            expect.objectContaining({code: 'contradiction', ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})
+        ]);
+        expect(() => assertLabelDependencyCoverage(input({labels: annotations,
+            resolvedAreas: [Area.Addition, Area.EquationSolving]}))).toThrow(LabelDependencyCoverageError);
+        expect(annotations).toEqual([Area.Addition, Scope.IntegerNumbers, Scope.NumbersSmaller10]);
+    });
+
+    it.each([
+        [Area.ArithmeticExpression, Area.Term],
+        [Area.Equation, Area.Addition],
+        [Area.CommutativeLaw, Area.Addition]
+    ])('keeps missing ranges advisory for the arithmetic context %s + %s', (first, second) => {
+        const annotations = Object.freeze([first, second, Scope.IntegerNumbers, Scope.ArabicNumerals,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
+        const result = assertLabelDependencyCoverage(input({labels: annotations}));
+        expect(result.status).toBe('checked');
+        expect(result.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        expect(assertLabelDependencyCoverage(input({labels: [...annotations, Scope.NumbersSmaller10]})).failures).toEqual([]);
+    });
+
+    it('keeps decimal base completeness and the independent algebra polarity exclusions intact', () => {
+        const annotations = [Area.AlgebraicExpression, Scope.ArabicNumerals, Scope.DecimalNumbers];
+        expect(assess({labels: annotations}).failures).toEqual([
+            expect.objectContaining({code: 'missing', ruleId: 'LD-DECIMAL-01', facet: 'base'})
+        ]);
+        const complete = [...annotations, Scope.Base10];
+        expect(assertLabelDependencyCoverage(input({labels: complete})).reportOnlyFacets).toEqual([]);
+        const result = assess({labels: [...complete, Scope.NumbersSmaller5,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithZero]});
+        expect(result.failures.map(failure => [failure.ruleId, failure.facet]).sort()).toEqual([
+            ['LD-ALGEBRA-POLARITY-01', 'sign'], ['LD-ALGEBRA-POLARITY-01', 'zero'],
+            ['LD-ALGEBRA-RANGE-01', 'range']
+        ]);
+    });
+
+    it.each([Area.UnknownVariable, Area.GeneralizedVariable])(
+        'excludes ranges for %s without inventing a polarity exclusion or changing annotations', role => {
+            const actual = Object.freeze([role, Ability.Interpretation]);
+            expect(assertLabelDependencyCoverage(input({labels: actual})).checkedFacets).toEqual([]);
+            const numeric = Object.freeze([...actual, Scope.RationalNumbers, Scope.ArabicNumerals]);
+            const incomplete = assess({labels: numeric});
+            expect(incomplete.failures.map(failure => [failure.code, failure.facet])).toEqual([
+                ['missing', 'sign'], ['missing', 'zero']
+            ]);
+            expect(incomplete.reportOnlyFacets).toEqual([]);
+            const complete = Object.freeze([...numeric, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
+            expect(assertLabelDependencyCoverage(input({labels: complete})).failures).toEqual([]);
+            const forbidden = Object.freeze([...complete, Scope.NumbersSmaller10]);
+            expect(assess({labels: forbidden}).failures).toEqual([
+                expect.objectContaining({code: 'contradiction', ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})
+            ]);
+            expect(() => assertLabelDependencyCoverage(input({labels: forbidden})))
+                .toThrow('LD-ALGEBRA-RANGE-01/range');
+            expect(actual).toEqual([role, Ability.Interpretation]);
+            expect(forbidden).toEqual([...complete, Scope.NumbersSmaller10]);
+        });
+
+    it.each([Area.StatisticalVariable, Area.RandomVariable])(
+        'keeps %s outside the symbolic variable-role range exclusion', role => {
+            const annotations = Object.freeze([role, Area.Addition, Scope.RationalNumbers,
+                Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero, Scope.NumbersSmaller20]);
+            const result = assertLabelDependencyCoverage(input({labels: annotations}));
+            expect(result.status).toBe('outside_policy_scope');
+            expect(result.failures).toEqual([]);
+            expect(annotations).toContain(Scope.NumbersSmaller20);
+        });
+
+    it('keeps numeric ratio tables in range classification despite their algebraic representation Scope', () => {
+        const annotations = Object.freeze([Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation,
+            Scope.TabularAlgebraicRepresentation, Scope.ArabicNumerals, Scope.Base10, Scope.RationalNumbers,
+            Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero, Ability.ProcedureInversion]);
+        const missingRange = assertLabelDependencyCoverage(input({labels: annotations}));
+        expect(missingRange.status).toBe('checked');
+        expect(missingRange.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        const ranged = assertLabelDependencyCoverage(input({labels: [...annotations, Scope.NumbersSmaller20]}));
+        expect(ranged.failures).toEqual([]);
+        expect(ranged.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        expect(annotations).toContain(Scope.TabularAlgebraicRepresentation);
+    });
+
     it('fails unknown annotations and missing or malformed Area context', () => {
         expect(assess({labels: []}).failures).toEqual(expect.arrayContaining([
             expect.objectContaining({code: 'context'}), expect.objectContaining({code: 'contract'})
@@ -242,6 +350,21 @@ describe('strict annotation report summary', () => {
         expect(result.report_only_facets).toEqual(['range']);
         expect(result.report_only_completeness_kinds).toEqual(['selection']);
         expect(summarizeLabelDependencyCoverage({dataset, subjects: [...subjects].reverse(), selection_coverage: []})).toEqual(result);
+    });
+
+    it('keeps forbidden algebra ranges blocking while arithmetic range omissions remain report-only', () => {
+        const algebra = [Area.AlgebraicExpression, Scope.RationalNumbers, Scope.NumbersSmaller10];
+        const subjects = [subject('stored-algebra', {labels: algebra}),
+            subject('future-algebra', {kind: 'selection', labels: [Area.EquationSolving, Area.Addition, Scope.NumbersSmaller10]}),
+            subject('arithmetic', {labels})];
+        const result = summarizeLabelDependencyCoverage({dataset, subjects, selection_coverage: []});
+        expect(result.failures).toEqual([
+            expect.objectContaining({subject: 'future-algebra', code: 'contradiction', ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'}),
+            expect.objectContaining({subject: 'stored-algebra', code: 'contradiction', ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})
+        ]);
+        expect(result.counts).toMatchObject({checked: 2, outside_policy_scope: 1, failures: 2, report_only_facets: 1});
+        expect(result.subjects.find(value => value.id === 'arithmetic')?.reportOnlyFacets).toEqual(['LD-NUM-01/range']);
+        expect(algebra).toEqual([Area.AlgebraicExpression, Scope.RationalNumbers, Scope.NumbersSmaller10]);
     });
 
     it('fails unavailable snapshots and incomplete selection enumeration independently of annotations', () => {

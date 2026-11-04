@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {beforeAll, describe, expect, it} from 'vitest';
 import {Ability, Area, Scope, bundledContext} from 'edugraph-ts/generated';
 import {createOntologyContext, RELATION_IRIS, type OntologyStatement} from 'edugraph-ts/core';
 import {labelDependencies} from '../validation/label-dependencies.ts';
@@ -193,37 +193,147 @@ describe('algebra annotation cutoff', () => {
             }
         });
 
-    it.each([Area.ArithmeticExpression, Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw])(
+    it.each([
+        ['symbolic expression', Area.AlgebraicExpression],
+        ['bound numerical substitution', Area.NumericSubstitution],
+        ['algebraic substitution', Area.AlgebraicSubstitution],
+        ['algebraic modeling', Area.AlgebraicModeling],
+        ['equation solving', Area.EquationSolving]
+    ])('excludes range completeness and claims for %s, including mixed arithmetic', (_name, area) => {
+        const labels = [area, Area.Addition, Scope.IntegerNumbers];
+        const missing = evaluator.evaluate(labels);
+        expect(missing.assessments.some(item => item.facet === 'range')).toBe(false);
+        expect(missing.conflicts).toEqual([]);
+        const claims = [Scope.NumbersLargerZero, Scope.NumbersLarger10, Scope.NumbersSmaller100];
+        for (const supplied of claims.map(claim => [claim]).concat([claims])) {
+            const annotations = [...labels, ...supplied], before = [...annotations];
+            const result = evaluator.evaluate(annotations);
+            expect(result.assessments.some(item => item.facet === 'range')).toBe(false);
+            expect(result.conflicts).toEqual([{
+                ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [...supplied].sort(),
+                reason: 'This annotation family is excluded in the resolved Area context.'
+            }]);
+            expect(annotations).toEqual(before);
+        }
+    });
+
+    it.each([Area.UnknownVariable, Area.GeneralizedVariable, Area.IndependentVariable, Area.DependentVariable,
+        Area.Parameter, Area.FreeVariable, Area.BoundVariable, Area.VaryingVariable])(
+        'excludes ranges for variable role %s while preserving its existing polarity policy', area => {
+            const labels = [area, Area.Addition, Scope.IntegerNumbers];
+            const missing = evaluator.evaluate(labels);
+            expect(missing.context.status).toBe('eligible');
+            expect(missing.assessments.some(item => item.facet === 'range')).toBe(false);
+            expect(missing.assessments.filter(item => item.facet === 'sign' || item.facet === 'zero'))
+                .toEqual(expect.arrayContaining([expect.objectContaining({facet: 'sign', status: 'missing'}),
+                    expect.objectContaining({facet: 'zero', status: 'missing'})]));
+            const polarity = [...labels, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero];
+            expect(evaluator.evaluate(polarity).conflicts).toEqual([]);
+            const ranged = evaluator.evaluate([...polarity, Scope.NumbersLarger10, Scope.NumbersSmaller100]);
+            expect(ranged.conflicts).toEqual([{
+                ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [Scope.NumbersLarger10, Scope.NumbersSmaller100].sort(),
+                reason: 'This annotation family is excluded in the resolved Area context.'
+            }]);
+            expect(ranged.assessments.some(item => item.facet === 'range')).toBe(false);
+        });
+
+    it('applies the variable-role exclusion through authoritative resolved Areas', () => {
+        const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers, Scope.NumbersSmaller100], [Area.UnknownVariable]);
+        expect(result.context.status).toBe('eligible');
+        expect(result.conflicts).toEqual([expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})]);
+    });
+
+    it('keeps statistical and random variables outside the range exclusion', () => {
+        const variableAreas = [Area.StatisticalVariable, Area.RandomVariable];
+        const value = graph();
+        // These Areas are outside the production completeness allowlist, independently of the exclusion.
+        const eligible = createLabelDependencyEvaluator({...value,
+            context: {...value.context, allAreasWithin: [...value.context.allAreasWithin, ...variableAreas]}});
+        for (const area of variableAreas) {
+            const labels = [area, Area.Addition, Scope.IntegerNumbers];
+            const outside = evaluator.evaluate([...labels, Scope.NumbersSmaller100]);
+            expect(outside.context.status).toBe('outside_policy_scope');
+            expect(outside.conflicts).toEqual([]);
+            const missing = eligible.evaluate(labels);
+            expect(missing.context.status).toBe('eligible');
+            expect(missing.assessments.find(item => item.facet === 'range')?.status).toBe('missing');
+            const present = eligible.evaluate([...labels, Scope.NumbersSmaller100]);
+            expect(present.conflicts).toEqual([]);
+            expect(present.assessments.find(item => item.facet === 'range')?.status).toBe('satisfied');
+        }
+    });
+
+    it.each([Area.ArithmeticExpression, Area.CommutativeLaw, Area.AssociativeLaw, Area.DistributiveLaw,
+        Area.FractionNumeratorInterpretation, Area.FractionDenominatorInterpretation,
+        Area.RatioAntecedentInterpretation, Area.RatioConsequentInterpretation])(
         'retains numeric completeness and claims for the arithmetic/shared role %s', area => {
             const missing = evaluator.evaluate([area, Scope.IntegerNumbers]);
             expect(missing.assessments.filter(item => item.facet === 'sign' || item.facet === 'zero'))
                 .toHaveLength(2);
-            const labeled = evaluator.evaluate([area, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero]);
+            expect(missing.assessments.find(item => item.facet === 'range')?.status).toBe('missing');
+            const labeled = evaluator.evaluate([area, Scope.IntegerNumbers, Scope.NumbersWithoutNegatives,
+                Scope.NumbersWithoutZero, Scope.NumbersLarger10, Scope.NumbersSmaller100]);
             expect(labeled.conflicts).toEqual([]);
+            expect(labeled.assessments.find(item => item.facet === 'range')).toMatchObject({status: 'satisfied',
+                labels: [Scope.NumbersLarger10, Scope.NumbersSmaller100].sort()});
         });
 
-    it('uses the full authoritative Area context and preserves non-polarity facets', () => {
+    it('uses the full authoritative Area context and preserves other numeric facets', () => {
         const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers, Scope.TwoOperands], [Area.AlgebraicExpression]);
         expect(result.assessments.map(item => item.facet).sort())
-            .toEqual(['numberKind', 'operandCount', 'operandDigits', 'range']);
+            .toEqual(['numberKind', 'operandCount', 'operandDigits']);
         const forbidden = evaluator.evaluate([Area.Addition, Scope.NumbersWithoutZero], [Area.EquationSolving]);
         expect(forbidden.context.status).toBe('outside_policy_scope');
-        expect(forbidden.conflicts).toEqual([expect.objectContaining({facet: 'zero'})]);
+        expect(forbidden.conflicts).toEqual([expect.objectContaining({ruleId: 'LD-ALGEBRA-POLARITY-01', facet: 'zero'})]);
+        const range = evaluator.evaluate([Area.Addition, Scope.NumbersSmaller100], [Area.AlgebraicExpression]);
+        expect(range.context.status).toBe('eligible');
+        expect(range.conflicts).toEqual([expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range'})]);
     });
 
-    it('preserves exponent and range scopes outside the two families', () => {
-        expect(evaluator.evaluate([Area.AlgebraicExpression, Scope.PositiveExponent, Scope.NegativeExponent,
-            Scope.NumbersLargerZero]).conflicts).toEqual([]);
+    it.each([Area.AlgebraicModeling, Area.EquationSolving])('rejects range claims outside completeness scope for %s', area => {
+        const result = evaluator.evaluate([Area.Addition, Scope.IntegerNumbers, Scope.NumbersLarger10,
+            Scope.NumbersSmaller100], [area]);
+        expect(result.context.status).toBe('outside_policy_scope');
+        expect(result.assessments).toEqual([]);
+        expect(result.conflicts).toEqual([{
+            ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [Scope.NumbersLarger10, Scope.NumbersSmaller100].sort(),
+            reason: 'This annotation family is excluded in the resolved Area context.'
+        }]);
     });
 
-    it('normalizes exclusion and ignored-branch order and binds them to policy identity', () => {
+    it('preserves exponent scopes while rejecting the separate range family', () => {
+        const labels = [Area.AlgebraicExpression, Scope.PositiveExponent, Scope.NegativeExponent];
+        expect(evaluator.evaluate(labels).conflicts).toEqual([]);
+        expect(evaluator.evaluate([...labels, Scope.NumbersLargerZero]).conflicts).toEqual([
+            expect.objectContaining({ruleId: 'LD-ALGEBRA-RANGE-01', facet: 'range', labels: [Scope.NumbersLargerZero]})
+        ]);
+    });
+
+    it('keeps the range exclusion separate from the existing polarity contract', () => {
+        const value = graph();
+        (value as any).exclusions = value.exclusions!.filter(rule => rule.id !== 'LD-ALGEBRA-RANGE-01');
+        const withoutRangeExclusion = createLabelDependencyEvaluator(value);
+        const result = withoutRangeExclusion.evaluate([Area.AlgebraicExpression, Scope.IntegerNumbers,
+            Scope.NumbersSmaller100, Scope.NumbersWithoutZero]);
+        expect(result.assessments.find(item => item.facet === 'range')?.status).toBe('satisfied');
+        expect(result.assessments.some(item => item.facet === 'sign' || item.facet === 'zero')).toBe(false);
+        expect(result.conflicts).toEqual([expect.objectContaining({ruleId: 'LD-ALGEBRA-POLARITY-01', facet: 'zero'})]);
+        expect(withoutRangeExclusion.policyHash).not.toBe(evaluator.policyHash);
+    });
+
+    it('normalizes exclusion facet and ignored-branch order without changing policy identity', () => {
         const value = graph();
         (value as any).exclusions[0].facets.reverse();
         (value as any).exclusions[0].when.any.reverse();
         expect(createLabelDependencyEvaluator(value).policyHash).toBe(evaluator.policyHash);
+    });
+
+    it('binds exclusion removal to policy identity and restores the excluded assessments', () => {
+        const value = graph();
         (value as any).exclusions = [];
-        expect(createLabelDependencyEvaluator(value).policyHash).not.toBe(evaluator.policyHash);
-        expect(createLabelDependencyEvaluator(value).evaluate([Area.AlgebraicExpression, Scope.IntegerNumbers])
+        const withoutExclusions = createLabelDependencyEvaluator(value);
+        expect(withoutExclusions.policyHash).not.toBe(evaluator.policyHash);
+        expect(withoutExclusions.evaluate([Area.AlgebraicExpression, Scope.IntegerNumbers])
             .assessments.some(item => item.facet === 'zero')).toBe(true);
     });
 });
@@ -382,21 +492,33 @@ describe('integer-only operand-digit qualification', () => {
         expect(strict.policyHash).not.toBe(evaluator.policyHash);
     });
 
-    it('normalizes ignored-root order and duplicates without changing their qualification', () => {
-        const value = graph();
-        const when = (value.rules.find(item => item.id === 'LD-OPERANDS-02')! as any).when;
-        const within = when.all.find((child: any) => 'familyWithin' in child).familyWithin;
-        within.ignore = [Scope.DecimalNumbers, Scope.Base10];
-        const original = createLabelDependencyEvaluator(value);
-        within.ignore = [Scope.Base10, Scope.DecimalNumbers, Scope.DecimalNumbers];
-        const reordered = createLabelDependencyEvaluator(value);
-        expect(reordered.policyHash).toBe(original.policyHash);
+    describe('ignored-root normalization and qualification', () => {
+        let original: ReturnType<typeof createLabelDependencyEvaluator>;
         const labels = [Area.Addition, Scope.IntegerNumbers, Scope.DecimalNumbers, Scope.TwoOperands];
-        expect(reordered.evaluate(labels)).toEqual(original.evaluate(labels));
-        within.ignore = [Scope.IntegerNumbers, Scope.DecimalNumbers];
-        const empty = createLabelDependencyEvaluator(value);
-        expect(empty.evaluate(labels).assessments.some(item => item.facet === 'operandDigits')).toBe(false);
-        expect(empty.policyHash).not.toBe(original.policyHash);
+        const withIgnoredRoots = (ignore: readonly Scope[]) => {
+            const value = graph();
+            const when = (value.rules.find(item => item.id === 'LD-OPERANDS-02')! as any).when;
+            when.all.find((child: any) => 'familyWithin' in child).familyWithin.ignore = [...ignore];
+            return value;
+        };
+
+        beforeAll(() => {
+            original = createLabelDependencyEvaluator(withIgnoredRoots([Scope.DecimalNumbers, Scope.Base10]));
+        });
+
+        it.each([
+            {name: 'reordered and duplicated roots', ignore: [Scope.Base10, Scope.DecimalNumbers, Scope.DecimalNumbers], equivalent: true},
+            {name: 'an empty qualifying family', ignore: [Scope.IntegerNumbers, Scope.DecimalNumbers], equivalent: false}
+        ])('preserves the expected identity and qualification for $name', ({ignore, equivalent}) => {
+            const custom = createLabelDependencyEvaluator(withIgnoredRoots(ignore));
+            if (equivalent) {
+                expect(custom.policyHash).toBe(original.policyHash);
+                expect(custom.evaluate(labels)).toEqual(original.evaluate(labels));
+            } else {
+                expect(custom.evaluate(labels).assessments.some(item => item.facet === 'operandDigits')).toBe(false);
+                expect(custom.policyHash).not.toBe(original.policyHash);
+            }
+        });
     });
 
     it('does not let integer-branch Area ancestry require digits for decimal algorithms', () => {

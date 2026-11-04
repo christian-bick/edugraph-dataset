@@ -172,15 +172,25 @@ describe('stored annotation integrity and policy identity', () => {
         expect(sample.evaluation.context.status).toBe('eligible');
         expect(sample.issues).toEqual([`Stored annotations omit a resolved Area: ${Area.Addition}.`]);
     });
-    it('versions deterministic reports with current machinery and ontology only', async () => {
-        const input = {projectRoot, spec: 'fixture', snapshot: snapshot([stored()])};
-        const original = await inspectLabelDependencies(input);
-        expect(await inspectLabelDependencies(input)).toEqual(original);
-        expect(mocks.digest.mock.calls.map(([path]) => path).every((path: string) => !/evidence|realized-labels/.test(path))).toBe(true);
-        mocks.digest.mockImplementation((path: string) => ({sha256: `changed:${path}`, bytes: 1}));
-        const changed = await inspectLabelDependencies(input);
-        expect(changed.policy_hash).not.toBe(original.policy_hash); expect(changed.subjects).toEqual(original.subjects);
-        mocks.provenance.mockReturnValue({version: 'new-ontology'});
-        expect((await inspectLabelDependencies(input)).policy_hash).not.toBe(changed.policy_hash);
-    });
+    it.each(['unchanged inputs', 'changed machinery', 'changed ontology'] as const)(
+        'versions deterministic reports with current machinery and ontology only: %s', async variant => {
+            const input = {projectRoot, spec: 'fixture', snapshot: snapshot([stored()])};
+            // Check ontology provenance independently while retaining the changed-machinery baseline.
+            if (variant === 'changed ontology') {
+                mocks.digest.mockImplementation((path: string) => ({sha256: `changed:${path}`, bytes: 1}));
+            }
+            const original = await inspectLabelDependencies(input);
+            if (variant === 'changed machinery') {
+                mocks.digest.mockImplementation((path: string) => ({sha256: `changed:${path}`, bytes: 1}));
+            } else if (variant === 'changed ontology') {
+                mocks.provenance.mockReturnValue({version: 'new-ontology'});
+            }
+            const compared = await inspectLabelDependencies(input);
+            if (variant === 'unchanged inputs') expect(compared).toEqual(original);
+            else {
+                expect(compared.policy_hash).not.toBe(original.policy_hash);
+                if (variant === 'changed machinery') expect(compared.subjects).toEqual(original.subjects);
+            }
+            expect(mocks.digest.mock.calls.map(([path]) => path).every((path: string) => !/evidence|realized-labels/.test(path))).toBe(true);
+        });
 });

@@ -1,5 +1,10 @@
 import {Area, Scope} from 'edugraph-ts/generated';
-import type {LabelDependencyGraph} from '../types/label-dependencies.ts';
+import type {DependencyTrigger, LabelDependencyGraph} from '../types/label-dependencies.ts';
+
+const algebraContext = {any: [
+    {areaWithin: Area.AlgebraicExpression},
+    {areaWithin: {root: Area.Algebra, ignore: [Area.Arithmetic]}}
+]} as const satisfies DependencyTrigger;
 
 /** Repo-local assessment obligations. Grouping roots never become annotations. */
 export const labelDependencies = {
@@ -53,9 +58,7 @@ export const labelDependencies = {
             labels: [Scope.SingleFrameOfReference, Scope.MultipleFramesOfReference]}
     ],
     exclusions: [
-        {id: 'LD-ALGEBRA-POLARITY-01', when: {any: [
-            {areaWithin: Area.AlgebraicExpression},
-            {areaWithin: {root: Area.Algebra, ignore: [Area.Arithmetic]}}
-        ]}, facets: ['sign', 'zero']}
+        {id: 'LD-ALGEBRA-POLARITY-01', when: algebraContext, facets: ['sign', 'zero']},
+        {id: 'LD-ALGEBRA-RANGE-01', when: {any: [...algebraContext.any, {areaWithin: Area.Variable}]}, facets: ['range']}
     ]
 } as const satisfies LabelDependencyGraph;

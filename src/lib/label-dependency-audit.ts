@@ -190,7 +190,7 @@ export function formatLabelDependencyAudit(report: ReturnType<typeof buildLabelD
         `- Stored samples with missing non-range dependencies: ${summary.samples_with_missing_dependencies}`,
         `- Row issues: ${summary.row_issues}; label contract errors: ${summary.contract_errors}; incomplete tuples: ${summary.incomplete_tuples}`,
         `- Inference resolution: ${summary.exhaustive_inference_selections} exhaustive, ${summary.pending_inference_selections} pending, ${summary.invalid_inference_selections} invalid selections`, '',
-        'Every eligible annotation set is checked directly. Contextual exclusions also reject forbidden claims outside the completeness allowlist. Strict mode enforces finalized samples; missing facets in pre-draw selections remain advisory. Range presence remains report-only; range-policy work is excluded.', '',
+        'Every eligible annotation set is checked directly. Contextual exclusions also reject forbidden claims outside the completeness allowlist. Strict mode enforces finalized samples; missing facets in pre-draw selections remain advisory. Range presence remains report-only; contextual range exclusions are enforced.', '',
         '## Missing annotation dependencies', '',
         '| Source | Generator / view | Rule / facet | Present | Subjects | Reason |',
         '|---|---|---|---|---:|---|'];
