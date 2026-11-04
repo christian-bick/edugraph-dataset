@@ -96,9 +96,10 @@ describe('decimal standard add/sub zero profiles', () => {
         expect(hasDecimalColumnZero(data)).toBe(true);
     });
 
-    it.each(['addition', 'subtraction'] as const)('has both nonempty %s profiles at every band and replays stress draws', operation => {
-        const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
-        for (const max of [20, 100, 120, 1000, 10000, 100000]) {
+    it.each((['addition', 'subtraction'] as const).flatMap(operation =>
+        [20, 100, 120, 1000, 10000, 100000].map(max => ({operation, max}))))(
+        'upper$max has both nonempty $operation profiles and replays every original stress draw', ({operation, max}) => {
+            const generator = new StandardAlgorithmDecimalAddSubtractGenerator();
             // The original nonzero competency witnesses remain mathematically supported.
             const witness = operation === 'addition' ? ['11.1', '11.1'] : ['33.3', '11.1'];
             expect(hasDecimalColumnZero(buildDecimalStandardAddSubtractProblem(operation, witness[0]!, witness[1]!))).toBe(false);
@@ -113,8 +114,7 @@ describe('decimal standard add/sub zero profiles', () => {
                 expect(generator.generate(config)).toEqual(first);
                 expect(rng.getRandomState()).toBe(state);
             }
-        }
-    });
+        });
 
     it('rejects an invalid profile before consuming mathematical proposal randomness', () => {
         const random = vi.spyOn(rng, 'random');

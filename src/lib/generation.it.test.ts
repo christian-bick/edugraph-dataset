@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
     buildCompatibleModulePairIndex,
     computeSampleKey,
@@ -16,13 +16,21 @@ import { isProblemTypeCompatible } from './type-parser.ts';
 import {extractSchemaLabels} from './utils.ts';
 import {generatePlannedDraw} from './planned-generation.ts';
 
+const gradePrefixes = ['1.', '2.', '3.', '4.', '5.', '6.', 'K.'] as const;
+let generatorCatalog: Awaited<ReturnType<typeof loadGeneratorCatalog>>;
+let viewCatalog: Awaited<ReturnType<typeof loadViewCatalog>>;
+let targets: Awaited<ReturnType<typeof loadTargets>>;
+
+beforeAll(async () => {
+    [generatorCatalog, viewCatalog, targets] = await Promise.all([
+        loadGeneratorCatalog(),
+        loadViewCatalog(),
+        loadTargets('ccss')
+    ]);
+}, 90000);
+
 describe('catalogs and end-to-end matching', () => {
     it('routes CCSS comparison targets to representation-compatible views', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('ccss')
-        ]);
         const pairIndex = buildCompatibleModulePairIndex(generatorCatalog, viewCatalog);
         const indexedPairs = new Set(pairIndex.orderedPairs.map(({generator, view}) =>
             `${generator.generatorId}\u0000${view.viewId}`));
@@ -68,16 +76,12 @@ describe('catalogs and end-to-end matching', () => {
         ]));
     }, 90000);
 
-    it('loads catalogs, matches CCSS and replays a sample by key', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('ccss')
-        ]);
-
+    it('loads complete catalogs and an exact grade partition of CCSS targets', () => {
         expect(generatorCatalog.length).toBeGreaterThan(0);
         expect(viewCatalog.length).toBeGreaterThan(0);
         expect(targets.length).toBeGreaterThan(0);
+        expect(gradePrefixes.flatMap(prefix => targets.filter(target => target.id.startsWith(prefix))))
+            .toEqual(targets);
 
         for (const view of viewCatalog) {
             expect(new Set(view.supportedLabels)).toEqual(new Set([
@@ -90,9 +94,11 @@ describe('catalogs and end-to-end matching', () => {
             expect(gen.generatorId).toBeTruthy();
             expect(Array.isArray(gen.labels)).toBe(true);
         }
+    }, 60000);
 
-        const { tuples, rejections } = diagnoseTargetMatches(targets, generatorCatalog, viewCatalog);
-        expect(tuples.length).toBeGreaterThan(0);
+    it.each(gradePrefixes)('checks every compatible pair and rejection for grade %s', prefix => {
+        const gradeTargets = targets.filter(target => target.id.startsWith(prefix));
+        const {tuples, rejections} = diagnoseTargetMatches(gradeTargets, generatorCatalog, viewCatalog);
 
         for (const tuple of tuples) {
             const gen = generatorCatalog.find(g => g.generatorId === tuple.generatorId)!;
@@ -112,7 +118,13 @@ describe('catalogs and end-to-end matching', () => {
             ])
                 .toContain(rejection.verdict.reason);
         }
+    }, 60000);
 
+    it('matches CCSS and replays the same first sample by key', async () => {
+        // The preceding indexed/exhaustive test proves these complete ordered
+        // tuple lists equal; this retains the original first diagnostic tuple.
+        const {tuples} = matchTargets(targets, generatorCatalog, viewCatalog);
+        expect(tuples.length).toBeGreaterThan(0);
         const tuple = tuples[0];
         const identity: SampleIdentity = {
             targetId: tuple.target.id,
@@ -142,12 +154,6 @@ describe('catalogs and end-to-end matching', () => {
     }, 60000);
 
     it('generates all samples for a single target deterministically', async () => {
-        const [generatorCatalog, viewCatalog, targets] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadViewCatalog(),
-            loadTargets('ccss')
-        ]);
-
         const { tuples } = matchTargets(targets, generatorCatalog, viewCatalog);
         const target = tuples[0].target;
 

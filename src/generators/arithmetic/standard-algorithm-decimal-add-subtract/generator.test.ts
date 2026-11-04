@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {beforeAll, describe, expect, it} from 'vitest';
 import {GeneratorValidationError} from '../../../lib/errors.ts';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
@@ -100,36 +100,58 @@ describe('decimal standard addition/subtraction configured generation', () => {
             expect(() => generator.generate(invalid as StandardAlgorithmDecimalAddSubtractGeneratorConfig)).toThrow(GeneratorValidationError);
     });
 
-    it('retains precision/regrouping support while every native draw satisfies its canonical scalar and column bounds', () => {
-        for (const operation of ['addition', 'subtraction'] as const) {
-            const observed = new Set<string>();
-            for (const max of [10, 20, 100, 120, 1000, 10000, 100000]) for (const zeroPresence of [true, false]) {
-                if (!zeroPresence && max === 10) continue;
-                for (let seed = 0; seed < 30; seed++) {
-                    setSeed(seed);
-                    const range = createCanonicalNumericRange(max), data = generator.generate({...config(operation, max), zeroPresence}).data;
-                    assertTrace(data);
-                    const topWidth = data.top.numeral.split('.')[0]!.length, bottomWidth = data.bottom.numeral.split('.')[0]!.length;
-                    const quantities = [data.top.coefficient / 10 ** data.top.scale, data.bottom.coefficient / 10 ** data.bottom.scale,
-                        data.result.coefficient / 10 ** data.result.scale, ...data.columns.flatMap(c => [c.workingValue,
-                            ...(c.placeExponent < topWidth ? [c.topDigit] : []), ...(c.placeExponent < bottomWidth ? [c.bottomDigit] : []),
-                            ...(c.regroupIn > 0 ? [c.regroupIn] : []), ...(operation === 'subtraction' ? [c.resultDigit] : [])])];
-                    expect(hasCanonicalRangeWitness(quantities, range)).toBe(true);
-                    expect(data.top.coefficient).toBeLessThanOrEqual(1000000);
-                    expect(data.result.coefficient).toBeLessThanOrEqual(1000000);
-                    expect(data.top.scale > 0 || data.bottom.scale > 0).toBe(true);
-                    if (data.top.scale === 3 || data.bottom.scale === 3) observed.add('thousandths');
-                    if (data.top.scale !== data.bottom.scale) observed.add('different-precision');
-                    if (data.columns.some(c => c.regroupOut === 1)) observed.add('regroup');
-                    if (data.result.coefficient === 0) observed.add('zero-result');
-                    if (data.columns.at(-1)!.topDigit === 0 && data.columns.at(-1)!.regroupIn === 1) observed.add('overflow');
-                    if (data.columns.filter(c => c.regroupOut === 1).length >= 2) observed.add('cascade');
+    describe.each(['addition', 'subtraction'] as const)('%s native scalar and column bounds', operation => {
+        const maxima = [10, 20, 100, 120, 1000, 10000, 100000];
+        let fixtures: ReadonlyMap<number, readonly DecimalStandardAddSubtractProblem[]>;
+
+        beforeAll(() => {
+            fixtures = new Map(maxima.map(max => {
+                const draws: DecimalStandardAddSubtractProblem[] = [];
+                for (const zeroPresence of [true, false]) {
+                    if (!zeroPresence && max === 10) continue;
+                    for (let seed = 0; seed < 30; seed++) {
+                        setSeed(seed);
+                        draws.push(generator.generate({...config(operation, max), zeroPresence}).data);
+                    }
                 }
+                return [max, Object.freeze(draws)] as const;
+            }));
+        });
+
+        it.each(maxima)('upper%s retains every native trace and canonical quantity bound', max => {
+            const draws = fixtures.get(max)!;
+            expect(draws).toHaveLength(max === 10 ? 30 : 60);
+            const range = createCanonicalNumericRange(max);
+            for (const data of draws) {
+                assertTrace(data);
+                const topWidth = data.top.numeral.split('.')[0]!.length, bottomWidth = data.bottom.numeral.split('.')[0]!.length;
+                const quantities = [data.top.coefficient / 10 ** data.top.scale, data.bottom.coefficient / 10 ** data.bottom.scale,
+                    data.result.coefficient / 10 ** data.result.scale, ...data.columns.flatMap(c => [c.workingValue,
+                        ...(c.placeExponent < topWidth ? [c.topDigit] : []), ...(c.placeExponent < bottomWidth ? [c.bottomDigit] : []),
+                        ...(c.regroupIn > 0 ? [c.regroupIn] : []), ...(operation === 'subtraction' ? [c.resultDigit] : [])])];
+                expect(hasCanonicalRangeWitness(quantities, range)).toBe(true);
+                expect(data.top.coefficient).toBeLessThanOrEqual(1000000);
+                expect(data.result.coefficient).toBeLessThanOrEqual(1000000);
+                expect(data.top.scale > 0 || data.bottom.scale > 0).toBe(true);
+            }
+        });
+
+        it('retains complete precision and regrouping support across all 390 original draws', () => {
+            const draws = [...fixtures.values()].flat();
+            expect(draws).toHaveLength(390);
+            const observed = new Set<string>();
+            for (const data of draws) {
+                if (data.top.scale === 3 || data.bottom.scale === 3) observed.add('thousandths');
+                if (data.top.scale !== data.bottom.scale) observed.add('different-precision');
+                if (data.columns.some(c => c.regroupOut === 1)) observed.add('regroup');
+                if (data.result.coefficient === 0) observed.add('zero-result');
+                if (data.columns.at(-1)!.topDigit === 0 && data.columns.at(-1)!.regroupIn === 1) observed.add('overflow');
+                if (data.columns.filter(c => c.regroupOut === 1).length >= 2) observed.add('cascade');
             }
             for (const feature of ['thousandths', 'different-precision', 'regroup']) expect(observed.has(feature)).toBe(true);
             expect(observed.has(operation === 'addition' ? 'overflow' : 'zero-result')).toBe(true);
             if (operation === 'subtraction') expect(observed.has('cascade')).toBe(true);
-        }
+        });
     });
 
     it('makes its mathematical range select distinct canonical value bands', () => {
