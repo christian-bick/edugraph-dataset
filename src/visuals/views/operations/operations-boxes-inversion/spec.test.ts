@@ -8,10 +8,8 @@ describe('operations-boxes-inversion view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.ArabicNumerals,
             Ability.ProcedureExecution,
-            Ability.Formalization,
             Ability.ProcedureInversion,
-            Area.Equation,
-            Scope.ExpressionOnOneSide
+            Area.Equation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')?.toSorted()).toEqual([
             Area.CommutativeLaw,

@@ -10,8 +10,8 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-vertical'>;
 }
 
-const Core = ({payload}: CoreProps) => (
-    <ArithmeticVerticalView invertProcedure={false} payload={payload} />
+const Core = ({config, payload}: CoreProps) => (
+    <ArithmeticVerticalView invertProcedure={false} presentation={config.presentation} payload={payload} />
 );
 
 export const OperationsVertical = withConfig(OperationsVerticalViewSchema, Core);

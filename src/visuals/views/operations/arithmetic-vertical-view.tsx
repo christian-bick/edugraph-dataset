@@ -2,6 +2,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {ArithmeticTripleProblem} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {ArithmeticLawExercise} from './arithmetic-law-view.tsx';
+import {validateVerticalEquationPresentation, type VerticalEquationPresentation} from './arithmetic-equation-presentation.ts';
 
 const operatorSymbols: Record<string, string> = {
     addition: '+',
@@ -12,13 +13,16 @@ const operatorSymbols: Record<string, string> = {
 
 interface ArithmeticVerticalViewProps {
     invertProcedure: boolean;
+    presentation: VerticalEquationPresentation | undefined;
     payload: ViewRenderPayload<'operations-vertical' | 'operations-vertical-inversion'>;
 }
 
-export const ArithmeticVerticalView = ({invertProcedure, payload}: ArithmeticVerticalViewProps) => {
+export const ArithmeticVerticalView = (props: ArithmeticVerticalViewProps) => {
+    const {invertProcedure, payload} = props;
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-vertical', data, ['num1', 'num2', 'operation', 'answer']);
+    validateVerticalEquationPresentation(data, props.presentation);
     const isFour = 'num4' in data && data.num4 !== undefined;
     const isTriple = !isFour && data.num3 !== undefined;
     if (isFour) {

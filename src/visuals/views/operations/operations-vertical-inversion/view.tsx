@@ -13,8 +13,8 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-vertical-inversion'>;
 }
 
-const Core = ({payload}: CoreProps) => (
-    <ArithmeticVerticalView invertProcedure payload={payload} />
+const Core = ({config, payload}: CoreProps) => (
+    <ArithmeticVerticalView invertProcedure presentation={config.presentation} payload={payload} />
 );
 
 export const OperationsVerticalInversion = withConfig(OperationsVerticalInversionViewSchema, Core);

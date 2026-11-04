@@ -5589,6 +5589,7 @@ export interface ViewTypeMap {
     'numbers-composite-classification': CompositeClassificationProblem;
     'operations-boxes': ArithmeticProblem;
     'operations-boxes-inversion': ArithmeticProblem;
+    'operations-equal-addends-equation': ArithmeticPairProblem;
     'operations-representation': ArithmeticPairProblem;
     'operations-word-problem': ArithmeticProblem;
     'operations-word-problem-inversion': ArithmeticProblem;

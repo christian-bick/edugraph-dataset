@@ -13,8 +13,8 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes-inversion'>;
 }
 
-const Core = ({payload}: CoreProps) => (
-    <ArithmeticBoxesView invertProcedure payload={payload} />
+const Core = ({config, payload}: CoreProps) => (
+    <ArithmeticBoxesView invertProcedure equationShape={config.equationShape} payload={payload} />
 );
 
 export const OperationsBoxesInversion = withConfig(OperationsBoxesInversionViewSchema, Core);

@@ -9,9 +9,7 @@ describe('operations-boxes view spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.ArabicNumerals,
             Ability.ProcedureExecution,
-            Ability.Formalization,
-            Area.Equation,
-            Scope.ExpressionOnOneSide
+            Area.Equation
         ]);
         expect(getTargetPolicyLabels(spec.compatibility, 'reject')).toEqual([]);
     });

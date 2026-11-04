@@ -1,0 +1,2 @@
+- **Identity:** Given an even number, write a complete addition equation expressing it as two equal addends.
+- **Modes:** Question Mode withholds both addends and the completed equation; Solution Mode shows the two equal addends and their equality to the given number.

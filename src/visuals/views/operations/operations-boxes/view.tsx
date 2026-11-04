@@ -10,8 +10,8 @@ interface CoreProps {
     payload: ViewRenderPayload<'operations-boxes'>;
 }
 
-const Core = ({payload}: CoreProps) => (
-    <ArithmeticBoxesView invertProcedure={false} payload={payload} />
+const Core = ({config, payload}: CoreProps) => (
+    <ArithmeticBoxesView invertProcedure={false} equationShape={config.equationShape} payload={payload} />
 );
 
 export const OperationsBoxes = withConfig(OperationsBoxesViewSchema, Core);

@@ -70,10 +70,10 @@ describe('arithmetic law rendering', () => {
 
     it('routes boxes, vertical, and word-problem inversion through the shared law renderer', () => {
         const boxes = renderToStaticMarkup(
-            <ArithmeticBoxesView invertProcedure payload={payload(distributive)} />
+            <ArithmeticBoxesView invertProcedure equationShape="both-sides" payload={payload(distributive)} />
         );
         const vertical = renderToStaticMarkup(
-            <ArithmeticVerticalView invertProcedure payload={payload(distributive) as never} />
+            <ArithmeticVerticalView invertProcedure presentation="law-both-sides" payload={payload(distributive) as never} />
         );
         const word = renderToStaticMarkup(
             <ArithmeticWordProblemView invertProcedure payload={payload(distributive) as never} />

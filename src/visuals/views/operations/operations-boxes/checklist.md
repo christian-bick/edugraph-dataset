@@ -1,3 +1,3 @@
-- **Identity:** A horizontal arithmetic equation presents all operands and makes the result the single visible unknown.
-- **Modes:** Question Mode leaves the result empty; Solution Mode reveals it in the same equation position.
+- **Identity:** Find the arithmetic result in a horizontal equation, or in equivalent equations that make a named arithmetic property visible.
+- **Modes:** Question Mode leaves the result blank wherever it occurs; Solution Mode fills the same result positions. Property tasks retain both equivalent forms and their required distributive partial products.
 - **Iterated-operation evidence:** When the target includes `IteratedOperation`, the same visible value must occupy both addend positions. This repeated operand value is the required evidence; multiple operator glyphs are not required.

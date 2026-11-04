@@ -2,6 +2,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {ArithmeticTripleProblem} from '../../../types/problems.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
 import {ArithmeticLawExercise} from './arithmetic-law-view.tsx';
+import {type BoxedEquationShape, validateBoxedEquationShape} from './arithmetic-equation-presentation.ts';
 
 const operatorSymbols: Record<string, string> = {
     addition: '+',
@@ -12,13 +13,16 @@ const operatorSymbols: Record<string, string> = {
 
 interface ArithmeticBoxesViewProps {
     invertProcedure: boolean;
+    equationShape: BoxedEquationShape | undefined;
     payload: ViewRenderPayload<'operations-boxes' | 'operations-boxes-inversion'>;
 }
 
-export const ArithmeticBoxesView = ({invertProcedure, payload}: ArithmeticBoxesViewProps) => {
+export const ArithmeticBoxesView = (props: ArithmeticBoxesViewProps) => {
+    const {invertProcedure, payload} = props;
     const {problem, isSolutionView} = payload;
     const data = problem.data;
     validateProblemData('operations-boxes', data, ['num1', 'num2', 'operation', 'answer']);
+    validateBoxedEquationShape(data, props.equationShape);
 
     const isFour = 'num4' in data && data.num4 !== undefined;
     const isTriple = !isFour && data.num3 !== undefined;
