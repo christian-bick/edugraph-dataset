@@ -14,7 +14,7 @@ the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification),
 [Q15 total/enumeration separation](canonical-range-labeling.md#q15-source-verification),
 [Q16 represented-scalar writing ranges](canonical-range-labeling.md#q16-source-verification) and
 [Q4 bounded multiplication with retained overflow](canonical-range-labeling.md#q4-source-verification) are implemented.
-Current source coverage is **1,547 normalized targets / 2,024 routes / 4,768 selections**, with
+The accepted Q4 source checkpoint is **1,547 normalized targets / 2,024 routes / 4,768 selections**, with
 **one intentionally unlabelled multiplication-overflow selection**. Q1/Q2 closed 14 source omissions, Q6
 closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; Q13 retires eight
 algebra range obligations by policy. Q15 refines 20 already-labelled routes and adds one
@@ -22,6 +22,13 @@ conservation source variant. Q16 refines the 14 positive non-Name writing routes
 selections while preserving the nine Name and three fixed-zero controls. Q4 refines one existing
 route into four bounded selections and one unlabelled overflow selection. All decision topics
 are resolved; the approved overflow gap and dataset acceptance remain visible.
+
+The later [artifact follow-up](canonical-range-labeling.md#artifact-acceptance-2026-11-04)
+corrects eight representation producers under these policies and records395 passing focused
+tests plus coverage and TypeScript acceptance. Dataset publication/VQA remains pending two
+declaration corrections: unsupported operations admitted to the object-operation view and
+missing integer scopes in two comparison source families. The candidate source count and
+the13 exposed decimal matches are recorded separately from the Q4 checkpoint above.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and

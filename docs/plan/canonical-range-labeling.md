@@ -25,7 +25,7 @@ checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15, Q16 and Q4 decision 
 focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
-authorized integer-domain and fixed-bound source corrections. The accepted source covers
+authorized integer-domain and fixed-bound source corrections. The accepted Q4 source checkpoint covers
 **1,547 normalized targets / 2,024 routes and 4,768 complete selections**, with **one intentionally
 unlabelled multiplication-overflow selection**. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
@@ -35,6 +35,10 @@ local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes. Missing-range findings
 remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
+The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
+producers and records a candidate 4,810 selections /2,037 routes. Its 13 newly exposed decimal
+comparison routes and the object-operation view's unsupported matches require declaration review
+before dataset acceptance; the Q4 checkpoint above remains historical.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -1262,6 +1266,142 @@ Stored dataset regeneration and independent VQA remain separate gates. Evidence 
 `source-matching-after.json`, `renders/manifest.json`, `visual-review.json`, `types-final.log`,
 `check.log`, `scoped-coverage.log`, `coverage-summary.json` and `coverage-gate.log`.
 Matching snapshots remain beside the source proof as `matching-before.json` and `matching-after.json`.
+
+## Artifact acceptance (2026-11-04)
+
+The user authorized canonical regeneration, live VQA and resolution of the failing artifact
+gates after source commit `446d433f`. This stage does not publish a release or change the
+approved range policies, including algebra exclusion and unlabelled multiplication overflow.
+
+The local baseline contains 1,944 images in an immutable-store snapshot, but its build graph
+uses older schema/epoch identities and its rows lack current generation plans and replay
+receipts. Its renderer also predates the current fit-view capture policy. A complete canonical
+regeneration of both splits is required before incremental regeneration or VQA is trustworthy.
+The current 2,024 routes allocate at most 4,048 train and 1,032 validation images before
+deduplication and finite-domain exhaustion; the 4,768 schema selections do not multiply that
+allocation.
+
+The acceptance sequence is full canonical regeneration with `--reset-graph`, complete
+replay/range and annotation checks, split/image integrity, cached live VQA with the existing
+LOW/HIGH workflow, strict offline cache audit, churn review and union rebuild. Failures are
+assigned to their mathematical or visual owners through the fix-spec workflow. Declarations
+and evaluator policy are not weakened to hide failures.
+
+Baseline and run evidence belongs under `temp/range-artifact-acceptance-2026-11-04/`.
+Acceptance remains in progress until the resulting artifact and cache pass these gates.
+
+### Representation follow-ups found during artifact review
+
+The replay-audit preparation found earlier producers whose bounds still include passive
+digit-strip coefficients, contrary to the approved Q16 interpretation (SPEC-G2). These are
+implementation corrections under the existing policy, not new ontology decisions:
+
+| Producer / unchanged consumer | Assessed range quantities | Concrete correction |
+| --- | --- | --- |
+| `place-value-expanded` / `place-value-expanded-form` | The represented numeral and actual nonzero operands in the requested sum | `3100 = 3000 + 100` needs lower100/upper10000; the passive digits `3,1,0,0` cannot force no positive lower. Retain all existing numerals and term counts. |
+| `place-value-scaling` / `place-value-scaling` | The represented numeral, the two asked place values and factor10 | A repeated5 in the hundred-thousands and ten-thousands places of556789 gives minimum10 and upper1m; unrelated digits cannot force lower5 or no positive lower. Retain every repeated-digit and zero-digit pattern. |
+| `decimal-writing`, `decimal-reading-relations` / three decimal reading/writing leaves | Complete decimal values, including all complete reading choices | `8.123` needs lower5/upper10. Its fractional component is not another assessed value. `0.123` remains positive despite its zero whole-part glyph. |
+| `decimal-place-comparison` / `numbers-decimal-place-comparison` | The two complete decimal values | Comparing `555.555` with `555.556` needs lower120/upper1000. The aligned digit counts support numeral comparison rather than introducing separate quantities. |
+| `decimal-place-value-expanded`, `decimal-place-value-scaling` / their existing leaves | Retain independently assessed multiplication/unit or scaling quantities | Preserve all zero-glyph charts while retiring false numeric-zero choices: expanded terms omit zero coefficients and the scaling quantities are positive. |
+| `decimal-notation` / both notation directions, decimal number line and measurement | Decimal value, assessed numerator and denominator, and the shared whole | `0.79 = 79/100` and locating tick79 of100 require upper100. Tenths require upper10. This applies the approved Q8 part-count rule, rather than treating fraction counts as numeral digits. |
+
+The pinned ontology's `NumbersWithZero` and `NumbersWithoutZero` statements explicitly say
+that a zero digit in a nonzero numeral does not establish a zero-valued quantity. Both tasks'
+actual inputs, results and assessed sum/scaling quantities are positive. Their former
+digit-strip zero claims are therefore corrected to invariant `NumbersWithoutZero`; the
+expanded-form inference callback is retired, and scaling's glyph-zero schema choice becomes
+ordinary concrete numeral variation in the generator. No production target or view spec changes.
+
+Both repairs preserve their payloads, tasks and supported mathematical outcomes. Expanded form
+retains all 15,714 numerals and one uniform conditional draw across 50 feasible cardinality/range
+cells. Scaling retains all 269,001 native outcomes in three actual lower cells0/5/10 under
+upper1m, using the original proposal weights8/9 according to adjacent-pair position. Its six-draw
+sampler preserves zero-digit patterns as incidental variation; the old seeded schedule changes.
+Canonical regeneration and VQA will use the repaired profiles, and the complete replay audit
+must pass before the artifact is accepted.
+
+The decimal repairs retain native values, precision patterns and original conditional proposal
+weights. The two plain reading/writing bands merge whole-part0 with wholes1..4 in their original
+1:4 mass ratio, and retain wholes5..9 in lower5/upper10. Decimal notation retains all99 original
+fraction/decimal values and its two-draw continuation, conditioning its original equally likely
+tenths/hundredths branches on the selected upper10/upper100 profile. Source and finite-domain
+acceptance evidence for these follow-ups is recorded below.
+
+The first focused follow-up gate passes 208 tests across 11 files, including the expanded-form
+source/SSR integration, all99 decimal-notation values and original two-draw continuation controls.
+All six covered generator/helper files pass the unchanged 85% statement /60% branch thresholds
+(99.23% statements /96.84% branches overall). The decimal place-value preservation oracle also
+passes: 810,243 expanded outcomes and 177,309 scaling outcomes retain their exact original masses,
+including 278,802 and 66,717 zero-glyph outcomes respectively. All 240 protected SSR strings remain
+byte-identical; source lineages remain intact while false zero-choice selections merge8→6 and7→5.
+
+The remaining decimal gate passes 187 tests across 28 files, bringing these follow-ups to 395
+passing focused tests across 39 files. Its 13 covered implementation/helper files have 100%
+statement and 97.93% branch coverage and pass the unchanged thresholds. The earlier six-file
+gate remains independently recorded. No timeout or coverage threshold was changed.
+
+Plain before/after checks preserve all 10,080 decimal-writing construction paths and 9,990
+distinct values, with 5,040 paths /4,995 values in each scalar band. All 2,048 protected high-band
+payload and PRNG-continuation controls remain exact. Decimal place comparison retains the
+original 11 deciding/shortening branch masses, 4,495,500 independent triangular transition paths,
+98,901 equality values, 295 interval probes and 192 generated/replayed draw schedules. Only nine
+strict scalar cells are feasible under its original prefix law; those and six equality cells
+retain 24 complete choices across the three protected decimal source lineages.
+
+The obsolete `NumbersWithoutZero`-only number-name fallback in plain decimal writing is retired.
+Numeric zero absence is now invariant and does not select notation. The ordinary two-family
+schema retains exact explicit notation requests and seeded fallback; all five actual source
+routes explicitly request notation, so their mathematical availability is unchanged (SPEC-9).
+
+The complete eight-producer source comparison records 4,810 selections /2,037 routes /1,547
+normalized targets. All 4,691 unaffected semantic/annotation outcomes remain exact; all 23 old
+affected lineages remain, with 75 exhaustive inference selections and no conflicts, contract
+errors, incomplete tuples or invalid contexts. The sole missing-range finding remains approved
+Q4 overflow. There are 13 additional decimal-place-comparison routes, discussed below, so this
+is a candidate source checkpoint rather than curriculum acceptance. The comparison preserves
+2,001 old plans unchanged and records 23 affected old-plan changes.
+
+All source stages of the repository check pass after test-only TypeScript fixture adoption;
+the 115 affected test cases are rerun successfully. The stored-artifact stages still fail on
+the unchanged 1,944-row snapshot: missing generation receipts/plans at the split gate and 4,006
+strict annotation failures. No stored artifact, VQA cache or evaluator policy was changed.
+The Gemini key is locally configured, ignored by Git and verified by a successful authentication
+request; live image evaluation awaits a successful canonical publication.
+
+The source fixes are committed in three batches: `7e062245` (whole place value), `d741179c`
+(decimal representations and genuine scaling/decomposition quantities), and `7df8d785`
+(assessed fraction counts in decimal notation).
+
+The first complete canonical render attempt produced 4,860 successful images and 10 failures in
+`operations-representation`; the transaction did not promote its staged snapshot. All failures
+were multiplication/division payloads admitted to a view whose actual object renderer supports
+only nonnegative addition/subtraction within10. A read-only proposed compatibility correction
+removes exactly four invalid pairings, retains every target and its other working views, and
+leaves all existing addition/subtraction plans unchanged. The view-spec change is awaiting the
+user confirmation required by the fix-spec workflow. Live VQA has not started on the failed stage.
+
+The 13 newly exposed decimal comparison routes reveal a second declaration gap. The two source
+builders `K.CC.C.7-compare-numerals` and `2.NBT.A.4-compare-three-digit` omit `IntegerNumbers`.
+Their broad labels therefore admit the corrected decimal producer. The
+[approved source review](canonical-range-source-review.md#comparison-definitions) and
+[consumer review](canonical-range-consumer-review.md) describe integer comparison and the
+Grade2 domain100..999; this is not intended decimal practice. Keep the truthful decimal producer
+capabilities. The proposed precision correction adds the missing integer scope at the two
+source builders, with explicit target-ID migration and preservation of their integer routes.
+No production target has been edited; impact evidence and the prospective patch are prepared
+under `temp/spec-plans/ccss/integer-comparison-precision/`. This target-declaration correction
+also requires user confirmation before application (SPEC-2, TSPEC-13).
+
+The read-only precision proposal passes patch applicability and full raw/normalized matching.
+It changes exactly two builder label lists: raw count 1,595, normalized count 1,547 and 48
+deduplications stay unchanged; 14 target IDs migrate and all 1,533 other targets remain exact.
+Routes fall 2,037→2,024 solely by removing the 13 unintended decimal pairs. Every integer
+`comparison#numbers-compare` route remains, with the same 16 bindings and 128 same-seed
+configuration/annotation/math and pre/post-draw PRNG controls under the explicit ID mapping.
+The reviewable proposal is `temp/spec-plans/ccss/integer-comparison-precision/plan.md`.
+The separate object-view
+proposal would then remove its four unsupported routes; neither prospective correction has
+been applied.
 
 ## Accepted direction
 

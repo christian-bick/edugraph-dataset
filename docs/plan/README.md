@@ -45,7 +45,7 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15, Q16 and Q4, current source gates cover **1,547 normalized targets / 2,024 routes and 4,768 selections**,
+  At the Q4 checkpoint after Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15 and Q16, source gates cover **1,547 normalized targets / 2,024 routes and 4,768 selections**,
   with one intentionally unlabelled multiplication-overflow selection. The [decision record](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
   has no remaining policy questions; ordinary profile and approved local-repair work is complete.
   Dataset acceptance and the approved overflow gap remain separate. Sixth-batch acceptance in the rollout ledger passes
@@ -155,6 +155,13 @@ These items are not newly scheduled by the archive move.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
+  The [artifact follow-up](canonical-range-labeling.md#artifact-acceptance-2026-11-04) corrects eight
+  representation producers in three commits;395 focused tests,19 coverage-file gates and
+  TypeScript pass. Its candidate source has4,810 selections /2,037 routes, including13 newly
+  exposed decimal matches in two integer-intended comparison families. The first full render
+  also found10 unsupported multiplication/division renders in the object-operation view.
+  The proposed source/view declaration corrections require confirmation; no new snapshot or
+  live VQA result is accepted yet.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 
