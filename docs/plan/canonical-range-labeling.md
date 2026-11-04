@@ -35,12 +35,14 @@ local repairs are complete. The original inventory remains historical.
 Stored annotations and the approved image-label corrections have now been canonically regenerated;
 the [published affected snapshot](#affected-canonical-snapshot-checkpoint-2026-11-04) passes replay,
 range, annotation and split checks, but exposes one further `MultiplesOf10` image-label conflict.
-Its concrete correction proposal awaits approval; live VQA and full repository coverage are running.
+The user approved the [both-operand correction](#approved-both-operand-policy-and-word-diagram-follow-up).
+Its local source proofs pass; the completed pair VQA run identifies two word-diagram failures,
+whose renderer correction still requires canonical revalidation. Full repository coverage remains pending.
 Missing-range findings remain
 report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
 The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
-producers and the approved declaration/image-label gaps. Current source verification covers
+producers and the approved declaration/image-label gaps. The preceding image-label source checkpoint covers
 4,825 selections /2,017 routes /1,547 normalized targets, with no remaining inference callbacks;
 the Q4 checkpoint above remains historical. Dataset and independent VQA acceptance are still
 in progress.
@@ -1562,8 +1564,8 @@ under coverage. They retain all 704 general-model draws /2,816 SSR calls, 264 wo
 is staged separately from the independently loaded full runtime catalog, with both 30-second
 limits retained. This test-structure verification does not replace the affected production-file
 coverage above. The test-only batch is committed as `e2de6a2a`.
-The complete suite is running alongside network-bound VQA after affected regeneration; its
-result remains pending. Source/native verification does not establish final artifact or live
+Complete-suite verification remains pending; the later three-file timeout repair is recorded
+below. Source/native verification does not establish final artifact or live
 VQA acceptance; the published snapshot checkpoint below records the current gates.
 
 Evidence includes `after-approved-corrections/source-acceptance.json`,
@@ -1601,21 +1603,94 @@ outside the approved closure. Two changed retry seeds/attempts are independently
 valid deduplication shifts, rather than sampler regressions; provenance refreshes are recorded
 separately from mathematical changes.
 
-A concrete, **not yet approved or implemented**, whole-ten correction is recorded in
-`temp/range-artifact-acceptance-2026-11-04/multiples-ten-fix/proposal.md`. Its dry run retains all
-67 routes and refines 114 selections into 152 by truthful primary-operand involvement, while
-preserving the native-domain distinction. Its bounded allocation simulation checks 132 train
-and 32 validation SSR rows with zero conflicting annotations or cross-split collisions.
-These proposed counts are not adopted source or canonical PNG acceptance results.
+The initial **any-operand proposal was withdrawn**. Its 67-route /114→152-selection dry run and
+132 train /32 validation SSR simulation remain historical evidence in
+`temp/range-artifact-acceptance-2026-11-04/multiples-ten-fix/proposal.md`; they are not the approved
+condition or current source counts. The both-operand policy and its verification follow below.
 
-Live arithmetic-pair VQA and the full repository coverage run after the test partitions remain
-in progress. Final full VQA, cache acceptance, repository checks and union verification remain
-pending; no full-suite or dataset-acceptance pass is claimed. Evidence is under
+Final full VQA, cache acceptance, repository checks, global coverage and union verification
+remain pending; no full-suite or dataset-acceptance pass is claimed. Evidence is under
 `temp/range-artifact-acceptance-2026-11-04/`: `generation-corrections-affected.log` and
 `after-approved-corrections/` reports `artifact-fast-audit.json`, `images-after.json`,
 `annotations-after.json`, `split-after.json`, `range-audit.json`, `snapshot-churn.json`,
-`width-seed-attempt-review.json` and `fresh-cache-readiness.json`. The active full-suite log is
+`width-seed-attempt-review.json` and `fresh-cache-readiness.json`. The interrupted full-suite log is
 `full-coverage-after-partitions.log`.
+
+### Approved both-operand policy and word-diagram follow-up
+
+The user approved the binary `MultiplesOf10` rule now recorded in
+[SPEC-G3](../spec-generator.md#spec-g3--declare-the-area-and-scope-capabilities-the-math-produces):
+**both primary operands must be multiples of ten**, including a necessary unknown operand.
+Thus `10 + [] = 20` qualifies, while `34 + 20` does not. A divisible result or a derived
+place-value component does not establish this claim. Keep the native sampling pool separate
+from the semantic condition.
+
+The final place-value source proof preserves all **67 routes**, refining **114→126 selections**,
+with **1,008 planned draw/replay controls passing**. The independent native proof covers all
+**775,251 general ordered pairs across 60 contexts**, refining 61 width cells into 77 nonempty
+cells under the both-operand partition, and retains all fourteen legacy native contexts. Three upper100 legacy
+addition bindings each refine **368→44** truthfully labelled pairs: the concrete model
+`1.NBT.C.4-concrete-place-value-addition~cdd1e96d`, explanation
+`1.NBT.C.4-explain-place-value-addition~313fb8fe`, and written method
+`1.NBT.C.4-model-to-written-method~25ba6b2e`. The 324 excluded false-claim occurrences per
+binding total 972; their mathematical pairs remain available through general sampling and
+raw native controls. These are corrected claim-conditioned pools, not lost mathematical support.
+The final 126-plan allocation simulation retains all 67 routes and checks 132 train /32 validation
+SSR rows plus 64 native constructor controls. It has zero cross-split collisions or conflicting
+label groups; the one same-label, same-split `10+10` copy group remains a warning.
+
+All **379 module tests across nine files pass**. Coverage instruments all nine production files
+and measures **95.32% statements /92.69% branches /97.64% functions /98.48% lines**, passing the
+unchanged thresholds. Canonical artifact acceptance remains separate from this source proof.
+The module correction, future generic-pair helper and normative SPEC-G3 clarification are
+committed as `b1d11c86`.
+
+The same rule removes the false claim from known-fact place-value scaling without changing
+its mathematics. All **64 native scaling frames, 18 competencies, 32 routes and 39 selections**
+retain their configurations and draw law. Eight scaling selections lose only `MultiplesOf10`;
+31 other selections retain their labels. Checks cover 624 seeded mathematical draws and
+256 native continuation controls. All **25 focused tests pass**, with full statement/branch
+coverage of the unchanged generator and domain. This correction is committed as `b14fb1b4`.
+Under the unchanged
+`3.NBT.A.3-one-digit-times-multiple-of-ten` prefix, the three approved target suffix migrations
+are `2da80b18→c9f9a57d`, `703366da→3df7c1b7` and `a0353fc0→c0753c57`; the standard competencies,
+learner tasks and native outcomes remain.
+
+Future generic-pair multiplication with `MultiplesOf10` now uses a step of ten for both
+factors. All **842 stored pair images lack that claim**, so the correction does not invalidate
+their existing mathematics. The completed live evaluation of those images records **840 PASS,
+two HIGH-confirmed FAIL, zero uncached rows and zero evaluation errors**; this pre-fix cache
+checkpoint is preserved separately as `9483a4c5`. The two failures share
+the normal word-problem target `3.OA.A.3-multiplication-division-word-problems~b8ee80e2`, but are
+different exercises: Question `1÷1` and Solution `2÷2=1`. Both diagrams incorrectly depict
+the friend count as another apple amount. The shared-view correction uses the actual
+story roles, withholds the unknown answer picture in Question mode, and restores it in Solution
+mode. It preserves all mathematical tasks across the two leaves' 30 routes /80 physical rows;
+every current plan bounds the answer by 20. Specs, checklists and mathematical payloads are
+unchanged. The renderer correction is committed as `2fecb3be`.
+Canonical rendering and live evaluation of the corrected images
+remain pending, so the pre-fix VQA run does not establish their acceptance.
+
+The separate test-only commit **`01811486` passes all 65 tests across three files**. Its grade
+partition retains the complete authored target/candidate inventory; all 780 decimal trace
+fixtures and 2,400 original /2,400 replay stress draws remain. Both reported decimal production
+files have 100% statement, branch, function and line coverage. Every original assertion,
+timeout and threshold is retained.
+
+A separate **52-test run across six files passes**, measuring **98.13% statements /95.62%
+branches /100% functions /98.94% lines**; the quantity component and generic-pair generator
+each have full coverage. Final TypeScript passes. Global coverage remains pending after these
+bounded repairs; no coverage exclusion, timeout or threshold is relaxed.
+
+Evidence under `temp/range-artifact-acceptance-2026-11-04/` includes
+`multiples-ten-both-fix/native-proof.json`, `multiples-ten-both-fix/source-proof.json`,
+`multiples-ten-both-fix/simulated-splits.json`, `multiples-ten-both-fix/focused-coverage-final.log`
+and its `coverage/coverage-summary.json`,
+`both-multiples-review/known-fact-after.json`, `both-multiples-review/known-fact-focused-coverage.log`,
+`both-policy-root-coverage.log`, `both-policy-root-coverage/coverage-summary.json`,
+`both-policy-types.log`, `test-partitions-followup-coverage-final.log` and its coverage summary.
+No post-fix generation,
+full VQA/cache, complete-check or union acceptance is claimed.
 
 ## Accepted direction
 

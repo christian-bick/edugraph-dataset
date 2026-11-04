@@ -30,8 +30,8 @@ in two comparison source families. All 442 focused tests pass; source coverage i
 normalized targets /2,020 routes /4,791 selections at that checkpoint. The 14 approved target-ID
 migrations and 13 exposed decimal matches are recorded separately from the Q4 checkpoint above.
 A fresh 4,866-image snapshot passes replay, range, annotation and split checks. Its two image-label
-conflicts led to the separately reviewed exact-width and equation-task corrections: current source
-verification is 1,547 unchanged targets /2,017 routes /4,825 selections, with only the approved
+conflicts led to the separately reviewed exact-width and equation-task corrections: their source
+verification reached 1,547 unchanged targets /2,017 routes /4,825 selections, with only the approved
 six-to-three writer route migration. All 304 new focused tests and their unchanged coverage gates
 pass. The [affected canonical snapshot](canonical-range-labeling.md#affected-canonical-snapshot-checkpoint-2026-11-04)
 from clean `6aae1dae` is now published as
@@ -40,11 +40,24 @@ from clean `6aae1dae` is now published as
 producers, annotations and splits pass. The graph retains 1,547 targets /2,017 routes, with
 three tuple-allocation advisories still distinct from physical coverage. The image gate finds
 one new `MultiplesOf10` conflict on identical `10+10` Solutions and two identical-label warning
-groups. Its concrete correction proposal preserves 67 routes and refines 114→152 selections;
-132 train /32 validation simulated SSR rows have no annotation or cross-split conflicts.
-This proposal is awaiting approval and is not implemented. Live VQA and full repository
-coverage after the test partitions are running; final VQA/cache, checks and union acceptance
-remain pending. No new range-policy question or full-suite/dataset-acceptance pass is implied.
+groups. The user approved the [both-operand rule](canonical-range-labeling.md#approved-both-operand-policy-and-word-diagram-follow-up)
+now recorded in [SPEC-G3](../spec-generator.md#spec-g3--declare-the-area-and-scope-capabilities-the-math-produces):
+necessary hidden operands count, so `10 + [] = 20` qualifies and `34 + 20` does not.
+The earlier any-operand /152-selection proposal is withdrawn and retained only as history.
+The place-value proof preserves 67 routes, refines 114→126 selections and passes 1,008 planned
+controls. Three legacy claim-conditioned pools refine 368→44 each; all 972 removed false-claim
+occurrences retain their mathematical pairs in the general/native domains. All 379 module tests
+and unchanged nine-file coverage thresholds pass (`b1d11c86`). The final 132 train /32 validation SSR
+simulation has no conflicting labels or cross-split collisions. Known-fact scaling
+preserves 64 frames and all 32 routes /39 selections, removing only eight false claims with
+three approved target-ID migrations; its 25 focused tests and full generator/domain coverage pass
+(`b14fb1b4`).
+The completed 842-image pair VQA run records 840 PASS and two HIGH-confirmed word-diagram failures,
+with zero uncached rows or errors. Their renderer repair (`2fecb3be`) still requires canonical revalidation.
+The `01811486` test-only batch passes all 65 tests with both reported decimal production files
+fully covered. A separate 52-test/six-file focused run and final TypeScript pass. Global coverage,
+post-fix generation/VQA/cache, complete checks and union
+acceptance remain pending. No new range-policy question or dataset-acceptance pass is implied.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and

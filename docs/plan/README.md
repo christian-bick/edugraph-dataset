@@ -163,7 +163,7 @@ These items are not newly scheduled by the archive move.
   normalized targets, including the explicit 14-target ID migration. Fresh canonical generation
   produces 4,866 images with passing replay/range, annotation and split checks. Two remaining
   image-label conflicts have approved source corrections for exact operand widths and equation-task separation;
-  current source verification is 4,825 selections /2,017 routes with all target claims unchanged.
+  that source checkpoint has 4,825 selections /2,017 routes with all target claims unchanged.
   All 304 additional focused tests and their unchanged coverage gates pass. The
   [affected canonical snapshot](canonical-range-labeling.md#affected-canonical-snapshot-checkpoint-2026-11-04)
   from clean `6aae1dae` is published as `fc0ce99326514fd6b08124643fd3dc3458df0d0295e7cf35f7e50b0bbb34dd70`:
@@ -172,10 +172,22 @@ These items are not newly scheduled by the archive move.
   1,547 targets /2,017 routes, with three tuple-allocation advisories rather than complete
   physical tuple coverage. Churn is confined to the approved width/writer/presentation work.
   One new `MultiplesOf10` conflict on identical `10+10` Solutions blocks the image gate;
-  two identical-label duplicate groups remain warnings. The concrete 67-route /114→152-selection
-  correction proposal is awaiting approval and is not implemented. Live VQA and full repository
-  coverage after the test partitions are running; final VQA/cache, check and union acceptance
-  remain pending.
+  two identical-label duplicate groups remain warnings. The user approved the
+  [both-operand rule and follow-up](canonical-range-labeling.md#approved-both-operand-policy-and-word-diagram-follow-up)
+  in [SPEC-G3](../spec-generator.md#spec-g3--declare-the-area-and-scope-capabilities-the-math-produces):
+  `10 + [] = 20` qualifies, `34 + 20` does not. The earlier any-operand /152-selection proposal
+  is withdrawn. The place-value proof retains 67 routes /126 selections and passes 1,008
+  planned controls, with all 379 module tests and unchanged nine-file coverage thresholds passing
+  (`b1d11c86`).
+  Its final 132 train /32 validation SSR simulation has no conflicting labels or cross-split
+  collisions. Known-fact scaling preserves all mathematics across 32 routes /39 selections,
+  with only false claims removed and three target IDs explicitly migrated. Its 25 focused tests
+  and full generator/domain coverage pass (`b14fb1b4`). The completed pair VQA run has 840 PASS and two
+  HIGH-confirmed word-diagram failures among 842 images, with no uncached rows or errors.
+  Their role/answer-card renderer correction (`2fecb3be`) awaits canonical revalidation. The separate
+  `01811486` test-only batch passes all 65 tests with full coverage of both reported decimal
+  production files. A separate 52-test/six-file focused run and final TypeScript pass; global
+  coverage and final post-fix generation/VQA/cache/check/union acceptance remain pending.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 
