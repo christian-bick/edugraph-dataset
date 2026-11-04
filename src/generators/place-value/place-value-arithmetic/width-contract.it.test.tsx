@@ -151,3 +151,371 @@ it.each(views)('$viewId renders identical16+4 math unchanged across native domai
         if (!isSolutionView) expect(text).not.toMatch(/\b20\b/);
     }
 });
+
+// Frozen real-source lineage inventory; expected counts independently enumerated
+// from native arithmetic, exact widths and the both-primary-operand predicate.
+const currentSourceLineages = [
+    {
+        "id": "1.NBT.B.2c-multiples-of-ten~322116ef",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.B.2c-multiples-of-ten~864e16c2",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~4d2f3278",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~3c346185",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~f15e70e4",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~fbf817e9",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~b4febbae",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-concrete-place-value-addition~cdd1e96d",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~0d9e009b",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~02d372e4",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~808d2df5",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~f6e0a4de",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~948840df",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-model-to-written-method~25ba6b2e",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~2aea53d1",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~5d3340b8",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~7428ad8d",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~6b473b9c",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~ee2f7e79",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.4-explain-place-value-addition~313fb8fe",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-concrete-place-value-subtraction~6d03556a",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-concrete-place-value-subtraction~52634bc9",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-concrete-place-value-subtraction~de2f1aa9",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-concrete-place-value-subtraction~1760ec38",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-concrete-place-value-subtraction~bd94f77d",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-model-to-written-method~e587239f",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-model-to-written-method~973978da",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-model-to-written-method~cc15c54e",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-model-to-written-method~1a251da3",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-model-to-written-method~9a5c1508",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-explain-place-value-subtraction~0458fbf7",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-explain-place-value-subtraction~3026996c",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-explain-place-value-subtraction~af2861cc",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-explain-place-value-subtraction~032cc9b5",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "1.NBT.C.6-explain-place-value-subtraction~9e3b5600",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~960f2fca",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~2f5f94dd",
+        "viewId": "place-value-arithmetic-model",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~ad16ab2c",
+        "viewId": "place-value-arithmetic-model",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~fc8215ba",
+        "viewId": "place-value-arithmetic-model",
+        "count": 4
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~f5125172",
+        "viewId": "place-value-arithmetic-model",
+        "count": 5
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~5dbb9242",
+        "viewId": "place-value-arithmetic-model",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~2f2987df",
+        "viewId": "place-value-arithmetic-model",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~e40a9918",
+        "viewId": "place-value-arithmetic-model",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~9d8853a2",
+        "viewId": "place-value-arithmetic-model",
+        "count": 3
+    },
+    {
+        "id": "2.NBT.B.7-concrete-regrouping~0130749a",
+        "viewId": "place-value-arithmetic-model",
+        "count": 4
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~2e035a3f",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~d14c5358",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~ff030627",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~03db4911",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 4
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~3cfc3d3f",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 5
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~ea385ddd",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~f3c08d94",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~4cee3805",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~25b139b3",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 3
+    },
+    {
+        "id": "2.NBT.B.7-model-to-written-method~7682ea5d",
+        "viewId": "place-value-arithmetic-written-method",
+        "count": 4
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~8adcd14f",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~da18e3f9",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~c0e70882",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 2
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~59fb534b",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 3
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~6436bff1",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 5
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~4203a811",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 8
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~c1da8e15",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~177cc5f3",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 1
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~9666e92e",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 3
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~8bf99291",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 3
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~4010f9cb",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 5
+    },
+    {
+        "id": "2.NBT.B.9-explain-strategies~dbec91bb",
+        "viewId": "place-value-arithmetic-explanation",
+        "count": 6
+    }
+] as const;
+
+it.each(currentSourceLineages)('$viewId preserves $id with $count semantic selections and replay', ({id, viewId, count}) => {
+    const target = [...gradeOne, ...gradeTwo].find(candidate => candidate.id === id)!;
+    expect(target).toBeDefined();
+    const view = views.find(candidate => candidate.viewId === viewId)!;
+    const choices = planned(target, view);
+    expect(choices).toHaveLength(count);
+    for (const choice of choices) {
+        expect(choice.resolved.generatorConfig.requireMultipleOf10).toBe(target.labels.includes(Scope.MultiplesOf10));
+        for (const seed of [0, 17, 42]) {
+            const input = {...choice.input, seed, replay: {...choice.input.replay, seed}};
+            const draw = generatePlannedDraw(input), state = rng.getRandomState();
+            expect(draw.stub).not.toBeNull();
+            const data = draw.stub!.data;
+            const both = data.num1 % 10 === 0 && data.num2 % 10 === 0;
+            expect(draw.labels.includes(Scope.MultiplesOf10)).toBe(both);
+            expect(choice.resolved.generatorConfig.multipleOf10Presence).toBe(both);
+            expect(draw.labels).toEqual(expect.arrayContaining(widthLabels(data.num1, data.num2)));
+            expect(draw.labels).not.toContain(Scope.MultipleDigitLargestOperand);
+            if (data.operation === 'addition') expect(draw.labels).toEqual(expect.arrayContaining([Area.Addition, Area.AdditionPlaceValuePartitioning]));
+            else if (data.operandProfile === 'general' || data.answer === 0) {
+                expect(draw.labels).toEqual(expect.arrayContaining([Area.Subtraction, Area.SubtractionPlaceValuePartitioning]));
+            } else expect(draw.labels).not.toContain(Area.SubtractionPlaceValuePartitioning);
+            expect(generatePlannedDraw(input)).toEqual(draw);
+            expect(rng.getRandomState()).toBe(state);
+        }
+    }
+});

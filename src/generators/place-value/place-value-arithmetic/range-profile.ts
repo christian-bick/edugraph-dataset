@@ -4,8 +4,8 @@ import {resolveRangeFromLabels} from '../../../lib/ontology.ts';
 import {selectExactLabelMap} from '../../../lib/resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
-import {grade1AdditionPairs, grade1SubtractionPairs} from './pair-domain.ts';
-import {exactPrimaryWidths, hasPrimaryWidth, primaryWidthRows} from './width-domain.ts';
+import {grade1SubtractionPairs} from './pair-domain.ts';
+import {exactPrimaryWidths, hasPrimaryWidth, matchesMultipleOf10Presence, primaryWidthRows} from './width-domain.ts';
 
 const bounds = [[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10],
     [Scope.NumbersSmaller20, 20], [Scope.NumbersSmaller100, 100],
@@ -48,15 +48,12 @@ export function permitsPlaceValueRange(labels: string[], originalZero?: boolean)
     const minimum = 1, maximum = Math.min(999, range.max), floor = maximumAbove(range.max);
     return zeroResults.some(requestedZero => coefficients.some(coefficient => {
         const equality = requestedZero && subtraction && !regrouping;
-        if (!selected(Scope.MultiplesOf10)) return widths.some(width => primaryWidthRows({operation: addition ? 'addition' : 'subtraction',
+        if (addition || selected(Area.SubtractionPlaceValuePartitioning) || !selected(Scope.MultiplesOf10)) return widths.some(width => primaryWidthRows({operation: addition ? 'addition' : 'subtraction',
             minimum, maximum, maximumAbove: floor, regrouping,
-            zeroResult: equality, coefficientZero: coefficient}, width).length > 0);
-        if (addition) return coefficient && !regrouping
-            && grade1AdditionPairs('two-digit-multiple-of-ten', minimum, maximum, false)
-                .some(([a, b]) => a + b > floor && widths.some(width => hasPrimaryWidth(a, b, width)));
+            zeroResult: equality, coefficientZero: coefficient, multipleOf10Presence: selected(Scope.MultiplesOf10)}, width).length > 0);
         return !regrouping && coefficient === equality
             && grade1SubtractionPairs(minimum, maximum, equality)
-                .some(([a, b]) => a > floor && widths.some(width => hasPrimaryWidth(a, b, width)));
+                .some(([a, b]) => a > floor && matchesMultipleOf10Presence(a, b, true) && widths.some(width => hasPrimaryWidth(a, b, width)));
     }));
 }
 export const resolvePlaceValueRange = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) =>

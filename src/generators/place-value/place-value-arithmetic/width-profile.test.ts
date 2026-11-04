@@ -111,8 +111,8 @@ describe('reviewed owner-specific resolver contract', () => {
     });
 
     it.each([
-        ['2.NBT.B.9-explain-strategies~4203a811', explanation, 5],
-        ['2.NBT.B.9-explain-strategies~dbec91bb', explanation, 4],
+        ['2.NBT.B.9-explain-strategies~4203a811', explanation, 8],
+        ['2.NBT.B.9-explain-strategies~dbec91bb', explanation, 6],
         ['2.NBT.B.7-concrete-regrouping~f5125172', concrete, 5],
         ['2.NBT.B.7-model-to-written-method~3cfc3d3f', written, 5]
     ] as const)('closes the real planned width omission without pending inference: %s', (id, view, count) => {

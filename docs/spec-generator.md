@@ -96,6 +96,12 @@ through [SPEC-4](spec-general.md#spec-4--never-declare-a-capability-broader-than
 declare the most specific label that is *actually true* of the output, never an ancestor of
 it, and never a leaf the module does not really satisfy.
 
+For binary arithmetic, `Scope.MultiplesOf10` requires **both primary operands** to be
+integer multiples of ten. Include an operand that the learner must determine: `10 + [] = 20`
+qualifies because the missing operand is 10; `34 + 20` and `10 + [] = 21` do not qualify.
+A divisible result, a zero digit or a derived place-value component does not establish this
+operand claim. Keep any narrower native operand pool separate from the semantic condition.
+
 Generator specs contain no `Ability` labels. Abilities depend on the final observable task,
 so they are exclusively owned by views ([SPEC-V5](spec-view.md#spec-v5--abilities-are-exclusively-view-owned)).
 When an apparent Ability choice changes operands, unknowns, wording, hints, or requested
@@ -115,6 +121,6 @@ assertions of the declared contract, with tests that every admitted variant sati
 
 - [ ] **SPEC-G1** — `spec`, `GeneratorSchema` and `Config` are all exported, with `Config` extracted from the schema.
 - [ ] **SPEC-G2** — every schema parameter is a mathematical property; no `isReverse`, `layoutStyle`, `themeColor`, `useColor`, `showTenFrame`, or comparable presentation flag.
-- [ ] **SPEC-G3** — declared Area/Scope labels are the most specific true claims about the math produced.
+- [ ] **SPEC-G3** — declared Area/Scope labels are the most specific true claims about the math produced; a binary `MultiplesOf10` claim holds for both primary operands, including a necessary unknown operand.
 - [ ] **SPEC-G3** — neither `generalLabels` nor any generator schema parameter contains an Ability.
 - [ ] All general rules in [spec-general.md](spec-general.md#audit) pass.

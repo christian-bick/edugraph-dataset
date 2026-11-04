@@ -31,10 +31,13 @@ export const permitsPrimaryWidth = (selected: Selected, width: ExactPrimaryWidth
     const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
     const subtraction = selected(Area.Subtraction) || selected(Area.SubtractionPlaceValuePartitioning);
     if (!addition && !subtraction) return true;
-    if (selected(Scope.MultiplesOf10)) return width === '22' && !selected(Area.IntegerRegrouping);
+    if (selected(Scope.MultiplesOf10) && subtraction && !selected(Area.SubtractionPlaceValuePartitioning)) {
+        return width === '22' && !selected(Area.IntegerRegrouping);
+    }
     const base = {operation: addition ? 'addition' as const : 'subtraction' as const,
         ...widthRangeDomain(rangeLabels.filter(label => selected(label))), regrouping: selected(Area.IntegerRegrouping),
-        coefficientZero: selected(Scope.NumbersWithoutZero) ? false : undefined};
+        coefficientZero: selected(Scope.NumbersWithoutZero) ? false : undefined,
+        multipleOf10Presence: selected(Scope.MultiplesOf10)};
     return [false, ...(selected(Scope.NumbersWithZero) && subtraction && !base.regrouping ? [true] : [])].some(zeroResult =>
         primaryWidthRows({...base, zeroResult}, width).length > 0);
 };

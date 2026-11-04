@@ -15,7 +15,8 @@ const width = (selected: Selected) => primaryWidthFromLabels(primaryWidthLabels.
 const domain = (selected: Selected, zeroResult: boolean, coefficientZero: boolean): WidthDomain => {
     return {operation: addition(selected) ? 'addition' : 'subtraction',
         ...widthRangeDomain(coefficientContext.filter(label => selected(label))),
-        regrouping: selected(Area.IntegerRegrouping), zeroResult, coefficientZero};
+        regrouping: selected(Area.IntegerRegrouping), zeroResult, coefficientZero,
+        multipleOf10Presence: selected(Scope.MultiplesOf10)};
 };
 const hasPairs = (selected: Selected, zeroResult: boolean, presence: boolean) =>
     primaryWidthRows(domain(selected, zeroResult, presence), width(selected)).length > 0;
@@ -26,7 +27,7 @@ export const permitsCoefficientProfile = (selected: Selected, originalZero: bool
     if (presence === selected(Scope.NumbersWithoutZero)) return false;
     if (addition(selected) && selected(Scope.TwoDigitLargestOperand)) return presence;
     const equality = originalZero && subtraction(selected) && !selected(Area.IntegerRegrouping);
-    if (selected(Scope.MultiplesOf10)) return presence === equality;
+    if (selected(Scope.MultiplesOf10) && subtraction(selected) && !selected(Area.SubtractionPlaceValuePartitioning)) return presence === equality;
     return hasPairs(selected, equality, presence);
 };
 
@@ -40,7 +41,7 @@ export const resolveCoefficientPresence = registerStaticResolver(withLabelChoice
         if (present && absent) return undefined;
         if (!present && !absent) {
             if (addition(selected) && selected(Scope.TwoDigitLargestOperand)) return true;
-            if (subtraction(selected) && selected(Scope.MultiplesOf10)) return false;
+            if (subtraction(selected) && !selected(Area.SubtractionPlaceValuePartitioning) && selected(Scope.MultiplesOf10)) return false;
             return undefined;
         }
         if (!addition(selected) && !subtraction(selected)) return present;
@@ -59,6 +60,5 @@ export const resolveCoefficientPresence = registerStaticResolver(withLabelChoice
         {whenAll: [Area.Addition, Scope.TwoDigitLargestOperand], labels: [Scope.NumbersWithZero]},
         {whenAll: [Area.AdditionPlaceValuePartitioning, Scope.TwoDigitLargestOperand], labels: [Scope.NumbersWithZero]},
         {whenAll: [Area.Subtraction, Scope.MultiplesOf10], labels: [Scope.NumbersWithoutZero]},
-        {whenAll: [Area.SubtractionPlaceValuePartitioning, Scope.MultiplesOf10], labels: [Scope.NumbersWithoutZero]}
     ]
 }));

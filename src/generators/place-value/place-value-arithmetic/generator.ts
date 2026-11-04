@@ -10,7 +10,7 @@ import {
     PlaceValueRegroupingEvidence
 } from '../../../types/problems.ts';
 import {PlaceValueArithmeticGeneratorConfig, PlaceValueArithmeticGeneratorSchema, spec} from './spec.ts';
-import {exactPrimaryWidths, hasPrimaryWidth, samplePrimaryWidth} from './width-domain.ts';
+import {exactPrimaryWidths, hasPrimaryWidth, matchesMultipleOf10Presence, samplePrimaryWidth} from './width-domain.ts';
 import {grade1AdditionPairs, grade1SubtractionPairs, operandProfile} from './pair-domain.ts';
 import {maximumAbove} from './range-profile.ts';
 
@@ -194,6 +194,9 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
             );
         }
 
+        if (config.multipleOf10Presence !== undefined && typeof config.multipleOf10Presence !== 'boolean') {
+            throw new GeneratorValidationError('place-value-arithmetic', 'Expected a boolean multiple-of-ten presence profile.');
+        }
         const profile = operandProfile(config);
         if (profile === null) return null;
         const minimum = Math.max(1, Math.ceil(config.range!.min));
@@ -215,24 +218,24 @@ export class PlaceValueArithmeticGenerator implements ProblemGenerator<
             throw new GeneratorValidationError('place-value-arithmetic', 'Unsupported primary operand width profile.');
         }
         if (['single', 'multiple'].includes(primaryWidth) && (profile !== 'general'
-            || primaryWidth === 'single' && config.operation === Area.Subtraction && requireRegrouping)) return null;
+            || primaryWidth === 'single' && config.operation !== Area.Addition && requireRegrouping)) return null;
         let pair: OperandPair | null = null;
         if (config.operation === Area.Addition) {
             if (requireZero || profile === 'multiples-of-ten') return null;
             pair = profile === 'general'
                 ? samplePrimaryWidth({operation: 'addition', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,
-                    coefficientZero: coefficientPresence}, primaryWidth)
+                    coefficientZero: coefficientPresence, multipleOf10Presence: config.multipleOf10Presence}, primaryWidth)
                 : coefficientPresence ? choose(grade1AdditionPairs(profile, minimum, maximum, requireRegrouping)
-                    .filter(([a, b]) => a + b > floor && hasPrimaryWidth(a, b, primaryWidth))) : null;
+                    .filter(([a, b]) => a + b > floor && matchesMultipleOf10Presence(a, b, config.multipleOf10Presence) && hasPrimaryWidth(a, b, primaryWidth))) : null;
         } else if (profile === 'multiples-of-ten') {
             if (requireRegrouping) return null;
             if (coefficientPresence !== requireZero) return null;
             pair = choose(grade1SubtractionPairs(minimum, maximum, requireZero)
-                .filter(([a, b]) => a > floor && hasPrimaryWidth(a, b, primaryWidth)));
+                .filter(([a, b]) => a > floor && matchesMultipleOf10Presence(a, b, config.multipleOf10Presence) && hasPrimaryWidth(a, b, primaryWidth)));
         } else if (profile === 'general') {
             if (requireZero && requireRegrouping) return null;
             pair = samplePrimaryWidth({operation: 'subtraction', minimum, maximum, maximumAbove: floor, regrouping: requireRegrouping,
-                zeroResult: requireZero, coefficientZero: coefficientPresence}, primaryWidth);
+                zeroResult: requireZero, coefficientZero: coefficientPresence, multipleOf10Presence: config.multipleOf10Presence}, primaryWidth);
         }
 
         if (pair === null) return null;

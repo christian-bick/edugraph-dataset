@@ -29,6 +29,10 @@ describe('canonical pair sampling', () => {
                             expect(Math.max(Math.abs(data.num1), Math.abs(data.num2))).toBeGreaterThanOrEqual(width[0]);
                             expect(Math.max(Math.abs(data.num1), Math.abs(data.num2))).toBeLessThanOrEqual(width[1]);
                             if (requireEvenResult) expect(Math.abs(data.answer % 2)).toBe(0);
+                            if (requireMultipleOf10) {
+                                expect(Math.abs(data.num1 % 10)).toBe(0);
+                                expect(Math.abs(data.num2 % 10)).toBe(0);
+                            }
                             if (operation === 'addition') expect(data.num1 + data.num2).toBe(data.answer);
                             if (operation === 'subtraction') expect(data.num1 - data.num2).toBe(data.answer);
                             if (operation === 'multiplication') expect(data.num1 * data.num2).toBeCloseTo(data.answer);
@@ -60,14 +64,14 @@ describe('canonical pair sampling', () => {
             expect(hasCanonicalRangeWitness([data!.num1, data!.num2, data!.answer], range)).toBe(true);
         }
     });
-    it('preserves the single-digit times whole-tens source domain and even subtraction roles', () => {
+    it('requires both multiplication factors to be multiples of ten and retains even subtraction roles', () => {
         for (let seed = 0; seed < 80; seed++) {
             setSeed(seed);
-            const config = {...base, operation: 'multiplication' as const, range: createCanonicalNumericRange(1000),
+            const config = {...base, operation: 'multiplication' as const, range: createCanonicalNumericRange(1000, 10),
                 largestOperandDigits: 2 as const, requireMultipleOf10: true};
             const data = sampleCanonicalPair(config)!;
-            expect(Math.min(data.num1, data.num2)).toBeLessThanOrEqual(9);
-            expect(Math.max(data.num1, data.num2) % 10).toBe(0);
+            expect(data.num1 % 10).toBe(0);
+            expect(data.num2 % 10).toBe(0);
             expect(data.answer).toBeGreaterThan(120);
         }
         const results = Array.from({length: 200}, (_, seed) => {
@@ -76,6 +80,14 @@ describe('canonical pair sampling', () => {
                 largestOperandDigits: 2, requireEvenResult: true})!;
         });
         expect(results.some(data => data.answer === 2 && data.num1 % 2 === 1 && data.num2 > 10)).toBe(true);
+    });
+    it('includes the necessary unknown operand in the 10 + [] = 20 whole-tens claim', () => {
+        const config = {...base, range: createCanonicalNumericRange(20, 10), largestOperandDigits: 2 as const,
+            requireMultipleOf10: true};
+        expect(sampleCanonicalPair(config)).toEqual({num1: 10, num2: 10, answer: 20, operation: 'addition'});
+        for (const operation of ['addition', 'subtraction', 'multiplication', 'division'] as const) {
+            expect(canSampleCanonicalPair({...config, operation, largestOperandDigits: 1})).toBe(false);
+        }
     });
     it('retains both division factor roles and applies evenness to the selected quotient', () => {
         for (const requireEvenResult of [false, true]) {

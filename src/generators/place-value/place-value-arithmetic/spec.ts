@@ -1,5 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
-import {hasLabel, selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {hasLabel} from '../../../lib/resolvers.ts';
 import {GeneratorSpec} from '../../../types/generator-spec.ts';
 import {ConfigFromSchema, exactResolver, withLabelChoices} from '../../../types/schema.ts';
 import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
@@ -8,25 +8,45 @@ import {primaryWidthLabels, primaryWidthChoices, primaryWidthFromLabels,
 import {resolveResultZero} from './zero-result.ts';
 import {coefficientLabels, resolveCoefficientPresence} from './coefficient-profile.ts';
 import {placeValueRangeLabels, placeValueRangeChoices, placeValueUpperBounds, resolvePlaceValueRange} from './range-profile.ts';
-import {originalOperandFlags, originalOperandLabels, resolveOriginalSingleDigit, resolveOriginalTwoDigit} from './operand-domain.ts';
+import {originalOperandFlags, originalOperandLabels, resolveOriginalSingleDigit,
+    resolveOriginalTwoDigit, resolveOriginalMultipleOf10} from './operand-domain.ts';
 import {hasNativePairs, operandProfile} from './pair-domain.ts';
 
 const operationLabels = [Area.AdditionPlaceValuePartitioning, Area.SubtractionPlaceValuePartitioning,
     Area.Addition, Area.Subtraction];
-const operationValue = selectExactLabelMap([
-    [Area.AdditionPlaceValuePartitioning, Area.Addition], [Area.SubtractionPlaceValuePartitioning, Area.Subtraction],
-    [Area.Addition, Area.Addition], [Area.Subtraction, Area.Subtraction]
-] as const);
+const fullAddition = [Area.Addition, Area.AdditionPlaceValuePartitioning];
+const fullSubtraction = [Area.Subtraction, Area.SubtractionPlaceValuePartitioning];
+const operationChoices = [fullAddition, [Area.Subtraction], fullSubtraction];
+
+/** Full partial-equation mathematics versus positive whole-tens subtraction. */
+export function placeValueOperation(selected: (label: string) => boolean) {
+    const addition = selected(Area.Addition) || selected(Area.AdditionPlaceValuePartitioning);
+    const subtraction = selected(Area.Subtraction) || selected(Area.SubtractionPlaceValuePartitioning);
+    if (addition && subtraction) return undefined;
+    if (addition) return Area.Addition;
+    if (selected(Area.SubtractionPlaceValuePartitioning)) {
+        return selected(Scope.MultiplesOf10) && !selected(Scope.NumbersWithZero) ? undefined : Area.Subtraction;
+    }
+    return subtraction && !selected(Scope.NumbersWithZero) ? Area.Subtraction : undefined;
+}
 const resolveOperation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
-    const selected = operationLabels.filter(label => labels.includes(label));
-    if (selected.length === 1) return operationValue(labels);
-    if (selected.length > 1) return undefined;
-    // Preserve the legacy partial-request default. A bound operation is never
-    // reinterpreted from completed widths; the joint native-domain rule checks it.
-    const flags = originalOperandFlags(label => labels.includes(label));
-    return flags.requireTwoDigitLargest ? Area.Addition
-        : labels.includes(Scope.MultiplesOf10) ? Area.Subtraction : undefined;
-}), {kind: 'alternatives', alternatives: operationLabels.map(label => [label]), contextLabels: originalOperandLabels}));
+    const selected = (label: string) => labels.includes(label);
+    const operation = placeValueOperation(selected);
+    if (operation || operationLabels.some(selected)) return operation;
+    const flags = originalOperandFlags(selected);
+    return flags.requireTwoDigitLargest ? Area.Addition : selected(Scope.MultiplesOf10) ? Area.Subtraction : undefined;
+}), {kind: 'alternatives', alternatives: operationChoices, relation: 'capability',
+    contextLabels: [...originalOperandLabels, Scope.NumbersWithZero],
+    defaults: [
+        {whenAll: [Scope.MultiplesOf10, Scope.TwoDigitLargestOperand], labels: fullAddition},
+        {whenAll: [Scope.MultiplesOf10, Scope.NumbersWithZero], labels: fullSubtraction},
+        {whenAll: [Scope.MultiplesOf10], whenNone: [Scope.NumbersWithZero], labels: [Area.Subtraction]}
+    ]}));
+
+// No unconditional absent default: a broad request retains both truthful native subsets.
+const resolveMultipleOf10Presence = registerStaticResolver(withLabelChoices(exactResolver(
+    (labels: string[]) => labels.includes(Scope.MultiplesOf10)
+), {kind: 'alternatives', alternatives: [[], [Scope.MultiplesOf10]]}));
 
 const nativeLabels = [...operationLabels, Area.IntegerRegrouping, Scope.MultiplesOf10,
     ...primaryWidthLabels, ...coefficientLabels, ...placeValueRangeLabels];
@@ -40,26 +60,31 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
         ],
         predicate: query => {
             const selected = (label: string) => query.exact('generator', label);
-            const operations = operationLabels.filter(selected);
+            const operation = placeValueOperation(selected);
             const width = primaryWidthFromLabels(primaryWidthLabels.filter(selected));
             const uppers = placeValueRangeLabels.filter(selected);
             const presence = selected(Scope.NumbersWithZero);
-            if (operations.length !== 1 || !width || uppers.length !== 1 || presence === selected(Scope.NumbersWithoutZero)) return false;
-            const operation = operations[0] === Area.Addition || operations[0] === Area.AdditionPlaceValuePartitioning
-                ? Area.Addition : Area.Subtraction;
+            if (!operation || !width || uppers.length !== 1 || presence === selected(Scope.NumbersWithoutZero)) return false;
+            // Every full family carries its complete, non-specializing Area bundle.
+            if (operation === Area.Addition && !fullAddition.every(selected)) return false;
             const regrouping = selected(Area.IntegerRegrouping);
             const config: PlaceValueArithmeticGeneratorConfig = {
                 operation, requireRegrouping: regrouping,
                 ...originalOperandFlags(label => query.exact('target', label)),
-                requireMultipleOf10: selected(Scope.MultiplesOf10),
-                requireZero: query.exact('target', Scope.NumbersWithZero) && operation === Area.Subtraction && !regrouping,
+                requireMultipleOf10: query.exact('target', Scope.MultiplesOf10),
+                multipleOf10Presence: selected(Scope.MultiplesOf10),
+                requireZero: query.exact('target', Scope.NumbersWithZero) && operation !== Area.Addition && !regrouping,
                 largestOperandProfile: width, coefficientPresence: presence,
                 range: {min: 0, max: placeValueUpperBounds[placeValueRangeLabels.indexOf(uppers[0]!)]!}
             };
             const domain = operandProfile(config);
             if (!domain) return false;
-            if (domain !== 'general' && (operation === Area.Addition ? domain === 'multiples-of-ten'
-                : domain !== 'multiples-of-ten' || operations[0] !== Area.Subtraction)) return false;
+            if (operation === Area.Addition && domain === 'multiples-of-ten') return false;
+            if (operation !== Area.Addition && domain !== 'general' && domain !== 'multiples-of-ten') return false;
+            if (operation === Area.Subtraction) {
+                const full = domain === 'general' || config.requireZero;
+                if (full ? !fullSubtraction.every(selected) : selected(Area.SubtractionPlaceValuePartitioning)) return false;
+            }
             return hasNativePairs(config);
         }
     }],
@@ -68,16 +93,13 @@ export const spec: GeneratorSpec<typeof PlaceValueArithmeticGeneratorSchema> = {
 };
 
 export const PlaceValueArithmeticGeneratorSchema = {
-    operation: [operationLabels, resolveOperation, operationLabels.map(label => [label])],
+    operation: [operationLabels, resolveOperation, operationChoices],
     requireRegrouping: [[Area.IntegerRegrouping], hasLabel(Area.IntegerRegrouping)],
     requireSingleDigitSmallest: [originalOperandLabels, resolveOriginalSingleDigit],
     requireTwoDigitLargest: [originalOperandLabels, resolveOriginalTwoDigit],
-    requireMultipleOf10: [[Scope.MultiplesOf10], selectExactLabelSetMap([
-        [[], false], [[Scope.MultiplesOf10], true]
-    ] as const), [[], [Scope.MultiplesOf10]]],
+    requireMultipleOf10: [[Scope.MultiplesOf10], resolveOriginalMultipleOf10],
+    multipleOf10Presence: [[Scope.MultiplesOf10], resolveMultipleOf10Presence, [[], [Scope.MultiplesOf10]]],
     requireZero: [[Scope.NumbersWithZero], resolveResultZero],
-    // Resolve the range before completing widths in the direct helper path.
-    // Planned generation still resolves the authoritative joint assignment.
     range: [placeValueRangeLabels, resolvePlaceValueRange, placeValueRangeChoices],
     largestOperandProfile: [primaryWidthLabels, resolvePrimaryWidth, primaryWidthChoices],
     coefficientPresence: [coefficientLabels, resolveCoefficientPresence, coefficientLabels.map(label => [label])]

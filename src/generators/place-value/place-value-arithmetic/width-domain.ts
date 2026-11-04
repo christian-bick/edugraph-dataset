@@ -13,12 +13,17 @@ export interface WidthDomain {
     readonly zeroResult?: boolean;
     readonly coefficientZero?: boolean;
     readonly maximumAbove?: number;
+    readonly multipleOf10Presence?: boolean;
 }
 interface PairRow {
     readonly first: number;
     readonly seconds: readonly number[];
     readonly weight: number;
 }
+
+/** Both primary operands, including a determined hidden operand, must be divisible by ten. */
+export const matchesMultipleOf10Presence = (a: number, b: number, presence?: boolean): boolean =>
+    presence === undefined || (a % 10 === 0 && b % 10 === 0) === presence;
 
 const cache = new Map<string, readonly PairRow[]>();
 export const hasPrimaryWidth = (a: number, b: number, width: PrimaryWidth): boolean => {
@@ -60,14 +65,15 @@ export const hasCoefficientZero = (first: number, second: number, operation: Wid
 /** Complete finite support with the original uniform-first/uniform-second proposal weights. */
 export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): readonly PairRow[] {
     const key = JSON.stringify([domain.operation, domain.minimum, domain.maximum, domain.regrouping,
-        domain.zeroResult, domain.coefficientZero, domain.maximumAbove, width]);
+        domain.zeroResult, domain.coefficientZero, domain.maximumAbove, domain.multipleOf10Presence, width]);
     const cached = cache.get(key);
     if (cached) return cached;
     const rows: PairRow[] = [];
     const {operation, minimum, maximum, regrouping} = domain;
     if (operation === 'subtraction' && domain.zeroResult) {
         if (!regrouping) for (let operand = minimum; operand <= maximum; operand++) {
-            if (operand > (domain.maximumAbove ?? -1) && domain.coefficientZero !== false && hasPrimaryWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
+            if (operand > (domain.maximumAbove ?? -1) && domain.coefficientZero !== false
+                && matchesMultipleOf10Presence(operand, operand, domain.multipleOf10Presence) && hasPrimaryWidth(operand, operand, width)) rows.push({first: operand, seconds: [operand],
                 weight: 1 / (maximum - minimum + 1)});
         }
         cache.set(key, rows);
@@ -88,6 +94,7 @@ export function primaryWidthRows(domain: WidthDomain, width: PrimaryWidth): read
         if (!interval) continue;
         const seconds: number[] = [];
         for (let second = interval[0]; second <= interval[1]; second++) {
+            if (!matchesMultipleOf10Presence(first, second, domain.multipleOf10Presence)) continue;
             if ((operation === 'addition' ? first + second : first) <= (domain.maximumAbove ?? -1)) continue;
             if (domain.coefficientZero !== undefined
                 && hasCoefficientZero(first, second, operation) !== domain.coefficientZero) continue;

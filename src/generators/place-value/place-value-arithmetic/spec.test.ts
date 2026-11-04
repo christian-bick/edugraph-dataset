@@ -5,6 +5,7 @@ import {resolveInferredLabels} from '../../../lib/inferred-labels.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
 import {getRandomState, setSeed} from '../../../lib/random.ts';
 import {hasLabel} from '../../../lib/resolvers.ts';
+import {withLabelChoices} from '../../../types/schema.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
 import {spec as modelView} from '../../../visuals/views/place-value/place-value-arithmetic-model/spec.ts';
@@ -187,7 +188,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
             Scope.SingleDigitSmallestOperand,
             Scope.TwoDigitLargestOperand
         ]));
-        expect(stub!.labels).not.toContain(Area.Addition);
+        expect(stub!.labels).toContain(Area.Addition);
     });
 
     it('resolves two-digit plus a multiple of 10', () => {
@@ -198,6 +199,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         ]);
         expect(stub).not.toBeNull();
         expect(stub!.data.operandProfile).toBe('two-digit-multiple-of-ten');
+        expect(stub!.data.num1 % 10).toBe(0);
         expect(stub!.data.num2 % 10).toBe(0);
         expect(stub!.data.regrouping.kind).toBe('none');
     });
@@ -223,12 +225,12 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
             zeroLabel
         ]));
         expect(spec.generalLabels).toContain(Area.PlaceValue);
-        expect(stub!.labels).not.toContain(Area.SubtractionPlaceValuePartitioning);
+        expect(stub!.labels!.includes(Area.SubtractionPlaceValuePartitioning)).toBe(requireZero);
     });
 
     it.each(views.flatMap(view => [Scope.NumbersWithoutZero, Scope.NumbersWithZero]
         .map(zeroLabel => ({view, zeroLabel}))))(
-        'admits whole-tens subtraction without partitioning in $view.viewId / $zeroLabel',
+        'admits the truthful positive/equality whole-tens family in $view.viewId / $zeroLabel',
         ({view, zeroLabel}) => {
             const labels = [Area.PlaceValue, Scope.MultiplesOf10, Scope.TwoOperands,
                 Scope.NumbersSmaller100, Scope.NumbersWithoutNegatives, zeroLabel, ...view.generalLabels];
@@ -239,7 +241,7 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
 
             const rejected = planModelCompatibility({id: 'unsupported-partitioning',
                 labels: [...labels, Area.SubtractionPlaceValuePartitioning]}, model, consumer);
-            expect(rejected).toMatchObject({supported: false, reason: 'incompatible-rules'});
+            expect(rejected.supported).toBe(zeroLabel === Scope.NumbersWithZero);
         }
     );
 
@@ -289,11 +291,11 @@ describe('PlaceValueArithmeticGenerator spec integration', () => {
         [Area.AdditionPlaceValuePartitioning, Scope.MultiplesOf10, Scope.TwoDigitLargestOperand],
         [Area.Subtraction, Scope.MultiplesOf10, Scope.NumbersWithoutZero],
         [Area.Subtraction, Scope.MultiplesOf10, Scope.NumbersWithZero]
-    ].map(profileLabels => ({profileLabels})))('preserves the old configuration, entropy and choice counts for $profileLabels', ({profileLabels}) => {
+    ].map(profileLabels => ({profileLabels})))('preserves original-request constraints under equivalent target-bound resolution for $profileLabels', ({profileLabels}) => {
         const labels = [...profileLabels, Scope.NumbersSmaller100];
         const generator = new PlaceValueArithmeticGenerator();
         const legacySchema = {...PlaceValueArithmeticGeneratorSchema,
-            requireMultipleOf10: [[Scope.MultiplesOf10], hasLabel(Scope.MultiplesOf10)]} as const;
+            requireMultipleOf10: [[Scope.MultiplesOf10], withLabelChoices(hasLabel(Scope.MultiplesOf10), {kind: 'target'})]} as const;
         const domains = [legacySchema, generator.schema].map(schema => {
             setSeed(71);
             const choices = normalizeSchemaChoices(schema, labels, 'generator');

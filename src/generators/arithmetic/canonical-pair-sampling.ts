@@ -61,7 +61,7 @@ function pairPlans(config: CanonicalPairConfig): PairPlan[] {
         }
         return plans;
     }
-    const step = requireMultipleOf10 && operation !== 'multiplication' ? 10 : 1;
+    const step = requireMultipleOf10 ? 10 : 1;
     const min = Math.max(1, Math.ceil(range.min / step));
     const smallMax = Math.ceil(range.minimumBelow / step) - 1;
     if (min > smallMax) return [];
@@ -103,18 +103,6 @@ function pairPlans(config: CanonicalPairConfig): PairPlan[] {
                 values: (total, part) => requireNegative
                     ? [(total - part) * step, total * step, -part * step]
                     : [total * step, (total - part) * step, part * step]});
-        }
-        return plans;
-    }
-    // Multiples-of-ten multiplication is the existing single-digit × whole-tens competency.
-    if (operation === 'multiplication' && requireMultipleOf10) {
-        for (let single = Math.max(1, range.min); single <= Math.min(9, range.minimumBelow - 1); single++) {
-            const factors = interval(Math.max(10, widthMin, Math.ceil((range.maximumAbove + 1) / single)),
-                Math.min(90, widthMax, Math.floor(range.max / single)), 10);
-            add({first: factors, second: () => fixed(single), values: (tens, digit) => {
-                const signed = requireNegative ? -digit : digit;
-                return [signed, tens, signed * tens];
-            }});
         }
         return plans;
     }

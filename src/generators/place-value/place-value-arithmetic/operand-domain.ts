@@ -25,3 +25,8 @@ export const resolveOriginalSingleDigit = registerStaticResolver(withLabelChoice
 export const resolveOriginalTwoDigit = registerStaticResolver(withLabelChoices(exactResolver(
     (labels: string[]) => originalOperandFlags(label => labels.includes(label)).requireTwoDigitLargest
 ), {kind: 'target'}));
+
+/** Retains the native source constraint independently of its semantic refinement. */
+export const resolveOriginalMultipleOf10 = registerStaticResolver(withLabelChoices(exactResolver(
+    (labels: string[]) => labels.includes(Scope.MultiplesOf10)
+), {kind: 'target'}));
