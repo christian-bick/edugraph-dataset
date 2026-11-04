@@ -4,7 +4,7 @@ import * as randomSource from '../../../lib/random.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {coinDenominations} from './spec.ts';
-import {banknoteRangeProfiles, pennyRangeProfiles, centOnlyRangeProfiles, centOnlyRowsForRange} from './numeric-domain.ts';
+import {banknoteRangeProfiles, pennyRangeProfiles, centOnlyRangeProfiles, centOnlyRowsForRange, pendingCurrencyRanges} from './numeric-domain.ts';
 
 const representationProfiles = [
     {name: 'banknotes', useCoins: false, useBanknotes: true, coinDenomination: 'none' as const, range: banknoteRangeProfiles[0]!.range},
@@ -15,11 +15,14 @@ const representationProfiles = [
     ])
 ];
 const operationConfig = (profile: typeof representationProfiles[number], operation: Area) => {
-    const denomination = profile.coinDenomination === Scope.TwentiethDenomination ? 5 : 10;
+    const denomination = profile.coinDenomination === Scope.QuarterDenomination ? 25
+        : profile.coinDenomination === Scope.TenthDenomination ? 10
+            : profile.coinDenomination === Scope.TwentiethDenomination ? 5 : 1;
     const centOnly = !profile.useBanknotes && (profile.coinDenomination === Scope.TwentiethDenomination
         || profile.coinDenomination === Scope.TenthDenomination && operation === Area.Subtraction);
     const range = centOnly ? centOnlyRangeProfiles.find(profile =>
-        centOnlyRowsForRange(operation === Area.Addition ? 'addition' : 'subtraction', denomination, profile.range).length)!.range : profile.range;
+        centOnlyRowsForRange(operation === Area.Addition ? 'addition' : 'subtraction', denomination as 5 | 10, profile.range).length)!.range
+        : profile.range ?? pendingCurrencyRanges(operation === Area.Addition ? 'addition' : 'subtraction', profile.useBanknotes, denomination)[0];
     return {...profile, operation, range};
 };
 
@@ -32,7 +35,8 @@ describe('CurrencyArithmeticGenerator', () => {
         operation: Area.Addition,
         useCoins: true,
         useBanknotes: false,
-        coinDenomination: Scope.QuarterDenomination
+        coinDenomination: Scope.QuarterDenomination,
+        range: pendingCurrencyRanges('addition', false, 25)[0]!
     } as const;
 
     it('generates denomination-consistent coin amounts', () => {
@@ -52,7 +56,8 @@ describe('CurrencyArithmeticGenerator', () => {
         const problem = generator.generate({
             ...config,
             useBanknotes: true,
-            coinDenomination: Scope.TwentiethDenomination
+            coinDenomination: Scope.TwentiethDenomination,
+            range: pendingCurrencyRanges('addition', true, 5)[0]!
         })!;
 
         for (const amount of problem.data.amounts) {

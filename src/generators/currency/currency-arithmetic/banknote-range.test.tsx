@@ -12,7 +12,8 @@ import {resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
 import type {CurrencyAmount, CurrencyArithmeticProblem} from '../../../types/problems.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {CurrencyArithmeticGeneratorSchema as schema, spec} from './spec.ts';
-import {banknoteRangeProfiles, banknoteRowsForRange} from './numeric-domain.ts';
+import {banknoteRangeProfiles, banknoteRowsForRange, pendingCurrencyTicketsForRange} from './numeric-domain.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {spec as viewSpec} from '../../../visuals/views/currency/currency-word-problem/spec.ts';
 
 let View: typeof import('../../../visuals/views/currency/currency-word-problem/view.tsx')['CurrencyWordProblem'];
@@ -21,6 +22,12 @@ beforeAll(async () => {
     ({CurrencyWordProblem: View} = await import('../../../visuals/views/currency/currency-word-problem/view.tsx'));
 });
 afterAll(() => vi.unstubAllGlobals());
+
+const pendingCases = [[Scope.QuarterDenomination, 25], [Scope.TenthDenomination, 10],
+    [Scope.TwentiethDenomination, 5], [Scope.HundredthDenomination, 1]].flatMap(([coinDenomination, denomination]) =>
+    [false, true].flatMap(useBanknotes => [Area.Addition, Area.Subtraction]
+        .filter(operation => useBanknotes || denomination === 25 || denomination === 10 && operation === Area.Addition)
+        .map(operation => ({coinDenomination: coinDenomination as Scope, denominationCents: Number(denomination), useBanknotes, operation}))));
 
 describe('banknotes-only canonical ranges', () => {
     it('retains every original count draw with exact duplicate weights and both question/solution projections', () => {
@@ -77,21 +84,14 @@ describe('banknotes-only canonical ranges', () => {
         } finally { draw.mockRestore(); }
     });
 
-    it('preserves all702 remaining unqualified coin/mixed count outcomes, probability weights and draw counts', () => {
+    it.each(pendingCases)('preserves the original pending tickets for $denominationCents cents, banknotes=$useBanknotes, $operation', ({coinDenomination, denominationCents, useBanknotes, operation}) => {
         const generator = new CurrencyArithmeticGenerator(), draw = vi.spyOn(rng, 'random');
         let cases = 0;
         try {
-            for (const [coinDenomination, denominationCents] of [[Scope.QuarterDenomination, 25],
-                [Scope.TenthDenomination, 10], [Scope.TwentiethDenomination, 5], [Scope.HundredthDenomination, 1]] as const) {
-                for (const useBanknotes of [false, true]) {
-                    if (!useBanknotes && coinDenomination === Scope.HundredthDenomination) continue;
                     const maxCoins = useBanknotes ? 3 : Math.max(2, Math.min(6, Math.floor(75 / denominationCents)));
                     const inputs = (useBanknotes ? [1, 2, 3] : [0]).flatMap(banknotes =>
                         Array.from({length: maxCoins}, (_, index) => ({banknotes, coins: index + 1})));
-                    for (const operation of [Area.Addition, Area.Subtraction]) for (const first of inputs) for (const second of inputs) {
-                        // Separate complete finite-profile proofs cover the newly adopted cents-only slices.
-                        if (!useBanknotes && (coinDenomination === Scope.TwentiethDenomination
-                            || coinDenomination === Scope.TenthDenomination && operation === Area.Subtraction)) continue;
+                    for (const first of inputs) for (const second of inputs) {
                         const amount = (input: typeof first): CurrencyAmount => ({items: [
                             ...(useBanknotes ? [{kind: 'banknote' as const, denominationCents: 100, count: input.banknotes}] : []),
                             {kind: 'coin', denominationCents, count: input.coins}
@@ -105,22 +105,39 @@ describe('banknotes-only canonical ranges', () => {
                         const expected: CurrencyArithmeticProblem = {operation: operation === Area.Addition ? 'addition' : 'subtraction',
                             amounts: [left, right], answerCents: operation === Area.Addition
                                 ? left.totalCents + right.totalCents : left.totalCents - right.totalCents};
-                        const values = [first, second].flatMap(input => [
-                            ...(useBanknotes ? [(input.banknotes - 0.5) / 3] : []), (input.coins - 0.5) / maxCoins]);
+                        const magnitude = (cents: number, dollars: boolean) => dollars || cents >= 100 ? cents / 100 : cents;
+                        const quantities = [...expected.amounts.flatMap(amount => [
+                            ...amount.items.map(item => magnitude(item.denominationCents, item.kind === 'banknote')),
+                            magnitude(amount.totalCents, useBanknotes)
+                        ]), magnitude(expected.answerCents, useBanknotes)];
+                        const thresholds = [5, 10, 20, 100, 120, 1000, 10000, 100000, 1000000];
+                        const upper = thresholds.find(bound => Math.max(...quantities) <= bound)!;
+                        const lower = thresholds.findLast(bound => Math.min(...quantities) >= bound) ?? 0;
+                        const range = createCanonicalNumericRange(upper, lower);
+                        const rawTicket = [first, second].flatMap(input => [...(useBanknotes ? [input.banknotes] : []), input.coins]);
+                        let candidates = pendingCurrencyTicketsForRange(expected.operation, useBanknotes, denominationCents, range);
+                        const values = rawTicket.map((count, depth) => {
+                            const before = candidates.filter(ticket => ticket[depth]! < count).length;
+                            const matching = candidates.filter(ticket => ticket[depth] === count);
+                            expect(matching.length).toBeGreaterThan(0);
+                            const value = (before + matching.length / 2) / candidates.length;
+                            candidates = matching;
+                            return value;
+                        });
                         draw.mockClear();
                         for (const value of values) draw.mockReturnValueOnce(value);
-                        const actual = generator.generate({operation, useCoins: true, useBanknotes, coinDenomination, range: false})!;
+                        const actual = generator.generate({operation, useCoins: true, useBanknotes, coinDenomination, range})!;
                         expect(actual.data).toEqual(expected);
                         expect(draw).toHaveBeenCalledTimes(useBanknotes ? 4 : 2);
                         cases++;
                     }
-                }
-            }
-            expect(cases).toBe(702);
+            expect(cases).toBe(useBanknotes ? 81 : denominationCents === 25 ? 9 : 36);
+            expect(pendingCases).toHaveLength(11);
+            expect(pendingCases.reduce((sum, profile) => sum + (profile.useBanknotes ? 81 : profile.denominationCents === 25 ? 9 : 36), 0)).toBe(702);
         } finally { draw.mockRestore(); }
     });
 
-    it('admits only the three banknote range cells and keeps coin range findings visible', () => {
+    it('admits the same three banknote cells while closing the coin range findings', () => {
         const evaluator = createLabelDependencyEvaluator();
         let banknoteCells = 0;
         for (const operation of [Area.Addition, Area.Subtraction]) {
@@ -146,18 +163,18 @@ describe('banknotes-only canonical ranges', () => {
             }
         }
         expect(banknoteCells).toBe(3);
-        const deferred = extractConfig(schema, [Area.Addition, Scope.Coins, Scope.QuarterDenomination]);
-        expect(deferred.config.range).toBe(false);
-        const evaluation = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...deferred.resolvedLabels]);
-        expect(evaluation.assessments.filter(item => item.status === 'missing').map(item => item.facet)).toEqual(['range']);
+        const resolved = extractConfig(schema, [Area.Addition, Scope.Coins, Scope.QuarterDenomination]);
+        expect(resolved.config.range).toBeDefined();
+        const evaluation = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...resolved.resolvedLabels]);
+        expect(evaluation.assessments.filter(item => item.status === 'missing')).toEqual([]);
     });
 
-    it('rejects missing banknote profiles, infeasible subtraction ranges and premature coin range claims', () => {
+    it('rejects missing banknote profiles and infeasible banknote or coin range claims', () => {
         const generator = new CurrencyArithmeticGenerator(), draw = vi.spyOn(rng, 'random');
         const base = {operation: Area.Addition, useCoins: false, useBanknotes: true, coinDenomination: 'none'} as const;
         try {
             expect(() => generator.generate(base)).toThrow();
-            expect(() => generator.generate({...base, range: false})).toThrow();
+            expect(() => generator.generate({...base, range: false} as never)).toThrow();
             expect(() => generator.generate({...base, operation: Area.Subtraction, range: banknoteRangeProfiles[1]!.range})).toThrow();
             expect(() => generator.generate({...base, useCoins: true, coinDenomination: Scope.QuarterDenomination,
                 range: banknoteRangeProfiles[0]!.range})).toThrow();

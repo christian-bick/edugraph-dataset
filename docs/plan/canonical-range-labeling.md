@@ -13,17 +13,18 @@ the existing producer with [shared part-count ranges](#q8-fraction-equivalence-p
 Q9 separates [fractional-scale relations and whole-number analogies](#q9-fractional-scale-relation-and-analogy-contracts).
 Q10 separates [generic unit counts and scale-factor derivation](#q10-source-verification).
 Q11 separates [single named-unit equivalences and five-row sequences](#q11-source-verification).
+Q12 qualifies [currency amounts in their displayed monetary units](#q12-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10 and Q11 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11 and Q12 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets / 2,000 routes and 4,735 complete selections**, with **20 range-presence
-omissions across three producers** remaining. The
+**1,528 normalized targets / 2,000 routes and 4,740 complete selections**, with **nine range-presence
+omissions across two producers** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records five remaining contract/policy questions, including two already-labelled precision topics.
+records four remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -725,6 +726,118 @@ canonical regeneration and independent VQA acceptance are not claimed.
 Evidence is under `temp/range-decisions/batch7-q11/` (`baseline-summary.json`,
 `verification-after.json`, `source-audit.json` and `renders/`) and
 `temp/spec-plans/ccss/range-q11-2026-11-04/`.
+
+## Q12 currency amounts and monetary units
+
+Approved 2026-11-04 after Q11, from `be96a334`. Count monetary amounts and denominations
+in the units actually shown, including the required result. Include conversion quantities
+only when shown or required by the task. Integer-cent storage does not itself establish a
+range quantity or require an all-cents solution method. Preserve the existing cents/dollars
+competency, every denomination and every supported mathematical outcome.
+
+For `$1 - 75¢ = 25¢`, relevant monetary magnitudes include 1, 75, 25 and the 25-cent coin
+face. The unshown storage value 100 is not a separate assessed amount. Likewise, a displayed
+75-cent addition with a dollar-valued result does not automatically add an integer-cent
+result to the quantity set. The current tasks neither request nor show a particular conversion
+algorithm. Both possible strategies and the existing monetary-order definition of operand
+digits remain available; do not change the accepted integer/digit declarations.
+
+| Production consumer | Mathematical contract and adoption | Preservation check |
+| --- | --- | --- |
+| `currency-word-problem` | Retain `currency-arithmetic` / `CurrencyArithmeticProblem` and all existing fields; qualify the remaining coin-only and mixed-unit configurations before generation | All 18 Grade 2 routes, both operations, all denominations, both modes, original stories, unknowns, denomination faces and equation notation |
+| Already adopted banknotes-only, penny-only, nickel-only and dime-subtraction configurations | Retain their current range cells, sampled rows and one-draw behavior | All seven configurations / 198 original ordered paths and exact direct/planned replay controls |
+| Pending quarter-only, dime-addition and mixed bills/coins configurations | Add explicit canonical profiles using amounts in their shown units and coin/bill faces | All 11 configurations / 702 original ordered paths, preserving duplicate outcome weights and the original two/four-draw order |
+
+Monetary items, totals, operation and result remain Ability-neutral mathematical data
+(SPEC-11, IMPL-G8). Coin faces are cent-valued amounts; banknote faces are dollar-valued.
+Operand and result units follow the existing local amount-card and global story/equation
+rules. Unasked piece counts and `Amount 1` / `Amount 2` captions are not additional monetary
+operands or results. No payload, view task, ontology or target changes are needed.
+
+Condition the pending sampler's original count-prefix tree on the preselected range. Preserve
+ordered raw paths and their multiplicities; do not deduplicate equal payloads or flatten the
+prefix probabilities. Mixed paths draw notes/coins for the first amount, then notes/coins for
+the second. Equal totals deterministically add one first item, which is a banknote for mixed
+amounts and a coin for coin-only amounts; subtraction then swaps amounts when necessary.
+That adjustment consumes no extra randomness. The accepted range-profile direction permits
+the changed global mixture while retaining the exact within-cell law and draw count.
+
+The independent quantity review predicts 16 cells for the 11 pending configurations.
+Quarter addition has lower20/upper100 for 3 of 9 paths and no-positive-lower/upper100 for
+6; subtraction has 8 and 1, respectively. Dime addition has lower10/upper100 for 30 of
+36 paths and no-positive-lower/upper100 for 6. Mixed quarter and dime configurations
+use upper100 and upper10 respectively. Mixed nickel/penny addition has upper5 for 51 of
+81 paths and upper10 for 30; their subtraction uses upper5. All mixed configurations
+have no positive lower because the shown banknote face is one dollar.
+
+Expected currency selections grow 26→31 without changing any of the 18 routes; global
+selections become 4,740. Closing all 11 Q12 omissions should leave nine across two producers
+and four decision topics, including the same two already-labelled precision topics. Verify
+these predictions with fresh matching and an empty-snapshot audit after the protected baseline.
+Use independent integer-unit proofs, direct/planned replay, native rendering and focused
+coverage. Canonical dataset regeneration and independent VQA remain separate acceptance gates.
+
+### Q12 source verification
+
+All 18 currency source routes remain, with no target additions/removals, claim edits,
+producer/view pair changes, disposition changes or unmatched targets. Matching records exactly
+11 changed generation plans for the newly qualified configurations. Currency selections grow
+26→31: the 15 adopted selections remain, and the 11 pending selections become 16 canonical
+cells. Global source coverage is 1,528 normalized targets / 2,000 routes / 4,740 complete selections.
+
+The empty-snapshot source dependency audit closes all 11 Q12 range omissions, leaving nine
+across two producers. Non-range omissions, conflicts, contract errors, incomplete tuples,
+invalid contexts and pending/invalid inference remain zero; all 119 existing inference
+selections resolve exhaustively. Four decision topics remain, including the same two precision
+topics covering 34 already-labelled routes.
+
+The independent integer-unit oracle preserves all 900 original ordered paths and 619 distinct
+payloads with their exact multiplicities. All 702 newly qualified paths have exact rational
+prefix-probability proofs and 1,404 interior sampler-interval checks. Across 3,776 seeded draws,
+every pending path remains reachable with its original two/four-draw continuation and
+deterministic equal-total correction. All 198 previously adopted raw paths retain their
+one-draw law, and all 121 distinct control payloads retain their protected seeded continuations.
+The quantity proof includes denomination faces, local cards, global story/equation amounts
+and the required answer in their displayed units, without treating cent storage or unasked
+piece counts as additional quantities.
+
+All 31 selections pass 248 planned draws, direct resolution and exact current-receipt replay.
+The 15 old selections preserve their selected labels, configurations, mathematical bindings,
+payloads and PRNG continuation across 120 source draws. Their semantic generation plans and
+receipts are also unchanged; only the 15 operational input hashes refresh source provenance.
+All 1,238 native Question/Solution renderings and 416 protected source renderings are
+byte-identical for the same mathematical payloads. No payload or learner-task changes are needed.
+
+Native browser verification covers all 18 routes and 31 selections: 62 Question/Solution
+images, each captured twice with identical bytes (124 captures), without browser errors or
+error cards. The captured boundary cases preserve the existing cent/dollar formatting,
+denomination faces and withheld answers. This source smoke check remains separate from
+canonical dataset regeneration and independent VQA acceptance.
+
+Focused coverage passes all 179 tests across nine files and the unchanged four-file coverage
+gate. The generator has 100% statement / 100% branch coverage; the numeric domain has
+99.18% / 98.73%, the range profile 100% / 94.44%, and the unchanged view helper 100% / 100%.
+Overall affected-code coverage is 99.5% statements / 97.79% branches, with 100% function and
+line coverage. The cent-only direct/planned proof shares one ontology evaluator across its
+seven selections after the first run hit the existing five-second test limit; all assertions
+and timeouts are retained, with no exclusions or threshold changes. This focused acceptance
+does not replace the earlier full-suite timeout limitations recorded in
+[Q1/Q2](#q1q2-source-verification) and [Q6](#q6-source-verification).
+
+Source validation passes: full `npm run check` stages 2–5 pass generator/view contracts,
+label usage, documentation and source standards, and final standalone TypeScript validation
+passes after the test-fixture type correction. The stored-artifact stages retain the known
+failures on the unchanged local 1,944-row dataset: missing recorded generation plans/receipts
+fail split integrity, and strict annotation validation reports 4,006 failures. Its current
+audit has 1,396 eligible rows and 2,285 missing annotation-facet assessments, with zero
+conflicts or incomplete tuples. Canonical regeneration and independent VQA acceptance remain
+separate from these source checks.
+
+Evidence is under `temp/range-decisions/batch8-q12/` (`baseline-summary.json`,
+`verification-after.json`, `source-audit.json` and `renders/`) and
+`temp/spec-plans/ccss/range-q12-2026-11-04/`.
+Acceptance logs are `scoped-coverage.log`, `scoped-coverage-first.log`, `coverage-gate.log`,
+`types-final.log` and `check.log` in the Q12 evidence directory.
 
 ## Accepted direction
 

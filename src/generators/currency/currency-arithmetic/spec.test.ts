@@ -9,6 +9,7 @@ import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-
 import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {CurrencyArithmeticGenerator} from './generator.ts';
 import {coinDenominations, CurrencyArithmeticGeneratorSchema, spec} from './spec.ts';
+import {pendingCurrencyTicketsForRange} from './numeric-domain.ts';
 
 const representations = [
     {name: 'banknotes', labels: [Scope.Banknotes, Scope.MajorDenomination], maxCount: 3},
@@ -107,11 +108,15 @@ describe('CurrencyArithmeticGenerator spec', () => {
             const nickels = profile.labels.includes(Scope.TwentiethDenomination) && !profile.labels.includes(Scope.Banknotes);
             const dimeSubtraction = operation === Area.Subtraction && profile.labels.includes(Scope.TenthDenomination)
                 && !profile.labels.includes(Scope.Banknotes);
+            const mixed = profile.labels.includes(Scope.Coins) && profile.labels.includes(Scope.Banknotes);
+            const pendingDouble = !mixed && (profile.labels.includes(Scope.QuarterDenomination)
+                || profile.labels.includes(Scope.TenthDenomination) && operation === Area.Addition)
+                || mixed && operation === Area.Addition && (profile.labels.includes(Scope.TwentiethDenomination)
+                    || profile.labels.includes(Scope.HundredthDenomination));
             expect(enumeration.selections).toHaveLength(pennies ? operation === Area.Addition ? 3 : 2
                 : nickels ? operation === Area.Addition ? 2 : 3 : dimeSubtraction ? 2
-                : profile.name === 'banknotes' && operation === Area.Addition ? 2 : 1);
+                : profile.name === 'banknotes' && operation === Area.Addition || pendingDouble ? 2 : 1);
             const selected = enumeration.selections[0].labels;
-            const mixed = profile.labels.includes(Scope.Coins) && profile.labels.includes(Scope.Banknotes);
             const additionConversion = operation === Area.Addition && (profile.labels.includes(Scope.QuarterDenomination)
                 || profile.labels.includes(Scope.TenthDenomination));
             const integer = !mixed && !additionConversion;
@@ -131,18 +136,27 @@ describe('CurrencyArithmeticGenerator spec', () => {
             // The adopted finite-profile tests exhaust the complete old count paths for these slices.
             if (!integer || profile.name === 'banknotes' || pennies || nickels || dimeSubtraction) continue;
 
-            const selection = enumeration.selections[0];
-            const bindings = Object.fromEntries(selection.choices.map(choice => {
-                const domain = result.plan.domains.find(field => field.field === choice.field)!;
-                return [choice.field, domain.alternatives.find(alternative => alternative.id === choice.alternativeId)!.labels];
-            }));
-            const {config} = resolveSchemaChoices(CurrencyArithmeticGeneratorSchema, labels, bindings);
-            // Enumerate every initial count pair, including equal-count adjustment and subtraction order.
-            for (let first = 1; first <= profile.maxCount; first++) {
-                for (let second = 1; second <= profile.maxCount; second++) {
+            let countTickets = 0;
+            for (const selection of enumeration.selections) {
+                const bindings = Object.fromEntries(selection.choices.map(choice => {
+                    const domain = result.plan.domains.find(field => field.field === choice.field)!;
+                    return [choice.field, domain.alternatives.find(alternative => alternative.id === choice.alternativeId)!.labels];
+                }));
+                const {config} = resolveSchemaChoices(CurrencyArithmeticGeneratorSchema, labels, bindings);
+                const tickets = pendingCurrencyTicketsForRange('subtraction', false, 25, config.range!);
+                // Probe every original quarter count pair inside its preselected canonical cell.
+                for (const ticket of tickets) {
+                    let candidates = tickets;
+                    const probes = ticket.map((count, depth) => {
+                        const before = candidates.filter(candidate => candidate[depth]! < count).length;
+                        const matching = candidates.filter(candidate => candidate[depth] === count);
+                        const value = (before + matching.length / 2) / candidates.length;
+                        candidates = matching;
+                        return value;
+                    });
                     const random = vi.spyOn(randomSource, 'random')
-                        .mockReturnValueOnce((first - 1) / profile.maxCount)
-                        .mockReturnValueOnce((second - 1) / profile.maxCount);
+                        .mockReturnValueOnce(probes[0]!)
+                        .mockReturnValueOnce(probes[1]!);
                     try {
                         const data = new CurrencyArithmeticGenerator().generate(config)!.data;
                         const amounts = data.amounts.map(amount => amount.totalCents);
@@ -153,11 +167,13 @@ describe('CurrencyArithmeticGenerator spec', () => {
                         expect(String(displayedValue).length).toBe(expectedWidth === Scope.SingleDigitLargestOperand ? 1 : 2);
                         const displayedAnswer = data.answerCents < 100 ? data.answerCents : data.answerCents / 100;
                         expect(Number.isInteger(displayedAnswer)).toBe(true);
+                        countTickets++;
                     } finally {
                         random.mockRestore();
                     }
                 }
             }
+            expect(countTickets).toBe(profile.maxCount ** 2);
         }
     });
 

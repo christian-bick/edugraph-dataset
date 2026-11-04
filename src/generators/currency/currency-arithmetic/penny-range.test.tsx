@@ -78,7 +78,7 @@ describe('penny-only canonical ranges', () => {
         } finally { draw.mockRestore(); }
     });
 
-    it('resolves allfive penny cells in direct/planned paths and leaves cross-unit branches deferred', () => {
+    it('resolves allfive penny cells and the adopted cross-unit branches in direct/planned paths', () => {
         const evaluator = createLabelDependencyEvaluator();
         let cells = 0;
         for (const operation of [Area.Addition, Area.Subtraction]) {
@@ -106,10 +106,10 @@ describe('penny-only canonical ranges', () => {
         expect(cells).toBe(5);
         for (const labels of [[Area.Addition, Scope.Coins, Scope.QuarterDenomination],
             [Area.Addition, Scope.Coins, Scope.Banknotes, Scope.HundredthDenomination]]) {
-            const deferred = extractConfig(schema, labels);
-            expect(deferred.config.range).toBe(false);
-            const evaluation = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...deferred.resolvedLabels]);
-            expect(evaluation.assessments.filter(item => item.status === 'missing').map(item => item.facet)).toEqual(['range']);
+            const resolved = extractConfig(schema, labels);
+            expect(resolved.config.range).toBeDefined();
+            const evaluation = evaluator.evaluate([...spec.generalLabels!, ...viewSpec.generalLabels!, ...resolved.resolvedLabels]);
+            expect(evaluation.assessments.filter(item => item.status === 'missing')).toEqual([]);
         }
     });
 
@@ -119,7 +119,7 @@ describe('penny-only canonical ranges', () => {
             coinDenomination: Scope.HundredthDenomination} as const;
         try {
             expect(() => generator.generate(config)).toThrow();
-            expect(() => generator.generate({...config, range: false})).toThrow();
+            expect(() => generator.generate({...config, range: false} as never)).toThrow();
             expect(() => generator.generate({...config, range: pennyRangeProfiles[2]!.range})).toThrow();
             expect(draw).not.toHaveBeenCalled();
         } finally { draw.mockRestore(); }

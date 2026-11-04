@@ -7,11 +7,12 @@ the [Q6 unit-division separation](canonical-range-labeling.md#q6-source-verifica
 [Q7 fraction-product separation](canonical-range-labeling.md#q7-source-verification), followed by
 the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification),
 [Q9 relation/analogy separation](canonical-range-labeling.md#q9-source-verification),
-[Q10 unit-count/factor separation](canonical-range-labeling.md#q10-source-verification) and
-[Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification), are implemented.
-Current source coverage is **1,528 normalized targets / 2,000 routes / 4,735 selections**, with
-**20 missing range facets across three producers**. Q1/Q2 closed 14 source omissions, Q6
-closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two and Q11 28; five decision topics remain, including the same two precision topics covering
+[Q10 unit-count/factor separation](canonical-range-labeling.md#q10-source-verification),
+[Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification) and
+[Q12 monetary-unit ranges](canonical-range-labeling.md#q12-source-verification), are implemented.
+Current source coverage is **1,528 normalized targets / 2,000 routes / 4,740 selections**, with
+**nine missing range facets across two producers**. Q1/Q2 closed 14 source omissions, Q6
+closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; four decision topics remain, including the same two precision topics covering
 34 already-labelled routes.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
@@ -56,7 +57,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
-| Q12 — currency,11 | Which numeric amounts define the range when `$1−75¢=25¢` or `75¢+75¢=$1.50` uses both named units? | Recommend values in each explicitly required unit, plus conversion quantities only where the task requires conversion. Confirm this convention before implementation. Preserve the explicitly wanted cents/dollars competency; no cents-only rendering or storage-based shortcut. |
 | Q13 — symbolic algebra,8 | Should the range describe written constants only, or be inapplicable to unbound structural tasks such as `3+x` and `3÷x`? | Prefer an explicit structural-task qualification after deciding the intended classifier pattern. A sampled hidden binding cannot bound all valid values. Preserve the existing algebra sign/zero cutoff. |
 | Q15 — Basic counting,20 already-labelled routes | Is the range for a totalN alone, or the explicitly requested sequence1..N? AtN=6 conservation supports lower5, but one-to-one enumeration does not. | Confirm total-only versus enumerated-count contracts; a rare producer split can preserve both. The valid cardinality consumer must also be considered, even without a present source route. No canonical Basic precision is claimed yet. |
 | Q16 — positive non-Name writing,14 already-labelled routes | At321, numeral reading uses scalar321; count writing explicitly assesses3hundreds/2tens/1one. Which task contract owns those counts? | Distinguish block/count quantities from scalar numeral reading/writing before refining the complete mixed roles. Preserve the nine canonical Name routes and three canonical fixed-zero routes; they are not open work. |
@@ -97,10 +97,17 @@ all seven named unit pairs and eight starting values in both families. The
 omissions while retaining all 28 named target/view lineages and every shared control route.
 All source and native renderings remain unchanged for identical mathematics.
 
-The first three rows account for all 20 remaining missing source facets: arithmetic 1,
-currency 11 and symbolic algebra 8. The last two
+Q12 is resolved by qualifying monetary amounts and denomination faces in their displayed
+units, including the required answer. The
+[Q12 source verification](canonical-range-labeling.md#q12-source-verification) closes all 11
+omissions while preserving all 18 routes, all 900 original ordered paths and the cents/dollars
+tasks. The 15 adopted selections retain their exact bindings, semantic plans and receipts;
+the remaining configurations gain 16 explicit range cells with their original conditional weights.
+
+The first two rows account for all nine remaining missing source facets: arithmetic 1
+and symbolic algebra 8. The last two
 concern 34 already-labelled routes with unresolved precision and must not be added to omission
-totals. These five questions are contract/policy topics, not an estimated implementation-batch
+totals. These four questions are contract/policy topics, not an estimated implementation-batch
 count. Current checks prove source consistency; they do not close the unresolved range work
 or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.
@@ -338,6 +345,11 @@ if normalized to cents. The earlier operand-width contract deliberately compares
 so parsing numeral magnitudes or normalizing storage is not an established solution. Mixed bills/
 coins additionally raise whether the unshown100 conversion identity is a required task quantity.
 Keep these questions separate from the three cents-only slices already repaired.
+
+This paragraph preserves the historical pre-Q12 question. The approved
+[Q12 monetary-unit contract](canonical-range-labeling.md#q12-currency-amounts-and-monetary-units)
+and [source verification](canonical-range-labeling.md#q12-source-verification) now settle that
+convention and close all 11 currency omissions; the current backlog at the top excludes them.
 
 ## Validation and acceptance
 

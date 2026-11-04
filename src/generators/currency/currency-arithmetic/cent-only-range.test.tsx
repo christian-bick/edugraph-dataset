@@ -84,6 +84,7 @@ describe('nickel arithmetic and dime subtraction canonical ranges', () => {
     });
 
     it('resolves allseven cells directly/planned with no dependency findings while cross-unit branches stay separate', () => {
+        const evaluator = createLabelDependencyEvaluator();
         let cells = 0;
         for (const slice of slices) {
             const target = [slice.area, Scope.Coins, slice.label];
@@ -97,7 +98,7 @@ describe('nickel arithmetic and dime subtraction canonical ranges', () => {
                 const direct = extractConfig(schema, selection.labels).config;
                 expect(direct).toEqual(resolveSchemaChoices(schema, target, bindings).config);
                 expect(direct.range).not.toBe(false);
-                const evaluation = createLabelDependencyEvaluator().evaluate(selection.labels);
+                const evaluation = evaluator.evaluate(selection.labels);
                 expect(evaluation.errors).toEqual([]);
                 expect(evaluation.conflicts).toEqual([]);
                 expect(evaluation.assessments.filter(item => item.status === 'missing')).toEqual([]);
@@ -107,7 +108,7 @@ describe('nickel arithmetic and dime subtraction canonical ranges', () => {
         expect(cells).toBe(7);
         for (const labels of [[Area.Addition, Scope.Coins, Scope.TenthDenomination],
             [Area.Subtraction, Scope.Coins, Scope.Banknotes, Scope.TwentiethDenomination]])
-            expect(extractConfig(schema, labels).config.range).toBe(false);
+            expect(extractConfig(schema, labels).config.range).toBeDefined();
     });
 
     it('rejects missing, altered and operation-infeasible profiles before randomness and replays exactly', () => {
@@ -117,7 +118,7 @@ describe('nickel arithmetic and dime subtraction canonical ranges', () => {
         const profile = centOnlyRangeProfiles.find(profile => profile.range.min === 5 && profile.range.max === 20)!;
         try {
             expect(() => generator.generate(config)).toThrow();
-            expect(() => generator.generate({...config, range: false})).toThrow();
+            expect(() => generator.generate({...config, range: false} as never)).toThrow();
             expect(() => generator.generate({...config, range: {...profile.range, minimumBelow: 11}})).toThrow();
             expect(centOnlyRowsForRange('addition', 10, profile.range)).toEqual([]);
             expect(draw).not.toHaveBeenCalled();

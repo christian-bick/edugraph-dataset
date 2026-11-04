@@ -44,9 +44,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7, Q8, Q9, Q10 and Q11, current source gates cover **1,528 normalized targets / 2,000 routes and 4,735 selections**,
-  with 20 range omissions across three producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records three missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
+  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11 and Q12, current source gates cover **1,528 normalized targets / 2,000 routes and 4,740 selections**,
+  with nine range omissions across two producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records two missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -100,6 +100,16 @@ These items are not newly scheduled by the archive move.
   both generators and all reported resolver/helper/renderer files have full statement/branch
   coverage, with the mathematical domain at 96.77% / 96.66%. Full-check source stages pass;
   the Q11 checkpoint records the existing stored-artifact failures separately.
+  Q12's [source verification](canonical-range-labeling.md#q12-source-verification) closes 11
+  further omissions using monetary amounts in their displayed units, preserving all 18
+  currency routes and all 900 raw paths / 619 distinct payloads with exact conditional weights.
+  The 15 adopted bindings, semantic plans and receipts remain exact. All 1,238 native and
+  416 protected source renderings remain byte-identical. Native browser verification covers
+  all 31 selections: 62 images, each captured twice with identical bytes (124 captures).
+  All 179 focused tests across nine files and the unchanged four-file coverage gate pass;
+  overall coverage is 99.5% statements / 97.79% branches with all functions and lines covered.
+  The checkpoint records passing source checks and the existing full-suite timeout and
+  stored-artifact limitations separately from dataset acceptance.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
