@@ -1,48 +1,30 @@
-import {Area, Scope} from 'edugraph-ts';
+import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
-import {extractConfig, findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
+import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {findSchemaFallbackContractIssues, generateWithLabels} from '../../../lib/utils.ts';
 import {normalizeSchemaChoices} from '../../../lib/schema-choices.ts';
 import {DecimalPlaceValueScalingGenerator} from './generator.ts';
-import {DecimalPlaceValueScalingGeneratorSchema, spec} from './spec.ts';
+import {DecimalPlaceValueScalingGeneratorSchema as schema, spec} from './spec.ts';
+import {scalingRangePairs} from './range-profile.ts';
 
-describe('DecimalPlaceValueScalingGenerator spec', () => {
-    it('keeps the bidirectional adjacent-place claims invariant', () => {
-        expect(spec.generalLabels).toEqual([
-        Area.PlaceValue,
-        Area.ProportionalScaling,
-        Area.Multiplication,
-        Area.Division,
-        Scope.Base10,
-        Scope.DecimalNumbers,
-        Scope.NumbersWithoutNegatives
-    ]);
-        expect(findSchemaFallbackContractIssues(DecimalPlaceValueScalingGeneratorSchema)).toEqual([]);
-        expect(normalizeSchemaChoices(DecimalPlaceValueScalingGeneratorSchema, [], 'generator').find(field => field.field === 'requireZeroCoefficient')!.alternatives
-            .map(alternative => alternative.labels)).toEqual([[Scope.NumbersWithZero], [Scope.NumbersWithoutZero]]);
+describe('decimal-place-value-scaling truthful zero ownership', () => {
+    it('keeps zero absence invariant and only mathematical ranges parameterized', () => {
+        expect(spec.generalLabels).toContain(Scope.NumbersWithoutZero);
+        expect(spec.generalLabels).not.toContain(Scope.NumbersWithZero);
+        expect(Object.keys(schema)).toEqual(['range']);
+        expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+        const [field] = normalizeSchemaChoices(schema, [], 'generator');
+        expect(field!.alternatives.map(choice => choice.labels.join('|')).sort())
+            .toEqual(scalingRangePairs.map(([label]) => label).sort());
     });
 
-    it('resolves a Grade 5 decimal scaling target to the exact canonical model', () => {
-        const stub = generateWithLabels(new DecimalPlaceValueScalingGenerator(), [
-            Area.PlaceValue,
-            Area.ProportionalScaling,
-            Area.Multiplication,
-            Area.Division,
-            Scope.Base10,
-            Scope.DecimalNumbers
-        ])!;
-        expect(stub.labels).toHaveLength(2);
-        expect(stub.labels.some(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never))).toBe(true);
-        expect(stub.data.kind).toBe('decimal-adjacent-place-scaling');
-        expect(stub.data.higherPlace.digitValueInThousandths)
-            .toBe(stub.data.lowerPlace.digitValueInThousandths * 10);
-    });
-
-    it.each([Scope.NumbersWithZero, Scope.NumbersWithoutZero])('resolves the explicit coefficient profile %s', label => {
-        const resolved = extractConfig(DecimalPlaceValueScalingGeneratorSchema, [label]);
-        expect(resolved.config.requireZeroCoefficient).toBe(label === Scope.NumbersWithZero);
-        expect(resolved.resolvedLabels).toContain(label);
-        expect(resolved.resolvedLabels).toHaveLength(2);
-        const data = new DecimalPlaceValueScalingGenerator().generate(resolved.config).data;
-        expect(data.digits.includes(0)).toBe(label === Scope.NumbersWithZero);
+    it.each(scalingRangePairs)('resolves %s before creating positive assessed quantities', (bound) => {
+        const generator = new DecimalPlaceValueScalingGenerator();
+        const stub = generateWithLabels(generator, [bound])!;
+        expect(stub.labels).toEqual([bound]);
+        const data = stub.data;
+        const quantities = [data.numberInThousandths / 1000, data.higherPlace.digitValueInThousandths / 1000, data.lowerPlace.digitValueInThousandths / 1000, data.scale.factor, data.scale.reciprocalNumerator / data.scale.reciprocalDenominator];
+        expect(quantities.every(value => value > 0)).toBe(true);
+        expect(hasCanonicalRangeWitness(quantities, schema.range[1]([bound])!)).toBe(true);
     });
 });

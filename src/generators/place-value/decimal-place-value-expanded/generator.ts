@@ -1,4 +1,4 @@
-import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {DecimalExpandedPlace, DecimalPlaceValueExpandedProblem} from '../../../types/problems.ts';
@@ -83,9 +83,8 @@ export class DecimalPlaceValueExpandedGenerator implements ProblemGenerator<
     generate(
         config: DecimalPlaceValueExpandedGeneratorConfig
     ): ProblemStub<DecimalPlaceValueExpandedProblem> | null {
-        validateConfigFields('decimal-place-value-expanded', config, ['requireZeroCoefficient', 'range']);
-        const blocks = expandedDecimalRangeBlocks(config.requireZeroCoefficient!, config.range!);
-        if (!blocks.length) throw new GeneratorValidationError('decimal-place-value-expanded', 'No expanded-form values support this range and zero profile.');
+        validateConfigFields('decimal-place-value-expanded', config, ['range']);
+        const blocks = expandedDecimalRangeBlocks(config.range!);
         let remaining = random() * blocks.reduce((sum, block) => sum + block.weight, 0);
         const block = blocks.find(block => (remaining -= block.weight) < 0) ?? blocks[blocks.length - 1]!;
         const wholePart = block.wholes[Math.floor(random() * block.wholes.length)]!;

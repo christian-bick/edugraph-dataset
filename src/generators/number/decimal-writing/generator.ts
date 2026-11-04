@@ -16,7 +16,11 @@ export class DecimalWritingGenerator implements ProblemGenerator<
     schema = DecimalWritingGeneratorSchema;
 
     generate(config: DecimalWritingGeneratorConfig): ProblemStub<DecimalWritingProblem> | null {
-        validateConfigFields('decimal-writing', config, ['notationFamily', 'zeroProfile', 'range']);
+        validateConfigFields('decimal-writing', config, ['notationFamily', 'range']);
+        if (typeof config !== 'object' || Array.isArray(config)
+            || Object.keys(config).some(key => !['notationFamily', 'range'].includes(key))) {
+            throw new GeneratorValidationError('decimal-writing', 'Only notation and range profiles are accepted.');
+        }
         if (config.notationFamily !== Area.DecimalNotation
             && config.notationFamily !== Area.NumberNameNotation) {
             throw new GeneratorValidationError(
@@ -25,10 +29,6 @@ export class DecimalWritingGenerator implements ProblemGenerator<
             );
         }
 
-        const profile = config.zeroProfile;
-        if (profile !== 'with-zero' && profile !== 'without-zero') {
-            throw new GeneratorValidationError('decimal-writing', 'A declared zero profile is required.');
-        }
-        return {data: sampleDecimalWritingInRange(profile === 'with-zero', config.range!)};
+        return {data: sampleDecimalWritingInRange(config.range!)};
     }
 }

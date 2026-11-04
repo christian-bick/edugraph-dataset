@@ -84,7 +84,7 @@ describe('DecimalPlaceValueExpandedGenerator', () => {
         let zeroWholeThousandths = 0;
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(bounds[seed % bounds.length]!)})!.data;
+            const data = generator.generate({range: createCanonicalNumericRange(bounds[seed % bounds.length]!)})!.data;
             verifyExactDecomposition(data);
             expect(data.fractionalPrecision).toBe(3);
             expect(data.sumTerms.some(term => term.name === 'thousandths')).toBe(true);
@@ -99,18 +99,21 @@ describe('DecimalPlaceValueExpandedGenerator', () => {
 
     it('replays the exact same decomposition under one seed', () => {
         setSeed('decimal-expanded-form');
-        const first = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)});
+        const first = generator.generate({range: createCanonicalNumericRange(1000)});
         setSeed('decimal-expanded-form');
-        expect(generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 
-    it.each([true, false])('always realizes the resolved zero-coefficient profile %s', requireZeroCoefficient => {
+    it('keeps incidental zero glyphs and zero wholes while every assessed factor and term is positive', () => {
+        const zeroStates = new Set<boolean>();
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const allowed = requireZeroCoefficient ? bounds : [120, 1000];
-            const data = generator.generate({requireZeroCoefficient, range: createCanonicalNumericRange(allowed[seed % allowed.length]!)})!.data;
+            const data = generator.generate({range: createCanonicalNumericRange(bounds[seed % bounds.length]!)})!.data;
             verifyExactDecomposition(data);
-            expect(data.places.some(place => place.digit === 0)).toBe(requireZeroCoefficient);
+            zeroStates.add(data.places.some(place => place.digit === 0));
+            expect(data.sumTerms.every(term => term.digit > 0 && term.unitNumerator > 0
+                && term.unitDenominator > 0 && term.contributionInThousandths > 0)).toBe(true);
         }
+        expect(zeroStates).toEqual(new Set([true, false]));
     });
 });

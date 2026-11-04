@@ -1,28 +1,35 @@
 import {Scope} from 'edugraph-ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
-import {selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {selectExactLabelMap, selectExactLabelSetMap} from '../../../lib/resolvers.ts';
+import {registerStaticResolver} from '../../../lib/static-resolvers.ts';
 import {exactResolver, withLabelChoices} from '../../../types/schema.ts';
 
-export const comparisonRangeMappings = [
-    ...[[Scope.NumbersSmaller5, 5], [Scope.NumbersSmaller10, 10], [Scope.NumbersSmaller20, 20], [Scope.NumbersSmaller100, 100],
-        [Scope.NumbersSmaller120, 120], [Scope.NumbersSmaller1000, 1000]].map(([label, bound]) =>
-        [[label as string], createCanonicalNumericRange(bound as number)] as const),
-    [[Scope.NumbersSmaller1000, Scope.NumbersLarger5], createCanonicalNumericRange(1000, 5)] as const
-] as const;
+const bounds = [5, 10, 20, 100, 120, 1000] as const;
+// The original first-difference law preserves the first nonzero whole place.
+// These nine cells, rather than every theoretical scalar pair, partition it.
+const lowerBounds = [[0], [0, 5], [10], [10, 20], [100], [100, 120]] as const;
+export const comparisonRangeMappings = bounds.flatMap((upper, index) => lowerBounds[index]!.map(lower =>
+    [[`http://edugraph.io/edu/NumbersSmaller${upper}`, ...(lower ? [`http://edugraph.io/edu/NumbersLarger${lower}`] : [])],
+        createCanonicalNumericRange(upper, lower)] as const));
 export const comparisonRangeChoices = comparisonRangeMappings.map(([labels]) => [...labels]);
 export const comparisonRangeLabels = [...new Set(comparisonRangeChoices.flat())];
+export const comparisonAdjacentRangeChoices = comparisonRangeMappings.filter(([, range]) =>
+    range.min === Math.max(0, range.maximumAbove)).map(([labels]) => labels);
 const selectRange = selectExactLabelSetMap(comparisonRangeMappings);
-export const supportsComparisonRange = (nonzero: boolean, range: {min: number; max: number}) => nonzero
-    ? range.max >= 120 : range.min === 0;
-export const resolveComparisonRange = withLabelChoices(exactResolver((labels: string[]) => {
-    const range = selectRange(labels);
-    if (!range) return undefined;
-    return labels.includes(Scope.NumbersWithoutZero) ? supportsComparisonRange(true, range) ? range : undefined
-        : labels.includes(Scope.NumbersWithZero) || labels.includes(Scope.Equal) ? supportsComparisonRange(false, range) ? range : undefined : range;
+const selectRelation = selectExactLabelMap([[Scope.Greater, 'greater'], [Scope.Equal, 'equal'], [Scope.Less, 'less']] as const);
+
+export const supportsComparisonRange = (relation: string, range: {min: number; max: number}): boolean =>
+    relation !== 'equal' || range.min === (bounds[bounds.indexOf(range.max as typeof bounds[number]) - 1] ?? 0);
+
+// Each complete relation/range binding has a unique configuration. The source
+// domain is numeric-only and all native represented operands are positive.
+export const resolveComparisonRelation = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
+    const relation = selectRelation(labels), range = selectRange(labels);
+    return relation && (!range || supportsComparisonRange(relation, range)) ? relation : undefined;
+}), {...selectRelation.labelChoices!, contextLabels: comparisonRangeLabels}));
+
+export const resolveComparisonRange = registerStaticResolver(withLabelChoices(exactResolver((labels: string[]) => {
+    const relation = selectRelation(labels), range = selectRange(labels);
+    return range && (!relation || supportsComparisonRange(relation, range)) ? range : undefined;
 }), {kind: 'alternatives', alternatives: comparisonRangeChoices,
-    contextLabels: [Scope.NumbersWithZero, Scope.NumbersWithoutZero, Scope.Greater, Scope.Equal, Scope.Less], resolvedContext: true});
-export const comparisonRelationAllowed = (labels: string[], nonzero: boolean) => {
-    if (!nonzero && labels.includes(Scope.NumbersLarger5)) return false;
-    const range = selectRange(labels);
-    return !range || supportsComparisonRange(nonzero, range);
-};
+    contextLabels: [Scope.Greater, Scope.Equal, Scope.Less], resolvedContext: true}));

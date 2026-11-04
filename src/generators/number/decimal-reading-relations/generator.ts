@@ -20,14 +20,11 @@ export class DecimalReadingRelationsGenerator implements ProblemGenerator<
     schema = DecimalReadingRelationsGeneratorSchema;
 
     generate(config: DecimalReadingRelationsGeneratorConfig): ProblemStub<DecimalReadingRelationProblem> | null {
-        validateConfigFields('decimal-reading-relations', config, ['zeroProfile', 'range']);
-        if (typeof config !== 'object' || Array.isArray(config) || Object.keys(config).some(key => !['zeroProfile', 'range'].includes(key))) {
-            throw new GeneratorValidationError('decimal-reading-relations', 'Only zero and range profiles are accepted.');
+        validateConfigFields('decimal-reading-relations', config, ['range']);
+        if (typeof config !== 'object' || Array.isArray(config) || Object.keys(config).some(key => key !== 'range')) {
+            throw new GeneratorValidationError('decimal-reading-relations', 'Only a range profile is accepted.');
         }
-        if (config.zeroProfile !== 'with-zero' && config.zeroProfile !== 'without-zero') {
-            throw new GeneratorValidationError('decimal-reading-relations', 'A declared zero profile is required.');
-        }
-        const source = sampleDecimalWritingInRange(config.zeroProfile === 'with-zero', config.range!);
+        const source = sampleDecimalWritingInRange(config.range!);
         return {data: buildDecimalReadingRelation(source)};
     }
 }

@@ -6,16 +6,16 @@ import {sampleDecimalWritingInRange} from './decimal-writing-values.ts';
 afterEach(() => vi.restoreAllMocks());
 
 describe('shared exact decimal source sampler', () => {
-    it('selects whole quantities constructively while retaining fractional zero digits', () => {
+    it('selects complete decimal values constructively while retaining fractional zero digits', () => {
         const draws = [0.1, 0.18, 0.25, 0.5, 0.05, 0.06, 0.5];
         const spy = vi.spyOn(random, 'random').mockImplementation(() => {
             const draw = draws.shift();
             if (draw === undefined) throw new Error('Unexpected conditional draw');
             return draw;
         });
-        expect(sampleDecimalWritingInRange(false, createCanonicalNumericRange(10)).canonicalNumeral).toBe('5.05');
+        expect(sampleDecimalWritingInRange(createCanonicalNumericRange(10, 5)).canonicalNumeral).toBe('5.05');
         expect(spy).toHaveBeenCalledTimes(4);
-        expect(sampleDecimalWritingInRange(true, createCanonicalNumericRange(5)).canonicalNumeral).toBe('0.5');
+        expect(sampleDecimalWritingInRange(createCanonicalNumericRange(5)).canonicalNumeral).toBe('0.5');
         expect(draws).toEqual([]);
     });
     it.each([
@@ -33,7 +33,7 @@ describe('shared exact decimal source sampler', () => {
             if (next === undefined) throw new Error('Unexpected sampler draw');
             return next;
         });
-        const data = sampleDecimalWritingInRange(false, createCanonicalNumericRange(10));
+        const data = sampleDecimalWritingInRange(createCanonicalNumericRange(10, 5));
         expect(data.canonicalNumeral).toBe(numeral);
         expect(data.valueInThousandths).toBe(value);
         expect(data.fractionalPart.numerator / data.fractionalPart.denominator + data.wholePart)

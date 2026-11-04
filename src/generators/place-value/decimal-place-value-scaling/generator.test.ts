@@ -56,7 +56,7 @@ describe('DecimalPlaceValueScalingGenerator', () => {
         const domains = new Set<string>();
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(bounds[seed % bounds.length]!)}).data;
+            const data = generator.generate({range: createCanonicalNumericRange(bounds[seed % bounds.length]!)}).data;
             checkExactScaling(data);
             higherIndices.add(data.higherPlace.digitIndex);
             repeatedDigits.add(data.repeatedDigit);
@@ -76,20 +76,23 @@ describe('DecimalPlaceValueScalingGenerator', () => {
 
     it('replays the same exact chart under the same seed', () => {
         setSeed('decimal-adjacent-place-scaling');
-        const first = generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)});
+        const first = generator.generate({range: createCanonicalNumericRange(1000)});
         setSeed('decimal-adjacent-place-scaling');
-        expect(generator.generate({requireZeroCoefficient: true, range: createCanonicalNumericRange(1000)})).toEqual(first);
+        expect(generator.generate({range: createCanonicalNumericRange(1000)})).toEqual(first);
     });
 
-    it.each([true, false])('realizes the complete coefficient profile %s', requireZeroCoefficient => {
+    it('preserves incidental zero glyphs while every assessed quantity is positive', () => {
+        const zeroStates = new Set<boolean>();
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const allowed = requireZeroCoefficient ? bounds : [120, 1000];
-            const data = generator.generate({requireZeroCoefficient, range: createCanonicalNumericRange(allowed[seed % allowed.length]!)}).data;
+            const data = generator.generate({range: createCanonicalNumericRange(bounds[seed % bounds.length]!)}).data;
             checkExactScaling(data);
-            expect(data.digits.includes(0)).toBe(requireZeroCoefficient);
-            if (!requireZeroCoefficient) expect(data.higherPlace.digitIndex).toBeGreaterThanOrEqual(2);
+            zeroStates.add(data.digits.includes(0));
+            expect([data.numberInThousandths, data.higherPlace.digitValueInThousandths,
+                data.lowerPlace.digitValueInThousandths, data.scale.factor,
+                data.scale.reciprocalNumerator / data.scale.reciprocalDenominator].every(value => value > 0)).toBe(true);
         }
+        expect(zeroStates).toEqual(new Set([true, false]));
     });
 
 });

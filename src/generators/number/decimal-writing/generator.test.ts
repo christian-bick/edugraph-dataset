@@ -41,7 +41,7 @@ describe('DecimalWritingGenerator', () => {
     it('requires a supported notation family', () => {
         expect(() => generator.generate({})).toThrow('notationFamily');
         expect(() => generator.generate(null as never)).toThrow();
-        expect(() => generator.generate({notationFamily: 'invalid', zeroProfile: 'legacy', range: createCanonicalNumericRange(5)} as never)).toThrow(
+        expect(() => generator.generate({notationFamily: 'invalid', range: createCanonicalNumericRange(5)} as never)).toThrow(
             'Expected DecimalNotation or NumberNameNotation'
         );
     });
@@ -53,10 +53,10 @@ describe('DecimalWritingGenerator', () => {
             let zeroWholeCases = 0;
             for (let seed = 0; seed < 240; seed++) {
                 setSeed(seed);
-                const {data} = generator.generate({notationFamily,
-                    zeroProfile: seed % 2 === 0 ? 'with-zero' : 'without-zero', range: createCanonicalNumericRange(5)})!;
+                const {data} = generator.generate({notationFamily, range: createCanonicalNumericRange(5)})!;
                 verifyExactValue(data);
-                expect(data.wholePart === 0).toBe(seed % 2 === 0);
+                expect(data.valueInThousandths).toBeGreaterThan(0);
+                expect(data.valueInThousandths).toBeLessThan(5000);
                 precisions.add(data.fractionalPart.precision);
                 if (data.fractionalPart.precision === 'thousandths'
                     && data.fractionalPart.digits[0] === 0
@@ -71,16 +71,16 @@ describe('DecimalWritingGenerator', () => {
 
     it('replays the same decimal under the same seed', () => {
         setSeed('decimal-writing-replay');
-        const first = generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)});
+        const first = generator.generate({notationFamily: Area.DecimalNotation, range: createCanonicalNumericRange(10, 5)});
         setSeed('decimal-writing-replay');
-        expect(generator.generate({notationFamily: Area.DecimalNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)})).toEqual(first);
+        expect(generator.generate({notationFamily: Area.DecimalNotation, range: createCanonicalNumericRange(10, 5)})).toEqual(first);
     });
 
     it('can represent five and eight thousandths with both zero placeholders', () => {
         let example: DecimalWritingProblem | undefined;
         for (let seed = 0; seed < 10000 && !example; seed++) {
             setSeed(seed);
-            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, zeroProfile: 'without-zero', range: createCanonicalNumericRange(10)})!;
+            const {data} = generator.generate({notationFamily: Area.NumberNameNotation, range: createCanonicalNumericRange(10, 5)})!;
             if (data.canonicalNumeral === '5.008') example = data;
         }
         expect(example).toEqual({
@@ -96,5 +96,13 @@ describe('DecimalWritingGenerator', () => {
                 denominator: 1000
             }
         });
+    });
+
+    it('rejects retired zero flags and malformed configuration records', () => {
+        const range = createCanonicalNumericRange(5), notationFamily = Area.DecimalNotation;
+        for (const config of [{notationFamily, range, zeroProfile: 'with-zero'}, {notationFamily, range, extra: true},
+            Object.assign([], {notationFamily, range}), Object.assign(() => {}, {notationFamily, range})]) {
+            expect(() => generator.generate(config as never)).toThrow('Only notation and range');
+        }
     });
 });

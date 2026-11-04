@@ -10,9 +10,10 @@ describe('DecimalWritingGenerator spec', () => {
         expect(spec.generalLabels).toEqual([
             Scope.ThousandthDecimals,
             Scope.Base10,
-            Scope.NumbersWithoutNegatives
+            Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero
         ]);
-        expect(Object.keys(DecimalWritingGeneratorSchema)).toEqual(['notationFamily', 'zeroProfile', 'range']);
+        expect(Object.keys(DecimalWritingGeneratorSchema)).toEqual(['notationFamily', 'range']);
     });
 
     it.each([Area.DecimalNotation, Area.NumberNameNotation])(
@@ -27,7 +28,7 @@ describe('DecimalWritingGenerator spec', () => {
             expect(result).not.toBeNull();
             expect(result!.labels).toContain(label);
             expect(result!.data.kind).toBe('decimal-writing');
-            expect(result!.data.valueInThousandths).toBeGreaterThanOrEqual(0);
+            expect(result!.data.valueInThousandths).toBeGreaterThan(0);
         }
     );
 });

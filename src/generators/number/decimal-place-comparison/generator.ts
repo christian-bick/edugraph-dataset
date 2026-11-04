@@ -123,7 +123,7 @@ const inputFromDigits = (digits: readonly number[]): OperandInput => {
 };
 
 const sampleInequalityPair = (config: DecimalPlaceComparisonGeneratorConfig): readonly [OperandInput, OperandInput] => {
-    const block = weightedChoice(decimalComparisonRangeCases(config.relation!.endsWith('-zero'), config.range!));
+    const block = weightedChoice(decimalComparisonRangeCases(config.range!));
     const [lowDigits, highDigits] = block.sample(random);
     const low = inputFromDigits(lowDigits);
     const high = inputFromDigits(highDigits);
@@ -146,7 +146,7 @@ export class DecimalPlaceComparisonGenerator implements ProblemGenerator<
                 'decimal-place-comparison', 'The configuration contains an unexpected field.'
             );
         }
-        if (!['greater-zero', 'greater-nonzero', 'equal', 'less-zero', 'less-nonzero'].includes(config.relation!)) {
+        if (!['greater', 'equal', 'less'].includes(config.relation!)) {
             throw new GeneratorValidationError(
                 'decimal-place-comparison', 'The relation must be Greater, Equal, or Less.'
             );

@@ -3,7 +3,7 @@ import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import type {DecimalPlaceComparisonProblem} from '../../../types/problems.ts';
 import {createDecimalPlaceComparison, DecimalPlaceComparisonGenerator} from '../../../generators/number/decimal-place-comparison/generator.ts';
-import {comparisonRangeMappings} from '../../../generators/number/decimal-place-comparison/range-profile.ts';
+import {comparisonRangeMappings, supportsComparisonRange} from '../../../generators/number/decimal-place-comparison/range-profile.ts';
 import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {assertDecimalPlaceComparison, COMPARISON_PLACES, comparisonPlaceUnit} from './decimal-place-comparison-helpers.ts';
 
@@ -79,15 +79,12 @@ function render(data: DecimalPlaceComparisonProblem, isSolutionView: boolean): s
 }
 
 describe('decimal place comparison view', () => {
-    it('keeps the assessed unit counts and decimal values in every supported range in both modes', () => {
+    it.each(['equal', 'less', 'greater'] as const)('keeps the represented %s scalars in every supported range in both modes', relation => {
         const generator = new DecimalPlaceComparisonGenerator();
-        for (const relation of ['equal', 'less-zero', 'greater-zero', 'less-nonzero', 'greater-nonzero'] as const)
-            for (const [, range] of comparisonRangeMappings) {
-                const nonzero = relation.endsWith('-nonzero');
-                if (nonzero ? range.max < 120 : range.min !== 0) continue;
+        for (const [, range] of comparisonRangeMappings) {
+                if (!supportsComparisonRange(relation, range)) continue;
                 const data = generator.generate({comparisonKind: relation === 'equal' ? 'equality' : 'inequality', relation, range})!.data;
-                expect(hasCanonicalRangeWitness([data.left, data.right].flatMap(operand =>
-                    [operand.valueInThousandths / 1000, ...operand.wholeDigits, ...operand.fractionalDigits]), range)).toBe(true);
+                expect(hasCanonicalRangeWitness([data.left.valueInThousandths / 1000, data.right.valueInThousandths / 1000], range)).toBe(true);
                 for (const solution of [false, true]) {
                     const text = render(data, solution);
                     expect(text).toContain(data.left.displayNumeral);
@@ -138,7 +135,7 @@ describe('decimal place comparison view', () => {
         })).toThrow('exact, aligned');
     });
 
-    it('shows actual zero thousandths as a count while withholding the deciding relation in Question', () => {
+    it('retains zero place-value padding while withholding the deciding relation in Question', () => {
         const data = createDecimalPlaceComparison(
             {wholePart: 410, fractionalDigits: [6, 7, 8], displayPrecision: 3},
             {wholePart: 410, fractionalDigits: [6, 7, 0], displayPrecision: 2}
@@ -158,7 +155,7 @@ describe('decimal place comparison view', () => {
         expect(solution).toContain('410.678 > 410.67');
     });
 
-    it('does not introduce zero quantities into a complete nonzero place-unit comparison', () => {
+    it('retains a complete chart whose written digit glyphs are all nonzero', () => {
         const data = createDecimalPlaceComparison(
             {wholePart: 876, fractionalDigits: [5, 4, 3], displayPrecision: 3},
             {wholePart: 876, fractionalDigits: [5, 4, 2], displayPrecision: 3}

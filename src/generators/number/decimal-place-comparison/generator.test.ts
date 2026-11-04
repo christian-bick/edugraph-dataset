@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {setSeed} from '../../../lib/random.ts';
 import * as rng from '../../../lib/random.ts';
 import type {
@@ -12,6 +12,7 @@ import {
     DecimalPlaceComparisonGenerator
 } from './generator.ts';
 import type {DecimalPlaceComparisonGeneratorConfig} from './spec.ts';
+import {comparisonRangeMappings, supportsComparisonRange} from './range-profile.ts';
 
 const generator = new DecimalPlaceComparisonGenerator();
 afterEach(() => vi.restoreAllMocks());
@@ -19,9 +20,9 @@ const PLACES: readonly DecimalPlaceComparisonPlace[] = [
     'hundreds', 'tens', 'ones', 'tenths', 'hundredths', 'thousandths'
 ];
 const configs = {
-    greater: {comparisonKind: 'inequality', relation: 'greater-zero', range: createCanonicalNumericRange(1000)},
-    equal: {comparisonKind: 'equality', relation: 'equal', range: createCanonicalNumericRange(1000)},
-    less: {comparisonKind: 'inequality', relation: 'less-zero', range: createCanonicalNumericRange(1000)}
+    greater: {comparisonKind: 'inequality', relation: 'greater', range: createCanonicalNumericRange(1000, 120)},
+    equal: {comparisonKind: 'equality', relation: 'equal', range: createCanonicalNumericRange(1000, 120)},
+    less: {comparisonKind: 'inequality', relation: 'less', range: createCanonicalNumericRange(1000, 120)}
 } as const satisfies Record<DecimalPlaceComparisonProblem['relation'],
     DecimalPlaceComparisonGeneratorConfig>;
 
@@ -91,6 +92,21 @@ const expectExactProblem = (problem: DecimalPlaceComparisonProblem): void => {
 };
 
 describe('createDecimalPlaceComparison', () => {
+    it('ranges555.555 and555.556 by their represented values rather than their digit glyphs', () => {
+        const problem = createDecimalPlaceComparison(input(555, [5, 5, 5], 3), input(555, [5, 5, 6], 3))!;
+        const quantities = [problem.left.valueInThousandths / 1000, problem.right.valueInThousandths / 1000];
+        expect(hasCanonicalRangeWitness(quantities, createCanonicalNumericRange(1000, 120))).toBe(true);
+        expect(hasCanonicalRangeWitness(quantities, createCanonicalNumericRange(1000, 5))).toBe(false);
+    });
+
+    it('retains exact manually supplied zero relations outside the positive native sampler', () => {
+        const zero = input(0, [0, 0, 0], 1);
+        const problem = createDecimalPlaceComparison(zero, input(0, [0, 0, 1], 3))!;
+        expectExactProblem(problem);
+        expect(problem.left.valueInThousandths).toBe(0);
+        expect(problem.relation).toBe('less');
+    });
+
     it('finds the thousandths difference in 3.407 < 3.408', () => {
         const problem = createDecimalPlaceComparison(
             input(3, [4, 0, 7], 3), input(3, [4, 0, 8], 3)
@@ -149,19 +165,23 @@ describe('createDecimalPlaceComparison', () => {
 });
 
 describe('DecimalPlaceComparisonGenerator', () => {
-    it.each(['greater-nonzero', 'less-nonzero'] as const)('proves coefficient absence for %s', relation => {
+    it.each(['greater', 'less'] as const)('keeps represented values positive while retaining zero glyphs for %s', relation => {
+        let zeroGlyph = false;
         for (let seed = 0; seed < 64; seed++) {
             setSeed(seed);
-            const problem = generator.generate({comparisonKind: 'inequality', relation, range: createCanonicalNumericRange(1000)})!.data;
+            const problem = generator.generate({comparisonKind: 'inequality', relation, range: createCanonicalNumericRange(1000, 120)})!.data;
             expectExactProblem(problem);
-            expect([...digitsOf(problem.left), ...digitsOf(problem.right)].every(digit => digit > 0)).toBe(true);
+            expect(Math.min(problem.left.valueInThousandths, problem.right.valueInThousandths)).toBeGreaterThan(0);
+            zeroGlyph ||= [...digitsOf(problem.left), ...digitsOf(problem.right)].includes(0);
         }
+        expect(zeroGlyph).toBe(true);
     });
 
-    it('constructs the narrow positive-count band without numeric rejection', () => {
-        vi.spyOn(rng, 'random').mockReturnValue(0.9);
-        const data = generator.generate({comparisonKind: 'inequality', relation: 'greater-nonzero', range: createCanonicalNumericRange(1000, 5)})!.data;
-        expect([...digitsOf(data.left), ...digitsOf(data.right)].every(digit => digit >= 5)).toBe(true);
+    it('constructs a strong scalar floor without restricting individual digits', () => {
+        vi.spyOn(rng, 'random').mockReturnValue(0);
+        const data = generator.generate({comparisonKind: 'inequality', relation: 'greater', range: createCanonicalNumericRange(1000, 120)})!.data;
+        expect(Math.min(data.left.valueInThousandths, data.right.valueInThousandths)).toBeGreaterThanOrEqual(120000);
+        expect(Math.min(...digitsOf(data.left), ...digitsOf(data.right))).toBeLessThan(5);
     });
     it('rejects missing, extra, and incompatible relation configuration', () => {
         expect(() => generator.generate({} as never)).toThrow('comparisonKind');
@@ -182,7 +202,8 @@ describe('DecimalPlaceComparisonGenerator', () => {
         const precisionPairs = new Set<string>();
         for (let seed = 0; seed < 300; seed++) {
             setSeed(`decimal-place-comparison-${relation}-${seed}`);
-            const problem = generator.generate(config)?.data;
+            const ranges = comparisonRangeMappings.map(([, range]) => range).filter(range => supportsComparisonRange(relation, range));
+            const problem = generator.generate({...config, range: ranges[seed % ranges.length]!})?.data;
             expect(problem).toBeDefined();
             expectExactProblem(problem!);
             expect(problem!.relation).toBe(relation);
@@ -214,5 +235,17 @@ describe('DecimalPlaceComparisonGenerator', () => {
         const first = generator.generate(configs.less);
         setSeed('decimal-place-comparison-replay');
         expect(generator.generate(configs.less)).toEqual(first);
+    });
+
+    it.each(Object.entries(configs))('keeps the original %s draw count and continuation schedule', (relation, config) => {
+        setSeed(`decimal-place-comparison-schedule-${relation}`);
+        const draw = vi.spyOn(rng, 'random');
+        generator.generate(config);
+        expect(draw).toHaveBeenCalledTimes(relation === 'equal' ? 5 : 9);
+        const continuation = rng.getRandomState();
+        vi.restoreAllMocks();
+        setSeed(`decimal-place-comparison-schedule-${relation}`);
+        for (let i = 0; i < (relation === 'equal' ? 5 : 9); i++) rng.random();
+        expect(rng.getRandomState()).toBe(continuation);
     });
 });

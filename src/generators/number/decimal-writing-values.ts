@@ -46,16 +46,16 @@ function decimalWriting(wholePart: number): DecimalWritingProblem {
         canonicalNumeral, fractionalPart: fraction};
 }
 
-/** The whole quantity fixes the upper band; the required fractional quantity is
- * always below one, so neither band has a positive lower descriptor. */
-export function sampleDecimalWritingInRange(requireZeroWhole: boolean, range: CanonicalNumericRange): DecimalWritingProblem {
-    if (!range || range.min !== 0 || ![5, 10].includes(range.max)
-        || requireZeroWhole && range.max !== 5) throw new Error('Unsupported decimal whole-quantity range.');
-    const expected = createCanonicalNumericRange(range.max);
+/** Condition the original uniform0..9 whole-part proposal on the complete
+ * decimal value. Zero wholes and digit placeholders are not zero quantities. */
+export function sampleDecimalWritingInRange(range: CanonicalNumericRange): DecimalWritingProblem {
+    if (!range || !(range.max === 5 && range.min === 0 || range.max === 10 && range.min === 5))
+        throw new Error('Unsupported decimal-value range.');
+    const expected = createCanonicalNumericRange(range.max, range.min);
     if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
-        throw new Error('Invalid decimal whole-quantity range witnesses.');
+        throw new Error('Invalid decimal-value range witnesses.');
     const draw = random();
-    const wholePart = requireZeroWhole ? 0 : range.max === 5 ? 1 + Math.floor(draw * 4) : 5 + Math.floor(draw * 5);
+    const wholePart = (range.max === 5 ? 0 : 5) + Math.floor(draw * 5);
     return decimalWriting(wholePart);
 }
 

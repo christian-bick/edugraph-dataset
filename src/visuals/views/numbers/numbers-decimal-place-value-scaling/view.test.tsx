@@ -25,12 +25,11 @@ function render(data: DecimalAdjacentPlaceScalingProblem, isSolutionView: boolea
 }
 
 describe('numbers-decimal-place-value-scaling view', () => {
-    it('preserves the required numerical quantities across all seven range profiles in both modes', () => {
+    it('preserves the required numerical quantities across all five range profiles in both modes', () => {
         const generator = new DecimalPlaceValueScalingGenerator();
-        for (const requireZeroCoefficient of [true, false]) for (const upper of [10, 20, 100, 120, 1000]) {
-            if (!requireZeroCoefficient && upper <= 100) continue;
+        for (const upper of [10, 20, 100, 120, 1000]) {
             const range = createCanonicalNumericRange(upper);
-            const data = generator.generate({requireZeroCoefficient, range}).data;
+            const data = generator.generate({range}).data;
             expect(hasCanonicalRangeWitness([data.numberInThousandths / 1000,
                 data.higherPlace.digitValueInThousandths / 1000, data.lowerPlace.digitValueInThousandths / 1000,
                 10, 1 / 10], range)).toBe(true);

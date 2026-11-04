@@ -1,7 +1,7 @@
 import {createCanonicalNumericRange, type CanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 
 type DigitPair = readonly [number, number, number]; // lower digit, higher digit, source probability
-type State = Readonly<{position: number; upper: number; previous: number; zero: boolean; small: boolean; large: boolean; whole: boolean}>;
+type State = Readonly<{position: number; minimum: number; below: number; maximum: number; above: number; whole: boolean}>;
 export type DecimalComparisonRangeCase = Readonly<{
     decidingIndex: number;
     shorter: boolean;
@@ -16,15 +16,15 @@ export type DecimalEqualityRangeBlock = Readonly<{
 }>;
 const digits = Array.from({length: 10}, (_, value) => value);
 const positive = digits.slice(1);
-const small = positive.slice(0, 5), large = positive.slice(5);
 const comparisonCache = new Map<string, readonly DecimalComparisonRangeCase[]>();
 const equalityCache = new Map<string, readonly DecimalEqualityRangeBlock[]>();
 const transitionCache = new Map<string, readonly DigitPair[]>();
 const numberDigits = (value: number) => String(value * 1000).padStart(6, '0').split('').map(Number);
 
 function validateRange(range: CanonicalNumericRange): void {
-    if (!range || ![5, 10, 20, 100, 120, 1000].includes(range.max) || ![0, 5].includes(range.min)
-        || range.min === 5 && range.max !== 1000) throw new Error('Unsupported decimal comparison range.');
+    if (!range || ![5, 10, 20, 100, 120, 1000].includes(range.max)
+        || ![0, 5, 10, 20, 100, 120].includes(range.min) || range.min >= range.max)
+        throw new Error('Unsupported decimal comparison range.');
     const expected = createCanonicalNumericRange(range.max, range.min);
     if (range.maximumAbove !== expected.maximumAbove || range.minimumBelow !== expected.minimumBelow)
         throw new Error('Invalid decimal comparison range witnesses.');
@@ -57,36 +57,35 @@ function transitions(deciding: number, shorter: boolean, position: number, whole
 }
 
 /** A six-position weighted digit automaton conditions the original source law.
- * Its state records only bound comparisons and required coefficient witnesses;
+ * Its state compares the complete lower/higher represented values with the four
+ * canonical bounds. Digit glyphs, including zero padding, are not quantities;
  * no payloads, labels, generated images or random draws are inspected. */
-export function decimalComparisonRangeCases(requireZero: boolean, range: CanonicalNumericRange): readonly DecimalComparisonRangeCase[] {
+export function decimalComparisonRangeCases(range: CanonicalNumericRange): readonly DecimalComparisonRangeCase[] {
     validateRange(range);
-    if (typeof requireZero !== 'boolean') throw new Error('The decimal comparison zero profile must be Boolean.');
-    const key = `${requireZero}:${range.min}:${range.max}`;
+    const key = `${range.min}:${range.max}`;
     const existing = comparisonCache.get(key);
     if (existing) return existing;
     const cases: DecimalComparisonRangeCase[] = [];
-    const upperDigits = numberDigits(range.max), previousDigits = numberDigits(Math.max(0, range.maximumAbove));
+    const minimumDigits = numberDigits(range.min), belowDigits = numberDigits(range.minimumBelow);
+    const maximumDigits = numberDigits(range.max), aboveDigits = numberDigits(Math.max(0, range.maximumAbove));
     const compare = (prior: number, digit: number, boundary: number) => prior || Math.sign(digit - boundary);
     for (let decidingIndex = 0; decidingIndex < 6; decidingIndex++) for (const shorter of decidingIndex < 5 ? [true, false] : [false]) {
         const memo = new Map<string, number>();
-        const initial: State = {position: 0, upper: range.max === 1000 ? -1 : 0, previous: range.maximumAbove < 0 ? 1 : 0,
-            zero: false, small: false, large: false, whole: false};
+        const initial: State = {position: 0, minimum: 0, below: range.minimumBelow === 1000 ? -1 : 0,
+            maximum: range.max === 1000 ? -1 : 0, above: range.maximumAbove < 0 ? 1 : 0, whole: false};
         const advance = (state: State, pair: DigitPair): State | null => {
             const [low, high] = pair;
-            if ((!requireZero && (low === 0 || high === 0)) || range.min === 5 && (low < 5 || high < 5)
-                || low > range.max || high > range.max) return null;
-            const upper = compare(state.upper, high, upperDigits[state.position]!);
-            if (upper > 0) return null;
-            return {position: state.position + 1, upper, previous: compare(state.previous, high, previousDigits[state.position]!),
-                zero: state.zero || low === 0 || high === 0, small: state.small || low < 5 || high < 5,
-                large: state.large || low > range.maximumAbove || high > range.maximumAbove,
+            const minimum = compare(state.minimum, low, minimumDigits[state.position]!);
+            const below = compare(state.below, low, belowDigits[state.position]!);
+            const maximum = compare(state.maximum, high, maximumDigits[state.position]!);
+            const above = compare(state.above, high, aboveDigits[state.position]!);
+            if (minimum < 0 || below > 0 || maximum > 0 || above < 0) return null;
+            return {position: state.position + 1, minimum, below, maximum, above,
                 whole: state.whole || state.position < 3 && low !== 0};
         };
         const mass = (state: State): number => {
-            if (state.position === 6) return Number(state.zero === requireZero && (range.min === 5 || state.small)
-                && (state.previous > 0 || state.large));
-            const stateKey = `${state.position}:${state.upper}:${state.previous}:${+state.zero}:${+state.small}:${+state.large}:${+state.whole}`;
+            if (state.position === 6) return Number(state.below < 0 && state.above > 0);
+            const stateKey = `${state.position}:${state.minimum}:${state.below}:${state.maximum}:${state.above}:${+state.whole}`;
             const cached = memo.get(stateKey);
             if (cached !== undefined) return cached;
             let total = 0;
@@ -124,25 +123,13 @@ export function decimalEqualityRangeBlocks(range: CanonicalNumericRange): readon
     const key = `${range.min}:${range.max}`;
     const existing = equalityCache.get(key);
     if (existing) return existing;
-    if (range.min > 0) return [];
+    // Equal positive nonintegral values occupy only adjacent scalar bands.
+    if (range.min !== Math.max(0, range.maximumAbove)) return [];
     const result: DecimalEqualityRangeBlock[] = [];
     for (const pattern of [0, 1]) {
-        const append = (first: number, last: number, tenths: readonly number[], hundredths: readonly number[]) => {
-            const wholes = Array.from({length: 999}, (_, index) => index + 1).filter(whole => whole >= first && whole <= last);
-            if (!wholes.length) return;
-            const sourceFractionCount = pattern ? 90 : 9;
-            result.push({wholes, tenths, hundredths, weight: (pattern ? 0.4 : 0.6) * wholes.length / 999
-                * tenths.length * hundredths.length / sourceFractionCount});
-        };
-        if (range.max === 5) append(1, 4, pattern ? [0, ...small] : small, pattern ? small : [0]);
-        else if (range.max === 10) {
-            append(5, 9, pattern ? digits : positive, pattern ? positive : [0]);
-            if (!pattern) append(1, 4, large, [0]);
-            else {
-                append(1, 4, large, positive);
-                append(1, 4, [0, ...small], large);
-            }
-        } else append(range.maximumAbove, range.max - 1, pattern ? digits : positive, pattern ? positive : [0]);
+        const wholes = Array.from({length: range.max - Math.max(1, range.min)}, (_, index) => Math.max(1, range.min) + index);
+        result.push({wholes, tenths: pattern ? digits : positive, hundredths: pattern ? positive : [0],
+            weight: (pattern ? 0.4 : 0.6) * wholes.length / 999});
     }
     equalityCache.set(key, result);
     return result;

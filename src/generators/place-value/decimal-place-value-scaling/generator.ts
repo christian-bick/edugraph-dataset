@@ -1,4 +1,4 @@
-import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
+import {validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {
@@ -25,8 +25,7 @@ const place = (index: DecimalScalingPlace['digitIndex'], digit: number): Decimal
 
 /** Every contribution stays integral in thousandths, including the 1/1000 place. */
 function adjacentPlaceScaling(config: DecimalPlaceValueScalingGeneratorConfig): DecimalAdjacentPlaceScalingProblem {
-    const blocks = scalingDecimalRangeBlocks(config.requireZeroCoefficient!, config.range!);
-    if (!blocks.length) throw new GeneratorValidationError('decimal-place-value-scaling', 'No adjacent-place charts support this range and zero profile.');
+    const blocks = scalingDecimalRangeBlocks(config.range!);
     let remaining = random() * blocks.reduce((total, block) => total + block.weight, 0);
     const block = blocks.find(block => (remaining -= block.weight) < 0) ?? blocks[blocks.length - 1]!;
     const {repeatedDigit, higherIndex} = block;
@@ -57,7 +56,7 @@ export class DecimalPlaceValueScalingGenerator implements ProblemGenerator<
     schema = DecimalPlaceValueScalingGeneratorSchema;
 
     generate(config: DecimalPlaceValueScalingGeneratorConfig): ProblemStub<DecimalAdjacentPlaceScalingProblem> {
-        validateConfigFields('decimal-place-value-scaling', config, ['requireZeroCoefficient', 'range']);
+        validateConfigFields('decimal-place-value-scaling', config, ['range']);
         return {data: adjacentPlaceScaling(config)};
     }
 }

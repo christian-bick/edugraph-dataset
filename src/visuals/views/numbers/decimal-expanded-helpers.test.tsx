@@ -59,10 +59,9 @@ function render(data: DecimalPlaceValueExpandedProblem, isSolutionView: boolean)
 describe('decimal expanded-form view', () => {
     it('keeps every resolved numerical band meaningful in both render modes', () => {
         const generator = new DecimalPlaceValueExpandedGenerator();
-        for (const requireZeroCoefficient of [true, false]) for (const upper of [5, 10, 20, 100, 120, 1000]) {
-            if (!requireZeroCoefficient && upper <= 100) continue;
+        for (const upper of [5, 10, 20, 100, 120, 1000]) {
             const range = createCanonicalNumericRange(upper);
-            const data = generator.generate({requireZeroCoefficient, range})!.data;
+            const data = generator.generate({range})!.data;
             expect(hasCanonicalRangeWitness([data.valueInThousandths / 1000,
                 ...data.sumTerms.flatMap(term => [term.digit, term.unitNumerator / term.unitDenominator,
                     term.contributionInThousandths / 1000])], range)).toBe(true);

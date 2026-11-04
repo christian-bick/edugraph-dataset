@@ -1,51 +1,60 @@
-import {Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import {createGenerationSelectionReceipt} from '../../../lib/compatibility.ts';
+import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
-import {setSeed} from '../../../lib/random.ts';
+import {generatePlannedDraw, resolvePlannedConfigurations} from '../../../lib/planned-generation.ts';
+import {getRandomState} from '../../../lib/random.ts';
 import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
 import {extractConfig} from '../../../lib/utils.ts';
-import {spec as viewSpec, NumbersDecimalPlaceValueScalingViewSchema} from '../../../visuals/views/numbers/numbers-decimal-place-value-scaling/spec.ts';
+import {spec as viewSpec, NumbersDecimalPlaceValueScalingViewSchema as viewSchema} from '../../../visuals/views/numbers/numbers-decimal-place-value-scaling/spec.ts';
 import {DecimalPlaceValueScalingGenerator} from './generator.ts';
 import {scalingRangePairs, resolveScalingRange} from './range-profile.ts';
-import {DecimalPlaceValueScalingGeneratorSchema as schema, spec} from './spec.ts';
+import {DecimalPlaceValueScalingGeneratorSchema as schema, type DecimalPlaceValueScalingGeneratorConfig, spec} from './spec.ts';
 
-describe('adjacent-place correlated decimal ranges', () => {
-    it('resolves exactly seven feasible combinations in direct and planned paths', () => {
-        for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) for (const [bound, upper] of scalingRangePairs) {
-            const labels = [...spec.generalLabels, ...viewSpec.generalLabels, zero, bound];
-            const match = planModelCompatibility({id: 'scaling-range', labels},
-                {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
-                {viewId: viewSpec.viewId, generalLabels: viewSpec.generalLabels, schema: NumbersDecimalPlaceValueScalingViewSchema, spec: viewSpec});
-            if (zero === Scope.NumbersWithoutZero && upper <= 100) {
-                expect(match.supported).toBe(false);
-                expect(() => extractConfig(schema, labels)).toThrow();
-                continue;
-            }
-            expect(match.supported).toBe(true);
-            const direct = extractConfig(schema, labels);
-            const planned = resolveSchemaChoices(schema, labels, {requireZeroCoefficient: [zero], range: [bound]});
-            expect(planned.config).toEqual(direct.config);
-            expect(new Set(planned.resolvedLabels)).toEqual(new Set(direct.resolvedLabels));
-            expect(direct.config.range).toEqual(createCanonicalNumericRange(upper));
-            const data = new DecimalPlaceValueScalingGenerator().generate(direct.config).data;
-            expect(hasCanonicalRangeWitness([data.numberInThousandths / 1000,
-                data.higherPlace.digitValueInThousandths / 1000, data.lowerPlace.digitValueInThousandths / 1000,
-                data.scale.factor, data.scale.reciprocalNumerator / data.scale.reciprocalDenominator], direct.config.range!)).toBe(true);
-        }
+describe('decimal-place-value-scaling range configurations', () => {
+    it.each(scalingRangePairs)('resolves %s identically in direct and planned paths', (bound, upper) => {
+        const direct = extractConfig(schema, [bound]), planned = resolveSchemaChoices(schema, [bound], {range: [bound]});
+        expect(planned).toEqual(direct);
+        expect(direct.config).toEqual({range: createCanonicalNumericRange(upper)});
+        const data = new DecimalPlaceValueScalingGenerator().generate(direct.config)!.data;
+        expect(hasCanonicalRangeWitness([data.numberInThousandths / 1000, data.higherPlace.digitValueInThousandths / 1000, data.lowerPlace.digitValueInThousandths / 1000, data.scale.factor, data.scale.reciprocalNumerator / data.scale.reciprocalDenominator], direct.config.range!)).toBe(true);
     });
 
-    it('filters impossible fallback combinations before choosing', () => {
-        for (let seed = 0; seed < 40; seed++) {
-            setSeed(seed);
-            const smaller = extractConfig(schema, [Scope.NumbersSmaller20]);
-            expect(smaller.config.requireZeroCoefficient).toBe(true);
-            const noZero = extractConfig(schema, [Scope.NumbersWithoutZero]);
-            expect([120, 1000]).toContain(noZero.config.range?.max);
-            const unspecified = extractConfig(schema, []);
-            expect(unspecified.config.requireZeroCoefficient || unspecified.config.range!.max > 100).toBe(true);
+    it('retains every broad-source range choice and current receipt replay', () => {
+        const target = {id: 'decimal-range', labels: [...spec.generalLabels, ...viewSpec.generalLabels]};
+        const match = planModelCompatibility(target,
+            {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec},
+            {viewId: viewSpec.viewId, generalLabels: viewSpec.generalLabels, schema: viewSchema, spec: viewSpec});
+        expect(match.supported).toBe(true);
+        if (!match.supported) throw new Error(match.reason);
+        const enumeration = enumerateDependencyAuditSelections(match.plan);
+        expect(enumeration.status).toBe('complete');
+        expect(enumeration.selections).toHaveLength([10, 20, 100, 120, 1000].length);
+        const uppers = new Set<number>();
+        for (const selection of enumeration.selections) {
+            const sampleKey = `${target.id}#${spec.generatorId}#${viewSpec.viewId}#train#question#inst:0`;
+            const input = {generator: new DecimalPlaceValueScalingGenerator(), generatorSchema: schema,
+                generatorSpec: spec, viewSchema, viewSpec, plan: match.plan, sampleKey, seed: 29, attempt: 1,
+                replay: {version: 1 as const, sampleKey, seed: 29, attempt: 1,
+                    selection: createGenerationSelectionReceipt(match.plan, selection.choices)}};
+            const resolved = resolvePlannedConfigurations(input), draw = generatePlannedDraw(input), state = getRandomState();
+            const config: DecimalPlaceValueScalingGeneratorConfig = resolved.generatorConfig;
+            const range = config.range;
+            if (!range) throw new Error('The planned decimal scaling selection must resolve a range.');
+            expect(range).toEqual(createCanonicalNumericRange(range.max));
+            uppers.add(range.max);
+            expect(draw.stub).not.toBeNull();
+            expect(generatePlannedDraw(input)).toEqual(draw);
+            expect(getRandomState()).toBe(state);
         }
+        expect(uppers).toEqual(new Set([10, 20, 100, 120, 1000]));
+    });
+
+    it('rejects ambiguous bounds and leaves absent bounds to schema fallback', () => {
         expect(resolveScalingRange([])).toBeUndefined();
-        expect(() => resolveScalingRange([Scope.NumbersSmaller10, Scope.NumbersSmaller20])).toThrow(/Ambiguous/);
+        expect(() => resolveScalingRange(scalingRangePairs.slice(0, 2).map(([label]) => label)))
+            .toThrow(/Ambiguous/);
+        expect([10, 20, 100, 120, 1000]).toContain(extractConfig(schema, []).config.range!.max);
     });
 });

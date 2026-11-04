@@ -31,6 +31,7 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
             Scope.ThousandthDecimals,
             Scope.Base10,
             Scope.NumbersWithoutNegatives,
+            Scope.NumbersWithoutZero,
             Scope.TwoOperands
         ]);
         expect(spec.generalLabels).not.toContain(Ability.ProcedureExecution);
@@ -45,7 +46,7 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
         expect(stub).not.toBeNull();
         expect(stub!.data.relation).toBe(relation);
         expect(stub!.labels).toEqual(expect.arrayContaining([area, scope]));
-        expect(stub!.labels.filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never)))
+        expect([...spec.generalLabels, ...stub!.labels].filter(label => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].includes(label as never)))
             .toHaveLength(1);
         expect(stub!.labels).not.toContain(Ability.ProcedureExecution);
         if (relation === 'equal') {
@@ -58,12 +59,11 @@ describe('DecimalPlaceComparisonGenerator spec integration', () => {
         expect(generator.generate(resolved.config)?.data).toEqual(stub!.data);
     });
 
-    it.each([Scope.Greater, Scope.Less])('constrains the requested zero profile for %s comparison', relation => {
-        for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) {
-            const stub = generateWithLabels(generator, [...commonLabels, Area.NumericInequality, relation, zero])!;
-            expect(stub.labels).toContain(zero);
-            const digits = [stub.data.left, stub.data.right].flatMap(operand => [...operand.wholeDigits, ...operand.fractionalDigits]);
-            expect(digits.includes(0)).toBe(zero === Scope.NumbersWithZero);
-        }
+    it.each([Scope.Greater, Scope.Less])('declares actual scalar zero absence for %s independently of zero glyphs', relation => {
+        const stub = generateWithLabels(generator, [...commonLabels, Area.NumericInequality, relation, Scope.NumbersWithoutZero])!;
+        expect([...spec.generalLabels, ...stub.labels]).toContain(Scope.NumbersWithoutZero);
+        expect([...spec.generalLabels, ...stub.labels]).not.toContain(Scope.NumbersWithZero);
+        expect(stub.data.left.valueInThousandths).toBeGreaterThan(0);
+        expect(stub.data.right.valueInThousandths).toBeGreaterThan(0);
     });
 });
