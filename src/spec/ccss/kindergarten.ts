@@ -182,6 +182,7 @@ const compareGroupsByMatchingBuilder = createCompareGroupsBuilder([
 // --- K.CC.C.7: Compare two numbers between 1 and 10 presented as written numerals ---
 const compareNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,

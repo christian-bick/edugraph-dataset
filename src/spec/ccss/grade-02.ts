@@ -221,6 +221,7 @@ const expandedFormBuilder = new DatasetPermutationBuilder()
 // --- 2.NBT.A.4: Compare three-digit numbers ---
 const compareThreeDigitBuilder = new DatasetPermutationBuilder()
     .addLabels([
+        Scope.IntegerNumbers,
         Scope.ArabicNumerals,
         Scope.Base10,
         Scope.NumbersWithoutNegatives,
