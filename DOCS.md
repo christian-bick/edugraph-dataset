@@ -94,6 +94,8 @@ capability requirement. Matching does not acquire range-containment or implicati
 Reviewed targets expand before IDs are assigned, and generator payloads remain mathematical data.
 The plan records active families, intentional support changes, matching migration and the separate
 regeneration/VQA acceptance status; other families retain their existing inclusive-range contracts.
+The quantity interpretation for numeral and place-value representations is defined in
+[SPEC-G2](docs/spec-generator.md#spec-g2--the-schema-maps-to-abstract-mathematical-configuration-only).
 
 Dependent schema fields can read declared earlier resolved choices in the direct path, as they
 already do in planned resolution. Opt-in capability alternatives retain more-specific realizations

@@ -2,6 +2,7 @@ import {requireTargetLabels} from '../../../../lib/target-policies.ts';
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
+import {writingScalarCapacityRule} from '../writing-capacity.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-write-count',
@@ -11,7 +12,8 @@ export const spec: ViewSpec = {
         Scope.ArabicNumerals
     ],
     compatibility: [
-        requireTargetLabels('integer-numeration-request', [Area.NumerationWithIntegers])
+        requireTargetLabels('integer-numeration-request', [Area.NumerationWithIntegers]),
+        writingScalarCapacityRule('count-selected-scalar-capacity', 1000)
     ]
 };
 

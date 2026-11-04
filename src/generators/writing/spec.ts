@@ -26,24 +26,13 @@ export const spec: GeneratorSpec<typeof WritingGeneratorSchema> = {
             ...[Scope.NumbersWithZero, Scope.NumbersWithoutZero].map(label => ({scope: 'generator' as const, label})),
             ...writingRangeLabels.flatMap(label => [{scope: 'target' as const, label}, {scope: 'generator' as const, label}])],
         predicate: labels => {
-            if (!labels.exact('generator', Area.NumberNameNotation))
+            if (!labels.exact('generator', Area.NumberNameNotation) && labels.exact('generator', Scope.NumbersWithZero))
                 return writingRangeLabels.every(label => labels.exact('target', label) === labels.exact('generator', label));
             const range = nameRangeForLabels(writingRangeLabels.filter(label => labels.exact('generator', label)));
             return !!range && !labels.exact('generator', Scope.NumbersLargerZero)
                 && (labels.exact('generator', Scope.NumbersWithZero) ? range.max === 5
                 : labels.exact('generator', Scope.NumbersWithoutZero));
         }
-    }],
-    // SPEC-12: zero absence depends on both the zero selector and legacy range.
-    // Range-only bundles overclaim explicit zero; a blanket false-selector default
-    // also overclaims the number-line origin. Larger bounded requests already
-    // resolve matching-capable zero choices rather than needing this annotation.
-    // The number-line consumer requires max <= 100, so it cannot enter this guard.
-    inferredLabels: [{
-        produces: [Scope.NumbersWithoutZero],
-        infer: ({requireZero, range}) => !requireZero && range && range.max > 100 && range.max <= 1000
-            ? [Scope.NumbersWithoutZero]
-            : []
     }],
     generalLabels: [
         Scope.IntegerNumbers,

@@ -2,6 +2,7 @@ import {requireTargetLabels, rejectTargetLabels} from '../../../../lib/target-po
 import {ViewSpec} from '../../../../types/view-spec.ts';
 import {Ability, Area, deductAdmitting, Scope} from 'edugraph-ts';
 import { ConfigFromSchema } from '../../../../types/schema.ts';
+import {writingScalarCapacityRule} from '../writing-capacity.ts';
 
 export const spec: ViewSpec = {
     viewId: 'numbers-write-stroke',
@@ -11,7 +12,8 @@ export const spec: ViewSpec = {
     ],
     compatibility: [
         requireTargetLabels('digit-notation-request', [Area.DigitNotation]),
-        rejectTargetLabels('stroke-count-capacity', [...deductAdmitting([Scope.NumbersLarger120])])
+        rejectTargetLabels('stroke-count-capacity', [...deductAdmitting([Scope.NumbersLarger120])]),
+        writingScalarCapacityRule('stroke-selected-scalar-capacity', 1000)
     ],
 };
 

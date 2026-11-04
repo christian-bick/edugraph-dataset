@@ -228,7 +228,8 @@ const readNumeralsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller120,
         Ability.TextualReception
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100, 120]});
 
 // --- 1.NBT.A.1: Write numerals through 120 ---
 const writeNumeralsBuilder = new DatasetPermutationBuilder()
@@ -239,7 +240,8 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller120,
         Ability.VisualArticulation
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100, 120]});
 
 // --- 1.NBT.A.1: Represent a number of objects with a written numeral ---
 const representCountsBuilder = new DatasetPermutationBuilder()
@@ -251,7 +253,8 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersSmaller120,
         Ability.Formalization
-    ]);
+    ])
+    .applyUpperRangeVariants({bands: [5, 10, 20, 100, 120]});
 
 // --- 1.NBT.B.2a: 10 as a bundle of ten ones ---
 const tenBundleBuilder = new DatasetPermutationBuilder()

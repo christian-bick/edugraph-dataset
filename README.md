@@ -30,6 +30,8 @@ capabilities, canonical payloads, and rendered tasks is defined in
 Distinct mathematical payload families, such as written expression structure and evaluated
 calculations or collection totals and enumerations, can share rendering helpers while retaining
 separate typed capability contracts.
+The [generator reference](docs/spec-generator.md#spec-g2--the-schema-maps-to-abstract-mathematical-configuration-only)
+defines numeric-range quantities for numeral and place-value representations.
 
 The architecture is split into three main parts:
 *   **The Brain (Generators):** Abstract mathematical constraint satisfiers.

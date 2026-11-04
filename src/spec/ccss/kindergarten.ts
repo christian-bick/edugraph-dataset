@@ -62,6 +62,7 @@ const writeNumeralsBuilder = new DatasetPermutationBuilder()
         Ability.VisualArticulation
     ])
     .applyLabelVariants([
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller5],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
         [Scope.NumbersWithZero, Scope.NumbersSmaller5]
@@ -77,6 +78,7 @@ const representCountsBuilder = new DatasetPermutationBuilder()
         Ability.Formalization
     ])
     .applyLabelVariants([
+        [Scope.NumbersWithoutZero, Scope.NumbersSmaller5],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller10],
         [Scope.NumbersWithoutZero, Scope.NumbersSmaller20],
         [Scope.NumbersWithZero, Scope.NumbersSmaller5]

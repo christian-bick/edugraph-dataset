@@ -49,10 +49,10 @@ describe('source bounds for fixed numerical competencies', () => {
         expect(draw.data.tens).toBe(0);
     });
 
-    it('uses upper5 for the two zero-only sources without altering positive writing bands', () => {
+    it('preserves the two upper5 zero sources alongside the reviewed positive writing bands', () => {
         const family = kindergarten.filter(target => target.id.startsWith('K.CC.A.3-write-numerals~')
             || target.id.startsWith('K.CC.A.3-represent-counts~'));
-        expect(family).toHaveLength(6);
+        expect(family).toHaveLength(8);
         const zeros = family.filter(target => target.labels.includes(Scope.NumbersWithZero));
         expect(zeros).toHaveLength(2);
         const generator = new WritingGenerator();
@@ -74,7 +74,8 @@ describe('source bounds for fixed numerical competencies', () => {
             }
         }
         const positives = family.filter(target => target.labels.includes(Scope.NumbersWithoutZero));
-        expect(positives).toHaveLength(4);
+        expect(positives).toHaveLength(6);
+        expect(positives.filter(target => target.labels.includes(Scope.NumbersSmaller5))).toHaveLength(2);
         expect(positives.filter(target => target.labels.includes(Scope.NumbersSmaller10))).toHaveLength(2);
         expect(positives.filter(target => target.labels.includes(Scope.NumbersSmaller20))).toHaveLength(2);
         expect(positives.every(target => target.labels.includes(Area.DigitNotation)

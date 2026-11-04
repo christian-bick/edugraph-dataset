@@ -16,19 +16,20 @@ Q11 separates [single named-unit equivalences and five-row sequences](#q11-sourc
 Q12 qualifies [currency amounts in their displayed monetary units](#q12-source-verification).
 Q13 excludes [algebra tasks from numeric range annotations](#q13-source-verification).
 Q15 separates [collection totals and enumeration](#q15-source-verification).
+Q16 qualifies [the represented scalar for every writing notation](#q16-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13 and Q15 decision batches also pass their
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15 and Q16 decision batches also pass their
 focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,529 normalized targets / 2,001 routes and 4,741 complete selections**, with **one range-presence
+**1,547 normalized targets / 2,024 routes and 4,764 complete selections**, with **one range-presence
 omission in one producer** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records two remaining contract/policy questions, including one already-labelled precision topic
-covering 14 routes.
+records one remaining contract/policy question, concerning multiplication overflow above the
+largest ontology upper bound.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes. Missing-range findings
 remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
@@ -1051,6 +1052,122 @@ The fresh matching comparison is under `temp/spec-plans/ccss/range-q15-2026-11-0
 Focused evidence is `scoped-coverage-first.log`, `scoped-coverage.log`,
 `coverage-core-gate.log` / `core-summary.json`, and
 `view-coverage.log` / `coverage-views-gate.log` / `views-summary.json`.
+
+## Q16 scalar numeral ranges
+
+Approved 2026-11-04 after Q15, from `463ab518`. The user clarified that individual digits
+and place-value components represent the whole number for numeric-range labeling. Thus
+321, including a representation as three hundreds, two tens and one unit, uses scalar
+321 and lower120/upper1000. A zero digit in 310 does not establish scalar zero. Other
+independently assessed quantities retain the existing inclusive minimum/maximum convention.
+This quantity interpretation is recorded under SPEC-G2.
+
+Retain the existing `WritingProblem`, producer id and five consumers. No payload, type or
+renderer migration is required (IMPL-G6, IMPL-8). Refine positive non-Name configurations
+using the nine existing scalar Name profiles. Keep the nine Name source bindings and three
+fixed-zero bindings exact, including resolved configs, mathematics and PRNG continuation.
+Preserve the existing explicit non-Name zero path and its legacy range binding. Positive
+zero absence becomes a matching-capable choice before generation; digits do not drive it.
+
+| Consumer | Baseline source routes | Adoption | Verification |
+| --- | --- | --- | --- |
+| `numbers-read-standard` | 3 positive | Shared scalar range, unchanged numeral/name task and place-value payload | Retained scalar intervals, source successors, legacy/multidigit Q/S and replay |
+| `numbers-write-standard` | 5 positive + 1 zero | Shared scalar range, unchanged frames/block sketch/place chart | All source bands, zero-digit examples, Q/S and replay |
+| `numbers-write-stroke` | 3 positive + 1 zero | Same shared payload; selected positive profiles honor the renderer's 1000 capacity, retaining its original target policy | Every valid band and glyph branch, including 321 under an unqualified request's upper1000 completion; zero and missing-bound capacity cases |
+| `numbers-write-count` | 3 positive + 1 zero | Same whole-number response; selected positive profiles honor the 1000 renderer capacity | Ten-frame/block modes, decomposition and zero-digit cases; zero/capacity isolation |
+| `numbers-write-name` | 9 Name | Unchanged scalar Name contract and source | Exact config, labels, payload, RNG, replay and Q/S controls |
+
+The two selected-profile capacity rules query generator-owned semantic labels. An explicit
+generator scalar-zero choice bypasses this positive-profile check, preserving its actual zero
+domain even when the legacy configured range is broad. Stroke retains its original target
+participation boundary without applying that boundary to unrequested selected descriptors. Both
+stroke and count support scalar values through 1000; read/standard/name retain their complete
+valid range through one million.
+
+Reviewed source expansion preserves the represented-number union for each competency, apart
+from the already-approved threshold singletons (TSPEC-4). Kindergarten numeral-writing and
+count-writing gain a positive upper5 variant. The three Grade 1 reading/writing/count-writing
+competencies expand their upper120 ceiling into upper5/10/20/100/120. The two Grade 4
+digit-reading/writing lineages with lower1000/upper1m receive three explicit adjacent-band
+successors, matching the established Name source refinement. All other source ids remain.
+Expected delta: +18 normalized targets and +23 routes/selections; writing grows 26 to 49
+routes (14 positive non-Name to 37, with the 12 controls retained). Expected global coverage
+is 1,547 normalized targets / 2,024 routes / 4,764 selections; verify these rather than treating
+the expectation as acceptance.
+
+Each positive notation family retains all 999,991 nonthreshold integers through one million.
+The only excluded values are 5, 10, 20, 100, 120, 1000, 10000, 100000 and 1000000 under the
+existing threshold-singleton policy. Each band conditions the original uniform scalar law
+and consumes one draw; explicit zero consumes none. Profile mixtures may change as already
+accepted. The shared positive-number primitive remains unchanged.
+
+The protected baseline has 26 selections, 208 seeded draws, 416 source Q/S SSR strings,
+234 independent boundary SSR projections and 53 saved source inputs. Keep raw schema labels,
+complete inferred annotations and operational source identities distinct when comparing.
+Independent scalar support/weight proofs, matching/source audit, persistent integration,
+native browser checks, TypeScript and scoped coverage establish source acceptance. Stored
+dataset regeneration and independent VQA remain separate gates. Evidence belongs under
+`temp/range-decisions/batch11-q16/`; the matching plan is `range-q16-2026-11-04`.
+
+### Q16 source verification
+
+The accepted source has **1,547 normalized targets / 2,024 routes / 4,764 complete selections**.
+Writing grows from 26 to 49 routes/selections: 37 positive non-Name selections, nine Name
+controls and three fixed-zero controls. All 24 retained target/view lineages keep their labels;
+the two former Grade 4 broad digit-reading/writing lineages have six explicit adjacent-band
+successors. The matching comparison records 20 added and two removed targets, 25 added and
+two removed pairs, and 12 changed generation plans. No dispositions or competency associations
+are lost, and no stable target ID changes its labels.
+
+The source audit retains all 4,715 non-writing selections semantically unchanged. It reports
+4,299 eligible selections and 22,178 satisfied assessments, with zero conflicts, contract errors,
+incomplete tuples, invalid contexts or pending/invalid inference. The sole missing range facet
+remains `5.NBT.B.5-multiplication-standard-algorithm~71786b7e`, whose supported overflow exceeds
+upper1m. The writing inference callback is retired because positive zero absence is selected
+before generation; the remaining 93 non-writing inference selections resolve exhaustively.
+The 12 Name/zero controls retain their emitted annotations and evaluations while their
+annotation-resolution bookkeeping changes from `exhaustive` to `not_required`.
+
+The independent scalar proof exhaustively partitions all 999,991 retained positive integers
+for each of the three notation families across nine cells. Only the nine catalog threshold
+singletons retire from the former non-Name domain. Every cell conditions the original uniform
+scalar law, with one positive-sample draw and no zero-sample draw; 240 native seeded checks
+independently reconstruct the payload and PRNG continuation. All 49 source selections pass
+eight seeds: 392 planned draws, exact replays and direct-generation comparisons. The nine
+Name and three fixed-zero controls preserve configurations, mathematical payloads, emitted
+labels, semantic plans, receipts and all 96 seeded PRNG continuations. Their 12 operational
+input hashes refresh with the source closure; this is recorded separately from semantic identity.
+
+All 192 protected control SSR strings and 176 retained native boundary SSR projections remain
+byte-identical. The other 58 non-Name boundary projections represent the deliberately retired
+threshold values. Of 53 protected production/reference inputs, eight have the approved source,
+schema, sampler or capacity changes; all five renderer implementations remain unchanged.
+The independent source-lineage proof preserves every competency's represented-number union
+apart from those approved endpoints.
+
+Native browser verification covers all 49 source selections and the five consumers, plus
+Count321, Read1005 and Stroke321: **104 Question/Solution images / 208 byte-identical repeated
+captures**, with no browser errors or error cards. Stroke321 uses an unqualified positive
+target's upper1000 completion; explicit upper1000 targets remain rejected by the original
+participation rule. Ten representative captures are visually inspected: place-value parts
+still ask for the whole 321, zero digits in 1005 do not imply scalar zero, tracing keeps its
+unknown writing boxes, and Name/fixed-zero controls retain their tasks and complete layouts.
+
+Repository check stages 1–5 pass, including TypeScript, contracts, labels, documentation and
+source standards. The unchanged local artifact stages still fail on 1,944 stored rows missing
+recorded generation plans/receipts, 2,277 missing annotation facets and 4,006 strict failures
+among 1,396 eligible stored samples, with zero conflicts or incomplete tuples.
+
+All **129 focused tests across 11 files pass** on the first coordinated coverage run.
+Overall measured coverage is **100% statements / 97.59% branches**. The writing generator,
+unchanged zero-profile resolver and new capacity helper have 100% statement/branch coverage;
+the shared range-profile module has 100% statements / 95.23% branches. The unchanged four-file
+85% statement / 60% branch gate passes. These focused source/native results do not claim
+a new full-suite pass, dataset regeneration or independent VQA. Evidence is under
+`temp/range-decisions/batch11-q16/`: `baseline.json`, `independent-math.ts`,
+`verification-after.json`, `source-audit.json`, `renders/manifest.json`, `visual-review.json`
+and `check.log`; focused results are in `scoped-coverage.log`, `coverage-summary.json` and
+`coverage-gate.log`. Fresh matching is under `temp/spec-plans/ccss/range-q16-2026-11-04/`.
 
 ## Accepted direction
 

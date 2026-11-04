@@ -30,8 +30,8 @@ export class WritingGenerator implements ProblemGenerator<WritingProblem, Writin
             return {data: {number: 0}};
         }
 
-        const currentNum = samplePositiveWholeNumber(resolvedRange);
-        if (currentNum === null) return null;
+        const [first, last] = nameIntegerInterval(resolvedRange, false);
+        const currentNum = samplePositiveWholeNumber({min: first, max: last})!;
         
         if (currentNum <= 1000) return {data: {number: currentNum}};
 

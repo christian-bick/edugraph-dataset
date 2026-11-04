@@ -8,18 +8,33 @@ import {generatePlannedDraw} from '../../lib/planned-generation.ts';
 import {resolveInferredLabels} from '../../lib/inferred-labels.ts';
 import {spec as numberLineSpec} from '../../visuals/views/operations/operations-number-line-representation/spec.ts';
 import {spec as readingSpec} from '../../visuals/views/numbers/numbers-read-standard/spec.ts';
-import {WritingGeneratorSchema, spec} from './spec.ts';
+import {WritingGeneratorSchema, spec, type WritingGeneratorConfig} from './spec.ts';
 import {WritingGenerator} from './generator.ts';
+import {resolveWritingRange} from './range-profile.ts';
+import {createCanonicalNumericRange} from '../../lib/canonical-numeric-range.ts';
 
 describe('WritingGenerator Spec Integration', () => {
     const generator = new WritingGenerator();
     const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
         schema: WritingGeneratorSchema, spec};
+    const formerInference = [{produces: [Scope.NumbersWithoutZero],
+        infer: ({requireZero, range}: WritingGeneratorConfig) => !requireZero && range && range.max > 100 && range.max <= 1000
+            ? [Scope.NumbersWithoutZero] : []}];
+
+    it('validates standalone fallback bounds without discarding a selected positive notation context', () => {
+        expect(resolveWritingRange([Scope.NumbersSmaller10])).toEqual({min: 0, max: 10});
+        expect(resolveWritingRange([Area.DigitNotation, Scope.NumbersWithoutZero, Scope.NumbersSmaller10])).toBeUndefined();
+        expect(resolveWritingRange([Area.DigitNotation, Scope.NumbersWithoutZero, Scope.NumbersSmaller10,
+            Scope.NumbersLarger5])).toEqual(createCanonicalNumericRange(10, 5));
+    });
 
     it.each([Scope.NumbersSmaller120, Scope.NumbersSmaller1000])(
-        'adds zero absence throughout the bounded positive legacy %s configuration', maximum => {
+        'selects zero absence before generation for the positive %s profile', maximum => {
             for (let seed = 0; seed < 24; seed++) {
                 setSeed(seed);
+                const resolved = extractConfig(generator.schema, [Area.DigitNotation, maximum]);
+                expect(resolved.resolvedLabels).toContain(Scope.NumbersWithoutZero);
+                expect(resolved.config.requireZero).toBe(false);
                 const stub = generateWithLabels(generator, [Area.DigitNotation, maximum]);
                 expect(stub).not.toBeNull();
                 expect(stub!.data.number).toBeGreaterThan(0);
@@ -31,16 +46,12 @@ describe('WritingGenerator Spec Integration', () => {
         }
     );
 
-    it('keeps both branch boundaries and explicit zero outside the added claim', () => {
+    it('uses matching-capable declarations instead of the retired inference callback', () => {
+        expect(spec.inferredLabels).toBeUndefined();
         const base = {notationFamily: Area.DigitNotation, requireZero: false};
-        for (const maximum of [100, 1001, 1000000]) {
+        for (const maximum of [100, 101, 1000, 1001, 1000000]) {
             expect(resolveInferredLabels({spec, schema: WritingGeneratorSchema,
                 config: {...base, range: {min: 0, max: maximum}}, labels: [], owner: 'generator'})).toEqual([]);
-        }
-        for (const maximum of [101, 1000]) {
-            expect(resolveInferredLabels({spec, schema: WritingGeneratorSchema,
-                config: {...base, range: {min: 0, max: maximum}}, labels: [], owner: 'generator'}))
-                .toEqual([Scope.NumbersWithoutZero]);
         }
         const zero = generateWithLabels(generator,
             [Area.DigitNotation, Scope.NumbersWithZero, Scope.NumbersSmaller1000]);
@@ -62,8 +73,8 @@ describe('WritingGenerator Spec Integration', () => {
         expect(result).toEqual({matched: false, reason: 'incompatible-type'});
     });
 
-    it('preserves complete direct configurations, payloads and random continuation', () => {
-        const oldSpec = {...spec, inferredLabels: undefined};
+    it('preserves direct configurations, payloads and continuation when removing redundant inference', () => {
+        const oldSpec = {...spec, inferredLabels: formerInference};
         for (const notation of [[], [Area.DigitNotation], [Area.NumerationWithIntegers], [Area.NumberNameNotation]]) {
             for (const maximum of [Scope.NumbersSmaller100, Scope.NumbersSmaller120,
                 Scope.NumbersSmaller1000, Scope.NumbersSmaller1000000]) {
@@ -80,18 +91,17 @@ describe('WritingGenerator Spec Integration', () => {
                             const configState = getRandomState();
                             return {...resolved, configState, stub: generator.generate(resolved.config), state: getRandomState()};
                         });
-                        const expected = draws[0];
-                        const additional = !expected.config.requireZero && expected.config.range!.max > 100
-                            && expected.config.range!.max <= 1000 ? [Scope.NumbersWithoutZero] : [];
-                        expect(draws[1]).toEqual({...expected,
-                            resolvedLabels: [...new Set([...expected.resolvedLabels, ...additional])]});
+                        const {resolvedLabels: beforeLabels, ...before} = draws[0];
+                        const {resolvedLabels: afterLabels, ...after} = draws[1];
+                        expect(after).toEqual(before);
+                        expect(new Set(afterLabels)).toEqual(new Set(beforeLabels));
                     }
                 }
             }
         }
     });
 
-    it('preserves planned draws and recomputes the additional annotation on replay', () => {
+    it('preserves planned draws and explicit zero absence after retiring inference', () => {
         const target = {id: 'read-legacy', labels: [Area.DigitNotation, Scope.NumbersSmaller1000,
             Scope.ArabicNumerals, Ability.TextualReception]};
         const result = planModelCompatibility(target, model, {viewId: readingSpec.viewId,
@@ -100,7 +110,7 @@ describe('WritingGenerator Spec Integration', () => {
         if (!result.supported) throw new Error('Expected legacy reading to remain admitted.');
         const input = {generator, viewSchema: {}, viewSpec: readingSpec, plan: result.plan,
             sampleKey: 'read-legacy#writing#numbers-read-standard#train#question#inst:0', attempt: 1, seed: 42};
-        const old = generatePlannedDraw({...input, generatorSpec: {...spec, inferredLabels: undefined}});
+        const old = generatePlannedDraw({...input, generatorSpec: {...spec, inferredLabels: formerInference}});
         const oldState = getRandomState();
         const current = generatePlannedDraw(input);
         expect(current.stub!.data).toEqual(old.stub!.data);
@@ -134,13 +144,13 @@ describe('WritingGenerator Spec Integration', () => {
                 Scope.NumbersSmaller20
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.number).toBeLessThanOrEqual(20);
+            expect(stub!.data.number).toBeGreaterThan(10);
+            expect(stub!.data.number).toBeLessThan(20);
             expect(stub!.labels).toContain(Scope.NumbersWithoutZero);
         }
     });
 
-    it('should resolve the inclusive NumbersSmaller120 boundary', () => {
+    it('resolves the strict scalar interior under inclusive NumbersSmaller120', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generateWithLabels(generator, [
@@ -149,13 +159,13 @@ describe('WritingGenerator Spec Integration', () => {
                 Scope.NumbersSmaller120
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.number).toBeLessThanOrEqual(120);
+            expect(stub!.data.number).toBeGreaterThan(100);
+            expect(stub!.data.number).toBeLessThan(120);
             expect(stub!.labels).toContain(Scope.NumbersSmaller120);
         }
     });
 
-    it('should resolve the inclusive NumbersSmaller1000 boundary', () => {
+    it('resolves the strict scalar interior under inclusive NumbersSmaller1000', () => {
         for (let seed = 0; seed < 50; seed++) {
             setSeed(seed);
             const stub = generateWithLabels(generator, [
@@ -164,8 +174,8 @@ describe('WritingGenerator Spec Integration', () => {
                 Scope.NumbersSmaller1000
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.number).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.number).toBeLessThanOrEqual(1000);
+            expect(stub!.data.number).toBeGreaterThan(120);
+            expect(stub!.data.number).toBeLessThan(1000);
             expect(stub!.labels).toContain(Scope.NumbersSmaller1000);
         }
     });
@@ -176,10 +186,11 @@ describe('WritingGenerator Spec Integration', () => {
     ] as const)('resolves Grade 4 %s through one million', notationFamily => {
         setSeed(404);
         const maximum = notationFamily === Area.NumberNameNotation ? Scope.NumbersSmaller10000 : Scope.NumbersSmaller1000000;
+        const minimum = notationFamily === Area.NumberNameNotation ? Scope.NumbersLarger1000 : Scope.NumbersLarger100000;
         const stub = generateWithLabels(generator, [
             notationFamily,
             Scope.Base10,
-            Scope.NumbersLarger1000,
+            minimum,
             maximum
         ]);
 
@@ -189,7 +200,7 @@ describe('WritingGenerator Spec Integration', () => {
         expect(stub!.data.number).toBeLessThanOrEqual(1_000_000);
         expect(stub!.labels).toEqual(expect.arrayContaining([
             notationFamily,
-            Scope.NumbersLarger1000,
+            minimum,
             maximum
         ]));
     });

@@ -11,13 +11,15 @@ the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification),
 [Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification),
 [Q12 monetary-unit ranges](canonical-range-labeling.md#q12-source-verification),
 [Q13 algebra range exclusion](canonical-range-labeling.md#q13-source-verification) and
-[Q15 total/enumeration separation](canonical-range-labeling.md#q15-source-verification) are implemented.
-Current source coverage is **1,529 normalized targets / 2,001 routes / 4,741 selections**, with
+[Q15 total/enumeration separation](canonical-range-labeling.md#q15-source-verification) and
+[Q16 represented-scalar writing ranges](canonical-range-labeling.md#q16-source-verification) are implemented.
+Current source coverage is **1,547 normalized targets / 2,024 routes / 4,764 selections**, with
 **one missing range facet in one producer**. Q1/Q2 closed 14 source omissions, Q6
 closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; Q13 retires eight
 algebra range obligations by policy. Q15 refines 20 already-labelled routes and adds one
-conservation source variant. Two decision topics remain, including writing precision on
-14 already-labelled routes.
+conservation source variant. Q16 refines the 14 positive non-Name writing routes into 37
+selections while preserving the nine Name and three fixed-zero controls. One decision topic
+remains: multiplication overflow above the largest ontology upper bound.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
@@ -61,7 +63,6 @@ them. A valid consumer cannot be excluded merely to make another consumer's rang
 | ID / remaining slice | Concrete question | Recommendation and consequence |
 | --- | --- | --- |
 | Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
-| Q16 — positive non-Name writing,14 already-labelled routes | At321, numeral reading uses scalar321; count writing explicitly assesses3hundreds/2tens/1one. Which task contract owns those counts? | Distinguish block/count quantities from scalar numeral reading/writing before refining the complete mixed roles. Preserve the nine canonical Name routes and three canonical fixed-zero routes; they are not open work. |
 
 Q1/Q2 are resolved by the approved syntax/calculation separation, with all nine source target/view
 lineages preserved and 14 omissions closed. Their source proofs and native render verification are
@@ -125,10 +126,21 @@ The broad 314-test scoped run and later 53-test view run pass, with separate unc
 and view coverage gates. Final TypeScript passes; the verification checkpoint records exact
 overlap between those runs and the earlier full-suite/stored-artifact limitations.
 
-The first row accounts for the one remaining missing source facet: arithmetic 1. The last row
-concerns 14 already-labelled routes with unresolved precision and must not be added to omission
-totals. These two questions are contract/policy topics, not an estimated implementation-batch
-count. Current checks prove source consistency; they do not close the unresolved range work
+Q16 is resolved using the represented scalar for every writing notation. The
+[Q16 source verification](canonical-range-labeling.md#q16-source-verification) preserves the
+nine Name and three fixed-zero controls, all five consumer tasks and all retained integers
+apart from the previously approved threshold singletons. Writing now has 49 selections;
+24 old lineages remain and two broad Grade 4 lineages receive six explicit successors.
+Independent proofs check all nine scalar cells, 392 planned draws/replays, exact control
+receipts/PRNG and 368 unchanged control/native SSR strings. Native verification covers
+104 images captured twice, including scalar321 and zero-digit1005 examples. All 129 focused
+tests across 11 files pass, with 100% statement / 97.59% branch coverage and the unchanged
+four-file coverage gate passing. The linked checkpoint records the existing full-suite and
+stored-artifact limitations separately from source acceptance.
+
+The remaining row accounts for the one missing source facet: arithmetic 1. This question is
+a contract/policy topic, not an estimated implementation-batch count. Current checks prove
+source consistency; they do not close the unresolved range work
 or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.
 

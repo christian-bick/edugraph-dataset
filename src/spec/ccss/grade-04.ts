@@ -183,9 +183,12 @@ const readWriteBaseTenNumeralsBuilder = new DatasetPermutationBuilder()
     .addLabels([
         Area.DigitNotation,
         Scope.ArabicNumerals,
-        Scope.Base10,
-        Scope.NumbersLarger1000,
-        Scope.NumbersSmaller1000000
+        Scope.Base10
+    ])
+    .applyLabelVariants([
+        [Scope.NumbersLarger1000, Scope.NumbersSmaller10000],
+        [Scope.NumbersLarger10000, Scope.NumbersSmaller100000],
+        [Scope.NumbersLarger100000, Scope.NumbersSmaller1000000]
     ])
     .applyLabelVariants([[Ability.TextualReception], [Ability.VisualArticulation]]);
 

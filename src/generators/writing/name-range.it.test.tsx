@@ -47,7 +47,7 @@ const oldSchema = {
 const oldSpec = {...spec, compatibility: [spec.compatibility![0]!]};
 const allSources = [...kindergarten, ...gradeOne, ...gradeTwo, ...gradeFour];
 
-describe('scalar name canonical profiles and legacy isolation', () => {
+describe('scalar name canonical profiles and fixed-zero isolation', () => {
     it('preserves every nonthreshold scalar in the complete old inclusive1m corpus, plus the explicit zero competency', () => {
         const covered = new Uint8Array(1000001);
         let total = 0, failures = 0;
@@ -103,7 +103,7 @@ describe('scalar name canonical profiles and legacy isolation', () => {
         }
     });
 
-    it('covers all999991 positive names through nine actual source successors with exhaustive static inference', () => {
+    it('covers all999991 positive names through nine actual source successors with declared annotations', () => {
         const targets = allSources.filter(t => t.id.startsWith('2.NBT.A.3-number-names~') || t.id.startsWith('4.NBT.A.2-write-number-names~'));
         expect(targets).toHaveLength(9);
         let values = 0, selections = 0;
@@ -113,7 +113,7 @@ describe('scalar name canonical profiles and legacy isolation', () => {
             if (!matched.supported) throw Error('A name source lost coverage');
             for (const selection of enumerateDependencyAuditSelections(matched.plan).selections) {
                 expect(resolveDependencyAuditAnnotation({id: selection.variantHash, plan: matched.plan, selection,
-                    generator: {schema, spec}, view: {schema: {}, spec: nameViewSpec}}).annotationResolution.status).toBe('exhaustive');
+                    generator: {schema, spec}, view: {schema: {}, spec: nameViewSpec}}).annotationResolution.status).toBe('not_required');
                 const sampleKey = `${target.id}#writing#numbers-write-name#train#question#inst:0`;
                 const resolved = resolvePlannedConfigurations({generatorSchema: schema, viewSchema: {}, generatorSpec: spec, viewSpec: nameViewSpec,
                     plan: matched.plan, sampleKey, seed: 0, attempt: 1, replay: {version: 1, sampleKey, seed: 0, attempt: 1,
@@ -144,10 +144,10 @@ describe('scalar name canonical profiles and legacy isolation', () => {
         }
     });
 
-    it('leaves every old non-name source binding, resolved config, same-seed payload and random continuation identical', () => {
+    it('leaves all three fixed-zero source bindings, configs, same-seed payloads and random continuation identical', () => {
         expect(schema.range[0]).toEqual(oldSchema.range[0]);
         let routes = 0;
-        for (const target of allSources.filter(t => !t.labels.includes(Area.NumberNameNotation)))
+        for (const target of allSources.filter(t => !t.labels.includes(Area.NumberNameNotation) && t.labels.includes(Scope.NumbersWithZero)))
             for (const view of [readingViewSpec, standardViewSpec, strokeViewSpec, countViewSpec]) {
                 const previous = planModelCompatibility(target, {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema: oldSchema, spec: oldSpec},
                     {viewId: view.viewId, generalLabels: view.generalLabels, schema: {}, spec: view});
@@ -157,7 +157,7 @@ describe('scalar name canonical profiles and legacy isolation', () => {
                 if (!current.supported) throw Error('An untouched writing source lost coverage');
                 for (const selection of enumerateDependencyAuditSelections(current.plan).selections)
                     expect(resolveDependencyAuditAnnotation({id: selection.variantHash, plan: current.plan, selection,
-                        generator: {schema, spec}, view: {schema: {}, spec: view}}).annotationResolution.status).toBe('exhaustive');
+                        generator: {schema, spec}, view: {schema: {}, spec: view}}).annotationResolution.status).toBe('not_required');
                 expect(enumerateDependencyAuditSelections(current.plan).selections.map(s => s.labels))
                     .toEqual(enumerateDependencyAuditSelections(previous.plan).selections.map(s => s.labels));
                 for (const seed of [0, 17, 2026, 105]) {
@@ -172,7 +172,7 @@ describe('scalar name canonical profiles and legacy isolation', () => {
                 }
                 routes++;
             }
-        expect(routes).toBe(17);
+        expect(routes).toBe(3);
     });
 
     it('uses the existing typed number-line boundary rather than adding a range-specific guard', () => {

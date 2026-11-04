@@ -41,6 +41,12 @@ Keep the chosen profile feasible with every other admitted mathematical constrai
 [approved range contracts](plan/canonical-range-labeling.md#approved-contracts-and-remaining-rollout)
 for the rollout boundary and endpoint policy.
 
+Numeric ranges describe the values represented by numerals. Digit glyphs and place-value
+components used to represent a number do not introduce independent quantities: reading,
+writing, tracing or representing 321 as three hundreds, two tens and one unit uses 321 for
+its range. Include other quantities when the exercise assesses them independently; do not
+extract additional range quantities merely from a numeral's digits or decomposition.
+
 The schema must contain **zero** visual or presentation parameters — no `isReverse`,
 `layoutStyle`, `themeColor`, or comparable flag. Anything describing how a problem is laid
 out, styled, or interacted with belongs in the view spec ([spec-view.md](spec-view.md)).

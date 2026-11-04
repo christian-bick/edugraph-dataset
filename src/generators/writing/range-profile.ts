@@ -43,10 +43,11 @@ export const resolveWritingNotation = registerStaticResolver(withLabelChoices(ex
 }), {kind: 'alternatives', alternatives: writingNotationLabels.map(label => [label]),
     contextLabels: [...writingRangeLabels, Scope.NumbersWithZero, Scope.NumbersWithoutZero]}));
 
-/** Non-name fields retain their old target-label binding exactly. Name cells
- * are finite scalar bands; no quantity depends on a generated glyph or image. */
+/** Positive values use scalar bands for every notation. Preserve the legacy
+ * binding of explicit non-name zero; glyphs and place-value parts do not add quantities. */
 export const resolveWritingRange = registerStaticResolver(withLabelChoices(compositionalResolver((labels: string[]) => {
-    if (!labels.includes(Area.NumberNameNotation)) return resolveRangeFromLabels(labels);
+    if (!writingNotationLabels.some(label => labels.includes(label))) return resolveRangeFromLabels(labels);
+    if (!labels.includes(Area.NumberNameNotation) && labels.includes(Scope.NumbersWithZero)) return resolveRangeFromLabels(labels);
     const range = nameRangeForLabels(labels);
     return labels.includes(Scope.NumbersWithZero) && range?.max !== 5 ? undefined : range;
 }), {
@@ -55,13 +56,14 @@ export const resolveWritingRange = registerStaticResolver(withLabelChoices(compo
         Scope.NumbersWithZero, Scope.NumbersWithoutZero], resolvedContext: true
 }));
 
-/** Only the name competency gets the matching-capable positive scalar default.
- * All old zero and non-name default rules, and explicit zero requests, remain. */
+/** Positive scalar absence is a matching-capable choice. Name defaults keep
+ * their established priority; explicit zero and the legacy number-line boundary remain. */
 export const resolveNameAwareWritingZero = registerStaticResolver(withLabelChoices(compositionalResolver((labels: string[]) =>
     labels.includes(Area.NumberNameNotation) && !labels.includes(Scope.NumbersWithZero) && !labels.includes(Scope.NumbersWithoutZero)
         ? false : resolveWritingZero(labels)), {...resolveWritingZero.labelChoices!, kind: 'alternatives',
     contextLabels: [...resolveWritingZero.labelChoices!.contextLabels!, Area.NumberNameNotation], resolvedContext: true,
     defaults: [{whenAll: [Area.NumberNameNotation], labels: [Scope.NumbersWithoutZero]},
+        {whenNone: [Scope.Numberline], labels: [Scope.NumbersWithoutZero]},
         ...(resolveWritingZero.labelChoices!.kind === 'alternatives' ? resolveWritingZero.labelChoices!.defaults ?? [] : [])]
 }));
 
@@ -70,6 +72,6 @@ export function nameIntegerInterval(range: Partial<CanonicalNumericRange> & {min
     const full = range as CanonicalNumericRange;
     if (!profile || full.maximumAbove !== profile.range.maximumAbove || full.minimumBelow !== profile.range.minimumBelow
         || zero && range.max !== 5)
-        throw new GeneratorValidationError('writing', 'Number names require a feasible canonical scalar range.');
+        throw new GeneratorValidationError('writing', 'Writing requires a feasible canonical scalar range.');
     return zero ? [0, 0] : [Math.max(1, profile.range.maximumAbove + 1), profile.range.max - 1];
 }
