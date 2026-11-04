@@ -338,7 +338,6 @@ const oneDigitTimesMultipleOfTenBuilder = new DatasetPermutationBuilder()
         Scope.NumbersWithoutNegatives,
         Scope.NumbersWithoutZero,
         Scope.NumbersSmaller1000,
-        Scope.MultiplesOf10,
         Scope.SingleDigitSmallestOperand,
         Scope.TwoDigitLargestOperand,
         Ability.ProcedureUnderstanding

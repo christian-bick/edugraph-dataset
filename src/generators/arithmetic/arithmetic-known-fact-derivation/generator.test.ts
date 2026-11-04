@@ -72,6 +72,22 @@ describe('canonical known-fact derivation', () => {
         expect(knownFactDomain('place-value-scaling', createCanonicalNumericRange(120)).some(data => data.answer === 120)).toBe(true);
     });
 
+    it.each([100, 120, 1000])('retains upper%s scaling payloads and the original one-draw continuation', upper => {
+        const config = configFor('place-value-scaling', upper);
+        const expected = knownFactDomain('place-value-scaling', config.range!);
+        expect(expected.length).toBeGreaterThan(0);
+        for (let seed = 0; seed < 32; seed++) {
+            rng.setSeed(seed);
+            const index = Math.floor(rng.random() * expected.length), state = rng.getRandomState();
+            rng.setSeed(seed);
+            const result = generator.generate(config)!;
+            expect(result.data).toEqual(expected[index]);
+            expect(result.data.derivedOperands[0] % 10).not.toBe(0);
+            expect(result.data.derivedOperands[1] % 10).toBe(0);
+            expect(rng.getRandomState()).toBe(state);
+        }
+    });
+
     it('keeps broad fluency and explicit commutativity as the same mathematical manifestation', () => {
         const explicit = configFor('commutative', 100);
         rng.setSeed(41);

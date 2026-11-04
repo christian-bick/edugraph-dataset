@@ -90,14 +90,13 @@ export const ArithmeticKnownFactDerivationGeneratorSchema = {
     usePlaceValueScaling: [
         [
             Area.PlaceValue,
-            Scope.MultiplesOf10,
             Scope.SingleDigitSmallestOperand,
             Scope.TwoDigitLargestOperand
         ],
         hasLabel(Area.PlaceValue),
         [
             [Scope.SingleDigitSmallestOperand],
-            [Area.PlaceValue, Scope.MultiplesOf10, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]
+            [Area.PlaceValue, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]
         ]
     ],
     range: [

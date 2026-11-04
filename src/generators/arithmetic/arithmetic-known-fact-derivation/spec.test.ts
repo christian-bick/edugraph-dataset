@@ -1,7 +1,7 @@
 import {Ability, Area, Scope} from 'edugraph-ts';
 import {describe, expect, it} from 'vitest';
 import {setSeed} from '../../../lib/random.ts';
-import {extractConfig, generateWithLabels} from '../../../lib/utils.ts';
+import {extractConfig, extractSchemaLabels, generateWithLabels} from '../../../lib/utils.ts';
 import {ArithmeticKnownFactDerivationGenerator} from './generator.ts';
 import {spec, ArithmeticKnownFactDerivationGeneratorSchema as schema} from './spec.ts';
 import {normalizeSchemaChoices, resolveSchemaChoices} from '../../../lib/schema-choices.ts';
@@ -67,6 +67,25 @@ describe('ArithmeticKnownFactDerivationGenerator spec integration', () => {
         expect(spec.generalLabels).not.toContain(Ability.ProcedureUnderstanding);
     });
 
+    it('retains one-digit times whole-ten scaling without a both-operands-multiple-of-ten claim', () => {
+        const labels = [Area.MultiplicationKnownFactDerivation, Area.PlaceValue, Scope.TwoOperands,
+            Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand, Scope.NumbersSmaller1000];
+        const resolved = extractConfig(schema, labels);
+        expect(resolved.config).toEqual({operation: 'multiplication', arity: Scope.TwoOperands,
+            useCommutativeLaw: false, useAssociativeLaw: false, usePlaceValueScaling: true,
+            range: resolveCanonicalRangeFromLabels([Scope.NumbersSmaller1000])});
+        expect(resolved.resolvedLabels).toEqual(expect.arrayContaining([
+            Area.PlaceValue, Scope.SingleDigitSmallestOperand, Scope.TwoDigitLargestOperand]));
+        expect(extractSchemaLabels(schema)).not.toContain(Scope.MultiplesOf10);
+        expect(resolved.resolvedLabels).not.toContain(Scope.MultiplesOf10);
+        const stub = generate(labels)!;
+        expect(stub.data.strategy).toBe('place-value-scaling');
+        expect(stub.data.derivedOperands[0]).toBeGreaterThanOrEqual(2);
+        expect(stub.data.derivedOperands[0]).toBeLessThanOrEqual(9);
+        expect(stub.data.derivedOperands[1] % 10).toBe(0);
+        expect(stub.labels).not.toContain(Scope.MultiplesOf10);
+    });
+
     it.each([
         [
             [
@@ -102,7 +121,6 @@ describe('ArithmeticKnownFactDerivationGenerator spec integration', () => {
                 Area.PlaceValue,
                 Scope.TwoOperands,
                 Scope.NumbersSmaller1000,
-                Scope.MultiplesOf10,
                 Scope.SingleDigitSmallestOperand,
                 Scope.TwoDigitLargestOperand
             ],
