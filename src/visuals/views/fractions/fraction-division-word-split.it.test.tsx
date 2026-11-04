@@ -12,7 +12,7 @@ import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts
 import {matchTarget} from '../../../lib/matching.ts';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from '../../../lib/model-catalog.ts';
 import {generatePlannedDraw} from '../../../lib/planned-generation.ts';
-import {getRandomState, setSeed} from '../../../lib/random.ts';
+import {getRandomState, setRandomState, setSeed} from '../../../lib/random.ts';
 import {spec as grade5Targets} from '../../../spec/ccss/grade-05.ts';
 import {spec as grade6Targets} from '../../../spec/ccss/grade-06.ts';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
@@ -21,6 +21,16 @@ import {FractionQuotientBody} from './fraction-quotient-view.tsx';
 
 const generalId = 'fractions-general-division-word-problem';
 const quotientId = 'fractions-division-word-problem';
+const projectionProfiles = ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
+    'fraction-by-integer-proper', 'fraction-by-integer-improper',
+    'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const;
+type ProjectionProfile = typeof projectionProfiles[number];
+type ProjectionFixture = Readonly<{
+    data: FractionDivisionRelationProblem;
+    groupCountProfile: 'zero' | 'positive';
+    withMultiplication: boolean;
+    randomState: number;
+}>;
 let generalCore: typeof import('./fractions-general-division-word-problem/view.tsx').FractionsGeneralDivisionWordProblemCore;
 let quotientCore: typeof import('./fractions-division-word-problem/view.tsx').FractionsDivisionWordProblemCore;
 let generators: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>;
@@ -49,25 +59,44 @@ const quotientPayload = (data: FractionQuotientProblem, isSolutionView: boolean)
     ({viewId: quotientId, problem: {type: 'fraction', data, labels: []}, targetLabels: [], isSolutionView, seed: 42});
 
 describe('fraction division word-problem family separation', () => {
-    it('preserves reading as necessary while requiring a common-part method without supplying the solved groups', () => {
-        const generalView = views.find(view => view.viewId === generalId)!;
-        expect(generalView.problemType).toBe('FractionDivisionRelationProblem');
-        expect(generalView.generalLabels).toEqual([Ability.TextualReception, Ability.ProcedureExecution,
-            Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.BarModel]);
-        expect(generalView.schema).toEqual({});
-        expect(generalView.spec).not.toHaveProperty('inferredLabels');
-        const contexts = new Set<string>();
-        for (const operandProfile of ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
-            'fraction-by-integer-proper', 'fraction-by-integer-improper',
-            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const) {
-            for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
-                ? ['zero'] as const : ['zero', 'positive'] as const)
-            for (const withMultiplication of [false, true]) for (let seed = 0; seed < 12; seed++) {
-                setSeed(`word-division-split-${operandProfile}-${withMultiplication}-${seed}`);
-                const data = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile,
-                    withEquation: true, withMultiplication}).data;
-                contexts.add(data.context.kind);
-                const randomState = getRandomState();
+    describe('general reading and common-part projections', () => {
+        let fixtures: ReadonlyMap<ProjectionProfile, readonly ProjectionFixture[]>;
+
+        beforeAll(() => {
+            // Keep every original seeded draw and its exact post-generation
+            // continuation while partitioning the rendering work by profile.
+            fixtures = new Map(projectionProfiles.map(operandProfile => {
+                const profileFixtures: ProjectionFixture[] = [];
+                for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+                    ? ['zero'] as const : ['zero', 'positive'] as const)
+                for (const withMultiplication of [false, true]) for (let seed = 0; seed < 12; seed++) {
+                    setSeed(`word-division-split-${operandProfile}-${withMultiplication}-${seed}`);
+                    const data = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile,
+                        withEquation: true, withMultiplication}).data;
+                    profileFixtures.push({data, groupCountProfile, withMultiplication, randomState: getRandomState()});
+                }
+                return [operandProfile, Object.freeze(profileFixtures)] as const;
+            }));
+        });
+
+        it('retains reading as necessary and complete physical-context support', () => {
+            const generalView = views.find(view => view.viewId === generalId)!;
+            expect(generalView.problemType).toBe('FractionDivisionRelationProblem');
+            expect(generalView.generalLabels).toEqual([Ability.TextualReception, Ability.ProcedureExecution,
+                Scope.ArabicNumerals, Scope.Base10, Scope.Numberline, Scope.BarModel]);
+            expect(generalView.schema).toEqual({});
+            expect(generalView.spec).not.toHaveProperty('inferredLabels');
+            const allFixtures = [...fixtures.values()].flat();
+            expect(allFixtures).toHaveLength(264);
+            expect(new Set(allFixtures.map(({data}) => data.context.kind)))
+                .toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
+        });
+
+        it.each(projectionProfiles)('%s requires a common-part method without supplying the solved groups', operandProfile => {
+            const profileFixtures = fixtures.get(operandProfile)!;
+            expect(profileFixtures).toHaveLength(operandProfile === 'fraction-by-integer-proper' ? 24 : 48);
+            for (const {data, groupCountProfile, withMultiplication, randomState} of profileFixtures) {
+                setRandomState(randomState);
                 const question = renderToStaticMarkup(generalCore({payload: generalPayload(data, false)}));
                 const solution = renderToStaticMarkup(generalCore({payload: generalPayload(data, true)}));
                 expect(getRandomState()).toBe(randomState);
@@ -91,8 +120,7 @@ describe('fraction division word-problem family separation', () => {
                 expect(solution).toContain(`The numerical model has ${data.model.completeGroups} complete divisor-sized`);
                 expect(solution.match(/ y="219" width="[^"]+" height="27"/g)).toHaveLength(data.model.divisorTicks);
             }
-        }
-        expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
+        });
     });
 
     it('retains the three general targets with thirty-eight exhaustive range/group bindings', () => {

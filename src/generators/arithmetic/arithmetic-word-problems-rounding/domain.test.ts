@@ -14,53 +14,62 @@ afterEach(() => vi.restoreAllMocks());
 const values = (r: RoundingCore) => [r.a, r.b, r.c, r.intermediate, r.answer, r.roundedAnswer];
 
 describe('rounding-story finite cores and monotone proposal intervals', () => {
-    it('retains all old primitive outcomes at every valid source floor, including all1984 special floor20 corners', () => {
-        let all = 0, extra = 0, errors = 0;
+    it.each(roundingOperationProfiles)('retains all old primitive outcomes at every valid source floor for $operations', profile => {
+        let errors = 0;
         const countAtFloor = [0, 0, 0, 0];
-        for (const profile of roundingOperationProfiles) {
-            const rows = roundingCores(profile.operations), lookup = new Map(rows.map(row => [`${row.a}:${row.b}:${row.c}`, row]));
-            expect(lookup.size).toBe(rows.length);
-            all += rows.length;
-            extra += rows.filter(r => r.sourceMinimum === 20).length;
-            // Independent primitive oracle for all four formerly declared nonempty floors.
-            for (const [floorIndex, floor] of [1, 5, 10, 20].entries()) {
-                const first = Math.max(2, floor), divisionLast = Math.max(first, 12), factorLast = Math.max(first, 10);
-                const check = (a: number, b: number, c: number, intermediate: number, answer: number) => {
-                    if (![a, b, c, intermediate, answer].every(n => Number.isInteger(n) && n >= floor && n <= 999999) || answer < Math.max(5, floor)) return;
-                    const evidence = buildRounding({num1: a, num2: b, num3: c, intermediate, answer}, profile.operations);
-                    const old = roundingProposalInterval({...evidence, numberDomain: {min: floor, max: 1000000}});
-                    if (!old) return;
-                    const row = lookup.get(`${a}:${b}:${c}`);
-                    if (!row || row.intermediate !== intermediate || row.answer !== answer
-                        || row.roundingPlace !== evidence.roundingPlace || row.roundedAnswer !== evidence.roundedAnswer
-                        || row.proposalLower > old.lower || old.upper > 1000000) errors++;
-                    countAtFloor[floorIndex]!++;
-                };
-                const sequence = profile.operations.join('-');
-                if (sequence === 'division-division') {
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= divisionLast; c++) check(a * b * c, b, c, a * c, a);
-                } else if (sequence === 'division-addition') {
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= 50; c++) check(a * b, b, c, a, a + c);
-                } else if (sequence === 'division-subtraction') {
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= 50; c++) check((a + c) * b, b, c, a + c, a);
-                } else if (sequence === 'multiplication-division') {
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= factorLast; b++) for (let c = first; c <= factorLast; c++) check(a, b * c, c, a * b * c, a * b);
-                } else if (sequence === 'subtraction-subtraction') {
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= 50; b++) for (let c = first; c <= 50; c++) check(a + b + c, b, c, a + c, a);
-                } else {
-                    const operation = (a: number, b: number, op: string) => op === 'addition' ? a + b : op === 'subtraction' ? a - b : a * b;
-                    for (let a = first; a <= 50; a++) for (let b = first; b <= 50; b++) for (let c = first; c <= 50; c++) {
-                        const intermediate = operation(a, b, profile.operations[0]);
-                        check(a, b, c, intermediate, operation(intermediate, c, profile.operations[1]));
-                    }
+        const rows = roundingCores(profile.operations), lookup = new Map(rows.map(row => [`${row.a}:${row.b}:${row.c}`, row]));
+        expect(lookup.size).toBe(rows.length);
+        // Independent primitive oracle for all four formerly declared nonempty floors.
+        for (const [floorIndex, floor] of [1, 5, 10, 20].entries()) {
+            const first = Math.max(2, floor), divisionLast = Math.max(first, 12), factorLast = Math.max(first, 10);
+            const check = (a: number, b: number, c: number, intermediate: number, answer: number) => {
+                if (![a, b, c, intermediate, answer].every(n => Number.isInteger(n) && n >= floor && n <= 999999) || answer < Math.max(5, floor)) return;
+                const evidence = buildRounding({num1: a, num2: b, num3: c, intermediate, answer}, profile.operations);
+                const old = roundingProposalInterval({...evidence, numberDomain: {min: floor, max: 1000000}});
+                if (!old) return;
+                const row = lookup.get(`${a}:${b}:${c}`);
+                if (!row || row.intermediate !== intermediate || row.answer !== answer
+                    || row.roundingPlace !== evidence.roundingPlace || row.roundedAnswer !== evidence.roundedAnswer
+                    || row.proposalLower > old.lower || old.upper > 1000000) errors++;
+                countAtFloor[floorIndex]!++;
+            };
+            const sequence = profile.operations.join('-');
+            if (sequence === 'division-division') {
+                for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= divisionLast; c++) check(a * b * c, b, c, a * c, a);
+            } else if (sequence === 'division-addition') {
+                for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= 50; c++) check(a * b, b, c, a, a + c);
+            } else if (sequence === 'division-subtraction') {
+                for (let a = first; a <= 50; a++) for (let b = first; b <= divisionLast; b++) for (let c = first; c <= 50; c++) check((a + c) * b, b, c, a + c, a);
+            } else if (sequence === 'multiplication-division') {
+                for (let a = first; a <= 50; a++) for (let b = first; b <= factorLast; b++) for (let c = first; c <= factorLast; c++) check(a, b * c, c, a * b * c, a * b);
+            } else if (sequence === 'subtraction-subtraction') {
+                for (let a = first; a <= 50; a++) for (let b = first; b <= 50; b++) for (let c = first; c <= 50; c++) check(a + b + c, b, c, a + c, a);
+            } else {
+                const operation = (a: number, b: number, op: string) => op === 'addition' ? a + b : op === 'subtraction' ? a - b : a * b;
+                for (let a = first; a <= 50; a++) for (let b = first; b <= 50; b++) for (let c = first; c <= 50; c++) {
+                    const intermediate = operation(a, b, profile.operations[0]);
+                    check(a, b, c, intermediate, operation(intermediate, c, profile.operations[1]));
                 }
             }
         }
         expect(errors).toBe(0);
+        expect(countAtFloor[0]).toBe(rows.filter(row => row.sourceMinimum === 1).length);
+        expect(countAtFloor.every(n => n > 0)).toBe(true);
+    });
+
+    it('retains exact aggregate base and special-floor20 core cardinalities', () => {
+        let all = 0, extra = 0, base = 0;
+        for (const profile of roundingOperationProfiles) {
+            const rows = roundingCores(profile.operations);
+            all += rows.length;
+            for (const row of rows) {
+                if (row.sourceMinimum === 1) base++;
+                if (row.sourceMinimum === 20) extra++;
+            }
+        }
         expect(all).toBe(735348);
         expect(extra).toBe(1984);
-        expect(countAtFloor[0]).toBe(733364);
-        expect(countAtFloor.every(n => n > 0)).toBe(true);
+        expect(base).toBe(733364);
     });
 
     it.each(roundingOperationProfiles)('partitions every full proposal interval exactly for $operations, with valid monotone endpoints and original conditional CDF weights', profile => {

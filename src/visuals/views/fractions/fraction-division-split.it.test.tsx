@@ -34,6 +34,14 @@ type GeneralId = typeof cases[number]['newId'];
 type QuotientId = typeof cases[number]['oldId'];
 type Renderer<T> = (data: T, solution: boolean) => string;
 type Renderers = {general: Renderer<FractionDivisionRelationProblem>; quotient: Renderer<FractionQuotientProblem>};
+const projectionProfiles = ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
+    'fraction-by-integer-proper', 'fraction-by-integer-improper',
+    'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const;
+type ProjectionProfile = typeof projectionProfiles[number];
+type ProjectionFixture = Readonly<{
+    data: FractionDivisionRelationProblem;
+    groupCountProfile: 'zero' | 'positive';
+}>;
 let renderers: Record<GeneralId, Renderers>;
 let generators: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>;
 let views: Awaited<ReturnType<typeof loadViewModelCatalog>>;
@@ -89,26 +97,46 @@ beforeAll(async () => {
 afterAll(() => vi.unstubAllGlobals());
 
 describe('supplied general division model migrations', () => {
-    it.each(cases)('$newId preserves its complete model and both-mode projection across all six profiles', entry => {
-        const view = views.find(candidate => candidate.viewId === entry.newId)!;
-        expect(view.problemType).toBe('FractionDivisionRelationProblem');
-        expect(view.schema).toEqual({});
-        expect(view.generalLabels).toEqual([entry.ability, Scope.ArabicNumerals, Scope.Base10,
-            Scope.Numberline, Scope.BarModel]);
-        expect(view.spec).not.toHaveProperty('inferredLabels');
-        const profiles = ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
-            'fraction-by-integer-proper', 'fraction-by-integer-improper',
-            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const;
-        const contexts = new Set<string>();
-        const dividends = new Set<string>();
-        for (const operandProfile of profiles) for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
-            ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
-            for (const withMultiplication of [false, true]) for (let seed = 0; seed < 4; seed++) {
-                setSeed(`division-model-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
+    describe.each(cases)('$newId model projections', entry => {
+        let fixtures: ReadonlyMap<ProjectionProfile, readonly ProjectionFixture[]>;
+
+        beforeAll(() => {
+            // Generate the original 176 seeded draws once per leaf. Rendering is
+            // partitioned by mathematical profile without sharing test mutations.
+            fixtures = new Map(projectionProfiles.map(operandProfile => {
+                const profileFixtures: ProjectionFixture[] = [];
+                for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
+                    ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
+                    for (const withMultiplication of [false, true]) for (let seed = 0; seed < 4; seed++) {
+                        setSeed(`division-model-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
+                        const {data} = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
+                        profileFixtures.push({data, groupCountProfile});
+                    }
+                }
+                return [operandProfile, Object.freeze(profileFixtures)] as const;
+            }));
+        });
+
+        it('retains its schema and complete context and dividend support', () => {
+            const view = views.find(candidate => candidate.viewId === entry.newId)!;
+            expect(view.problemType).toBe('FractionDivisionRelationProblem');
+            expect(view.schema).toEqual({});
+            expect(view.generalLabels).toEqual([entry.ability, Scope.ArabicNumerals, Scope.Base10,
+                Scope.Numberline, Scope.BarModel]);
+            expect(view.spec).not.toHaveProperty('inferredLabels');
+            const allFixtures = [...fixtures.values()].flat();
+            expect(allFixtures).toHaveLength(176);
+            expect(new Set(allFixtures.map(({data}) => data.context.kind)))
+                .toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
+            expect(new Set(allFixtures.map(({data}) => data.dividend.numerator === 0 ? 'zero' : 'positive')))
+                .toEqual(new Set(['zero', 'positive']));
+        });
+
+        it.each(projectionProfiles)('%s preserves its complete model and both-mode projection', operandProfile => {
+            const profileFixtures = fixtures.get(operandProfile)!;
+            expect(profileFixtures).toHaveLength(operandProfile === 'fraction-by-integer-proper' ? 16 : 32);
+            for (const {data, groupCountProfile} of profileFixtures) {
                 expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
-                contexts.add(data.context.kind);
-                dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
                 for (const solution of [false, true]) {
                     const markup = renderers[entry.newId].general(data, solution);
                     expect(markup).toBe(renderToStaticMarkup(createElement(GeneralFractionDivisionBody,
@@ -125,9 +153,7 @@ describe('supplied general division model migrations', () => {
                     expect(markup.match(/ y="219" width="[^"]+" height="27"/g)).toHaveLength(data.model.divisorTicks);
                 }
             }
-        }
-        expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
-        expect(dividends).toEqual(new Set(['zero', 'positive']));
+        });
     });
 
     it.each(cases)('$newId and $oldId reject the other valid named payload family in both modes', entry => {

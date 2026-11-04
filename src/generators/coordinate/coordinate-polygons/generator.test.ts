@@ -119,9 +119,12 @@ describe('genuine polygon sampling domains, evidence and global ranges', () => {
         }
     });
 
-    it.each(['nonnegative', 'signed'] as const)('samples full %s polygons with proof data, concavity and readable unequal metric scales', signDomain => {
+    it.each((['nonnegative', 'signed'] as const).flatMap(signDomain =>
+        (['geometry-only', 'side-equations'] as const).map(distanceEvidence => ({signDomain, distanceEvidence}))))(
+        'samples full $signDomain polygons/$distanceEvidence with proof data, concavity and readable unequal metric scales',
+        ({signDomain, distanceEvidence}) => {
         const features = new Set<string>();
-        for (const maximum of [20, 100]) for (const distanceEvidence of ['geometry-only', 'side-equations'] as const) {
+        for (const maximum of [20, 100]) {
             for (let seed = 0; seed < 120; seed++) {
                 setSeed(seed);
                 const stub = generator.generate({signDomain, distanceEvidence, range: {min: 0, max: maximum}});

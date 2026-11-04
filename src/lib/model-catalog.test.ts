@@ -1,7 +1,7 @@
 import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, relative, resolve} from 'node:path';
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeAll, beforeEach, describe, expect, it} from 'vitest';
 import {
     clearGenerationCatalogCaches,
     loadGeneratorCatalog,
@@ -59,24 +59,35 @@ afterEach(() => {
 });
 
 describe('model catalogs', () => {
-    it('is the canonical source of full catalog matching semantics', async () => {
-        const [fullGenerators, modelGenerators, fullViews, modelViews] = await Promise.all([
-            loadGeneratorCatalog(),
-            loadGeneratorModelCatalog(),
+    describe('full generator catalog equivalence', () => {
+        let modelGenerators: Readonly<Awaited<ReturnType<typeof loadGeneratorModelCatalog>>>;
+
+        beforeAll(async () => {
+            // The parent beforeEach clears both caches before the independent runtime load.
+            modelGenerators = await loadGeneratorModelCatalog();
+        }, 30_000);
+
+        it('is the canonical source of full generator catalog matching semantics', async () => {
+            const fullGenerators = await loadGeneratorCatalog();
+            expect(modelGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
+                generatorId,
+                generalLabels,
+                labels,
+                problemType
+            }))).toEqual(fullGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
+                generatorId,
+                generalLabels,
+                labels,
+                problemType
+            })));
+        }, 30_000);
+    });
+
+    it('is the canonical source of full view catalog matching semantics', async () => {
+        const [fullViews, modelViews] = await Promise.all([
             loadViewCatalog(),
             loadViewModelCatalog()
         ]);
-        expect(modelGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
-            generatorId,
-            generalLabels,
-            labels,
-            problemType
-        }))).toEqual(fullGenerators.map(({generatorId, generalLabels, labels, problemType}) => ({
-            generatorId,
-            generalLabels,
-            labels,
-            problemType
-        })));
         expect(modelViews.map(({viewId, generalLabels, supportedLabels, problemType}) => ({
             viewId,
             generalLabels,
