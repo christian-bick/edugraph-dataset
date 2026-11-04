@@ -33,7 +33,18 @@ A fresh 4,866-image snapshot passes replay, range, annotation and split checks. 
 conflicts led to the separately reviewed exact-width and equation-task corrections: current source
 verification is 1,547 unchanged targets /2,017 routes /4,825 selections, with only the approved
 six-to-three writer route migration. All 304 new focused tests and their unchanged coverage gates
-pass. Affected regeneration and live VQA remain pending.
+pass. The [affected canonical snapshot](canonical-range-labeling.md#affected-canonical-snapshot-checkpoint-2026-11-04)
+from clean `6aae1dae` is now published as
+`fc0ce99326514fd6b08124643fd3dc3458df0d0295e7cf35f7e50b0bbb34dd70`: 4,866 images in 529 shards,
+334 reused and 195 written. All primary rows replay exactly; 3,899 range proofs across 119
+producers, annotations and splits pass. The graph retains 1,547 targets /2,017 routes, with
+three tuple-allocation advisories still distinct from physical coverage. The image gate finds
+one new `MultiplesOf10` conflict on identical `10+10` Solutions and two identical-label warning
+groups. Its concrete correction proposal preserves 67 routes and refines 114→152 selections;
+132 train /32 validation simulated SSR rows have no annotation or cross-split conflicts.
+This proposal is awaiting approval and is not implemented. Live VQA and full repository
+coverage after the test partitions are running; final VQA/cache, checks and union acceptance
+remain pending. No new range-policy question or full-suite/dataset-acceptance pass is implied.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and

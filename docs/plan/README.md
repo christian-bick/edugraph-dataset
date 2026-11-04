@@ -164,8 +164,18 @@ These items are not newly scheduled by the archive move.
   produces 4,866 images with passing replay/range, annotation and split checks. Two remaining
   image-label conflicts have approved source corrections for exact operand widths and equation-task separation;
   current source verification is 4,825 selections /2,017 routes with all target claims unchanged.
-  All 304 additional focused tests and their unchanged coverage gates pass. Affected regeneration
-  and live VQA remain pending, including regenerated image-collision acceptance.
+  All 304 additional focused tests and their unchanged coverage gates pass. The
+  [affected canonical snapshot](canonical-range-labeling.md#affected-canonical-snapshot-checkpoint-2026-11-04)
+  from clean `6aae1dae` is published as `fc0ce99326514fd6b08124643fd3dc3458df0d0295e7cf35f7e50b0bbb34dd70`:
+  4,866 images /529 shards (334 reused, 195 written). All primary rows replay exactly; 3,899
+  range proofs across 119 producers and the annotation/split gates pass. Its graph retains
+  1,547 targets /2,017 routes, with three tuple-allocation advisories rather than complete
+  physical tuple coverage. Churn is confined to the approved width/writer/presentation work.
+  One new `MultiplesOf10` conflict on identical `10+10` Solutions blocks the image gate;
+  two identical-label duplicate groups remain warnings. The concrete 67-route /114→152-selection
+  correction proposal is awaiting approval and is not implemented. Live VQA and full repository
+  coverage after the test partitions are running; final VQA/cache, check and union acceptance
+  remain pending.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 

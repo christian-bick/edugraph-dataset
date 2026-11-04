@@ -32,8 +32,11 @@ unlabelled multiplication-overflow selection**. The
 records all contract/policy decisions as resolved. Overflow above the largest ontology upper
 bound remains an approved range-presence exception. Ordinary profiles and the source-backed
 local repairs are complete. The original inventory remains historical.
-Stored annotations have now been canonically regenerated, with the subsequent image-label
-corrections awaiting affected regeneration and live VQA. Missing-range findings remain
+Stored annotations and the approved image-label corrections have now been canonically regenerated;
+the [published affected snapshot](#affected-canonical-snapshot-checkpoint-2026-11-04) passes replay,
+range, annotation and split checks, but exposes one further `MultiplesOf10` image-label conflict.
+Its concrete correction proposal awaits approval; live VQA and full repository coverage are running.
+Missing-range findings remain
 report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
 The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
@@ -1499,8 +1502,9 @@ Evidence in the artifact-acceptance directory includes `generation-approved.log`
 `check-fresh-artifact.log`, `range-audit.json`, `range-audit-projector-review.md`,
 `range-audit-advisory-reconciliation.md`, `artifact-fast-audit.json`,
 `fresh-cache-readiness.json`, `width-fix/proposal.md`, `width-fix/law-proof.json` and
-`law-correction-proposal.md` / `.json`. Batch both changes before canonical affected regeneration,
-then rerun image, mathematical, annotation, split and cache gates before live evaluation.
+`law-correction-proposal.md` / `.json`. This snapshot precedes the approved source changes;
+their affected regeneration and remaining acceptance gates are recorded in the
+[published snapshot checkpoint](#affected-canonical-snapshot-checkpoint-2026-11-04).
 
 ### Approved image-label correction verification
 
@@ -1558,14 +1562,60 @@ under coverage. They retain all 704 general-model draws /2,816 SSR calls, 264 wo
 is staged separately from the independently loaded full runtime catalog, with both 30-second
 limits retained. This test-structure verification does not replace the affected production-file
 coverage above. The test-only batch is committed as `e2de6a2a`.
-The complete suite will run alongside network-bound VQA after regeneration.
-Source/native verification does not establish the forthcoming artifact or live VQA result.
+The complete suite is running alongside network-bound VQA after affected regeneration; its
+result remains pending. Source/native verification does not establish final artifact or live
+VQA acceptance; the published snapshot checkpoint below records the current gates.
 
 Evidence includes `after-approved-corrections/source-acceptance.json`,
 `after-approved-corrections/law-width-induced-proof.json`,
 `after-approved-corrections/width-native-proof.json`, `width-fix/expanded-coverage-second/coverage-summary.json`,
 `law-coverage/coverage-summary.json`, `types-corrections-verified.log`,
 `specs-corrections-final.log`, `docs-corrections-final.log` and `test-partitions-coverage-final.log`.
+
+### Affected canonical snapshot checkpoint (2026-11-04)
+
+Canonical affected generation from clean `6aae1dae` completed successfully and published
+`fc0ce99326514fd6b08124643fd3dc3458df0d0295e7cf35f7e50b0bbb34dd70`: **4,866 images in
+529 shards**, with 334 reused and 195 written. Its graph retains **1,547 targets /2,017 routes**.
+The split report retains three tuple-allocation advisories; graph-plan coverage does not imply
+that every matched tuple has a physical sample.
+
+Independent replay reproduces all **4,866 primary rows exactly**. Mathematical checks pass
+all **3,899 range-bearing rows across 119 producers**, separately accounting for 92 algebra
+exclusions, 874 rows outside range obligations and the one approved unlabelled overflow
+product, **1,464,892**. There are no failures or uninspected rows. Annotation checks pass for
+3,912 eligible rows, with 954 outside policy scope and no invalid contexts. All image digests,
+recorded plans, receipts and prepared views agree with the immutable graph. The 3,968 train
+and 898 validation rows have no split leakage or task redundancy.
+
+The image gate remains blocked by **one new conflicting-label group**: the same `10+10=20`
+place-value explanation Solution is labelled `MultiplesOf10` on its legacy route but lacks
+that claim on its general route. Two other identical-image groups have identical labels and
+remain warnings: distributive boxes/vertical Solutions, whose approved equation labels now
+agree, and the existing Grade5/Grade6 unit-sharing inverse Questions.
+
+The exact `cc7ba1…` to `fc0ce9…` churn review finds **57 width image/payload changes**, eight new
+writer identities and eight retired completion identities. All **486 equation-presentation
+changes retain their pixels and mathematical payloads**. There are no unexpected changes
+outside the approved closure. Two changed retry seeds/attempts are independently verified
+valid deduplication shifts, rather than sampler regressions; provenance refreshes are recorded
+separately from mathematical changes.
+
+A concrete, **not yet approved or implemented**, whole-ten correction is recorded in
+`temp/range-artifact-acceptance-2026-11-04/multiples-ten-fix/proposal.md`. Its dry run retains all
+67 routes and refines 114 selections into 152 by truthful primary-operand involvement, while
+preserving the native-domain distinction. Its bounded allocation simulation checks 132 train
+and 32 validation SSR rows with zero conflicting annotations or cross-split collisions.
+These proposed counts are not adopted source or canonical PNG acceptance results.
+
+Live arithmetic-pair VQA and the full repository coverage run after the test partitions remain
+in progress. Final full VQA, cache acceptance, repository checks and union verification remain
+pending; no full-suite or dataset-acceptance pass is claimed. Evidence is under
+`temp/range-artifact-acceptance-2026-11-04/`: `generation-corrections-affected.log` and
+`after-approved-corrections/` reports `artifact-fast-audit.json`, `images-after.json`,
+`annotations-after.json`, `split-after.json`, `range-audit.json`, `snapshot-churn.json`,
+`width-seed-attempt-review.json` and `fresh-cache-readiness.json`. The active full-suite log is
+`full-coverage-after-partitions.log`.
 
 ## Accepted direction
 
