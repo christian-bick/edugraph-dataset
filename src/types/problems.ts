@@ -1745,6 +1745,13 @@ export type UnitEquivalenceSequenceProblem = {
     equivalents: readonly MeasurementUnitEquivalence[];
 };
 
+/** One positive integer equality, with largerValue in 2..9 and the pair's one-unit factor. */
+export type UnitEquivalenceProblem = {
+    kind: 'unit-equivalence';
+    pair: MeasurementConversionPair;
+    equivalent: MeasurementUnitEquivalence;
+};
+
 /** Exact symmetric unit equalities; the consuming view chooses direction and unknowns. */
 export type MeasurementConversionValuesProblem = {
     pair: MeasurementConversionPair;
@@ -1753,7 +1760,7 @@ export type MeasurementConversionValuesProblem = {
 
 export type MeasurementConversionProblem =
     | GenericUnitScaleRelationProblem
-    | UnitEquivalenceSequenceProblem;
+    | UnitEquivalenceProblem;
 
 /**
  * A two-step measurement relation: convert the source quantity into the other
@@ -5647,7 +5654,7 @@ export interface ViewTypeMap {
     'measure-select-tool': MeasurementToolSelectionProblem;
     'measure-unit-scale-relation': GenericUnitCountRelationProblem;
     'measure-conversion-derivation': MeasurementConversionProblem;
-    'measure-conversion-to-smaller': UnitEquivalenceSequenceProblem;
+    'measure-conversion-to-smaller': UnitEquivalenceProblem;
     'measure-conversion-bidirectional': MeasurementConversionValuesProblem;
     'measure-conversion-table': UnitEquivalenceSequenceProblem;
     'measure-conversion-problems': MeasurementConversionStoryProblem;

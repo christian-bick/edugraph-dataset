@@ -8,7 +8,8 @@ import {
     formatUnitEquivalence,
     getMeasurementUnitPresentation,
     isValidMeasurementConversionPair,
-    isValidUnitEquivalenceSequence
+    isValidUnitEquivalenceSequence,
+    isValidUnitEquivalence
 } from './measurement-conversion.ts';
 
 const hourMinute: MeasurementConversionPair = {
@@ -71,5 +72,32 @@ describe('unit-equivalence sequence validation', () => {
         const sparse = [...equivalents];
         delete sparse[2];
         expect(isValidUnitEquivalenceSequence({pair, equivalents: sparse})).toBe(false);
+    });
+});
+
+describe('single unit-equivalence validation', () => {
+    it('accepts every exact native single equality while separating the five-row family', () => {
+        for (let start = 2; start <= 9; start++) {
+            const equivalent = {largerValue: start, smallerValue: start * 60};
+            const single = {kind: 'unit-equivalence' as const, pair: hourMinute, equivalent};
+            const sequence = {pair: hourMinute, equivalents: Array.from({length: 5}, (_, i) =>
+                ({largerValue: start + i, smallerValue: (start + i) * 60}))};
+            expect(isValidUnitEquivalence(single)).toBe(true);
+            expect(isValidUnitEquivalenceSequence(sequence)).toBe(true);
+            expect(isValidUnitEquivalence(sequence as never)).toBe(false);
+            expect(isValidUnitEquivalenceSequence(single as never)).toBe(false);
+            expect(isValidUnitEquivalence({...single, equivalents: sequence.equivalents} as never)).toBe(false);
+            expect(isValidUnitEquivalenceSequence({...sequence, kind: 'unit-equivalence'} as never)).toBe(false);
+        }
+    });
+
+    it('rejects missing, unsafe, nonnative and inconsistent values before rendering', () => {
+        const valid = {kind: 'unit-equivalence' as const, pair: hourMinute, equivalent: {largerValue: 2, smallerValue: 120}};
+        for (const data of [null, {}, {...valid, kind: 'other'}, {...valid, equivalent: undefined},
+            {...valid, pair: {...hourMinute, factor: 16}},
+            ...[0, 1, 10, 2.5, NaN, Number.MAX_SAFE_INTEGER + 1].map(largerValue => ({...valid,
+                equivalent: {largerValue, smallerValue: largerValue * 60}})),
+            ...[119, 120.5, Infinity].map(smallerValue => ({...valid, equivalent: {largerValue: 2, smallerValue}}))])
+            expect(isValidUnitEquivalence(data as never)).toBe(false);
     });
 });

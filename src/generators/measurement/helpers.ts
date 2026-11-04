@@ -46,18 +46,23 @@ const decimalFractionHundredths = [
 export const decimalLargerHundredths: readonly number[] = Array.from({length: 5}, (_, whole) =>
     decimalFractionHundredths.map(fraction => whole * 100 + fraction)).flat();
 
-/** Five consecutive integer quantities, using one seeded draw for the first row. */
-export const buildUnitEquivalenceSequence = (
+/** Five exact consecutive rows from an already selected starting quantity. */
+export const buildUnitEquivalenceSequenceAt = (
     pair: MeasurementConversionPair,
-    draw: () => number = random
+    startValue: number
 ): UnitEquivalenceSequenceProblem => {
-    const startValue = 2 + Math.floor(draw() * 8);
     const equivalents = Array.from({length: 5}, (_, index) => {
         const largerValue = startValue + index;
         return {largerValue, smallerValue: largerValue * pair.factor};
     });
     return {pair, equivalents};
 };
+
+/** Five consecutive integer quantities, using one seeded draw for the first row. */
+export const buildUnitEquivalenceSequence = (
+    pair: MeasurementConversionPair,
+    draw: () => number = random
+): UnitEquivalenceSequenceProblem => buildUnitEquivalenceSequenceAt(pair, 2 + Math.floor(draw() * 8));
 
 /** Two distinct exact equalities; the second draw selects among the remaining candidates. */
 export const buildMeasurementConversionValues = (

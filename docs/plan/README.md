@@ -44,9 +44,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7, Q8, Q9 and Q10, current source gates cover **1,528 normalized targets / 2,000 routes and 4,710 selections**,
-  with 48 range omissions across four producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records four missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
+  After Q1/Q2, Q6, Q7, Q8, Q9, Q10 and Q11, current source gates cover **1,528 normalized targets / 2,000 routes and 4,735 selections**,
+  with 20 range omissions across three producers. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
+  records three missing-facet topics and two already-labelled precision topics covering 34 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -87,6 +87,19 @@ These items are not newly scheduled by the archive move.
   both generators, the comparison leaf and shared renderer/helper have full statement/branch
   coverage. TypeScript and full-check source stages pass; the Q10 checkpoint records the
   unchanged stored-artifact failures separately from source acceptance.
+  Q11's [source verification](canonical-range-labeling.md#q11-source-verification) closes 28
+  further omissions with separate single-equivalence and five-row sequence contracts,
+  preserving all 28 named-unit lineages and the complete 51-route shared measurement union.
+  Independent proofs cover all 112 family payloads and exact one-draw conditional weights
+  across 31 cells. All 1,376 protected source renderings and 368 native named/Q10 renderings
+  remain byte-identical. The 58 control receipts and semantic plans are unchanged; the new
+  named range choices replay exactly through their current receipts.
+  Native browser verification covers 100 images across all five leaves, each captured twice
+  with identical bytes (200 captures), including every named cell and eight shared controls.
+  All 305 focused tests across 16 files and the unchanged nine-file coverage gate pass;
+  both generators and all reported resolver/helper/renderer files have full statement/branch
+  coverage, with the mathematical domain at 96.77% / 96.66%. Full-check source stages pass;
+  the Q11 checkpoint records the existing stored-artifact failures separately.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.

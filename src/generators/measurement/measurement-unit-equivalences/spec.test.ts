@@ -24,7 +24,7 @@ describe('MeasurementUnitEquivalencesGenerator spec integration', () => {
             Scope.NumbersWithoutNegatives, Scope.NumbersWithoutZero
         ]);
         expect(spec.inferredLabels).toBeUndefined();
-        expect(Object.keys(MeasurementUnitEquivalencesGeneratorSchema)).toEqual(['unitPair']);
+        expect(Object.keys(MeasurementUnitEquivalencesGeneratorSchema)).toEqual(['unitPair', 'range']);
         expect(MeasurementUnitEquivalencesGeneratorSchema.unitPair[0]).not.toContain(Scope.IntegerNumbers);
     });
 
@@ -41,7 +41,8 @@ describe('MeasurementUnitEquivalencesGenerator spec integration', () => {
             expect(stub.data).toEqual(reference.data);
             expect(stub.data.pair.id).toBe(pairId);
             expect(stub.data).not.toHaveProperty('numericExamples');
-            expect(new Set(stub.labels)).toEqual(new Set(pairLabels));
+            expect(new Set(stub.labels)).toEqual(new Set(reference.labels));
+            expect(stub.labels).toEqual(expect.arrayContaining([...pairLabels]));
         }
     });
 
@@ -56,7 +57,11 @@ describe('MeasurementUnitEquivalencesGenerator spec integration', () => {
         setSeed('unit-pair-fallback');
         const stub = generateWithLabels(generator, [Ability.ProcedureExecution])!;
         const expected = unitPairCases.find(([, pairId]) => pairId === stub.data.pair.id)!;
-        expect(new Set(stub.labels)).toEqual(new Set(expected[0]));
+        expect(stub.labels).toEqual(expect.arrayContaining([...expected[0]]));
+        const maximum = stub.data.equivalents.at(-1)!.smallerValue;
+        const upper = [100, 120, 1000, 10000, 100000].find(bound => maximum <= bound)!;
+        expect(stub.labels).toContain(Scope[`NumbersSmaller${upper}` as keyof typeof Scope]);
+        expect(stub.labels.includes(Scope.NumbersLarger5)).toBe(stub.data.equivalents[0]!.largerValue >= 5);
         expect(stub.data.equivalents).toHaveLength(5);
     });
 });

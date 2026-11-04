@@ -2,7 +2,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vitest';
 import type {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import type {GenericUnitScaleRelationProblem, MeasurementConversionPair,
-    MeasurementConversionValuesProblem, UnitEquivalenceSequenceProblem} from '../../../types/problems.ts';
+    MeasurementConversionValuesProblem, UnitEquivalenceProblem} from '../../../types/problems.ts';
 import {getMeasurementUnitPresentation, formatUnitEquivalence} from '../../helpers/measurement-conversion.ts';
 import {formatConversionHundredths} from './measure-conversion-helpers.ts';
 import {MeasureConversionToSmallerView, MeasureConversionBidirectionalView,
@@ -18,10 +18,8 @@ const pairs = [
     {id: 'minute-second', quantityKind: 'time', scalingKind: 'factor', largerUnit: 'minute', smallerUnit: 'second', factor: 60}
 ] as const satisfies readonly MeasurementConversionPair[];
 
-const sequence = (pair: MeasurementConversionPair, start = 2): UnitEquivalenceSequenceProblem => ({
-    pair, equivalents: Array.from({length: 5}, (_, index) => ({
-        largerValue: start + index, smallerValue: (start + index) * pair.factor
-    }))
+const single = (pair: MeasurementConversionPair, start = 2): UnitEquivalenceProblem => ({
+    kind: 'unit-equivalence', pair, equivalent: {largerValue: start, smallerValue: start * pair.factor}
 });
 
 function values(pair: MeasurementConversionPair, numberKind: 'integer' | 'decimal'): MeasurementConversionValuesProblem {
@@ -32,7 +30,7 @@ function values(pair: MeasurementConversionPair, numberKind: 'integer' | 'decima
     ]}};
 }
 
-function renderSequence(data: UnitEquivalenceSequenceProblem, isSolutionView: boolean): string {
+function renderSingle(data: UnitEquivalenceProblem, isSolutionView: boolean): string {
     const payload: ViewRenderPayload<'measure-conversion-to-smaller'> = {
         problem: {type: 'measurement', data, labels: []}, viewId: 'measure-conversion-to-smaller',
         targetLabels: [], isSolutionView, seed: 17
@@ -48,7 +46,7 @@ function renderValues(data: MeasurementConversionValuesProblem, isSolutionView: 
     return renderToStaticMarkup(<MeasureConversionBidirectionalView payload={payload} />);
 }
 
-function renderDerivation(data: GenericUnitScaleRelationProblem | UnitEquivalenceSequenceProblem,
+function renderDerivation(data: GenericUnitScaleRelationProblem | UnitEquivalenceProblem,
     isSolutionView: boolean): string {
     const payload: ViewRenderPayload<'measure-conversion-derivation'> = {
         problem: {type: 'measurement', data, labels: []}, viewId: 'measure-conversion-derivation',
@@ -62,9 +60,9 @@ const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').repl
 describe('fixed measurement conversion tasks', () => {
     it.each(pairs)('keeps the one-way task and withholds its answer for $id', pair => {
         for (const start of [2, 9]) {
-            const data = sequence(pair, start);
-            const question = visible(renderSequence(data, false));
-            const solution = visible(renderSequence(data, true));
+            const data = single(pair, start);
+            const question = visible(renderSingle(data, false));
+            const solution = visible(renderSingle(data, true));
             const factor = formatConversionHundredths(pair.factor * 100);
             const result = formatConversionHundredths(start * pair.factor * 100);
             expect(question).toContain('Convert to a smaller unit');
@@ -72,12 +70,12 @@ describe('fixed measurement conversion tasks', () => {
             expect(question).not.toContain(`${start} × ${factor} = ${result}`);
             expect(question).not.toContain('Convert in both directions');
             expect(solution).toContain(`${start} × ${factor} = ${result}`);
-            expect(renderSequence(data, false)).toBe(renderSequence(data, false));
+            expect(renderSingle(data, false)).toBe(renderSingle(data, false));
         }
     });
 
     it.each(pairs)('retains standard-unit derivation evidence for $id', pair => {
-        const data = sequence(pair);
+        const data = single(pair);
         const question = visible(renderDerivation(data, false));
         const solution = visible(renderDerivation(data, true));
         expect(question).toContain('Derive a unit-size relation');
@@ -139,18 +137,18 @@ describe('fixed measurement conversion tasks', () => {
     });
 
     it('requires the fixed leaf payload instead of dispatching on optional examples', () => {
-        const rows = sequence(pairs[0]);
+        const rows = single(pairs[0]);
         const numeric = values(pairs[0], 'decimal');
-        expect(() => renderSequence(numeric as never, false)).toThrow('equivalents');
+        expect(() => renderSingle(numeric as never, false)).toThrow('kind');
         expect(() => renderValues(rows as never, false)).toThrow('numericExamples');
-        expect(() => renderDerivation(numeric as never, false)).toThrow('equivalents');
-        expect(visible(renderSequence({...rows, ...numeric} as never, false))).toContain('Convert to a smaller unit');
-        expect(visible(renderSequence({...rows, ...numeric} as never, false))).not.toContain('Convert in both directions');
+        expect(() => renderDerivation(numeric as never, false)).toThrow('kind');
+        expect(visible(renderSingle({...rows, ...numeric} as never, false))).toContain('Convert to a smaller unit');
+        expect(visible(renderSingle({...rows, ...numeric} as never, false))).not.toContain('Convert in both directions');
     });
 
     it('rejects inconsistent data at every fixed entry before rendering', () => {
-        const rows = sequence(pairs[0]);
-        expect(() => renderSequence({...rows, equivalents: rows.equivalents.slice(1)}, false)).toThrow('must agree');
+        const rows = single(pairs[0]);
+        expect(() => renderSingle({...rows, equivalent: {...rows.equivalent, smallerValue: rows.equivalent.smallerValue + 1}}, false)).toThrow('must agree');
         expect(() => renderDerivation({...rows, pair: {...rows.pair, factor: 100}}, false)).toThrow('must agree');
         expect(() => renderDerivation({largeUnitCount: 4, unitsPerLarge: 2, smallUnitCount: 9}, false)).toThrow('must agree');
         const numeric = values(pairs[5], 'decimal');

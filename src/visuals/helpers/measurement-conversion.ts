@@ -3,7 +3,8 @@ import {
     MeasurementConversionPair,
     MeasurementConversionPairId,
     MeasurementConversionUnitId,
-    UnitEquivalenceSequenceProblem
+    UnitEquivalenceSequenceProblem,
+    UnitEquivalenceProblem
 } from '../../types/problems.ts';
 
 export type MeasurementUnitPresentation = {
@@ -104,6 +105,7 @@ export const getMeasurementUnitPresentation = (
 
 export const isValidUnitEquivalenceSequence = (data: UnitEquivalenceSequenceProblem): boolean => {
     if (!data || !isValidMeasurementConversionPair(data.pair)
+        || 'kind' in data
         || !Array.isArray(data.equivalents) || data.equivalents.length !== 5) return false;
     return Array.from(data.equivalents).every((equivalent, index) => Boolean(equivalent)
         && Number.isSafeInteger(equivalent.largerValue) && equivalent.largerValue > 0
@@ -112,6 +114,15 @@ export const isValidUnitEquivalenceSequence = (data: UnitEquivalenceSequenceProb
         && (index === 0
             ? equivalent.largerValue >= 2 && equivalent.largerValue <= 9
             : equivalent.largerValue === data.equivalents[index - 1]!.largerValue + 1));
+};
+
+/** A single named equality retains the pair's exact one-unit relation and native source domain. */
+export const isValidUnitEquivalence = (data: UnitEquivalenceProblem): boolean => {
+    if (!data || data.kind !== 'unit-equivalence' || 'equivalents' in data
+        || !isValidMeasurementConversionPair(data.pair) || !data.equivalent) return false;
+    const {largerValue, smallerValue} = data.equivalent;
+    return Number.isSafeInteger(largerValue) && largerValue >= 2 && largerValue <= 9
+        && Number.isSafeInteger(smallerValue) && smallerValue === largerValue * data.pair.factor;
 };
 
 export const getQuantityName = (

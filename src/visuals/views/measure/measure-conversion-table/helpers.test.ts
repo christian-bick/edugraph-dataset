@@ -1,13 +1,14 @@
 import {describe, expect, it} from 'vitest';
 import {MeasurementUnitEquivalencesGenerator} from '../../../../generators/measurement/measurement-unit-equivalences/generator.ts';
 import {setSeed} from '../../../../lib/random.ts';
+import {unitEquivalenceRanges} from '../../../../generators/measurement/unit-equivalence-domain.ts';
 import {UnitEquivalenceSequenceProblem} from '../../../../types/problems.ts';
 import {formatTableValue, hasCoherentConversionTable} from './helpers.ts';
 
-const buildEquivalences = (seed: string): UnitEquivalenceSequenceProblem => {
+const buildEquivalences = (seed: string, rangeIndex = 0): UnitEquivalenceSequenceProblem => {
     setSeed(seed);
     const data = new MeasurementUnitEquivalencesGenerator().generate({
-        unitPair: 'kilometer-meter'
+        unitPair: 'kilometer-meter', range: unitEquivalenceRanges('sequence', 'kilometer-meter')[rangeIndex]!
     }).data;
     return data;
 };
@@ -16,7 +17,7 @@ describe('hasCoherentConversionTable', () => {
     it('accepts canonical equivalences across the complete starting range', () => {
         const starts = new Set<number>();
         for (let seed = 0; seed < 100; seed++) {
-            const data = buildEquivalences(`table-${seed}`);
+            const data = buildEquivalences(`table-${seed}`, seed % 3);
             starts.add(data.equivalents[0]!.largerValue);
             expect(hasCoherentConversionTable(data)).toBe(true);
         }

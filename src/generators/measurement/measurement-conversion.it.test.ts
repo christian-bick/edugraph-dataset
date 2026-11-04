@@ -8,8 +8,9 @@ import {createLabelDependencyEvaluator} from '../../lib/label-dependencies.ts';
 
 const expectedViews = new Map([
     ['measurement-unit-equivalences', [
-        'measure-conversion-derivation', 'measure-conversion-to-smaller', 'measure-conversion-table'
+        'measure-conversion-table'
     ]],
+    ['measurement-unit-equivalence', ['measure-conversion-derivation', 'measure-conversion-to-smaller']],
     ['measurement-conversion-values', ['measure-conversion-bidirectional']],
     ['measurement-unit-scale', ['measure-conversion-derivation']],
     ['measurement-unit-count-relations', ['measure-unit-scale-relation']]
@@ -38,7 +39,7 @@ describe('unit-relation payload contracts', () => {
         const viewIds = new Set([...expectedViews.values()].flat());
         const generators = generatorCatalog.filter(generator => expectedViews.has(generator.generatorId));
         const views = viewCatalog.filter(view => viewIds.has(view.viewId));
-        expect(generators).toHaveLength(4);
+        expect(generators).toHaveLength(5);
         expect(views).toHaveLength(5);
 
         // No ontology precondition is needed to distinguish these payload families.
@@ -65,7 +66,7 @@ describe('unit-relation payload contracts', () => {
             loadConversionCatalog(), loadMatchingTargets('ccss')
         ]);
         const conversionGenerators = generators.filter(generator =>
-            ['measurement-unit-equivalences', 'measurement-conversion-values'].includes(generator.generatorId));
+            ['measurement-unit-equivalences', 'measurement-unit-equivalence', 'measurement-conversion-values'].includes(generator.generatorId));
         const families = [
             '4.MD.A.1-relative-unit-sizes',
             '4.MD.A.1-convert-larger-to-smaller',
@@ -90,11 +91,9 @@ describe('unit-relation payload contracts', () => {
                 expect(evaluation.conflicts).toEqual([]);
                 expect(evaluation.assessments.filter(assessment =>
                     assessment.status === 'missing' && assessment.facet !== 'range')).toEqual([]);
-                if (tuple.generatorId === 'measurement-conversion-values') {
-                    expect(evaluation.assessments.filter(assessment => assessment.status === 'missing')).toEqual([]);
-                }
+                expect(evaluation.assessments.filter(assessment => assessment.status === 'missing')).toEqual([]);
             }
         }
-        expect(selectionCount).toBe(80);
+        expect(selectionCount).toBe(105);
     }, 30_000);
 });

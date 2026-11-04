@@ -4,7 +4,7 @@ import {ViewRenderPayload} from '../../../types/ml-engine.ts';
 import {
     GenericUnitScaleRelationProblem,
     MeasurementConversionValuesProblem,
-    UnitEquivalenceSequenceProblem
+    UnitEquivalenceProblem
 } from '../../../types/problems.ts';
 import {
     formatFactorInstruction,
@@ -14,7 +14,7 @@ import {
     formatUnitEquivalence,
     getMeasurementUnitPresentation,
     getQuantityName,
-    isValidUnitEquivalenceSequence,
+    isValidUnitEquivalence,
     MeasurementUnitPresentation
 } from '../../helpers/measurement-conversion.ts';
 import {validateProblemData, ViewValidationError} from '../../helpers/validation.ts';
@@ -43,7 +43,7 @@ const UnitCard = ({unit, role}: {
 );
 
 const UnitPair = ({data}: {
-    data: Pick<UnitEquivalenceSequenceProblem, 'pair'>;
+    data: Pick<UnitEquivalenceProblem, 'pair'>;
 }) => (
     <div className="grid grid-cols-[1fr_76px_1fr] items-center gap-3">
         <UnitCard
@@ -128,13 +128,13 @@ const GenericUnitScale = ({data, isSolutionView}: {
 };
 
 const RelativeUnitSize = ({data, isSolutionView}: {
-    data: UnitEquivalenceSequenceProblem;
+    data: UnitEquivalenceProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
     const quantity = getQuantityName(data.pair.quantityKind);
-    const equivalent = data.equivalents[0]!;
+    const equivalent = data.equivalent;
     const exampleEquation = formatMeasurementEquation(
         equivalent.largerValue,
         equivalent.smallerValue,
@@ -191,12 +191,12 @@ const RelativeUnitSize = ({data, isSolutionView}: {
 };
 
 const LargerToSmaller = ({data, isSolutionView}: {
-    data: UnitEquivalenceSequenceProblem;
+    data: UnitEquivalenceProblem;
     isSolutionView: boolean;
 }) => {
     const larger = getMeasurementUnitPresentation(data.pair.largerUnit);
     const smaller = getMeasurementUnitPresentation(data.pair.smallerUnit);
-    const equivalent = data.equivalents[0]!;
+    const equivalent = data.equivalent;
     const source = formatMeasurement(equivalent.largerValue, data.pair.largerUnit);
     const converted = formatMeasurement(equivalent.smallerValue, data.pair.smallerUnit);
     const sourceText = formatStandardNumeral(equivalent.largerValue);
@@ -374,8 +374,8 @@ export const MeasureConversionDerivationView = ({payload}: {
             </ConversionFrame>
         );
     }
-    validateProblemData(viewId, data, ['pair', 'equivalents']);
-    if (!isValidUnitEquivalenceSequence(data)) {
+    validateProblemData(viewId, data, ['kind', 'pair', 'equivalent']);
+    if (!isValidUnitEquivalence(data)) {
         throw new ViewValidationError(viewId, 'The unit pair, scale factor, and equivalent quantities must agree.');
     }
     const prompt = `Use the equivalent ${getQuantityName(data.pair.quantityKind)} to determine how many ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural} equal 1 ${getMeasurementUnitPresentation(data.pair.largerUnit).singular}.`;
@@ -392,11 +392,11 @@ export const MeasureConversionToSmallerView = ({payload}: {
 }) => {
     const viewId = 'measure-conversion-to-smaller';
     const data = payload.problem.data;
-    validateProblemData(viewId, data, ['pair', 'equivalents']);
-    if (!isValidUnitEquivalenceSequence(data)) {
+    validateProblemData(viewId, data, ['kind', 'pair', 'equivalent']);
+    if (!isValidUnitEquivalence(data)) {
         throw new ViewValidationError(viewId, 'The unit pair, scale factor, and equivalent quantities must agree.');
     }
-    const prompt = `Convert ${formatMeasurement(data.equivalents[0]!.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
+    const prompt = `Convert ${formatMeasurement(data.equivalent.largerValue, data.pair.largerUnit)} to ${getMeasurementUnitPresentation(data.pair.smallerUnit).plural}.`;
     return (
         <ConversionFrame title="Convert to a smaller unit" prompt={prompt}>
             <div className="mt-5"><UnitPair data={data} /></div>

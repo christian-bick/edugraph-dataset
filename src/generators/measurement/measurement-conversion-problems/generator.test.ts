@@ -9,6 +9,7 @@ import type {
 } from '../../../types/problems.ts';
 import {measurementConversionPairSeeds} from '../helpers.ts';
 import {MeasurementUnitEquivalencesGenerator} from '../measurement-unit-equivalences/generator.ts';
+import {unitEquivalenceRanges} from '../unit-equivalence-domain.ts';
 import {MeasurementConversionProblemsGenerator} from './generator.ts';
 import {conversionStoryRangeProfiles, conversionStoryTuples} from './numeric-domain.ts';
 
@@ -72,7 +73,7 @@ describe('MeasurementConversionProblemsGenerator', () => {
             const seedPair = measurementConversionPairSeeds[unitPair];
             expect(Object.isFrozen(seedPair)).toBe(true);
             setSeed(`shared-pair-${unitPair}`);
-            const sequence = sequenceGenerator.generate({unitPair}).data;
+            const sequence = sequenceGenerator.generate({unitPair, range: unitEquivalenceRanges('sequence', unitPair)[0]!}).data;
             setSeed(`shared-pair-${unitPair}`);
             const story = generator.generate({unitPair, numberKind: 'integer', range: rangesFor(unitPair, 'integer')[0]!.range}).data;
             expect(sequence.pair).toEqual(seedPair);

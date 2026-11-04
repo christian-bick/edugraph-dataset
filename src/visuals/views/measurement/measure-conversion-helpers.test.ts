@@ -5,6 +5,7 @@ import {MeasurementUnitEquivalencesGenerator} from '../../../generators/measurem
 import {MeasurementUnitScaleGenerator} from '../../../generators/measurement/measurement-unit-scale/generator.ts';
 import {setSeed} from '../../../lib/random.ts';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {unitEquivalenceRanges} from '../../../generators/measurement/unit-equivalence-domain.ts';
 import {MeasurementConversionPairId, MeasurementConversionValuesProblem} from '../../../types/problems.ts';
 import {isValidUnitEquivalenceSequence} from '../../helpers/measurement-conversion.ts';
 import {
@@ -22,7 +23,7 @@ const pairIds: MeasurementConversionPairId[] = [
 describe('measure-conversion validation', () => {
     it.each(pairIds)('validates the distinct sequence and numeric contracts for %s', unitPair => {
         setSeed(unitPair);
-        const sequence = new MeasurementUnitEquivalencesGenerator().generate({unitPair}).data;
+        const sequence = new MeasurementUnitEquivalencesGenerator().generate({unitPair, range: unitEquivalenceRanges('sequence', unitPair)[0]!}).data;
         expect(isValidUnitEquivalenceSequence(sequence)).toBe(true);
         expect(isValidMeasurementConversionValues(sequence as never)).toBe(false);
         for (const numericProfile of ['integer', 'decimal'] as const) {

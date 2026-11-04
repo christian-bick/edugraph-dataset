@@ -12,17 +12,18 @@ records the implementation and source verification scope. The approved Q6
 the existing producer with [shared part-count ranges](#q8-fraction-equivalence-part-counts).
 Q9 separates [fractional-scale relations and whole-number analogies](#q9-fractional-scale-relation-and-analogy-contracts).
 Q10 separates [generic unit counts and scale-factor derivation](#q10-source-verification).
+Q11 separates [single named-unit equivalences and five-row sequences](#q11-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9 and Q10 decision batches also pass their focused and independent source checks.
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10 and Q11 decision batches also pass their focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets / 2,000 routes and 4,710 complete selections**, with **48 range-presence
-omissions across four producers** remaining. The
+**1,528 normalized targets / 2,000 routes and 4,735 complete selections**, with **20 range-presence
+omissions across three producers** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records six remaining contract/policy questions, including two already-labelled precision topics.
+records five remaining contract/policy questions, including two already-labelled precision topics.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes, and the range gate remains
 report-only. Source readiness and dataset acceptance remain separate gates.
@@ -614,6 +615,116 @@ regeneration and independent VQA acceptance remain unclaimed.
 Evidence is under `temp/range-decisions/batch6-q10/` (`baseline-summary.json`,
 `verification-after.json`, `source-audit.json` and `renders/`) and
 `temp/spec-plans/ccss/range-q10-2026-11-04/`.
+
+## Q11 single-equivalence and five-row contracts
+
+Approved 2026-11-04 after Q10, from `ebb35553`. Separate one named-unit equality from
+five consecutive equalities, preserving every unit pair, original starting value and task.
+A single conversion from seven kilometers reaches 7,000 meters, while the five-row sequence
+starting there reaches 11,000 meters. The two single-equivalence consumers both involve the
+one-unit relation: it is given in conversion and derived in the relation task. Their relevant
+quantities are `1`, the unit factor, the larger-unit value and its equivalent smaller-unit value.
+The table uses the factor and all five larger/smaller values. Its instruction to complete two
+blank entries counts response positions rather than assessed measurement quantities; likewise,
+the column count is layout metadata. Preserve those instructions without treating them as
+measurement operands or results. This follows the existing incidental-layout exclusion, not
+a new interpretation of range bounds.
+
+| Production consumer | Mathematical contract and adoption | Preservation check |
+| --- | --- | --- |
+| Named arm of `measure-conversion-derivation` | Adopt `measurement-unit-equivalence` / `UnitEquivalenceProblem`, with nominal kind, named pair and one exact `equivalent` | Seven source routes; all seven unit pairs and eight starting values, both modes; same one-unit factor derivation |
+| `measure-conversion-to-smaller` | Adopt the same single-equivalence family | Fourteen source routes; same given one-unit relation, larger-to-smaller calculation, unknown and solution |
+| `measure-conversion-table` | Retain `measurement-unit-equivalences` / `UnitEquivalenceSequenceProblem`, with the complete five-row sequence | Seven source routes; all 56 original sequences, both withheld entries and both modes unchanged |
+| Generic scale-factor and count-relation arms, numeric bidirectional conversions and conversion stories | Retain their precise current types and producers | All shared-union controls, including the Q10 families and integer/decimal and directional arms |
+
+Define `UnitEquivalenceProblem = {kind: 'unit-equivalence', pair, equivalent}` with exact
+positive integer equality, native larger value 2..9 and a supported named unit pair. Replace
+only the named arm in `MeasurementConversionProblem` with that type, retaining its generic
+scale-factor arm. The table sequence remains a separate type and producer. Establish types,
+`ViewTypeMap` and minimum producer/consumer adoption through a passing serial typecheck before
+independent role work (IMPL-8). All typed and runtime family boundaries must agree; do not
+reject valid mathematical outcomes to simplify labeling (SPEC-G3, IMPL-G6, IMPL-V11).
+
+The original generator uses one uniform draw for a starting larger-unit value in 2..9.
+Each family retains that draw count and the exact conditional uniform distribution within
+its selected range cell, without rejection sampling. Preserve all 56 native pair/start states
+in each family. The accepted range-selection direction permits a changed global mixture and
+seeded draw results. Unit choices and their existing Area/Scope bundles remain unchanged.
+
+The finite quantity review predicts 11 single-equivalence unit-pair/range cells and 20 table
+cells. Single equivalences have no positive lower because they involve one. Table starts 2..4
+have no positive lower, while starts 5..9 support lower5. The upper witness uses the single
+converted value or the last converted row, respectively, and includes the supplied factor.
+All 28 named-unit routes should remain, growing from 28 to 53 complete selections. Expected
+global selections are 4,735, with 20 remaining omissions across three producers and five decision
+topics, including the same two already-labelled precision topics. Verify these predictions
+against fresh matching and an empty-snapshot source audit; do not change targets or ontology.
+
+Capture the protected clean baseline before source edits. Verify all native states, exact
+conditional probabilities, direct/planned configuration, receipts/replay, one-draw continuation,
+complete source lineages and identical rendering for identical mathematics. Canonical dataset
+regeneration and independent VQA remain separate acceptance gates.
+
+### Q11 source verification
+
+The serial shared-type/consumer gate passes before independent verification (IMPL-8).
+All 28 named-unit source target/view lineages remain: 21 single-consumer routes migrate to
+`measurement-unit-equivalence`, and seven table routes retain `measurement-unit-equivalences`.
+Matching records exactly 21 added/21 removed approved producer-pair substitutions and seven
+retained-table generation-plan changes, with no target additions/removals, claim edits,
+disposition changes or unmatched targets. Named selections grow 28→53; the complete shared
+measurement union retains all 51 routes and grows 86→111 selections. Global source coverage
+is 1,528 normalized targets / 2,000 routes / 4,735 complete selections.
+
+The empty-snapshot source dependency audit closes all 28 Q11 range omissions, leaving 20
+across three producers. Non-range omissions, conflicts, contract errors, incomplete tuples,
+invalid contexts and pending/invalid inference remain zero; all 119 existing inference
+selections resolve exhaustively. Five decision topics remain, including the same two precision
+topics covering 34 already-labelled routes.
+
+The independent finite oracle verifies all 112 family-specific payload projections and exact
+conditional probabilities across 31 unit-pair/range cells: 11 single-equivalence and 20 table
+cells. It checks 224 sampler intervals/left endpoints and reaches every state across 235 seeded
+draws with exact one-draw PRNG continuation. All 53 named selections pass 424 planned draws,
+direct resolution and exact replay of their current receipts, which include the new range
+choices. The 23 shared control routes retain all 58 selections, with byte-identical baseline
+receipts and semantic plans, configurations, labels, payloads and PRNG continuation across
+464 draws. Operational input hashes refresh for source provenance without changing those
+control semantic plans.
+
+All 448 protected named source renderings and 928 control source renderings are byte-identical.
+The 336 renderings of all 56 native named sequences remain identical through the single-row
+projections and complete tables; all 32 native Q10 control renderings also remain unchanged.
+The original full-sequence helper preserves all 56 seeded payloads and one-draw continuations.
+The complete five-producer/five-view nominal admission matrix and all 50 runtime family/view/mode
+checks pass. No task wording or pixels change for identical mathematics.
+
+Native browser verification covers all 42 named unit-pair/range/consumer cells plus eight
+control selections: six Q10 generic cells and both numeric bidirectional kinds. Across all
+five leaves, 100 Question/Solution images each produce identical repeated captures (200
+captures), without browser errors or error cards. Visual inspection confirms the single
+7 km→7,000 m conversion/derivation against the table's 7..11 km sequence reaching 11,000 m, with
+unchanged tasks and unknowns. This source smoke check is separate from canonical dataset
+regeneration and independent VQA acceptance.
+
+Focused coverage passes all 305 tests across 16 files in 16.44 seconds, including the unchanged
+nine-file coverage gate. Both generators, the shared profile resolver factory, generator and
+visual helpers, both renderers and the conversion validation helper have 100% statement /
+100% branch coverage. The mathematical domain has 96.77% / 96.66%; overall affected-code
+coverage is 99.61% / 99.59%, with 100% function coverage. No exclusions, timeout changes or
+threshold changes are introduced.
+
+The first five source stages of full `npm run check` pass, including types, generator/view
+contracts, labels, documentation and source standards. Only the existing stored-artifact
+stages fail on the unchanged local 1,944-row dataset: missing recorded generation plans/receipts
+fail split integrity, and strict annotation validation reports 4,006 failures. The current
+stored audit has 1,396 eligible rows and 2,296 missing annotation-facet assessments, with zero
+conflicts or incomplete tuples. These artifact failures remain separate from source acceptance;
+canonical regeneration and independent VQA acceptance are not claimed.
+
+Evidence is under `temp/range-decisions/batch7-q11/` (`baseline-summary.json`,
+`verification-after.json`, `source-audit.json` and `renders/`) and
+`temp/spec-plans/ccss/range-q11-2026-11-04/`.
 
 ## Accepted direction
 

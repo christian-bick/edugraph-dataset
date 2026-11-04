@@ -13,7 +13,7 @@ import {generatePlannedDraw} from '../../lib/planned-generation.ts';
 import * as randomModule from '../../lib/random.ts';
 import {loadMatchingTargets} from '../../lib/spec-validator.ts';
 import type {GenericUnitCountRelationProblem, GenericUnitScaleRelationProblem, MeasurementConversionPair,
-    MeasurementConversionStoryProblem, MeasurementConversionValuesProblem, UnitEquivalenceSequenceProblem} from '../../types/problems.ts';
+    MeasurementConversionStoryProblem, MeasurementConversionValuesProblem, UnitEquivalenceSequenceProblem, UnitEquivalenceProblem} from '../../types/problems.ts';
 import {ViewValidationError} from '../../visuals/helpers/validation.ts';
 import {MeasureConversionTableCore} from '../../visuals/views/measure/measure-conversion-table-view.tsx';
 import {MeasureConversionBidirectionalView, MeasureConversionDerivationView, MeasureConversionToSmallerView} from '../../visuals/views/measurement/measure-conversion-view.tsx';
@@ -21,13 +21,13 @@ import {MeasurementUnitCountRelationsGenerator} from './measurement-unit-count-r
 import {MeasurementUnitScaleGenerator} from './measurement-unit-scale/generator.ts';
 
 const countId = 'measurement-unit-count-relations', factorId = 'measurement-unit-scale';
-const namedId = 'measurement-unit-equivalences', numericId = 'measurement-conversion-values', storyId = 'measurement-conversion-problems';
+const namedId = 'measurement-unit-equivalences', singleId = 'measurement-unit-equivalence', numericId = 'measurement-conversion-values', storyId = 'measurement-conversion-problems';
 const countView = 'measure-unit-scale-relation', factorView = 'measure-conversion-derivation';
 const smallerView = 'measure-conversion-to-smaller', tableView = 'measure-conversion-table';
 const numericView = 'measure-conversion-bidirectional', storyView = 'measure-conversion-problems';
-const generatorIds = [countId, factorId, namedId, numericId, storyId];
+const generatorIds = [countId, factorId, namedId, singleId, numericId, storyId];
 const viewIds = [countView, factorView, smallerView, tableView, numericView, storyView];
-const validPairs = [[countId, countView], [factorId, factorView], [namedId, factorView], [namedId, smallerView],
+const validPairs = [[countId, countView], [factorId, factorView], [singleId, factorView], [singleId, smallerView],
     [namedId, tableView], [numericId, numericView], [storyId, storyView]] as const;
 const lineages = [
     ['2.MD.A.2-unit-scale-relation~bcfa4087', countId, countView, 4],
@@ -69,6 +69,8 @@ const pairs = [
 ] as const satisfies readonly MeasurementConversionPair[];
 const sequence = (pair: MeasurementConversionPair): UnitEquivalenceSequenceProblem => ({pair,
     equivalents: [2, 3, 4, 5, 6].map(largerValue => ({largerValue, smallerValue: largerValue * pair.factor}))});
+const single = (pair: MeasurementConversionPair): UnitEquivalenceProblem => ({kind: 'unit-equivalence', pair,
+    equivalent: {largerValue: 2, smallerValue: 2 * pair.factor}});
 function numeric(pair: MeasurementConversionPair, decimal: boolean): MeasurementConversionValuesProblem {
     const equality = (largerHundredths: number) => ({largerHundredths, smallerHundredths: largerHundredths * pair.factor});
     return {pair, numericExamples: {numberKind: decimal ? 'decimal' : 'integer',
@@ -110,7 +112,7 @@ const visible = (markup: string): string => markup.replace(/<[^>]*>/g, ' ').repl
     .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
 describe('unit count comparison and factor derivation contract integration', () => {
-    it('keeps all seven nominal pairs across five producers and six leaves', () => {
+    it('keeps all seven nominal pairs across six producers and six leaves', () => {
         expect(buildCompatibleModulePairIndex(generators, views).orderedPairs.map(pair => `${pair.generator.generatorId}#${pair.view.viewId}`).sort())
             .toEqual(validPairs.map(([generator, view]) => `${generator}#${view}`).sort());
         expect(tuples.map(tuple => `${tuple.target.id}#${tuple.generatorId}#${tuple.viewId}`).sort())
@@ -196,7 +198,7 @@ describe('unit count comparison and factor derivation contract integration', () 
 
     it.each(generatorIds)('enforces both-mode runtime acceptance for the complete %s consumer family', id => {
         const data = id === countId ? fixture(native[0]!, false) : id === factorId ? fixture(native[0]!, true)
-            : id === namedId ? sequence(pairs[0]) : id === numericId ? numeric(pairs[0], false) : story(pairs[0], false, 'larger');
+            : id === namedId ? sequence(pairs[0]) : id === singleId ? single(pairs[0]) : id === numericId ? numeric(pairs[0], false) : story(pairs[0], false, 'larger');
         for (const viewId of viewIds) for (const solution of [false, true]) {
             if (validPairs.some(([generator, view]) => generator === id && view === viewId)) expect(() => render(viewId, data, solution)).not.toThrow();
             else expect(() => render(viewId, data, solution)).toThrow(ViewValidationError);
@@ -206,7 +208,7 @@ describe('unit count comparison and factor derivation contract integration', () 
     it.each(pairs)('preserves every named-unit, numeric and story arm for $id', pair => {
         const data = sequence(pair);
         for (const solution of [false, true]) {
-            const derivation = render(factorView, data, solution), smaller = render(smallerView, data, solution), table = render(tableView, data, solution);
+            const derivation = render(factorView, single(pair), solution), smaller = render(smallerView, single(pair), solution), table = render(tableView, data, solution);
             expect(derivation).toContain('Common-quantity evidence');
             expect(derivation.includes('Unresolved one-unit scale factor')).toBe(!solution);
             expect(smaller).toContain('Convert to a smaller unit');
