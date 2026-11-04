@@ -156,12 +156,12 @@ These items are not newly scheduled by the archive move.
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
   The [artifact follow-up](canonical-range-labeling.md#artifact-acceptance-2026-11-04) corrects eight
-  representation producers in three commits;395 focused tests,19 coverage-file gates and
-  TypeScript pass. Its candidate source has4,810 selections /2,037 routes, including13 newly
-  exposed decimal matches in two integer-intended comparison families. The first full render
-  also found10 unsupported multiplication/division renders in the object-operation view.
-  The proposed source/view declaration corrections require confirmation; no new snapshot or
-  live VQA result is accepted yet.
+  representation producers in three commits. Both additional source/view declaration corrections
+  are explicitly approved and applied: integer scope in two comparison families and the object
+  renderer's existing supported-operation boundary. All 442 focused tests pass, with the earlier
+  19 coverage-file gates retained. Final source coverage is 4,791 selections /2,020 routes /1,547
+  normalized targets, including the explicit 14-target ID migration. No new snapshot or live VQA
+  result is accepted yet; canonical regeneration follows these verified repairs.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 

@@ -24,11 +24,12 @@ route into four bounded selections and one unlabelled overflow selection. All de
 are resolved; the approved overflow gap and dataset acceptance remain visible.
 
 The later [artifact follow-up](canonical-range-labeling.md#artifact-acceptance-2026-11-04)
-corrects eight representation producers under these policies and records395 passing focused
-tests plus coverage and TypeScript acceptance. Dataset publication/VQA remains pending two
-declaration corrections: unsupported operations admitted to the object-operation view and
-missing integer scopes in two comparison source families. The candidate source count and
-the13 exposed decimal matches are recorded separately from the Q4 checkpoint above.
+corrects eight representation producers under these policies. Both declaration corrections
+are approved and applied: the object view's supported-operation boundary and integer scopes
+in two comparison source families. All 442 focused tests pass; source coverage is now 1,547
+normalized targets /2,020 routes /4,791 selections. The 14 approved target-ID migrations and
+13 exposed decimal matches are recorded separately from the Q4 checkpoint above. Canonical
+publication and VQA remain in progress.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and

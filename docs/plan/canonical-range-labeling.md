@@ -36,9 +36,9 @@ Stored annotations have not been regenerated for these range changes. Missing-ra
 remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
 The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
-producers and records a candidate 4,810 selections /2,037 routes. Its 13 newly exposed decimal
-comparison routes and the object-operation view's unsupported matches require declaration review
-before dataset acceptance; the Q4 checkpoint above remains historical.
+producers and two approved declaration gaps. Current source verification covers 4,791 selections
+/2,020 routes /1,547 normalized targets; the Q4 checkpoint above remains historical. Dataset
+regeneration and independent VQA acceptance are still in progress.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -1377,8 +1377,9 @@ The first complete canonical render attempt produced 4,860 successful images and
 were multiplication/division payloads admitted to a view whose actual object renderer supports
 only nonnegative addition/subtraction within10. A read-only proposed compatibility correction
 removes exactly four invalid pairings, retains every target and its other working views, and
-leaves all existing addition/subtraction plans unchanged. The view-spec change is awaiting the
-user confirmation required by the fix-spec workflow. Live VQA has not started on the failed stage.
+leaves all existing addition/subtraction plans unchanged. The user explicitly approved this
+compatibility correction and it is applied without changing the renderer, capabilities or
+checklist. Live VQA has not started on the failed stage.
 
 The 13 newly exposed decimal comparison routes reveal a second declaration gap. The two source
 builders `K.CC.C.7-compare-numerals` and `2.NBT.A.4-compare-three-digit` omit `IntegerNumbers`.
@@ -1388,9 +1389,9 @@ Their broad labels therefore admit the corrected decimal producer. The
 Grade2 domain100..999; this is not intended decimal practice. Keep the truthful decimal producer
 capabilities. The proposed precision correction adds the missing integer scope at the two
 source builders, with explicit target-ID migration and preservation of their integer routes.
-No production target has been edited; impact evidence and the prospective patch are prepared
-under `temp/spec-plans/ccss/integer-comparison-precision/`. This target-declaration correction
-also requires user confirmation before application (SPEC-2, TSPEC-13).
+The user explicitly approved the precision correction (SPEC-2, TSPEC-13); only those two scope
+labels are added to the production builders. Impact evidence and the reviewed patch remain
+under `temp/spec-plans/ccss/integer-comparison-precision/`.
 
 The read-only precision proposal passes patch applicability and full raw/normalized matching.
 It changes exactly two builder label lists: raw count 1,595, normalized count 1,547 and 48
@@ -1399,9 +1400,31 @@ Routes fall 2,037→2,024 solely by removing the 13 unintended decimal pairs. Ev
 `comparison#numbers-compare` route remains, with the same 16 bindings and 128 same-seed
 configuration/annotation/math and pre/post-draw PRNG controls under the explicit ID mapping.
 The reviewable proposal is `temp/spec-plans/ccss/integer-comparison-precision/plan.md`.
-The separate object-view
-proposal would then remove its four unsupported routes; neither prospective correction has
-been applied.
+The object-view correction removes its four unsupported routes as separately approved.
+
+### Approved declaration verification
+
+After both corrections, the complete source gate passes with **1,547 normalized targets /2,020
+routes /4,791 selections**. Raw count 1,595 and 48 deduplications remain unchanged. All 14 target
+ID/label migrations match the approved map; all other target claims remain exact. Relative to
+the Q4 checkpoint, only the four unsupported object-view routes are removed, with 4,685
+unaffected selection semantics/annotations exact, 37 expected plan changes and 1,983 unchanged
+plans. Relative to the representation candidate, all 4,791 retained selections remain exact
+under the ID mapping; only the 13 exposed decimal selections and six unsupported operation
+selections are removed. All 14 intended integer routes, 16 bindings and 128 same-seed
+payload/annotation/config/replay and post-draw PRNG controls pass.
+
+The bounded production-target regression suite passes all 16 cases. The object-view suite
+passes all 31 cases, including supported zero/endpoint10 payloads in both modes, rejection of
+unsupported selected domains, broad-target fallback, all eight intended K/Grade1 lineages and
+continued alternate-view coverage for the four Grade3 targets. These bring focused acceptance
+to 442 tests across 41 files. No mathematical, rendered or checklist contract was weakened.
+Final source evidence is `source-audit-approved.json`, `matching-after-approved.json` and
+`source-matching-approved.json` in the artifact-acceptance folder. The configured Gemini model
+also passed an authenticated availability check before the live VQA phase.
+Final TypeScript and the complete generator/view contract audit pass after these declarations.
+The integer correction is committed as `04151500`; the object-view boundary and its 31 tests
+are committed as `8a31e6a4`. Both preserve their existing mathematical/rendering implementations.
 
 ## Accepted direction
 
