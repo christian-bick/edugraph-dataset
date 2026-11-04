@@ -1,2 +1,2 @@
 - **Identity:** A clearly bounded collection of distinct, non-overlapping objects is presented for counting and explaining why the counting method gives the total.
-- **Modes:** Question Mode leaves the total and explanation unanswered and requests the count in digits. Solution Mode reveals the total and explains the one-to-one count and final counting number; an empty collection is explained as zero.
+- **Modes:** Question Mode leaves the total and explanation unanswered and requests the count in digits. Solution Mode reveals the total and explains the one-to-one count and final counting number.

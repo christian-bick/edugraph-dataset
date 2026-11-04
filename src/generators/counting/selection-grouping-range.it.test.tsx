@@ -18,40 +18,71 @@ import {CountingSelectionGenerator} from './counting-selection/generator.ts';
 import {ParityGroupingGenerator} from './parity-grouping/generator.ts';
 
 describe('selection and grouping canonical quantity contracts', () => {
-    it('projects all207 requested/supply pairs in every arrangement and all20 grouping counts in both modes', () => {
+    const arrangements = [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement] as const;
+    const selectionCases = selectionCountingProfiles.flatMap(({range}) => arrangements.map(arrangement => ({
+        name: `${range.min}..${range.max}, ${arrangement.split('/').at(-1)}`,
+        range, arrangement, rows: countingSupplyRows(range, 'any')
+    })));
+    const groupingCases = groupingCountingProfiles.flatMap(({range}) =>
+        (['even', 'singleton-odd', 'positive-odd'] as const).map(parity => ({
+            name: `${range.min}..${range.max}, ${parity}`,
+            counts: groupingCountsForRange(range, parity)
+        })));
+
+    it.each(selectionCases)('projects every requested/supply pair for $name in both modes', ({rows, arrangement}) => {
         let projections = 0;
-        for (const {range} of selectionCountingProfiles) for (const row of countingSupplyRows(range, 'any')) {
+        for (const row of rows) {
             for (let available = row.first; available <= row.last; available++) {
-                for (const arrangement of [Scope.LinearArrangement, Scope.CircularArrangement, Scope.ScatteredArrangement] as const) {
-                    for (const isSolutionView of [false, true]) {
-                        const markup = renderToStaticMarkup(<CountingObjectsCountOutCore config={{arrangement}} payload={{
-                            viewId: 'counting-objects-count-out', problem: {type: 'counting', labels: [],
-                                data: {numObjects: row.requested, simpleAnswer: row.requested, availableCount: available}},
-                            targetLabels: [], seed: 7, isSolutionView}} />);
-                        expect(markup.match(/<img\b/g)).toHaveLength(available);
-                        expect(markup).toContain(isSolutionView ? `Colored: ${row.requested}`
-                            : `Color exactly ${row.requested} `);
-                        expect(markup).not.toMatch(/NaN|undefined/);
-                        projections++;
-                    }
+                for (const isSolutionView of [false, true]) {
+                    const markup = renderToStaticMarkup(<CountingObjectsCountOutCore config={{arrangement}} payload={{
+                        viewId: 'counting-objects-count-out', problem: {type: 'counting', labels: [],
+                            data: {numObjects: row.requested, simpleAnswer: row.requested, availableCount: available}},
+                        targetLabels: [], seed: 7, isSolutionView}} />);
+                    expect(markup.match(/<img\b/g)).toHaveLength(available);
+                    expect(markup).toContain(isSolutionView ? `Colored: ${row.requested}`
+                        : `Color exactly ${row.requested} `);
+                    expect(markup).not.toMatch(/NaN|undefined/);
+                    projections++;
                 }
             }
         }
-        for (const {range} of groupingCountingProfiles) for (const parity of ['even', 'singleton-odd', 'positive-odd'] as const) {
-            for (const count of groupingCountsForRange(range, parity)) for (const isSolutionView of [false, true]) {
-                const groupSize = Math.floor(count / 2), remainder = count % 2 as 0 | 1;
-                const markup = renderToStaticMarkup(<CountingObjectsParityCore config={{}} payload={{
-                    viewId: 'counting-objects-parity', problem: {type: 'counting', labels: [], data: {
-                        kind: 'parity-grouping', numObjects: count, groupSize, remainder,
-                        parity: remainder ? 'odd' : 'even'}}, targetLabels: [], seed: 7, isSolutionView}} />);
-                expect(markup).toContain(`Can ${count} objects be split into two equal groups?`);
-                expect(markup).toContain(`group 1 with ${groupSize} objects`);
-                expect(markup).toContain(`group 2 with ${groupSize} objects`);
-                expect(markup).not.toMatch(/NaN|undefined/);
-                projections++;
-            }
+        expect(projections).toBe(rows.reduce((sum, row) => sum + row.last - row.first + 1, 0) * 2);
+    });
+
+    it.each(groupingCases)('projects every grouping count for $name in both modes', ({counts}) => {
+        let projections = 0;
+        for (const count of counts) for (const isSolutionView of [false, true]) {
+            const groupSize = Math.floor(count / 2), remainder = count % 2 as 0 | 1;
+            const markup = renderToStaticMarkup(<CountingObjectsParityCore config={{}} payload={{
+                viewId: 'counting-objects-parity', problem: {type: 'counting', labels: [], data: {
+                    kind: 'parity-grouping', numObjects: count, groupSize, remainder,
+                    parity: remainder ? 'odd' : 'even'}}, targetLabels: [], seed: 7, isSolutionView}} />);
+            expect(markup).toContain(`Can ${count} objects be split into two equal groups?`);
+            expect(markup).toContain(`group 1 with ${groupSize} objects`);
+            expect(markup).toContain(`group 2 with ${groupSize} objects`);
+            expect(markup).not.toMatch(/NaN|undefined/);
+            projections++;
         }
-        expect(projections).toBe(1282);
+        expect(projections).toBe(counts.length * 2);
+    });
+
+    it('retains all207 pairs, three arrangements, all20 grouping counts and exactly1282 projections', () => {
+        const pairs = selectionCountingProfiles.flatMap(({range}) => countingSupplyRows(range, 'any')
+            .flatMap(row => Array.from({length: row.last - row.first + 1}, (_, offset) =>
+                `${row.requested}/${row.first + offset}`)));
+        expect(pairs).toHaveLength(207);
+        expect(new Set(pairs).size).toBe(207);
+        expect(selectionCases).toHaveLength(selectionCountingProfiles.length * 3);
+        expect(selectionCases.map(({arrangement}) => arrangement)).toEqual(
+            selectionCountingProfiles.flatMap(() => [...arrangements]));
+        const counts = groupingCases.flatMap(({counts}) => [...counts]);
+        expect(counts.sort((a, b) => a - b)).toEqual(Array.from({length: 20}, (_, index) => index + 1));
+        const selectionProjections = selectionCases.reduce((sum, {rows}) =>
+            sum + rows.reduce((total, row) => total + row.last - row.first + 1, 0) * 2, 0);
+        const groupingProjections = groupingCases.reduce((sum, {counts}) => sum + counts.length * 2, 0);
+        expect(selectionProjections).toBe(1242);
+        expect(groupingProjections).toBe(40);
+        expect(selectionProjections + groupingProjections).toBe(1282);
     });
     it('retains old source support through reviewed fine bands and validates every admitted annotation selection', async () => {
         const targets = [...kindergarten, ...gradeTwo].filter(target => target.id.startsWith('K.CC.B.5-how-many~')

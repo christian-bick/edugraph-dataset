@@ -1,13 +1,20 @@
 import {getTargetPolicyLabels} from './compatibility.ts';
 import {beforeAll, describe, expect, it} from 'vitest';
 import {Ability, Area, Scope} from 'edugraph-ts';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {loadGeneratorModelCatalog, loadViewModelCatalog} from './model-catalog.ts';
+import {findLeafModules} from './module-resolver.ts';
 import {buildCompatibleModulePairIndex, matchesTarget, matchTargets} from './matching.ts';
 import {loadMatchingTargets} from './spec-validator.ts';
 
 // These regressions deliberately load declarations only, never generator implementations.
 const families = [
     ['counting-objects-count-out', 'counting-selection', 'counting-basic', 'CountingProblem'],
+    ['counting-objects-simple', 'counting-basic', 'counting-total', 'CountingProblem'],
+    ['counting-objects-one-to-one', 'counting-basic', 'counting-total', 'CountingProblem'],
+    ['counting-objects-cardinality', 'counting-basic', 'counting-total', 'CountingProblem'],
+    ['counting-conservation', 'counting-total', 'counting-basic', 'CountingProblem'],
     ['measure-mass', 'measurement-mass', 'measurement-liquid-volume', 'MassVolumeMeasurementProblem'],
     ['measure-liquid-volume', 'measurement-liquid-volume', 'measurement-mass', 'MassVolumeMeasurementProblem'],
     ['measure-mass-estimate', 'measurement-mass-estimation', 'measurement-liquid-volume-estimation', 'MassVolumeEstimateProblem'],
@@ -26,11 +33,33 @@ const families = [
     ['place-value-hundreds-bundles-explanation', 'place-value-hundreds-bundles', 'place-value-bundles', 'PlaceValueBundlesProblem']
 ] as const;
 
+const contractGeneratorIds = [...new Set([...families.flatMap(([, generatorId, otherId]) => [generatorId, otherId]),
+    'arithmetic-property-relations', 'arithmetic-ops-triples'])];
+const contractViewIds = [...new Set([...families.map(([viewId]) => viewId),
+    'operations-word-problem-within-100', 'counting-objects-parity', 'place-value-tens-bundles',
+    'operations-properties', 'operations-properties-explanation', 'counting-inc-dec'])];
+function contractEntries(relativeRoot: string, ids: readonly string[]): Map<string, string> {
+    const wanted = new Set(ids);
+    const entries = new Map(findLeafModules(fileURLToPath(new URL(relativeRoot, import.meta.url)))
+        .filter(module => wanted.has(module.id)).map(module => [module.id, resolve(module.absolutePath, 'spec.ts')]));
+    const missing = ids.filter(id => !entries.has(id));
+    if (missing.length) throw new Error(`Missing contract fixture modules: ${missing.join(', ')}.`);
+    return entries;
+}
+
+let fullCatalogPromise: Promise<[
+    Awaited<ReturnType<typeof loadGeneratorModelCatalog>>, Awaited<ReturnType<typeof loadViewModelCatalog>>
+]> | undefined;
+const fullCatalogs = () => fullCatalogPromise ??= Promise.all([loadGeneratorModelCatalog(), loadViewModelCatalog()]);
+
 describe('declared producer/view payload families', () => {
     let generators: Awaited<ReturnType<typeof loadGeneratorModelCatalog>>;
     let views: Awaited<ReturnType<typeof loadViewModelCatalog>>;
     beforeAll(async () => {
-        [generators, views] = await Promise.all([loadGeneratorModelCatalog(), loadViewModelCatalog()]);
+        [generators, views] = await Promise.all([
+            loadGeneratorModelCatalog(undefined, undefined, contractEntries('../generators/', contractGeneratorIds)),
+            loadViewModelCatalog(undefined, undefined, contractEntries('../visuals/views/', contractViewIds))
+        ]);
     }, 30_000);
 
     it.each(families)('%s selects its complete payload contract before target labels', (viewId, generatorId, otherId, broadType) => {
@@ -107,6 +136,7 @@ describe('declared producer/view payload families', () => {
     });
 
     it('separates completion and explanation throughout the real CCSS property and hundreds routes', async () => {
+        const [generators, views] = await fullCatalogs();
         const targets = await loadMatchingTargets('ccss');
         const tuples = matchTargets(targets, generators, views).tuples;
         const families = [
@@ -152,6 +182,7 @@ describe('declared producer/view payload families', () => {
 
     // The complete catalog scan also runs under coverage as new grade modules are added.
     it('agrees between indexed and direct matching for all CCSS targets', async () => {
+        const [generators, views] = await fullCatalogs();
         const targets = await loadMatchingTargets('ccss');
         const pairs = buildCompatibleModulePairIndex(generators, views).orderedPairs;
         const direct = targets.flatMap(target => pairs
@@ -163,6 +194,10 @@ describe('declared producer/view payload families', () => {
         expect(indexed).toEqual(direct);
         for (const [viewId, generatorId] of families) {
             const tuples = matchedTuples.filter(tuple => tuple.viewId === viewId);
+            if (viewId === 'counting-objects-cardinality') {
+                expect(tuples, viewId).toHaveLength(0);
+                continue;
+            }
             expect(tuples.length, viewId).toBeGreaterThan(0);
             expect(new Set(tuples.map(tuple => tuple.generatorId)), viewId).toEqual(new Set([generatorId]));
         }

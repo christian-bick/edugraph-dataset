@@ -1581,11 +1581,31 @@ export type DecimalDivisionProblem = Readonly<{
     }>;
 }>;
 
+/** Scalar sampling result shared by the internal positive-count primitives. */
 export type CountingProblem = {
     numObjects: number;
     simpleAnswer: number;
     parity?: 'even' | 'odd';
 };
+
+/** A collection together with its complete bijective count from one to its cardinality. */
+export type CountingEnumerationProblem = Readonly<{
+    kind: 'counting-enumeration';
+    numObjects: number;
+    simpleAnswer: number;
+    /** Dense counting-number witness, exactly [1, ..., numObjects]. */
+    countingNumbers: readonly number[];
+    /** When constrained, parity describes the collection's cardinality. */
+    parity?: 'even' | 'odd';
+}>;
+
+/** Cardinality of a nonempty collection, without an enumeration witness. */
+export type CountingTotalProblem = Readonly<{
+    kind: 'counting-total';
+    numObjects: number;
+    simpleAnswer: number;
+    parity?: 'even' | 'odd';
+}>;
 
 /** Canonical division of a collection into two equal groups and its remainder. */
 export type ParityGroupingProblem = Readonly<{
@@ -5633,16 +5653,16 @@ export interface ViewTypeMap {
     'operations-decimal-multiplication-method': DecimalMultiplicationProblem;
     'operations-decimal-division-method': DecimalDivisionProblem;
 
-    'counting-objects-simple': CountingProblem;
-    'counting-objects-one-to-one': CountingProblem;
-    'counting-objects-cardinality': CountingProblem;
+    'counting-objects-simple': CountingEnumerationProblem;
+    'counting-objects-one-to-one': CountingEnumerationProblem;
+    'counting-objects-cardinality': CountingEnumerationProblem;
     'counting-objects-count-out': CountingSelectionProblem;
     'counting-objects-parity': ParityGroupingProblem;
     'counting-inc-dec': CountingSmallOffsetProblem;
     'counting-ten-more-less': CountingTenOffsetProblem;
     'counting-hundred-more-less': CountingHundredOffsetProblem;
     'counting-number-sequence': CountingSequenceProblem;
-    'counting-conservation': CountingProblem;
+    'counting-conservation': CountingTotalProblem;
     'sorting-classify-count': CountingClassifyCountProblem;
     'sorting-classify-sort': CountingClassifySortProblem;
     'sorting-classify-order': CountingClassifySortProblem;

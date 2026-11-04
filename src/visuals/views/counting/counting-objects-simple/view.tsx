@@ -6,7 +6,7 @@ import { generatePositions } from '../../../helpers/counting-helpers.ts';
 import { CountingObjectsSimpleViewConfig, CountingObjectsSimpleViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
 import { ViewValidationError } from '../../../helpers/validation.ts';
-import {validatePositiveCountingData} from '../positive-count.ts';
+import {validateCountingEnumerationData} from '../positive-count.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -21,7 +21,7 @@ const CountingObjectsSimpleCore = ({ config, payload }: CoreProps) => {
     const seed = payload.seed;
     const data = problem.data;
 
-    const numObjects = validatePositiveCountingData('counting-objects-simple', data);
+    const {numObjects} = validateCountingEnumerationData('counting-objects-simple', data);
     
     let arrangement: 'line' | 'circle' | 'scattered' | 'array';
     if (config.arrangement === Scope.BoxArrangement) arrangement = 'array';

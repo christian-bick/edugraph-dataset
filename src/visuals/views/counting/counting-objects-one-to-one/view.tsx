@@ -5,7 +5,7 @@ import { ViewRenderPayload } from '../../../../types/ml-engine.ts';
 import { generatePositions } from '../../../helpers/counting-helpers.ts';
 import { CountingObjectsOneToOneViewConfig, CountingObjectsOneToOneViewSchema } from './spec.ts';
 import { withConfig } from '../../withConfig.tsx';
-import {validatePositiveCountingData} from '../positive-count.ts';
+import {validateCountingEnumerationData} from '../positive-count.ts';
 import '../../../../tailwind.css';
 
 const ICONS = ['circle.svg', 'square.svg', 'triangle.svg', 'star.svg', 'pentagon.svg', 'hexagon.svg', 'heart.svg', 'diamond.svg'];
@@ -20,7 +20,7 @@ const CountingObjectsOneToOneCore = ({ config, payload }: CoreProps) => {
     const seed = payload.seed;
     const data = problem.data;
 
-    const numObjects = validatePositiveCountingData('counting-objects-one-to-one', data);
+    const {numObjects, countingNumbers} = validateCountingEnumerationData('counting-objects-one-to-one', data);
     
     let arrangement: 'line' | 'circle' | 'scattered' | 'array' = 'scattered';
     if (config.arrangement === Scope.LinearArrangement) arrangement = 'line';
@@ -59,7 +59,7 @@ const CountingObjectsOneToOneCore = ({ config, payload }: CoreProps) => {
                             <div className={`absolute -bottom-[16px] bg-white border-[1.5px] rounded-full w-5 h-5 text-[0.8rem] font-bold flex justify-center items-center shadow-[0_2px_4px_rgba(0,0,0,0.05)] ${
                                 isSolutionView ? 'bg-green-100 border-green-600 text-green-700' : 'border-slate-400 text-slate-400'
                             }`}>
-                                {isSolutionView ? `${i + 1}` : ''}
+                                {isSolutionView ? `${countingNumbers[i]}` : ''}
                             </div>
                         </div>
                     ))}

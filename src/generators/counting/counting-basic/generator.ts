@@ -1,17 +1,16 @@
 import {AbstractProblem, ProblemGenerator, ProblemStub} from "../../../types/ml-engine.ts";
-import {CountingProblem} from "../../../types/problems.ts";
+import {CountingEnumerationProblem} from "../../../types/problems.ts";
 import {random} from "../../../lib/random.ts";
 import {CountingBasicGeneratorConfig, CountingBasicGeneratorSchema} from "./spec.ts";
 import {validateConfigFields} from "../../../lib/errors.ts";
-import {sampleCountingQuantity} from '../counting-quantity.ts';
+import {buildCountingEnumeration, sampleBasicCountingQuantity} from '../basic-counting-domain.ts';
 
-export class CountingBasicGenerator implements ProblemGenerator<CountingProblem, CountingBasicGeneratorConfig> {
+export class CountingBasicGenerator implements ProblemGenerator<CountingEnumerationProblem, CountingBasicGeneratorConfig> {
     type: AbstractProblem['type'] = 'counting';
     schema = CountingBasicGeneratorSchema;
 
-    generate(config: CountingBasicGeneratorConfig): ProblemStub<CountingProblem> | null {
+    generate(config: CountingBasicGeneratorConfig): ProblemStub<CountingEnumerationProblem> {
         validateConfigFields('counting-basic', config, ['range', 'parity']);
-        const data = sampleCountingQuantity(config.range!, config.parity!, random);
-        return data ? {data} : null;
+        return {data: buildCountingEnumeration(sampleBasicCountingQuantity('enumeration', config.range!, config.parity!, random))};
     }
 }

@@ -23,7 +23,7 @@ const numeralConsumers = [
 ] as const;
 
 const objectOnlyConsumers = [
-    ['counting-basic', 'counting-conservation', Ability.DirectUnderstanding],
+    ['counting-total', 'counting-conservation', Ability.DirectUnderstanding],
     ['counting-classify-sort', 'sorting-classify-sort', Ability.ProcedureExecution]
 ] as const;
 
@@ -53,7 +53,7 @@ describe('counting numeral representation ownership', () => {
             const labels = [...quantityLabels, ability];
 
             expect(matchesTarget(labels, generator, view)).toEqual({matched: true});
-            if (generatorId === 'counting-basic') {
+            if (generatorId === 'counting-total') {
                 expect(generator.generalLabels).not.toContain(Scope.NumbersWithoutZero);
                 expect(view.generalLabels).toContain(Scope.NumbersWithoutZero);
             }
@@ -104,11 +104,13 @@ describe('counting numeral representation ownership', () => {
             .toEqual({matched: false, reason: 'empty-label-domain'});
     });
 
-    it('keeps the scalar counting producer outside the canonical grouping payload contract', () => {
-        const generator = generators.find(entry => entry.generatorId === 'counting-basic')!;
+    it('keeps both basic counting families outside the canonical grouping payload contract', () => {
         const view = views.find(entry => entry.viewId === 'counting-objects-parity')!;
-        expect(matchesTarget([...quantityLabels.filter(label => label !== Scope.NumbersWithoutZero),
-            Ability.ConceptClassification], generator, view)).toEqual({matched: false, reason: 'incompatible-type'});
+        for (const generatorId of ['counting-basic', 'counting-total']) {
+            const generator = generators.find(entry => entry.generatorId === generatorId)!;
+            expect(matchesTarget([...quantityLabels.filter(label => label !== Scope.NumbersWithoutZero),
+                Ability.ConceptClassification], generator, view)).toEqual({matched: false, reason: 'incompatible-type'});
+        }
     });
 
 });

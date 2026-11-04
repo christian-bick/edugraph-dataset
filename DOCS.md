@@ -71,6 +71,9 @@ Written expression structure and evaluated calculations can be separate mathemat
 families while reusing formatting and rendering helpers. Model matching uses their named contracts,
 so a syntax consumer does not implicitly accept a calculation producer through TypeScript's
 structural assignability.
+Collection totals and enumerations likewise have distinct contracts: an enumeration carries its
+complete counting sequence, while a total carries the collection's cardinality. Their consumers
+validate the required mathematical evidence before rendering.
 Target requirements remain independent learner-task participation policies. Schema resolution
 translates ontology-backed capabilities into typed configuration for the owning role before
 generation or rendering.

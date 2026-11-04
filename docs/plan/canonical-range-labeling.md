@@ -15,18 +15,20 @@ Q10 separates [generic unit counts and scale-factor derivation](#q10-source-veri
 Q11 separates [single named-unit equivalences and five-row sequences](#q11-source-verification).
 Q12 qualifies [currency amounts in their displayed monetary units](#q12-source-verification).
 Q13 excludes [algebra tasks from numeric range annotations](#q13-source-verification).
+Q15 separates [collection totals and enumeration](#q15-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12 and Q13 decision batches also pass their
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13 and Q15 decision batches also pass their
 focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,528 normalized targets / 2,000 routes and 4,740 complete selections**, with **one range-presence
+**1,529 normalized targets / 2,001 routes and 4,741 complete selections**, with **one range-presence
 omission in one producer** remaining. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records three remaining contract/policy questions, including two already-labelled precision topics.
+records two remaining contract/policy questions, including one already-labelled precision topic
+covering 14 routes.
 Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes. Missing-range findings
 remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
@@ -926,6 +928,129 @@ Evidence is under `temp/range-decisions/batch9-q13/`, including `inventory-befor
 `baseline.json`, `preservation-after.json`, `source-audit.json`, `renders/manifest.json` and
 `check.log`. Focused acceptance logs are `scoped-coverage-first.log`, `scoped-coverage.log`
 and `coverage-gate.log`.
+
+## Q15 collection totals and enumeration
+
+Approved 2026-11-04 after Q13, from `f4c839f8`. Separate the cardinality of a collection
+from the mathematical enumeration `1..N` used to count it. For six objects, conservation
+compares the quantities 6 and 6; explaining or supplying the count uses 1 through 6.
+The user also approved applying the existing threshold-singleton exclusion to conservation
+totals 5, 10 and 20. Preserve every other supported total and all enumeration totals 1..20.
+
+Keep `counting-basic` for enumeration and add `counting-total` for scalar cardinality.
+Use distinct named, tagged mathematical payloads: `CountingEnumerationProblem` supplies
+`countingNumbers` exactly `1..N`; `CountingTotalProblem` supplies the total. Both retain
+`numObjects`, `simpleAnswer` and the optional parity constraint on the collection total.
+The existing plain `CountingProblem` remains an internal scalar sampling shape, not a
+shared accepted payload for the adopted views. Establish the shared types and `ViewTypeMap`
+entries, then pass TypeScript before generator/view implementation proceeds independently
+(IMPL-8). Neither payload contains a learner-action or display flag.
+
+| Consumer | Mathematical producer / payload | Adoption and verification |
+| --- | --- | --- |
+| `counting-objects-simple` | `counting-basic` / `CountingEnumerationProblem` | Preserve its count explanation, all four arrangements and the current ten source routes; validate the necessary enumeration witness |
+| `counting-objects-one-to-one` | `counting-basic` / `CountingEnumerationProblem` | Render supplied counting numbers on the existing numbered objects; preserve all eight source routes and all three arrangements |
+| `counting-objects-cardinality` | `counting-basic` / `CountingEnumerationProblem` | Preserve the valid admitted consumer even without a current source route; render supplied counting numbers and the final total |
+| `counting-conservation` | `counting-total` / `CountingTotalProblem` | Preserve the two equal collections, task, layout and capacity; migrate both existing routes and add the reviewed upper5 source variant |
+
+Enumeration has no positive lower: upper5 covers totals 1..5, upper10 covers 6..10 and
+upper20 covers 11..20. Total-only cardinality has no-lower/upper5 for 1..4,
+lower5/upper10 for 6..9, and lower10/upper20 for 11..19. The excluded conservation
+totals are exactly 5, 10 and 20; they remain supported in enumeration. Each cell retains
+uniform one-draw sampling among its original parity-compatible totals. Changed profile
+mixture is accepted; no retries, post-generation labels or unused quantity witnesses.
+
+Add conservation's upper5 source variant so totals 1..4 remain covered after canonical
+refinement. Preserve its existing upper10/upper20 target claims and IDs; the selected
+mathematical profiles supply the stronger lower descriptors. Predicted coverage becomes
+1,529 normalized targets / 2,001 routes / 4,741 selections. This precision review does
+not close the separate multiplication-overflow omission.
+
+Keep the shared `countingQuantitySchema`, labels and scalar sampling primitive unchanged.
+Protect counting-selection and parity-grouping consumers, all current non-range claims,
+fixed-seed mathematical controls, configuration/receipt replay and equal-mathematics rendering.
+Validate nominal family isolation and complete native supports, including the future cardinality
+consumer. Canonical dataset regeneration and independent VQA remain separate acceptance gates.
+
+### Q15 source verification
+
+The fresh matching comparison preserves all earlier targets, claims, dispositions and active
+coverage. The two conservation pairs migrate to `counting-total`, while the new upper5 source
+adds one target/pair: +1 target and +3 / -2 pairs overall. All 18 enumeration pairs retain
+their IDs and receive changed canonical plans. Global coverage is 1,529 normalized targets /
+2,001 routes / 4,741 complete selections. All 20 earlier Basic target/view lineages remain;
+conservation now has three source bands and enumeration retains its 18 source routes.
+
+The empty-snapshot source audit reports 4,276 eligible selections and 22,086 satisfied
+assessments. All 4,720 unaffected selections remain semantically identical to Q13. The one
+remaining range omission is still multiplication overflow; non-range omissions, conflicts,
+contract errors, incomplete tuples, invalid contexts and pending/invalid inference remain
+zero. All 119 existing inference selections resolve exhaustively. Q15 refines 20 already-labelled
+routes rather than closing a missing facet. Two topics remain: multiplication overflow and
+positive non-Name writing precision on 14 already-labelled routes.
+
+The independent baseline protects 34 routes / 42 selections across the shared three-producer,
+six-view counting union, with 336 seeded draws and 672 Question/Solution SSR records. Its finite
+scalar oracle covers all totals 1..20 under any/even/odd constraints, including 27 bound/parity
+profiles and 142 original profile paths. It also protects 880 native renderings through all
+four legitimate Basic consumers and all 11 arrangement configurations, including cardinality
+without a current source route.
+
+The after proof covers 35 routes / 43 selections with 344 planned draws, direct mathematical
+generation and exact receipt replay. Complete native support is 40 enumeration count/parity
+payloads and 34 total-only payloads, with exact uniform conditional weights and one draw per
+sample across 18 cells. Only conservation totals 5, 10 and 20 retire; every other total remains,
+and enumeration retains all three endpoints with its supplied `1..N` witness. Builders explicitly
+project scalar fields so richer inputs cannot override the family or leak foreign evidence.
+All 868 retained native Question/Solution SSR strings are byte-identical; the 12 retired rows
+are exactly the conservation singleton cases.
+
+All 22 shared parity/selection controls preserve their selected labels/configurations, semantic
+plans, receipts, seeded mathematics, PRNG continuation and replay: 176 draws and 352 unchanged
+SSR strings. Actual operational input/plan/receipt identity changes are zero for these controls.
+The shared schema, labels and scalar sampling primitive remain unchanged. Changed canonical
+profile mixtures and affected receipts are accepted; this proof does not claim identical old
+affected draws after conditioning on the new mathematical contracts.
+
+Native browser verification covers all six views and 32 selections: all 21 affected source
+lineages, two shared controls, three matched future-cardinality bands and six boundary cases.
+All 64 Question/Solution images have byte-identical repeated captures (128 captures), with no
+browser errors or error cards. The boundary cases retain enumeration totals 5, 6 and 20 and
+show total-only cardinalities 4, 6 and 19. Visual inspection of five saved captures confirms
+clear upper5 conservation in both modes, complete 1..20 numbering and total, a correct future
+cardinality endpoint marker and the unchanged parity control, with no clipping or overlap.
+
+Full-check source stages 1–5 pass, including TypeScript, specs, labels, documentation and
+standards. Existing artifact stages 6/7 still fail on the unchanged stored snapshot without
+recorded generation plans/receipts: 2,277 missing annotation facets, 4,006 strict findings,
+1,396 eligible stored samples, zero conflicts and zero incomplete tuples.
+
+The broad scoped run passes 314 tests across 19 files, including the complete catalog/source
+checks and all 1,282 selection/grouping SSR control projections. A later 53-test run across
+two view/integration files adds five cases beyond that run: 319 distinct current tests are
+verified across the 19 files, rather than a single 319-test execution. The eight-file core
+coverage gate passes separately: every reported file has 100% statement and branch coverage
+except the unchanged selection generator's 83.33% branches, which passes its unchanged
+threshold. The separate four-view gate passes with 100% statements in every affected view
+body; branches are 100% for conservation/simple, 95.45% for cardinality and 95% for one-to-one.
+The added view tests exercise browser entrypoint registration, mounting, reused roots and
+existing validation branches.
+
+Contract tests load their participating declarations; full-catalog regressions still load
+the complete catalogs within their existing test budgets. Planned-draw tests distinguish raw
+payloads from resolved annotations and cover every admitted parity alias alternative.
+The selection/grouping render proof is partitioned by range/arrangement and
+range/parity, retaining all 207 pairs, all 20 grouping counts, both modes, every assertion and
+the exact 1,282 total. No timeouts or coverage thresholds change, and no cases are excluded.
+Final TypeScript revalidation after these test changes passes. Earlier full-suite timeout
+limitations remain as recorded above; these source/native proofs do not claim a new full-suite pass, canonical dataset regeneration
+or independent VQA. Evidence is under
+`temp/range-decisions/batch10-q15/`: `baseline.json`, `verification-after.json`,
+`independent-math.ts`, `source-audit.json`, `renders/manifest.json` and `visual-review.json`.
+The fresh matching comparison is under `temp/spec-plans/ccss/range-q15-2026-11-04/`.
+Focused evidence is `scoped-coverage-first.log`, `scoped-coverage.log`,
+`coverage-core-gate.log` / `core-summary.json`, and
+`view-coverage.log` / `coverage-views-gate.log` / `views-summary.json`.
 
 ## Accepted direction
 

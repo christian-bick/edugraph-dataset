@@ -17,7 +17,7 @@ describe('CountingBasicGenerator Spec Integration', () => {
             Scope.NumbersSmaller10
         ]);
         expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
+        expect(stub!.data.numObjects).toBeGreaterThan(5);
         expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
         expect(stub!.data.simpleAnswer).toBe(stub!.data.numObjects);
     });
@@ -28,19 +28,20 @@ describe('CountingBasicGenerator Spec Integration', () => {
                 Scope.NumbersSmaller20
             ]);
             expect(stub).not.toBeNull();
-            expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
+            expect(stub!.data.numObjects).toBeGreaterThan(10);
             expect(stub!.data.numObjects).toBeLessThanOrEqual(20);
         }
     });
 
-    it('should enforce minCount of at least 1 even if resolving to zero', () => {
+    it('retains all positive through-five counts with a canonical no-lower profile', () => {
         for (let i = 0; i < 20; i++) {
             const stub = generateWithLabels(generator, [
-                Scope.NumbersSmaller10
+                Scope.NumbersSmaller5
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.numObjects).toBeGreaterThanOrEqual(1);
-            expect(stub!.data.numObjects).toBeLessThanOrEqual(10);
+            expect(stub!.data.numObjects).toBeLessThanOrEqual(5);
+            expect(stub!.data.countingNumbers).toEqual(Array.from({length: stub!.data.numObjects}, (_, index) => index + 1));
         }
     });
 
@@ -56,6 +57,7 @@ describe('CountingBasicGenerator Spec Integration', () => {
             ]);
             expect(stub).not.toBeNull();
             expect(stub!.data.parity).toBe(parity);
+            expect(stub!.data.numObjects % 2).toBe(parity === 'even' ? 0 : 1);
             expect(stub!.labels).toEqual(expect.arrayContaining([area, scope]));
         }
     });
@@ -66,5 +68,15 @@ describe('CountingBasicGenerator Spec Integration', () => {
             Scope.OddNumbers,
             Scope.NumbersSmaller20
         ])).toThrow();
+    });
+
+    it('resolves an unqualified request to a complete feasible mathematical configuration', () => {
+        const stub = generateWithLabels(generator, [])!;
+        expect(stub.data.kind).toBe('counting-enumeration');
+        expect(stub.data.countingNumbers[0]).toBe(1);
+        expect(stub.data.countingNumbers.at(-1)).toBe(stub.data.numObjects);
+        expect(stub.labels.filter(label => [Scope.NumbersSmaller5, Scope.NumbersSmaller10, Scope.NumbersSmaller20]
+            .includes(label as Scope))).toHaveLength(1);
+        expect(stub.labels).not.toContain(Scope.NumbersLargerZero);
     });
 });

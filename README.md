@@ -28,7 +28,8 @@ The relationship between target claims, dimension-neutral label declarations, ge
 capabilities, canonical payloads, and rendered tasks is defined in
 [Label Architecture](docs/label-architecture.md).
 Distinct mathematical payload families, such as written expression structure and evaluated
-calculations, can share rendering helpers while retaining separate typed capability contracts.
+calculations or collection totals and enumerations, can share rendering helpers while retaining
+separate typed capability contracts.
 
 The architecture is split into three main parts:
 *   **The Brain (Generators):** Abstract mathematical constraint satisfiers.

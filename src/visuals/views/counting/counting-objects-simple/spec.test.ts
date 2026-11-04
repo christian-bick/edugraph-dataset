@@ -15,11 +15,11 @@ describe('CountingObjectsSimpleViewSchema', () => {
             generatorId: generatorSpec.generatorId, spec: generatorSpec, schema: CountingBasicGeneratorSchema,
             generalLabels: generatorSpec.generalLabels,
             labels: [...generatorSpec.generalLabels, ...extractSchemaLabels(CountingBasicGeneratorSchema)],
-            problemType: 'CountingProblem'
+            problemType: 'CountingEnumerationProblem'
         }, {
             viewId: spec.viewId, spec, schema: CountingObjectsSimpleViewSchema, generalLabels: spec.generalLabels,
             supportedLabels: [...spec.generalLabels, ...extractSchemaLabels(CountingObjectsSimpleViewSchema)],
-            problemType: 'CountingProblem'
+            problemType: 'CountingEnumerationProblem'
         });
         expect(matched.matched).toBe(true);
         if (!matched.matched) throw new Error('Existing counting target stopped matching.');

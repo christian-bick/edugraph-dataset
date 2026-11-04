@@ -1,81 +1,86 @@
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
+import * as rng from '../../../lib/random.ts';
+import {basicCountingCounts, basicCountingProfiles} from '../basic-counting-domain.ts';
 import {CountingBasicGenerator} from './generator.ts';
-import {getRandomState, setSeed} from '../../../lib/random.ts';
 
 describe('CountingBasicGenerator', () => {
-    let generator: CountingBasicGenerator;
+    const generator = new CountingBasicGenerator();
+    beforeEach(() => rng.setSeed(42));
 
-    beforeEach(() => {
-        generator = new CountingBasicGenerator();
-        setSeed(42);
+    it('has the counting type and requires explicit range and parity', () => {
+        expect(generator.type).toBe('counting');
+        expect(() => generator.generate({})).toThrow();
+        expect(() => generator.generate({parity: 'any'})).toThrow();
+        expect(() => generator.generate({range: createCanonicalNumericRange(10)})).toThrow();
     });
 
-    it('should have the correct type', () => {
-         expect(generator.type).toBe('counting');
-    });
-
-    it('should throw validation error when range is missing', () => {
-        expect(() => generator.generate({} as any)).toThrow();
-    });
-
-    it('should respect resolved ranges from labels', () => {
-        const config = { 
-            range: { min: 0, max: 10 },
-            parity: 'any' as const
-        };
-        for (let i = 0; i < 50; i++) {
-            const stub = generator.generate(config);
-            if (stub) {
-                expect(stub.data.numObjects).toBeGreaterThanOrEqual(0);
-                expect(stub.data.numObjects).toBeLessThanOrEqual(10);
+    it.each(basicCountingProfiles('enumeration'))('preserves every count/parity outcome in canonical $range.min..$range.max', ({range}) => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            for (const parity of ['any', 'even', 'odd'] as const) {
+                const counts = basicCountingCounts('enumeration', range, parity);
+                for (let index = 0; index < counts.length; index++) {
+                    draw.mockClear().mockReturnValue((index + 0.5) / counts.length);
+                    const stub = generator.generate({range, parity}), data = stub.data;
+                    expect(Object.keys(stub)).toEqual(['data']);
+                    expect(data.kind).toBe('counting-enumeration');
+                    expect(data.numObjects).toBe(counts[index]);
+                    expect(data.simpleAnswer).toBe(data.numObjects);
+                    expect(data.countingNumbers).toEqual(Array.from({length: data.numObjects}, (_, number) => number + 1));
+                    expect(hasCanonicalRangeWitness(data.countingNumbers, range)).toBe(true);
+                    expect(data.numObjects).toBeGreaterThanOrEqual(1);
+                    expect(data.numObjects).toBeLessThanOrEqual(20);
+                    if (parity === 'any') expect(data).not.toHaveProperty('parity');
+                    else {
+                        expect(data.parity).toBe(parity);
+                        expect(data.numObjects % 2).toBe(parity === 'even' ? 0 : 1);
+                    }
+                    expect(data).not.toHaveProperty('availableCount');
+                    expect(draw).toHaveBeenCalledTimes(1);
+                }
             }
-        }
+        } finally { draw.mockRestore(); }
     });
 
-    it('should generate valid stubs', () => {
-        const config = { 
-            range: { min: 0, max: 10 },
-            parity: 'any' as const
-        };
-        const stub = generator.generate(config);
-        expect(stub).not.toBeNull();
-        expect(stub!.data.numObjects).toBeDefined();
+    it.each([['any', 9], ['even', 8], ['odd', 9]] as const)(
+        'keeps the original one-draw continuation for seed42 and %s', (parity, count) => {
+            const {data} = generator.generate({range: createCanonicalNumericRange(10), parity});
+            expect(data.numObjects).toBe(count);
+            expect(rng.getRandomState()).toBe(1831565855);
+        });
+
+    it('allocates fresh enumeration arrays and replays exactly', () => {
+        const config = {range: createCanonicalNumericRange(20), parity: 'odd' as const};
+        const first = generator.generate(config), continuation = rng.getRandomState();
+        rng.setSeed(42);
+        expect(generator.generate(config)).toEqual(first);
+        expect(rng.getRandomState()).toBe(continuation);
+        (first.data.countingNumbers as number[])[0] = 99;
+        rng.setSeed(42);
+        const next = generator.generate(config);
+        expect(next.data.countingNumbers[0]).toBe(1);
+        expect(next.data).not.toBe(first.data);
+        expect(next.data.countingNumbers).not.toBe(first.data.countingNumbers);
     });
 
-    it('generates only the requested parity and exposes it in the payload', () => {
-        for (const parity of ['even', 'odd'] as const) {
-            for (let seed = 0; seed < 20; seed++) {
-                setSeed(seed);
-                const stub = generator.generate({range: {min: 1, max: 20}, parity});
-                expect(stub).not.toBeNull();
-                expect(stub!.data.numObjects % 2).toBe(parity === 'even' ? 0 : 1);
-                expect(stub!.data.parity).toBe(parity);
-            }
-        }
+    it.each([undefined, false, {min: 0, max: 10}, createCanonicalNumericRange(100),
+        createCanonicalNumericRange(10, 5), {...createCanonicalNumericRange(10), maximumAbove: 0},
+        {...createCanonicalNumericRange(10), minimumBelow: 10}, {min: 20, max: 10}])(
+        'rejects missing, altered or unsupported range %j before randomness', range => {
+            const draw = vi.spyOn(rng, 'random');
+            try {
+                expect(() => generator.generate({range, parity: 'any'} as never)).toThrow();
+                expect(draw).not.toHaveBeenCalled();
+                expect(rng.getRandomState()).toBe(42);
+            } finally { draw.mockRestore(); }
+        });
+
+    it('rejects an unsupported parity before randomness', () => {
+        const draw = vi.spyOn(rng, 'random');
+        try {
+            expect(() => generator.generate({range: createCanonicalNumericRange(10), parity: 'prime'} as never)).toThrow();
+            expect(draw).not.toHaveBeenCalled();
+        } finally { draw.mockRestore(); }
     });
-
-    it('returns null when the requested parity has no value in range', () => {
-        expect(generator.generate({range: {min: 1, max: 1}, parity: 'even'})).toBeNull();
-    });
-
-    it.each([
-        ['any', {numObjects: 7, simpleAnswer: 7}],
-        ['even', {numObjects: 8, simpleAnswer: 8, parity: 'even'}],
-        ['odd', {numObjects: 7, simpleAnswer: 7, parity: 'odd'}]
-    ] as const)('preserves the established seed-42 payload and continuation for %s', (parity, data) => {
-        const stub = generator.generate({range: {min: 0, max: 10}, parity});
-        expect(stub).toEqual({data});
-        expect(getRandomState()).toBe(1831565855);
-        expect(stub!.data).not.toHaveProperty('availableCount');
-    });
-
-    it('preserves entropy when the established quantity domain is empty', () => {
-        expect(generator.generate({range: {min: 1, max: 1}, parity: 'even'})).toBeNull();
-        expect(getRandomState()).toBe(42);
-        expect(generator.generate({range: {min: 20, max: 10}, parity: 'any'})).toBeNull();
-        expect(getRandomState()).toBe(42);
-    });
-
-
-
 });

@@ -45,9 +45,9 @@ These items are not newly scheduled by the archive move.
   The [autonomous rollout](canonical-range-autonomous-rollout.md) records six subsequent source batches:
   15 families/78 closed source omissions,14 families/29 further closures,12 families/41 closures,
   then nine families/37 closures, a fifth batch with168 further closures and65 in the sixth.
-  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12 and Q13, current source gates cover **1,528 normalized targets / 2,000 routes and 4,740 selections**,
+  After Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13 and Q15, current source gates cover **1,529 normalized targets / 2,001 routes and 4,741 selections**,
   with one range omission in one producer. The [current decision backlog](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-  records one missing-facet topic and two already-labelled precision topics covering 34 routes; ordinary profile and
+  records one missing-facet topic and one already-labelled precision topic covering 14 routes; ordinary profile and
   approved local-repair work is complete. Sixth-batch acceptance in the rollout ledger passes
   all7,705 tests /1,009 files and every generator coverage threshold.
   Q1/Q2's [source verification](canonical-range-labeling.md#q1q2-source-verification) records its
@@ -120,6 +120,18 @@ These items are not newly scheduled by the archive move.
   11 files and the unchanged four-file coverage gate pass, with overall 98.94% statement /
   97.72% branch coverage. Source checks and TypeScript pass; the checkpoint records the
   existing direct-resolver, full-suite and stored-artifact limitations separately from dataset acceptance.
+  Q15's [source verification](canonical-range-labeling.md#q15-source-verification) separates
+  scalar totals from `1..N` enumeration, preserving all 20 earlier Basic lineages and adding
+  conservation's upper5 source variant. Only conservation totals 5, 10 and 20 retire; all
+  enumeration endpoints remain. Independent proofs cover all 74 native count/parity payloads
+  and exact one-draw weights across 18 cells, with 868 unchanged native and 352 shared-control
+  renderings. Native verification covers 64 images across six views, captured twice with
+  identical bytes (128 captures), including future cardinality and the reviewed boundary cases.
+  Source/native proofs and full-check source stages pass. The broad 314-test / 19-file run
+  and later 53-test view run pass, with five additional distinct cases in the latter.
+  Separate core and view coverage gates pass with unchanged thresholds; all eight core files
+  and four affected view bodies have full statement coverage. Final TypeScript passes.
+  The checkpoint records exact test overlap and the earlier full-suite/stored-artifact limitations.
   All earlier route lineages remain supported through the authorized
   integer-domain and fixed-bound source corrections. Module-specific details stay in plans
   and module tests; README.md and DOCS.md contain general usage and architecture.
