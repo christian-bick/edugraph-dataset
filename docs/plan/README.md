@@ -159,9 +159,13 @@ These items are not newly scheduled by the archive move.
   representation producers in three commits. Both additional source/view declaration corrections
   are explicitly approved and applied: integer scope in two comparison families and the object
   renderer's existing supported-operation boundary. All 442 focused tests pass, with the earlier
-  19 coverage-file gates retained. Final source coverage is 4,791 selections /2,020 routes /1,547
-  normalized targets, including the explicit 14-target ID migration. No new snapshot or live VQA
-  result is accepted yet; canonical regeneration follows these verified repairs.
+  19 coverage-file gates retained. That checkpoint has 4,791 selections /2,020 routes /1,547
+  normalized targets, including the explicit 14-target ID migration. Fresh canonical generation
+  produces 4,866 images with passing replay/range, annotation and split checks. Two remaining
+  image-label conflicts have approved source corrections for exact operand widths and equation-task separation;
+  current source verification is 4,825 selections /2,017 routes with all target claims unchanged.
+  All 304 additional focused tests and their unchanged coverage gates pass. Affected regeneration
+  and live VQA remain pending, including regenerated image-collision acceptance.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 

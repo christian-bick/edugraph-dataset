@@ -32,13 +32,15 @@ unlabelled multiplication-overflow selection**. The
 records all contract/policy decisions as resolved. Overflow above the largest ontology upper
 bound remains an approved range-presence exception. Ordinary profiles and the source-backed
 local repairs are complete. The original inventory remains historical.
-Stored annotations have not been regenerated for these range changes. Missing-range findings
-remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
+Stored annotations have now been canonically regenerated, with the subsequent image-label
+corrections awaiting affected regeneration and live VQA. Missing-range findings remain
+report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
 The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
-producers and two approved declaration gaps. Current source verification covers 4,791 selections
-/2,020 routes /1,547 normalized targets; the Q4 checkpoint above remains historical. Dataset
-regeneration and independent VQA acceptance are still in progress.
+producers and the approved declaration/image-label gaps. Current source verification covers
+4,825 selections /2,017 routes /1,547 normalized targets, with no remaining inference callbacks;
+the Q4 checkpoint above remains historical. Dataset and independent VQA acceptance are still
+in progress.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -1425,6 +1427,145 @@ also passed an authenticated availability check before the live VQA phase.
 Final TypeScript and the complete generator/view contract audit pass after these declarations.
 The integer correction is committed as `04151500`; the object-view boundary and its 31 tests
 are committed as `8a31e6a4`. Both preserve their existing mathematical/rendering implementations.
+
+### Fresh snapshot and remaining image-label corrections
+
+Canonical regeneration from `046575f7` completed successfully and published immutable generation
+`cc7ba1aac520daa1842a3f1a0f43cda649c3e050e57f198f976cd506a3c50e62`: 4,866 images,
+527 shards and 160,611,856 PNG bytes. All seven repository check stages pass. The independent
+stored-row audit replays every primary row exactly and checks 3,899 range proofs across all
+119 range-bearing producers, with no unmapped producer or mathematical failure. It separately
+records 92 algebra exclusions, 874 rows outside range obligations and the one approved overflow
+sample (product 1,464,892). The official two range advisories refer to that sample and its source
+selection, rather than two physical images.
+
+Every PNG digest, graph identity and replay receipt passes the fast artifact audit. Strict
+annotation checks pass for 3,912 eligible rows, with 954 outside the policy scope; splits have
+no leakage or task redundancy. The image gate still finds two groups with identical pixels and
+different labels. One additional identical-label copy group is advisory. Live VQA has not run.
+The protected original 175 cache files remain unchanged; the read-only readiness check finds
+1,002 reusable passing rows and 3,864 uncached rows (3,863 unique missing module cache keys).
+These counts describe this snapshot, before the following corrections.
+
+After reviewing both concrete proposals, the user explicitly approved both corrections:
+
+- **Exact operand widths:** refine `place-value-arithmetic` into the six exact largest/smallest
+  width cells `(1,1)`, `(2,1)`, `(2,2)`, `(3,1)`, `(3,2)`, `(3,3)`. Keep the original native-domain
+  selection separate from completed width labels, preserving the legacy nine ordered pairs and
+  general eighteen ordered pairs in the upper20 regrouping collision. The proposal's independent
+  finite proof partitions 775,251 accepted general cases across 60 original contexts and retains
+  all 14 nonempty legacy contexts. Legacy seeded sampling is to stay exact; general profiles may
+  change seeds and their unqualified mixture while preserving conditional weights and support.
+  Payloads, targets and all three consuming views remain unchanged.
+- **Equation tasks:** remove unsupported `Formalization` from numeric result/operand completion.
+  Preserve the existing law completion tasks through preselected presentation profiles: ordinary,
+  commutative and associative equations use `ExpressionOnOneSide`; the necessary distributive
+  composite-to-composite witness uses `ExpressionOnBothSides`. The ontology forbids emitting both.
+  Add `operations-equal-addends-equation`, using the existing `ArithmeticPairProblem`, to ask for
+  a whole equation from an even total and reveal the canonical equal pair only in Solution mode.
+  This retains the same three target IDs for upper5/10/20, rather than reclassifying their demands.
+
+Implementation review found a further admitted configuration of the same law-shape issue:
+`Multiplication + SingleDigitSmallestOperand + NumbersSmaller20 + ProcedureInversion` selects
+the triples producer's bundled distributive capability without explicitly requesting a law.
+The target-only property rejection therefore does not establish that inversion always has a
+one-side equation. Apply the same approved correlated presentation rule to both inversion
+siblings as well, retaining their existing explicit law-target rejection, unknowns and pixels.
+Verify these width-induced law bindings in all four execution/inversion leaves; an absent law
+in the raw target must not prune a valid profile selected by the producer. Evidence is
+`law-inversion-width-fallback.json` / `.log`. This is the same equation-label correction, with
+no new mathematical producer, task identity or exclusion boundary.
+
+The width-domain separation also removes the old addition-only coupling from explicit subtraction
+width requests. `Subtraction` / `SubtractionPlaceValuePartitioning` with exact `(2,1)` uses the
+existing general subtraction domain; exact `(2,2)` plus `MultiplesOf10` keeps whole-tens
+subtraction. Only an addition-compatible original conjunction selects the legacy addition
+sampler, and its unspecified-operation default remains addition. This makes the approved exact
+capabilities requestable without changing any previous domain. The intermediate focused width suite passed
+195 cases across eight files, including all 60 general contexts, 14 legacy contexts /448
+continuation controls, the actual collision and all three consumers. Independent source review
+finds no target-ID dispatch, post-generation labels or native-support loss.
+
+The equation proposal's full in-memory dry-run preserves all 1,547 target IDs, label conjunctions
+and dispositions, all twenty law routes /26 selections and every retained generator binding.
+Its authorized six-to-three equal-addends route migration gives 2,017 routes /4,786 selections
+before any width refinement; 160 retained plans change and 1,854 remain exact. The width plan's
+actual matching delta and both implementations' runtime proofs were pending at that proposal
+checkpoint; their completed results follow below. The approved new view type-map entry
+typechecked before view implementation began. These source corrections still require final
+artifact and VQA acceptance.
+
+Evidence in the artifact-acceptance directory includes `generation-approved.log`,
+`check-fresh-artifact.log`, `range-audit.json`, `range-audit-projector-review.md`,
+`range-audit-advisory-reconciliation.md`, `artifact-fast-audit.json`,
+`fresh-cache-readiness.json`, `width-fix/proposal.md`, `width-fix/law-proof.json` and
+`law-correction-proposal.md` / `.json`. Batch both changes before canonical affected regeneration,
+then rerun image, mathematical, annotation, split and cache gates before live evaluation.
+
+### Approved image-label correction verification
+
+The actual combined source comparison passes with **1,547 targets /2,017 routes /4,825 complete
+selections**. Every target ID, label conjunction and disposition is unchanged. The only route
+change is the approved six-to-three equal-addends writer migration. All 1,947 retained non-width
+routes keep their generator bindings. The 67 width routes remain, with their selections refined
+75→114; no additional width route appears in the current catalog. Every old width cell has its
+complete exact refinements, and all 280 legacy planned payload/PRNG controls pass.
+
+The old 75 width-inference selections retire: there are now no inference callbacks in the current
+source selections. The annotation gate has zero conflicts, contract errors, invalid contexts,
+incomplete tuples or pending inference; the only missing range remains approved Q4 overflow.
+
+Independent native verification checks all 775,251 general cases, all 14 legacy ordered lists,
+and 1,550,502 legacy/single/multiple control comparisons across 180 contexts. Original rational
+proposal denominators, row/second ordering and conditional weights remain exact. All 1,952
+exact-cell and 528 control two-draw continuations pass. The feasibility scan now limits each
+row to the selected digit interval before visiting pairs; it retains the original proposal
+denominators and random calls. No mathematical outcome is removed by this optimization.
+
+The two protected implicit-law width contexts survive in all four equation leaves: twelve
+original generator-binding selections and 48 draw/replay/PRNG controls pass. Their distributive
+projections all declare Equation/BothSides without false Formalization. Result and second-operand
+unknowns remain distinct and withheld in Question mode. The ordinary law/writer lineage suite
+also verifies all 26 law and five writer selections across four seeds, including 124 draw/replay
+controls and 248 Question/Solution SSR checks.
+
+Focused acceptance passes **304 tests across eighteen files**: 222 width tests and 82 equation
+tests. Expanded width coverage includes all nine module production files (95.30% statements,
+92.32% branches); every file clears the unchanged 85%/60% thresholds. Equation coverage includes
+fourteen production files at 100% statements, branches, functions and lines. The expanded scan
+initially exposed four timeout failures; interval pruning removes three, and organizing the
+remaining monolithic range proof into ten independent contexts preserves every pair, band,
+witness and exact cardinality. No timeout, assertion, coverage threshold or gate is weakened.
+The original failure logs remain protected.
+
+The compatibility regression fixture now loads exactly its 26 required generators and one
+real view rather than the entire catalog, asserting both discovered and loaded inventories.
+Its original cases and 30-second setup limit remain. Two formerly rejected width requests
+are now valid under the approved exact capabilities; their negative rows use genuinely
+impossible single-digit/whole-tens conjunctions, with two additional positive native regressions.
+All 62 compatibility tests pass. Independent final reviews of both source batches find no
+actionable correctness or preservation issues.
+
+Final TypeScript, complete generator/view declaration validation and documentation references
+pass. One integration-test-only generic typing correction uses the concrete pair schema and
+asserts its actual no-inference spec; no production type or producer changes. The source batches
+are committed as `4ae015ef` (exact operand widths) and `a1bd08f2` (equation tasks).
+Full repository coverage remains pending: two collected attempts exposed existing exhaustive-test
+and cold catalog timeouts. Five test files now separate independent contexts and fixture phases,
+retaining every original candidate, seeded draw, assertion and timeout. All 90 revised cases pass
+under coverage. They retain all 704 general-model draws /2,816 SSR calls, 264 word-model draws
+/528 SSR calls, 960 polygon draws and the complete rounding oracle. Model-only catalog loading
+is staged separately from the independently loaded full runtime catalog, with both 30-second
+limits retained. This test-structure verification does not replace the affected production-file
+coverage above. The test-only batch is committed as `e2de6a2a`.
+The complete suite will run alongside network-bound VQA after regeneration.
+Source/native verification does not establish the forthcoming artifact or live VQA result.
+
+Evidence includes `after-approved-corrections/source-acceptance.json`,
+`after-approved-corrections/law-width-induced-proof.json`,
+`after-approved-corrections/width-native-proof.json`, `width-fix/expanded-coverage-second/coverage-summary.json`,
+`law-coverage/coverage-summary.json`, `types-corrections-verified.log`,
+`specs-corrections-final.log`, `docs-corrections-final.log` and `test-partitions-coverage-final.log`.
 
 ## Accepted direction
 

@@ -27,9 +27,13 @@ The later [artifact follow-up](canonical-range-labeling.md#artifact-acceptance-2
 corrects eight representation producers under these policies. Both declaration corrections
 are approved and applied: the object view's supported-operation boundary and integer scopes
 in two comparison source families. All 442 focused tests pass; source coverage is now 1,547
-normalized targets /2,020 routes /4,791 selections. The 14 approved target-ID migrations and
-13 exposed decimal matches are recorded separately from the Q4 checkpoint above. Canonical
-publication and VQA remain in progress.
+normalized targets /2,020 routes /4,791 selections at that checkpoint. The 14 approved target-ID
+migrations and 13 exposed decimal matches are recorded separately from the Q4 checkpoint above.
+A fresh 4,866-image snapshot passes replay, range, annotation and split checks. Its two image-label
+conflicts led to the separately reviewed exact-width and equation-task corrections: current source
+verification is 1,547 unchanged targets /2,017 routes /4,825 selections, with only the approved
+six-to-three writer route migration. All 304 new focused tests and their unchanged coverage gates
+pass. Affected regeneration and live VQA remain pending.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
