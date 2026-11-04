@@ -17,20 +17,21 @@ Q12 qualifies [currency amounts in their displayed monetary units](#q12-source-v
 Q13 excludes [algebra tasks from numeric range annotations](#q13-source-verification).
 Q15 separates [collection totals and enumeration](#q15-source-verification).
 Q16 qualifies [the represented scalar for every writing notation](#q16-source-verification).
+Q4 qualifies [representable standard multiplication while retaining unlabelled overflow](#q4-source-verification).
 
 Status: the target-expansion helper, first eight-family adoption, R4/R5 and six implemented
 [autonomous batches](canonical-range-autonomous-rollout.md) pass their repository and full-suite
-checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15 and Q16 decision batches also pass their
+checks. The Q1/Q2, Q6, Q7, Q8, Q9, Q10, Q11, Q12, Q13, Q15, Q16 and Q4 decision batches also pass their
 focused and independent source checks.
 These batches preserve
 earlier competency/route lineages while adding reviewed source variants and applying the
 authorized integer-domain and fixed-bound source corrections. The accepted source covers
-**1,547 normalized targets / 2,024 routes and 4,764 complete selections**, with **one range-presence
-omission in one producer** remaining. The
+**1,547 normalized targets / 2,024 routes and 4,768 complete selections**, with **one intentionally
+unlabelled multiplication-overflow selection**. The
 [remaining-family review](canonical-range-remaining-families.md#sixth-batch-final-review-and-decision-boundaries)
-records one remaining contract/policy question, concerning multiplication overflow above the
-largest ontology upper bound.
-Ordinary profiles and the source-backed local repairs are complete. The original inventory remains historical.
+records all contract/policy decisions as resolved. Overflow above the largest ontology upper
+bound remains an approved range-presence exception. Ordinary profiles and the source-backed
+local repairs are complete. The original inventory remains historical.
 Stored annotations have not been regenerated for these range changes. Missing-range findings
 remain report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
 remain separate gates.
@@ -1168,6 +1169,99 @@ a new full-suite pass, dataset regeneration or independent VQA. Evidence is unde
 `verification-after.json`, `source-audit.json`, `renders/manifest.json`, `visual-review.json`
 and `check.log`; focused results are in `scoped-coverage.log`, `coverage-summary.json` and
 `coverage-gate.log`. Fresh matching is under `temp/spec-plans/ccss/range-q16-2026-11-04/`.
+
+## Q4 multiplication overflow
+
+Approved 2026-11-04 after Q16, from `a34caa50`: keep products above the pinned
+ontology's largest upper bound unlabelled for now. Adopt canonical ranges for representable
+standard multiplication without truncating the existing factors, products or algorithm work.
+This resolves the last policy question; it does not authorize an upstream ontology change
+or claim that the intentionally unlabelled overflow satisfies range completeness.
+
+| Consumer / source | Mathematical contract and adoption | Verification |
+| --- | --- | --- |
+| `operations-multiplication-standard-algorithm`, `5.NBT.B.5-multiplication-standard-algorithm` | Retain `standard-algorithm-multiplication` / `StandardMultiplicationProblem`, both factor domains, shifted partial products, carry chains and final sum; select a representable range or unlabelled overflow before sampling | Original conditional sampling weights, complete support partition, direct/planned replay, both native modes and unchanged rendering for equal mathematics |
+| Decimal multiplication and shared column-calculation renderer | Separate decimal payload and producer remain controls; shared row/sum structures and renderer require no migration | Shared renderer and decimal consumer regression tests |
+
+Relevant quantities include the factors, final product, partial products and the explicitly
+assessed digit multiplication and column addition arithmetic. Passive numeral digits and
+place indexes are not additional quantities. Every aligned-row sum contains an actual zero
+addend from a shifted row, so no positive lower descriptor is justified. The product dominates
+the maximum; the existing requirement for both multiplication and addition carries places
+all admitted products above 120. The feasible upper bands are 1000,10000,100000 and1m; overflow
+above1m retains an explicit no-range configuration. The payload and learner task stay the same
+(SPEC-6, IMPL-G4, IMPL-G6, IMPL-G7).
+
+The four range alternatives and explicit empty overflow alternative refine the existing
+Grade 5 target's generation plan. No target, payload type, view or shared matching rule needs
+to change. Exact upper endpoints remain supported because these tasks also contain zero;
+they are not threshold singletons. For example, `4000 × 250 = 1,000,000` is labelled upper1m,
+while `4001 × 250 = 1,000,250` is unlabelled.
+
+The original proposal law assigns multiplicand-width weights 100/10/1 and multiplier
+weights 90 for two digits, 9 for ordinary three digits and 109 for the overlapping `a0b`/`ab0`
+scenarios. Pair weights have common denominator 874,800,000 before the two carry requirements
+are applied. The implementation conditions that law on the selected cell. Lazy per-cell
+row masses and two inverse draws preserve every admitted pair and its conditional weight
+without constructing millions of payloads at catalog import. The original retry sampler's
+seeded payloads and draw counts intentionally change; equal mathematical payloads retain
+their rendering.
+
+### Q4 source verification
+
+An independent scan of all 9,890,100 native factor pairs finds 8,975,330 pairs satisfying both
+original carry requirements, with total integer weight 582,992,000. The production domains
+agree on every admitted pair, every row mass and all five cell hashes:
+
+| Selected upper | Admitted pairs | Original integer weight |
+| --- | ---: | ---: |
+| 1000 | 369 | 3,321,000 |
+| 10000 | 17,560 | 50,384,000 |
+| 100000 | 293,772 | 166,527,770 |
+| 1m | 2,348,923 | 210,830,376 |
+| Unlabelled overflow | 6,314,706 | 151,928,854 |
+
+The independent proof checks 160 native draws and 160 planned draws/replays against the
+conditional inverse sampler and exact two-draw continuation. All 64 protected source/native
+Question/Solution SSR strings remain byte-identical, including maximum overflow. Of 22
+protected inputs, only the producer implementation and schema change; the new local domain
+helper enters the source closure. The original 512 seeded payloads remain valid supported
+mathematics, while the new seed schedule intentionally selects different pairs.
+
+The accepted source has **1,547 normalized targets / 2,024 routes / 4,768 complete selections**.
+All 4,763 other selections are semantically unchanged. Q4 refines its sole existing route from
+one to five selections, with no changes to target IDs/labels, matched pairs or dispositions. Only its generation
+plan changes; the other 2,023 plans remain exact. Source inspection finds 4,303 eligible selections
+and 22,202 satisfied assessments, with 93 exhaustive inference selections and zero conflicts,
+contract errors, incomplete tuples, invalid contexts or pending/invalid inference. The single
+missing range assessment now belongs exclusively to the approved overflow selection; it remains
+visible in the report rather than being suppressed by a validator exception.
+
+Native browser verification covers all five planned cells, four exact upper endpoints,
+maximum overflow and a zero-multiplier pass: **22 Question/Solution images / 44 byte-identical
+repeated captures**, with no browser errors or error cards. Six representative captures are
+visually inspected. Unknowns remain withheld in Questions; Solutions preserve every aligned
+row, carry and column equation, including the complete seven-digit maximum result.
+
+Final standalone TypeScript and full-check stages 2–5 pass: generator/view contracts, labels,
+documentation and source standards. The initial check found a readonly-array mismatch in a
+new test call; passing a mutable copy resolves it, and the final TypeScript run exits 0.
+The unchanged local artifact gates still fail on 1,944 stored rows without recorded generation
+plans/receipts, 2,277 missing annotation facets and 4,006 strict failures among 1,396 eligible
+stored samples, with zero conflicts or incomplete tuples.
+
+All **140 focused tests across 13 files pass**. Measured coverage is **100% statements /
+98.75% branches**, with the unchanged two-file coverage gate passing: generator100%/100%,
+domain100%/98.61%. The first focused run passed the other 118 tests but exceeded the default
+setup timeout for the 22-case integration suite. Splitting independent catalog, renderer,
+source and domain fixtures into separate ordinary hooks resolves the timeout; all 22 cases,
+default timeouts and assertions remain intact. The final run includes every focused case.
+These checks do not claim a new full-suite pass, canonical regeneration or independent VQA.
+Stored dataset regeneration and independent VQA remain separate gates. Evidence belongs under
+`temp/range-decisions/batch12-q4/`: `verification-after.json`, `independent-math.ts`,
+`source-matching-after.json`, `renders/manifest.json`, `visual-review.json`, `types-final.log`,
+`check.log`, `scoped-coverage.log`, `coverage-summary.json` and `coverage-gate.log`.
+Matching snapshots remain beside the source proof as `matching-before.json` and `matching-after.json`.
 
 ## Accepted direction
 

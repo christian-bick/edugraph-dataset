@@ -1,5 +1,4 @@
 import {validateConfigFields} from '../../../lib/errors.ts';
-import {random} from '../../../lib/random.ts';
 import type {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
 import type {
     StandardMultiplicationPartialRow,
@@ -10,9 +9,7 @@ import {
     StandardAlgorithmMultiplicationGeneratorConfig,
     StandardAlgorithmMultiplicationGeneratorSchema
 } from './spec.ts';
-
-const randomInteger = (minimum: number, maximum: number): number =>
-    minimum + Math.floor(random() * (maximum - minimum + 1));
+import {sampleStandardMultiplicationFactors} from './domain.ts';
 
 const digitsFromOnes = (value: number): number[] =>
     String(value).split('').reverse().map(Number);
@@ -84,22 +81,6 @@ export function buildStandardMultiplicationProblem(
     };
 }
 
-function sampleMultiplier(): number {
-    const scenario = randomInteger(0, 3);
-    if (scenario === 1) {
-        return randomInteger(1, 9) * 100 + randomInteger(1, 9);
-    }
-    if (scenario === 2) {
-        return randomInteger(1, 9) * 100 + randomInteger(1, 9) * 10;
-    }
-    const digitCount = randomInteger(2, 3);
-    return randomInteger(10 ** (digitCount - 1), 10 ** digitCount - 1);
-}
-
-const hasVisibleCarry = (problem: StandardMultiplicationProblem): boolean =>
-    problem.partialRows.some(row => row.columns.some(column => column.carryOut > 0))
-    && problem.sumColumns.some(column => column.carryOut > 0);
-
 export class StandardAlgorithmMultiplicationGenerator implements ProblemGenerator<
     StandardMultiplicationProblem,
     StandardAlgorithmMultiplicationGeneratorConfig
@@ -109,15 +90,9 @@ export class StandardAlgorithmMultiplicationGenerator implements ProblemGenerato
 
     generate(
         config: StandardAlgorithmMultiplicationGeneratorConfig
-    ): ProblemStub<StandardMultiplicationProblem> | null {
-        validateConfigFields('standard-algorithm-multiplication', config, []);
-        for (let attempt = 0; attempt < 100; attempt++) {
-            const multiplicandDigits = randomInteger(2, 4);
-            const multiplicand = randomInteger(10 ** (multiplicandDigits - 1), 10 ** multiplicandDigits - 1);
-            const multiplier = sampleMultiplier();
-            const data = buildStandardMultiplicationProblem(multiplicand, multiplier);
-            if (hasVisibleCarry(data)) return {data};
-        }
-        return null;
+    ): ProblemStub<StandardMultiplicationProblem> {
+        validateConfigFields('standard-algorithm-multiplication', config, ['range']);
+        const [multiplicand, multiplier] = sampleStandardMultiplicationFactors(config.range!);
+        return {data: buildStandardMultiplicationProblem(multiplicand, multiplier)};
     }
 }

@@ -1,12 +1,18 @@
 import {describe, expect, it} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
+import {getRandomState, random, setSeed} from '../../../lib/random.ts';
 import type {StandardMultiplicationProblem} from '../../../types/problems.ts';
 import {
     buildStandardMultiplicationProblem,
     StandardAlgorithmMultiplicationGenerator
 } from './generator.ts';
+import {STANDARD_MULTIPLICATION_UPPERS, type StandardMultiplicationRange} from './domain.ts';
 
 const generator = new StandardAlgorithmMultiplicationGenerator();
+const profiles: {name: string; range: StandardMultiplicationRange}[] = [
+    ...STANDARD_MULTIPLICATION_UPPERS.map(upper => ({name: `upper ${upper}`, range: createCanonicalNumericRange(upper)})),
+    {name: 'overflow', range: false}
+];
 
 const digitAt = (value: number, placeIndex: number): number =>
     Math.floor(value / 10 ** placeIndex) % 10;
@@ -83,7 +89,14 @@ function expectExactAlgorithm(data: StandardMultiplicationProblem): void {
 
 describe('StandardAlgorithmMultiplicationGenerator', () => {
     it('validates configuration and explicit factor bounds', () => {
+        setSeed('invalid-multiplication');
+        const state = getRandomState();
         expect(() => generator.generate(null as never)).toThrow();
+        expect(() => generator.generate({})).toThrow('range');
+        for (const range of [undefined, null, true, {}, createCanonicalNumericRange(120), createCanonicalNumericRange(1000, 5),
+            {...createCanonicalNumericRange(1000), maximumAbove: 0}, {...createCanonicalNumericRange(1000), minimumBelow: 10}])
+            expect(() => generator.generate({range} as never)).toThrow();
+        expect(getRandomState()).toBe(state);
         expect(() => buildStandardMultiplicationProblem(9, 10)).toThrow(RangeError);
         expect(() => buildStandardMultiplicationProblem(10, 1000)).toThrow(RangeError);
     });
@@ -108,31 +121,51 @@ describe('StandardAlgorithmMultiplicationGenerator', () => {
         expect(data.product).toBe(product);
     });
 
-    it('samples both factor widths, zero passes, and visible carries', () => {
+    it.each(profiles)('samples exact canonical mathematics in $name', ({range}) => {
+        for (let seed = 0; seed < 60; seed++) {
+            setSeed(seed);
+            const data = generator.generate({range}).data;
+            expectExactAlgorithm(data);
+            if (range === false) expect(data.product).toBeGreaterThan(1000000);
+            else {
+                expect(data.product).toBeGreaterThan(range.maximumAbove);
+                expect(data.product).toBeLessThanOrEqual(range.max);
+            }
+            expect(data.partialRows.some(row => row.columns.some(column => column.carryOut > 0))).toBe(true);
+            expect(data.sumColumns.some(column => column.carryOut > 0)).toBe(true);
+        }
+    });
+
+    it('retains every factor width and native zero-digit passes across the five profiles', () => {
         const multiplicandWidths = new Set<number>();
         const multiplierWidths = new Set<number>();
         let zeroPasses = 0;
         for (let seed = 0; seed < 300; seed++) {
             setSeed(seed);
-            const data = generator.generate({})?.data;
-            expect(data).toBeDefined();
-            expectExactAlgorithm(data!);
-            multiplicandWidths.add(String(data!.multiplicand).length);
-            multiplierWidths.add(String(data!.multiplier).length);
-            if (data!.partialRows.some(row => row.multiplierDigit === 0)) zeroPasses++;
-            expect(data!.partialRows.some(row => row.columns.some(column => column.carryOut > 0)))
-                .toBe(true);
-            expect(data!.sumColumns.some(column => column.carryOut > 0)).toBe(true);
+            const data = generator.generate({range: profiles[seed % profiles.length]!.range}).data;
+            multiplicandWidths.add(String(data.multiplicand).length);
+            multiplierWidths.add(String(data.multiplier).length);
+            if (data.partialRows.some(row => row.multiplierDigit === 0)) zeroPasses++;
         }
         expect(multiplicandWidths).toEqual(new Set([2, 3, 4]));
         expect(multiplierWidths).toEqual(new Set([2, 3]));
         expect(zeroPasses).toBeGreaterThan(0);
     });
 
-    it('replays the same factor and carry chains under the same seed', () => {
+    it.each(profiles)('replays fresh exact payloads and consumes two draws in $name', ({range}) => {
         setSeed('standard-algorithm-multiplication');
-        const first = generator.generate({});
+        random();
+        random();
+        const continuation = getRandomState();
         setSeed('standard-algorithm-multiplication');
-        expect(generator.generate({})).toEqual(first);
+        const first = generator.generate({range});
+        expect(getRandomState()).toBe(continuation);
+        setSeed('standard-algorithm-multiplication');
+        const second = generator.generate({range});
+        expect(second).toEqual(first);
+        expect(second.data).not.toBe(first.data);
+        expect(second.data.partialRows).not.toBe(first.data.partialRows);
+        expect(second.data.partialRows[0]!.columns).not.toBe(first.data.partialRows[0]!.columns);
+        expect(second.data.sumColumns).not.toBe(first.data.sumColumns);
     });
 });

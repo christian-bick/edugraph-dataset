@@ -10,16 +10,18 @@ the [Q8 part-count ranges](canonical-range-labeling.md#q8-source-verification),
 [Q10 unit-count/factor separation](canonical-range-labeling.md#q10-source-verification),
 [Q11 single/sequence separation](canonical-range-labeling.md#q11-source-verification),
 [Q12 monetary-unit ranges](canonical-range-labeling.md#q12-source-verification),
-[Q13 algebra range exclusion](canonical-range-labeling.md#q13-source-verification) and
-[Q15 total/enumeration separation](canonical-range-labeling.md#q15-source-verification) and
-[Q16 represented-scalar writing ranges](canonical-range-labeling.md#q16-source-verification) are implemented.
-Current source coverage is **1,547 normalized targets / 2,024 routes / 4,764 selections**, with
-**one missing range facet in one producer**. Q1/Q2 closed 14 source omissions, Q6
+[Q13 algebra range exclusion](canonical-range-labeling.md#q13-source-verification),
+[Q15 total/enumeration separation](canonical-range-labeling.md#q15-source-verification),
+[Q16 represented-scalar writing ranges](canonical-range-labeling.md#q16-source-verification) and
+[Q4 bounded multiplication with retained overflow](canonical-range-labeling.md#q4-source-verification) are implemented.
+Current source coverage is **1,547 normalized targets / 2,024 routes / 4,768 selections**, with
+**one intentionally unlabelled multiplication-overflow selection**. Q1/Q2 closed 14 source omissions, Q6
 closed another 16, Q7 seven, Q8 seven, Q9 five, Q10 two, Q11 28 and Q12 11; Q13 retires eight
 algebra range obligations by policy. Q15 refines 20 already-labelled routes and adds one
 conservation source variant. Q16 refines the 14 positive non-Name writing routes into 37
-selections while preserving the nine Name and three fixed-zero controls. One decision topic
-remains: multiplication overflow above the largest ontology upper bound.
+selections while preserving the nine Name and three fixed-zero controls. Q4 refines one existing
+route into four bounded selections and one unlabelled overflow selection. All decision topics
+are resolved; the approved overflow gap and dataset acceptance remain visible.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
@@ -53,16 +55,14 @@ These follow the approved source-correction, canonical-relation and question/sol
 approaches. They require neither a new producer nor a quantity policy. Former questions Q3,
 Q5 and Q14 are therefore resolved rather than carried forward as approvals.
 
-The following questions concern mathematical meaning or a contract change. They are not deferred
-because their domains are large or because the implementation is difficult. The numeric examples
-are counterexamples to an unqualified shared range, not requests to change the agreed inclusive
-bound convention. Preserve every current route and supported mathematical outcome when resolving
-them. A valid consumer cannot be excluded merely to make another consumer's range truthful
-(SPEC-G3, IMPL-G4, IMPL-V11).
+The final decision below concerned mathematical meaning and the finite ontology ceiling.
+The approved resolution preserves every current route and supported mathematical outcome,
+including overflow, without changing the inclusive bound convention or excluding a valid
+consumer (SPEC-G3, IMPL-G4, IMPL-V11).
 
-| ID / remaining slice | Concrete question | Recommendation and consequence |
+| ID / resolved slice | Approved decision | Consequence |
 | --- | --- | --- |
-| Q4 — multiplication overflow,1 | How should `9999×999=9,989,001` be represented above the largest ontology upper1m? | Prefer an upstream upper10m descriptor. Alternatively explicitly retain an unlabelled overflow slice while adopting expressible cases. Do not truncate existing multiplication support silently. |
+| Q4 — multiplication overflow,1 | Keep products above upper1m unlabelled for now. | Four precise representable range cells and one explicit unlabelled overflow cell preserve all admitted factor pairs, including `9999×999=9,989,001`; no upstream descriptor request is needed for this batch. |
 
 Q1/Q2 are resolved by the approved syntax/calculation separation, with all nine source target/view
 lineages preserved and 14 omissions closed. Their source proofs and native render verification are
@@ -138,10 +138,15 @@ tests across 11 files pass, with 100% statement / 97.59% branch coverage and the
 four-file coverage gate passing. The linked checkpoint records the existing full-suite and
 stored-artifact limitations separately from source acceptance.
 
-The remaining row accounts for the one missing source facet: arithmetic 1. This question is
-a contract/policy topic, not an estimated implementation-batch count. Current checks prove
-source consistency; they do not close the unresolved range work
-or authorize additional producer splits. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
+Q4's [source verification](canonical-range-labeling.md#q4-source-verification) preserves all
+8,975,330 admitted factor pairs and their exact original conditional weights across four
+bounded cells and one overflow cell. All 4,763 other selections and 2,023 other generation plans
+remain exact. The sole missing source facet is the intentionally unlabelled arithmetic overflow;
+there are no remaining contract/policy questions. All 140 focused tests and the unchanged
+coverage gate pass, with 100% statement / 98.75% branch coverage. Native verification covers
+22 images / 44 identical captures, including exact upper endpoints and the maximum overflow.
+Source consistency does not claim complete
+range presence or dataset acceptance. Sixth-batch acceptance in the rollout ledger passes all7,705 tests /
 1,009 files and all generator coverage thresholds; dataset acceptance remains separate.
 
 ## Review baseline (historical)
