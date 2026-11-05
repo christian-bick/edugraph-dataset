@@ -1,2 +1,2 @@
-- **Identity:** Two visible numerals and a central relation position form a numerical comparison; multi-digit solutions identify the decisive place or confirm that every place matches.
-- **Modes:** Question Mode withholds the symbol and place-value evidence; Solution Mode reveals the supplied equation, deciding-place evidence, and conclusion.
+- **Identity:** Two visible numerals and a central relation position form a numerical comparison. A worked place-value comparison additionally identifies the decisive place or confirms that every place matches.
+- **Modes:** Question Mode withholds the relation symbol and any deciding-place working; Solution Mode reveals the completed comparison. A worked place-value comparison also reveals its deciding-place or all-equal evidence and conclusion.

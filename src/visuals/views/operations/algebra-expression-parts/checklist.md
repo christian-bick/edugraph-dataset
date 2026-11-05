@@ -1,2 +1,3 @@
 - **Identity:** A marked expression component is classified by its additive, multiplicative, quotient or coefficient role; a coefficient is relative to a stated variable part.
 - **Modes:** Question Mode shows the complete numeric or symbolic structural expression and the neutral selected component, with its category unresolved. Solution Mode identifies the role and the structural relationship, retaining signs of complete additive terms and the designated variable part.
+- **Essential specifics:** Classify structure without evaluating unrequested totals or subtotals. A written fractional number is one complete numeric component; separately assessed numerator/denominator quantities, explicit quotient operands and complete signed terms remain distinct assessed components.

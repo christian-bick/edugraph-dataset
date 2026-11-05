@@ -1,2 +1,3 @@
 - **Identity:** A countable ten-frame or place-value representation is the source for writing its numeral.
 - **Modes:** Question Mode leaves the numeral response empty; Solution Mode reveals the numeral matching the unchanged quantity.
+- **Essential specifics:** The requested numeral describes the whole represented quantity. Place-value group counts support that representation; independently assessed component counts and arithmetic inputs/results remain separate quantities.
