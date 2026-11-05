@@ -10,8 +10,21 @@ interface Row {readonly source: EstimationConstructionDomain; readonly first: nu
 export interface CanonicalEstimationDomain {readonly rows: readonly Row[]; readonly weight: number}
 const cache = new Map<string, CanonicalEstimationDomain>(), feasibility = new Map<string, boolean>();
 interface Admission {readonly cases: readonly ProposalCase[]; readonly mass: number}
-const admissions = new Map<string, Admission>();
+type AdmissionCache = readonly Map<number, Admission>[];
+const admissions = new Map<string, AdmissionCache>();
 const emptyAdmission: Admission = {cases: [], mass: 0};
+
+/** Prepare the unchanged domain/zero/range prefix once per source row. Numeric
+ * Map keys preserve the original Number-to-string equality for NaN and signed0. */
+function admissionCache(minimum: number, maximum: number, zero: boolean, range: CanonicalNumericRange): AdmissionCache {
+    const key = `${minimum}:${maximum}:${zero}:${range.min}:${range.max}`;
+    let result = admissions.get(key);
+    if (!result) {
+        result = Array.from({length: 8}, () => new Map<number, Admission>());
+        admissions.set(key, result);
+    }
+    return result;
+}
 const uppers = [10, 20, 100, 120, 1000], lowers = [0, 5, 10, 20, 100, 120];
 const invalid = (message: string) => new GeneratorValidationError('arithmetic-estimation', message);
 const round = (value: number) => Math.round(value / 10) * 10;
@@ -34,15 +47,16 @@ export const estimationConstructionContexts = (operation: ArithmeticOperation, r
     uppers.filter(upper => upper >= range.max).flatMap(upper => lowers.filter(lower => lower < upper && lower <= range.min)
         .map(lower => ({operation, minimum: lower, maximum: upper})));
 
-function admission(data: EstimationRelation, zero: boolean, range: CanonicalNumericRange): Admission {
+function admission(data: EstimationRelation, zero: boolean, range: CanonicalNumericRange, prepared?: AdmissionCache): Admission {
     const minimum = Math.min(data.num1, data.num2, data.roundedNum1, data.roundedNum2, data.exactAnswer, data.estimatedAnswer, round(data.estimatedAnswer));
     const maximum = Math.max(data.num1, data.num2, data.roundedNum1, data.roundedNum2, data.exactAnswer, data.estimatedAnswer, round(data.estimatedAnswer));
     const baseZero = minimum === 0;
     if (minimum < range.min || maximum > range.max || !zero && baseZero) return emptyAdmission;
     const needUpper = maximum <= range.maximumAbove, needLower = minimum >= range.minimumBelow;
     // The complete relation affects proposal admission only through these booleans.
-    const key = `${data.numberDomain.min}:${data.numberDomain.max}:${data.estimatedAnswer}:${zero}:${range.min}:${range.max}:${baseZero}:${needUpper}:${needLower}`;
-    let result = admissions.get(key);
+    const flags = (baseZero ? 4 : 0) | (needUpper ? 2 : 0) | (needLower ? 1 : 0);
+    const cache = (prepared ?? admissionCache(data.numberDomain.min, data.numberDomain.max, zero, range))[flags]!;
+    let result = cache.get(data.estimatedAnswer);
     if (!result) {
         const cases = estimationProposalCases(data).filter(proposal => {
             const low = Math.min(proposal.proposedAnswer, proposal.roundedProposedAnswer);
@@ -51,7 +65,7 @@ function admission(data: EstimationRelation, zero: boolean, range: CanonicalNume
                 && (!needUpper || high > range.maximumAbove) && (!needLower || low < range.minimumBelow);
         });
         result = {cases, mass: cases.reduce((sum, proposal) => sum + proposal.seeds, 0) / proposalSeedCount};
-        admissions.set(key, result);
+        cache.set(data.estimatedAnswer, result);
     }
     return result;
 }
@@ -93,12 +107,13 @@ export function canonicalEstimationDomain(operation: ArithmeticOperation, zero: 
         const rows: Row[] = [];
         let weight = 0;
         for (const row of sourceRows(operation, range)) {
+            const context = admissionCache(row.source.minimum, row.source.maximum, zero, range);
             const seconds: number[] = [], masses: number[] = [];
             let rowWeight = 0;
             for (let second = row.firstSecond; second <= row.lastSecond; second++) {
                 const data = estimationRelation(row.source, row.first, second);
                 if (!data) continue;
-                const mass = admission(data, zero, range).mass;
+                const mass = admission(data, zero, range, context).mass;
                 if (!mass) continue;
                 seconds.push(second); masses.push(mass); rowWeight += row.pairWeight * mass;
             }
