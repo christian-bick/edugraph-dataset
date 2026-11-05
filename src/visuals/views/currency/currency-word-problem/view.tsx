@@ -87,6 +87,8 @@ const CurrencyWordProblemCore = ({payload}: CoreProps) => {
     validateProblem(data);
 
     const forceDollars = data.amounts.some(amount => amount.items.some(item => item.kind === 'banknote'));
+    const answerText = formatCurrency(data.answerCents, forceDollars);
+    const answerPlaceholder = answerText.startsWith('$') ? '$?' : '?¢';
     const symbol = data.operation === 'addition' ? '+' : '−';
 
     return (
@@ -111,7 +113,7 @@ const CurrencyWordProblemCore = ({payload}: CoreProps) => {
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-dashed border-slate-400 bg-white text-slate-400'
                 }`}>
-                    {isSolutionView ? formatCurrency(data.answerCents, forceDollars) : '?'}
+                    {isSolutionView ? answerText : answerPlaceholder}
                 </span>
             </div>
         </div>
