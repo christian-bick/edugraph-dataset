@@ -32,7 +32,7 @@ unlabelled multiplication-overflow selection**. The
 records all contract/policy decisions as resolved. Overflow above the largest ontology upper
 bound remains an approved range-presence exception. Ordinary profiles and the source-backed
 local repairs are complete. The original inventory remains historical.
-The latest protected artifact baseline is
+The protected pre-fix artifact baseline is
 `ec7939fbc7e81ff14ce36337791517f9e28faed32aab3671fc9aa568faed7f9b`, with **4,870 rows**.
 Its offline replay, annotation, split and both-operand checks pass. The historical range report
 has a subsequently identified fraction-comparison part-count blindspot; it does not establish
@@ -43,10 +43,14 @@ fraction correction, layout repairs, exact estimation-cache proof and test repai
 coverage is **1,547 targets /2,017 routes /4,843 selections**; only seven fraction semantic plans
 change from the preceding 4,837-selection checkpoint. Operational input hashes are separate.
 All five reviewed leaf checklist corrections are applied as `43c13b2d`; central policy and
-evaluator code remain unchanged. The first full coverage collector failed; 69 scoped follow-up
-tests and TypeScript now pass, but final whole-repository coverage remains pending.
-Canonical affected regeneration, offline acceptance, fresh VQA/cache, complete checks, churn and
-union verification are still pending. Source readiness does not establish dataset acceptance.
+evaluator code remain unchanged. Three prior failed full collectors remain historical. The
+final complete **10,016-test /1,077-file coverage run and original generator gate now pass**.
+The [affected publication checkpoint](#affected-canonical-acceptance-checkpoint-2026-11-05) now
+records successful regeneration and passing offline replay/range/annotation/split checks.
+The d724 churn has one separately accepted range-conditioned retry change. The subsequent
+[multiplication-cache refresh](#multiplication-cache-and-canonical-refresh-2026-11-05) now passes
+all-row offline checks, exact zero-row/pixel/key churn, all seven repository checks and full
+coverage. Authorized live VQA/current-key cache coverage and union acceptance remain pending. Source readiness and offline checks do not establish final dataset acceptance.
 Missing-range findings remain report-only; the algebra exclusions are enforced. The earlier
 Q4 and 4,825-selection image-label checkpoints remain historical.
 
@@ -1739,12 +1743,13 @@ records **9,978 passed /six timeouts of 9,984 tests across 1,077 files**, taking
 not pass. Windows independently records a 1,588.565-second sleep during the two extreme cases.
 Commit `b018a772` partitions only the other four composite checks. All **69 scoped tests /six
 files pass**, including both unchanged sleep-affected controls, and TypeScript passes. No test
-budget, skip or coverage threshold is relaxed. Final whole-repository coverage is **pending**.
+budget, skip or coverage threshold is relaxed. Whole-repository coverage was pending at that
+checkpoint; the complete passing run is recorded below.
 
-Next: canonical affected regeneration, then guarded replay/range/image/split/cache/churn audits.
-Fresh VQA and the final awake full-coverage run follow; only network I/O may overlap the timed
-suite. Complete strict repository checks and union verification remain required. No new
-generation ID, final passing verdict count or dataset-acceptance result is claimed here.
+The affected publication and completed offline checks are recorded in the
+[next checkpoint](#affected-canonical-acceptance-checkpoint-2026-11-05). The final full-coverage
+and seven-stage repository passes are recorded below; fresh VQA/cache and union remain pending.
+Neither failed collector above is superseded by a scoped pass.
 
 Evidence is under `temp/range-artifact-acceptance-2026-11-04/`: `after-both-corrections/` retains
 the old range report and completed VQA/cache evidence; `fraction-comparison-fix/` has the native,
@@ -1754,6 +1759,127 @@ retain the source proofs. Failed collectors remain `full-coverage-both-policy.lo
 `full-coverage-vqa-corrections.log`; the 69-test follow-up is
 `test-coverage-followups-and-suspend-controls.log`. Fresh acceptance evidence belongs under
 `after-vqa-content-fixes/`, including the applied-context inventory and protected baseline-state map.
+
+### Affected canonical acceptance checkpoint (2026-11-05)
+
+Canonical affected regeneration from clean `9c35e6a1` published
+`d72415e5450387efa43a5135a8de1a2d137405149ccfbb55961bfd046c50b9a7`.
+It retains **4,870 physical rows: 3,968 train /902 validation**, with 529 shards: 520 reused
+and nine written. Canonical work rendered 100 images in 91.23 seconds. The immutable manifest
+is 43,264,064 bytes, SHA256 `d738a15a2bdedad8b829f364b782d30575da7ea5c44224c8a744a2bb3850b056`.
+The protected `ec7939` publication, baseline cache and both failed coverage logs remain intact.
+
+All **4,870 primary rows replay exactly**, including stored receipts, prepared configurations,
+annotations and recorded view RNG. Direct/planned mathematical RNG repeatability also passes
+for every row. The corrected explicit projectors verify **3,903 mathematical range rows**,
+92 algebra exclusions, one approved multiplication-overflow row and 874 rows without a range
+obligation; zero rows are uninspected and zero failures remain. All 78 `MultiplesOf10` rows
+and 18 corrected known-fact scaling rows pass. This proves the sampled stored rows, not all
+future outcomes; historical post-generation RNG continuations are not stored.
+
+The offline annotation gate checks 3,916 eligible rows with zero failures. Images and split
+integrity pass: no label conflicts, cross-split leaks or redundancy errors; three duplicate
+image groups share labels, mode and split. All **1,547 target identities/claims and 2,017 route
+identities** remain exact against `ec7939`, with no new target migrations. Current source has
+4,843 complete selections. These source counts are distinct from physical allocation: three
+matched routes are unrepresented, and 451 of 521 allocated validation tuples are realized
+(70 advisories). No claim of complete matched-route allocation is made.
+
+Immutable churn retains all 4,870 sample identities with no additions, removals or unexpected
+changes. **26 PNGs change** within the three approved families: decimal multiplication captions,
+fraction comparisons, and whole/fraction number-line captions. All 48 estimation rows retain
+exact math and PNGs; the private cache optimization has no semantic or pixel change. There are
+189 changed VQA keys. The sole changed winning attempt is explained by exact production replay:
+old `1/3 < 2/3` at attempt one duplicates a train task and selects attempt two; the conditioned
+new `2/6 < 5/6` is unique at attempt one. Seeds and dedup rules are unchanged.
+
+Fresh readiness reuses 4,680 passing physical rows /4,678 unique module keys. **190 normal
+evaluation keys remain**: 189 fresh keys and the old uncached measurement-table request.
+All 18 baseline HIGH failures now have fresh keys. No fresh-key passing verdict is claimed;
+zero current completed failures before evaluation is not VQA acceptance. The protected
+baseline remains 4,851 PASS /18 HIGH failures /one missing request.
+
+The awake collector subsequently ended at **10,015 passed /one overflow timeout of 10,016
+tests**, with 1,076 of 1,077 files passing, in 29m21s. It did not pass; the chained generator
+coverage gate was not reached. An isolated passing timing does not supersede this full-run
+failure. The subsequent cache correction and complete passing run are recorded below.
+
+| Final gate | Verified result or remaining work |
+| --- | --- |
+| Awake whole-repository coverage | **PASS** — 10,016 tests /1,077 files in 1,754.12s; all 185 generator files pass unchanged 85% statement /60% branch thresholds. |
+| Fresh live VQA/cache | **PENDING** — evaluate the 190 exact current keys, then record all-row/current-key outcomes, including the old fetch error. |
+| Complete strict repository checks | **PASS** — all seven ed256 stages; separate strict VQA cache audit remains unmet at 190 missing /189 stale keys. |
+| Immutable churn and union | ed256 churn **PASS**, all stored rows/PNGs/keys exact; live-cache and union acceptance remain **PENDING**. |
+
+Evidence in `temp/range-artifact-acceptance-2026-11-04/after-vqa-content-fixes/` includes
+`range-audit.json`, `artifact-fast-audit.json`, `target-lineages.json`, `split-after.json`,
+`fresh-cache-readiness.json`, `snapshot-churn.json`, `winning-attempt-review.json` and
+`decision-cross-gate-review.json`. The churn report's review-required retry is resolved by the
+separate exact retry proof. The latest checkpoint below records the subsequent passing offline
+audits, seven repository stages and complete coverage; fresh VQA/cache and union remain pending.
+
+### Multiplication cache and canonical refresh (2026-11-05)
+
+Commit `d530904d` changes only the standard-multiplication domain's private fixed table of
+990 multiplier digits/maxima/weights. Range domains remain lazy; guards, carry logic, bounds,
+ordered support, integer weights and the two-draw sampler remain unchanged. Independent
+execution proves all **9,890,100 native pairs**, 8,975,330 admitted pairs and total integer mass
+582,992,000, with exact row/order hashes in all five cells, 55 interval tapes and **1,285 seeded
+payload/continuation comparisons**. No spec, payload, view, target or test changes are made.
+
+The bounded fresh-process V8 comparison keeps both original files/all 39 cases, two workers
+and 5s limits: cold overflow construction improves **3.664→2.596s**, and its original 60-seed
+case **4.235→3.034s**. These are one measured pair of runs, not a timing guarantee. All **68
+module tests /four files pass**; generator statement/branch/function/line coverage is 100%,
+and TypeScript passes. This scoped result does not convert the failed full collector to a pass.
+
+Canonical affected refresh from clean `d530904d` publishes
+`ed25642af4e0ad38ef6f47710a345608cc513253c641adbff866e6121ebbab69`.
+It retains **4,870 rows: 3,968 train /902 validation**. The pipeline renders one pair/two images
+in 28.95s, reuses all 529 shards and writes no new shard or image bytes. The immutable manifest
+is 42,958,039 bytes, SHA256 `1f27bf6b394474d15b0f7ac21cc1ff8cf9fc6756cef62975675199139f23bb25`.
+
+New guarded audits replay all **4,870 rows**, including mathematical RNG repeatability;
+3,903 range proofs, 92 algebra exclusions, one approved overflow and 874 no-obligation rows
+have zero failures/uninspected rows. All 78 `MultiplesOf10` and 18 known-fact scaling rows pass.
+The annotation gate checks 3,916 eligible rows with no failures. Images/splits pass, retaining
+three same-label/mode/split duplicate warnings and the separate three missing-route /70
+unrealized-validation allocation advisories. All 1,547 target identities/claims and 2,017 route
+identities remain exact; current source still has 4,843 complete selections.
+
+Strict immutable d724→ed256 churn finds **all 4,870 complete stored rows, PNGs and VQA keys
+identical**: no math/config/label/fingerprint/seed/attempt/RNG/identity/allocation change.
+The graph changes only the pinned domain bytes and retires five unreferenced checklist nodes.
+Each retired leaf has zero graph/physical references and unchanged disk/Git bytes; this is the
+pipeline's intentional orphan pruning, not five additional source edits. The first overly broad
+source-node assertion and its failed log are protected; the corrected derived predicate and
+independent review pass without relaxing any physical-row check.
+
+All **seven repository checks pass**, including TypeScript and strict annotations. The separate
+API-disabled strict VQA cache audit **exits 1**: 4,680/4,870 passing physical rows,
+**190 missing current keys /189 stale historical keys**, zero freshness/structure/renderer
+issues, and no API calls. Readiness preserves the old fetch-error key as ordinary work; no
+fresh-key passing verdict is claimed. A successful offline inventory is not live VQA acceptance.
+
+The final unchanged awake `npm run test:coverage` **exits 0**: all **10,016 tests /1,077 files
+pass in 1,754.12s**, with zero skipped tests. npm continues into the generator coverage gate:
+all **185 generator files pass** the original **85% statement /60% branch** thresholds; minima
+are 87.5% /66.66%. Aggregate coverage is **98.85% statements /97.27% branches /100% functions
+/99.4% lines**. Node24, the default worker pool, V8 coverage, two workers, timeouts, tests and thresholds are unchanged.
+The process-only sleep lease is released. HEAD/source configuration and the ed256 pointer stay
+exact throughout; all three prior failed collectors and their logs remain protected.
+
+**PENDING:** explicit Gemini transfer approval, live VQA/current-key cache acceptance, then
+union regeneration/verification. The separate strict cache result remains unmet at 190 missing
+/189 stale keys; no live API request or fresh passing verdict is claimed.
+Evidence: `after-vqa-content-fixes/multiplication-overflow-perf-fix/installed-proof-inventory.json`
+plus `temp/range-artifact-acceptance-2026-11-04/after-multiplication-cache/` — `range-audit.json`,
+`artifact-fast-audit.json`, `fresh-cache-readiness.json`, `snapshot-churn.json`,
+`source-node-churn-diagnostic.json`, `decision-corrected-churn-review.json`,
+`full-repository-check.log`, `strict-cache-audit-before-live.log` and
+`final-whole-coverage-result.json` (SHA256 `c7bd10d6336e0e57c705b38d2256cb65b701e10b9140050c5e964f1c60ab898c`).
+Its final log SHA256 is `b8950f0154a37dbae27637eef8495f2007d16600816bb6591bbacf8d847cbb74`;
+`final-whole-coverage/` preserves the log and both coverage reports.
 
 ## Accepted direction
 

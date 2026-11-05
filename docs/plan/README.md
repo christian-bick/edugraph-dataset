@@ -195,11 +195,32 @@ These items are not newly scheduled by the archive move.
   155 tests with exact 47-cell /3,008-draw preservation. Test batch `956687e0` conserves all 28
   inventories and budgets. All five reviewed leaf checklists are applied as `43c13b2d`, with
   central policy and evaluator files unchanged.
-  Full coverage remains unaccepted: the historical 9,357/9,392 run failed 35 cases; the next
+  Earlier full collectors were unaccepted: the historical 9,357/9,392 run failed 35 cases; the next
   9,978/9,984 run failed six, including two confirmed host-sleep cases. Commit `b018a772` and
-  unchanged sleep controls pass 69 scoped tests /six files, with TypeScript green. Canonical
-  affected regeneration, offline acceptance, fresh VQA/cache, final awake full coverage,
-  strict checks, churn and union verification remain **pending**.
+  unchanged sleep controls pass 69 scoped tests /six files, with TypeScript green. The
+  [affected canonical checkpoint](canonical-range-labeling.md#affected-canonical-acceptance-checkpoint-2026-11-05)
+  records publication `d72415e5450387efa43a5135a8de1a2d137405149ccfbb55961bfd046c50b9a7`:
+  4,870 rows (3,968 train /902 validation), 529 shards (520 reused /nine written) and 100 renders.
+  All-row replay/range/annotation/split checks pass; corrected explicit range proofs retain
+  the algebra and approved-overflow exceptions. Targets/routes remain 1,547 /2,017, with 4,843
+  source selections; three unrepresented routes and 70 unrealized validation allocations are
+  separate advisories. Churn has 26 approved PNG changes, 189 changed keys and one accepted
+  conditioned retry; all 48 estimation rows retain exact math/PNGs. Fresh evaluation requires
+  190 keys including the old uncached request. Fresh VQA/cache and union remain **PENDING**;
+  the cache-only checkpoint below records repository/churn and complete-coverage passes.
+  The earlier awake collector recorded 10,015/10,016 tests and 1,076/1,077 files passing, one overflow
+  timeout, and no chained generator coverage-gate result; it remains a failed historical collector.
+  The [cache-only refresh](canonical-range-labeling.md#multiplication-cache-and-canonical-refresh-2026-11-05)
+  `d530904d` preserves all 9,890,100 native pair decisions /1,285 seeded continuations, with 68
+  passing module tests and 100% generator coverage. Canonical `ed25642a…bb69` reuses all 529
+  shards; all 4,870 rows replay and every d724→ed256 stored row/PNG/key remains exact. The
+  one source-byte change and five verified orphan-node retirements are distinct. All seven
+  repository checks pass, while the separate API-disabled strict cache audit fails only for
+  190 missing /189 stale keys. Final awake coverage passes **10,016 tests /1,077 files in
+  1,754.12s**; all 185 generator files pass unchanged 85% statement /60% branch thresholds
+  (minima 87.5% /66.66%). The earlier failed collectors remain preserved. Specific live VQA
+  transfer approval/current-key cache acceptance and union regeneration/verification remain
+  **PENDING**. Source/offline/coverage acceptance is not a final dataset verdict.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 
