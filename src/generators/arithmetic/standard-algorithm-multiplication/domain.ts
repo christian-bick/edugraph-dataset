@@ -39,10 +39,9 @@ const maximumDigit = (value: number): number => {
 
 /** A carry must first arise from an uncarried column total of at least ten. */
 function hasBothCarries(multiplicand: number, multiplier: number, largestDigit = maximumDigit(multiplicand)): boolean {
-    const ones = multiplier % 10;
-    const tens = Math.floor(multiplier / 10) % 10;
-    const hundreds = Math.floor(multiplier / 100);
-    if (largestDigit * Math.max(ones, tens, hundreds) < 10) return false;
+    const traits = nativeMultiplierTraits[multiplier - 10]!;
+    const {ones, tens, hundreds} = traits;
+    if (largestDigit * traits.maximumDigit < 10) return false;
     let first = multiplicand * ones;
     let second = multiplicand * tens * 10;
     let third = multiplicand * hundreds * 100;
@@ -63,6 +62,16 @@ export function standardMultiplicationMultiplierWeight(multiplier: number): numb
     const ones = multiplier % 10;
     return 9 + (tens === 0 && ones > 0 || tens > 0 && ones === 0 ? 100 : 0);
 }
+
+/** Fixed native digit/weight data avoids decoding the same multiplier for every multiplicand. */
+const nativeMultiplierTraits = Array.from({length: 990}, (_, index) => {
+    const multiplier = index + 10;
+    const ones = multiplier % 10;
+    const tens = Math.floor(multiplier / 10) % 10;
+    const hundreds = Math.floor(multiplier / 100);
+    return {ones, tens, hundreds, maximumDigit: Math.max(ones, tens, hundreds),
+        weight: standardMultiplicationMultiplierWeight(multiplier)};
+});
 
 /** Native proposal probability is this weight / 874,800,000 before carry conditioning. */
 export function standardMultiplicationPairWeight(multiplicand: number, multiplier: number): number {
@@ -85,7 +94,7 @@ function visitMultipliers(multiplicand: number, key: number | false,
     let weight = 0;
     for (let multiplier = minimum; multiplier <= maximum; multiplier++) {
         if (!hasBothCarries(multiplicand, multiplier, largestDigit)) continue;
-        const entryWeight = standardMultiplicationMultiplierWeight(multiplier);
+        const entryWeight = nativeMultiplierTraits[multiplier - 10]!.weight;
         count++;
         weight += entryWeight;
         visit?.(multiplier, entryWeight);
