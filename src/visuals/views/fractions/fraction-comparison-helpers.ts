@@ -58,7 +58,7 @@ export const unlikeFractionComparisonPresentation = (
         symbol,
         firstBenchmarkStatement,
         secondBenchmarkStatement,
-        prompt: `Compare ${firstNotation} and ${secondNotation} using 1/2 as a benchmark on the same whole.`,
+        prompt: `Compare ${firstNotation} and ${secondNotation} using 1/2 as a benchmark on the same whole. Explain how the benchmark justifies your comparison.`,
         questionEquation: `${firstNotation} ? ${secondNotation}`,
         solutionEquation,
         answerStatement: `${solutionEquation}.`,

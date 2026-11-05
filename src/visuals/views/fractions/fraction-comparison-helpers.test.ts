@@ -56,7 +56,7 @@ describe('isValidUnlikeFractionComparison', () => {
             symbol: '>',
             firstBenchmarkStatement: '3/4 is greater than 1/2.',
             secondBenchmarkStatement: '1/3 is less than 1/2.',
-            prompt: 'Compare 3/4 and 1/3 using 1/2 as a benchmark on the same whole.',
+            prompt: 'Compare 3/4 and 1/3 using 1/2 as a benchmark on the same whole. Explain how the benchmark justifies your comparison.',
             questionEquation: '3/4 ? 1/3',
             solutionEquation: '3/4 > 1/3',
             answerStatement: '3/4 > 1/3.',

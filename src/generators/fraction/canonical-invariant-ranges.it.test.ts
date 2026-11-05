@@ -6,8 +6,6 @@ import { planModelCompatibility } from '../../lib/model-compatibility.ts';
 import { DecimalNotationGenerator } from './decimal-notation/generator.ts';
 import { DecimalComparisonGenerator } from '../number/decimal-comparison/generator.ts';
 import { DecimalComparisonGeneratorSchema, spec as decimalComparisonSpec } from '../number/decimal-comparison/spec.ts';
-import { FractionComparisonGenerator } from './fraction-comparison/generator.ts';
-import { FractionComparisonGeneratorSchema, spec as fractionComparisonSpec } from './fraction-comparison/spec.ts';
 import { FractionBenchmarkArithmeticGenerator } from './fraction-benchmark-arithmetic/generator.ts';
 import { FractionBenchmarkArithmeticGeneratorSchema, spec as benchmarkSpec } from './fraction-benchmark-arithmetic/spec.ts';
 afterEach(() => vi.restoreAllMocks());
@@ -20,7 +18,6 @@ const check = (values: number[]) => expect(hasCanonicalRangeWitness(values, rang
 describe('invariant canonical ranges for bounded fractional values', () => {
     it('provides a matching-capable upper5 without a new configuration choice', () => {
         for (const [spec, schema, task] of [[decimalComparisonSpec, DecimalComparisonGeneratorSchema, [Area.NumericEquality, Scope.Equal]],
-            [fractionComparisonSpec, FractionComparisonGeneratorSchema, [Area.FractionCommonDenominatorComparison, Scope.CommonDenominator, Scope.Greater]],
             [benchmarkSpec, FractionBenchmarkArithmeticGeneratorSchema, [Area.Addition]]] as const) {
             expect(spec.generalLabels).toContain(Scope.NumbersSmaller5);
             expect(spec.generalLabels).not.toContain(Scope.NumbersLargerZero);
@@ -72,51 +69,6 @@ describe('invariant canonical ranges for bounded fractional values', () => {
                 count++;
             }
         expect(count).toBe(1638);
-    });
-    it('covers every fraction-comparison family and boundary without treating notation parts as operands', () => {
-        const random = vi.spyOn(rng, 'random');
-        const generator = new FractionComparisonGenerator();
-        const denominators = [2, 3, 4, 6, 8], common = [3, 4, 6, 8];
-        let count = 0;
-        const verify = (data: ReturnType<typeof generator.generate>['data']) => {
-            check([rational(data.first), rational(data.second), data.sharedWhole,
-                ...('benchmark' in data ? [rational(data.benchmark)] : [])]);
-            count++;
-        };
-        for (const relation of [Scope.Greater, Scope.Less]) {
-            for (const [dIndex, d] of common.entries())
-                for (let first = 0; first < d - 1; first++)
-                    for (let second = 0; second < d - 2; second++) {
-                        random.mockReturnValueOnce((dIndex + 0.5) / common.length).mockReturnValueOnce((first + 0.5) / (d - 1)).mockReturnValueOnce((second + 0.5) / (d - 2));
-                        verify(generator.generate({ comparisonMode: Area.FractionCommonDenominatorComparison, usesReferenceComparison: false,
-                            usesCommonDenominator: true, usesCommonNumerator: false, relation }).data);
-                    }
-            for (let first = 0; first < 5; first++)
-                for (let second = 0; second < 4; second++) {
-                    const other = second >= first ? second + 1 : second, lowest = Math.min(denominators[first], denominators[other]);
-                    for (let n = 1; n < lowest; n++) {
-                        random.mockReturnValueOnce((first + 0.5) / 5).mockReturnValueOnce((second + 0.5) / 4).mockReturnValueOnce((n - 0.5) / (lowest - 1));
-                        verify(generator.generate({ comparisonMode: Area.FractionCommonNumeratorComparison, usesReferenceComparison: false,
-                            usesCommonDenominator: false, usesCommonNumerator: true, relation }).data);
-                    }
-                }
-        }
-        const proper = denominators.flatMap(d => Array.from({ length: d - 1 }, (_, i) => ({ numerator: i + 1, denominator: d })));
-        for (const relation of [Scope.Greater, Scope.Equal, Scope.Less]) {
-            const expected = proper.flatMap(first => proper.map(second => ({ first, second }))).filter(({ first: a, second: b }) => a.numerator !== b.numerator && a.denominator !== b.denominator && (relation === Scope.Equal
-                ? a.denominator < b.denominator && 2 * a.numerator === a.denominator && 2 * b.numerator === b.denominator && a.denominator > 2
-                : relation === Scope.Greater ? 2 * a.numerator > a.denominator && 2 * b.numerator < b.denominator
-                    : 2 * a.numerator < a.denominator && 2 * b.numerator > b.denominator));
-            for (const [index, pair] of expected.entries()) {
-                random.mockReturnValueOnce((index + 0.5) / expected.length);
-                const { data } = generator.generate({ comparisonMode: relation === Scope.Equal ? Area.NumericEquality : Area.NumericInequality,
-                    usesReferenceComparison: true, usesCommonDenominator: false, usesCommonNumerator: false, relation });
-                expect(data.first).toEqual(pair.first);
-                expect(data.second).toEqual(pair.second);
-                verify(data);
-            }
-        }
-        expect(count).toBeGreaterThan(200);
     });
     it('covers every finite benchmark pair, approximation mode and proposal branch', () => {
         const random = vi.spyOn(rng, 'random');

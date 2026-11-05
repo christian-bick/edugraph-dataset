@@ -1,4 +1,5 @@
 import {Area, Scope} from 'edugraph-ts';
+import {comparisonPartCountUpper, hasComparisonPartCountUpper, sampleComparisonDenominators} from './range-domain.ts';
 import {GeneratorValidationError, validateConfigFields} from '../../../lib/errors.ts';
 import {random} from '../../../lib/random.ts';
 import {AbstractProblem, ProblemGenerator, ProblemStub} from '../../../types/ml-engine.ts';
@@ -81,9 +82,9 @@ const compareToHalf = (fraction: FractionValue): 'greater' | 'equal' | 'less' =>
 };
 
 const generateUnlikeComparison = (
-    relation: UnlikeFractionComparisonProblem['relation']
+    relation: UnlikeFractionComparisonProblem['relation'], upper: 5 | 10
 ): UnlikeFractionComparisonProblem => {
-    const pair = randomItem(UNLIKE_PAIRS[relation]);
+    const pair = randomItem(UNLIKE_PAIRS[relation].filter(pair => hasComparisonPartCountUpper(pair.first.denominator, pair.second.denominator, upper)));
     const first = toFractionValue(pair.first.numerator, pair.first.denominator);
     const second = toFractionValue(pair.second.numerator, pair.second.denominator);
     const firstBenchmarkRelation = compareToHalf(first);
@@ -115,9 +116,11 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             'usesReferenceComparison',
             'usesCommonDenominator',
             'usesCommonNumerator',
-            'relation'
+            'relation',
+            'range'
         ]);
 
+        const rangeUpper = comparisonPartCountUpper(config.range!);
         const comparisonMode = config.comparisonMode!;
         const relationLabel = config.relation!;
         const usesReferenceComparison = config.usesReferenceComparison === true;
@@ -148,7 +151,8 @@ export class FractionComparisonGenerator implements ProblemGenerator<
                     'Fraction reference comparison requires NumericEquality with Equal or NumericInequality with Greater/Less, without a common-component family.'
                 );
             }
-            return {data: generateUnlikeComparison(relation)};
+            if (relation === 'equal' && rangeUpper === 5) throw new GeneratorValidationError('fraction-comparison', 'Benchmark equality has no upper5 native support.');
+            return {data: generateUnlikeComparison(relation, rangeUpper)};
         }
 
         const usesCommonDenominator = comparisonMode === Area.FractionCommonDenominatorComparison
@@ -175,7 +179,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
         let family: LegacyFractionComparisonProblem['family'];
 
         if (usesCommonDenominator) {
-            const denominator = randomItem(COMMON_DENOMINATORS);
+            const denominator = randomItem(COMMON_DENOMINATORS.filter(denominator => hasComparisonPartCountUpper(denominator, denominator, rangeUpper)));
             const [one, two] = randomDistinctPair(
                 Array.from({length: denominator - 1}, (_, index) => index + 1)
             );
@@ -187,7 +191,7 @@ export class FractionComparisonGenerator implements ProblemGenerator<
             second = toFractionValue(secondNumerator, denominator);
             family = 'common-denominator';
         } else {
-            const [one, two] = randomDistinctPair(DENOMINATORS);
+            const [one, two] = sampleComparisonDenominators(rangeUpper, random);
             const lower = Math.min(one, two) as FractionParts;
             const upper = Math.max(one, two) as FractionParts;
             const firstDenominator = relation === 'greater' ? lower : upper;

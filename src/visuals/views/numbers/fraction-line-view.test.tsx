@@ -92,8 +92,8 @@ describe('fraction-line Ability projections', () => {
         );
     });
 
-    it.each([1, 2, 3])('keeps every whole-%s endpoint fraction inside the line without exposing the missing numerator', wholeNumber => {
-        for (const denominator of [2, 3, 4, 6, 8]) for (const mode of ['formalization', 'explanation'] as const) {
+    it.each([1, 2, 3] as const)('keeps every whole-%s endpoint fraction inside the line without exposing the missing numerator', wholeNumber => {
+        for (const denominator of [2, 3, 4, 6, 8] as const) for (const mode of ['formalization', 'explanation'] as const) {
             const data: WholeNumberFractionEquivalenceProblem = {task: 'represent-whole-as-fraction', wholeNumber,
                 fraction: {numerator: wholeNumber * denominator, denominator}, relation: 'equal'};
             for (const isSolution of [false, true]) {
