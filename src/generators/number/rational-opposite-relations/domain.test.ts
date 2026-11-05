@@ -23,68 +23,86 @@ const key = (radius: number, numerator: number, denominator: number, original: n
     return `${radius}:${numerator / divisor}/${denominator / divisor}:${original}:${opposite}`;
 };
 
+const oppositePathPartitions = [
+    {relation: 'iterated-negation', expectedPaths: 7084},
+    {relation: 'nonzero-opposition', expectedPaths: 6344},
+    {relation: 'zero-fixed-point', expectedPaths: 740}
+] as const;
+
 describe('relation-aware finite opposite range profiles', () => {
-    it('retains all 14,168 raw lattice/point paths and their conditional probability mass', () => {
+    it.each(oppositePathPartitions)('retains every $relation lattice/point path and its conditional probability mass', ({relation, expectedPaths}) => {
         const generator = new RationalOppositeRelationsGenerator();
         const draw = vi.spyOn(random, 'random');
         let paths = 0;
-        for (const relation of ['iterated-negation', 'nonzero-opposition', 'zero-fixed-point'] as const) {
-            const expected = new Map<string, number>();
-            for (let radius = 2; radius <= 5; radius++) {
-                const cap = Math.floor(10 / radius);
-                for (let numerator = 1; numerator <= cap; numerator++) for (const denominator of [1, 2])
-                    for (let original = -radius; original <= radius; original++) {
-                        if (relation === 'zero-fixed-point' && original !== 0 || relation === 'nonzero-opposition' && original === 0) continue;
-                        const originalCount = relation === 'zero-fixed-point' ? 1 : relation === 'nonzero-opposition' ? 2 * radius : 2 * radius + 1;
-                        for (let opposite = 1; opposite <= radius; opposite++) {
-                            const id = key(radius, numerator, denominator, original, opposite);
-                            expected.set(id, (expected.get(id) ?? 0) + 1 / 4 / cap / 2 / originalCount / radius);
-                        }
+        const expected = new Map<string, number>();
+        for (let radius = 2; radius <= 5; radius++) {
+            const cap = Math.floor(10 / radius);
+            for (let numerator = 1; numerator <= cap; numerator++) for (const denominator of [1, 2])
+                for (let original = -radius; original <= radius; original++) {
+                    if (relation === 'zero-fixed-point' && original !== 0 || relation === 'nonzero-opposition' && original === 0) continue;
+                    const originalCount = relation === 'zero-fixed-point' ? 1 : relation === 'nonzero-opposition' ? 2 * radius : 2 * radius + 1;
+                    for (let opposite = 1; opposite <= radius; opposite++) {
+                        const id = key(radius, numerator, denominator, original, opposite);
+                        expected.set(id, (expected.get(id) ?? 0) + 1 / 4 / cap / 2 / originalCount / radius);
                     }
-            }
-            const actual = new Map<string, number>();
-            let mass = 0;
-            for (const upper of [5, 10]) {
-                const range = createCanonicalNumericRange(upper);
-                const profiles = rationalOppositeRangeProfiles(relation, range);
-                expect(rationalOppositeRangeProfiles(relation, range)).toBe(profiles);
-                const total = profiles.reduce((sum, profile) => sum + profile.weight, 0);
-                let preceding = 0;
-                for (const profile of profiles) {
-                    const {radiusTicks: radius, step, originalTick: original, oppositeMagnitudeTick: opposite} = profile;
-                    const id = key(radius, step.numerator, step.denominator, original, opposite);
-                    actual.set(id, (actual.get(id) ?? 0) + profile.weight);
-                    mass += profile.weight;
-                    for (let first = 1; first <= radius; first++) for (let second = 1; second <= radius; second++) {
-                        if (first === second) continue;
-                        const secondDraw = second > first ? second - 1 : second;
-                        const draws = [(preceding + profile.weight / 2) / total, (first - 0.5) / radius, (secondDraw - 0.5) / (radius - 1)];
-                        draw.mockImplementation(() => {
-                            const next = draws.shift();
-                            if (next === undefined) throw new Error('Unexpected opposite-model draw');
-                            return next;
-                        });
-                        const {data} = generator.generate({relation, range});
-                        expect(draws).toEqual([]);
-                        expect(data.axis.zeroIndex).toBe(radius);
-                        expect(data.axis.step).toEqual(step);
-                        expect(data.original.tickIndex - radius).toBe(original);
-                        expect(data.oppositePair.positive.tickIndex - radius).toBe(opposite);
-                        expect(data.unequalSignedPair.negative.tickIndex - radius).toBe(-first);
-                        expect(data.unequalSignedPair.positive.tickIndex - radius).toBe(second);
-                        const maximum = (relation === 'iterated-negation' ? Math.abs(original) || opposite : radius) * step.numerator / step.denominator;
-                        expect(hasCanonicalRangeWitness([0, maximum], range)).toBe(true);
-                        expect(data.axis.maximum.numerator / data.axis.maximum.denominator).toBeLessThanOrEqual(10);
-                        paths++;
-                    }
-                    preceding += profile.weight;
                 }
-            }
-            expect(actual.size).toBe(expected.size);
-            for (const [id, weight] of expected) expect(actual.get(id)).toBeCloseTo(weight, 15);
-            expect(mass).toBeCloseTo(1, 13);
         }
-        expect(paths).toBe(14168);
+        const actual = new Map<string, number>();
+        let mass = 0;
+        for (const upper of [5, 10]) {
+            const range = createCanonicalNumericRange(upper);
+            const profiles = rationalOppositeRangeProfiles(relation, range);
+            expect(rationalOppositeRangeProfiles(relation, range)).toBe(profiles);
+            const total = profiles.reduce((sum, profile) => sum + profile.weight, 0);
+            let preceding = 0;
+            for (const profile of profiles) {
+                const {radiusTicks: radius, step, originalTick: original, oppositeMagnitudeTick: opposite} = profile;
+                const id = key(radius, step.numerator, step.denominator, original, opposite);
+                actual.set(id, (actual.get(id) ?? 0) + profile.weight);
+                mass += profile.weight;
+                for (let first = 1; first <= radius; first++) for (let second = 1; second <= radius; second++) {
+                    if (first === second) continue;
+                    const secondDraw = second > first ? second - 1 : second;
+                    const draws = [(preceding + profile.weight / 2) / total, (first - 0.5) / radius, (secondDraw - 0.5) / (radius - 1)];
+                    draw.mockImplementation(() => {
+                        const next = draws.shift();
+                        if (next === undefined) throw new Error('Unexpected opposite-model draw');
+                        return next;
+                    });
+                    const {data} = generator.generate({relation, range});
+                    expect(draws).toEqual([]);
+                    expect(data.axis.zeroIndex).toBe(radius);
+                    expect(data.axis.step).toEqual(step);
+                    expect(data.original.tickIndex - radius).toBe(original);
+                    expect(data.oppositePair.positive.tickIndex - radius).toBe(opposite);
+                    expect(data.unequalSignedPair.negative.tickIndex - radius).toBe(-first);
+                    expect(data.unequalSignedPair.positive.tickIndex - radius).toBe(second);
+                    const maximum = (relation === 'iterated-negation' ? Math.abs(original) || opposite : radius) * step.numerator / step.denominator;
+                    expect(hasCanonicalRangeWitness([0, maximum], range)).toBe(true);
+                    expect(data.axis.maximum.numerator / data.axis.maximum.denominator).toBeLessThanOrEqual(10);
+                    paths++;
+                }
+                preceding += profile.weight;
+            }
+        }
+        expect(actual.size).toBe(expected.size);
+        for (const [id, weight] of expected) expect(actual.get(id)).toBeCloseTo(weight, 15);
+        expect(mass).toBeCloseTo(1, 13);
+        expect(paths).toBe(expectedPaths);
+    });
+
+    it('partitions all14168 original lattice/point paths with an independent radius count', () => {
+        let total = 0;
+        for (const {relation, expectedPaths} of oppositePathPartitions) {
+            let paths = 0;
+            for (let radius = 2; radius <= 5; radius++) {
+                const originalCount = relation === 'zero-fixed-point' ? 1 : relation === 'nonzero-opposition' ? 2 * radius : 2 * radius + 1;
+                paths += Math.floor(10 / radius) * 2 * originalCount * radius * radius * (radius - 1);
+            }
+            expect(paths).toBe(expectedPaths);
+            total += paths;
+        }
+        expect(total).toBe(14168);
     });
 
     it('validates both canonical bands in direct/planned configurations and each actual question/solution projection', () => {

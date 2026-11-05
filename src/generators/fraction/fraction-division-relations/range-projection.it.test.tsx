@@ -1,6 +1,6 @@
 import {Scope} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vitest';
+import {afterAll, describe, expect, it} from 'vitest';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {extractConfig} from '../../../lib/utils.ts';
@@ -24,9 +24,11 @@ const matcher = (labels: string[]) => planModelCompatibility({id: 'shared-divisi
     {viewId: 'division-proof', generalLabels: [], schema: {}, spec: {viewId: 'division-proof', generalLabels: []}});
 
 describe('common-part division range projections', () => {
-    it('exposes38 settled bands across all six Question/Solution task leaves', () => {
+    const rangeProfiles = profiles.map(([roles, profile]) => ({roles, profile}));
+    const rangeProofCounts = new Map<string, number>();
+    it.each(rangeProfiles)('exposes settled bands across all six Q/S leaves for $profile', ({roles, profile}) => {
         let combinations = 0;
-        for (const [roles, profile] of profiles) for (const group of ['zero', 'positive'] as const) {
+        for (const group of ['zero', 'positive'] as const) {
             if (!divisionOperandDistribution(profile, group).length || !hasSharedDivisionRange(profile, group)) continue;
             const zeroLabel = group === 'zero' ? Scope.NumbersWithZero : Scope.NumbersWithoutZero;
             for (const [label, upper] of ranges) {
@@ -53,9 +55,14 @@ describe('common-part division range projections', () => {
                 combinations++;
             }
         }
-        expect(combinations).toBe(38);
+        rangeProofCounts.set(profile, combinations);
     });
 
+    afterAll(() => {
+        expect(rangeProfiles).toHaveLength(6);
+        expect(rangeProofCounts.size).toBe(rangeProfiles.length);
+        expect([...rangeProofCounts.values()].reduce((sum, count) => sum + count, 0)).toBe(38);
+    });
     it('completes every feasible operand/group choice with a canonical range', () => {
         for (const [roles, profile] of profiles) for (const group of ['zero', 'positive'] as const) {
             if (!hasSharedDivisionRange(profile, group)) continue;

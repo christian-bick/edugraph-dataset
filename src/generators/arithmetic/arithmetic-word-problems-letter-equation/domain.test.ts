@@ -10,16 +10,9 @@ const apply = (a: number, b: number, operation: ArithmeticOperation): number => 
 const key = (min: number, max: number) => `${min}:${max}`;
 
 describe('letter-equation scalar interval mathematics', () => {
-    it('proves all affine row endpoints, count/index boundaries and both required calculations', () => {
-        let nativeCells = 0, nativeFrames = 0, allMatchingCells = 0;
-        for (const [formulaIndex, formula] of letterEquationFormulas.entries()) for (const {range} of profiles) {
+    it.each(letterEquationFormulas.map((formula, formulaIndex) => ({formula, formulaIndex})))('proves affine endpoints and both calculations for formula $formulaIndex', ({formula}) => {
+        for (const {range} of profiles) {
             const domain = letterEquationDomain(formula.operations, range);
-            if (formulaIndex < 10 && domain.count) {
-                allMatchingCells++;
-                const nativeRows = domain.rows.filter(row => row.second <= formula.secondLimit && row.third <= formula.thirdLimit);
-                if (nativeRows.length) nativeCells++;
-                nativeFrames += nativeRows.reduce((sum, row) => sum + row.last - row.first + 1, 0);
-            }
             let count = 0;
             for (const row of domain.rows) {
                 const start = row.end - (row.last - row.first + 1);
@@ -37,6 +30,19 @@ describe('letter-equation scalar interval mathematics', () => {
                 count = row.end;
             }
             expect(count).toBe(domain.count);
+        }
+    });
+
+    it('retains all original native cell and frame totals independently of endpoint-case order', () => {
+        let nativeCells = 0, nativeFrames = 0, allMatchingCells = 0;
+        for (const formula of letterEquationFormulas.slice(0, 10)) for (const {range} of profiles) {
+            const domain = letterEquationDomain(formula.operations, range);
+            if (domain.count) {
+                allMatchingCells++;
+                const nativeRows = domain.rows.filter(row => row.second <= formula.secondLimit && row.third <= formula.thirdLimit);
+                if (nativeRows.length) nativeCells++;
+                nativeFrames += nativeRows.reduce((sum, row) => sum + row.last - row.first + 1, 0);
+            }
         }
         expect(nativeCells).toBe(224);
         expect(nativeFrames).toBe(7772047013);

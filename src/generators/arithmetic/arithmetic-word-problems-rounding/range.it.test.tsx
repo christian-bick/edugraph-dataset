@@ -1,6 +1,6 @@
 import {Area} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vitest';
+import {afterAll, describe, expect, it} from 'vitest';
 import {createGenerationSelectionReceipt} from '../../../lib/compatibility.ts';
 import {hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
@@ -21,11 +21,23 @@ const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels,
 const view = {viewId: viewSpec.viewId, generalLabels: viewSpec.generalLabels, schema: {}, spec: viewSpec};
 
 describe('canonical rounding-story integration', () => {
-    it('resolves all232 feasible profiles through both native paths and preserves equal-value Q/S rendering', () => {
+    // Only completion counts are shared; no mathematical fixtures or random
+    // state depend on another case or on execution order.
+    const completedProfiles = new Map<string, number>();
+    afterAll(() => {
+        expect([...completedProfiles.keys()].sort()).toEqual(roundingOperationProfiles.map(profile => profile.operations.join('-')).sort());
+        expect(roundingOperationProfiles.length * roundingRangeProfiles.length).toBe(290);
+        expect([...completedProfiles.values()].reduce((sum, count) => sum + count, 0)).toBe(232);
+    });
+
+    it('retains complete schema fallback contracts', () => {
         expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
+    });
+
+    it.each(roundingOperationProfiles)('resolves every candidate range for $operations through both native paths and preserves equal-value Q/S rendering', operations => {
         const generator = new ArithmeticWordProblemsRoundingGenerator();
         let profiles = 0;
-        for (const operations of roundingOperationProfiles) for (const {range, labels: rangeLabels} of roundingRangeProfiles) {
+        for (const {range, labels: rangeLabels} of roundingRangeProfiles) {
             const labels = [...spec.generalLabels, ...viewSpec.generalLabels, ...operations.labels, ...rangeLabels];
             const match = planModelCompatibility({id: 'rounding-story-profile', labels}, model, view);
             if (!roundingDomain(operations.operations, range).weight) {
@@ -44,13 +56,14 @@ describe('canonical rounding-story integration', () => {
                 const markup = (input: typeof data) => renderToStaticMarkup(<ArithmeticWordProblemWithin100View
                     config={{expectedKind: 'rounding', invertProcedure: false, useLengthContext: false}}
                     payload={{viewId: viewSpec.viewId, targetLabels: labels, problem: {type: 'arithmetic', data: input, labels}, seed: 0, isSolutionView}} />);
-                expect(markup(data)).toBe(markup(legacy));
-                expect(markup(data)).toContain('Use the rounding check');
-                expect(markup(data)).not.toMatch(/NaN|undefined/);
+                const currentMarkup = markup(data), legacyMarkup = markup(legacy);
+                expect(currentMarkup).toBe(legacyMarkup);
+                expect(currentMarkup).toContain('Use the rounding check');
+                expect(currentMarkup).not.toMatch(/NaN|undefined/);
             }
             profiles++;
         }
-        expect(profiles).toBe(232);
+        completedProfiles.set(operations.operations.join('-'), profiles);
     });
 
     it('replays2320 native profile draws with exact random continuation', () => {

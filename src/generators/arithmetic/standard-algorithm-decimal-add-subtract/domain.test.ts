@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {afterAll, afterEach, describe, expect, it, vi} from 'vitest';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import * as rng from '../../../lib/random.ts';
 import {exactDecimal} from '../standard-decimal-helpers.ts';
@@ -30,9 +30,12 @@ describe('standard decimal column constructive domains', () => {
         expect(count).toBe(597870);
     });
 
-    it('proves the borrow automaton and bounded ranks against every small actual column trace', () => {
+    const borrowHundreds = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+    const borrowTraceCounts = new Map<number, number>();
+    it.each(borrowHundreds)('proves borrow traces and bounded ranks for top coefficients in hundred %i', hundred => {
         let traces = 0, errors = 0;
-        for (const scale of [1, 2]) for (let top = 10 ** (scale + 1); top <= 999; top++) {
+        const first = hundred * 100, last = first + 99;
+        for (const scale of [1, 2]) for (let top = Math.max(10 ** (scale + 1), first); top <= last; top++) {
             let count = 0;
             for (let bottom = 0; bottom <= top; bottom++) {
                 const data = buildDecimalStandardAddSubtractProblem('subtraction', exactDecimal(top, scale).numeral, exactDecimal(bottom, scale).numeral);
@@ -43,25 +46,38 @@ describe('standard decimal column constructive domains', () => {
             if (nonzeroSubtractionCount(top, scale) !== count) errors++;
         }
         expect(errors).toBe(0);
-        expect(traces).toBe(495450);
+        expect(traces).toBe((last + 1) * (last + 2) / 2 - first * (first + 1) / 2);
+        borrowTraceCounts.set(hundred, traces);
+    });
+
+    it('retains the bounded-rank boundary checks', () => {
         expect(nonzeroSubtractionAtMost(333, 1, -1)).toBe(0);
         expect(nonzeroSubtractionAtMost(333, 1, 1000)).toBe(nonzeroSubtractionCount(333, 1));
     });
 
-    it('partitions the complete old largest-cap law into the feasible range/zero profiles', () => {
-        for (const operation of ['addition', 'subtraction'] as const) {
-            let mass = 0;
-            for (const upper of STANDARD_DECIMAL_COLUMN_UPPERS) for (const zero of [true, false]) {
-                if (!zero && upper === 10) continue;
-                const cases = standardDecimalColumnCases(operation, createCanonicalNumericRange(upper), zero);
-                expect(cases.length).toBeGreaterThan(0);
-                for (const entry of cases) {
-                    expect(entry.weight).toBeGreaterThan(0);
-                    mass += entry.weight;
-                }
-            }
-            expect(mass).toBeCloseTo(1, 9);
+    const columnProfiles = (['addition', 'subtraction'] as const).flatMap(operation =>
+        STANDARD_DECIMAL_COLUMN_UPPERS.flatMap(upper => [true, false]
+            .filter(zero => zero || upper !== 10).map(zero => ({operation, upper, zero}))));
+    const columnMasses = new Map<string, {operation: 'addition' | 'subtraction'; mass: number}>();
+    it.each(columnProfiles)('retains the old law for $operation / upper$upper / zero=$zero', ({operation, upper, zero}) => {
+        let mass = 0;
+        const cases = standardDecimalColumnCases(operation, createCanonicalNumericRange(upper), zero);
+        expect(cases.length).toBeGreaterThan(0);
+        for (const entry of cases) {
+            expect(entry.weight).toBeGreaterThan(0);
+            mass += entry.weight;
         }
+        columnMasses.set(`${operation}/${upper}/${zero}`, {operation, mass});
+    });
+
+    afterAll(() => {
+        expect([...borrowTraceCounts.keys()]).toEqual(borrowHundreds);
+        expect([...borrowTraceCounts.values()].reduce((sum, count) => sum + count, 0)).toBe(495450);
+        expect(columnProfiles).toHaveLength(26);
+        expect(columnMasses.size).toBe(columnProfiles.length);
+        for (const operation of ['addition', 'subtraction'] as const)
+            expect([...columnMasses.values()].filter(entry => entry.operation === operation)
+                .reduce((sum, entry) => sum + entry.mass, 0)).toBeCloseTo(1, 9);
     });
 
     it('retains each original variant/scale/top/bottom probability on independently enumerated ordinary rows', () => {

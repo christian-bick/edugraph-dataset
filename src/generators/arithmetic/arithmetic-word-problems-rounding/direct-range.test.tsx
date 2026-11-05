@@ -19,6 +19,12 @@ const directPairs = [
     ['addition', 'multiplication'], ['subtraction', 'addition'], ['subtraction', 'multiplication'],
     ['addition', 'division'], ['subtraction', 'division'], ['division', 'multiplication']
 ] as const;
+// These disjoint bands partition the original independent first draw2..50.
+const directFirstOperandBands = [
+    {minimum: 2, maximum: 10}, {minimum: 11, maximum: 20}, {minimum: 21, maximum: 30},
+    {minimum: 31, maximum: 40}, {minimum: 41, maximum: 50}
+] as const;
+const directProposalCases = directPairs.flatMap(operations => directFirstOperandBands.map(band => ({operations, ...band})));
 const operationLabels = {addition: Area.Addition, subtraction: Area.Subtraction,
     multiplication: Area.Multiplication, division: Area.Division};
 const apply = (a: number, b: number, operation: ArithmeticOperation) => operation === 'addition' ? a + b
@@ -56,34 +62,42 @@ describe('rounding-story direct-only operation support', () => {
         expect(floorOutcomes).toBeGreaterThan(retained);
     });
 
-    it('partitions every old direct proposal interval with exact conditional masses and positive endpoint witnesses', () => {
-        for (const operations of directPairs) {
-            const rows = roundingCores(operations), covered = new Float64Array(rows.length);
-            for (const {range} of roundingRangeProfiles) {
-                const domain = roundingDomain(operations, range);
-                let before = 0;
-                for (const [index, row] of rows.entries()) {
-                    const interval = canonicalProposalInterval(row, range);
-                    let count = 0;
-                    if (interval) {
-                        count = interval.upper - interval.lower + 1 - Number(row.answer >= interval.lower && row.answer <= interval.upper);
-                        covered[index]! += count;
-                        const first = interval.lower === row.answer ? interval.lower + 1 : interval.lower;
-                        const last = interval.upper === row.answer ? interval.upper - 1 : interval.upper;
-                        for (const P of [first, last]) {
-                            const quantities = [row.a, row.b, row.c, row.intermediate, row.answer, row.roundedAnswer,
-                                P, Math.round(P / row.roundingPlace) * row.roundingPlace];
-                            if (quantities.some(n => n <= 0) || P === row.answer || !hasCanonicalRangeWitness(quantities, range))
-                                throw new Error('False direct canonical or nonzero claim');
-                        }
+    it('assigns every original first-draw value to exactly one proposal-proof band', () => {
+        const firstDraws = directFirstOperandBands.flatMap(({minimum, maximum}) =>
+            Array.from({length: maximum - minimum + 1}, (_, index) => minimum + index));
+        expect(firstDraws).toEqual(Array.from({length: 49}, (_, index) => index + 2));
+        expect(directProposalCases).toHaveLength(30);
+    });
+
+    it.each(directProposalCases)('partitions every old direct proposal interval for $operations, first operand $minimum through $maximum, with exact masses and positive witnesses', ({operations, minimum, maximum}) => {
+        const rows = roundingCores(operations);
+        const selected = rows.flatMap((row, index) => row.a >= minimum && row.a <= maximum ? [{row, index}] : []);
+        const covered = new Float64Array(selected.length);
+        for (const {range} of roundingRangeProfiles) {
+            const domain = roundingDomain(operations, range);
+            for (const [position, {index, row}] of selected.entries()) {
+                const interval = canonicalProposalInterval(row, range);
+                let count = 0;
+                if (interval) {
+                    count = interval.upper - interval.lower + 1 - Number(row.answer >= interval.lower && row.answer <= interval.upper);
+                    covered[position]! += count;
+                    const first = interval.lower === row.answer ? interval.lower + 1 : interval.lower;
+                    const last = interval.upper === row.answer ? interval.upper - 1 : interval.upper;
+                    for (const P of [first, last]) {
+                        const quantities = [row.a, row.b, row.c, row.intermediate, row.answer, row.roundedAnswer,
+                            P, Math.round(P / row.roundingPlace) * row.roundingPlace];
+                        if (quantities.some(n => n <= 0) || P === row.answer || !hasCanonicalRangeWitness(quantities, range))
+                            throw new Error('False direct canonical or nonzero claim');
                     }
-                    if (Math.abs(domain.cumulative[index]! - before - count / row.proposalCount) > 3e-11)
-                        throw new Error('Incorrect direct conditional mass');
-                    before = domain.cumulative[index]!;
                 }
+                // This remains the increment at the original full-domain index,
+                // including when this proof band starts after an earlier row.
+                const before = index === 0 ? 0 : domain.cumulative[index - 1]!;
+                if (Math.abs(domain.cumulative[index]! - before - count / row.proposalCount) > 3e-11)
+                    throw new Error('Incorrect direct conditional mass');
             }
-            for (const [index, row] of rows.entries()) expect(covered[index]).toBe(row.proposalCount);
         }
+        for (const [position, {row}] of selected.entries()) expect(covered[position]).toBe(row.proposalCount);
     });
 
     it('generates and replays every direct-only feasible cell at both true RNG boundaries and renders both modes', () => {

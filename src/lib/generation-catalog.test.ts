@@ -30,10 +30,13 @@ describe('selected generation catalogs', () => {
         write(resolve(generatorsRoot, 'demo', 'generator.ts'), `
             import {DemoGeneratorSchema} from './spec.ts';
             interface ProblemGenerator<T> {}
-            interface CountingProblem {count: number}
-            export class DemoGenerator implements ProblemGenerator<CountingProblem> {
-                type = 'arithmetic'; schema = DemoGeneratorSchema;
-                generate(config) { return {data: {count: config.count}}; }
+            interface CountingEnumerationProblem {
+                kind: 'counting-enumeration'; numObjects: number; simpleAnswer: number; countingNumbers: readonly number[];
+            }
+            export class DemoGenerator implements ProblemGenerator<CountingEnumerationProblem> {
+                type = 'counting'; schema = DemoGeneratorSchema;
+                generate(config) { return {data: {kind: 'counting-enumeration', numObjects: config.count,
+                    simpleAnswer: config.count, countingNumbers: Array.from({length: config.count}, (_, index) => index + 1)}}; }
             }
         `);
         write(resolve(generatorsRoot, 'demo', 'spec.ts'), `
@@ -58,6 +61,8 @@ describe('selected generation catalogs', () => {
         const [generators, views] = await Promise.all([
             loadGeneratorCatalog(generatorsRoot), loadViewCatalog(viewsRoot)
         ]);
+        expect(generators[0].problemType).toBe('CountingEnumerationProblem');
+        expect(views[0].problemType).toBe('CountingEnumerationProblem');
         expect(generators[0].labels).toEqual(target.labels);
         expect(views[0].supportedLabels).toEqual([]);
         expect(matchTargets([{...target, labels: [Scope.IntegerNumbers]}], generators, views).tuples).toEqual([]);
@@ -66,7 +71,8 @@ describe('selected generation catalogs', () => {
         const expectedLabels = [...target.labels, Scope.IntegerNumbers, Scope.ArabicNumerals].sort();
         for (const sample of diagnostics) {
             expect(sample.error).toBeNull();
-            expect(sample.stub?.data).toEqual({count: 2});
+            expect(sample.stub?.data).toEqual({kind: 'counting-enumeration', numObjects: 2,
+                simpleAnswer: 2, countingNumbers: [1, 2]});
             expect(sample.labels).toEqual(expectedLabels);
             expect(sample.preparedView?.config).toEqual({notation: 'arabic'});
             expect(sample.preparedView?.labels).toEqual([Scope.ArabicNumerals]);

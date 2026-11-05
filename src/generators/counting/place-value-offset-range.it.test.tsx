@@ -18,30 +18,62 @@ import {placeValueOffsetQuantities, placeValueOffsetStarts} from './place-value-
 import {CountingTenOffsetGenerator} from './counting-ten-offset/generator.ts';
 import {CountingHundredOffsetGenerator} from './counting-hundred-offset/generator.ts';
 
+const offsetProjectionContexts = [
+    {step: 10, upper: 100, profile: 'two-digit', expectedFrames: 72},
+    {step: 10, upper: 1000, profile: 'three-digit', expectedFrames: 648},
+    {step: 100, upper: 1000, profile: 'three-digit', expectedFrames: 648}
+] as const;
+const offsetSourceContexts = offsetProjectionContexts.flatMap(context =>
+    (['inc', 'dec'] as const).map(direction => ({...context, direction})));
+const offsetProjectionCases = offsetSourceContexts.flatMap(context => {
+    const hundreds = context.profile === 'two-digit' ? [0] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    return hundreds.map(hundred => ({...context,
+        minimum: hundred === 0 ? 10 : hundred * 100,
+        maximum: hundred === 0 ? 99 : hundred * 100 + 99,
+        expectedBandFrames: context.step === 10 ? 72
+            : context.direction === 'inc' ? (hundred < 9 ? 81 : 0) : (hundred > 1 ? 81 : 0)
+    }));
+});
+
 describe('place-value offset source correction', () => {
-    it('projects all2736 unchanged source frames through both actual Question/Solution consumers', () => {
+    it('retains the exact six-context,2736-frame and5472-render projection inventory', () => {
+        expect(offsetSourceContexts).toHaveLength(6);
+        expect(offsetProjectionCases).toHaveLength(38);
+        const frames = offsetProjectionCases.reduce((sum, context) => sum + context.expectedBandFrames, 0);
+        expect(frames).toBe(2736);
+        expect(frames * 2).toBe(5472);
+    });
+
+    it.each(offsetSourceContexts)('retains the complete original $step/$upper/$profile/$direction source domain', ({step, upper, profile, direction, expectedFrames}) => {
+        const old = countingOffsetStarts({range: {min: step, max: upper}, direction}, step, profile),
+            current = placeValueOffsetStarts(step, createCanonicalNumericRange(upper), direction, profile, false);
+        expect(current).toEqual(old);
+        expect(current).toHaveLength(expectedFrames);
+        const bands = offsetProjectionCases.filter(context => context.step === step && context.upper === upper
+            && context.profile === profile && context.direction === direction);
+        expect(current.every(start => bands.filter(band => start >= band.minimum && start <= band.maximum).length === 1)).toBe(true);
+    }, 15000);
+
+    it.each(offsetProjectionCases)('projects every $step/$upper/$profile/$direction source frame from $minimum to $maximum through actual Q/S consumers', ({step, upper, profile, direction, minimum, maximum, expectedBandFrames}) => {
+        const current = placeValueOffsetStarts(step, createCanonicalNumericRange(upper), direction, profile, false)
+            .filter(start => start >= minimum && start <= maximum);
+        expect(current).toHaveLength(expectedBandFrames);
         let projections = 0;
-        for (const [step, upper, profile] of [[10, 100, 'two-digit'], [10, 1000, 'three-digit'],
-            [100, 1000, 'three-digit']] as const) for (const direction of ['inc', 'dec'] as const) {
-            const old = countingOffsetStarts({range: {min: step, max: upper}, direction}, step, profile),
-                current = placeValueOffsetStarts(step, createCanonicalNumericRange(upper), direction, profile, false);
-            expect(current).toEqual(old);
-            for (const start of current) {
-                const data = buildCountingOffsetProblem(start, direction, step, upper);
-                expect(hasCanonicalRangeWitness(placeValueOffsetQuantities(data), createCanonicalNumericRange(upper))).toBe(true);
-                const viewId = step === 10 ? 'counting-ten-more-less' : 'counting-hundred-more-less';
-                for (const isSolutionView of [false, true]) {
-                    const markup = renderToStaticMarkup(<CountingPlaceValueOffsetView expectedStepSize={step}
-                        viewId={viewId} payload={{viewId, problem: {type: 'counting', data, labels: []},
-                            targetLabels: [], seed: 7, isSolutionView}} />);
-                    expect(markup).toContain(`${direction === 'inc' ? '+' : '−'} 1 ${step === 10 ? 'ten' : 'hundred'}`);
-                    expect(markup).not.toMatch(/NaN|undefined|>0(?:\s|<)/);
-                    if (isSolutionView) expect(markup).toContain(`>${data.incDecAnswer}</div>`);
-                    projections++;
-                }
+        for (const start of current) {
+            const data = buildCountingOffsetProblem(start, direction, step, upper);
+            expect(hasCanonicalRangeWitness(placeValueOffsetQuantities(data), createCanonicalNumericRange(upper))).toBe(true);
+            const viewId = step === 10 ? 'counting-ten-more-less' : 'counting-hundred-more-less';
+            for (const isSolutionView of [false, true]) {
+                const markup = renderToStaticMarkup(<CountingPlaceValueOffsetView expectedStepSize={step}
+                    viewId={viewId} payload={{viewId, problem: {type: 'counting', data, labels: []},
+                        targetLabels: [], seed: 7, isSolutionView}} />);
+                expect(markup).toContain(`${direction === 'inc' ? '+' : '−'} 1 ${step === 10 ? 'ten' : 'hundred'}`);
+                expect(markup).not.toMatch(/NaN|undefined|>0(?:\s|<)/);
+                if (isSolutionView) expect(markup).toContain(`>${data.incDecAnswer}</div>`);
+                projections++;
             }
         }
-        expect(projections).toBe(5472);
+        expect(projections).toBe(expectedBandFrames * 2);
     }, 15000);
     it('keeps visible zero-count mathematics available without confusing zero digits with numerical zero', () => {
         for (const [step, start, upper, direction] of [[10, 1, 20, 'inc'], [10, 11, 20, 'dec'],

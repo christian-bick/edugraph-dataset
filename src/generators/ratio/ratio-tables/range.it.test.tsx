@@ -1,6 +1,6 @@
 import {fileURLToPath} from 'node:url';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vitest';
+import {afterAll, describe, expect, it} from 'vitest';
 import {createGenerationSelectionReceipt} from '../../../lib/compatibility.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
 import {createLabelDependencyEvaluator} from '../../../lib/label-dependencies.ts';
@@ -16,11 +16,15 @@ import {RatioTablesGenerator} from './generator.ts';
 import {ratioTableBaseRows, ratioTableRangeProfiles} from './numeric-domain.ts';
 
 describe('ratio-table required mathematical models', () => {
-    it('checks every numeric frame in all three actual Q/S projection contracts', () => {
+    const projectionTasks = ['construction', 'missing-values', 'plotting'] as const;
+    const projectionContexts = ratioTableRangeProfiles.flatMap(({range}) =>
+        projectionTasks.map(task => ({range, task})));
+    const projectionCounts = new Map<string, number>();
+    it.each(projectionContexts)('checks every upper$range.max frame through the actual $task Q/S contract', ({range, task}) => {
         let projections = 0;
-        for (const {range} of ratioTableRangeProfiles) for (const row of ratioTableBaseRows(range)) for (const second of row.seconds) {
+        for (const row of ratioTableBaseRows(range)) for (const second of row.seconds) {
             const data = ratioTable([row.first, second], ratioQuantities[0]!, [1,2,3,4]);
-            for (const task of ['construction', 'missing-values', 'plotting'] as const) for (const isSolutionView of [false, true]) {
+            for (const isSolutionView of [false, true]) {
                 const viewId = task === 'construction' ? 'ratio-table-construction'
                     : task === 'missing-values' ? 'ratio-table-missing-values' : 'ratio-coordinate-plotting';
                 const markup = renderToStaticMarkup(<RatioTableView task={task} viewId={viewId} payload={{
@@ -46,8 +50,15 @@ describe('ratio-table required mathematical models', () => {
                 projections++;
             }
         }
-        expect(projections).toBe(3456);
+        expect(projections).toBe(2 * ratioTableBaseRows(range).reduce((sum, row) => sum + row.seconds.length, 0));
+        projectionCounts.set(`${range.max}/${task}`, projections);
     }, 15000);
+
+    afterAll(() => {
+        expect(projectionContexts).toHaveLength(12);
+        expect(projectionCounts.size).toBe(projectionContexts.length);
+        expect([...projectionCounts.values()].reduce((sum, count) => sum + count, 0)).toBe(3456);
+    });
     it('retains the four existing targets and validates every admitted range selection', async () => {
         const ids = ['5.OA.B.3-graph-pattern-pairs~e639c9f8', '6.RP.A.3a-ratio-coordinate-plotting~480f996f',
             '6.RP.A.3a-ratio-table-construction~8e7d1da7', '6.RP.A.3a-ratio-table-missing-values~e60644ec'];

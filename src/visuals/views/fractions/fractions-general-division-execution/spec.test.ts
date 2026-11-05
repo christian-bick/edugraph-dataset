@@ -44,41 +44,50 @@ describe('general division execution split', () => {
         expect(spec.compatibility).toBeUndefined();
     });
 
-    it('preserves the exact general rendering and numerical-zero/bar evidence in both modes for all six profiles', () => {
+    const executionContexts = profiles.flatMap(operandProfile =>
+        (operandProfile === 'fraction-by-integer-proper' ? ['zero'] as const : ['zero', 'positive'] as const)
+            .map(groupCountProfile => ({operandProfile, groupCountProfile})));
+    const executionProofs = new Map<string, {draws: number; contexts: readonly string[]; dividends: readonly string[]}>();
+    it.each(executionContexts)('preserves exact rendering and numerical-zero/bar evidence for $operandProfile / $groupCountProfile', ({operandProfile, groupCountProfile}) => {
         const generator = new FractionDivisionRelationsGenerator();
-        const contexts = new Set<string>();
-        const dividends = new Set<string>();
-        for (const operandProfile of profiles) for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
-            ? ['zero'] as const : ['zero', 'positive'] as const) for (const withEquation of [false, true]) {
-            for (const withMultiplication of [false, true]) for (let seed = 0; seed < 8; seed++) {
-                setSeed(`general-execution-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
-                expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
-                contexts.add(data.context.kind);
-                dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
-                for (const solution of [false, true]) {
-                    const markup = render(data, solution);
-                    expect(markup).toBe(renderToStaticMarkup(createElement(GeneralFractionDivisionBody,
-                        {data, isSolutionView: solution, task: 'division-execution'})));
-                    expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                    expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup)).toBe(groupCountProfile === 'zero');
-                    expect(markup).toMatch(/<text[^>]*>1<\/text>/);
-                    expect(markup).toContain(solution ? `The numerical model has ${data.model.completeGroups} complete divisor-sized`
-                        : 'Use the count of complete divisor-sized groups');
-                    const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
-                    expect(parts).toHaveLength(data.model.coverageTicks);
-                    expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
-                    for (const part of parts) expect(Number(part[1])).toBeCloseTo(700 / data.model.coverageTicks, 12);
-                    expect(markup.match(/ y="219" width="[^"]+" height="27"/g)).toHaveLength(data.model.divisorTicks);
-                    expect(markup.includes('The exact quotient is')).toBe(solution);
-                    expect(markup.includes('data-response="answer-blank"')).toBe(!solution);
-                }
+        const contexts = new Set<string>(), dividends = new Set<string>();
+        let draws = 0;
+        for (const withEquation of [false, true]) for (const withMultiplication of [false, true]) for (let seed = 0; seed < 8; seed++) {
+            setSeed(`general-execution-split-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
+            const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
+            expect(data.model.completeGroups === 0).toBe(groupCountProfile === 'zero');
+            contexts.add(data.context.kind);
+            dividends.add(data.dividend.numerator === 0 ? 'zero' : 'positive');
+            for (const solution of [false, true]) {
+                const markup = render(data, solution);
+                expect(markup).toBe(renderToStaticMarkup(createElement(GeneralFractionDivisionBody,
+                    {data, isSolutionView: solution, task: 'division-execution'})));
+                expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
+                expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup)).toBe(groupCountProfile === 'zero');
+                expect(markup).toMatch(/<text[^>]*>1<\/text>/);
+                expect(markup).toContain(solution ? `The numerical model has ${data.model.completeGroups} complete divisor-sized`
+                    : 'Use the count of complete divisor-sized groups');
+                const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
+                expect(parts).toHaveLength(data.model.coverageTicks);
+                expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
+                for (const part of parts) expect(Number(part[1])).toBeCloseTo(700 / data.model.coverageTicks, 12);
+                expect(markup.match(/ y="219" width="[^"]+" height="27"/g)).toHaveLength(data.model.divisorTicks);
+                expect(markup.includes('The exact quotient is')).toBe(solution);
+                expect(markup.includes('data-response="answer-blank"')).toBe(!solution);
             }
+            draws++;
         }
-        expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
-        expect(dividends).toEqual(new Set(['zero', 'positive']));
+        expect(draws).toBe(32);
+        executionProofs.set(`${operandProfile}/${groupCountProfile}`, {draws, contexts: [...contexts], dividends: [...dividends]});
     });
 
+    afterAll(() => {
+        expect(executionContexts).toHaveLength(11);
+        expect(executionProofs.size).toBe(executionContexts.length);
+        expect([...executionProofs.values()].reduce((sum, proof) => sum + proof.draws, 0)).toBe(352);
+        expect(new Set([...executionProofs.values()].flatMap(proof => proof.contexts))).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
+        expect(new Set([...executionProofs.values()].flatMap(proof => proof.dividends))).toEqual(new Set(['zero', 'positive']));
+    });
     it('rejects the other valid payload family statically and at runtime in both directions', () => {
         const general = new FractionDivisionRelationsGenerator().generate({range: divisionFixtureRange('fraction-by-fraction-proper', 'zero'), operandProfile: 'fraction-by-fraction-proper',
             groupCountProfile: 'zero', withEquation: false, withMultiplication: false}).data;

@@ -3,7 +3,7 @@ import {quotientFixtureRange} from '../../../generators/fraction/fraction-quotie
 import {createElement, type ComponentType} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
-import {setSeed} from '../../../lib/random.ts';
+import {getRandomState, setRandomState, setSeed} from '../../../lib/random.ts';
 import {FractionDivisionRelationsGenerator} from '../../../generators/fraction/fraction-division-relations/generator.ts';
 import {FractionQuotientFixtureGenerator as FractionQuotientModelGenerator} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
 import {sharingFixture} from '../../../generators/fraction/fraction-quotient-fixtures.ts';
@@ -61,71 +61,101 @@ const render = (id: LeafId, data: unknown, isSolutionView: boolean) =>
         targetLabels: [], isSolutionView, seed: 42
     }}));
 
+const generalLeafCases = (['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
+    'fraction-by-integer-proper', 'fraction-by-integer-improper',
+    'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const).flatMap(operandProfile =>
+    (operandProfile === 'fraction-by-integer-proper' ? ['zero'] as const : ['zero', 'positive'] as const)
+        .flatMap(groupCountProfile => [false, true].flatMap(withEquation => [false, true]
+            .map(withMultiplication => ({operandProfile, groupCountProfile, withEquation, withMultiplication})))));
+const generalLeafKey = (choice: typeof generalLeafCases[number]) => JSON.stringify([
+    choice.operandProfile, choice.groupCountProfile, choice.withEquation, choice.withMultiplication
+]);
+type GeneralLeafFrame = Readonly<{data: ReturnType<FractionDivisionRelationsGenerator['generate']>['data']; randomState: number}>;
+let generalLeafFixtures: ReadonlyMap<string, readonly GeneralLeafFrame[]>;
+
+beforeAll(() => {
+    // Native fixtures are prepared once; all6336 actual leaf renders remain in
+    // the44 bounded mathematical cases below. This hook performs no SSR.
+    const generator = new FractionDivisionRelationsGenerator();
+    const fixtures = new Map<string, GeneralLeafFrame[]>();
+    for (const choice of generalLeafCases) {
+        const frames: GeneralLeafFrame[] = [];
+        const {operandProfile, groupCountProfile, withEquation, withMultiplication} = choice;
+        for (let seed = 0; seed < 12; seed++) {
+            setSeed('general-leaf-' + operandProfile + '-' + withEquation + '-' + withMultiplication + '-' + seed);
+            const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile,
+                groupCountProfile, withEquation, withMultiplication});
+            frames.push({data, randomState: getRandomState()});
+        }
+        fixtures.set(generalLeafKey(choice), frames);
+    }
+    generalLeafFixtures = fixtures;
+});
+
 describe('general fraction division leaf contracts', () => {
-    it('accepts every original operand profile, context, and optional witness state in all six leaves and modes', () => {
-        const generator = new FractionDivisionRelationsGenerator();
-        const contexts = new Set<string>();
-        for (const operandProfile of ['fraction-by-fraction-proper', 'fraction-by-fraction-improper',
-            'fraction-by-integer-proper', 'fraction-by-integer-improper',
-            'integer-by-fraction-proper', 'integer-by-fraction-improper'] as const)
-            for (const groupCountProfile of operandProfile === 'fraction-by-integer-proper'
-                ? ['zero'] as const : ['zero', 'positive'] as const) {
-            for (const withEquation of [false, true]) {
-                for (const withMultiplication of [false, true]) {
-                    for (let seed = 0; seed < 12; seed++) {
-                        setSeed(`general-leaf-${operandProfile}-${withEquation}-${withMultiplication}-${seed}`);
-                        const {data} = generator.generate({range: divisionFixtureRange(operandProfile, groupCountProfile), operandProfile, groupCountProfile, withEquation, withMultiplication});
-                        contexts.add(data.context.kind);
-                        for (const id of leafIds) {
-                            const question = render(id, data, false);
-                            const solution = render(id, data, true);
-                            expect(question).not.toContain('Validation Error');
-                            expect(solution).not.toContain('Validation Error');
-                            expect(question).toContain('Use the count of complete divisor-sized groups');
-                            expect(solution).toContain(`${data.model.completeGroups} complete divisor-sized`);
-                            for (const markup of [question, solution]) {
-                                expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup))
-                                    .toBe(groupCountProfile === 'zero');
-                            }
-                            if (id === 'fractions-general-division-execution') {
-                                expect(executionSpec.generalLabels).toContain(Scope.BarModel);
-                                for (const markup of [question, solution]) {
-                                    const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
-                                    expect(parts).toHaveLength(data.model.coverageTicks);
-                                    expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
-                                    for (const part of parts) {
-                                        expect(Number(part[1])).toBeCloseTo(700 / data.model.coverageTicks, 12);
-                                    }
-                                    expect(markup.match(/ y="219" width="[^"]+" height="27"/g))
-                                        .toHaveLength(data.model.divisorTicks);
-                                    expect(markup).toContain('All rows use the same numerical scale.');
-                                }
-                            }
-                            if (id === 'fractions-division-model-construction') {
-                                // The invariant Numberline claim holds for the blank and completed frames.
-                                for (const markup of [question, solution]) {
-                                    expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
-                                    expect(markup).toMatch(/<text[^>]*>1<\/text>/);
-                                }
-                            }
-                            if (id === 'fractions-general-division-word-problem') {
-                                expect(question).toContain('Equation: ____________________');
-                                expect(question).not.toContain('data-evidence="product-relation"');
-                                expect(question).not.toContain('×');
-                                expect(question.includes('Check by multiplication: ____________________')).toBe(withMultiplication);
-                            } else if (withEquation || withMultiplication) {
-                                expect(question).toContain('×');
-                            }
-                            if (withEquation || withMultiplication) {
-                                expect(solution).toContain('×');
-                            }
+    it.each(generalLeafCases)('accepts $operandProfile/$groupCountProfile/equation=$withEquation/multiplication=$withMultiplication in all six leaves and modes', choice => {
+        const {groupCountProfile, withEquation, withMultiplication} = choice;
+        const frames = generalLeafFixtures.get(generalLeafKey(choice))!;
+        expect(frames).toHaveLength(12);
+        for (const {data, randomState} of frames) {
+            // Preserve the original post-generation RNG prefix for the complete
+            // six-leaf/both-mode sequence, as well as its exact input data.
+            setRandomState(randomState);
+            for (const id of leafIds) {
+                const question = render(id, data, false);
+                const solution = render(id, data, true);
+                expect(question).not.toContain('Validation Error');
+                expect(solution).not.toContain('Validation Error');
+                expect(question).toContain('Use the count of complete divisor-sized groups');
+                expect(solution).toContain(`${data.model.completeGroups} complete divisor-sized`);
+                for (const markup of [question, solution]) {
+                    expect(/<text[^>]*x="32"[^>]*>0<\/text>/.test(markup))
+                        .toBe(groupCountProfile === 'zero');
+                }
+                if (id === 'fractions-general-division-execution') {
+                    expect(executionSpec.generalLabels).toContain(Scope.BarModel);
+                    for (const markup of [question, solution]) {
+                        const parts = [...markup.matchAll(/<rect[^>]* y="83" width="([^"]+)" height="29" fill="([^"]+)"/g)];
+                        expect(parts).toHaveLength(data.model.coverageTicks);
+                        expect(parts.filter(part => part[2] === '#a5b4fc')).toHaveLength(data.model.dividendTicks);
+                        for (const part of parts) {
+                            expect(Number(part[1])).toBeCloseTo(700 / data.model.coverageTicks, 12);
                         }
+                        expect(markup.match(/ y="219" width="[^"]+" height="27"/g))
+                            .toHaveLength(data.model.divisorTicks);
+                        expect(markup).toContain('All rows use the same numerical scale.');
                     }
+                }
+                if (id === 'fractions-division-model-construction') {
+                    // The invariant Numberline claim holds for the blank and completed frames.
+                    for (const markup of [question, solution]) {
+                        expect(markup).toMatch(/<line x1="32" x2="732" y1="38" y2="38"/);
+                        expect(markup).toMatch(/<text[^>]*>1<\/text>/);
+                    }
+                }
+                if (id === 'fractions-general-division-word-problem') {
+                    expect(question).toContain('Equation: ____________________');
+                    expect(question).not.toContain('data-evidence="product-relation"');
+                    expect(question).not.toContain('×');
+                    expect(question.includes('Check by multiplication: ____________________')).toBe(withMultiplication);
+                } else if (withEquation || withMultiplication) {
+                    expect(question).toContain('×');
+                }
+                if (withEquation || withMultiplication) {
+                    expect(solution).toContain('×');
                 }
             }
         }
-        expect(contexts).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
     }, 30_000);
+
+    it('retains all528 original frames,6336 actual mode projections and all original physical contexts', () => {
+        expect(generalLeafCases).toHaveLength(44);
+        expect(generalLeafFixtures.size).toBe(44);
+        const frames = [...generalLeafFixtures.values()].flat();
+        expect(frames).toHaveLength(528);
+        expect(frames.length * leafIds.length * 2).toBe(6336);
+        expect(new Set(frames.map(({data}) => data.context.kind))).toEqual(new Set(['sharing', 'measured-groups', 'rectangle']));
+    });
 
     it('rejects malformed general arithmetic, models, contexts, and optional witnesses in every leaf', () => {
         setSeed('general-fraction-invalid-leaf');

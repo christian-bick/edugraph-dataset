@@ -43,9 +43,11 @@ describe('letter-equation canonical range integration', () => {
         }
     });
 
-    it('retains Question/Solution rendering for the smallest and largest scalar frames of all cells', () => {
+    it.each(letterEquationFormulas.slice(0, 10))('retains both endpoint/mode projections for $operations', formula => {
+        const formulaProfiles = profiles.filter(profile => profile.operations.join() === formula.operations.join());
+        expect(formulaProfiles.length).toBeGreaterThan(0);
         let rendered = 0;
-        for (const profile of profiles) {
+        for (const profile of formulaProfiles) {
             const domain = letterEquationDomain(profile.operations, profile.range);
             for (const index of [0, domain.count - 1]) {
                 const data = letterEquationFrame(domain, profile.operations, index);
@@ -59,6 +61,15 @@ describe('letter-equation canonical range integration', () => {
                 }
             }
         }
-        expect(rendered).toBe(952);
+        expect(rendered).toBe(formulaProfiles.length * 4);
+    });
+
+    it('partitions all238 cells and952 endpoint/mode comparisons without dropping either annotation render', () => {
+        const operations = letterEquationFormulas.slice(0, 10).map(formula => formula.operations.join());
+        expect(new Set(operations).size).toBe(10);
+        expect(profiles).toHaveLength(238);
+        expect(profiles.every(profile => operations.filter(value => value === profile.operations.join()).length === 1)).toBe(true);
+        expect(profiles.length * 2 * 2).toBe(952);
+        expect(profiles.length * 2 * 2 * 2).toBe(1904);
     });
 });

@@ -1,7 +1,7 @@
 import {Area, Scope} from 'edugraph-ts';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vitest';
+import {afterAll, describe, expect, it} from 'vitest';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
 import {resolveSchemaChoices} from '../../../lib/schema-choices.ts';
@@ -15,32 +15,40 @@ describe('standard decimal add/subtract range integration', () => {
     const model = {generatorId: spec.generatorId, generalLabels: spec.generalLabels, schema, spec};
     const view = {viewId: viewSpec.viewId, generalLabels: viewSpec.generalLabels, schema: OperationsDecimalStandardAddSubtractViewSchema, spec: viewSpec};
 
-    it('resolves all26 feasible profiles identically through direct/planned paths and preserves Q/S column contracts', () => {
+    const profileContexts = ([[Area.AdditionStandardAlgorithm, 'addition'], [Area.SubtractionStandardAlgorithm, 'subtraction']] as const)
+        .flatMap(([operation, value]) => [Scope.NumbersWithZero, Scope.NumbersWithoutZero].flatMap(zero =>
+            [10, 20, 100, 120, 1000, 10000, 100000].filter(upper => zero !== Scope.NumbersWithoutZero || upper !== 10)
+                .map(upper => ({operation, value, zero, upper}))));
+    const observedProfiles: string[] = [];
+
+    it('retains the complete schema fallback contract', () => {
         expect(findSchemaFallbackContractIssues(schema)).toEqual([]);
-        let profiles = 0;
-        for (const [operation, value] of [[Area.AdditionStandardAlgorithm, 'addition'], [Area.SubtractionStandardAlgorithm, 'subtraction']] as const)
-            for (const zero of [Scope.NumbersWithZero, Scope.NumbersWithoutZero]) for (const upper of [10, 20, 100, 120, 1000, 10000, 100000]) {
-                if (zero === Scope.NumbersWithoutZero && upper === 10) continue;
-                const range = `http://edugraph.io/edu/NumbersSmaller${upper}`;
-                const labels = [...spec.generalLabels, ...viewSpec.generalLabels, operation, zero, range];
-                expect(planModelCompatibility({id: 'decimal-column-profile', labels}, model, view).supported).toBe(true);
-                const direct = extractConfig(schema, labels), planned = resolveSchemaChoices(schema, labels,
-                    {operation: [operation], zeroPresence: [zero], range: [range]});
-                expect(planned.config).toEqual(direct.config);
-                expect([...planned.resolvedLabels].sort()).toEqual([...direct.resolvedLabels].sort());
-                expect(direct.config).toEqual({operation: value, zeroPresence: zero === Scope.NumbersWithZero, range: createCanonicalNumericRange(upper)});
-                const data = new StandardAlgorithmDecimalAddSubtractGenerator().generate(direct.config).data;
-                const question = renderToStaticMarkup(createElement(DecimalStandardAddSubtractBody, {data, isSolutionView: false}));
-                const solution = renderToStaticMarkup(createElement(DecimalStandardAddSubtractBody, {data, isSolutionView: true}));
-                expect(question).toContain(data.top.numeral);
-                expect(question).toContain(data.bottom.numeral);
-                expect(question).toContain('counts of place-value units');
-                expect(solution).toContain('Column arithmetic in place units');
-                expect(solution).toContain('aligned-top-units');
-                expect(solution).toContain('decimal-result');
-                profiles++;
-            }
-        expect(profiles).toBe(26);
+    });
+
+    it.each(profileContexts)('resolves $value / $zero / upper$upper through direct/planned paths and actual Q/S rendering', ({operation, value, zero, upper}) => {
+        const range = `http://edugraph.io/edu/NumbersSmaller${upper}`;
+        const labels = [...spec.generalLabels, ...viewSpec.generalLabels, operation, zero, range];
+        expect(planModelCompatibility({id: 'decimal-column-profile', labels}, model, view).supported).toBe(true);
+        const direct = extractConfig(schema, labels), planned = resolveSchemaChoices(schema, labels,
+            {operation: [operation], zeroPresence: [zero], range: [range]});
+        expect(planned.config).toEqual(direct.config);
+        expect([...planned.resolvedLabels].sort()).toEqual([...direct.resolvedLabels].sort());
+        expect(direct.config).toEqual({operation: value, zeroPresence: zero === Scope.NumbersWithZero, range: createCanonicalNumericRange(upper)});
+        const data = new StandardAlgorithmDecimalAddSubtractGenerator().generate(direct.config).data;
+        const question = renderToStaticMarkup(createElement(DecimalStandardAddSubtractBody, {data, isSolutionView: false}));
+        const solution = renderToStaticMarkup(createElement(DecimalStandardAddSubtractBody, {data, isSolutionView: true}));
+        expect(question).toContain(data.top.numeral);
+        expect(question).toContain(data.bottom.numeral);
+        expect(question).toContain('counts of place-value units');
+        expect(solution).toContain('Column arithmetic in place units');
+        expect(solution).toContain('aligned-top-units');
+        expect(solution).toContain('decimal-result');
+        observedProfiles.push(`${operation}/${zero}/${upper}`);
+    });
+
+    afterAll(() => {
+        expect(profileContexts).toHaveLength(26);
+        expect(observedProfiles).toEqual(profileContexts.map(({operation, zero, upper}) => `${operation}/${zero}/${upper}`));
     });
 
     it('excludes infeasible nonzeroU10 and elementary integer-domain targets through ordinary matching', () => {

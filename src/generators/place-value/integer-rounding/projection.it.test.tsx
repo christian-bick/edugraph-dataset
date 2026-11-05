@@ -12,9 +12,10 @@ beforeAll(async () => {
 afterAll(() => vi.unstubAllGlobals());
 
 describe('rounding canonical annotations and same-value projections', () => {
-    it('renders Question/Solution at both boundaries of every admitted cell without label-dependent changes', () => {
+    const contexts = roundingPlaces.flatMap(([, place]) => [false, true].map(zero => ({place, zero})));
+    const projectionCounts = new Map<string, number>();
+    it.each(contexts)('renders both boundaries and Q/S without label-dependent changes for place$place / zero=$zero', ({place, zero}) => {
         let rendered = 0;
-        for (const [, place] of roundingPlaces) for (const zero of [false, true]) {
             for (const {range, labels} of canonicalRangeProfiles) {
                 const domain = roundingDomain(place, zero, range);
                 if (!domain.count) continue;
@@ -34,7 +35,11 @@ describe('rounding canonical annotations and same-value projections', () => {
                     }
                 }
             }
-        }
-        expect(rendered).toBeGreaterThan(200);
+        projectionCounts.set(`${place}/${zero}`, rendered);
+    });
+
+    afterAll(() => {
+        expect(projectionCounts.size).toBe(contexts.length);
+        expect([...projectionCounts.values()].reduce((sum, count) => sum + count, 0)).toBeGreaterThan(200);
     });
 });

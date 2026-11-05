@@ -53,6 +53,10 @@ function assertRelations(data: CommonFactorMultipleProblem): void {
     expect(data).not.toHaveProperty('question');
 }
 
+const completeWitnessPartitions = Array.from({length: 11}, (_, index) => ({
+    firstMinimum: index * 10, firstMaximum: Math.min(100, index * 10 + 9)
+}));
+
 describe('uniform common factor/multiple exact witnesses', () => {
     it.each([
         [0, 100, 100, 0], [100, 0, 100, 0], [100, 100, 100, 100], [1, 100, 1, 100],
@@ -73,10 +77,19 @@ describe('uniform common factor/multiple exact witnesses', () => {
         });
     });
 
-    it('preserves complete mathematical witnesses for every pair from0 through100', () => {
-        for (let first = 0; first <= 100; first++) {
+    it.each(completeWitnessPartitions)('preserves complete mathematical witnesses for first operands $firstMinimum through $firstMaximum', ({firstMinimum, firstMaximum}) => {
+        for (let first = firstMinimum; first <= firstMaximum; first++) {
             for (let second = 0; second <= 100; second++) assertRelations(buildCommonFactorMultipleProblem(first, second));
         }
+    });
+
+    it('partitions every first operand from0 through100 and all10201 ordered witness pairs', () => {
+        expect(completeWitnessPartitions).toHaveLength(11);
+        expect(completeWitnessPartitions.flatMap(({firstMinimum, firstMaximum}) =>
+            Array.from({length: firstMaximum - firstMinimum + 1}, (_, index) => firstMinimum + index)))
+            .toEqual(Array.from({length: 101}, (_, index) => index));
+        expect(completeWitnessPartitions.reduce((sum, {firstMinimum, firstMaximum}) =>
+            sum + (firstMaximum - firstMinimum + 1) * 101, 0)).toBe(10201);
     });
 
     it('rejects invalid and noncanonical operands in either original position', () => {
@@ -89,10 +102,17 @@ describe('uniform common factor/multiple exact witnesses', () => {
 
 afterEach(() => vi.restoreAllMocks());
 
+const commonNativePartitions = (['gcd', 'lcm'] as const).flatMap(operation => {
+    const maximum = operation === 'gcd' ? 100 : 12;
+    return Array.from({length: Math.ceil((maximum + 1) / 10)}, (_, index) => ({
+        operation, maximum, firstMinimum: index * 10, firstMaximum: Math.min(maximum, index * 10 + 9)
+    }));
+});
+
 describe('common factor/multiple canonical operation domains', () => {
-    it('retains every original pair exactly once across its canonical bands', () => {
-        const random = vi.spyOn(rng, 'random');
-        for (const operation of ['gcd', 'lcm'] as const) {
+    it.each(commonNativePartitions)('retains $operation first operands $firstMinimum through $firstMaximum exactly once with original full-band tickets',
+        ({operation, maximum, firstMinimum, firstMaximum}) => {
+            const random = vi.spyOn(rng, 'random');
             const covered = new Set<string>();
             const uppers = operation === 'gcd' ? [5, 10, 20, 100] : [5, 10, 20, 100, 120, 1000];
             for (const upper of uppers) {
@@ -101,7 +121,12 @@ describe('common factor/multiple canonical operation domains', () => {
                 const total = candidates.reduce((sum, candidate) => sum + candidate.weight, 0);
                 let cumulative = 0;
                 for (const candidate of candidates) {
-                    random.mockReset().mockReturnValue((cumulative + candidate.weight / 2) / total);
+                    const ticket = (cumulative + candidate.weight / 2) / total;
+                    cumulative += candidate.weight;
+                    // Keep the original full-domain inverse-CDF position. The
+                    // test partition never renormalizes the mathematical law.
+                    if (candidate.inputs[0] < firstMinimum || candidate.inputs[0] > firstMaximum) continue;
+                    random.mockReset().mockReturnValue(ticket);
                     const {data} = generator.generate({profile: {operation, range}});
                     expect(random).toHaveBeenCalledTimes(1);
                     expect(data.inputs).toEqual(candidate.inputs);
@@ -114,20 +139,29 @@ describe('common factor/multiple canonical operation domains', () => {
                                     data.lcm.value, ...data.lcm.commonMultipliers, ...data.lcm.commonProducts] : [];
                     expect(hasCanonicalRangeWitness(values, range)).toBe(true);
                     expect(data).not.toHaveProperty('operation');
-                    const key = `${first}:${second}`;
+                    const key = first + ':' + second;
                     expect(covered.has(key)).toBe(false);
                     covered.add(key);
-                    cumulative += candidate.weight;
                 }
             }
-            const maximum = operation === 'gcd' ? 100 : 12;
             const original = new Set<string>();
-            for (let first = 0; first <= maximum; first++) for (let second = 0; second <= maximum; second++) {
-                if (operation === 'lcm' || first !== 0 || second !== 0) original.add(`${first}:${second}`);
+            for (let first = firstMinimum; first <= firstMaximum; first++) for (let second = 0; second <= maximum; second++) {
+                if (operation === 'lcm' || first !== 0 || second !== 0) original.add(first + ':' + second);
             }
             expect(covered).toEqual(original);
-            expect(covered.size).toBe(operation === 'gcd' ? 10200 : 169);
-        }
+            expect(covered.size).toBe((firstMaximum - firstMinimum + 1) * (maximum + 1)
+                - Number(operation === 'gcd' && firstMinimum === 0));
+        });
+
+    it.each(['gcd', 'lcm'] as const)('covers the complete original %s first-operand partition and total', operation => {
+        const maximum = operation === 'gcd' ? 100 : 12;
+        const partitions = commonNativePartitions.filter(partition => partition.operation === operation);
+        expect(partitions.flatMap(({firstMinimum, firstMaximum}) =>
+            Array.from({length: firstMaximum - firstMinimum + 1}, (_, index) => firstMinimum + index)))
+            .toEqual(Array.from({length: maximum + 1}, (_, index) => index));
+        const total = partitions.reduce((sum, {firstMinimum, firstMaximum}) => sum
+            + (firstMaximum - firstMinimum + 1) * (maximum + 1) - Number(operation === 'gcd' && firstMinimum === 0), 0);
+        expect(total).toBe(operation === 'gcd' ? 10200 : 169);
     });
 
     it('rejects malformed profiles before drawing randomness', () => {

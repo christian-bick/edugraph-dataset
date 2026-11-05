@@ -130,23 +130,38 @@ describe('unit cube specification and packing views', () => {
         }
     });
 
-    it('accepts seeded producer data in every task and unit profile', () => {
-        for (const unitId of ['generic', 'cm', 'in', 'ft'] as const) {
-            for (let seed = 0; seed < 15; seed++) {
-                const data = fixture(unitId, seed);
-                for (const render of [specification, interpretation]) {
-                    expect(() => render(data, false)).not.toThrow();
-                    expect(() => render(data, true)).not.toThrow();
-                }
-                const enumerated = fixture(unitId, seed, 'enumerated');
-                expect(() => count(enumerated, false)).not.toThrow();
-                expect(() => count(enumerated, true)).not.toThrow();
-                expect(() => count(data, false)).not.toThrow();
-                expect(() => count(data, true)).not.toThrow();
+    const seededUnits = ['generic', 'cm', 'in', 'ft'] as const;
+    const seededTasks = ['specification', 'interpretation', 'enumerated-count', 'unindexed-count'] as const;
+    const seededFixtureCounts = new Map<string, number>();
+    const seededProjectionCounts = new Map<string, number>();
+    describe.each(seededUnits)('seeded producer in %s', unitId => {
+        let frames: readonly {unindexed: UnitCubeVolumeProblem; enumerated: UnitCubeVolumeProblem}[] = [];
+        beforeAll(() => {
+            frames = Array.from({length: 15}, (_, seed) => ({
+                unindexed: fixture(unitId, seed), enumerated: fixture(unitId, seed, 'enumerated')
+            }));
+            seededFixtureCounts.set(unitId, frames.length * 2);
+        });
+        it.each(seededTasks)('accepts all seeded data in %s', task => {
+            const render = task === 'specification' ? specification : task === 'interpretation' ? interpretation : count;
+            let projections = 0;
+            for (const frame of frames) {
+                const data = task === 'enumerated-count' ? frame.enumerated : frame.unindexed;
+                expect(() => render(data, false)).not.toThrow();
+                expect(() => render(data, true)).not.toThrow();
+                projections += 2;
             }
-        }
+            expect(projections).toBe(30);
+            seededProjectionCounts.set(`${unitId}/${task}`, projections);
+        });
     });
 
+    afterAll(() => {
+        expect(seededFixtureCounts.size).toBe(seededUnits.length);
+        expect([...seededFixtureCounts.values()].reduce((sum, count) => sum + count, 0)).toBe(120);
+        expect(seededProjectionCounts.size).toBe(seededUnits.length * seededTasks.length);
+        expect([...seededProjectionCounts.values()].reduce((sum, count) => sum + count, 0)).toBe(480);
+    });
     it('rejects malformed occupancy before all three views render', () => {
         const data = fixture('cm');
         const invalid = {...data, occupiedCells: data.occupiedCells.slice(1)};

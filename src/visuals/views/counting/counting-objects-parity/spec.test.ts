@@ -45,7 +45,10 @@ describe('counting-objects-parity capabilities', () => {
         // The odd zero-involving singleton belongs to the canonical U5 band.
         expect(matchTarget({...target, labels: target.labels.map(label => label === Scope.NumbersSmaller20
             ? Scope.NumbersSmaller5 : label).concat(Scope.NumbersWithZero)}, generator, view).matched).toBe(true);
-        const assessment = createLabelDependencyEvaluator().evaluate(resolved.labels)
+        // Evaluation is stateless; retain one ontology-bound index for every
+        // original annotation assessment in this independently timed case.
+        const evaluator = createLabelDependencyEvaluator();
+        const assessment = evaluator.evaluate(resolved.labels)
             .assessments.find(item => item.facet === 'zero');
         expect(assessment?.status).toBe('satisfied');
         const variants = enumerateDependencyAuditSelections(matched.plan);
@@ -54,7 +57,7 @@ describe('counting-objects-parity capabilities', () => {
         for (const variant of variants.selections) {
             expect(variant.labels.filter(label => zeroLabels.includes(label)))
                 .toHaveLength(1);
-            expect(createLabelDependencyEvaluator().evaluate(variant.labels)
+            expect(evaluator.evaluate(variant.labels)
                 .assessments.find(item => item.facet === 'zero')?.status).toBe('satisfied');
         }
 

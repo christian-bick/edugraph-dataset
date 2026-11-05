@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {afterAll, afterEach, describe, expect, it, vi} from 'vitest';
 import {createCanonicalNumericRange} from '../../../lib/canonical-numeric-range.ts';
 import * as rng from '../../../lib/random.ts';
 import {exactDecimal} from '../standard-decimal-helpers.ts';
@@ -17,13 +17,18 @@ const maximum = (data: ReturnType<typeof buildDecimalStandardDivisionProblem>) =
 );
 
 describe('standard decimal division finite prefix and analytic tails', () => {
-    it('retains all 16592798 existing source rows and their exact four-scenario conditional masses', () => {
-        const source = decimalDivisionSourceProfiles();
-        expect(source).toHaveLength(139);
+    const source = decimalDivisionSourceProfiles();
+    const precisionContexts = [0, 1, 2, 3].flatMap(divisorScale => [0, 1, 2]
+        .filter(quotientScale => divisorScale + quotientScale > 0)
+        .map(quotientScale => ({divisorScale, quotientScale})));
+    const contextProofs = new Map<string, {rows: number; totalMass: number}>();
+    it.each(precisionContexts)('retains every source row and four-scenario mass for divisor scale $divisorScale / quotient scale $quotientScale', context => {
+        const profiles = source.filter(p => p.divisorScale === context.divisorScale && p.quotientScale === context.quotientScale);
+        expect(profiles.length).toBeGreaterThan(0);
         const all = STANDARD_DECIMAL_DIVISION_UPPERS.flatMap(upper =>
             standardDecimalDivisionCases(createCanonicalNumericRange(upper)).map(block => ({...block, upper})));
         let rows = 0, errors = 0, totalMass = 0;
-        for (const p of source) {
+        for (const p of profiles) {
             const mass = new Float64Array(p.maximum + 1);
             for (const block of all.filter(b => b.divisorScale === p.divisorScale
                 && b.quotientScale === p.quotientScale && b.divisorCoefficient === p.divisorCoefficient)) {
@@ -47,9 +52,19 @@ describe('standard decimal division finite prefix and analytic tails', () => {
                 rows++;
             }
         }
-        expect(rows).toBe(16592798);
         expect(errors).toBe(0);
-        expect(totalMass).toBeCloseTo(1, 12);
+        expect(rows).toBe(profiles.reduce((sum, p) => sum + p.maximum - p.minimum + 1, 0));
+        expect(totalMass).toBeCloseTo(profiles.length / source.length, 12);
+        contextProofs.set(`${context.divisorScale}/${context.quotientScale}`, {rows, totalMass});
+    });
+
+    afterAll(() => {
+        expect(source).toHaveLength(139);
+        expect(precisionContexts.flatMap(context => source.filter(p =>
+            p.divisorScale === context.divisorScale && p.quotientScale === context.quotientScale))).toEqual(source);
+        expect(contextProofs.size).toBe(precisionContexts.length);
+        expect([...contextProofs.values()].reduce((sum, proof) => sum + proof.rows, 0)).toBe(16592798);
+        expect([...contextProofs.values()].reduce((sum, proof) => sum + proof.totalMass, 0)).toBeCloseTo(1, 12);
     });
 
     it('checks every finite-prefix coefficient and every supplied trailing-zero trim against actual long division', () => {

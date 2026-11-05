@@ -18,6 +18,8 @@ const estimationTargets = [Area.Addition, Area.Subtraction, Area.Multiplication,
     id: `rounded-${operation.split('/').at(-1)}`,
     labels: [operation, Area.IntegerRounding, Scope.NumbersSmaller1000, Ability.PlausibilityEvaluation]
 }));
+const renderFixtureCases = [...targets, ...estimationTargets].flatMap(target =>
+    [0, 1].map(seed => ({target, seed, id: target.id})));
 const zeroRoundingTarget = {
     id: '3.OA.D.8-answer-reasonableness~4ec714b8',
     labels: [Area.Division, Area.IntegerRounding, Scope.NumbersSmaller1000, Ability.PlausibilityEvaluation]
@@ -61,24 +63,22 @@ function originalZeroFixture() {
 }
 
 describe('answer reasonableness domain rendering', () => {
-    it.each([...targets, ...estimationTargets])('renders both modes and verdicts for fixture $id', target => {
-        for (const seed of [0, 1]) {
-            const payload = prepare(target, seed);
-            const claim = resolveEstimationClaim(payload.problem.data);
-            const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
-            const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
-            expect(question).toContain('Round to the nearest ten');
-            expect(text(question)).toContain(comparisonMethod);
-            const data = payload.problem.data;
-            const roundedCalculation = `${data.roundedNum1} ${symbols[data.operation]} ${data.roundedNum2} = ${data.estimatedAnswer}`;
-            expect(text(question)).toContain(roundedCalculation);
-            expect(text(solution)).toContain(roundedCalculation);
-            expect(question).not.toContain('rounds to');
-            expect(solution).toContain(`${claim.proposedAnswer} rounds to ${claim.roundedProposedAnswer}`);
-            expect(solution).toContain(claim.isReasonable ? 'which matches' : 'which does not match');
-            expect(question).not.toContain('Validation Error');
-            expect(solution).not.toContain('Validation Error');
-        }
+    it.each(renderFixtureCases)('renders both modes and the emitted verdict for fixture $id, seed $seed', ({target, seed}) => {
+        const payload = prepare(target, seed);
+        const claim = resolveEstimationClaim(payload.problem.data);
+        const question = renderToStaticMarkup(<OperationsAnswerReasonableness payload={payload} />);
+        const solution = renderToStaticMarkup(<OperationsAnswerReasonableness payload={{...payload, isSolutionView: true}} />);
+        expect(question).toContain('Round to the nearest ten');
+        expect(text(question)).toContain(comparisonMethod);
+        const data = payload.problem.data;
+        const roundedCalculation = `${data.roundedNum1} ${symbols[data.operation]} ${data.roundedNum2} = ${data.estimatedAnswer}`;
+        expect(text(question)).toContain(roundedCalculation);
+        expect(text(solution)).toContain(roundedCalculation);
+        expect(question).not.toContain('rounds to');
+        expect(solution).toContain(`${claim.proposedAnswer} rounds to ${claim.roundedProposedAnswer}`);
+        expect(solution).toContain(claim.isReasonable ? 'which matches' : 'which does not match');
+        expect(question).not.toContain('Validation Error');
+        expect(solution).not.toContain('Validation Error');
     });
 
     it('requires the zero-producing comparison method for the original division failure without revealing its answer', () => {

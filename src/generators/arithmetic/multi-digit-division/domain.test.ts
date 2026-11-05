@@ -17,34 +17,52 @@ const quantities = (n: number, d: number) => {
 };
 const ranges = canonicalRangeProfiles.filter(({range}) => range.max <= 10000 && [0, 5].includes(range.min));
 
+const nativeDivisionPartitions = [1, 2, 3, 4].flatMap(dividendDigits => [1, 2].flatMap(divisorDigits => {
+    const minimum = 10 ** (dividendDigits - 1), maximum = 10 ** dividendDigits - 1;
+    const span = dividendDigits === 4 ? 1000 : maximum - minimum + 1;
+    return Array.from({length: Math.ceil((maximum - minimum + 1) / span)}, (_, index) => ({
+        dividendDigits, divisorDigits, firstDividend: minimum + index * span,
+        lastDividend: Math.min(maximum, minimum + (index + 1) * span - 1)
+    }));
+}));
+
 describe('finite weighted partial-quotient domains', () => {
-    it('retains every original divisor/dividend pair exactly once and conditions its original draw-path probability', () => {
-        let total = 0;
-        for (const dividendDigits of [1, 2, 3, 4]) for (const divisorDigits of [1, 2]) {
+    it.each(nativeDivisionPartitions)('retains widths $dividendDigits/$divisorDigits, dividends $firstDividend through $lastDividend, with exact original mass',
+        ({dividendDigits, divisorDigits, firstDividend, lastDividend}) => {
             const minimum = 10 ** (dividendDigits - 1), maximum = 10 ** dividendDigits - 1;
             const seen = new Uint8Array((maximum + 1) * 100);
-            let actualCount = 0, weightSum = 0;
+            let actualCount = 0, fullCount = 0, weightSum = 0;
             for (const zero of [false, true]) for (const {range} of ranges) {
                 const domain = partialQuotientDomain(dividendDigits, divisorDigits, zero, range);
                 let valid = true, count = 0;
                 for (const row of domain.rows) {
-                    const exact = row.remainders[0] === 0;
-                    const lastDivisor = dividendDigits === 2 && !exact ? 98 : 99;
-                    const firstQ = Math.max(1, Math.ceil((minimum - (exact ? 0 : row.divisor - 1)) / row.divisor));
-                    const lastQ = Math.floor((maximum - (exact ? 0 : 1)) / row.divisor);
-                    const firstR = exact ? 0 : Math.max(1, minimum - row.divisor * row.quotient);
-                    const lastR = exact ? 0 : Math.min(row.divisor - 1, maximum - row.divisor * row.quotient);
-                    const expectedWeight = divisorDigits === 1 ? 1 : 0.5 / (lastDivisor - 9) / (lastQ - firstQ + 1) / (lastR - firstR + 1);
-                    valid &&= Math.abs(row.weight - expectedWeight) < 1e-15;
+                    valid &&= row.remainders.length > 0;
+                    const initialDividend = row.divisor * row.quotient + row.remainders[0]!;
+                    const ownsRow = initialDividend >= firstDividend && initialDividend <= lastDividend;
+                    if (ownsRow) {
+                        const exact = row.remainders[0] === 0;
+                        const lastDivisor = dividendDigits === 2 && !exact ? 98 : 99;
+                        const firstQ = Math.max(1, Math.ceil((minimum - (exact ? 0 : row.divisor - 1)) / row.divisor));
+                        const lastQ = Math.floor((maximum - (exact ? 0 : 1)) / row.divisor);
+                        const firstR = exact ? 0 : Math.max(1, minimum - row.divisor * row.quotient);
+                        const lastR = exact ? 0 : Math.min(row.divisor - 1, maximum - row.divisor * row.quotient);
+                        const expectedWeight = divisorDigits === 1 ? 1 : 0.5 / (lastDivisor - 9) / (lastQ - firstQ + 1) / (lastR - firstR + 1);
+                        valid &&= Math.abs(row.weight - expectedWeight) < 1e-15;
+                    }
                     for (const remainder of row.remainders) {
                         const dividend = row.divisor * row.quotient + remainder;
+                        count++;
+                        valid &&= dividend >= minimum && dividend <= maximum;
+                        if (dividend < firstDividend || dividend > lastDividend) continue;
                         const index = dividend * 100 + row.divisor;
                         valid &&= seen[index] === 0 && hasCanonicalRangeWitness(quantities(dividend, row.divisor), range)
                             && partialQuotientHasZero({dividend, divisor: row.divisor, quotient: row.quotient, remainder}) === zero;
                         seen[index] = 1;
-                        count++;
+                        actualCount++;
                     }
-                    for (const index of [0, row.remainders.length - 1]) {
+                    // Each row's original weight and both exact weighted-index
+                    // endpoints belong to the partition containing its first dividend.
+                    if (ownsRow) for (const index of [0, row.remainders.length - 1]) {
                         const position = row.end - row.weight * row.remainders.length + row.weight * (index + 0.5);
                         const candidate = partialQuotientFrame(domain, position);
                         valid &&= candidate.divisor === row.divisor && candidate.quotient === row.quotient
@@ -53,11 +71,11 @@ describe('finite weighted partial-quotient domains', () => {
                 }
                 expect(valid).toBe(true);
                 expect(count).toBe(domain.count);
-                actualCount += count;
+                fullCount += count;
                 weightSum += domain.weight;
             }
             let expectedCount = 0, exactSupport = true;
-            for (let n = minimum; n <= maximum; n++) for (let d = divisorDigits === 1 ? 2 : 10; d <= (divisorDigits === 1 ? 9 : 99); d++) {
+            for (let n = firstDividend; n <= lastDividend; n++) for (let d = divisorDigits === 1 ? 2 : 10; d <= (divisorDigits === 1 ? 9 : 99); d++) {
                 const q = Math.floor(n / d), r = n % d;
                 const supported = divisorDigits <= dividendDigits && q > 0 && (divisorDigits === 2
                     || r > 0 && ![n, q].some(value => String(value).includes('0')));
@@ -67,8 +85,21 @@ describe('finite weighted partial-quotient domains', () => {
             expect(exactSupport).toBe(true);
             expect(actualCount).toBe(expectedCount);
             if (divisorDigits === 2 && dividendDigits >= 2) expect(weightSum).toBeCloseTo(1, 10);
-            else expect(weightSum).toBe(actualCount);
-            total += actualCount;
+            else expect(weightSum).toBe(fullCount);
+        });
+
+    it('covers every original dividend interval and all931315 native pairs without shared result state', () => {
+        let total = 0;
+        for (const dividendDigits of [1, 2, 3, 4]) for (const divisorDigits of [1, 2]) {
+            const minimum = 10 ** (dividendDigits - 1), maximum = 10 ** dividendDigits - 1;
+            const partitions = nativeDivisionPartitions.filter(partition => partition.dividendDigits === dividendDigits && partition.divisorDigits === divisorDigits);
+            expect(partitions.flatMap(({firstDividend, lastDividend}) => Array.from({length: lastDividend - firstDividend + 1}, (_, index) => firstDividend + index)))
+                .toEqual(Array.from({length: maximum - minimum + 1}, (_, index) => minimum + index));
+            for (let n = minimum; n <= maximum; n++) for (let d = divisorDigits === 1 ? 2 : 10; d <= (divisorDigits === 1 ? 9 : 99); d++) {
+                const q = Math.floor(n / d), r = n % d;
+                if (divisorDigits <= dividendDigits && q > 0 && (divisorDigits === 2
+                    || r > 0 && ![n, q].some(value => String(value).includes('0')))) total++;
+            }
         }
         expect(total).toBe(931315);
     });

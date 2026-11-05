@@ -9,6 +9,7 @@ import {massReadingRangeProfiles, massReadingsForRange} from './numeric-domain.t
 
 describe('measurement-mass spec', () => {
     it('retains both scales and resolves each feasible cell directly and through planned choices', () => {
+        const evaluator = createLabelDependencyEvaluator();
         let cells = 0;
         for (const scale of [Scope.GramScale, Scope.KilogramScale]) {
             const measurement = scale === Scope.GramScale ? 'gram-weight' : 'kilogram-weight';
@@ -20,7 +21,7 @@ describe('measurement-mass spec', () => {
                 expect(extractConfig(schema, labels).config).toEqual({measurement, range: profile.range});
                 expect(resolveSchemaChoices(schema, labels, {measurement: [scale], range: profile.labels}).config)
                     .toEqual({measurement, range: profile.range});
-                const result = createLabelDependencyEvaluator().evaluate([...spec.generalLabels!, ...labels, Ability.ProcedureExecution]);
+                const result = evaluator.evaluate([...spec.generalLabels!, ...labels, Ability.ProcedureExecution]);
                 expect(result.errors).toEqual([]);
                 expect(result.conflicts).toEqual([]);
                 expect(result.assessments.filter(item => item.status === 'missing')).toEqual([]);

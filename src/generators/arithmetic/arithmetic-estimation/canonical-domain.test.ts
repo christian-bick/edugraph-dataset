@@ -13,34 +13,43 @@ const profiles = canonicalRangeProfiles.filter(({range}) => range.max <= 1000);
 
 describe.sequential('canonical estimation construction-context union', () => {
     const proofCoverage = new Map<string, {contexts: number; cells: number; pairPaths: number; proposalPaths: number}>();
+    const constructionProofs = new Map<typeof operations[number], {
+        expected: Map<string, number>; contexts: number; pairPaths: number; proposalPaths: number
+    }>(operations.map(operation => [operation,
+        {expected: new Map<string, number>(), contexts: 0, pairPaths: 0, proposalPaths: 0}] as const));
+    const sourceContexts = operations.flatMap(operation => [5, 10, 20, 100, 120, 1000].flatMap(maximum =>
+        [0, 5, 10, 20, 100, 120].filter(minimum => minimum < maximum).map(minimum => ({operation, minimum, maximum}))));
 
-    it.each(operations)('preserves every original %s declared-context pair/proposal path and its exact conditional probability', operation => {
-        const expected = new Map<string, number>();
-        let contexts = 0, pairPaths = 0, proposalPaths = 0;
-        for (const maximum of [5, 10, 20, 100, 120, 1000]) {
-            for (const minimum of [0, 5, 10, 20, 100, 120].filter(minimum => minimum < maximum)) {
-                contexts++;
-                const source = {operation, minimum, maximum};
-                for (const row of estimationRawRows(source)) for (let second = row.secondMin; second <= row.secondMax; second++) {
-                    const data = estimationRelation(source, row.first, second);
-                    if (!data) continue;
-                    const proposals = estimationProposalCases(data);
-                    if (!proposals.length) continue;
-                    pairPaths++;
-                    const values = estimationQuantities(data), baseMin = Math.min(...values), baseMax = Math.max(...values);
-                    for (const proposal of proposals) {
-                        proposalPaths++;
-                        const min = Math.min(baseMin, proposal.proposedAnswer, proposal.roundedProposedAnswer);
-                        const max = Math.max(baseMax, proposal.proposedAnswer, proposal.roundedProposedAnswer);
-                        const upper = CANONICAL_RANGE_THRESHOLDS.find(bound => max <= bound)!;
-                        const lower = [120, 100, 20, 10, 5, 0].find(bound => min >= bound)!;
-                        if (minimum > lower || maximum < upper) throw new Error('A contributing old context was excluded');
-                        const key = cellKey(operation, min === 0, lower, upper);
-                        expected.set(key, (expected.get(key) ?? 0) + row.pairWeight * proposal.seeds / proposalSeedCount);
-                    }
-                }
+    it.each(sourceContexts)('preserves every $operation pair/proposal path in the original construction context from $minimum to $maximum', ({operation, minimum, maximum}) => {
+        const proof = constructionProofs.get(operation)!;
+        const expected = proof.expected;
+        let pairPaths = 0, proposalPaths = 0;
+        const source = {operation, minimum, maximum};
+        for (const row of estimationRawRows(source)) for (let second = row.secondMin; second <= row.secondMax; second++) {
+            const data = estimationRelation(source, row.first, second);
+            if (!data) continue;
+            const proposals = estimationProposalCases(data);
+            if (!proposals.length) continue;
+            pairPaths++;
+            const values = estimationQuantities(data), baseMin = Math.min(...values), baseMax = Math.max(...values);
+            for (const proposal of proposals) {
+                proposalPaths++;
+                const min = Math.min(baseMin, proposal.proposedAnswer, proposal.roundedProposedAnswer);
+                const max = Math.max(baseMax, proposal.proposedAnswer, proposal.roundedProposedAnswer);
+                const upper = CANONICAL_RANGE_THRESHOLDS.find(bound => max <= bound)!;
+                const lower = [120, 100, 20, 10, 5, 0].find(bound => min >= bound)!;
+                if (minimum > lower || maximum < upper) throw new Error('A contributing old context was excluded');
+                const key = cellKey(operation, min === 0, lower, upper);
+                expected.set(key, (expected.get(key) ?? 0) + row.pairWeight * proposal.seeds / proposalSeedCount);
             }
         }
+        proof.contexts++;
+        proof.pairPaths += pairPaths;
+        proof.proposalPaths += proposalPaths;
+    }, 60000);
+
+    it.each(operations)('checks the complete %s context union against every canonical cell', operation => {
+        const {expected, contexts, pairPaths, proposalPaths} = constructionProofs.get(operation)!;
         let cells = 0;
         for (const zero of [false, true]) for (const {range} of profiles) {
             const domain = canonicalEstimationDomain(operation, zero, range);
@@ -69,6 +78,7 @@ describe.sequential('canonical estimation construction-context union', () => {
     }, 60000);
 
     it('retains the complete84-context/47-cell proof and all pair/proposal paths across the four operations', () => {
+        expect(sourceContexts).toHaveLength(84);
         expect([...proofCoverage.keys()].sort()).toEqual([...operations].sort());
         const total = [...proofCoverage.values()].reduce((sum, value) => ({
             contexts: sum.contexts + value.contexts, cells: sum.cells + value.cells,

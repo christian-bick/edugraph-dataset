@@ -159,22 +159,22 @@ describe('answer reasonableness projection', () => {
         expect(readClaim(canonical)).toEqual(readClaim(canonical));
     });
 
-    it.each([createCanonicalNumericRange(10), createCanonicalNumericRange(20), createCanonicalNumericRange(1000, 10), createCanonicalNumericRange(1000, 20)])(
-        'supports both verdicts for every operation across seeded emitted data in %j', range => {
+    it.each([createCanonicalNumericRange(10), createCanonicalNumericRange(20), createCanonicalNumericRange(1000, 10), createCanonicalNumericRange(1000, 20)]
+        .flatMap(range => ([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const)
+            .map(operation => ({range, operation, operationName: operationNames[operation], minimum: range.min, maximum: range.max}))))(
+        'supports both verdicts across every original seed for $operationName from $minimum to $maximum', ({range, operation}) => {
             const generator = new ArithmeticEstimationGenerator();
-            for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division] as const) {
-                for (let seed = 0; seed < 12; seed++) {
-                    setSeed(seed);
-                    const zeroPresence = canonicalEstimationDomain(operationNames[operation], true, range).weight > 0;
-                    if (!zeroPresence && canonicalEstimationDomain(operationNames[operation], false, range).weight === 0) continue;
-                    const generated = generator.generate({operation, range, zeroPresence});
-                    expect(generated).not.toBeNull();
-                    for (const claimSeed of [2 * seed, 2 * seed + 1]) {
-                        const claim = resolveEstimationClaim(generated!.data, claimSeed);
-                        expect(claim.isReasonable).toBe(claimSeed % 2 === 0);
-                        expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]
-                            .every(value => value >= generated!.data.numberDomain.min && value <= generated!.data.numberDomain.max)).toBe(true);
-                    }
+            for (let seed = 0; seed < 12; seed++) {
+                setSeed(seed);
+                const zeroPresence = canonicalEstimationDomain(operationNames[operation], true, range).weight > 0;
+                if (!zeroPresence && canonicalEstimationDomain(operationNames[operation], false, range).weight === 0) continue;
+                const generated = generator.generate({operation, range, zeroPresence});
+                expect(generated).not.toBeNull();
+                for (const claimSeed of [2 * seed, 2 * seed + 1]) {
+                    const claim = resolveEstimationClaim(generated!.data, claimSeed);
+                    expect(claim.isReasonable).toBe(claimSeed % 2 === 0);
+                    expect([claim.proposedAnswer, claim.roundedProposedAnswer, claim.roundedEstimatedAnswer]
+                        .every(value => value >= generated!.data.numberDomain.min && value <= generated!.data.numberDomain.max)).toBe(true);
                 }
             }
         }

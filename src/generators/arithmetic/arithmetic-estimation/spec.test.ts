@@ -29,12 +29,10 @@ describe('ArithmeticEstimationGenerator spec integration', () => {
         expect(spec.generalLabels).not.toContain(Area.Estimation);
     });
 
-    it('resolves every reviewed operation within 1000', () => {
-        for (const operation of [Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division]) {
-            const stub = generateWithLabels(generator, [operation, Scope.NumbersSmaller1000]);
-            expect(stub).not.toBeNull();
-            expect(stub!.labels).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller1000]));
-        }
+    it.each([Area.Addition, Area.Subtraction, Area.Multiplication, Area.Division])('resolves reviewed operation %s within1000', operation => {
+        const stub = generateWithLabels(generator, [operation, Scope.NumbersSmaller1000]);
+        expect(stub).not.toBeNull();
+        expect(stub!.labels).toEqual(expect.arrayContaining([operation, Scope.NumbersSmaller1000]));
     });
 
     it.each(equationTargets)('generates small-number fixture $id through its authoritative plan', target => {
