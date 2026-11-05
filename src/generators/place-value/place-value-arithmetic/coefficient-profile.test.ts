@@ -73,47 +73,45 @@ describe('complete place-value coefficient presence profiles', () => {
         }
     });
 
-    it('keeps broad subtraction positive in direct and planned paths while preserving explicit equality', () => {
-        for (const operation of [Area.Addition, Area.Subtraction]) for (const regrouping of [false, true]) {
-            for (const explicit of [false, true]) {
-                const labels = [operation, Scope.NumbersSmaller1000, ...view.generalLabels,
-                    ...(regrouping ? [Area.IntegerRegrouping] : []), ...(explicit ? [Scope.NumbersWithZero] : [])];
-                const match = planModelCompatibility({id: 'coefficient', labels}, model, consumer);
-                expect(match.supported).toBe(true);
-                if (!match.supported) throw new Error(match.reason);
-                const selections = enumerateDependencyAuditSelections(match.plan);
-                expect(selections.status).toBe('complete');
-                for (const selection of selections.selections) {
-                    const resolved = resolveDependencyAuditAnnotation({id: 'coefficient', plan: match.plan,
-                        selection, generator: model, view: consumer});
-                    expect(resolved.annotationResolution.status).toBe('not_required');
-                    expect(resolved.labels.includes(Scope.NumbersWithZero))
-                        .not.toBe(resolved.labels.includes(Scope.NumbersWithoutZero));
-                    const sampleKey = `coefficient#${spec.generatorId}#${view.viewId}#train#question#inst:0`;
-                    const input = {generator: new PlaceValueArithmeticGenerator(), generatorSchema: PlaceValueArithmeticGeneratorSchema,
-                        viewSchema: {}, generatorSpec: spec, viewSpec: view, plan: match.plan, sampleKey, seed: 17, attempt: 1,
-                        replay: {version: 1 as const, sampleKey, seed: 17, attempt: 1,
-                            selection: createGenerationSelectionReceipt(match.plan, selection.choices)}};
-                    const configured = resolvePlannedConfigurations(input);
-                    const equality = explicit && operation === Area.Subtraction && !regrouping;
-                    expect(configured.generatorConfig.requireZero).toBe(equality);
-                    const draw = generatePlannedDraw(input);
-                    expect(draw.stub).not.toBeNull();
-                    expect(draw.stub!.data.answer === 0).toBe(equality);
-                    expect(hasCoefficientZero(draw.stub!.data.num1, draw.stub!.data.num2, draw.stub!.data.operation))
-                        .toBe(configured.generatorConfig.coefficientPresence);
-                    expect(generatePlannedDraw(input)).toEqual(draw);
-                }
-                for (let seed = 0; seed < 24; seed++) {
-                    setSeed(seed);
-                    const config = extractConfig(PlaceValueArithmeticGeneratorSchema, labels).config;
-                    expect(config.requireZero).toBe(explicit && operation === Area.Subtraction && !regrouping);
-                    const generated = new PlaceValueArithmeticGenerator().generate(config)!;
-                    expect(generated).not.toBeNull();
-                    expect(hasCoefficientZero(generated.data.num1, generated.data.num2, generated.data.operation))
-                        .toBe(config.coefficientPresence);
-                }
-            }
+    const directPlannedContexts = ([Area.Addition, Area.Subtraction] as const).flatMap(operation =>
+        [false, true].flatMap(regrouping => [false, true].map(explicit => ({operation, regrouping, explicit}))));
+    it.each(directPlannedContexts)('keeps direct/planned positivity and explicit equality for $operation / regrouping=$regrouping / explicit=$explicit', ({operation, regrouping, explicit}) => {
+        const labels = [operation, Scope.NumbersSmaller1000, ...view.generalLabels,
+            ...(regrouping ? [Area.IntegerRegrouping] : []), ...(explicit ? [Scope.NumbersWithZero] : [])];
+        const match = planModelCompatibility({id: 'coefficient', labels}, model, consumer);
+        expect(match.supported).toBe(true);
+        if (!match.supported) throw new Error(match.reason);
+        const selections = enumerateDependencyAuditSelections(match.plan);
+        expect(selections.status).toBe('complete');
+        for (const selection of selections.selections) {
+            const resolved = resolveDependencyAuditAnnotation({id: 'coefficient', plan: match.plan,
+                selection, generator: model, view: consumer});
+            expect(resolved.annotationResolution.status).toBe('not_required');
+            expect(resolved.labels.includes(Scope.NumbersWithZero))
+                .not.toBe(resolved.labels.includes(Scope.NumbersWithoutZero));
+            const sampleKey = `coefficient#${spec.generatorId}#${view.viewId}#train#question#inst:0`;
+            const input = {generator: new PlaceValueArithmeticGenerator(), generatorSchema: PlaceValueArithmeticGeneratorSchema,
+                viewSchema: {}, generatorSpec: spec, viewSpec: view, plan: match.plan, sampleKey, seed: 17, attempt: 1,
+                replay: {version: 1 as const, sampleKey, seed: 17, attempt: 1,
+                    selection: createGenerationSelectionReceipt(match.plan, selection.choices)}};
+            const configured = resolvePlannedConfigurations(input);
+            const equality = explicit && operation === Area.Subtraction && !regrouping;
+            expect(configured.generatorConfig.requireZero).toBe(equality);
+            const draw = generatePlannedDraw(input);
+            expect(draw.stub).not.toBeNull();
+            expect(draw.stub!.data.answer === 0).toBe(equality);
+            expect(hasCoefficientZero(draw.stub!.data.num1, draw.stub!.data.num2, draw.stub!.data.operation))
+                .toBe(configured.generatorConfig.coefficientPresence);
+            expect(generatePlannedDraw(input)).toEqual(draw);
+        }
+        for (let seed = 0; seed < 24; seed++) {
+            setSeed(seed);
+            const config = extractConfig(PlaceValueArithmeticGeneratorSchema, labels).config;
+            expect(config.requireZero).toBe(explicit && operation === Area.Subtraction && !regrouping);
+            const generated = new PlaceValueArithmeticGenerator().generate(config)!;
+            expect(generated).not.toBeNull();
+            expect(hasCoefficientZero(generated.data.num1, generated.data.num2, generated.data.operation))
+                .toBe(config.coefficientPresence);
         }
     });
 

@@ -1,6 +1,6 @@
 import {Scope} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import {afterAll, afterEach, describe, expect, it, vi} from 'vitest';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
 import {planModelCompatibility} from '../../../lib/model-compatibility.ts';
@@ -29,40 +29,46 @@ const candidateKey = (sample: object) => JSON.stringify(sample);
 afterEach(() => vi.restoreAllMocks());
 
 describe('prescribed common-part fraction ranges', () => {
-    it('partitions every old fraction/mixed pool path and preserves its conditional path law', () => {
+    const poolContexts = (['addition', 'subtraction'] as const).flatMap(operation =>
+        (['proper', 'improper', 'mixed'] as const).map(kind => ({operation, kind})));
+    const observedPoolPaths = new Map<string, number>();
+    afterAll(() => {
+        expect(observedPoolPaths.size).toBe(6);
+        expect([...observedPoolPaths.keys()].sort()).toEqual(poolContexts.map(({operation, kind}) => operation + ':' + kind).sort());
+        expect([...observedPoolPaths.values()].reduce((sum, count) => sum + count, 0)).toBe(4908);
+    });
+    it.each(poolContexts)('partitions every old $operation/$kind pool path with its exact conditional law', ({operation, kind}) => {
         const generator = new FractionArithmeticGenerator(), draw = vi.spyOn(rng, 'random');
         let paths = 0;
-        for (const operation of ['addition', 'subtraction'] as const) for (const kind of ['proper', 'improper', 'mixed'] as const) {
-            const original = kind === 'mixed' ? unlikeMixedRangeRows(operation) : unlikeFractionMagnitudeRows(operation, kind);
-            const seen = new Set<string>(), expected = new Set(original.flatMap(pool => pool.retained.map(row => `${pool.profile}:${candidateKey(row)}`)));
-            for (const [, upper] of bounds) {
-                const range = createCanonicalNumericRange(upper);
-                const pools = kind === 'mixed' ? unlikeMixedRangeRows(operation, range) : unlikeFractionMagnitudeRows(operation, kind, range);
-                const mass = pools.reduce((sum, pool) => sum + pool.weight, 0);
-                let before = 0;
-                for (const pool of pools) {
-                    expect(pool.originalCount).toBe(original.find(p => p.profile === pool.profile)!.originalCount);
-                    expect(pool.weight).toBe(pool.retained.length / pool.originalCount);
-                    for (const [index, sample] of pool.retained.entries()) {
-                        const key = `${pool.profile}:${candidateKey(sample)}`;
-                        expect(seen.has(key)).toBe(false); seen.add(key);
-                        draw.mockReset().mockReturnValueOnce((before + pool.weight / 2) / mass)
-                            .mockReturnValueOnce((index + 0.5) / pool.retained.length);
-                        const data = generator.generate({task: kind === 'mixed' ? 'unlike-mixed-operation'
-                            : kind === 'proper' ? 'unlike-fraction-operation-proper' : 'unlike-fraction-operation-improper',
-                            operation, usesCommonDenominator: false, range}).data as Unlike;
-                        expect({first: data.first, second: data.second, commonDenominator: data.commonDenominator}).toEqual(sample);
-                        expect(hasCanonicalRangeWitness(quantities(data), range)).toBe(true);
-                        expect(quantities(data).every(n => n > 0)).toBe(true);
-                        expect(draw).toHaveBeenCalledTimes(2);
-                        paths++;
-                    }
-                    before += pool.weight;
+        const original = kind === 'mixed' ? unlikeMixedRangeRows(operation) : unlikeFractionMagnitudeRows(operation, kind);
+        const seen = new Set<string>(), expected = new Set(original.flatMap(pool => pool.retained.map(row => `${pool.profile}:${candidateKey(row)}`)));
+        for (const [, upper] of bounds) {
+            const range = createCanonicalNumericRange(upper);
+            const pools = kind === 'mixed' ? unlikeMixedRangeRows(operation, range) : unlikeFractionMagnitudeRows(operation, kind, range);
+            const mass = pools.reduce((sum, pool) => sum + pool.weight, 0);
+            let before = 0;
+            for (const pool of pools) {
+                expect(pool.originalCount).toBe(original.find(p => p.profile === pool.profile)!.originalCount);
+                expect(pool.weight).toBe(pool.retained.length / pool.originalCount);
+                for (const [index, sample] of pool.retained.entries()) {
+                    const key = `${pool.profile}:${candidateKey(sample)}`;
+                    expect(seen.has(key)).toBe(false); seen.add(key);
+                    draw.mockReset().mockReturnValueOnce((before + pool.weight / 2) / mass)
+                        .mockReturnValueOnce((index + 0.5) / pool.retained.length);
+                    const data = generator.generate({task: kind === 'mixed' ? 'unlike-mixed-operation'
+                        : kind === 'proper' ? 'unlike-fraction-operation-proper' : 'unlike-fraction-operation-improper',
+                        operation, usesCommonDenominator: false, range}).data as Unlike;
+                    expect({first: data.first, second: data.second, commonDenominator: data.commonDenominator}).toEqual(sample);
+                    expect(hasCanonicalRangeWitness(quantities(data), range)).toBe(true);
+                    expect(quantities(data).every(n => n > 0)).toBe(true);
+                    expect(draw).toHaveBeenCalledTimes(2);
+                    paths++;
                 }
+                before += pool.weight;
             }
-            expect(seen).toEqual(expected);
         }
-        expect(paths).toBe(4908);
+        expect(seen).toEqual(expected);
+        observedPoolPaths.set(operation + ':' + kind, paths);
     });
 
     it('exhaustively verifies the original mixed straight/regroup/nonleast paths independently', () => {

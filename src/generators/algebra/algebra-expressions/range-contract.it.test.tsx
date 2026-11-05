@@ -1,6 +1,6 @@
 import {Area} from 'edugraph-ts';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it, vi} from 'vitest';
+import {afterAll, describe, expect, it, vi} from 'vitest';
 import {createCanonicalNumericRange, hasCanonicalRangeWitness} from '../../../lib/canonical-numeric-range.ts';
 import {createGenerationSelectionReceipt, planCompatibility} from '../../../lib/compatibility.ts';
 import {enumerateDependencyAuditSelections} from '../../../lib/label-dependency-audit.ts';
@@ -40,50 +40,53 @@ const plan = (id: string, labels: readonly string[], view: typeof parts | typeof
 });
 
 describe('structural numeric range source and consumer contracts', () => {
-    it('executes every one of the45 real numeric source selections on direct/planned/replay paths', () => {
-        const targets = gradeSix.filter(target => target.id.startsWith('6.EE.A.2b-') && target.labels.includes(Area.ArithmeticExpression));
-        expect(targets).toHaveLength(6);
+    const numericTargets = gradeSix.filter(target => target.id.startsWith('6.EE.A.2b-') && target.labels.includes(Area.ArithmeticExpression));
+    const observedNumericSelections = new Map<string, number>();
+    afterAll(() => {
+        expect(numericTargets).toHaveLength(6);
+        expect([...observedNumericSelections.keys()].sort()).toEqual(numericTargets.map(target => target.id).sort());
+        expect([...observedNumericSelections.values()].reduce((sum, count) => sum + count, 0)).toBe(45);
+    });
+    it.each(numericTargets)('executes direct/planned/replay numeric source $id', target => {
         const evaluator = createLabelDependencyEvaluator(), generator = new AlgebraExpressionsGenerator();
         let checked = 0;
-        for (const target of targets) {
-            const view = target.id.includes('interpret-subexpressions') ? grouped : parts;
-            const result = plan(target.id, target.labels, view);
-            if (!result.supported) throw new Error('An existing numeric target stopped matching.');
-            const enumeration = enumerateDependencyAuditSelections(result.plan);
-            expect(enumeration.status).toBe('complete');
-            for (const selection of enumeration.selections) {
-                const sampleKey = `${target.id}#${spec.generatorId}#${view.viewId}#train#question#inst:0`, seed = 37;
-                const replay = {version: 1 as const, sampleKey, seed, attempt: 1,
-                    selection: createGenerationSelectionReceipt(result.plan, selection.choices)};
-                const input = {plan: result.plan, sampleKey, seed, attempt: 1, replay, viewSchema: {}};
-                const resolved = resolvePlannedConfigurations({...input, generatorSchema: schema});
-                const direct = extractConfig(schema, selection.labels).config;
-                expect(direct).toEqual(resolved.generatorConfig);
-                rng.setRandomState(resolved.generatorRandomState);
-                const directStub = generator.generate(direct), state = rng.getRandomState();
-                const draw = generatePlannedDraw({...input, generator});
-                expect(draw.stub!.data).toEqual(directStub!.data);
-                expect(rng.getRandomState()).toBe(state);
-                expect(generatePlannedDraw({...input, generator})).toEqual(draw);
-                const range = direct.range;
-                if (!range) throw new Error('Numeric structural selections must resolve a range.');
-                const data = draw.stub!.data as AlgebraicExpressionProblem;
-                expect(hasCanonicalRangeWitness(quantities(data), range)).toBe(true);
-                const evaluated = evaluator.evaluate(draw.labels);
-                expect(evaluated.errors).toEqual([]);
-                expect(evaluated.conflicts).toEqual([]);
-                expect(evaluated.assessments.filter(item => item.status === 'missing')).toEqual([]);
-                for (const isSolutionView of [false, true]) {
-                    const markup = renderToStaticMarkup(view === grouped ? <AlgebraSubexpressionBody data={data} isSolutionView={isSolutionView} />
-                        : <AlgebraExpressionPartsBody data={data} isSolutionView={isSolutionView} />);
-                    expect(markup).toContain('data-frame-kind="numeric"');
-                    expect(markup).not.toMatch(/algebra-calculation|algebra-final-value|data-symbol-id/);
-                    expect(markup.includes('data-role="algebra-response"')).toBe(!isSolutionView);
-                }
-                checked++;
+        const view = target.id.includes('interpret-subexpressions') ? grouped : parts;
+        const result = plan(target.id, target.labels, view);
+        if (!result.supported) throw new Error('An existing numeric target stopped matching.');
+        const enumeration = enumerateDependencyAuditSelections(result.plan);
+        expect(enumeration.status).toBe('complete');
+        for (const selection of enumeration.selections) {
+            const sampleKey = `${target.id}#${spec.generatorId}#${view.viewId}#train#question#inst:0`, seed = 37;
+            const replay = {version: 1 as const, sampleKey, seed, attempt: 1,
+                selection: createGenerationSelectionReceipt(result.plan, selection.choices)};
+            const input = {plan: result.plan, sampleKey, seed, attempt: 1, replay, viewSchema: {}};
+            const resolved = resolvePlannedConfigurations({...input, generatorSchema: schema});
+            const direct = extractConfig(schema, selection.labels).config;
+            expect(direct).toEqual(resolved.generatorConfig);
+            rng.setRandomState(resolved.generatorRandomState);
+            const directStub = generator.generate(direct), state = rng.getRandomState();
+            const draw = generatePlannedDraw({...input, generator});
+            expect(draw.stub!.data).toEqual(directStub!.data);
+            expect(rng.getRandomState()).toBe(state);
+            expect(generatePlannedDraw({...input, generator})).toEqual(draw);
+            const range = direct.range;
+            if (!range) throw new Error('Numeric structural selections must resolve a range.');
+            const data = draw.stub!.data as AlgebraicExpressionProblem;
+            expect(hasCanonicalRangeWitness(quantities(data), range)).toBe(true);
+            const evaluated = evaluator.evaluate(draw.labels);
+            expect(evaluated.errors).toEqual([]);
+            expect(evaluated.conflicts).toEqual([]);
+            expect(evaluated.assessments.filter(item => item.status === 'missing')).toEqual([]);
+            for (const isSolutionView of [false, true]) {
+                const markup = renderToStaticMarkup(view === grouped ? <AlgebraSubexpressionBody data={data} isSolutionView={isSolutionView} />
+                    : <AlgebraExpressionPartsBody data={data} isSolutionView={isSolutionView} />);
+                expect(markup).toContain('data-frame-kind="numeric"');
+                expect(markup).not.toMatch(/algebra-calculation|algebra-final-value|data-symbol-id/);
+                expect(markup.includes('data-role="algebra-response"')).toBe(!isSolutionView);
             }
+            checked++;
         }
-        expect(checked).toBe(45);
+        observedNumericSelections.set(target.id, checked);
     });
 
     it('excludes numeric range from all eight unbound symbolic and writing selections', () => {
