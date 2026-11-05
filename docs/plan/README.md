@@ -205,9 +205,9 @@ These items are not newly scheduled by the archive move.
   the algebra and approved-overflow exceptions. Targets/routes remain 1,547 /2,017, with 4,843
   source selections; three unrepresented routes and 70 unrealized validation allocations are
   separate advisories. Churn has 26 approved PNG changes, 189 changed keys and one accepted
-  conditioned retry; all 48 estimation rows retain exact math/PNGs. Fresh evaluation requires
-  190 keys including the old uncached request. Fresh VQA/cache and union remain **PENDING**;
-  the cache-only checkpoint below records repository/churn and complete-coverage passes.
+  conditioned retry; all 48 estimation rows retain exact math/PNGs. At that checkpoint, fresh
+  evaluation required 190 keys including the old uncached request; later live/repair results
+  are below. The cache-only checkpoint records repository/churn and complete-coverage passes.
   The earlier awake collector recorded 10,015/10,016 tests and 1,076/1,077 files passing, one overflow
   timeout, and no chained generator coverage-gate result; it remains a failed historical collector.
   The [cache-only refresh](canonical-range-labeling.md#multiplication-cache-and-canonical-refresh-2026-11-05)
@@ -215,12 +215,27 @@ These items are not newly scheduled by the archive move.
   passing module tests and 100% generator coverage. Canonical `ed25642a…bb69` reuses all 529
   shards; all 4,870 rows replay and every d724→ed256 stored row/PNG/key remains exact. The
   one source-byte change and five verified orphan-node retirements are distinct. All seven
-  repository checks pass, while the separate API-disabled strict cache audit fails only for
-  190 missing /189 stale keys. Final awake coverage passes **10,016 tests /1,077 files in
+  repository checks pass; the protected before-live API-disabled strict cache audit recorded
+  190 missing /189 stale keys. The `d530904d` awake run passes **10,016 tests /1,077 files in
   1,754.12s**; all 185 generator files pass unchanged 85% statement /60% branch thresholds
-  (minima 87.5% /66.66%). The earlier failed collectors remain preserved. Specific live VQA
-  transfer approval/current-key cache acceptance and union regeneration/verification remain
-  **PENDING**. Source/offline/coverage acceptance is not a final dataset verdict.
+  (minima 87.5% /66.66%). This full run records `d530904d` and predates 17 later currency
+  view tests; all three failed collectors remain historical. The approved 190-key Gemini run
+  plus schema recovery records 188 PASS /two currency HIGH failures, protected as `82297e16`.
+  The Question-only canonical unit witness `25101e8c` passes all 196 scoped tests /10 files,
+  TypeScript, 42 recipe/HTML comparisons and native geometry /21 unchanged Solution PNG checks.
+  Current `b55cd009…2ea1` retains 4,870 rows, 527 reused /two written shards and all seven
+  repository-check passes. Strict churn finds every complete row/config/receipt/RNG unchanged;
+  exactly 21 Question PNGs and 42 currency keys change, with all Solutions/outside PNGs exact.
+  The normal 42-key follow-up passes (39 LOW /three HIGH); all 4,828 reused physical records
+  stay exact. Final VQA and strict current-key cache coverage pass **4,870/4,870**, with 4,868
+  unique keys, zero unresolved work/stale keys and 55 uncertain evaluations under existing
+  passing policy. Official churn is reviewed; its 11 seed flags are valid historical Q/S origin
+  shifts, with the seed algorithm unchanged. The local CCSS union passes merge, exact metadata/
+  source-PNG identity and standalone image/coverage checks: **3,968 train /902 validation rows**,
+  413 labels /2,442 label combinations. See the
+  [accepted checkpoint](canonical-range-labeling.md#approved-live-vqa-and-union-checkpoint-2026-11-05).
+  Preserve the historical 190/189 audit and failed collectors, the 3/70 allocation caveats and
+  approved overflow; sampled-artifact acceptance does not claim full source allocation.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 

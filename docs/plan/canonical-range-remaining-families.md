@@ -80,8 +80,8 @@ All 1,547 target identities/claims and 2,017 route identities remain exact; the 
 4,843 selections are separate from three unrepresented routes and 70 unrealized validation
 allocations. Churn retains every identity: 26 changed PNGs within the three approved families,
 189 changed keys and one accepted range-conditioned winning-retry change; all 48 estimation
-rows retain exact math and PNGs. Fresh VQA has 190 normal keys to evaluate, including the old
-uncached request. Fresh VQA/cache and union verification remain **PENDING**; the cache-only
+rows retain exact math and PNGs. At that checkpoint, fresh VQA had 190 normal keys to evaluate,
+including the old uncached request. Subsequent live/repair results are below; the cache-only
 checkpoint below records the latest repository/churn and complete-coverage passes.
 No final passing dataset verdict is implied.
 The earlier awake collector failed: 10,015/10,016 tests and 1,076/1,077 files passed, with one
@@ -92,14 +92,31 @@ unchanged module tests pass with 100% generator coverage. Canonical publication
 `ed25642af4e0ad38ef6f47710a345608cc513253c641adbff866e6121ebbab69` reuses all 529 shards.
 All 4,870 rows replay; strict d724→ed256 churn finds every complete row/PNG/key exact. Its
 sole source-byte change and five verified orphan-checklist retirements are reported separately.
-All seven repository checks pass. The separate API-disabled strict cache audit remains unmet:
-190 missing current keys /189 stale historical keys, zero freshness/structure/renderer issues.
-Final whole coverage now passes **10,016 tests /1,077 files in 1,754.12s**; all 185 generator
+All seven repository checks pass. The protected before-live API-disabled strict cache audit
+recorded 190 missing current keys /189 stale historical keys, with zero freshness/structure/renderer issues.
+Whole coverage at `d530904d` passes **10,016 tests /1,077 files in 1,754.12s**; all 185 generator
 files pass original 85% statement /60% branch thresholds (minima 87.5% /66.66%). Aggregate
 coverage is 98.85% statements /97.27% branches /100% functions /99.4% lines. The three prior
-failed collectors remain preserved. Fresh live VQA awaits specific transfer approval; the
-190-missing /189-stale cache gate and union regeneration/verification remain **PENDING**.
-No final passing dataset verdict follows from source/offline/coverage acceptance alone.
+failed collectors remain preserved. That full run records `d530904d`; it predates the later
+17 currency view tests. The approved 190-key Gemini run plus schema recovery records 188 PASS
+/two currency HIGH failures, with the exact pre-repair cache preserved as `82297e16` and
+`approved-live-vqa/first-run-cache/`. The view-only answer-unit witness `25101e8c` implements
+Q12 without policy/spec/math changes; all 196 scoped tests /10 files, TypeScript, 42 exact
+recipes/HTML comparisons and native Question geometry /21 unchanged Solution PNG checks pass.
+Canonical `b55cd009…2ea1` retains 4,870 rows: 42 renders in 44.40s, 527 reused /two written
+shards. Strict churn preserves every complete row/config/receipt/RNG and every Solution/outside
+PNG; only 21 Question PNGs and 42 currency keys change. All seven current repository checks pass.
+The completed 42-key follow-up passes (39 LOW /three HIGH), including both former failures;
+all 4,828 reused physical records stay exact. Final VQA is **4,870 PASS /zero failed or uncached**,
+with 55 uncertain evaluations passing under existing policy. Exact readiness/strict cache audit
+pass at 4,870 physical rows /4,868 unique keys, with zero unresolved work or stale keys.
+Official historical churn is reviewed, including all 11 valid Question/Solution draw-origin
+warnings; no seed algorithm changes. The CCSS-only local union passes merge, all-row/source-PNG
+and compact-metadata identity, image audit and coverage export: **3,968 train /902 validation**,
+413 labels /2,442 label combinations. Acceptance and exact evidence are recorded in the
+[final checkpoint](canonical-range-labeling.md#approved-live-vqa-and-union-checkpoint-2026-11-05).
+The old 190/189 audit and all failed histories remain protected. The 3/70 allocation advisories
+and approved overflow remain outside the sampled-artifact acceptance claim.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and
