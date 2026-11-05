@@ -52,12 +52,27 @@ simulation has no conflicting labels or cross-split collisions. Known-fact scali
 preserves 64 frames and all 32 routes /39 selections, removing only eight false claims with
 three approved target-ID migrations; its 25 focused tests and full generator/domain coverage pass
 (`b14fb1b4`).
-The completed 842-image pair VQA run records 840 PASS and two HIGH-confirmed word-diagram failures,
-with zero uncached rows or errors. Their renderer repair (`2fecb3be`) still requires canonical revalidation.
-The `01811486` test-only batch passes all 65 tests with both reported decimal production files
-fully covered. A separate 52-test/six-file focused run and final TypeScript pass. Global coverage,
-post-fix generation/VQA/cache, complete checks and union
-acceptance remain pending. No new range-policy question or dataset-acceptance pass is implied.
+The later protected baseline is `ec7939fbc7e81ff14ce36337791517f9e28faed32aab3671fc9aa568faed7f9b`,
+with 4,870 rows and passing offline replay/annotation/split/both-operand checks. Its fraction
+range projector omitted assessed model-part counts; that family's historical range pass is
+superseded. Completed baseline VQA records 4,851 PASS /18 HIGH-confirmed FAIL /one uncached
+request error; commit `840f8701` preserves the exact 184-file /4,867-record /35.6 MB cache.
+
+The [2026-11-05 checkpoint](canonical-range-labeling.md#vqa-findings-and-source-checkpoint-2026-11-05)
+records the approved fraction correction `f2495863`: 177 payloads /289 paths, seven routes /13
+cells,95 passing focused tests and 100% coverage of the three reviewed files. Full source
+comparison passes at 1,547 targets /2,017 routes /4,843 selections; all 2,010 unrelated routes
+/4,830 selections remain semantically exact. Layout `4e3e1112` passes 57 tests and native caption
+proofs; estimation `becba375` passes 155 tests and exact 47-cell /3,008-draw preservation.
+Test batch `956687e0` conserves all 28 inventories and original budgets. The five reviewed leaf
+checklists are now applied as `43c13b2d`; central policy/evaluator files remain unchanged.
+
+Historical full coverage records 9,357 passed /35 failed of 9,392; the next collector records
+9,978 passed /six timeouts of 9,984, including two confirmed sleep-affected cases. Four bounded
+test partitions `b018a772` and both unchanged sleep controls pass all 69 scoped tests /six files;
+TypeScript passes. This is not a full-suite pass. Canonical affected regeneration, guarded
+offline audits, fresh VQA/cache, final awake full coverage, strict checks, churn and union
+acceptance remain **pending**. No new publication or passing dataset verdict is implied.
 
 Sixth-batch source review (historical):2026-11-02, ontology `0.33.0`, branch `codex/label-dependency-audit`.
 This extends the [range plan](canonical-range-labeling.md). The earlier R4/R5 proposal and

@@ -3,7 +3,7 @@
 Started 2026-10-31 on `codex/label-dependency-audit`, from
 `031fb4b3a76068ab4f3e7478d9c05497b7ffab80`, using stable ontology `0.33.0`.
 
-Current direction, 2026-11-04: retain the pinned ontology's inclusive minimum/maximum definitions.
+Current direction, 2026-11-05: retain the pinned ontology's inclusive minimum/maximum definitions.
 The proposed largest-magnitude reinterpretation was withdrawn. Separate syntax and calculation
 contracts for Q1/Q2 are implemented; their [adoption matrix](#q1q2-syntax-and-calculation-contracts)
 records the implementation and source verification scope. The approved Q6
@@ -32,20 +32,23 @@ unlabelled multiplication-overflow selection**. The
 records all contract/policy decisions as resolved. Overflow above the largest ontology upper
 bound remains an approved range-presence exception. Ordinary profiles and the source-backed
 local repairs are complete. The original inventory remains historical.
-Stored annotations and the approved image-label corrections have now been canonically regenerated;
-the [published affected snapshot](#affected-canonical-snapshot-checkpoint-2026-11-04) passes replay,
-range, annotation and split checks, but exposes one further `MultiplesOf10` image-label conflict.
-The user approved the [both-operand correction](#approved-both-operand-policy-and-word-diagram-follow-up).
-Its local source proofs pass; the completed pair VQA run identifies two word-diagram failures,
-whose renderer correction still requires canonical revalidation. Full repository coverage remains pending.
-Missing-range findings remain
-report-only; the algebra exclusions are enforced. Source readiness and dataset acceptance
-remain separate gates.
-The [artifact follow-up](#artifact-acceptance-2026-11-04) corrects eight earlier representation
-producers and the approved declaration/image-label gaps. The preceding image-label source checkpoint covers
-4,825 selections /2,017 routes /1,547 normalized targets, with no remaining inference callbacks;
-the Q4 checkpoint above remains historical. Dataset and independent VQA acceptance are still
-in progress.
+The latest protected artifact baseline is
+`ec7939fbc7e81ff14ce36337791517f9e28faed32aab3671fc9aa568faed7f9b`, with **4,870 rows**.
+Its offline replay, annotation, split and both-operand checks pass. The historical range report
+has a subsequently identified fraction-comparison part-count blindspot; it does not establish
+that family's range correctness. Completed baseline VQA records **4,851 PASS /18 HIGH-confirmed
+FAIL /one uncached request error**. Its exact cache is preserved as `840f8701`.
+The [2026-11-05 checkpoint](#vqa-findings-and-source-checkpoint-2026-11-05) records the approved
+fraction correction, layout repairs, exact estimation-cache proof and test repairs. Current source
+coverage is **1,547 targets /2,017 routes /4,843 selections**; only seven fraction semantic plans
+change from the preceding 4,837-selection checkpoint. Operational input hashes are separate.
+All five reviewed leaf checklist corrections are applied as `43c13b2d`; central policy and
+evaluator code remain unchanged. The first full coverage collector failed; 69 scoped follow-up
+tests and TypeScript now pass, but final whole-repository coverage remains pending.
+Canonical affected regeneration, offline acceptance, fresh VQA/cache, complete checks, churn and
+union verification are still pending. Source readiness does not establish dataset acceptance.
+Missing-range findings remain report-only; the algebra exclusions are enforced. The earlier
+Q4 and 4,825-selection image-label checkpoints remain historical.
 
 This is a new initiative following the completed
 [local dependency work](label-dependency-graph.md) and
@@ -1691,6 +1694,66 @@ and its `coverage/coverage-summary.json`,
 `both-policy-types.log`, `test-partitions-followup-coverage-final.log` and its coverage summary.
 No post-fix generation,
 full VQA/cache, complete-check or union acceptance is claimed.
+
+### VQA findings and source checkpoint (2026-11-05)
+
+The protected pre-fix publication is
+`ec7939fbc7e81ff14ce36337791517f9e28faed32aab3671fc9aa568faed7f9b`: **4,870 physical rows**.
+All rows replay, with direct/planned mathematical RNG repeatability; 78 `MultiplesOf10` rows,
+18 known-fact scaling rows without the false claim, 92 algebra exclusions and one approved
+overflow are verified. Annotation and split checks pass. The historical 3,903-row range report
+omitted assessed part counts in fraction comparison; that family's range pass is superseded.
+The original report and projector remain preserved as historical evidence.
+
+Completed baseline VQA records **4,851 PASS /18 HIGH-confirmed FAIL /one uncached request error**,
+with no pending HIGH or invalid review. Commit `840f8701` preserves 184 cache files containing
+4,867 records /35.6 MB. There are 4,868 unique module keys: 4,849 passing, 18 failed and one
+missing. The missing measurement-table request remains ordinary evaluation work, not a verdict.
+
+The approved fraction correction `f2495863` retains **177 payloads /289 weighted paths**,
+**seven routes /13 canonical cells**, upper5/upper10 and no positive lower. Three common-part
+draws and one benchmark draw retain the original conditional law. The benchmark asks why its
+comparison is justified. Scoped proof covers 104 exact planned/direct/replayed draws and 208
+Q/S renders. All **95 tests /seven files pass**, with 100% statement, branch, function and line
+coverage of the generator, range domain and shared comparison helper under unchanged gates.
+Full source comparison passes at **1,547 targets /2,017 routes /4,843 selections**: only seven
+fraction semantic plans change, adding six choices. All 2,010 other routes /4,830 selections
+remain semantically exact; operational input-hash refreshes are recorded separately.
+
+| Verified source checkpoint | Evidence and boundary |
+| --- | --- |
+| Layout `4e3e1112` | 57 tests /three files pass, including 41 common-factor controls. Decimal captions: 12 images /24 identical captures, 36 contained boxes, no text/grid overlap. Whole-fraction line: 60 images /120 identical captures, 360 contained boxes, no overlap, minimum 5 px gap. Canonical pixels still need revalidation. |
+| Estimation `becba375` | Private admission-cache indexing only; 84 contexts /47 cells retain row/second order, weights and proposals. All 3,008 seeded payload/three-draw continuations match; 155 actual tests pass with V8 coverage, two workers and original limits. Final churn must show no math/config/label/RNG/pixel change. |
+| Test conservation `956687e0` | All 28 changed test inventories and distinct assertions reviewed, including mutable-Map typing, diagnostic titles and the final 41-case common-factor refinement. Original per-case budgets, skips and thresholds remain. Bounded setup staging, pure SSR reuse and the genuine enumeration fixture correction are disclosed. |
+
+All five reviewed leaf checklists are applied as **`43c13b2d`**: algebra-expression-parts,
+currency-word-problem, numbers-write-count, fractions-compare-benchmark-models and numbers-compare.
+Their guarded inventory SHA256 is `34b66df67bde9ecb86147e0cb80a82fef0b04a75d54d2819a31c37a7f099dcc7`.
+The central checklist, VQA evaluator and evaluation prompt, policy and cache machinery are unchanged. These
+task-owned clarifications retain independently assessed fraction parts, requested cent totals,
+actual response counts and worked comparison evidence; compact relation completion requires
+no extra place-value panel. Changed contexts require normal fresh-key LOW/HIGH validation.
+
+The earlier full baseline remains **9,357 passed /35 failed of 9,392 tests**. The next collector
+records **9,978 passed /six timeouts of 9,984 tests across 1,077 files**, taking 3,468.03 seconds; it did
+not pass. Windows independently records a 1,588.565-second sleep during the two extreme cases.
+Commit `b018a772` partitions only the other four composite checks. All **69 scoped tests /six
+files pass**, including both unchanged sleep-affected controls, and TypeScript passes. No test
+budget, skip or coverage threshold is relaxed. Final whole-repository coverage is **pending**.
+
+Next: canonical affected regeneration, then guarded replay/range/image/split/cache/churn audits.
+Fresh VQA and the final awake full-coverage run follow; only network I/O may overlap the timed
+suite. Complete strict repository checks and union verification remain required. No new
+generation ID, final passing verdict count or dataset-acceptance result is claimed here.
+
+Evidence is under `temp/range-artifact-acceptance-2026-11-04/`: `after-both-corrections/` retains
+the old range report and completed VQA/cache evidence; `fraction-comparison-fix/` has the native,
+planner, 95-test and full-source proofs; both layout directories retain their native proofs.
+`estimation-performance-fix/installed-proof-inventory.json` and the 28-file conservation review
+retain the source proofs. Failed collectors remain `full-coverage-both-policy.log` and
+`full-coverage-vqa-corrections.log`; the 69-test follow-up is
+`test-coverage-followups-and-suspend-controls.log`. Fresh acceptance evidence belongs under
+`after-vqa-content-fixes/`, including the applied-context inventory and protected baseline-state map.
 
 ## Accepted direction
 

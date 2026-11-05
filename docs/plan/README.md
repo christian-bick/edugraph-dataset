@@ -182,12 +182,24 @@ These items are not newly scheduled by the archive move.
   Its final 132 train /32 validation SSR simulation has no conflicting labels or cross-split
   collisions. Known-fact scaling preserves all mathematics across 32 routes /39 selections,
   with only false claims removed and three target IDs explicitly migrated. Its 25 focused tests
-  and full generator/domain coverage pass (`b14fb1b4`). The completed pair VQA run has 840 PASS and two
-  HIGH-confirmed word-diagram failures among 842 images, with no uncached rows or errors.
-  Their role/answer-card renderer correction (`2fecb3be`) awaits canonical revalidation. The separate
-  `01811486` test-only batch passes all 65 tests with full coverage of both reported decimal
-  production files. A separate 52-test/six-file focused run and final TypeScript pass; global
-  coverage and final post-fix generation/VQA/cache/check/union acceptance remain pending.
+  and full generator/domain coverage pass (`b14fb1b4`). The later protected
+  `ec7939fbc7e81ff14ce36337791517f9e28faed32aab3671fc9aa568faed7f9b` baseline has 4,870 rows.
+  Its offline replay/annotation/split/both-operand checks pass, but the old fraction range
+  projector omitted assessed part counts. Baseline VQA completes at 4,851 PASS /18 HIGH-confirmed
+  FAIL /one uncached request error; `840f8701` preserves 184 files /4,867 records /35.6 MB.
+  The [2026-11-05 checkpoint](canonical-range-labeling.md#vqa-findings-and-source-checkpoint-2026-11-05)
+  records fraction correction `f2495863` (177 payloads /289 paths, seven routes /13 cells,
+  95 passing tests and 100% reviewed-file coverage). Current source coverage is 1,547 targets
+  /2,017 routes /4,843 selections; all 2,010 unrelated routes /4,830 selections remain semantically
+  exact. Layout `4e3e1112` passes 57 tests and native caption proofs; estimation `becba375` passes
+  155 tests with exact 47-cell /3,008-draw preservation. Test batch `956687e0` conserves all 28
+  inventories and budgets. All five reviewed leaf checklists are applied as `43c13b2d`, with
+  central policy and evaluator files unchanged.
+  Full coverage remains unaccepted: the historical 9,357/9,392 run failed 35 cases; the next
+  9,978/9,984 run failed six, including two confirmed host-sleep cases. Commit `b018a772` and
+  unchanged sleep controls pass 69 scoped tests /six files, with TypeScript green. Canonical
+  affected regeneration, offline acceptance, fresh VQA/cache, final awake full coverage,
+  strict checks, churn and union verification remain **pending**.
   Dataset acceptance is recorded separately in the main plan. Missing-range findings remain
   report-only; the algebra exclusions are enforced.
 
