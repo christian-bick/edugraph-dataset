@@ -61,12 +61,12 @@ function AreaGrid({data}: {data: DecimalMultiplicationProblem}) {
             x1={left - 3} x2={left + plotWidth + 3} y1={top + boundary * CELL} y2={top + boundary * CELL}
             stroke="#312e81" strokeWidth="2.5" />)}
         <rect x={left} y={top} width={plotWidth} height={plotHeight} fill="none" stroke="#1e293b" strokeWidth="2.5" />
-        <text x={left} y={top - 8} className="fill-slate-600 text-[11px] font-bold">0</text>
-        <text x={left + plotWidth} y={top + plotHeight + 18} textAnchor="end" className="fill-slate-700 text-[11px] font-bold">
-            {width} hundredths →
-        </text>
-        <text x={left - 6} y={top + plotHeight / 2} textAnchor="middle" transform={`rotate(-90 ${left - 6} ${top + plotHeight / 2})`}
-            className="fill-slate-700 text-[10px] font-bold">{height} rows</text>
+        <text data-grid-label="origin" x={left} y={top - 8} textAnchor="start"
+            className="fill-slate-600 text-[11px] font-bold">0 hundredths</text>
+        <text data-grid-label="horizontal-length" x={left} y={top + plotHeight + 18} textAnchor="start"
+            className="fill-slate-700 text-[11px] font-bold">{width} hundredths →</text>
+        <text data-grid-label="row-count" x={left} y={top + plotHeight + 34} textAnchor="start"
+            className="fill-slate-700 text-[11px] font-bold">↓ {height} hundredth rows</text>
     </svg>;
 }
 

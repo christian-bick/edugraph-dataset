@@ -298,7 +298,7 @@ const WholeFractionEquivalenceLine = ({
                 <text x={endpointX - 14} y={80} textAnchor="end" className="fill-blue-700 text-[21px] font-bold">
                     {data.wholeNumber}
                 </text>
-                <text x={endpointX + 14} y={80} textAnchor="start" className="fill-emerald-700 text-[21px] font-bold">
+                <text x={endpointX - 14} y={110} textAnchor="end" className="fill-emerald-700 text-[21px] font-bold">
                     {displayedFraction}
                 </text>
                 <text x={endpointX} y={AXIS_Y + 76} textAnchor="middle" className="fill-slate-600 text-[15px] font-semibold">

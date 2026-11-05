@@ -101,6 +101,39 @@ function visible(markup: string): string {
     return markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
 }
 
+// Small exact rectangles exercise the independently measured caption space;
+// their arithmetic is deliberately explicit and does not call a producer helper.
+function hundredthRectangle(columns: number, rows: number): DecimalMultiplicationProblem {
+    const first = {valueInHundredths: columns, canonicalNumeral: '0.' + String(columns).padStart(2, '0'),
+        alignedDigits: [0, 0, columns] as const,
+        partitions: [{place: 'hundredths' as const, digit: columns, valueInHundredths: columns, startInHundredths: 0}]};
+    const second = {valueInHundredths: rows, canonicalNumeral: '0.' + String(rows).padStart(2, '0'),
+        alignedDigits: [0, 0, rows] as const,
+        partitions: [{place: 'hundredths' as const, digit: rows, valueInHundredths: rows, startInHundredths: 0}]};
+    const cells = columns * rows;
+    return {kind: 'decimal-multiplication-model', base: 10, operandScale: 100, productScale: 10000,
+        first, second, product: {valueInTenThousandths: cells, canonicalNumeral: '0.' + String(cells).padStart(4, '0')},
+        areaGrid: {widthInHundredths: columns, heightInHundredths: rows, cellAreaInTenThousandths: 1, cellCount: cells,
+            regions: [{firstPartitionIndex: 0, secondPartitionIndex: 0, columnStart: 0, rowStart: 0,
+                columns, rows, cellCount: cells, productInTenThousandths: cells}]}};
+}
+
+function gridMarkup(markup: string): string {
+    const svg = markup.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/);
+    expect(svg).not.toBeNull();
+    return svg![0];
+}
+
+function gridCaption(svg: string, name: string): {markup: string; text: string; x: number; y: number} {
+    const match = svg.match(new RegExp('<text(?=[^>]*data-grid-label="' + name + '")[^>]*>[\\s\\S]*?<\\/text>'));
+    expect(match).not.toBeNull();
+    const markup = match![0];
+    const x = markup.match(/\bx="([\d.]+)"/), y = markup.match(/\by="([\d.]+)"/);
+    expect(x).not.toBeNull();
+    expect(y).not.toBeNull();
+    return {markup, text: visible(markup).trim(), x: Number(x![1]), y: Number(y![1])};
+}
+
 describe('decimal multiplication method view', () => {
     it('renders a real 12-by-3 grid while withholding every numeric product in Question Mode', () => {
         expect(() => assertDecimalMultiplication('test', small)).not.toThrow();
@@ -143,6 +176,39 @@ describe('decimal multiplication method view', () => {
         expect((question.match(/data-region="/g) ?? []).length).toBe(4);
         expect(visible(question)).toContain('Use the rows and columns in each place-value region');
         expect(visible(question)).not.toContain('0.144');
+    });
+
+    it.each([[1, 1], [6, 3], [9, 9]] as const)('keeps %s-by-%s captions clear of the countable grid in both modes', (columns, rows) => {
+        const data = hundredthRectangle(columns, rows);
+        expect(() => assertDecimalMultiplication('test', data)).not.toThrow();
+        const question = render(data, false), solution = render(data, true);
+        const svg = gridMarkup(question);
+        // No requested product or solution-only layout enters the shared diagram.
+        expect(gridMarkup(solution)).toBe(svg);
+        expect(visible(question)).not.toContain(data.product.canonicalNumeral);
+        expect(visible(solution)).toContain(data.product.canonicalNumeral);
+        expect((svg.match(/data-region="/g) ?? [])).toHaveLength(1);
+        const origin = gridCaption(svg, 'origin');
+        const horizontal = gridCaption(svg, 'horizontal-length');
+        const vertical = gridCaption(svg, 'row-count');
+        expect(origin.text).toBe('0 hundredths');
+        expect(horizontal.text).toBe(columns + ' hundredths →');
+        expect(vertical.text).toBe('↓ ' + rows + ' hundredth rows');
+        for (const caption of [origin, horizontal, vertical]) {
+            expect(caption.markup).toContain('text-anchor="start"');
+            expect(caption.markup).not.toContain('transform=');
+            expect(caption.x).toBeGreaterThan(0);
+            expect(caption.y).toBeGreaterThan(0);
+        }
+        const outline = svg.match(/<rect\b[^>]*fill="none"[^>]*>/);
+        expect(outline).not.toBeNull();
+        const top = Number(outline![0].match(/\by="([\d.]+)"/)![1]);
+        const gridHeight = Number(outline![0].match(/\bheight="([\d.]+)"/)![1]);
+        const svgHeight = Number(svg.match(/^<svg\b[^>]*\bheight="([\d.]+)"/)![1]);
+        expect(origin.y).toBeLessThan(top);
+        expect(horizontal.y).toBeGreaterThan(top + gridHeight);
+        expect(vertical.y - horizontal.y).toBeGreaterThanOrEqual(16);
+        expect(vertical.y).toBeLessThan(svgHeight);
     });
 
     it('rejects a region shifted outside its exact place partition', () => {

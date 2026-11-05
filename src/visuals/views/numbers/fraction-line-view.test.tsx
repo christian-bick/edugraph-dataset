@@ -92,6 +92,30 @@ describe('fraction-line Ability projections', () => {
         );
     });
 
+    it.each([1, 2, 3])('keeps every whole-%s endpoint fraction inside the line without exposing the missing numerator', wholeNumber => {
+        for (const denominator of [2, 3, 4, 6, 8]) for (const mode of ['formalization', 'explanation'] as const) {
+            const data: WholeNumberFractionEquivalenceProblem = {task: 'represent-whole-as-fraction', wholeNumber,
+                fraction: {numerator: wholeNumber * denominator, denominator}, relation: 'equal'};
+            for (const isSolution of [false, true]) {
+                const markup = render(data, mode, isSolution);
+                const label = markup.match(/<text x="([\d.]+)" y="([\d.]+)" text-anchor="([^"]+)" class="fill-emerald-700 text-\[21px\] font-bold">([^<]*)<\/text>/);
+                expect(label).not.toBeNull();
+                // The whole-equivalence endpoint is always at the right edge.
+                // Its fraction belongs inside the scale, below the whole label.
+                const x = Number(label![1]), y = Number(label![2]);
+                expect(x).toBeGreaterThan(54);
+                expect(x).toBeLessThan(786);
+                expect(label![3]).toBe('end');
+                expect(y).toBeGreaterThan(101);
+                expect(y).toBeLessThan(142);
+                expect(label![4]).toBe(isSolution ? data.fraction.numerator + '/' + denominator : '?/' + denominator);
+                expect(visible(markup).includes(wholeNumber + ' = ' + data.fraction.numerator + '/' + denominator)).toBe(isSolution);
+                expect(markup).toContain('viewBox="0 0 840 285"');
+                expect(markup).toContain('same point');
+            }
+        }
+    });
+
     it('keeps the 100/100 endpoint label inside the number-line viewport', () => {
         const data = wholeTenthsData();
         const markup = render(data, 'explanation', true);
