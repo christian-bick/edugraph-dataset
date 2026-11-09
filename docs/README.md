@@ -22,6 +22,9 @@ Standing outside the matrix, because it describes standards rather than modules:
 
 - [label-architecture.md](label-architecture.md) — conceptual map for cross-role ownership,
   matching, payload/projection boundaries, observable evidence, and dataset identities.
+- [Deterministic labelling overview](plan/deterministic-labeling-overview.html) — self-contained
+  visual guide with interactive range examples, task-family decisions and version-pinned sources
+  for the `codex/label-dependency-audit` branch.
 - [target-spec.md](target-spec.md) — authoring competency targets under `src/spec/`.
 - [target-spec-plan-template.md](target-spec-plan-template.md) — required Pass 1 structure for
   reviewable standard-to-target plans.
@@ -30,6 +33,10 @@ Standing outside the matrix, because it describes standards rather than modules:
 
 The [open-work index](plan/README.md) links the remaining ontology reviews and deferred
 equivalence, content, regression, and maintenance work.
+
+- [Numeric resolution and label-policy review](plan/numeric-resolution-and-label-policy-review.html)
+  — evidence-backed proposals for shared numeric domains and a compact training annotation profile;
+  includes target-label ablations and standards contrasts, separate from approved authoring rules.
 
 ## Completed plans and verification records
 
